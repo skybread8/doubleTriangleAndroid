@@ -156,7 +156,7 @@ private fun FormStep(
     Column(Modifier.fillMaxSize().background(WildforceThemeTokens.background)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("‹", modifier = Modifier.size(44.dp).clickable(onClick = onBack), style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-            LinearProgressIndicator(progress = { progress }, modifier = Modifier.weight(1f), color = WildforceThemeTokens.accentGold)
+            LinearProgressIndicator(progress = progress, modifier = Modifier.weight(1f), color = WildforceThemeTokens.accentGold)
             Spacer(Modifier.size(44.dp))
         }
         Column(
