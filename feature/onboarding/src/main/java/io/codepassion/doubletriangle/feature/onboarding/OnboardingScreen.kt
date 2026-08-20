@@ -46,7 +46,38 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 
-data class OnboardingProfile(val name: String, val goal: FitnessGoal)
+data class OnboardingProfile(
+    val name: String,
+    val goal: FitnessGoal,
+    val lifestyle: LifestyleLevel = LifestyleLevel.ModeratelyActive,
+    val workoutDays: Set<WorkoutWeekday> = setOf(WorkoutWeekday.Monday, WorkoutWeekday.Wednesday, WorkoutWeekday.Friday),
+    val preferredWorkoutDurationMinutes: Int = 50,
+)
+
+enum class LifestyleLevel(val storedValue: String, val title: String, val description: String, val glyph: String) {
+    Sedentary("sedentary", "Sedentario", "Pasas la mayor parte del día sentado.", "□"),
+    LightlyActive("lightlyActive", "Ligeramente activo", "Pasas buena parte del día de pie.", "│"),
+    ModeratelyActive("moderatelyActive", "Moderadamente activo", "Pasas gran parte del día moviéndote.", "→"),
+    VeryActive("veryActive", "Muy activo", "Realizas actividad física durante la mayor parte del día.", "↗"),
+    ;
+
+    companion object {
+        fun fromStoredValue(value: String) = entries.firstOrNull { it.storedValue == value } ?: ModeratelyActive
+    }
+}
+
+enum class WorkoutWeekday(val storedValue: String, val title: String, val glyph: String) {
+    Monday("monday", "Lunes", "L"), Tuesday("tuesday", "Martes", "M"),
+    Wednesday("wednesday", "Miércoles", "X"), Thursday("thursday", "Jueves", "J"),
+    Friday("friday", "Viernes", "V"), Saturday("saturday", "Sábado", "S"),
+    Sunday("sunday", "Domingo", "D");
+
+    companion object {
+        fun fromStoredValues(values: Set<String>?) =
+            entries.filterTo(mutableSetOf()) { it.storedValue in values.orEmpty() }
+                .ifEmpty { setOf(Monday, Wednesday, Friday) }
+    }
+}
 
 enum class FitnessGoal(val storedValue: String, val title: String, val description: String, val glyph: String) {
     LoseWeight("loseWeight", "Perder peso", "Quema grasa y mejora tu salud metabólica.", "↘"),
@@ -68,12 +99,15 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
     var step by remember { mutableStateOf(0) }
     var name by remember { mutableStateOf("") }
     var goal by remember { mutableStateOf<FitnessGoal?>(null) }
+    var lifestyle by remember { mutableStateOf<LifestyleLevel?>(null) }
+    var workoutDays by remember { mutableStateOf(setOf(WorkoutWeekday.Monday, WorkoutWeekday.Wednesday, WorkoutWeekday.Friday)) }
+    var duration by remember { mutableStateOf(50) }
 
     AnimatedContent(targetState = step, label = "onboarding-step") { currentStep ->
         when (currentStep) {
             0 -> CoverStep { step = 1 }
             1 -> FormStep(
-                progress = 0.5f,
+                progress = 1f / 16f,
                 title = "Bienvenido",
                 subtitle = "¿Cómo quieres que te llamemos?",
                 canContinue = name.isNotBlank(),
@@ -90,18 +124,68 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
                     shape = RoundedCornerShape(12.dp),
                 )
             }
-            else -> FormStep(
-                progress = 1f,
+            2 -> FormStep(
+                progress = 2f / 16f,
                 title = "Tus objetivos",
                 subtitle = "Elige el objetivo de entrenamiento que mejor encaja contigo.",
                 canContinue = goal != null,
                 onBack = { step = 1 },
-                onContinue = { goal?.let { onCompleted(OnboardingProfile(name.trim(), it)) } },
-                buttonTitle = "CREAR PLAN",
+                onContinue = { step = 3 },
             ) {
                 FitnessGoal.entries.forEach { item ->
                     GoalOption(item = item, selected = goal == item, onClick = { goal = item })
                     Spacer(Modifier.height(10.dp))
+                }
+            }
+            3 -> FormStep(
+                progress = 3f / 16f,
+                title = "Estilo de vida",
+                subtitle = "Cuéntanos cuál es tu actividad durante un día normal.",
+                canContinue = lifestyle != null,
+                onBack = { step = 2 },
+                onContinue = { step = 4 },
+            ) {
+                LifestyleLevel.entries.forEach { item ->
+                    ChoiceOption(item.title, item.description, item.glyph, lifestyle == item) { lifestyle = item }
+                    Spacer(Modifier.height(10.dp))
+                }
+            }
+            4 -> FormStep(
+                progress = 4f / 16f,
+                title = "Disponibilidad",
+                subtitle = "Selecciona cuándo quieres entrenar cada semana.",
+                canContinue = workoutDays.isNotEmpty(),
+                onBack = { step = 3 },
+                onContinue = { step = 5 },
+            ) {
+                WorkoutWeekday.entries.forEach { day ->
+                    ChoiceOption(day.title, null, day.glyph, day in workoutDays) {
+                        workoutDays = if (day in workoutDays && workoutDays.size > 1) workoutDays - day else workoutDays + day
+                    }
+                    Spacer(Modifier.height(10.dp))
+                }
+            }
+            else -> FormStep(
+                progress = 5f / 16f,
+                title = "Duración del entrenamiento",
+                subtitle = "Indica la duración de sesión que quieres que optimicemos.",
+                canContinue = true,
+                onBack = { step = 4 },
+                onContinue = {
+                    val selectedGoal = goal ?: return@FormStep
+                    val selectedLifestyle = lifestyle ?: return@FormStep
+                    onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration))
+                },
+                buttonTitle = "CREAR PLAN",
+            ) {
+                Row(
+                    Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("−", Modifier.size(48.dp).clickable { duration = (duration - 5).coerceAtLeast(15) }, textAlign = TextAlign.Center, style = MaterialTheme.typography.h4)
+                    Text("$duration min", style = MaterialTheme.typography.h5, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text("+", Modifier.size(48.dp).clickable { duration = (duration + 5).coerceAtMost(180) }, textAlign = TextAlign.Center, style = MaterialTheme.typography.h4)
                 }
             }
         }
@@ -123,8 +207,7 @@ private fun CoverStep(onStart: () -> Unit) {
             ),
         )
         Column(
-            modifier = Modifier.align(Alignment.BottomCenter).padding(20.dp)
-                .liquidGlass(RoundedCornerShape(32.dp), emphasized = true).padding(horizontal = 24.dp, vertical = 28.dp),
+            modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 32.dp, vertical = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
@@ -158,7 +241,7 @@ private fun FormStep(
 ) {
     Column(Modifier.fillMaxSize().liquidGlassBackground()) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)
-            .liquidGlass(RoundedCornerShape(22.dp)).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            .liquidGlass(RoundedCornerShape(14.dp)).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("‹", modifier = Modifier.size(44.dp).clickable(onClick = onBack), style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
             LinearProgressIndicator(progress = progress, modifier = Modifier.weight(1f), color = WildforceThemeTokens.accentGold)
             Spacer(Modifier.size(44.dp))
@@ -171,26 +254,37 @@ private fun FormStep(
             Spacer(Modifier.height(34.dp))
             content()
         }
-        Box(Modifier.fillMaxWidth().padding(12.dp).liquidGlass(RoundedCornerShape(26.dp), emphasized = true).padding(16.dp)) {
+        Box(Modifier.fillMaxWidth().padding(12.dp).liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(16.dp)) {
             PrimaryAction(buttonTitle, canContinue, onContinue)
         }
     }
 }
 
 @Composable
-private fun GoalOption(item: FitnessGoal, selected: Boolean, onClick: () -> Unit) {
+private fun GoalOption(item: FitnessGoal, selected: Boolean, onClick: () -> Unit) =
+    ChoiceOption(item.title, item.description, item.glyph, selected, onClick)
+
+@Composable
+private fun ChoiceOption(
+    title: String,
+    description: String?,
+    glyph: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
     Row(
         Modifier.fillMaxWidth().then(
-            if (selected) Modifier.clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.accentGold.copy(alpha = 0.24f))
-            else Modifier.liquidGlass(RoundedCornerShape(18.dp)),
-        )
-            .clickable(onClick = onClick).padding(16.dp),
+            if (selected) Modifier.clip(RoundedCornerShape(16.dp)).background(WildforceThemeTokens.accentGold.copy(alpha = 0.20f))
+            else Modifier.liquidGlass(RoundedCornerShape(16.dp)),
+        ).clickable(onClick = onClick).padding(15.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(item.glyph, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.accentGold)
+        Text(glyph, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.accentGold)
         Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
-            Text(item.title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-            Text(item.description, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+            description?.let {
+                Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            }
         }
         Text(if (selected) "●" else "○", color = WildforceThemeTokens.accentGold)
     }
@@ -200,13 +294,13 @@ private fun GoalOption(item: FitnessGoal, selected: Boolean, onClick: () -> Unit
 private fun PrimaryAction(title: String, enabled: Boolean, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth().height(54.dp).liquidGlass(RoundedCornerShape(18.dp), emphasized = true),
+        modifier = Modifier.fillMaxWidth().height(52.dp),
         enabled = enabled,
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(14.dp),
         elevation = ButtonDefaults.elevation(defaultElevation = 0.dp, pressedElevation = 0.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.Transparent,
-            contentColor = WildforceThemeTokens.textPrimary,
+            backgroundColor = WildforceThemeTokens.textPrimary,
+            contentColor = WildforceThemeTokens.backgroundSecondary,
         ),
     ) { Text(title, fontWeight = FontWeight.Bold) }
 }

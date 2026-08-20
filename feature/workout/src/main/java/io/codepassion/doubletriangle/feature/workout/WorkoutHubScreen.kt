@@ -66,8 +66,8 @@ fun WorkoutHubScreen(
     ) {
         Column(
             Modifier.fillMaxWidth()
-                .liquidGlass(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp), emphasized = true)
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .liquidGlass(RoundedCornerShape(bottomStart = 18.dp, bottomEnd = 18.dp), emphasized = true)
+                .padding(horizontal = 20.dp, vertical = 14.dp),
         ) {
             WorkoutHeader(state)
             Spacer(Modifier.height(16.dp))

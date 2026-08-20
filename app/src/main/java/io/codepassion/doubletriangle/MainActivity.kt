@@ -32,6 +32,8 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
+import io.codepassion.doubletriangle.feature.onboarding.LifestyleLevel
+import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutHubScreen
@@ -64,6 +66,9 @@ fun WildforceRoot() {
                 OnboardingProfile(
                     name = name,
                     goal = FitnessGoal.fromStoredValue(preferences.getString("goal", "").orEmpty()),
+                    lifestyle = LifestyleLevel.fromStoredValue(preferences.getString("lifestyle", "").orEmpty()),
+                    workoutDays = WorkoutWeekday.fromStoredValues(preferences.getStringSet("workout_days", null)),
+                    preferredWorkoutDurationMinutes = preferences.getInt("workout_duration", 50),
                 )
             },
         )
@@ -75,6 +80,9 @@ fun WildforceRoot() {
             preferences.edit()
                 .putString("name", completedProfile.name)
                 .putString("goal", completedProfile.goal.storedValue)
+                .putString("lifestyle", completedProfile.lifestyle.storedValue)
+                .putStringSet("workout_days", completedProfile.workoutDays.mapTo(mutableSetOf()) { it.storedValue })
+                .putInt("workout_duration", completedProfile.preferredWorkoutDurationMinutes)
                 .apply()
             profile = completedProfile
         }
@@ -97,8 +105,8 @@ private fun WildforceApp(profile: OnboardingProfile, onResetOnboarding: () -> Un
         backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
         bottomBar = {
             BottomNavigation(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                    .liquidGlass(RoundedCornerShape(26.dp), emphasized = true),
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                    .liquidGlass(RoundedCornerShape(18.dp), emphasized = true),
                 backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
                 elevation = 0.dp,
             ) {
