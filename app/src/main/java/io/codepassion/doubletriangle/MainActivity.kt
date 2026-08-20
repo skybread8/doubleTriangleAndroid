@@ -5,7 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Scaffold
@@ -19,10 +24,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository
 import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
+import io.codepassion.doubletriangle.core.designsystem.liquidGlass
+import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
@@ -31,7 +39,13 @@ import io.codepassion.doubletriangle.feature.workout.WorkoutHubScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { WildforceTheme { WildforceRoot() } }
+        setContent {
+            WildforceTheme {
+                Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+                    WildforceRoot()
+                }
+            }
+        }
     }
 }
 
@@ -79,16 +93,22 @@ fun WildforceRoot() {
 private fun WildforceApp(profile: OnboardingProfile, onResetOnboarding: () -> Unit) {
     var selected by remember { mutableStateOf(RootDestination.Workout) }
     Scaffold(
-        backgroundColor = WildforceThemeTokens.background,
+        modifier = Modifier.liquidGlassBackground(),
+        backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
         bottomBar = {
-            BottomNavigation(backgroundColor = WildforceThemeTokens.backgroundSecondary) {
+            BottomNavigation(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    .liquidGlass(RoundedCornerShape(26.dp), emphasized = true),
+                backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
+                elevation = 0.dp,
+            ) {
                 RootDestination.values().forEach { destination ->
                     BottomNavigationItem(
                         selected = selected == destination,
                         onClick = { selected = destination },
                         icon = { Text(destination.glyph, fontWeight = FontWeight.Bold) },
                         label = { Text(destination.label) },
-                        selectedContentColor = WildforceThemeTokens.accent,
+                        selectedContentColor = WildforceThemeTokens.accentGold,
                         unselectedContentColor = WildforceThemeTokens.textSecondary,
                     )
                 }

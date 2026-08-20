@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.dp
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
+import io.codepassion.doubletriangle.core.designsystem.liquidGlass
+import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
@@ -60,11 +62,12 @@ fun WorkoutHubScreen(
     var mode by remember { mutableStateOf(WorkoutMode.Plan) }
 
     Column(
-        Modifier.fillMaxSize().padding(contentPadding).background(WildforceThemeTokens.background),
+        Modifier.fillMaxSize().padding(contentPadding).liquidGlassBackground(),
     ) {
         Column(
-            Modifier.fillMaxWidth().background(WildforceThemeTokens.backgroundSecondary)
-                .padding(horizontal = 24.dp, vertical = 12.dp),
+            Modifier.fillMaxWidth()
+                .liquidGlass(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp), emphasized = true)
+                .padding(horizontal = 24.dp, vertical = 16.dp),
         ) {
             WorkoutHeader(state)
             Spacer(Modifier.height(16.dp))
@@ -157,14 +160,13 @@ private fun WorkoutModeSelector(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier.fillMaxWidth().clip(RoundedCornerShape(9.dp))
-            .background(WildforceThemeTokens.textSecondary.copy(alpha = 0.12f)).padding(3.dp),
+        modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(4.dp),
     ) {
         WorkoutMode.values().forEach { mode ->
             Text(
                 mode.label,
                 Modifier.weight(1f).clip(RoundedCornerShape(7.dp))
-                    .background(if (selected == mode) WildforceThemeTokens.backgroundSecondary else Color.Transparent)
+                    .background(if (selected == mode) Color.White.copy(alpha = 0.22f) else Color.Transparent)
                     .clickable { onSelected(mode) }.padding(vertical = 9.dp, horizontal = 4.dp),
                 color = WildforceThemeTokens.textPrimary,
                 style = MaterialTheme.typography.caption,
@@ -234,8 +236,8 @@ private fun StatusBadge() {
 
 @Composable
 private fun RestDayCard() {
-    Surface(Modifier.fillMaxWidth(), color = WildforceThemeTokens.backgroundSecondary, shape = RoundedCornerShape(14.dp)) {
-        Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Surface(Modifier.fillMaxWidth(), color = Color.Transparent, elevation = 0.dp) {
+        Column(Modifier.liquidGlass(RoundedCornerShape(18.dp)).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text("DÍA DE DESCANSO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
             Text("No hay entrenamiento planificado.", color = WildforceThemeTokens.textSecondary)
         }

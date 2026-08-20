@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
+import io.codepassion.doubletriangle.core.designsystem.liquidGlass
+import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 
 data class OnboardingProfile(val name: String, val goal: FitnessGoal)
 
@@ -81,7 +83,7 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)),
                     textStyle = MaterialTheme.typography.h5.copy(textAlign = TextAlign.Center),
                     placeholder = { Text("Tu nombre", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
                     singleLine = true,
@@ -121,7 +123,8 @@ private fun CoverStep(onStart: () -> Unit) {
             ),
         )
         Column(
-            modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 42.dp, vertical = 36.dp),
+            modifier = Modifier.align(Alignment.BottomCenter).padding(20.dp)
+                .liquidGlass(RoundedCornerShape(32.dp), emphasized = true).padding(horizontal = 24.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
@@ -153,8 +156,9 @@ private fun FormStep(
     buttonTitle: String = "CONTINUAR",
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Column(Modifier.fillMaxSize().background(WildforceThemeTokens.background)) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+    Column(Modifier.fillMaxSize().liquidGlassBackground()) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)
+            .liquidGlass(RoundedCornerShape(22.dp)).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("‹", modifier = Modifier.size(44.dp).clickable(onClick = onBack), style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
             LinearProgressIndicator(progress = progress, modifier = Modifier.weight(1f), color = WildforceThemeTokens.accentGold)
             Spacer(Modifier.size(44.dp))
@@ -167,7 +171,7 @@ private fun FormStep(
             Spacer(Modifier.height(34.dp))
             content()
         }
-        Box(Modifier.fillMaxWidth().background(WildforceThemeTokens.backgroundSecondary).padding(24.dp)) {
+        Box(Modifier.fillMaxWidth().padding(12.dp).liquidGlass(RoundedCornerShape(26.dp), emphasized = true).padding(16.dp)) {
             PrimaryAction(buttonTitle, canContinue, onContinue)
         }
     }
@@ -176,8 +180,10 @@ private fun FormStep(
 @Composable
 private fun GoalOption(item: FitnessGoal, selected: Boolean, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp))
-            .background(if (selected) WildforceThemeTokens.accentGold.copy(alpha = 0.18f) else WildforceThemeTokens.backgroundSecondary)
+        Modifier.fillMaxWidth().then(
+            if (selected) Modifier.clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.accentGold.copy(alpha = 0.24f))
+            else Modifier.liquidGlass(RoundedCornerShape(18.dp)),
+        )
             .clickable(onClick = onClick).padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -194,12 +200,13 @@ private fun GoalOption(item: FitnessGoal, selected: Boolean, onClick: () -> Unit
 private fun PrimaryAction(title: String, enabled: Boolean, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth().height(52.dp),
+        modifier = Modifier.fillMaxWidth().height(54.dp).liquidGlass(RoundedCornerShape(18.dp), emphasized = true),
         enabled = enabled,
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(18.dp),
+        elevation = ButtonDefaults.elevation(defaultElevation = 0.dp, pressedElevation = 0.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = WildforceThemeTokens.textPrimary,
-            contentColor = WildforceThemeTokens.backgroundSecondary,
+            backgroundColor = Color.Transparent,
+            contentColor = WildforceThemeTokens.textPrimary,
         ),
     ) { Text(title, fontWeight = FontWeight.Bold) }
 }
