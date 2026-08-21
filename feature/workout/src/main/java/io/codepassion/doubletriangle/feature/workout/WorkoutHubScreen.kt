@@ -1,6 +1,9 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -485,7 +488,10 @@ fun ActiveWorkoutScreen(
                         betweenExercises = restBetweenExercises,
                         nextExercise = exercise,
                         gender = gender,
-                        onAddTime = { restRemaining = resting + 30 },
+                        onAddTime = {
+                            restInitialSeconds += 30
+                            restRemaining = resting + 30
+                        },
                         onSkip = { restRemaining = null },
                     )
                 } else if (exercise != null) {
@@ -634,6 +640,7 @@ private fun RestTimerContent(
     onAddTime: () -> Unit,
     onSkip: () -> Unit,
 ) {
+    val animatedProgress by animateFloatAsState((seconds.toFloat() / totalSeconds.coerceAtLeast(1)).coerceIn(0f, 1f), animationSpec = tween(1_000, easing = LinearEasing))
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             if (betweenExercises) "DESCANSO ANTES DEL SIGUIENTE EJERCICIO" else "DESCANSO ANTES DE LA SIGUIENTE SERIE",
@@ -645,7 +652,7 @@ private fun RestTimerContent(
             RestActionButton("+", "+30s", primary = false, onClick = onAddTime)
             Box(Modifier.padding(horizontal = 16.dp).size(148.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(
-                    progress = (seconds.toFloat() / totalSeconds.coerceAtLeast(1)).coerceIn(0f, 1f),
+                    progress = animatedProgress,
                     modifier = Modifier.fillMaxSize(), color = WildforceThemeTokens.accentGold,
                     backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.18f), strokeWidth = 12.dp,
                 )
