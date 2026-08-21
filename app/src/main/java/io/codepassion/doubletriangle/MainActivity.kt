@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.request.ReadRecordsRequest
+import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.records.HeightRecord
@@ -40,8 +43,10 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.feature.onboarding.BodyCompositionPhase
 import io.codepassion.doubletriangle.feature.onboarding.Equipment
 import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
+import io.codepassion.doubletriangle.feature.onboarding.Gender
 import io.codepassion.doubletriangle.feature.onboarding.GymType
 import io.codepassion.doubletriangle.feature.onboarding.LifestyleLevel
+import io.codepassion.doubletriangle.feature.onboarding.MetricSystem
 import io.codepassion.doubletriangle.feature.onboarding.MovementRestriction
 import io.codepassion.doubletriangle.feature.onboarding.TrainingLevel
 import io.codepassion.doubletriangle.feature.onboarding.TrainingSplitPreference
@@ -50,6 +55,8 @@ import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutHubScreen
+import java.time.Instant
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,18 +86,35 @@ fun WildforceRoot() {
             HealthPermission.getReadPermission(WeightRecord::class),
         )
     }
-    var pendingHealthResult by remember { mutableStateOf<((Boolean) -> Unit)?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+    var pendingHealthResult by remember { mutableStateOf<((Boolean, Int?, Double?) -> Unit)?>(null) }
     val healthPermissionLauncher = rememberLauncherForActivityResult(
         PermissionController.createRequestPermissionResultContract(),
     ) { granted ->
-        pendingHealthResult?.invoke(granted.containsAll(healthPermissions))
-        pendingHealthResult = null
+        if (granted.containsAll(healthPermissions)) {
+            coroutineScope.launch {
+                val client = HealthConnectClient.getOrCreate(context)
+                val imported = runCatching {
+                    val timeRange = TimeRangeFilter.before(Instant.now())
+                    val height = client.readRecords(ReadRecordsRequest(HeightRecord::class, timeRangeFilter = timeRange, ascendingOrder = false, pageSize = 1))
+                        .records.firstOrNull()?.height?.inMeters?.times(100)?.toInt()
+                    val weight = client.readRecords(ReadRecordsRequest(WeightRecord::class, timeRangeFilter = timeRange, ascendingOrder = false, pageSize = 1))
+                        .records.firstOrNull()?.weight?.inKilograms
+                    height to weight
+                }.getOrDefault(null to null)
+                pendingHealthResult?.invoke(true, imported.first, imported.second)
+                pendingHealthResult = null
+            }
+        } else {
+            pendingHealthResult?.invoke(false, null, null)
+            pendingHealthResult = null
+        }
     }
-    val requestHealthConnect: (((Boolean) -> Unit) -> Unit) = { result ->
+    val requestHealthConnect: (((Boolean, Int?, Double?) -> Unit) -> Unit) = { result ->
         if (HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE) {
             pendingHealthResult = result
             healthPermissionLauncher.launch(healthPermissions)
-        } else result(false)
+        } else result(false, null, null)
     }
     var profile by remember {
         mutableStateOf(
@@ -115,6 +139,12 @@ fun WildforceRoot() {
                         .ifEmpty { GymType.SmallGym.defaultEquipment },
                     movementRestrictions = MovementRestriction.fromStoredValues(preferences.getStringSet("restrictions", null)),
                     isHealthConnectEnabled = preferences.getBoolean("health_connect", false),
+                    birthMonth = preferences.getInt("birth_month", 1),
+                    birthYear = preferences.getInt("birth_year", 1995),
+                    gender = Gender.fromStoredValue(preferences.getString("gender", "").orEmpty()),
+                    metricSystem = MetricSystem.fromStoredValue(preferences.getString("metric_system", "").orEmpty()),
+                    heightCm = preferences.getInt("height_cm", 175),
+                    weightKg = java.lang.Double.longBitsToDouble(preferences.getLong("weight_kg", java.lang.Double.doubleToRawLongBits(70.0))),
                 )
             },
         )
@@ -137,6 +167,12 @@ fun WildforceRoot() {
                 .putStringSet("equipment", completedProfile.availableEquipment.mapTo(mutableSetOf()) { it.storedValue })
                 .putStringSet("restrictions", completedProfile.movementRestrictions.mapTo(mutableSetOf()) { it.storedValue })
                 .putBoolean("health_connect", completedProfile.isHealthConnectEnabled)
+                .putInt("birth_month", completedProfile.birthMonth)
+                .putInt("birth_year", completedProfile.birthYear)
+                .putString("gender", completedProfile.gender.storedValue)
+                .putString("metric_system", completedProfile.metricSystem.storedValue)
+                .putInt("height_cm", completedProfile.heightCm)
+                .putLong("weight_kg", java.lang.Double.doubleToRawLongBits(completedProfile.weightKg))
                 .apply()
             profile = completedProfile
         }

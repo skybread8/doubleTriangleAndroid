@@ -61,6 +61,12 @@ data class OnboardingProfile(
     val availableEquipment: Set<Equipment> = GymType.SmallGym.defaultEquipment,
     val movementRestrictions: Set<MovementRestriction> = emptySet(),
     val isHealthConnectEnabled: Boolean = false,
+    val birthMonth: Int = 1,
+    val birthYear: Int = 1995,
+    val gender: Gender = Gender.Male,
+    val metricSystem: MetricSystem = MetricSystem.Metric,
+    val heightCm: Int = 175,
+    val weightKg: Double = 70.0,
 )
 
 enum class LifestyleLevel(val storedValue: String, val title: String, val description: String, val glyph: String) {
@@ -109,6 +115,9 @@ enum class GymType(val storedValue:String,val title:String,val glyph:String){
 BigGym("bigGym","Gimnasio grande","▦"),SmallGym("smallGym","Gimnasio pequeño","▤"),HomeGym("homeGym","Gimnasio en casa","⌂"),SomeAccessories("someAccessories","Algunos accesorios","◆"),BodyweightOnly("bodyweightOnly","Solo peso corporal","◎");
 val defaultEquipment:Set<Equipment> get()=when(this){BigGym->Equipment.entries.toSet();SmallGym->setOf(Equipment.Bodyweight,Equipment.ResistanceBands,Equipment.Dumbbells,Equipment.Kettlebells,Equipment.CableMachine,Equipment.SmithMachine,Equipment.LegPressMachine,Equipment.Treadmill,Equipment.StationaryBike,Equipment.FlatBench,Equipment.AdjustableBench,Equipment.SquatRack,Equipment.OlympicBarbell,Equipment.PullUpBar);HomeGym->setOf(Equipment.Bodyweight,Equipment.Dumbbells,Equipment.Kettlebells,Equipment.FlatBench,Equipment.AdjustableBench,Equipment.SquatRack,Equipment.OlympicBarbell,Equipment.PullUpBar);SomeAccessories->setOf(Equipment.Bodyweight,Equipment.ResistanceBands,Equipment.Dumbbells,Equipment.Kettlebells,Equipment.MedicineBall);BodyweightOnly->setOf(Equipment.Bodyweight)}
 companion object{fun fromStoredValue(value:String)=entries.firstOrNull{it.storedValue==value}?:SmallGym}}
+
+enum class Gender(val storedValue:String,val title:String,val glyph:String){Male("male","Hombre","♂"),Female("female","Mujer","♀");companion object{fun fromStoredValue(value:String)=entries.firstOrNull{it.storedValue==value}?:Male}}
+enum class MetricSystem(val storedValue:String,val title:String){Metric("metric","Métrico"),Imperial("imperial","Imperial");companion object{fun fromStoredValue(value:String)=entries.firstOrNull{it.storedValue==value}?:Metric}}
 
 enum class MovementRestriction(val storedValue:String,val title:String){
 LowerBackPain("lowerBackPain","Dolor lumbar"),ShoulderPain("shoulderPain","Dolor de hombro"),KneePain("kneePain","Dolor de rodilla"),HipPain("hipPain","Dolor de cadera"),AnklePain("anklePain","Dolor de tobillo"),WristPain("wristPain","Dolor de muñeca"),ElbowPain("elbowPain","Dolor de codo"),NeckPain("neckPain","Dolor de cuello"),LimitedShoulderMobility("limitedShoulderMobility","Movilidad limitada de hombro"),LimitedHipMobility("limitedHipMobility","Movilidad limitada de cadera"),LimitedAnkleMobility("limitedAnkleMobility","Movilidad limitada de tobillo"),LimitedKneeFlexion("limitedKneeFlexion","Flexión limitada de rodilla"),OverheadMovementLimitation("overheadMovementLimitation","Limitación sobre la cabeza"),ImpactSensitivity("impactSensitivity","Sensibilidad al impacto");
@@ -169,7 +178,7 @@ enum class FitnessGoal(val storedValue: String, val title: String, val descripti
 
 @Composable
 fun OnboardingScreen(
-    onRequestHealthConnect: (((Boolean) -> Unit) -> Unit) = { result -> result(false) },
+    onRequestHealthConnect: ((((Boolean, Int?, Double?) -> Unit) -> Unit)) = { result -> result(false, null, null) },
     onCompleted: (OnboardingProfile) -> Unit,
 ) {
     var step by remember { mutableStateOf(0) }
@@ -188,12 +197,15 @@ fun OnboardingScreen(
     var hasRestrictions by remember { mutableStateOf(false) }
     var restrictions by remember { mutableStateOf(emptySet<MovementRestriction>()) }
     var healthConnectEnabled by remember { mutableStateOf<Boolean?>(null) }
+    val currentYear=java.time.Year.now().value
+    val monthNames=listOf("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre")
+    var birthMonth by remember{mutableStateOf(1)};var birthYear by remember{mutableStateOf(1995)};var gender by remember{mutableStateOf<Gender?>(null)};var metricSystem by remember{mutableStateOf(MetricSystem.Metric)};var heightCm by remember{mutableStateOf(175)};var weightKg by remember{mutableStateOf(70.0)}
     val completeProfile = {
         val selectedGoal = goal
         val selectedLifestyle = lifestyle
         if (selectedGoal != null && selectedLifestyle != null) {
             val selectedBodyPhase = bodyPhase.takeIf { selectedGoal.supportsBodyComposition && trainingLevel.supportsBodyComposition }
-            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses, gymType ?: GymType.SmallGym, equipment, restrictions, healthConnectEnabled == true))
+            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses, gymType ?: GymType.SmallGym, equipment, restrictions, healthConnectEnabled == true, birthMonth, birthYear, gender ?: Gender.Male, metricSystem, heightCm, weightKg))
         }
     }
 
@@ -335,12 +347,31 @@ fun OnboardingScreen(
                     MovementRestriction.entries.forEach{item->ChoiceOption(item.title,null,"•",item in restrictions){restrictions=if(item in restrictions)restrictions-item else restrictions+item};Spacer(Modifier.height(8.dp))}
                 }
             }
-            else -> FormStep(progress=12f/16f,title="Health Connect",subtitle="Importa de forma segura tu altura y peso desde Android.",canContinue=healthConnectEnabled!=null,onBack={step=11},onContinue=completeProfile,buttonTitle="CREAR PLAN"){
-                ChoiceOption("Conectar Health Connect","Android mostrará los permisos de altura y peso.","+",healthConnectEnabled==true){
-                    onRequestHealthConnect{granted->healthConnectEnabled=granted}
+            12 -> FormStep(progress=12f/16f,title="Health Connect",subtitle="Importa de forma segura tu altura y peso desde Android.",canContinue=healthConnectEnabled!=null,onBack={step=11},onContinue={step=13}){
+                ChoiceOption("Conectar Health Connect","Android mostrará los permisos de altura y peso.","+",healthConnectEnabled==true){onRequestHealthConnect{granted,h,w->healthConnectEnabled=granted;h?.let{heightCm=it};w?.let{weightKg=it}}}
+                Spacer(Modifier.height(10.dp));ChoiceOption("Ahora no","Podrás conectarlo más adelante desde Perfil.","−",healthConnectEnabled==false){healthConnectEnabled=false}
+            }
+            13 -> FormStep(progress=13f/16f,title="Fecha de nacimiento",subtitle="Esto nos ayuda a adaptar volumen, intensidad y recuperación.",canContinue=true,onBack={step=12},onContinue={step=14}){
+                ValueStepper("Mes",monthNames[birthMonth-1],{birthMonth=if(birthMonth==1)12 else birthMonth-1},{birthMonth=if(birthMonth==12)1 else birthMonth+1});Spacer(Modifier.height(12.dp))
+                ValueStepper("Año",birthYear.toString(),{birthYear=(birthYear-1).coerceAtLeast(1920)},{birthYear=(birthYear+1).coerceAtMost(currentYear-13)})
+            }
+            14 -> FormStep(progress=14f/16f,title="¿Cuál es tu sexo?",subtitle="Se utiliza para ajustar los cálculos físicos del plan.",canContinue=gender!=null,onBack={step=13},onContinue={step=15}){Gender.entries.forEach{item->ChoiceOption(item.title,null,item.glyph,gender==item){gender=item};Spacer(Modifier.height(10.dp))}}
+            15 -> FormStep(progress=15f/16f,title="Altura",subtitle="Esto nos ayuda a calcular tus necesidades con precisión.",canContinue=true,onBack={step=14},onContinue={step=16}){
+                Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){MetricSystem.entries.forEach{system->Box(Modifier.weight(1f)){CompactOption(system.title,metricSystem==system){metricSystem=system}}}}
+                Spacer(Modifier.height(20.dp))
+                val heightLabel=if(metricSystem==MetricSystem.Metric)"$heightCm cm" else {val inches=(heightCm/2.54).toInt();"${inches/12} ft ${inches%12} in"}
+                ValueStepper("Altura",heightLabel,{heightCm=(heightCm-1).coerceAtLeast(120)},{heightCm=(heightCm+1).coerceAtMost(230)})
+            }
+            16 -> FormStep(progress=1f,title="Peso",subtitle="Esto nos ayuda a calcular tus necesidades con precisión.",canContinue=true,onBack={step=15},onContinue={step=18}){
+                val weightLabel=if(metricSystem==MetricSystem.Metric)String.format("%.1f kg",weightKg) else String.format("%.1f lb",weightKg*2.20462)
+                ValueStepper("Peso",weightLabel,{weightKg=(weightKg-.5).coerceAtLeast(35.0)},{weightKg=(weightKg+.5).coerceAtMost(250.0)})
+            }
+            else -> FormStep(progress=1f,title="Tu plan está listo",subtitle="Hemos preparado una primera semana según tu perfil.",canContinue=true,onBack={step=16},onContinue=completeProfile,buttonTitle="EMPEZAR A ENTRENAR"){
+                Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(20.dp)){
+                    Text(trainingSplit.title.uppercase(),fontFamily=AntonFontFamily,style=MaterialTheme.typography.h5,color=WildforceThemeTokens.textPrimary)
+                    Text("${workoutDays.size} días · $duration min por sesión",color=WildforceThemeTokens.textSecondary);Spacer(Modifier.height(12.dp))
+                    Text("Objetivo: ${goal?.title.orEmpty()}",color=WildforceThemeTokens.textPrimary);Text("Nivel: ${trainingLevel.title}",color=WildforceThemeTokens.textPrimary);Text("Entorno: ${(gymType?:GymType.SmallGym).title}",color=WildforceThemeTokens.textPrimary)
                 }
-                Spacer(Modifier.height(10.dp))
-                ChoiceOption("Ahora no","Podrás conectarlo más adelante desde Perfil.","−",healthConnectEnabled==false){healthConnectEnabled=false}
             }
         }
     }
@@ -443,6 +474,9 @@ private fun ChoiceOption(
         Text(if (selected) "●" else "○", color = WildforceThemeTokens.accentGold)
     }
 }
+
+@Composable
+private fun ValueStepper(label:String,value:String,onMinus:()->Unit,onPlus:()->Unit){Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(16.dp)){Text(label,color=WildforceThemeTokens.textSecondary);Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween){Text("−",Modifier.size(48.dp).clickable(onClick=onMinus),textAlign=TextAlign.Center,style=MaterialTheme.typography.h4);Text(value,style=MaterialTheme.typography.h5,fontWeight=FontWeight.Bold,color=WildforceThemeTokens.textPrimary);Text("+",Modifier.size(48.dp).clickable(onClick=onPlus),textAlign=TextAlign.Center,style=MaterialTheme.typography.h4)}}}
 
 @Composable
 private fun CompactOption(title:String,selected:Boolean,onClick:()->Unit){
