@@ -32,10 +32,13 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.feature.onboarding.BodyCompositionPhase
+import io.codepassion.doubletriangle.feature.onboarding.Equipment
 import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
+import io.codepassion.doubletriangle.feature.onboarding.GymType
 import io.codepassion.doubletriangle.feature.onboarding.LifestyleLevel
 import io.codepassion.doubletriangle.feature.onboarding.TrainingLevel
 import io.codepassion.doubletriangle.feature.onboarding.TrainingSplitPreference
+import io.codepassion.doubletriangle.feature.onboarding.WorkoutFocus
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
@@ -75,6 +78,15 @@ fun WildforceRoot() {
                     trainingLevel = TrainingLevel.fromStoredValue(preferences.getString("training_level", "").orEmpty()),
                     trainingSplitPreference = TrainingSplitPreference.fromStoredValue(preferences.getString("training_split", "").orEmpty()),
                     bodyCompositionPhase = preferences.getString("body_phase", null)?.let(BodyCompositionPhase::fromStoredValue),
+                    customWorkoutFocuses = preferences.getStringSet("custom_focuses", emptySet()).orEmpty().mapNotNull { encoded ->
+                        val parts = encoded.split(":", limit = 2)
+                        val day = WorkoutWeekday.entries.firstOrNull { it.storedValue == parts.firstOrNull() }
+                        val focus = WorkoutFocus.entries.firstOrNull { it.storedValue == parts.getOrNull(1) }
+                        if (day != null && focus != null) day to focus else null
+                    }.toMap(),
+                    gymType = GymType.fromStoredValue(preferences.getString("gym_type", "").orEmpty()),
+                    availableEquipment = Equipment.fromStoredValues(preferences.getStringSet("equipment", null))
+                        .ifEmpty { GymType.SmallGym.defaultEquipment },
                 )
             },
         )
@@ -92,6 +104,9 @@ fun WildforceRoot() {
                 .putString("training_level", completedProfile.trainingLevel.storedValue)
                 .putString("training_split", completedProfile.trainingSplitPreference.storedValue)
                 .putString("body_phase", completedProfile.bodyCompositionPhase?.storedValue)
+                .putStringSet("custom_focuses", completedProfile.customWorkoutFocuses.mapTo(mutableSetOf()) { (day, focus) -> "${day.storedValue}:${focus.storedValue}" })
+                .putString("gym_type", completedProfile.gymType.storedValue)
+                .putStringSet("equipment", completedProfile.availableEquipment.mapTo(mutableSetOf()) { it.storedValue })
                 .apply()
             profile = completedProfile
         }

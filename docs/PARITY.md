@@ -9,7 +9,7 @@ Status values: `Not started`, `Foundation`, `In progress`, `Ready for review`, `
 | App shell | `ContentView` | Four root destinations and persistent bottom navigation | Ready for review | All four destinations are reachable |
 | Design system | Asset colors, Anton, Exo 2, button modifiers | Compose theme, typography, colors, reusable components | Foundation | Light/dark screenshots match brand tokens |
 | Workout hub | `WorkoutHubView` | Header, streak, weekly calendar, mode selector, plan cards | Ready for review | Layout and interactions compared side by side |
-| Onboarding | `OnboardingView` and 18 steps | Cover through program and conditional body phase are persisted; remaining steps pending | In progress | Complete the first slice and enter workout hub |
+| Onboarding | `OnboardingView` and 18 steps | Cover through gym and equipment are persisted, including custom daily focus; remaining steps pending | In progress | Complete the first slice and enter workout hub |
 | Workout plan | Plan, mesocycle, day and exercise models | Room entities plus domain mapping | In progress | Same fixture produces the same plan structure |
 | Active workout | Active workout store and views | Foreground-safe workout session | Not started | Start, log, pause, resume and finish |
 | Completion | Score, XP, streak and celebrations | Equivalent rules and Compose animations | Not started | Ported unit fixtures have identical results |

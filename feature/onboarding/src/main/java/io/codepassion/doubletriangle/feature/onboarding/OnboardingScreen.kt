@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -55,6 +56,9 @@ data class OnboardingProfile(
     val trainingLevel: TrainingLevel = TrainingLevel.Novice,
     val trainingSplitPreference: TrainingSplitPreference = TrainingSplitPreference.Automatic,
     val bodyCompositionPhase: BodyCompositionPhase? = null,
+    val customWorkoutFocuses: Map<WorkoutWeekday, WorkoutFocus> = emptyMap(),
+    val gymType: GymType = GymType.SmallGym,
+    val availableEquipment: Set<Equipment> = GymType.SmallGym.defaultEquipment,
 )
 
 enum class LifestyleLevel(val storedValue: String, val title: String, val description: String, val glyph: String) {
@@ -94,6 +98,15 @@ enum class TrainingLevel(val storedValue: String, val title: String, val descrip
         fun fromStoredValue(value: String) = entries.firstOrNull { it.storedValue == value } ?: Novice
     }
 }
+
+enum class WorkoutFocus(val storedValue:String,val title:String){FullBody("fullBody","Cuerpo completo"),UpperBody("upperBody","Tren superior"),LowerBody("lowerBody","Tren inferior"),Push("push","Empuje"),Pull("pull","Tirón"),Legs("legs","Piernas"),Core("core","Core"),Cardio("cardio","Cardio")}
+enum class Equipment(val storedValue:String,val title:String){
+Bodyweight("bodyweight","Peso corporal"),ResistanceBands("resistanceBands","Bandas"),Dumbbells("dumbbells","Mancuernas"),Kettlebells("kettlebells","Kettlebells"),MedicineBall("medicineBall","Balón medicinal"),BattleRopes("battleRopes","Cuerdas"),JumpRope("jumpRope","Comba"),SuspensionTrainer("suspensionTrainer","TRX"),GymnasticRings("gymnasticRings","Anillas"),CableMachine("cableMachine","Poleas"),SmithMachine("smithMachine","Máquina Smith"),LegPressMachine("legPressMachine","Prensa"),ChestPressMachine("chestPressMachine","Press de pecho"),LegCurlMachine("legCurlMachine","Curl femoral"),RearDeltMachine("rearDeltMachine","Deltoide posterior"),SeatedRowMachine("seatedRowMachine","Remo sentado"),GluteKickbackMachine("gluteKickbackMachine","Patada glúteo"),PecDeckMachine("pecDeckMachine","Pec deck"),HipAbductionMachine("hipAbductionMachine","Abductores"),HipAdductionMachine("hipAdductionMachine","Aductores"),RowingMachine("rowingMachine","Remo cardio"),Treadmill("treadmill","Cinta"),StationaryBike("stationaryBike","Bicicleta"),Elliptical("elliptical","Elíptica"),StairClimber("stairClimber","Escaladora"),SkiErg("skiErg","Ski erg"),FlatBench("flatBench","Banco plano"),AdjustableBench("adjustableBench","Banco ajustable"),SquatRack("squatRack","Rack"),OlympicBarbell("olympicBarbell","Barra olímpica"),EzBar("ezBar","Barra EZ"),TrapBar("trapBar","Trap bar"),DeadliftPlatform("deadliftPlatform","Plataforma"),PullUpBar("pullUpBar","Dominadas"),DipStation("dipStation","Paralelas"),PlyoBox("plyoBox","Cajón"),BoxingBag("boxingBag","Saco"),LandmineAttachment("landmineAttachment","Landmine");
+companion object{fun fromStoredValues(values:Set<String>?)=entries.filterTo(mutableSetOf()){it.storedValue in values.orEmpty()}}}
+enum class GymType(val storedValue:String,val title:String,val glyph:String){
+BigGym("bigGym","Gimnasio grande","▦"),SmallGym("smallGym","Gimnasio pequeño","▤"),HomeGym("homeGym","Gimnasio en casa","⌂"),SomeAccessories("someAccessories","Algunos accesorios","◆"),BodyweightOnly("bodyweightOnly","Solo peso corporal","◎");
+val defaultEquipment:Set<Equipment> get()=when(this){BigGym->Equipment.entries.toSet();SmallGym->setOf(Equipment.Bodyweight,Equipment.ResistanceBands,Equipment.Dumbbells,Equipment.Kettlebells,Equipment.CableMachine,Equipment.SmithMachine,Equipment.LegPressMachine,Equipment.Treadmill,Equipment.StationaryBike,Equipment.FlatBench,Equipment.AdjustableBench,Equipment.SquatRack,Equipment.OlympicBarbell,Equipment.PullUpBar);HomeGym->setOf(Equipment.Bodyweight,Equipment.Dumbbells,Equipment.Kettlebells,Equipment.FlatBench,Equipment.AdjustableBench,Equipment.SquatRack,Equipment.OlympicBarbell,Equipment.PullUpBar);SomeAccessories->setOf(Equipment.Bodyweight,Equipment.ResistanceBands,Equipment.Dumbbells,Equipment.Kettlebells,Equipment.MedicineBall);BodyweightOnly->setOf(Equipment.Bodyweight)}
+companion object{fun fromStoredValue(value:String)=entries.firstOrNull{it.storedValue==value}?:SmallGym}}
 
 enum class TrainingSplitPreference(val storedValue: String, val title: String, val description: String, val glyph: String) {
     Automatic("automatic", "Automático", "Elegiremos la estructura que mejor encaje con tu objetivo y recuperación.", "✦"),
@@ -159,12 +172,16 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
     var trainingLevel by remember { mutableStateOf(TrainingLevel.Novice) }
     var trainingSplit by remember { mutableStateOf(TrainingSplitPreference.Automatic) }
     var bodyPhase by remember { mutableStateOf(BodyCompositionPhase.Automatic) }
+    var customFocuses by remember { mutableStateOf<Map<WorkoutWeekday, WorkoutFocus>>(emptyMap()) }
+    var gymType by remember { mutableStateOf<GymType?>(null) }
+    var equipment by remember { mutableStateOf(setOf(Equipment.Bodyweight)) }
+    var equipmentSearch by remember { mutableStateOf("") }
     val completeProfile = {
         val selectedGoal = goal
         val selectedLifestyle = lifestyle
         if (selectedGoal != null && selectedLifestyle != null) {
             val selectedBodyPhase = bodyPhase.takeIf { selectedGoal.supportsBodyComposition && trainingLevel.supportsBodyComposition }
-            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase))
+            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses, gymType ?: GymType.SmallGym, equipment))
         }
     }
 
@@ -262,42 +279,39 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
                 }
             }
             7 -> FormStep(
-                progress = 7f / 16f,
-                title = "Programa",
-                subtitle = "Elige la estructura de entrenamiento que prefieres.",
-                canContinue = true,
-                onBack = { step = 6 },
-                onContinue = {
-                    if (goal?.supportsBodyComposition == true && trainingLevel.supportsBodyComposition) step = 8
-                    else completeProfile()
-                },
-                buttonTitle = if (goal?.supportsBodyComposition == true && trainingLevel.supportsBodyComposition) "CONTINUAR" else "CREAR PLAN",
-            ) {
-                trainingSplit.warning(workoutDays.size)?.let { warning ->
-                    Text(
-                        warning,
-                        Modifier.fillMaxWidth().background(Color(0xFFFFB020).copy(alpha = 0.14f), RoundedCornerShape(12.dp)).padding(12.dp),
-                        color = WildforceThemeTokens.textPrimary,
-                    )
-                    Spacer(Modifier.height(12.dp))
-                }
-                TrainingSplitPreference.entries.forEach { split ->
-                    ChoiceOption(split.title, split.description, split.glyph, trainingSplit == split) { trainingSplit = split }
-                    Spacer(Modifier.height(10.dp))
+                progress=7f/16f,title="Programa",subtitle="Elige la estructura de entrenamiento que prefieres.",
+                canContinue=trainingSplit!=TrainingSplitPreference.Custom||workoutDays.all{it in customFocuses},
+                onBack={step=6},onContinue={step=if(goal?.supportsBodyComposition==true&&trainingLevel.supportsBodyComposition)8 else 9},
+            ){
+                trainingSplit.warning(workoutDays.size)?.let{Text(it,Modifier.fillMaxWidth().background(Color(0xFFFFB020).copy(alpha=.14f),RoundedCornerShape(12.dp)).padding(12.dp));Spacer(Modifier.height(12.dp))}
+                TrainingSplitPreference.entries.forEach{split->ChoiceOption(split.title,split.description,split.glyph,trainingSplit==split){
+                    trainingSplit=split
+                    if(split==TrainingSplitPreference.Custom)customFocuses=workoutDays.withIndex().associate{(i,d)->d to listOf(WorkoutFocus.Push,WorkoutFocus.Pull,WorkoutFocus.Legs)[i%3]}
+                };Spacer(Modifier.height(10.dp))}
+                if(trainingSplit==TrainingSplitPreference.Custom){
+                    Text("Foco semanal",fontWeight=FontWeight.Bold,color=WildforceThemeTokens.textPrimary)
+                    workoutDays.sortedBy{it.ordinal}.forEach{day->
+                        Text(day.title,Modifier.padding(top=12.dp),color=WildforceThemeTokens.textSecondary)
+                        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)){
+                            WorkoutFocus.entries.forEach{focus->CompactOption(focus.title,customFocuses[day]==focus){customFocuses=customFocuses+(day to focus)}}
+                        }
+                    }
                 }
             }
-            else -> FormStep(
-                progress = 8f / 16f,
-                title = "Fase corporal",
-                subtitle = "Elige cómo debe influir tu objetivo corporal en el plan.",
-                canContinue = true,
-                onBack = { step = 7 },
-                onContinue = completeProfile,
-                buttonTitle = "CREAR PLAN",
-            ) {
-                BodyCompositionPhase.entries.forEach { phase ->
-                    ChoiceOption(phase.title, phase.description, phase.glyph, bodyPhase == phase) { bodyPhase = phase }
-                    Spacer(Modifier.height(10.dp))
+            8 -> FormStep(progress=8f/16f,title="Fase corporal",subtitle="Elige cómo debe influir tu objetivo corporal en el plan.",canContinue=true,onBack={step=7},onContinue={step=9}){
+                BodyCompositionPhase.entries.forEach{phase->ChoiceOption(phase.title,phase.description,phase.glyph,bodyPhase==phase){bodyPhase=phase};Spacer(Modifier.height(10.dp))}
+            }
+            9 -> FormStep(progress=9f/16f,title="Gimnasio",subtitle="¿En qué entorno vas a entrenar?",canContinue=gymType!=null,onBack={step=if(goal?.supportsBodyComposition==true&&trainingLevel.supportsBodyComposition)8 else 7},onContinue={step=10}){
+                GymType.entries.forEach{gym->ChoiceOption(gym.title,null,gym.glyph,gymType==gym){gymType=gym;equipment=gym.defaultEquipment};Spacer(Modifier.height(10.dp))}
+            }
+            else -> FormStep(progress=10f/16f,title="Equipamiento",subtitle="Ajusta el material al que realmente tienes acceso.",canContinue=true,onBack={step=9},onContinue=completeProfile,buttonTitle="CREAR PLAN"){
+                OutlinedTextField(value=equipmentSearch,onValueChange={equipmentSearch=it},modifier=Modifier.fillMaxWidth(),placeholder={Text("Buscar equipamiento")},singleLine=true,shape=RoundedCornerShape(14.dp))
+                Text("${equipment.size} seleccionados",Modifier.padding(vertical=12.dp),color=WildforceThemeTokens.textSecondary)
+                Equipment.entries.filter{it.title.contains(equipmentSearch.trim(),ignoreCase=true)}.chunked(2).forEach{items->
+                    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){
+                        items.forEach{item->Box(Modifier.weight(1f)){CompactOption(item.title,item in equipment){equipment=if(item in equipment)equipment-item else equipment+item}}}
+                        if(items.size==1)Spacer(Modifier.weight(1f))
+                    };Spacer(Modifier.height(10.dp))
                 }
             }
         }
@@ -400,6 +414,11 @@ private fun ChoiceOption(
         }
         Text(if (selected) "●" else "○", color = WildforceThemeTokens.accentGold)
     }
+}
+
+@Composable
+private fun CompactOption(title:String,selected:Boolean,onClick:()->Unit){
+Text(title,Modifier.clip(RoundedCornerShape(12.dp)).background(if(selected)WildforceThemeTokens.accentGold.copy(alpha=.22f)else Color.White.copy(alpha=.07f)).clickable(onClick=onClick).padding(horizontal=13.dp,vertical=11.dp),color=WildforceThemeTokens.textPrimary,style=MaterialTheme.typography.caption,fontWeight=if(selected)FontWeight.Bold else FontWeight.Normal,maxLines=1)
 }
 
 @Composable
