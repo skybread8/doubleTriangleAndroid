@@ -53,6 +53,8 @@ data class OnboardingProfile(
     val workoutDays: Set<WorkoutWeekday> = setOf(WorkoutWeekday.Monday, WorkoutWeekday.Wednesday, WorkoutWeekday.Friday),
     val preferredWorkoutDurationMinutes: Int = 50,
     val trainingLevel: TrainingLevel = TrainingLevel.Novice,
+    val trainingSplitPreference: TrainingSplitPreference = TrainingSplitPreference.Automatic,
+    val bodyCompositionPhase: BodyCompositionPhase? = null,
 )
 
 enum class LifestyleLevel(val storedValue: String, val title: String, val description: String, val glyph: String) {
@@ -93,6 +95,44 @@ enum class TrainingLevel(val storedValue: String, val title: String, val descrip
     }
 }
 
+enum class TrainingSplitPreference(val storedValue: String, val title: String, val description: String, val glyph: String) {
+    Automatic("automatic", "Automático", "Elegiremos la estructura que mejor encaje con tu objetivo y recuperación.", "✦"),
+    FullBody("fullBody", "Cuerpo completo", "Sesiones de cuerpo completo distribuidas durante la semana.", "◎"),
+    UpperLower("upperLower", "Tren superior / inferior", "Alterna sesiones de parte superior e inferior.", "↕"),
+    PushPullLegs("pushPullLegs", "Empuje / tirón / piernas", "Divide el trabajo en empuje, tirón y piernas.", "△"),
+    BodyPartSplit("bodyPartSplit", "Por grupos musculares", "Da más volumen específico a cada grupo muscular.", "◇"),
+    Custom("custom", "Personalizado", "Define una estructura específica para cada día seleccionado.", "☷");
+
+    fun warning(days: Int): String? = when {
+        this == UpperLower && days % 2 != 0 -> "Esta estructura suele funcionar mejor con 2, 4 o 6 días."
+        this == PushPullLegs && days % 3 != 0 -> "Esta estructura está pensada principalmente para 3 o 6 días."
+        this == BodyPartSplit && days < 5 -> "La división por grupos suele necesitar al menos 5 días."
+        else -> null
+    }
+
+    companion object {
+        fun fromStoredValue(value: String) = entries.firstOrNull { it.storedValue == value } ?: Automatic
+    }
+}
+
+enum class BodyCompositionPhase(val storedValue: String, val title: String, val description: String, val glyph: String) {
+    Automatic("automatic", "Automático", "Elegiremos el énfasis adecuado según tu objetivo, métricas y evolución.", "✦"),
+    Bulk("bulk", "Volumen", "Prioriza el crecimiento muscular y la sobrecarga progresiva.", "↗"),
+    Cut("cut", "Definición", "Prioriza perder grasa manteniendo fuerza y masa muscular.", "↘"),
+    Maintain("maintain", "Mantenimiento", "Mantiene un equilibrio estable de volumen e intensidad.", "=");
+
+    companion object {
+        fun fromStoredValue(value: String) = entries.firstOrNull { it.storedValue == value } ?: Automatic
+    }
+}
+
+val TrainingLevel.supportsBodyComposition: Boolean
+    get() = this == TrainingLevel.Intermediate || this == TrainingLevel.Advanced || this == TrainingLevel.Elite
+
+val FitnessGoal.supportsBodyComposition: Boolean
+    get() = this == FitnessGoal.LoseWeight || this == FitnessGoal.BuildMuscle ||
+        this == FitnessGoal.GainStrength || this == FitnessGoal.BodyRecomposition
+
 enum class FitnessGoal(val storedValue: String, val title: String, val description: String, val glyph: String) {
     LoseWeight("loseWeight", "Perder peso", "Quema grasa y mejora tu salud metabólica.", "↘"),
     BuildMuscle("buildMuscle", "Ganar músculo", "Aumenta masa muscular con entrenamiento de hipertrofia.", "◆"),
@@ -117,6 +157,16 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
     var workoutDays by remember { mutableStateOf(setOf(WorkoutWeekday.Monday, WorkoutWeekday.Wednesday, WorkoutWeekday.Friday)) }
     var duration by remember { mutableStateOf(50) }
     var trainingLevel by remember { mutableStateOf(TrainingLevel.Novice) }
+    var trainingSplit by remember { mutableStateOf(TrainingSplitPreference.Automatic) }
+    var bodyPhase by remember { mutableStateOf(BodyCompositionPhase.Automatic) }
+    val completeProfile = {
+        val selectedGoal = goal
+        val selectedLifestyle = lifestyle
+        if (selectedGoal != null && selectedLifestyle != null) {
+            val selectedBodyPhase = bodyPhase.takeIf { selectedGoal.supportsBodyComposition && trainingLevel.supportsBodyComposition }
+            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase))
+        }
+    }
 
     AnimatedContent(targetState = step, label = "onboarding-step") { currentStep ->
         when (currentStep) {
@@ -198,21 +248,55 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
                     Text("+", Modifier.size(48.dp).clickable { duration = (duration + 5).coerceAtMost(180) }, textAlign = TextAlign.Center, style = MaterialTheme.typography.h4)
                 }
             }
-            else -> FormStep(
+            6 -> FormStep(
                 progress = 6f / 16f,
                 title = "Experiencia",
                 subtitle = "Selecciona el nivel que mejor describe tu experiencia entrenando.",
                 canContinue = true,
                 onBack = { step = 5 },
-                onContinue = {
-                    val selectedGoal = goal ?: return@FormStep
-                    val selectedLifestyle = lifestyle ?: return@FormStep
-                    onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel))
-                },
-                buttonTitle = "CREAR PLAN",
+                onContinue = { step = 7 },
             ) {
                 TrainingLevel.entries.forEach { level ->
                     ChoiceOption(level.title, level.description, level.glyph, trainingLevel == level) { trainingLevel = level }
+                    Spacer(Modifier.height(10.dp))
+                }
+            }
+            7 -> FormStep(
+                progress = 7f / 16f,
+                title = "Programa",
+                subtitle = "Elige la estructura de entrenamiento que prefieres.",
+                canContinue = true,
+                onBack = { step = 6 },
+                onContinue = {
+                    if (goal?.supportsBodyComposition == true && trainingLevel.supportsBodyComposition) step = 8
+                    else completeProfile()
+                },
+                buttonTitle = if (goal?.supportsBodyComposition == true && trainingLevel.supportsBodyComposition) "CONTINUAR" else "CREAR PLAN",
+            ) {
+                trainingSplit.warning(workoutDays.size)?.let { warning ->
+                    Text(
+                        warning,
+                        Modifier.fillMaxWidth().background(Color(0xFFFFB020).copy(alpha = 0.14f), RoundedCornerShape(12.dp)).padding(12.dp),
+                        color = WildforceThemeTokens.textPrimary,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
+                TrainingSplitPreference.entries.forEach { split ->
+                    ChoiceOption(split.title, split.description, split.glyph, trainingSplit == split) { trainingSplit = split }
+                    Spacer(Modifier.height(10.dp))
+                }
+            }
+            else -> FormStep(
+                progress = 8f / 16f,
+                title = "Fase corporal",
+                subtitle = "Elige cómo debe influir tu objetivo corporal en el plan.",
+                canContinue = true,
+                onBack = { step = 7 },
+                onContinue = completeProfile,
+                buttonTitle = "CREAR PLAN",
+            ) {
+                BodyCompositionPhase.entries.forEach { phase ->
+                    ChoiceOption(phase.title, phase.description, phase.glyph, bodyPhase == phase) { bodyPhase = phase }
                     Spacer(Modifier.height(10.dp))
                 }
             }

@@ -31,9 +31,11 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
+import io.codepassion.doubletriangle.feature.onboarding.BodyCompositionPhase
 import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
 import io.codepassion.doubletriangle.feature.onboarding.LifestyleLevel
 import io.codepassion.doubletriangle.feature.onboarding.TrainingLevel
+import io.codepassion.doubletriangle.feature.onboarding.TrainingSplitPreference
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
@@ -71,6 +73,8 @@ fun WildforceRoot() {
                     workoutDays = WorkoutWeekday.fromStoredValues(preferences.getStringSet("workout_days", null)),
                     preferredWorkoutDurationMinutes = preferences.getInt("workout_duration", 50),
                     trainingLevel = TrainingLevel.fromStoredValue(preferences.getString("training_level", "").orEmpty()),
+                    trainingSplitPreference = TrainingSplitPreference.fromStoredValue(preferences.getString("training_split", "").orEmpty()),
+                    bodyCompositionPhase = preferences.getString("body_phase", null)?.let(BodyCompositionPhase::fromStoredValue),
                 )
             },
         )
@@ -86,6 +90,8 @@ fun WildforceRoot() {
                 .putStringSet("workout_days", completedProfile.workoutDays.mapTo(mutableSetOf()) { it.storedValue })
                 .putInt("workout_duration", completedProfile.preferredWorkoutDurationMinutes)
                 .putString("training_level", completedProfile.trainingLevel.storedValue)
+                .putString("training_split", completedProfile.trainingSplitPreference.storedValue)
+                .putString("body_phase", completedProfile.bodyCompositionPhase?.storedValue)
                 .apply()
             profile = completedProfile
         }
