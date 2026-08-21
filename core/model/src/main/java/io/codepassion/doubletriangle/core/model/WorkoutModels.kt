@@ -11,6 +11,13 @@ enum class WorkoutMode(val label: String) {
 
 enum class WorkoutStatus { Planned, Completed }
 
+data class ExerciseSummary(
+    val name: String,
+    val sets: Int,
+    val reps: String,
+    val restSeconds: Int,
+)
+
 data class WorkoutDaySummary(
     val id: String,
     val order: Int,
@@ -20,6 +27,7 @@ data class WorkoutDaySummary(
     val scheduledDay: DayOfWeek,
     val estimatedMinutes: Int,
     val status: WorkoutStatus,
+    val exercises: List<ExerciseSummary> = emptyList(),
 )
 
 data class WorkoutHubState(
@@ -42,10 +50,10 @@ object PreviewWorkoutRepository {
         planName = "Hipertrofia · Semana 1",
         phase = "Acumulación · Mesociclo 1",
         workouts = listOf(
-            WorkoutDaySummary("push", 1, "PUSH · TREN SUPERIOR", "Empuje", "Fuerza", DayOfWeek.MONDAY, 55, WorkoutStatus.Completed),
-            WorkoutDaySummary("legs", 2, "PIERNAS Y CORE", "Piernas", "Fuerza", DayOfWeek.WEDNESDAY, 60, WorkoutStatus.Planned),
-            WorkoutDaySummary("pull", 3, "PULL · ESPALDA", "Tirón", "Hipertrofia", DayOfWeek.FRIDAY, 50, WorkoutStatus.Planned),
-            WorkoutDaySummary("full", 4, "CUERPO COMPLETO", "Full body", "Fuerza", DayOfWeek.SATURDAY, 65, WorkoutStatus.Planned),
+            WorkoutDaySummary("push", 1, "PUSH · TREN SUPERIOR", "Empuje", "Fuerza", DayOfWeek.MONDAY, 55, WorkoutStatus.Completed, listOf(ExerciseSummary("Press de banca", 4, "8-10", 120), ExerciseSummary("Press militar", 3, "10", 90), ExerciseSummary("Fondos", 3, "8-12", 90))),
+            WorkoutDaySummary("legs", 2, "PIERNAS Y CORE", "Piernas", "Fuerza", DayOfWeek.WEDNESDAY, 60, WorkoutStatus.Planned, listOf(ExerciseSummary("Sentadilla", 4, "6-8", 150), ExerciseSummary("Peso muerto rumano", 3, "8-10", 120), ExerciseSummary("Plancha", 3, "45 s", 60))),
+            WorkoutDaySummary("pull", 3, "PULL · ESPALDA", "Tirón", "Hipertrofia", DayOfWeek.FRIDAY, 50, WorkoutStatus.Planned, listOf(ExerciseSummary("Dominadas", 4, "6-10", 120), ExerciseSummary("Remo con barra", 4, "8-10", 120), ExerciseSummary("Curl de bíceps", 3, "10-12", 75))),
+            WorkoutDaySummary("full", 4, "CUERPO COMPLETO", "Full body", "Fuerza", DayOfWeek.SATURDAY, 65, WorkoutStatus.Planned, listOf(ExerciseSummary("Peso muerto", 3, "5", 180), ExerciseSummary("Press inclinado", 3, "8", 120), ExerciseSummary("Zancadas", 3, "10/lado", 90))),
         ),
     )
 }

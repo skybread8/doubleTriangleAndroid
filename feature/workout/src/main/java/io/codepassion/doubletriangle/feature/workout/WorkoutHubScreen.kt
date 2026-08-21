@@ -18,6 +18,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -56,6 +59,7 @@ import java.util.Locale
 fun WorkoutHubScreen(
     contentPadding: PaddingValues,
     state: WorkoutHubState = PreviewWorkoutRepository.load(),
+    onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
 ) {
     var selectedDay by remember { mutableStateOf<DayOfWeek?>(null) }
     var mode by remember { mutableStateOf(WorkoutMode.Plan) }
@@ -79,7 +83,7 @@ fun WorkoutHubScreen(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
         )
         AnimatedVisibility(mode == WorkoutMode.Plan) {
-            WorkoutPlan(state, selectedDay, Modifier.fillMaxSize())
+            WorkoutPlan(state, selectedDay, onWorkoutSelected, Modifier.fillMaxSize())
         }
         AnimatedVisibility(mode == WorkoutMode.Custom) {
             EmptyCustomWorkouts(Modifier.fillMaxSize())
@@ -178,7 +182,7 @@ private fun WorkoutModeSelector(
 }
 
 @Composable
-private fun WorkoutPlan(state: WorkoutHubState, selectedDay: DayOfWeek?, modifier: Modifier = Modifier) {
+private fun WorkoutPlan(state: WorkoutHubState, selectedDay: DayOfWeek?, onWorkoutSelected: (WorkoutDaySummary) -> Unit, modifier: Modifier = Modifier) {
     val workouts = state.workoutsFor(selectedDay)
     LazyColumn(
         modifier,
@@ -190,13 +194,13 @@ private fun WorkoutPlan(state: WorkoutHubState, selectedDay: DayOfWeek?, modifie
             Text(state.phase, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
         if (workouts.isEmpty()) item { RestDayCard() }
-        else items(workouts, key = { it.id }) { WorkoutCard(it) }
+        else items(workouts, key = { it.id }) { workout -> WorkoutCard(workout) { onWorkoutSelected(workout) } }
     }
 }
 
 @Composable
-private fun WorkoutCard(workout: WorkoutDaySummary) {
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), elevation = 0.dp) {
+private fun WorkoutCard(workout: WorkoutDaySummary, onClick: () -> Unit) {
+    Card(Modifier.fillMaxWidth().clickable(onClick = onClick), shape = RoundedCornerShape(14.dp), elevation = 0.dp) {
         Box(
             Modifier.fillMaxWidth().height(180.dp).background(
                 Brush.linearGradient(listOf(Color(0xFF171717), Color(0xFF514A3D), Color(0xFF87785D))),
@@ -257,3 +261,44 @@ private fun EmptyCustomWorkouts(modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 private fun WorkoutHubPreview() = WildforceTheme { WorkoutHubScreen(PaddingValues()) }
+
+@Composable
+fun WorkoutDetailScreen(workout: WorkoutDaySummary, onBack: () -> Unit, onStart: () -> Unit) {
+    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(18.dp).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
+        Text("‹  VOLVER", Modifier.clickable(onClick = onBack).padding(vertical = 12.dp), color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+        Text("DÍA ${workout.order}", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+        Text(workout.title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+        Text("${workout.focus} · ${workout.dayType} · ${workout.estimatedMinutes} min", color = WildforceThemeTokens.textSecondary)
+        Spacer(Modifier.height(22.dp))
+        workout.exercises.forEachIndexed { index, exercise ->
+            Row(Modifier.fillMaxWidth().padding(vertical = 5.dp).liquidGlass(RoundedCornerShape(14.dp)).padding(15.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("${index + 1}", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.accentGold)
+                Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
+                    Text(exercise.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text("${exercise.sets} series · ${exercise.reps} reps · ${exercise.restSeconds}s descanso", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                }
+            }
+        }
+        Spacer(Modifier.height(18.dp))
+        Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp)) {
+            Text("EMPEZAR ENTRENAMIENTO", fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+fun ActiveWorkoutScreen(workout: WorkoutDaySummary, onFinish: () -> Unit) {
+    var currentExercise by remember { mutableStateOf(0) }
+    val exercise = workout.exercises.getOrNull(currentExercise)
+    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Text("EN ENTRENAMIENTO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.accentGold)
+        Spacer(Modifier.height(24.dp))
+        Text(exercise?.name ?: "Sesión completada", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        exercise?.let { Text("${it.sets} series · ${it.reps} reps", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.h6) }
+        Spacer(Modifier.height(36.dp))
+        Button(onClick = { if (currentExercise < workout.exercises.lastIndex) currentExercise++ else onFinish() }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp)) {
+            Text(if (currentExercise < workout.exercises.lastIndex) "SIGUIENTE EJERCICIO" else "FINALIZAR", fontWeight = FontWeight.Bold)
+        }
+        Text("${(currentExercise + 1).coerceAtMost(workout.exercises.size)} / ${workout.exercises.size} ejercicios", Modifier.padding(top = 16.dp), color = WildforceThemeTokens.textSecondary)
+    }
+}

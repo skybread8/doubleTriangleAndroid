@@ -179,7 +179,9 @@ enum class FitnessGoal(val storedValue: String, val title: String, val descripti
 @Composable
 fun OnboardingScreen(
     onRequestHealthConnect: ((((Boolean, Int?, Double?) -> Unit) -> Unit)) = { result -> result(false, null, null) },
-    onCompleted: (OnboardingProfile) -> Unit,
+    isGenerating: Boolean = false,
+    generationError: String? = null,
+    onCompleted: (OnboardingProfile, Boolean) -> Unit,
 ) {
     var step by remember { mutableStateOf(0) }
     var name by remember { mutableStateOf("") }
@@ -200,12 +202,12 @@ fun OnboardingScreen(
     val currentYear=java.time.Year.now().value
     val monthNames=listOf("Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre")
     var birthMonth by remember{mutableStateOf(1)};var birthYear by remember{mutableStateOf(1995)};var gender by remember{mutableStateOf<Gender?>(null)};var metricSystem by remember{mutableStateOf(MetricSystem.Metric)};var heightCm by remember{mutableStateOf(175)};var weightKg by remember{mutableStateOf(70.0)}
-    val completeProfile = {
+    val completeProfile: (Boolean) -> Unit = { useAi ->
         val selectedGoal = goal
         val selectedLifestyle = lifestyle
         if (selectedGoal != null && selectedLifestyle != null) {
             val selectedBodyPhase = bodyPhase.takeIf { selectedGoal.supportsBodyComposition && trainingLevel.supportsBodyComposition }
-            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses, gymType ?: GymType.SmallGym, equipment, restrictions, healthConnectEnabled == true, birthMonth, birthYear, gender ?: Gender.Male, metricSystem, heightCm, weightKg))
+            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses, gymType ?: GymType.SmallGym, equipment, restrictions, healthConnectEnabled == true, birthMonth, birthYear, gender ?: Gender.Male, metricSystem, heightCm, weightKg), useAi)
         }
     }
 
@@ -366,11 +368,16 @@ fun OnboardingScreen(
                 val weightLabel=if(metricSystem==MetricSystem.Metric)String.format("%.1f kg",weightKg) else String.format("%.1f lb",weightKg*2.20462)
                 ValueStepper("Peso",weightLabel,{weightKg=(weightKg-.5).coerceAtLeast(35.0)},{weightKg=(weightKg+.5).coerceAtMost(250.0)})
             }
-            else -> FormStep(progress=1f,title="Tu plan está listo",subtitle="Hemos preparado una primera semana según tu perfil.",canContinue=true,onBack={step=16},onContinue=completeProfile,buttonTitle="EMPEZAR A ENTRENAR"){
+            else -> FormStep(progress=1f,title="Genera tu plan",subtitle="Prueba la IA real o entra al instante con un plan local.",canContinue=false,onBack={step=16},onContinue={},showBottomAction=false){
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(20.dp)){
                     Text(trainingSplit.title.uppercase(),fontFamily=AntonFontFamily,style=MaterialTheme.typography.h5,color=WildforceThemeTokens.textPrimary)
                     Text("${workoutDays.size} días · $duration min por sesión",color=WildforceThemeTokens.textSecondary);Spacer(Modifier.height(12.dp))
                     Text("Objetivo: ${goal?.title.orEmpty()}",color=WildforceThemeTokens.textPrimary);Text("Nivel: ${trainingLevel.title}",color=WildforceThemeTokens.textPrimary);Text("Entorno: ${(gymType?:GymType.SmallGym).title}",color=WildforceThemeTokens.textPrimary)
+                    Spacer(Modifier.height(20.dp))
+                    PrimaryAction(if(isGenerating) "GENERANDO…" else "GENERAR CON IA", !isGenerating) { completeProfile(true) }
+                    Spacer(Modifier.height(10.dp))
+                    PrimaryAction("GENERAR PLAN DE PRUEBA", !isGenerating) { completeProfile(false) }
+                    generationError?.let { Text(it, Modifier.padding(top=12.dp), color=Color(0xFFB3261E), style=MaterialTheme.typography.caption) }
                 }
             }
         }
@@ -422,6 +429,7 @@ private fun FormStep(
     onBack: () -> Unit,
     onContinue: () -> Unit,
     buttonTitle: String = "CONTINUAR",
+    showBottomAction: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Column(Modifier.fillMaxSize().liquidGlassBackground()) {
@@ -439,7 +447,7 @@ private fun FormStep(
             Spacer(Modifier.height(34.dp))
             content()
         }
-        Box(Modifier.fillMaxWidth().padding(12.dp).liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(16.dp)) {
+        if (showBottomAction) Box(Modifier.fillMaxWidth().padding(12.dp).liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(16.dp)) {
             PrimaryAction(buttonTitle, canContinue, onContinue)
         }
     }
@@ -500,4 +508,4 @@ private fun PrimaryAction(title: String, enabled: Boolean, onClick: () -> Unit) 
 
 @Preview(showBackground = true)
 @Composable
-private fun OnboardingPreview() = WildforceTheme { OnboardingScreen {} }
+private fun OnboardingPreview() = WildforceTheme { OnboardingScreen { _, _ -> } }
