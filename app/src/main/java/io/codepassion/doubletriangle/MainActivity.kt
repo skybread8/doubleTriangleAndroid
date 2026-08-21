@@ -252,7 +252,7 @@ private fun WildforceApp(
             onFinish = { duration, sets, volume, streak ->
                 displayedWorkoutState = displayedWorkoutState.copy(
                     user = displayedWorkoutState.user.copy(currentStreak = streak),
-                    completedDays = displayedWorkoutState.completedDays + workout.scheduledDay,
+                    completedDays = if (displayedWorkoutState.workouts.any { it.id == workout.id }) displayedWorkoutState.completedDays + workout.scheduledDay else displayedWorkoutState.completedDays,
                     workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Completed) else it },
                 )
                 onWorkoutCompleted(workout.id, duration, sets, volume)

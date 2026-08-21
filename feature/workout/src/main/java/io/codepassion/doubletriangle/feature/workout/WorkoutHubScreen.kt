@@ -71,7 +71,20 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
 ) {
     var selectedDay by remember { mutableStateOf<DayOfWeek?>(null) }
     var mode by remember { mutableStateOf(WorkoutMode.Plan) }
+    val customContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
+    var customWorkouts by remember { mutableStateOf(CustomWorkoutStore.load(customContext)) }
+    var editingCustomWorkout by remember { mutableStateOf<WorkoutDaySummary?>(null) }
 
+    editingCustomWorkout?.let { draft ->
+        Box(Modifier.fillMaxSize().padding(contentPadding)) {
+            CustomWorkoutEditorScreen(draft, gender, onCancel = { editingCustomWorkout = null }) { saved ->
+                CustomWorkoutStore.save(customContext, saved)
+                customWorkouts = CustomWorkoutStore.load(customContext)
+                editingCustomWorkout = null
+            }
+        }
+        return
+    }
     Column(
         Modifier.fillMaxSize().padding(contentPadding).liquidGlassBackground(),
     ) {
@@ -94,7 +107,22 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
             WorkoutPlan(state, selectedDay, onWorkoutSelected, gender, Modifier.fillMaxSize())
         }
         AnimatedVisibility(mode == WorkoutMode.Custom) {
-            EmptyCustomWorkouts(Modifier.fillMaxSize())
+            CustomWorkoutsScreen(
+                workouts = customWorkouts.filter { selectedDay == null || it.scheduledDay == selectedDay }, gender = gender,
+                onCreateManual = { editingCustomWorkout = CustomWorkoutStore.empty(selectedDay ?: LocalDate.now().dayOfWeek) },
+                onCreateAutomatic = { editingCustomWorkout = CustomWorkoutStore.automatic(selectedDay ?: LocalDate.now().dayOfWeek) },
+                onOpen = onWorkoutSelected, onEdit = { editingCustomWorkout = it },
+                onDuplicate = { source ->
+                    editingCustomWorkout = CustomWorkoutStore.duplicate(customContext, source)
+                    customWorkouts = CustomWorkoutStore.load(customContext)
+                },
+                onDelete = { workout ->
+                    WorkoutSessionStore.clear(customContext, workout.id)
+                    CustomWorkoutStore.delete(customContext, workout.id)
+                    customWorkouts = CustomWorkoutStore.load(customContext)
+                },
+                modifier = Modifier.fillMaxSize(),
+            )
         }
     }
 }
@@ -254,16 +282,6 @@ private fun RestDayCard() {
     ) {
         Text("DÍA DE DESCANSO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
         Text("No hay entrenamiento planificado.", color = WildforceThemeTokens.textSecondary)
-    }
-}
-
-@Composable
-private fun EmptyCustomWorkouts(modifier: Modifier = Modifier) {
-    Box(modifier.padding(24.dp), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("CREA TU ENTRENAMIENTO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-            Text("Los entrenamientos personalizados llegarán en esta vertical.", color = WildforceThemeTokens.textSecondary)
-        }
     }
 }
 

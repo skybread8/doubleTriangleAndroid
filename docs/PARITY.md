@@ -13,7 +13,7 @@ Status values: `Not started`, `Foundation`, `In progress`, `Ready for review`, `
 | Workout plan | Plan, mesocycle, day and exercise models | Room entities plus domain mapping | In progress | Same fixture produces the same plan structure |
 | Active workout | Active workout store and views | Foreground-safe workout session | Ready for review | Start, log, pause, resume and finish |
 | Completion | Score, XP, streak and celebrations | Equivalent rules and Compose animations | Ready for review | Ported unit fixtures have identical results |
-| Custom workouts | Custom workout views | Create, edit, run and delete | Not started | CRUD plus active session verified |
+| Custom workouts | Custom workout views | Create, edit, run and delete | Ready for review | CRUD plus active session verified |
 | Analytics | Analytics and charts | Compose chart screens | Not started | Same dataset yields equivalent values |
 | Profile | Profile, settings, body metrics/photos | Compose profile flows | Not started | Fields and validation match |
 | Nutrition | Planner, calendar and seven log methods | Android nutrition verticals | Not started | Each method has an end-to-end test |
