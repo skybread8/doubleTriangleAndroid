@@ -2,6 +2,7 @@ package io.codepassion.doubletriangle.feature.workout
 
 import android.content.Context
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
+import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import java.time.DayOfWeek
@@ -23,7 +24,13 @@ internal object CustomWorkoutStore {
                 val exercises = buildList {
                     for (exerciseIndex in 0 until exercisesJson.length()) {
                         val exercise = exercisesJson.getJSONObject(exerciseIndex)
-                        add(ExerciseSummary(exercise.getString("name"), exercise.optString("imageKey").takeIf(String::isNotBlank), exercise.getInt("sets"), exercise.getString("reps"), exercise.getInt("restSeconds")))
+                        add(
+                            ExerciseSummary(
+                                exercise.getString("name"), exercise.optString("imageKey").takeIf(String::isNotBlank),
+                                exercise.getInt("sets"), exercise.getString("reps"), exercise.getInt("restSeconds"),
+                                runCatching { ExerciseSetStyle.valueOf(exercise.optString("setStyle")) }.getOrDefault(ExerciseSetStyle.Straight),
+                            ),
+                        )
                     }
                 }
                 add(
@@ -76,7 +83,15 @@ internal object CustomWorkoutStore {
             workouts.forEach { workout ->
                 val exercises = JSONArray().apply {
                     workout.exercises.forEach { exercise ->
-                        put(JSONObject().put("name", exercise.name).put("imageKey", exercise.imageKey ?: "").put("sets", exercise.sets).put("reps", exercise.reps).put("restSeconds", exercise.restSeconds))
+                        put(
+                            JSONObject()
+                                .put("name", exercise.name)
+                                .put("imageKey", exercise.imageKey ?: "")
+                                .put("sets", exercise.sets)
+                                .put("reps", exercise.reps)
+                                .put("restSeconds", exercise.restSeconds)
+                                .put("setStyle", exercise.setStyle.name),
+                        )
                     }
                 }
                 put(

@@ -11,13 +11,29 @@ enum class WorkoutMode(val label: String) {
 
 enum class WorkoutStatus { Planned, Completed }
 
+enum class ExerciseSetStyle(val label: String, val glyph: String) {
+    Warmup("Calentamiento", "●"),
+    Straight("Series normales", "="),
+    TopSetBackoff("Top set + backoff", "▲"),
+    AscendingPyramid("Pirámide ascendente", "△"),
+    DropSet("Drop set", "↘"),
+    RestPause("Rest-pause", "Ⅱ"),
+    Intervals("Intervalos", "◷"),
+    Tempo("Tempo", "♩"),
+}
+
 data class ExerciseSummary(
     val name: String,
     val imageKey: String? = null,
     val sets: Int,
     val reps: String,
     val restSeconds: Int,
+    val setStyle: ExerciseSetStyle = ExerciseSetStyle.Straight,
 )
+
+fun ExerciseSetStyle.appliesToSet(setNumber: Int, totalSets: Int): Boolean =
+    this !in setOf(ExerciseSetStyle.DropSet, ExerciseSetStyle.RestPause) || setNumber == totalSets
+
 
 data class WorkoutDaySummary(
     val id: String,

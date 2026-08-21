@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,6 +44,7 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
+import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 
 @Composable
@@ -185,6 +187,22 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
             EditorStepper("SERIES", exercise.sets.toString(), { onChange(exercise.copy(sets = (exercise.sets - 1).coerceAtLeast(1))) }, { onChange(exercise.copy(sets = exercise.sets + 1)) }, Modifier.weight(1f))
             EditorStepper("REPS", exercise.reps, { onChange(exercise.copy(reps = ((exercise.reps.toIntOrNull() ?: 10) - 1).coerceAtLeast(1).toString())) }, { onChange(exercise.copy(reps = ((exercise.reps.toIntOrNull() ?: 10) + 1).toString())) }, Modifier.weight(1f))
             EditorStepper("DESCANSO", "${exercise.restSeconds}s", { onChange(exercise.copy(restSeconds = (exercise.restSeconds - 15).coerceAtLeast(0))) }, { onChange(exercise.copy(restSeconds = exercise.restSeconds + 15)) }, Modifier.weight(1f))
+        }
+        Text("TIPO DE SERIE", Modifier.padding(top = 10.dp, bottom = 5.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            items(ExerciseSetStyle.values()) { style ->
+                val selected = exercise.setStyle == style
+                Row(
+                    Modifier
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(if (selected) WildforceThemeTokens.accentGold.copy(alpha = 0.18f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.07f))
+                        .clickable { onChange(exercise.copy(setStyle = style)) }
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("${style.glyph}  ${style.label}", color = if (selected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+                }
+            }
         }
     }
 }

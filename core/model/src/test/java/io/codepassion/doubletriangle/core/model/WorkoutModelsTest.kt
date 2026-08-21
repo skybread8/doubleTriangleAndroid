@@ -16,4 +16,11 @@ class WorkoutModelsTest {
     @Test fun restDayReturnsEmptyList() {
         assertEquals(emptyList<WorkoutDaySummary>(), state.workoutsFor(DayOfWeek.TUESDAY))
     }
+
+    @Test fun intensiveStylesApplyOnlyToFinalSet() {
+        assertEquals(false, ExerciseSetStyle.DropSet.appliesToSet(2, 3))
+        assertEquals(true, ExerciseSetStyle.DropSet.appliesToSet(3, 3))
+        assertEquals(false, ExerciseSetStyle.RestPause.appliesToSet(1, 4))
+        assertEquals(true, ExerciseSetStyle.Tempo.appliesToSet(1, 4))
+    }
 }

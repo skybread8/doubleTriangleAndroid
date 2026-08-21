@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
+import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import java.time.DayOfWeek
@@ -40,5 +41,13 @@ class WorkoutCompletionCalculatorTest {
         assertEquals(1, WorkoutCompletionCalculator.level(59))
         assertEquals(2, WorkoutCompletionCalculator.level(60))
         assertEquals(3, WorkoutCompletionCalculator.level(155))
+    }
+
+    @Test fun setStyleInstructionsFollowIosScope() {
+        assertEquals("TOP SET", setStyleInstruction(ExerciseSetStyle.TopSetBackoff, 1, 4))
+        assertEquals("BACKOFF", setStyleInstruction(ExerciseSetStyle.TopSetBackoff, 2, 4))
+        assertEquals("SERIE BASE", setStyleInstruction(ExerciseSetStyle.DropSet, 2, 3))
+        assertEquals("DROP SET · SIN DESCANSO", setStyleInstruction(ExerciseSetStyle.DropSet, 3, 3))
+        assertEquals("PESO MÁXIMO", setStyleInstruction(ExerciseSetStyle.AscendingPyramid, 4, 4))
     }
 }

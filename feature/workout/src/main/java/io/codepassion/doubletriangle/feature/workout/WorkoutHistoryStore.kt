@@ -2,6 +2,7 @@ package io.codepassion.doubletriangle.feature.workout
 
 import android.content.Context
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
+import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import org.json.JSONArray
 import org.json.JSONObject
@@ -19,6 +20,7 @@ internal data class CompletedSetRecord(
     val reps: Int,
     val weightKg: Double,
     val completedAtMillis: Long = System.currentTimeMillis(),
+    val setStyle: ExerciseSetStyle = ExerciseSetStyle.Straight,
 )
 internal data class ExerciseHistoryEntry(
     val timestampMillis: Long,

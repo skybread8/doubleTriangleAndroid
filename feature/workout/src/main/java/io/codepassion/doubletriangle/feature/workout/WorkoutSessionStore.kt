@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import android.content.Context
+import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
 import org.json.JSONObject
 
 internal data class WorkoutSessionSnapshot(
@@ -47,7 +48,13 @@ internal object WorkoutSessionStore {
         val setRecords = buildList {
             if (setRecordsJson != null) for (index in 0 until setRecordsJson.length()) {
                 val item = setRecordsJson.getJSONObject(index)
-                add(CompletedSetRecord(item.getInt("exerciseIndex"), item.getInt("setNumber"), item.getInt("reps"), item.getDouble("weightKg"), item.optLong("completedAt", updatedAtFallback())))
+                add(
+                    CompletedSetRecord(
+                        item.getInt("exerciseIndex"), item.getInt("setNumber"), item.getInt("reps"),
+                        item.getDouble("weightKg"), item.optLong("completedAt", updatedAtFallback()),
+                        runCatching { ExerciseSetStyle.valueOf(item.optString("setStyle")) }.getOrDefault(ExerciseSetStyle.Straight),
+                    ),
+                )
             }
         }
         val updatedAt = json.optLong("updatedAt", System.currentTimeMillis())
@@ -77,7 +84,11 @@ internal object WorkoutSessionStore {
         }
         val feedback = JSONObject().apply { snapshot.feedbackByExercise.forEach { (index, value) -> put(index.toString(), value) } }
         val setRecords = org.json.JSONArray().apply {
-            snapshot.completedSetRecords.forEach { record -> put(JSONObject().put("exerciseIndex", record.exerciseIndex).put("setNumber", record.setNumber).put("reps", record.reps).put("weightKg", record.weightKg).put("completedAt", record.completedAtMillis)) }
+            snapshot.completedSetRecords.forEach { record ->
+                put(JSONObject().put("exerciseIndex", record.exerciseIndex).put("setNumber", record.setNumber)
+                    .put("reps", record.reps).put("weightKg", record.weightKg).put("completedAt", record.completedAtMillis)
+                    .put("setStyle", record.setStyle.name))
+            }
         }
         val json = JSONObject()
             .put("exerciseIndex", snapshot.exerciseIndex).put("completed", completed)

@@ -49,6 +49,7 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
+import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
 import io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
@@ -492,6 +493,7 @@ fun ActiveWorkoutScreen(
                         Column(Modifier.weight(1f)) {
                             Text("SERIES", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
                             Text("Objetivo ${exercise.reps} reps · ${exercise.restSeconds}s descanso", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                            Text("${exercise.setStyle.glyph}  ${exercise.setStyle.label}", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                         }
                         Text("${completedForExercise + 1}/${exercise.sets}", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
                     }
@@ -514,7 +516,7 @@ fun ActiveWorkoutScreen(
                             val newCompleted = completedForExercise + 1
                             completedByExercise = completedByExercise + (exerciseIndex to newCompleted)
                             totalCompletedSets++; totalVolumeKg += reps * weightKg
-                            completedSetRecords = completedSetRecords + CompletedSetRecord(exerciseIndex, newCompleted, reps, weightKg)
+                            completedSetRecords = completedSetRecords + CompletedSetRecord(exerciseIndex, newCompleted, reps, weightKg, setStyle = exercise.setStyle)
                             val previousStats = exerciseStats[exerciseIndex] ?: ExerciseSessionStats()
                             exerciseStats = exerciseStats + (exerciseIndex to previousStats.copy(
                                 sets = previousStats.sets + 1,
@@ -565,7 +567,7 @@ private fun SetTrackingRows(
         ) {
             Text(if (completed) "✓" else "$setNumber", color = if (completed) Color(0xFF26A269) else WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
             Column(Modifier.padding(start = 12.dp).weight(1f)) {
-                Text(if (current) "SERIE ACTUAL" else if (completed) "COMPLETADA" else "PENDIENTE", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                Text("${setStyleInstruction(exercise.setStyle, setNumber, exercise.sets)} · ${if (current) "ACTUAL" else if (completed) "COMPLETADA" else "PENDIENTE"}", color = if (exercise.setStyle == ExerciseSetStyle.Straight) WildforceThemeTokens.textSecondary else WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 if (record != null) Text("Objetivo ${exercise.reps} → ${record.reps} reps", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
             }
             Text(
@@ -706,6 +708,17 @@ private fun MetricStepper(title: String, value: String, onMinus: () -> Unit, onP
 private fun targetReps(value: String?): Int = Regex("\\d+").find(value.orEmpty())?.value?.toIntOrNull() ?: 10
 private fun formatClock(seconds: Int): String = "%d:%02d".format(seconds / 60, seconds % 60)
 
+
+internal fun setStyleInstruction(style: ExerciseSetStyle, setNumber: Int, totalSets: Int): String = when (style) {
+    ExerciseSetStyle.Warmup -> "APROXIMACIÓN"
+    ExerciseSetStyle.Straight -> "SERIE NORMAL"
+    ExerciseSetStyle.TopSetBackoff -> if (setNumber == 1) "TOP SET" else "BACKOFF"
+    ExerciseSetStyle.AscendingPyramid -> if (setNumber == totalSets) "PESO MÁXIMO" else "SUBE EL PESO"
+    ExerciseSetStyle.DropSet -> if (setNumber == totalSets) "DROP SET · SIN DESCANSO" else "SERIE BASE"
+    ExerciseSetStyle.RestPause -> if (setNumber == totalSets) "REST-PAUSE · PAUSA BREVE" else "SERIE BASE"
+    ExerciseSetStyle.Intervals -> "INTERVALO"
+    ExerciseSetStyle.Tempo -> "TEMPO CONTROLADO"
+}
 private fun statsForExercise(records: List<CompletedSetRecord>, exerciseIndex: Int): ExerciseSessionStats {
     val exerciseRecords = records.filter { it.exerciseIndex == exerciseIndex }
     return ExerciseSessionStats(exerciseRecords.size, exerciseRecords.sumOf { it.reps }, exerciseRecords.maxOfOrNull { it.weightKg } ?: 0.0, exerciseRecords.sumOf { it.reps * it.weightKg })
