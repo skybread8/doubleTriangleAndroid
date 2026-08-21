@@ -369,6 +369,7 @@ fun ActiveWorkoutScreen(
     var selectedFeedback by remember(workout.id) { mutableStateOf(restored?.selectedFeedback) }
     var exerciseStats by remember(workout.id) { mutableStateOf(restored?.exerciseStats ?: emptyMap()) }
     var feedbackByExercise by remember(workout.id) { mutableStateOf(restored?.feedbackByExercise ?: emptyMap()) }
+    var completedSetRecords by remember(workout.id) { mutableStateOf(restored?.completedSetRecords ?: emptyList()) }
     var showsWorkoutPath by remember { mutableStateOf(false) }
     var showsExerciseHistory by remember { mutableStateOf(false) }
     var showsExerciseGuide by remember { mutableStateOf(false) }
@@ -384,10 +385,10 @@ fun ActiveWorkoutScreen(
             initializedExerciseIndex = exerciseIndex
         }
     }
-    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, showsSummary, exerciseStats, feedbackByExercise) {
+    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, showsSummary, exerciseStats, feedbackByExercise, completedSetRecords) {
         WorkoutSessionStore.save(
             context, workout.id,
-            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, exerciseStats, feedbackByExercise),
+            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, exerciseStats, feedbackByExercise, completedSetRecords),
         )
     }
     LaunchedEffect(restRemaining) {
@@ -496,18 +497,11 @@ fun ActiveWorkoutScreen(
                     }
                     Spacer(Modifier.height(10.dp))
                     Column(Modifier.weight(1f).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
-                        repeat(exercise.sets) { setIndex ->
-                            val completed = setIndex < completedForExercise
-                            val current = setIndex == completedForExercise
-                            Row(
-                                Modifier.fillMaxWidth().padding(vertical = 3.dp)
-                                    .background(if (current) WildforceThemeTokens.accentGold.copy(alpha = 0.13f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.055f), RoundedCornerShape(14.dp))
-                                    .padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(if (completed) "✓" else "${setIndex + 1}", color = if (completed) Color(0xFF26A269) else WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
-                                Text(if (current) "SERIE ACTUAL" else if (completed) "COMPLETADA" else "PENDIENTE", Modifier.padding(start = 12.dp).weight(1f), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
-                                Text("${exercise.reps} reps", color = WildforceThemeTokens.textPrimary)
-                            }
+                        SetTrackingRows(exerciseIndex, exercise, completedForExercise, completedSetRecords) { original, changed ->
+                            val updatedRecords = completedSetRecords.map { if (it.exerciseIndex == exerciseIndex && it.setNumber == original.setNumber) changed else it }
+                            totalVolumeKg += changed.reps * changed.weightKg - original.reps * original.weightKg
+                            completedSetRecords = updatedRecords
+                            exerciseStats = exerciseStats + (exerciseIndex to statsForExercise(updatedRecords, exerciseIndex))
                         }
                         Spacer(Modifier.height(8.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -520,6 +514,7 @@ fun ActiveWorkoutScreen(
                             val newCompleted = completedForExercise + 1
                             completedByExercise = completedByExercise + (exerciseIndex to newCompleted)
                             totalCompletedSets++; totalVolumeKg += reps * weightKg
+                            completedSetRecords = completedSetRecords + CompletedSetRecord(exerciseIndex, newCompleted, reps, weightKg)
                             val previousStats = exerciseStats[exerciseIndex] ?: ExerciseSessionStats()
                             exerciseStats = exerciseStats + (exerciseIndex to previousStats.copy(
                                 sets = previousStats.sets + 1,
@@ -537,6 +532,60 @@ fun ActiveWorkoutScreen(
                         colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp),
                     ) { Text(if (completedForExercise + 1 == exercise.sets) "COMPLETAR EJERCICIO" else "COMPLETAR SERIE", fontWeight = FontWeight.Bold) }
                     workout.exercises.getOrNull(exerciseIndex + 1)?.let { Text("Siguiente ejercicio: ${it.name}", Modifier.fillMaxWidth().padding(top = 8.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SetTrackingRows(
+    exerciseIndex: Int,
+    exercise: ExerciseSummary,
+    completedSets: Int,
+    records: List<CompletedSetRecord>,
+    onRecordChanged: (CompletedSetRecord, CompletedSetRecord) -> Unit,
+) {
+    var editingSetNumber by remember(exerciseIndex) { mutableStateOf<Int?>(null) }
+    var editReps by remember(exerciseIndex) { mutableStateOf(0) }
+    var editWeightKg by remember(exerciseIndex) { mutableStateOf(0.0) }
+    repeat(exercise.sets) { setIndex ->
+        val setNumber = setIndex + 1
+        val completed = setIndex < completedSets
+        val current = setIndex == completedSets
+        val record = records.lastOrNull { it.exerciseIndex == exerciseIndex && it.setNumber == setNumber }
+        Row(
+            Modifier.fillMaxWidth().padding(vertical = 3.dp)
+                .background(if (current) WildforceThemeTokens.accentGold.copy(alpha = 0.13f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.055f), RoundedCornerShape(14.dp))
+                .clickable(enabled = record != null) {
+                    record?.let { editingSetNumber = setNumber; editReps = it.reps; editWeightKg = it.weightKg }
+                }
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(if (completed) "✓" else "$setNumber", color = if (completed) Color(0xFF26A269) else WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
+            Column(Modifier.padding(start = 12.dp).weight(1f)) {
+                Text(if (current) "SERIE ACTUAL" else if (completed) "COMPLETADA" else "PENDIENTE", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                if (record != null) Text("Objetivo ${exercise.reps} → ${record.reps} reps", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+            }
+            Text(
+                if (record != null) String.format(Locale.getDefault(), "%.1f kg", record.weightKg) else "${exercise.reps} reps",
+                color = WildforceThemeTokens.textPrimary, fontWeight = if (record != null) FontWeight.Bold else FontWeight.Normal,
+            )
+        }
+        if (editingSetNumber == setNumber && record != null) {
+            Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 7.dp).background(WildforceThemeTokens.accentGold.copy(alpha = 0.08f), RoundedCornerShape(14.dp)).padding(10.dp)) {
+                Text("CORREGIR SERIE $setNumber", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+                Row(Modifier.padding(top = 7.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    CompactMetricStepper("REPS", editReps.toString(), { editReps = (editReps - 1).coerceAtLeast(0) }, { editReps++ }, Modifier.weight(1f))
+                    CompactMetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", editWeightKg), { editWeightKg = (editWeightKg - 2.5).coerceAtLeast(0.0) }, { editWeightKg += 2.5 }, Modifier.weight(1f))
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    Text("CANCELAR", Modifier.clickable { editingSetNumber = null }.padding(10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+                    Text("GUARDAR", Modifier.clickable {
+                        onRecordChanged(record, record.copy(reps = editReps, weightKg = editWeightKg))
+                        editingSetNumber = null
+                    }.padding(10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -656,3 +705,8 @@ private fun MetricStepper(title: String, value: String, onMinus: () -> Unit, onP
 
 private fun targetReps(value: String?): Int = Regex("\\d+").find(value.orEmpty())?.value?.toIntOrNull() ?: 10
 private fun formatClock(seconds: Int): String = "%d:%02d".format(seconds / 60, seconds % 60)
+
+private fun statsForExercise(records: List<CompletedSetRecord>, exerciseIndex: Int): ExerciseSessionStats {
+    val exerciseRecords = records.filter { it.exerciseIndex == exerciseIndex }
+    return ExerciseSessionStats(exerciseRecords.size, exerciseRecords.sumOf { it.reps }, exerciseRecords.maxOfOrNull { it.weightKg } ?: 0.0, exerciseRecords.sumOf { it.reps * it.weightKg })
+}

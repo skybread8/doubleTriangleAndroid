@@ -13,6 +13,13 @@ internal data class ExerciseSessionStats(
     val volumeKg: Double = 0.0,
 )
 
+internal data class CompletedSetRecord(
+    val exerciseIndex: Int,
+    val setNumber: Int,
+    val reps: Int,
+    val weightKg: Double,
+    val completedAtMillis: Long = System.currentTimeMillis(),
+)
 internal data class ExerciseHistoryEntry(
     val timestampMillis: Long,
     val sets: Int,
