@@ -348,6 +348,9 @@ fun ActiveWorkoutScreen(
     var showsSummary by remember(workout.id) { mutableStateOf(restored?.showsSummary ?: false) }
     var pendingFeedback by remember(workout.id) { mutableStateOf(restored?.pendingFeedback ?: false) }
     var selectedFeedback by remember(workout.id) { mutableStateOf(restored?.selectedFeedback) }
+    var exerciseStats by remember(workout.id) { mutableStateOf(restored?.exerciseStats ?: emptyMap()) }
+    var showsWorkoutPath by remember { mutableStateOf(false) }
+    var showsExerciseHistory by remember { mutableStateOf(false) }
     var showsExerciseGuide by remember { mutableStateOf(false) }
     var initializedExerciseIndex by remember(workout.id) { mutableStateOf(restored?.exerciseIndex ?: -1) }
     val exercise = workout.exercises.getOrNull(exerciseIndex)
@@ -361,15 +364,25 @@ fun ActiveWorkoutScreen(
             initializedExerciseIndex = exerciseIndex
         }
     }
-    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, showsSummary) {
+    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, showsSummary, exerciseStats) {
         WorkoutSessionStore.save(
             context, workout.id,
-            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback),
+            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, exerciseStats),
         )
     }
     LaunchedEffect(restRemaining) {
         val remaining = restRemaining ?: return@LaunchedEffect
         if (remaining > 0) { delay(1_000); restRemaining = remaining - 1 } else restRemaining = null
+    }
+
+    if (showsWorkoutPath) {
+        WorkoutPathScreen(workout, gender, exerciseIndex, completedByExercise, elapsedSeconds) { showsWorkoutPath = false }
+        return
+    }
+
+    if (showsExerciseHistory && exercise != null) {
+        ExerciseHistoryScreen(exercise, gender, WorkoutHistoryStore.history(context, exercise)) { showsExerciseHistory = false }
+        return
     }
 
     if (showsExerciseGuide && exercise != null) {
@@ -379,6 +392,7 @@ fun ActiveWorkoutScreen(
 
     if (showsSummary) {
         WorkoutFinishedScreen(workout, elapsedSeconds, totalCompletedSets, totalVolumeKg) {
+            WorkoutHistoryStore.record(context, workout, exerciseStats)
             WorkoutSessionStore.clear(context, workout.id)
             onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg)
         }
@@ -396,6 +410,8 @@ fun ActiveWorkoutScreen(
             Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text("‹ SALIR", Modifier.clickable(onClick = onExit).padding(10.dp), color = Color.White, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.weight(1f))
+                Text("RUTA", Modifier.clickable { showsWorkoutPath = true }.padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+                Text("DATOS", Modifier.clickable { showsExerciseHistory = true }.padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 Text(formatClock(elapsedSeconds), Modifier.liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(horizontal = 14.dp, vertical = 7.dp), color = Color.White, fontWeight = FontWeight.Bold)
             }
             LinearProgressIndicator(
@@ -430,6 +446,8 @@ fun ActiveWorkoutScreen(
                             selectedFeedback = null
                             if (exerciseIndex < workout.exercises.lastIndex) {
                                 exerciseIndex++
+                                restInitialSeconds = exercise.restSeconds.coerceAtLeast(1)
+                                restBetweenExercises = true
                                 restRemaining = exercise.restSeconds
                             } else showsSummary = true
                         },
@@ -478,6 +496,13 @@ fun ActiveWorkoutScreen(
                             val newCompleted = completedForExercise + 1
                             completedByExercise = completedByExercise + (exerciseIndex to newCompleted)
                             totalCompletedSets++; totalVolumeKg += reps * weightKg
+                            val previousStats = exerciseStats[exerciseIndex] ?: ExerciseSessionStats()
+                            exerciseStats = exerciseStats + (exerciseIndex to previousStats.copy(
+                                sets = previousStats.sets + 1,
+                                totalReps = previousStats.totalReps + reps,
+                                maxWeightKg = maxOf(previousStats.maxWeightKg, weightKg),
+                                volumeKg = previousStats.volumeKg + reps * weightKg,
+                            ))
                             if (newCompleted < exercise.sets) {
                                 restInitialSeconds = exercise.restSeconds.coerceAtLeast(1)
                                 restBetweenExercises = false
