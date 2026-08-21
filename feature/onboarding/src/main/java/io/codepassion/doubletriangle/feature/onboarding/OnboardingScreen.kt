@@ -52,6 +52,7 @@ data class OnboardingProfile(
     val lifestyle: LifestyleLevel = LifestyleLevel.ModeratelyActive,
     val workoutDays: Set<WorkoutWeekday> = setOf(WorkoutWeekday.Monday, WorkoutWeekday.Wednesday, WorkoutWeekday.Friday),
     val preferredWorkoutDurationMinutes: Int = 50,
+    val trainingLevel: TrainingLevel = TrainingLevel.Novice,
 )
 
 enum class LifestyleLevel(val storedValue: String, val title: String, val description: String, val glyph: String) {
@@ -79,6 +80,19 @@ enum class WorkoutWeekday(val storedValue: String, val title: String, val glyph:
     }
 }
 
+enum class TrainingLevel(val storedValue: String, val title: String, val description: String, val glyph: String) {
+    CompleteBeginner("completeBeginner", "Principiante total", "Estás empezando con el entrenamiento estructurado y los movimientos básicos.", "○"),
+    Beginner("beginner", "Principiante", "Tienes algo de experiencia y estás desarrollando constancia y técnica.", "◔"),
+    Novice("novice", "Novato", "Entrenas con cierta regularidad y sigues progresiones sencillas.", "◑"),
+    Intermediate("intermediate", "Intermedio", "Tienes hábitos sólidos y toleras un volumen de entrenamiento moderado.", "◕"),
+    Advanced("advanced", "Avanzado", "Entrenas de forma constante y dominas bien la progresión.", "●"),
+    Elite("elite", "Élite", "Tienes una base muy alta y puedes seguir planes especializados.", "◆");
+
+    companion object {
+        fun fromStoredValue(value: String) = entries.firstOrNull { it.storedValue == value } ?: Novice
+    }
+}
+
 enum class FitnessGoal(val storedValue: String, val title: String, val description: String, val glyph: String) {
     LoseWeight("loseWeight", "Perder peso", "Quema grasa y mejora tu salud metabólica.", "↘"),
     BuildMuscle("buildMuscle", "Ganar músculo", "Aumenta masa muscular con entrenamiento de hipertrofia.", "◆"),
@@ -102,6 +116,7 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
     var lifestyle by remember { mutableStateOf<LifestyleLevel?>(null) }
     var workoutDays by remember { mutableStateOf(setOf(WorkoutWeekday.Monday, WorkoutWeekday.Wednesday, WorkoutWeekday.Friday)) }
     var duration by remember { mutableStateOf(50) }
+    var trainingLevel by remember { mutableStateOf(TrainingLevel.Novice) }
 
     AnimatedContent(targetState = step, label = "onboarding-step") { currentStep ->
         when (currentStep) {
@@ -165,18 +180,13 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
                     Spacer(Modifier.height(10.dp))
                 }
             }
-            else -> FormStep(
+            5 -> FormStep(
                 progress = 5f / 16f,
                 title = "Duración del entrenamiento",
                 subtitle = "Indica la duración de sesión que quieres que optimicemos.",
                 canContinue = true,
                 onBack = { step = 4 },
-                onContinue = {
-                    val selectedGoal = goal ?: return@FormStep
-                    val selectedLifestyle = lifestyle ?: return@FormStep
-                    onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration))
-                },
-                buttonTitle = "CREAR PLAN",
+                onContinue = { step = 6 },
             ) {
                 Row(
                     Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(16.dp),
@@ -186,6 +196,24 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
                     Text("−", Modifier.size(48.dp).clickable { duration = (duration - 5).coerceAtLeast(15) }, textAlign = TextAlign.Center, style = MaterialTheme.typography.h4)
                     Text("$duration min", style = MaterialTheme.typography.h5, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                     Text("+", Modifier.size(48.dp).clickable { duration = (duration + 5).coerceAtMost(180) }, textAlign = TextAlign.Center, style = MaterialTheme.typography.h4)
+                }
+            }
+            else -> FormStep(
+                progress = 6f / 16f,
+                title = "Experiencia",
+                subtitle = "Selecciona el nivel que mejor describe tu experiencia entrenando.",
+                canContinue = true,
+                onBack = { step = 5 },
+                onContinue = {
+                    val selectedGoal = goal ?: return@FormStep
+                    val selectedLifestyle = lifestyle ?: return@FormStep
+                    onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel))
+                },
+                buttonTitle = "CREAR PLAN",
+            ) {
+                TrainingLevel.entries.forEach { level ->
+                    ChoiceOption(level.title, level.description, level.glyph, trainingLevel == level) { trainingLevel = level }
+                    Spacer(Modifier.height(10.dp))
                 }
             }
         }

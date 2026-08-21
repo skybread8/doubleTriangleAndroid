@@ -33,6 +33,7 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
 import io.codepassion.doubletriangle.feature.onboarding.LifestyleLevel
+import io.codepassion.doubletriangle.feature.onboarding.TrainingLevel
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
@@ -69,6 +70,7 @@ fun WildforceRoot() {
                     lifestyle = LifestyleLevel.fromStoredValue(preferences.getString("lifestyle", "").orEmpty()),
                     workoutDays = WorkoutWeekday.fromStoredValues(preferences.getStringSet("workout_days", null)),
                     preferredWorkoutDurationMinutes = preferences.getInt("workout_duration", 50),
+                    trainingLevel = TrainingLevel.fromStoredValue(preferences.getString("training_level", "").orEmpty()),
                 )
             },
         )
@@ -83,6 +85,7 @@ fun WildforceRoot() {
                 .putString("lifestyle", completedProfile.lifestyle.storedValue)
                 .putStringSet("workout_days", completedProfile.workoutDays.mapTo(mutableSetOf()) { it.storedValue })
                 .putInt("workout_duration", completedProfile.preferredWorkoutDurationMinutes)
+                .putString("training_level", completedProfile.trainingLevel.storedValue)
                 .apply()
             profile = completedProfile
         }

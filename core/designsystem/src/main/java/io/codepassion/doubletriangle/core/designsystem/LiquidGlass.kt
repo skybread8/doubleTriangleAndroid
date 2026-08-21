@@ -1,21 +1,19 @@
 package io.codepassion.doubletriangle.core.designsystem
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
 /**
- * Restrained frosted material inspired by Linear Mobile: low contrast, a fine
- * separator and almost no elevation. Content remains visually dominant.
+ * Borderless frosted material inspired by Linear Mobile. Separation comes from
+ * translucency and tonal contrast, avoiding halos or doubled outlines.
  */
 fun Modifier.liquidGlass(
     shape: Shape = RoundedCornerShape(16.dp),
@@ -23,23 +21,19 @@ fun Modifier.liquidGlass(
 ): Modifier = composed {
     val light = MaterialTheme.colors.isLight
     val top = when {
-        light && emphasized -> Color.White.copy(alpha = 0.84f)
-        light -> Color.White.copy(alpha = 0.58f)
-        emphasized -> Color.White.copy(alpha = 0.105f)
-        else -> Color.White.copy(alpha = 0.060f)
+        light && emphasized -> Color.White.copy(alpha = 0.88f)
+        light -> Color.White.copy(alpha = 0.62f)
+        emphasized -> Color.White.copy(alpha = 0.11f)
+        else -> Color.White.copy(alpha = 0.065f)
     }
     val bottom = when {
-        light && emphasized -> Color(0xFFF2F3F6).copy(alpha = 0.76f)
-        light -> Color(0xFFE9EBEF).copy(alpha = 0.48f)
-        emphasized -> Color(0xFF27272B).copy(alpha = 0.76f)
-        else -> Color(0xFF202024).copy(alpha = 0.58f)
+        light && emphasized -> Color(0xFFE9EAED).copy(alpha = 0.72f)
+        light -> Color(0xFFE4E6E9).copy(alpha = 0.42f)
+        emphasized -> Color(0xFF242428).copy(alpha = 0.70f)
+        else -> Color(0xFF1D1D20).copy(alpha = 0.52f)
     }
-    val outline = if (light) Color.Black.copy(alpha = 0.075f) else Color.White.copy(alpha = 0.105f)
 
-    this.shadow(if (emphasized) 6.dp else 1.dp, shape, clip = false)
-        .clip(shape)
-        .background(Brush.verticalGradient(listOf(top, bottom)))
-        .border(1.dp, outline, shape)
+    this.clip(shape).background(Brush.verticalGradient(listOf(top, bottom)))
 }
 
 fun Modifier.liquidGlassBackground(): Modifier = composed {

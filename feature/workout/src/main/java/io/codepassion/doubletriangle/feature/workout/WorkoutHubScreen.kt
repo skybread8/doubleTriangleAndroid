@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -236,11 +235,12 @@ private fun StatusBadge() {
 
 @Composable
 private fun RestDayCard() {
-    Surface(Modifier.fillMaxWidth(), color = Color.Transparent, elevation = 0.dp) {
-        Column(Modifier.liquidGlass(RoundedCornerShape(18.dp)).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("DÍA DE DESCANSO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
-            Text("No hay entrenamiento planificado.", color = WildforceThemeTokens.textSecondary)
-        }
+    Column(
+        Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text("DÍA DE DESCANSO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
+        Text("No hay entrenamiento planificado.", color = WildforceThemeTokens.textSecondary)
     }
 }
 
