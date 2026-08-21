@@ -57,4 +57,11 @@ class WorkoutCompletionCalculatorTest {
         assertEquals(listOf("3 drops", "-25% por drop", "RIR 0"), styleParameterLabels(ExerciseSetStyle.DropSet, parameters))
         assertEquals(listOf("Tempo 3-1-1-0", "RIR 2"), styleParameterLabels(ExerciseSetStyle.Tempo, SetStyleParameters()))
     }
+
+    @Test fun durationParserSeparatesTimedWorkFromRepetitions() {
+        assertEquals(45, targetDurationSeconds("45 s"))
+        assertEquals(120, targetDurationSeconds("2 min"))
+        assertEquals(30, targetDurationSeconds("30 segundos"))
+        assertEquals(null, targetDurationSeconds("8-10"))
+    }
 }

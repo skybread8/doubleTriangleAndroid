@@ -374,6 +374,10 @@ fun ActiveWorkoutScreen(
     var exerciseStats by remember(workout.id) { mutableStateOf(restored?.exerciseStats ?: emptyMap()) }
     var feedbackByExercise by remember(workout.id) { mutableStateOf(restored?.feedbackByExercise ?: emptyMap()) }
     var completedSetRecords by remember(workout.id) { mutableStateOf(restored?.completedSetRecords ?: emptyList()) }
+    val initialExerciseDuration = targetDurationSeconds(workout.exercises.firstOrNull()?.reps)
+    var exerciseTimeRemaining by remember(workout.id) { mutableStateOf(restored?.exerciseTimeRemaining ?: initialExerciseDuration) }
+    var exerciseTimeInitial by remember(workout.id) { mutableStateOf(restored?.exerciseTimeInitial?.takeIf { it > 0 } ?: (initialExerciseDuration ?: 0)) }
+    var exerciseTimerRunning by remember(workout.id) { mutableStateOf(restored?.exerciseTimerRunning ?: false) }
     var showsWorkoutPath by remember { mutableStateOf(false) }
     var showsExerciseHistory by remember { mutableStateOf(false) }
     var showsExerciseGuide by remember { mutableStateOf(false) }
@@ -387,18 +391,28 @@ fun ActiveWorkoutScreen(
         if (initializedExerciseIndex != exerciseIndex) {
             reps = targetReps(exercise?.reps)
             weightKg = 0.0
+            val duration = targetDurationSeconds(exercise?.reps)
+            exerciseTimeRemaining = duration
+            exerciseTimeInitial = duration ?: 0
+            exerciseTimerRunning = false
             initializedExerciseIndex = exerciseIndex
         }
     }
-    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, showsSummary, exerciseStats, feedbackByExercise, completedSetRecords) {
+    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, showsSummary, exerciseStats, feedbackByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning) {
         WorkoutSessionStore.save(
             context, workout.id,
-            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, exerciseStats, feedbackByExercise, completedSetRecords),
+            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, exerciseStats, feedbackByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning),
         )
     }
     LaunchedEffect(restRemaining) {
         val remaining = restRemaining ?: return@LaunchedEffect
         if (remaining > 0) { delay(1_000); restRemaining = remaining - 1 } else restRemaining = null
+    }
+    LaunchedEffect(exerciseTimerRunning, exerciseTimeRemaining) {
+        val remaining = exerciseTimeRemaining ?: return@LaunchedEffect
+        if (exerciseTimerRunning && remaining > 0) {
+            delay(1_000); exerciseTimeRemaining = remaining - 1
+        } else if (remaining <= 0) exerciseTimerRunning = false
     }
 
     if (showsWorkoutPath) {
@@ -519,26 +533,46 @@ fun ActiveWorkoutScreen(
                             exerciseStats = exerciseStats + (exerciseIndex to statsForExercise(updatedRecords, exerciseIndex))
                         }
                         Spacer(Modifier.height(8.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            CompactMetricStepper("REPS", reps.toString(), { reps = (reps - 1).coerceAtLeast(0) }, { reps++ }, Modifier.weight(1f))
-                            CompactMetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", weightKg), { weightKg = (weightKg - 2.5).coerceAtLeast(0.0) }, { weightKg += 2.5 }, Modifier.weight(1f))
+                        if (targetDurationSeconds(exercise.reps) != null) {
+                            ExerciseWorkTimer(
+                                seconds = exerciseTimeRemaining ?: exerciseTimeInitial,
+                                initialSeconds = exerciseTimeInitial,
+                                running = exerciseTimerRunning,
+                                onToggle = { exerciseTimerRunning = !exerciseTimerRunning },
+                                onAddTime = {
+                                    exerciseTimeRemaining = (exerciseTimeRemaining ?: 0) + 15
+                                    exerciseTimeInitial += 15
+                                },
+                            )
+                        } else {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                CompactMetricStepper("REPS", reps.toString(), { reps = (reps - 1).coerceAtLeast(0) }, { reps++ }, Modifier.weight(1f))
+                                CompactMetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", weightKg), { weightKg = (weightKg - 2.5).coerceAtLeast(0.0) }, { weightKg += 2.5 }, Modifier.weight(1f))
+                            }
                         }
                     }
                     Button(
                         onClick = {
                             val newCompleted = completedForExercise + 1
+                            val timedDuration = targetDurationSeconds(exercise.reps)
+                            val loggedReps = timedDuration?.let { (exerciseTimeInitial - (exerciseTimeRemaining ?: 0)).coerceAtLeast(0) } ?: reps
+                            val loggedWeight = if (timedDuration != null) 0.0 else weightKg
                             completedByExercise = completedByExercise + (exerciseIndex to newCompleted)
-                            totalCompletedSets++; totalVolumeKg += reps * weightKg
-                            completedSetRecords = completedSetRecords + CompletedSetRecord(exerciseIndex, newCompleted, reps, weightKg, setStyle = exercise.setStyle)
+                            totalCompletedSets++; totalVolumeKg += loggedReps * loggedWeight
+                            completedSetRecords = completedSetRecords + CompletedSetRecord(exerciseIndex, newCompleted, loggedReps, loggedWeight, setStyle = exercise.setStyle)
                             val previousStats = exerciseStats[exerciseIndex] ?: ExerciseSessionStats()
                             exerciseStats = exerciseStats + (exerciseIndex to previousStats.copy(
                                 sets = previousStats.sets + 1,
-                                totalReps = previousStats.totalReps + reps,
-                                maxWeightKg = maxOf(previousStats.maxWeightKg, weightKg),
-                                volumeKg = previousStats.volumeKg + reps * weightKg,
+                                totalReps = previousStats.totalReps + loggedReps,
+                                maxWeightKg = maxOf(previousStats.maxWeightKg, loggedWeight),
+                                volumeKg = previousStats.volumeKg + loggedReps * loggedWeight,
                             ))
                             if (newCompleted < exercise.sets) {
                                 restInitialSeconds = exercise.restSeconds.coerceAtLeast(1)
+                            exerciseTimerRunning = false
+                            if (timedDuration != null) {
+                                exerciseTimeRemaining = timedDuration; exerciseTimeInitial = timedDuration
+                            }
                                 restBetweenExercises = false
                                 restRemaining = exercise.restSeconds
                             } else pendingFeedback = true
@@ -581,10 +615,10 @@ private fun SetTrackingRows(
             Text(if (completed) "✓" else "$setNumber", color = if (completed) Color(0xFF26A269) else WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
             Column(Modifier.padding(start = 12.dp).weight(1f)) {
                 Text("${setStyleInstruction(exercise.setStyle, setNumber, exercise.sets)} · ${if (current) "ACTUAL" else if (completed) "COMPLETADA" else "PENDIENTE"}", color = if (exercise.setStyle == ExerciseSetStyle.Straight) WildforceThemeTokens.textSecondary else WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
-                if (record != null) Text("Objetivo ${exercise.reps} → ${record.reps} reps", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                if (record != null) Text(if (targetDurationSeconds(exercise.reps) != null) "Objetivo ${exercise.reps} → ${record.reps}s" else "Objetivo ${exercise.reps} → ${record.reps} reps", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
             }
             Text(
-                if (record != null) String.format(Locale.getDefault(), "%.1f kg", record.weightKg) else "${exercise.reps} reps",
+                if (record != null && targetDurationSeconds(exercise.reps) != null) "${record.reps}s" else if (record != null) String.format(Locale.getDefault(), "%.1f kg", record.weightKg) else exercise.reps,
                 color = WildforceThemeTokens.textPrimary, fontWeight = if (record != null) FontWeight.Bold else FontWeight.Normal,
             )
         }

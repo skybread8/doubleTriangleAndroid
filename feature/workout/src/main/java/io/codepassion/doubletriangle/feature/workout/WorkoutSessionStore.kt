@@ -21,6 +21,9 @@ internal data class WorkoutSessionSnapshot(
     val exerciseStats: Map<Int, ExerciseSessionStats> = emptyMap(),
     val feedbackByExercise: Map<Int, String> = emptyMap(),
     val completedSetRecords: List<CompletedSetRecord> = emptyList(),
+    val exerciseTimeRemaining: Int? = null,
+    val exerciseTimeInitial: Int = 0,
+    val exerciseTimerRunning: Boolean = false,
     val updatedAtMillis: Long = System.currentTimeMillis(),
 )
 
@@ -71,6 +74,9 @@ internal object WorkoutSessionStore {
             exerciseStats = stats,
             feedbackByExercise = feedback,
             completedSetRecords = setRecords,
+            exerciseTimeRemaining = if (json.isNull("exerciseTimeRemaining")) null else json.optInt("exerciseTimeRemaining"),
+            exerciseTimeInitial = json.optInt("exerciseTimeInitial"),
+            exerciseTimerRunning = json.optBoolean("exerciseTimerRunning"),
             updatedAtMillis = System.currentTimeMillis(),
         )
     }.getOrNull()
@@ -99,6 +105,9 @@ internal object WorkoutSessionStore {
             .put("totalVolumeKg", snapshot.totalVolumeKg).put("pendingFeedback", snapshot.pendingFeedback).put("showsSummary", snapshot.showsSummary)
             .put("selectedFeedback", snapshot.selectedFeedback ?: JSONObject.NULL).put("updatedAt", System.currentTimeMillis())
             .put("exerciseStats", stats).put("feedbackByExercise", feedback).put("completedSetRecords", setRecords)
+            .put("exerciseTimeRemaining", snapshot.exerciseTimeRemaining ?: JSONObject.NULL)
+            .put("exerciseTimeInitial", snapshot.exerciseTimeInitial)
+            .put("exerciseTimerRunning", snapshot.exerciseTimerRunning)
         context.getSharedPreferences(PREFERENCES, 0).edit().putString(workoutId, json.toString()).apply()
     }
 
