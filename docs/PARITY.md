@@ -11,8 +11,8 @@ Status values: `Not started`, `Foundation`, `In progress`, `Ready for review`, `
 | Workout hub | `WorkoutHubView` | Header, streak, weekly calendar, mode selector, plan cards | Ready for review | Layout and interactions compared side by side |
 | Onboarding | `OnboardingView` and 18 steps | Full flow through local plan preview is persisted; Health Connect imports latest height and weight | In progress | Complete the first slice and enter workout hub |
 | Workout plan | Plan, mesocycle, day and exercise models | Room entities plus domain mapping | In progress | Same fixture produces the same plan structure |
-| Active workout | Active workout store and views | Foreground-safe workout session | Not started | Start, log, pause, resume and finish |
-| Completion | Score, XP, streak and celebrations | Equivalent rules and Compose animations | Not started | Ported unit fixtures have identical results |
+| Active workout | Active workout store and views | Foreground-safe workout session | Ready for review | Start, log, pause, resume and finish |
+| Completion | Score, XP, streak and celebrations | Equivalent rules and Compose animations | Ready for review | Ported unit fixtures have identical results |
 | Custom workouts | Custom workout views | Create, edit, run and delete | Not started | CRUD plus active session verified |
 | Analytics | Analytics and charts | Compose chart screens | Not started | Same dataset yields equivalent values |
 | Profile | Profile, settings, body metrics/photos | Compose profile flows | Not started | Fields and validation match |

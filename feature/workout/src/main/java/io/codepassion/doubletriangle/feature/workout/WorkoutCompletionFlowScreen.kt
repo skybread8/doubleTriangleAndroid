@@ -1,0 +1,193 @@
+package io.codepassion.doubletriangle.feature.workout
+
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
+import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
+import io.codepassion.doubletriangle.core.designsystem.liquidGlass
+import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
+import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
+import java.util.Locale
+
+private enum class CompletionPhase { Records, Summary, Score, Streak, Xp, LevelUp }
+
+@Composable
+internal fun WorkoutCompletionFlowScreen(
+    workout: WorkoutDaySummary,
+    durationSeconds: Int,
+    stats: Map<Int, ExerciseSessionStats>,
+    feedback: Map<Int, String>,
+    records: List<ExerciseRecordEvent>,
+    progress: CompletionProgress,
+    onDone: () -> Unit,
+) {
+    var phase by remember(workout.id) { mutableStateOf(if (records.isEmpty()) CompletionPhase.Summary else CompletionPhase.Records) }
+    val score = remember(workout.id, stats, feedback) { WorkoutCompletionCalculator.score(workout, stats, feedback) }
+    when (phase) {
+        CompletionPhase.Records -> RecordsCelebration(records) { phase = CompletionPhase.Summary }
+        CompletionPhase.Summary -> CompletionSummary(workout, durationSeconds, stats) { phase = CompletionPhase.Score }
+        CompletionPhase.Score -> ScoreCelebration(score, stats.size, workout.exercises.size, dominantFeedback(feedback)) { phase = if (progress.streakIncreased) CompletionPhase.Streak else CompletionPhase.Xp }
+        CompletionPhase.Streak -> StreakCelebration(progress.streakAfter) { phase = CompletionPhase.Xp }
+        CompletionPhase.Xp -> XpCelebration(progress) { if (progress.levelAfter > progress.levelBefore) phase = CompletionPhase.LevelUp else onDone() }
+        CompletionPhase.LevelUp -> LevelUpCelebration(progress.levelAfter, onDone)
+    }
+}
+
+@Composable
+private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    Text("🏅", style = MaterialTheme.typography.h2)
+    Text(if (records.size == 1) "NUEVO RÉCORD" else "NUEVOS RÉCORDS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(top = 18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        records.forEach { record ->
+            Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).padding(16.dp)) {
+                Text(record.exerciseName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                Text(record.label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold)
+                Text(String.format(Locale.getDefault(), "%.1f %s", record.newValue, record.unit), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+                Text(String.format(Locale.getDefault(), "Antes %.1f · +%.1f %s", record.previousValue, record.newValue - record.previousValue, record.unit), color = WildforceThemeTokens.textSecondary)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, stats: Map<Int, ExerciseSessionStats>, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    Text("✓", Modifier.size(76.dp).background(WildforceThemeTokens.accentGold.copy(alpha = 0.12f), CircleShape).padding(12.dp), style = MaterialTheme.typography.h3, color = WildforceThemeTokens.accentGold, textAlign = TextAlign.Center)
+    Text("¡GRAN TRABAJO!", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text("Has completado ${workout.title}.", color = WildforceThemeTokens.textSecondary)
+    val sets = stats.values.sumOf { it.sets }
+    val volume = stats.values.sumOf { it.volumeKg }
+    val repetitions = stats.values.sumOf { it.totalReps }
+    Column(Modifier.fillMaxWidth().padding(top = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            CompletionStat("EJERCICIOS", stats.count { it.value.sets > 0 }.toString(), Modifier.weight(1f))
+            CompletionStat("SERIES", sets.toString(), Modifier.weight(1f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            CompletionStat("REPETICIONES", repetitions.toString(), Modifier.weight(1f))
+            CompletionStat("VOLUMEN", String.format(Locale.getDefault(), "%.0f kg", volume), Modifier.weight(1f))
+        }
+        CompletionStat("TIEMPO", formatCompletionClock(durationSeconds), Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+private fun ScoreCelebration(score: Double, completedExercises: Int, totalExercises: Int, effort: String, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    val animated by animateFloatAsState(score.toFloat() / 100f)
+    val tier = when {
+        score >= 95 -> "SESIÓN DE ÉLITE" to "Has clavado el entrenamiento y mantenido un esfuerzo excelente."
+        score >= 80 -> "SESIÓN POTENTE" to "Muy cerca de la prescripción y con un esfuerzo sólido."
+        score >= 65 -> "SESIÓN SÓLIDA" to "Buena constancia. Un poco más de precisión elevará la puntuación."
+        else -> "BUEN TRABAJO" to "Lo has completado. Sigue acumulando sesiones."
+    }
+    Text("PUNTUACIÓN DEL ENTRENAMIENTO", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+    Text(tier.first, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text(tier.second, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Box(Modifier.padding(24.dp).size(230.dp), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(animated, Modifier.fillMaxSize(), WildforceThemeTokens.textPrimary, strokeWidth = 18.dp)
+        Text("${score.toInt()}%", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h2, color = WildforceThemeTokens.textPrimary)
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        CompletionStat("EJERCICIOS", "$completedExercises/$totalExercises", Modifier.weight(1f))
+        CompletionStat("ESFUERZO", effort, Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun StreakCelebration(streak: Int, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    Spacer(Modifier.weight(1f))
+    Text("🔥", style = MaterialTheme.typography.h1)
+    Text(streak.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
+    Text(if (streak == 1) "DÍA DE RACHA" else "DÍAS DE RACHA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color(0xFFF07818))
+    Text(if (streak == 1) "¡El primer paso es el más importante!" else "¡Estás en llamas! Sigue manteniendo el ritmo.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Spacer(Modifier.weight(1f))
+}
+
+@Composable
+private fun XpCelebration(progress: CompletionProgress, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    Spacer(Modifier.weight(1f))
+    Text("⚡", style = MaterialTheme.typography.h1)
+    Text("XP TOTAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+    Text(progress.xpAfter.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
+    val levelStart = WorkoutCompletionCalculator.minimumXp(progress.levelBefore)
+    val levelEnd = WorkoutCompletionCalculator.minimumXp(progress.levelBefore + 1)
+    LinearProgressIndicator(
+        progress = ((progress.xpAfter - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(14.dp), color = WildforceThemeTokens.accentGold,
+        backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.18f),
+    )
+    Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+        Text("Nivel ${progress.levelBefore}", style = MaterialTheme.typography.caption)
+        Spacer(Modifier.weight(1f))
+        Text("+${WorkoutCompletionCalculator.WORKOUT_XP} XP", color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+    }
+    Spacer(Modifier.weight(1f))
+}
+
+@Composable
+private fun LevelUpCelebration(level: Int, onContinue: () -> Unit) = CelebrationFrame("TERMINAR", onContinue) {
+    Spacer(Modifier.weight(1f))
+    Text("★", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
+    Text("NUEVO NIVEL", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text(level.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
+    Text("Tu constancia sigue dando resultados.", color = WildforceThemeTokens.textSecondary)
+    Spacer(Modifier.weight(1f))
+}
+
+@Composable
+private fun CelebrationFrame(buttonLabel: String = "CONTINUAR", onContinue: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        Modifier.fillMaxSize().liquidGlassBackground().background(Brush.radialGradient(listOf(WildforceThemeTokens.accentGold.copy(alpha = 0.10f), Color.Transparent))).padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        content()
+        Spacer(Modifier.weight(1f))
+        Button(onClick = onContinue, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) {
+            Text(buttonLabel, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+@Composable
+private fun CompletionStat(title: String, value: String, modifier: Modifier) {
+    Column(modifier.liquidGlass(RoundedCornerShape(15.dp)).padding(13.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(value, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
+        Text(title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+    }
+}
+
+private fun dominantFeedback(feedback: Map<Int, String>): String = feedback.values.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: "SIN DATOS"
+private fun formatCompletionClock(seconds: Int): String = if (seconds >= 3600) "%d:%02d:%02d".format(seconds / 3600, seconds / 60 % 60, seconds % 60) else "%d:%02d".format(seconds / 60, seconds % 60)

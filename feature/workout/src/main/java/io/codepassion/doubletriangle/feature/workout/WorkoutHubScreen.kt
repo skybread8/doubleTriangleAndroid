@@ -330,8 +330,9 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
 fun ActiveWorkoutScreen(
     workout: WorkoutDaySummary,
     gender: String,
+    currentStreak: Int = 0,
     onExit: () -> Unit,
-    onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double) -> Unit,
+    onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double, streak: Int) -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current.applicationContext
     val restored = remember(workout.id) { WorkoutSessionStore.load(context, workout.id) }
@@ -349,6 +350,7 @@ fun ActiveWorkoutScreen(
     var pendingFeedback by remember(workout.id) { mutableStateOf(restored?.pendingFeedback ?: false) }
     var selectedFeedback by remember(workout.id) { mutableStateOf(restored?.selectedFeedback) }
     var exerciseStats by remember(workout.id) { mutableStateOf(restored?.exerciseStats ?: emptyMap()) }
+    var feedbackByExercise by remember(workout.id) { mutableStateOf(restored?.feedbackByExercise ?: emptyMap()) }
     var showsWorkoutPath by remember { mutableStateOf(false) }
     var showsExerciseHistory by remember { mutableStateOf(false) }
     var showsExerciseGuide by remember { mutableStateOf(false) }
@@ -356,7 +358,7 @@ fun ActiveWorkoutScreen(
     val exercise = workout.exercises.getOrNull(exerciseIndex)
     val completedForExercise = completedByExercise[exerciseIndex] ?: 0
 
-    LaunchedEffect(Unit) { while (true) { delay(1_000); elapsedSeconds++ } }
+    LaunchedEffect(showsSummary) { while (!showsSummary) { delay(1_000); elapsedSeconds++ } }
     LaunchedEffect(exerciseIndex) {
         if (initializedExerciseIndex != exerciseIndex) {
             reps = targetReps(exercise?.reps)
@@ -364,10 +366,10 @@ fun ActiveWorkoutScreen(
             initializedExerciseIndex = exerciseIndex
         }
     }
-    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, showsSummary, exerciseStats) {
+    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, showsSummary, exerciseStats, feedbackByExercise) {
         WorkoutSessionStore.save(
             context, workout.id,
-            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, exerciseStats),
+            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, exerciseStats, feedbackByExercise),
         )
     }
     LaunchedEffect(restRemaining) {
@@ -391,10 +393,13 @@ fun ActiveWorkoutScreen(
     }
 
     if (showsSummary) {
-        WorkoutFinishedScreen(workout, elapsedSeconds, totalCompletedSets, totalVolumeKg) {
+        val completionProgress = remember(workout.id) { CompletionProgressStore.preview(context, currentStreak) }
+        val recordEvents = remember(workout.id, exerciseStats) { WorkoutCompletionCalculator.records(context, workout, exerciseStats) }
+        WorkoutCompletionFlowScreen(workout, elapsedSeconds, exerciseStats, feedbackByExercise, recordEvents, completionProgress) {
             WorkoutHistoryStore.record(context, workout, exerciseStats)
+            CompletionProgressStore.commit(context, completionProgress)
             WorkoutSessionStore.clear(context, workout.id)
-            onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg)
+            onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg, completionProgress.streakAfter)
         }
         return
     }
@@ -442,6 +447,7 @@ fun ActiveWorkoutScreen(
                         selected = selectedFeedback,
                         onSelected = { selectedFeedback = it },
                         onContinue = {
+                            selectedFeedback?.let { feedbackByExercise = feedbackByExercise + (exerciseIndex to it) }
                             pendingFeedback = false
                             selectedFeedback = null
                             if (exerciseIndex < workout.exercises.lastIndex) {
@@ -627,31 +633,6 @@ private fun MetricStepper(title: String, value: String, onMinus: () -> Unit, onP
         }
         Text("−", Modifier.size(44.dp).clickable(onClick = onMinus), textAlign = androidx.compose.ui.text.style.TextAlign.Center, style = MaterialTheme.typography.h5)
         Text("+", Modifier.size(44.dp).clickable(onClick = onPlus), textAlign = androidx.compose.ui.text.style.TextAlign.Center, style = MaterialTheme.typography.h5)
-    }
-}
-
-@Composable
-private fun WorkoutFinishedScreen(workout: WorkoutDaySummary, durationSeconds: Int, completedSets: Int, volumeKg: Double, onDone: () -> Unit) {
-    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text("✓", style = MaterialTheme.typography.h2, color = Color(0xFF26A269))
-        Text("ENTRENAMIENTO COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-        Text(workout.title, color = WildforceThemeTokens.textSecondary)
-        Spacer(Modifier.height(28.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            SummaryStat("TIEMPO", formatClock(durationSeconds), Modifier.weight(1f))
-            SummaryStat("SERIES", completedSets.toString(), Modifier.weight(1f))
-            SummaryStat("VOLUMEN", String.format(Locale.getDefault(), "%.0f kg", volumeKg), Modifier.weight(1f))
-        }
-        Spacer(Modifier.height(30.dp))
-        Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text("GUARDAR Y SALIR", fontWeight = FontWeight.Bold) }
-    }
-}
-
-@Composable
-private fun SummaryStat(title: String, value: String, modifier: Modifier = Modifier) {
-    Column(modifier.liquidGlass(RoundedCornerShape(14.dp)).padding(vertical = 16.dp, horizontal = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-        Text(title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
 }
 
