@@ -246,6 +246,7 @@ private fun WildforceApp(
     activeWorkout?.let { workout ->
         ActiveWorkoutScreen(
             workout = workout,
+            gender = "male",
             onExit = { activeWorkout = null },
             onFinish = { duration, sets, volume ->
                 displayedWorkoutState = displayedWorkoutState.copy(
@@ -260,7 +261,7 @@ private fun WildforceApp(
         return
     }
     workoutDetail?.let { workout ->
-        WorkoutDetailScreen(workout, onBack = { workoutDetail = null }, onStart = { activeWorkout = workout })
+        WorkoutDetailScreen(workout, "male", onBack = { workoutDetail = null }, onStart = { activeWorkout = workout })
         return
     }
     Scaffold(
@@ -283,7 +284,7 @@ private fun WildforceApp(
         },
     ) { padding ->
         if (selected == RootDestination.Workout) {
-            WorkoutHubScreen(contentPadding = padding, state = displayedWorkoutState, onWorkoutSelected = { workoutDetail = it })
+            WorkoutHubScreen(contentPadding = padding, state = displayedWorkoutState, onWorkoutSelected = { workoutDetail = it }, gender = "male")
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
                 text = if (selected == RootDestination.Profile) "${selected.label}\nReiniciar onboarding" else "${selected.label}\nPróxima vertical",

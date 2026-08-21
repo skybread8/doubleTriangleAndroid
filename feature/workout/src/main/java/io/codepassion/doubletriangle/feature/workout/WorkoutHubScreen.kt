@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -63,7 +64,8 @@ import kotlinx.coroutines.delay
 fun WorkoutHubScreen(
     contentPadding: PaddingValues,
     state: WorkoutHubState = PreviewWorkoutRepository.load(),
-    onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
+onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
+    gender: String = "male",
 ) {
     var selectedDay by remember { mutableStateOf<DayOfWeek?>(null) }
     var mode by remember { mutableStateOf(WorkoutMode.Plan) }
@@ -87,7 +89,7 @@ fun WorkoutHubScreen(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
         )
         AnimatedVisibility(mode == WorkoutMode.Plan) {
-            WorkoutPlan(state, selectedDay, onWorkoutSelected, Modifier.fillMaxSize())
+            WorkoutPlan(state, selectedDay, onWorkoutSelected, gender, Modifier.fillMaxSize())
         }
         AnimatedVisibility(mode == WorkoutMode.Custom) {
             EmptyCustomWorkouts(Modifier.fillMaxSize())
@@ -186,7 +188,7 @@ private fun WorkoutModeSelector(
 }
 
 @Composable
-private fun WorkoutPlan(state: WorkoutHubState, selectedDay: DayOfWeek?, onWorkoutSelected: (WorkoutDaySummary) -> Unit, modifier: Modifier = Modifier) {
+private fun WorkoutPlan(state: WorkoutHubState, selectedDay: DayOfWeek?, onWorkoutSelected: (WorkoutDaySummary) -> Unit, gender: String, modifier: Modifier = Modifier) {
     val workouts = state.workoutsFor(selectedDay)
     LazyColumn(
         modifier,
@@ -198,18 +200,19 @@ private fun WorkoutPlan(state: WorkoutHubState, selectedDay: DayOfWeek?, onWorko
             Text(state.phase, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
         if (workouts.isEmpty()) item { RestDayCard() }
-        else items(workouts, key = { it.id }) { workout -> WorkoutCard(workout) { onWorkoutSelected(workout) } }
+        else items(workouts, key = { it.id }) { workout -> WorkoutCard(workout, gender) { onWorkoutSelected(workout) } }
     }
 }
 
 @Composable
-private fun WorkoutCard(workout: WorkoutDaySummary, onClick: () -> Unit) {
+private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, onClick: () -> Unit) {
     Card(Modifier.fillMaxWidth().clickable(onClick = onClick), shape = RoundedCornerShape(14.dp), elevation = 0.dp) {
-        Box(
-            Modifier.fillMaxWidth().height(180.dp).background(
-                Brush.linearGradient(listOf(Color(0xFF171717), Color(0xFF514A3D), Color(0xFF87785D))),
-            ),
-        ) {
+        Box(Modifier.fillMaxWidth().height(180.dp)) {
+            RemoteTrainingImage(
+                url = workoutCoverUrl(workout.focus, gender, workout.order),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+            )
             Column(
                 Modifier.align(Alignment.BottomStart).fillMaxWidth()
                     .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.86f))))
@@ -267,32 +270,44 @@ private fun EmptyCustomWorkouts(modifier: Modifier = Modifier) {
 private fun WorkoutHubPreview() = WildforceTheme { WorkoutHubScreen(PaddingValues()) }
 
 @Composable
-fun WorkoutDetailScreen(workout: WorkoutDaySummary, onBack: () -> Unit, onStart: () -> Unit) {
-    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(18.dp).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
-        Text("‹  VOLVER", Modifier.clickable(onClick = onBack).padding(vertical = 12.dp), color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
-        Text("DÍA ${workout.order}", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-        Text(workout.title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-        Text("${workout.focus} · ${workout.dayType} · ${workout.estimatedMinutes} min", color = WildforceThemeTokens.textSecondary)
-        Spacer(Modifier.height(22.dp))
-        workout.exercises.forEachIndexed { index, exercise ->
-            Row(Modifier.fillMaxWidth().padding(vertical = 5.dp).liquidGlass(RoundedCornerShape(14.dp)).padding(15.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("${index + 1}", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.accentGold)
-                Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
-                    Text(exercise.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                    Text("${exercise.sets} series · ${exercise.reps} reps · ${exercise.restSeconds}s descanso", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -> Unit, onStart: () -> Unit) {
+    Box(Modifier.fillMaxSize().liquidGlassBackground()) {
+        RemoteTrainingImage(
+            url = workoutCoverUrl(workout.focus, gender, workout.order),
+            contentDescription = workout.title,
+            modifier = Modifier.fillMaxWidth().height(390.dp),
+        )
+        Box(Modifier.fillMaxWidth().height(390.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.48f), Color.Transparent, WildforceThemeTokens.backgroundSecondary))))
+        Column(Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState())) {
+            Text("‹  VOLVER", Modifier.clickable(onClick = onBack).padding(horizontal = 18.dp, vertical = 18.dp), color = Color.White, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(190.dp))
+            Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(topStart = 38.dp, topEnd = 38.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(22.dp)) {
+                Text("DÍA ${workout.order}", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+                Text(workout.title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+                Text("${workout.focus} · ${workout.dayType} · ${workout.estimatedMinutes} min", color = WildforceThemeTokens.textSecondary)
+                Spacer(Modifier.height(20.dp))
+                workout.exercises.forEachIndexed { index, exercise ->
+                    Row(Modifier.fillMaxWidth().padding(vertical = 5.dp).liquidGlass(RoundedCornerShape(14.dp)).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), null, Modifier.size(58.dp).clip(RoundedCornerShape(12.dp)))
+                        Column(Modifier.weight(1f).padding(horizontal = 13.dp)) {
+                            Text(exercise.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                            Text("${exercise.sets} series · ${exercise.reps} reps · ${exercise.restSeconds}s", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                        }
+                        Text("${index + 1}", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+                Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp)) {
+                    Text("EMPEZAR ENTRENAMIENTO", fontWeight = FontWeight.Bold)
                 }
             }
         }
-        Spacer(Modifier.height(18.dp))
-        Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp)) {
-            Text("EMPEZAR ENTRENAMIENTO", fontWeight = FontWeight.Bold)
-        }
     }
 }
-
 @Composable
 fun ActiveWorkoutScreen(
     workout: WorkoutDaySummary,
+    gender: String,
     onExit: () -> Unit,
     onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double) -> Unit,
 ) {
@@ -305,112 +320,101 @@ fun ActiveWorkoutScreen(
     var totalCompletedSets by remember { mutableStateOf(0) }
     var totalVolumeKg by remember { mutableStateOf(0.0) }
     var showsSummary by remember { mutableStateOf(false) }
-
     val exercise = workout.exercises.getOrNull(exerciseIndex)
     val completedForExercise = completedByExercise[exerciseIndex] ?: 0
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(1_000)
-            elapsedSeconds++
-        }
-    }
-    LaunchedEffect(exerciseIndex) {
-        reps = targetReps(exercise?.reps)
-        weightKg = 0.0
-    }
+    LaunchedEffect(Unit) { while (true) { delay(1_000); elapsedSeconds++ } }
+    LaunchedEffect(exerciseIndex) { reps = targetReps(exercise?.reps); weightKg = 0.0 }
     LaunchedEffect(restRemaining) {
         val remaining = restRemaining ?: return@LaunchedEffect
-        if (remaining > 0) {
-            delay(1_000)
-            restRemaining = remaining - 1
-        } else restRemaining = null
+        if (remaining > 0) { delay(1_000); restRemaining = remaining - 1 } else restRemaining = null
     }
 
     if (showsSummary) {
-        WorkoutFinishedScreen(
-            workout = workout,
-            durationSeconds = elapsedSeconds,
-            completedSets = totalCompletedSets,
-            volumeKg = totalVolumeKg,
-            onDone = { onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg) },
-        )
+        WorkoutFinishedScreen(workout, elapsedSeconds, totalCompletedSets, totalVolumeKg) { onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg) }
         return
     }
 
-    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 20.dp, vertical = 12.dp)) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("‹ SALIR", Modifier.clickable(onClick = onExit).padding(vertical = 12.dp), color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.weight(1f))
-            Text(formatClock(elapsedSeconds), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
-        }
-        LinearProgressIndicator(
-            progress = if (workout.exercises.isEmpty()) 0f else (exerciseIndex + completedForExercise.toFloat() / (exercise?.sets ?: 1)) / workout.exercises.size,
-            modifier = Modifier.fillMaxWidth().height(5.dp),
-            color = WildforceThemeTokens.accentGold,
-            backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.12f),
+    Box(Modifier.fillMaxSize().background(WildforceThemeTokens.backgroundSecondary)) {
+        RemoteTrainingImage(
+            url = exerciseImageUrl(exercise?.imageKey, gender),
+            contentDescription = exercise?.name,
+            modifier = Modifier.fillMaxWidth().height(610.dp),
         )
-        Spacer(Modifier.height(24.dp))
-
-        val resting = restRemaining
-        if (resting != null) {
-            RestTimerContent(
-                seconds = resting,
-                nextLabel = exercise?.let { "Serie ${completedForExercise + 1} · ${it.name}" }.orEmpty(),
-                onAddTime = { restRemaining = resting + 15 },
-                onSkip = { restRemaining = null },
-            )
-        } else if (exercise != null) {
-            Text("EJERCICIO ${exerciseIndex + 1} DE ${workout.exercises.size}", color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
-            Text(exercise.name.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-            Text("Objetivo · ${exercise.reps} reps · ${exercise.restSeconds}s descanso", color = WildforceThemeTokens.textSecondary)
-            Spacer(Modifier.height(20.dp))
-
-            Column(Modifier.weight(1f).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
-                repeat(exercise.sets) { setIndex ->
-                    val completed = setIndex < completedForExercise
-                    val current = setIndex == completedForExercise
-                    Row(
-                        Modifier.fillMaxWidth().padding(vertical = 4.dp)
-                            .then(if (current) Modifier.liquidGlass(RoundedCornerShape(15.dp), emphasized = true) else Modifier.liquidGlass(RoundedCornerShape(15.dp)))
-                            .padding(15.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(if (completed) "✓" else "${setIndex + 1}", color = if (completed) Color(0xFF26A269) else WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
-                        Text(if (current) "SERIE ACTUAL" else if (completed) "COMPLETADA" else "PENDIENTE", Modifier.padding(start = 14.dp).weight(1f), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
-                        Text("${exercise.reps} reps", color = WildforceThemeTokens.textPrimary)
-                    }
-                }
-                Spacer(Modifier.height(16.dp))
-                MetricStepper("REPETICIONES", reps.toString(), onMinus = { reps = (reps - 1).coerceAtLeast(0) }, onPlus = { reps++ })
-                Spacer(Modifier.height(10.dp))
-                MetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", weightKg), onMinus = { weightKg = (weightKg - 2.5).coerceAtLeast(0.0) }, onPlus = { weightKg += 2.5 })
+        Box(Modifier.fillMaxWidth().height(610.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.62f), Color.Transparent, WildforceThemeTokens.backgroundSecondary), startY = 0f)))
+        Column(Modifier.fillMaxSize().padding(horizontal = 10.dp)) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("‹ SALIR", Modifier.clickable(onClick = onExit).padding(10.dp), color = Color.White, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.weight(1f))
+                Text(formatClock(elapsedSeconds), Modifier.liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(horizontal = 14.dp, vertical = 7.dp), color = Color.White, fontWeight = FontWeight.Bold)
             }
-
-            Button(
-                onClick = {
-                    val newCompleted = completedForExercise + 1
-                    completedByExercise = completedByExercise + (exerciseIndex to newCompleted)
-                    totalCompletedSets++
-                    totalVolumeKg += reps * weightKg
-                    if (newCompleted < exercise.sets) {
-                        restRemaining = exercise.restSeconds
-                    } else if (exerciseIndex < workout.exercises.lastIndex) {
-                        exerciseIndex++
-                        restRemaining = exercise.restSeconds
-                    } else showsSummary = true
-                },
-                modifier = Modifier.fillMaxWidth().height(54.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary),
-                elevation = ButtonDefaults.elevation(0.dp),
-            ) { Text(if (completedForExercise + 1 == exercise.sets) "COMPLETAR EJERCICIO" else "COMPLETAR SERIE", fontWeight = FontWeight.Bold) }
-        } else {
-            Text("Este entrenamiento no contiene ejercicios.", color = WildforceThemeTokens.textSecondary)
+            LinearProgressIndicator(
+                progress = if (workout.exercises.isEmpty()) 0f else (exerciseIndex + completedForExercise.toFloat() / (exercise?.sets ?: 1)) / workout.exercises.size,
+                modifier = Modifier.fillMaxWidth().height(4.dp), color = Color.White,
+                backgroundColor = Color.White.copy(alpha = 0.28f),
+            )
+            Column(Modifier.padding(horizontal = 10.dp, vertical = 14.dp)) {
+                Text("EJERCICIO ${exerciseIndex + 1} DE ${workout.exercises.size}", color = Color.White.copy(alpha = 0.72f), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
+                Text(exercise?.name?.uppercase().orEmpty(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
+                Text("FUERZA", Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.48f)).padding(horizontal = 10.dp, vertical = 5.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+            }
+            Spacer(Modifier.weight(1f))
+            Column(
+                Modifier.fillMaxWidth().height(438.dp)
+                    .clip(RoundedCornerShape(topStart = 42.dp, topEnd = 42.dp, bottomStart = 30.dp, bottomEnd = 30.dp))
+                    .background(WildforceThemeTokens.backgroundSecondary)
+                    .padding(horizontal = 18.dp, vertical = 18.dp),
+            ) {
+                val resting = restRemaining
+                if (resting != null) {
+                    RestTimerContent(resting, exercise?.let { "Serie ${completedForExercise + 1} · ${it.name}" }.orEmpty(), { restRemaining = resting + 15 }, { restRemaining = null })
+                } else if (exercise != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("SERIES", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+                            Text("Objetivo ${exercise.reps} reps · ${exercise.restSeconds}s descanso", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                        }
+                        Text("${completedForExercise + 1}/${exercise.sets}", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Column(Modifier.weight(1f).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
+                        repeat(exercise.sets) { setIndex ->
+                            val completed = setIndex < completedForExercise
+                            val current = setIndex == completedForExercise
+                            Row(
+                                Modifier.fillMaxWidth().padding(vertical = 3.dp)
+                                    .background(if (current) WildforceThemeTokens.accentGold.copy(alpha = 0.13f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.055f), RoundedCornerShape(14.dp))
+                                    .padding(horizontal = 14.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(if (completed) "✓" else "${setIndex + 1}", color = if (completed) Color(0xFF26A269) else WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
+                                Text(if (current) "SERIE ACTUAL" else if (completed) "COMPLETADA" else "PENDIENTE", Modifier.padding(start = 12.dp).weight(1f), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                                Text("${exercise.reps} reps", color = WildforceThemeTokens.textPrimary)
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            CompactMetricStepper("REPS", reps.toString(), { reps = (reps - 1).coerceAtLeast(0) }, { reps++ }, Modifier.weight(1f))
+                            CompactMetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", weightKg), { weightKg = (weightKg - 2.5).coerceAtLeast(0.0) }, { weightKg += 2.5 }, Modifier.weight(1f))
+                        }
+                    }
+                    Button(
+                        onClick = {
+                            val newCompleted = completedForExercise + 1
+                            completedByExercise = completedByExercise + (exerciseIndex to newCompleted)
+                            totalCompletedSets++; totalVolumeKg += reps * weightKg
+                            if (newCompleted < exercise.sets) restRemaining = exercise.restSeconds
+                            else if (exerciseIndex < workout.exercises.lastIndex) { exerciseIndex++; restRemaining = exercise.restSeconds }
+                            else showsSummary = true
+                        },
+                        modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp),
+                    ) { Text(if (completedForExercise + 1 == exercise.sets) "COMPLETAR EJERCICIO" else "COMPLETAR SERIE", fontWeight = FontWeight.Bold) }
+                    workout.exercises.getOrNull(exerciseIndex + 1)?.let { Text("Siguiente ejercicio: ${it.name}", Modifier.fillMaxWidth().padding(top = 8.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                }
+            }
         }
     }
 }
-
 @Composable
 private fun RestTimerContent(seconds: Int, nextLabel: String, onAddTime: () -> Unit, onSkip: () -> Unit) {
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -425,6 +429,17 @@ private fun RestTimerContent(seconds: Int, nextLabel: String, onAddTime: () -> U
     }
 }
 
+@Composable
+private fun CompactMetricStepper(title: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit, modifier: Modifier = Modifier) {
+    Column(modifier.background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(14.dp)).padding(10.dp)) {
+        Text(title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("−", Modifier.size(32.dp).clickable(onClick = onMinus), textAlign = androidx.compose.ui.text.style.TextAlign.Center, style = MaterialTheme.typography.h6)
+            Text(value, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
+            Text("+", Modifier.size(32.dp).clickable(onClick = onPlus), textAlign = androidx.compose.ui.text.style.TextAlign.Center, style = MaterialTheme.typography.h6)
+        }
+    }
+}
 @Composable
 private fun MetricStepper(title: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit) {
     Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(15.dp)).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {

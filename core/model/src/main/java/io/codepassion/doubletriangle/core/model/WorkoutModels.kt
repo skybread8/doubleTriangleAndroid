@@ -13,6 +13,7 @@ enum class WorkoutStatus { Planned, Completed }
 
 data class ExerciseSummary(
     val name: String,
+    val imageKey: String? = null,
     val sets: Int,
     val reps: String,
     val restSeconds: Int,
@@ -50,10 +51,10 @@ object PreviewWorkoutRepository {
         planName = "Hipertrofia · Semana 1",
         phase = "Acumulación · Mesociclo 1",
         workouts = listOf(
-            WorkoutDaySummary("push", 1, "PUSH · TREN SUPERIOR", "Empuje", "Fuerza", DayOfWeek.MONDAY, 55, WorkoutStatus.Completed, listOf(ExerciseSummary("Press de banca", 4, "8-10", 120), ExerciseSummary("Press militar", 3, "10", 90), ExerciseSummary("Fondos", 3, "8-12", 90))),
-            WorkoutDaySummary("legs", 2, "PIERNAS Y CORE", "Piernas", "Fuerza", DayOfWeek.WEDNESDAY, 60, WorkoutStatus.Planned, listOf(ExerciseSummary("Sentadilla", 4, "6-8", 150), ExerciseSummary("Peso muerto rumano", 3, "8-10", 120), ExerciseSummary("Plancha", 3, "45 s", 60))),
-            WorkoutDaySummary("pull", 3, "PULL · ESPALDA", "Tirón", "Hipertrofia", DayOfWeek.FRIDAY, 50, WorkoutStatus.Planned, listOf(ExerciseSummary("Dominadas", 4, "6-10", 120), ExerciseSummary("Remo con barra", 4, "8-10", 120), ExerciseSummary("Curl de bíceps", 3, "10-12", 75))),
-            WorkoutDaySummary("full", 4, "CUERPO COMPLETO", "Full body", "Fuerza", DayOfWeek.SATURDAY, 65, WorkoutStatus.Planned, listOf(ExerciseSummary("Peso muerto", 3, "5", 180), ExerciseSummary("Press inclinado", 3, "8", 120), ExerciseSummary("Zancadas", 3, "10/lado", 90))),
+            WorkoutDaySummary("push", 1, "PUSH · TREN SUPERIOR", "Empuje", "Fuerza", DayOfWeek.MONDAY, 55, WorkoutStatus.Completed, listOf(ExerciseSummary("Press de banca", "benchPress", 4, "8-10", 120), ExerciseSummary("Press militar", "overheadPress", 3, "10", 90), ExerciseSummary("Fondos", "chestDip", 3, "8-12", 90))),
+            WorkoutDaySummary("legs", 2, "PIERNAS Y CORE", "Piernas", "Fuerza", DayOfWeek.WEDNESDAY, 60, WorkoutStatus.Planned, listOf(ExerciseSummary("Sentadilla", "barbellBackSquat", 4, "6-8", 150), ExerciseSummary("Peso muerto rumano", "romanianDeadlift", 3, "8-10", 120), ExerciseSummary("Plancha", "plank", 3, "45 s", 60))),
+            WorkoutDaySummary("pull", 3, "PULL · ESPALDA", "Tirón", "Hipertrofia", DayOfWeek.FRIDAY, 50, WorkoutStatus.Planned, listOf(ExerciseSummary("Dominadas", "pullUp", 4, "6-10", 120), ExerciseSummary("Remo con barra", "bentOverRow", 4, "8-10", 120), ExerciseSummary("Curl de bíceps", "bicepsCurl", 3, "10-12", 75))),
+            WorkoutDaySummary("full", 4, "CUERPO COMPLETO", "Full body", "Fuerza", DayOfWeek.SATURDAY, 65, WorkoutStatus.Planned, listOf(ExerciseSummary("Peso muerto", "deadlift", 3, "5", 180), ExerciseSummary("Press inclinado", "inclineBenchPress", 3, "8", 120), ExerciseSummary("Zancadas", "walkingLunge", 3, "10/lado", 90))),
         ),
     )
 }

@@ -55,7 +55,9 @@ object WorkoutPlanGenerator {
                 val exercises = buildList {
                     for (exerciseIndex in 0 until exercisesJson.length()) {
                         val exercise = exercisesJson.getJSONObject(exerciseIndex)
-                        add(ExerciseSummary(exercise.getString("name"), exercise.getInt("sets").coerceIn(1, 10), exercise.getString("reps"), exercise.getInt("restSeconds").coerceIn(15, 600)))
+                        val name = exercise.getString("name")
+                        val imageKey = exercise.optString("imageKey").takeIf(String::isNotBlank) ?: legacyImageKey(name)
+                        add(ExerciseSummary(name, imageKey, exercise.getInt("sets").coerceIn(1, 10), exercise.getString("reps"), exercise.getInt("restSeconds").coerceIn(15, 600)))
                     }
                 }
                 add(WorkoutDaySummary("ai-${index + 1}", index + 1, day.getString("title"), day.getString("focus"), day.getString("dayType"), DayOfWeek.valueOf(day.getString("weekday").uppercase()), day.getInt("estimatedMinutes").coerceIn(15, 180), WorkoutStatus.Planned, exercises))
@@ -65,5 +67,24 @@ object WorkoutPlanGenerator {
         return WorkoutHubState(UserSummary(userName, goal, 0), workouts.mapTo(mutableSetOf()) { it.scheduledDay }, emptySet(), root.optString("planName", "Plan IA · Semana 1"), root.optString("phase", "Adaptación · Mesociclo 1"), workouts)
     }
 
-    private const val SYSTEM_PROMPT = """Eres un entrenador profesional. Responde exclusivamente con JSON válido, sin markdown. Usa exactamente: {"planName":"...","phase":"...","workouts":[{"title":"...","focus":"...","dayType":"...","weekday":"MONDAY","estimatedMinutes":50,"exercises":[{"name":"...","sets":3,"reps":"8-10","restSeconds":90}]}]}. weekday debe ser MONDAY, WEDNESDAY o FRIDAY. Incluye entre 4 y 6 ejercicios seguros por sesión."""
+    private fun legacyImageKey(name: String): String? {
+        val value = name.lowercase()
+        return when {
+            "banca" in value || "bench press" in value -> "benchPress"
+            "militar" in value || "overhead press" in value -> "overheadPress"
+            "inclinado" in value || "incline" in value -> "inclineBenchPress"
+            "fondos" in value || "dip" in value -> "chestDip"
+            "sentadilla" in value || "squat" in value -> "barbellBackSquat"
+            "rumano" in value || "romanian" in value -> "romanianDeadlift"
+            "peso muerto" in value || "deadlift" in value -> "deadlift"
+            "zancada" in value || "lunge" in value -> "walkingLunge"
+            "dominada" in value || "pull-up" in value || "pull up" in value -> "pullUp"
+            "remo" in value || "row" in value -> "bentOverRow"
+            "bíceps" in value || "biceps" in value || "curl" in value -> "bicepsCurl"
+            "plancha" in value || "plank" in value -> "plank"
+            "flexion" in value || "flexión" in value || "push-up" in value -> "pushUp"
+            else -> null
+        }
+    }
+    private const val SYSTEM_PROMPT = """Eres un entrenador profesional. Responde exclusivamente con JSON válido, sin markdown. Usa exactamente: {"planName":"...","phase":"...","workouts":[{"title":"...","focus":"...","dayType":"...","weekday":"MONDAY","estimatedMinutes":50,"exercises":[{"name":"...","imageKey":"benchPress","sets":3,"reps":"8-10","restSeconds":90}]}]}. weekday debe ser MONDAY, WEDNESDAY o FRIDAY. Incluye entre 4 y 6 ejercicios seguros por sesión. imageKey debe ser uno de: airSquat,gobletSquat,barbellBackSquat,walkingLunge,legPress,deadlift,romanianDeadlift,pushUp,benchPress,inclineBenchPress,overheadPress,lateralRaise,chestDip,tricepsPushdown,pullUp,latPulldown,seatedCableRow,bentOverRow,facePull,bicepsCurl,hammerCurl,plank,sidePlank,deadBug,mountainClimber."""
 }
