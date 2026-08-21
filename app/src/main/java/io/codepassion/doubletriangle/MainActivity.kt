@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
+import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
@@ -206,12 +207,23 @@ fun WildforceRoot() {
             }
         }
     } else {
-        val restoredState = generatedWorkoutState ?: preferences.getString("workout_plan_json", null)?.let { json ->
+        val baseState = generatedWorkoutState ?: preferences.getString("workout_plan_json", null)?.let { json ->
             runCatching { WorkoutPlanGenerator.parse(json, currentProfile.name, currentProfile.goal.title) }.getOrNull()
         } ?: PreviewWorkoutRepository.load(currentProfile.name, currentProfile.goal.title)
+        val completedIds = preferences.getStringSet("completed_workouts", emptySet()).orEmpty()
+        val restoredState = baseState.copy(
+            completedDays = baseState.workouts.filter { it.id in completedIds }.mapTo(mutableSetOf()) { it.scheduledDay },
+            workouts = baseState.workouts.map { if (it.id in completedIds) it.copy(status = WorkoutStatus.Completed) else it },
+        )
         WildforceApp(
             profile = currentProfile,
             workoutState = restoredState,
+            onWorkoutCompleted = { id, duration, sets, volume ->
+                val completed = preferences.getStringSet("completed_workouts", emptySet()).orEmpty() + id
+                preferences.edit().putStringSet("completed_workouts", completed)
+                    .putInt("last_workout_duration", duration).putInt("last_workout_sets", sets)
+                    .putLong("last_workout_volume", java.lang.Double.doubleToRawLongBits(volume)).apply()
+            },
             onResetOnboarding = {
                 preferences.edit().clear().apply()
                 profile = null
@@ -221,12 +233,30 @@ fun WildforceRoot() {
 }
 
 @Composable
-private fun WildforceApp(profile: OnboardingProfile, workoutState: WorkoutHubState, onResetOnboarding: () -> Unit) {
+private fun WildforceApp(
+    profile: OnboardingProfile,
+    workoutState: WorkoutHubState,
+    onWorkoutCompleted: (String, Int, Int, Double) -> Unit,
+    onResetOnboarding: () -> Unit,
+) {
     var selected by remember { mutableStateOf(RootDestination.Workout) }
+    var displayedWorkoutState by remember(workoutState) { mutableStateOf(workoutState) }
     var workoutDetail by remember { mutableStateOf<WorkoutDaySummary?>(null) }
     var activeWorkout by remember { mutableStateOf<WorkoutDaySummary?>(null) }
     activeWorkout?.let { workout ->
-        ActiveWorkoutScreen(workout) { activeWorkout = null; workoutDetail = null }
+        ActiveWorkoutScreen(
+            workout = workout,
+            onExit = { activeWorkout = null },
+            onFinish = { duration, sets, volume ->
+                displayedWorkoutState = displayedWorkoutState.copy(
+                    completedDays = displayedWorkoutState.completedDays + workout.scheduledDay,
+                    workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Completed) else it },
+                )
+                onWorkoutCompleted(workout.id, duration, sets, volume)
+                activeWorkout = null
+                workoutDetail = null
+            },
+        )
         return
     }
     workoutDetail?.let { workout ->
@@ -253,7 +283,7 @@ private fun WildforceApp(profile: OnboardingProfile, workoutState: WorkoutHubSta
         },
     ) { padding ->
         if (selected == RootDestination.Workout) {
-            WorkoutHubScreen(contentPadding = padding, state = workoutState, onWorkoutSelected = { workoutDetail = it })
+            WorkoutHubScreen(contentPadding = padding, state = displayedWorkoutState, onWorkoutSelected = { workoutDetail = it })
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
                 text = if (selected == RootDestination.Profile) "${selected.label}\nReiniciar onboarding" else "${selected.label}\nPróxima vertical",
@@ -267,5 +297,5 @@ private fun WildforceApp(profile: OnboardingProfile, workoutState: WorkoutHubSta
 @Preview(showBackground = true)
 @Composable
 private fun AppPreview() = WildforceTheme {
-    WildforceApp(OnboardingProfile("Jordi", FitnessGoal.BuildMuscle), PreviewWorkoutRepository.load()) {}
+    WildforceApp(OnboardingProfile("Jordi", FitnessGoal.BuildMuscle), PreviewWorkoutRepository.load(), { _, _, _, _ -> }) {}
 }
