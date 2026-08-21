@@ -271,6 +271,7 @@ private fun WorkoutHubPreview() = WildforceTheme { WorkoutHubScreen(PaddingValue
 
 @Composable
 fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -> Unit, onStart: () -> Unit) {
+    var expandedExercise by remember { mutableStateOf<Int?>(null) }
     Box(Modifier.fillMaxSize().liquidGlassBackground()) {
         RemoteTrainingImage(
             url = workoutCoverUrl(workout.focus, gender, workout.order),
@@ -287,13 +288,24 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
                 Text("${workout.focus} · ${workout.dayType} · ${workout.estimatedMinutes} min", color = WildforceThemeTokens.textSecondary)
                 Spacer(Modifier.height(20.dp))
                 workout.exercises.forEachIndexed { index, exercise ->
-                    Row(Modifier.fillMaxWidth().padding(vertical = 5.dp).liquidGlass(RoundedCornerShape(14.dp)).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(vertical = 5.dp).liquidGlass(RoundedCornerShape(14.dp))
+                            .clickable { expandedExercise = if (expandedExercise == index) null else index }.padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), null, Modifier.size(58.dp).clip(RoundedCornerShape(12.dp)))
                         Column(Modifier.weight(1f).padding(horizontal = 13.dp)) {
                             Text(exercise.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                             Text("${exercise.sets} series · ${exercise.reps} reps · ${exercise.restSeconds}s", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                         }
-                        Text("${index + 1}", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+                        Text(if (expandedExercise == index) "⌃" else "⌄", color = WildforceThemeTokens.accentGold)
+                    }
+                    if (expandedExercise == index) {
+                        Column(Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, bottom = 10.dp)) {
+                            Text("MÚSCULOS IMPLICADOS", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+                            MuscleStrip(exercise.imageKey, onDarkBackground = false, modifier = Modifier.padding(vertical = 5.dp))
+                            Text("Objetivo: ${exercise.sets} series de ${exercise.reps} repeticiones con ${exercise.restSeconds}s de recuperación.", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                        }
                     }
                 }
                 Spacer(Modifier.height(16.dp))
@@ -320,6 +332,8 @@ fun ActiveWorkoutScreen(
     var totalCompletedSets by remember { mutableStateOf(0) }
     var totalVolumeKg by remember { mutableStateOf(0.0) }
     var showsSummary by remember { mutableStateOf(false) }
+    var pendingFeedback by remember { mutableStateOf(false) }
+    var selectedFeedback by remember { mutableStateOf<String?>(null) }
     val exercise = workout.exercises.getOrNull(exerciseIndex)
     val completedForExercise = completedByExercise[exerciseIndex] ?: 0
 
@@ -357,6 +371,7 @@ fun ActiveWorkoutScreen(
                 Text("EJERCICIO ${exerciseIndex + 1} DE ${workout.exercises.size}", color = Color.White.copy(alpha = 0.72f), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
                 Text(exercise?.name?.uppercase().orEmpty(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
                 Text("FUERZA", Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.48f)).padding(horizontal = 10.dp, vertical = 5.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+                MuscleStrip(exercise?.imageKey, onDarkBackground = true, modifier = Modifier.padding(top = 8.dp))
             }
             Spacer(Modifier.weight(1f))
             Column(
@@ -366,7 +381,21 @@ fun ActiveWorkoutScreen(
                     .padding(horizontal = 18.dp, vertical = 18.dp),
             ) {
                 val resting = restRemaining
-                if (resting != null) {
+                if (pendingFeedback && exercise != null) {
+                    ExerciseFeedbackContent(
+                        exerciseName = exercise.name,
+                        selected = selectedFeedback,
+                        onSelected = { selectedFeedback = it },
+                        onContinue = {
+                            pendingFeedback = false
+                            selectedFeedback = null
+                            if (exerciseIndex < workout.exercises.lastIndex) {
+                                exerciseIndex++
+                                restRemaining = exercise.restSeconds
+                            } else showsSummary = true
+                        },
+                    )
+                } else if (resting != null) {
                     RestTimerContent(resting, exercise?.let { "Serie ${completedForExercise + 1} · ${it.name}" }.orEmpty(), { restRemaining = resting + 15 }, { restRemaining = null })
                 } else if (exercise != null) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -403,8 +432,7 @@ fun ActiveWorkoutScreen(
                             completedByExercise = completedByExercise + (exerciseIndex to newCompleted)
                             totalCompletedSets++; totalVolumeKg += reps * weightKg
                             if (newCompleted < exercise.sets) restRemaining = exercise.restSeconds
-                            else if (exerciseIndex < workout.exercises.lastIndex) { exerciseIndex++; restRemaining = exercise.restSeconds }
-                            else showsSummary = true
+                            else pendingFeedback = true
                         },
                         modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp),
@@ -412,6 +440,37 @@ fun ActiveWorkoutScreen(
                     workout.exercises.getOrNull(exerciseIndex + 1)?.let { Text("Siguiente ejercicio: ${it.name}", Modifier.fillMaxWidth().padding(top = 8.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 }
             }
+        }
+    }
+}
+@Composable
+private fun ExerciseFeedbackContent(
+    exerciseName: String,
+    selected: String?,
+    onSelected: (String) -> Unit,
+    onContinue: () -> Unit,
+) {
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("EJERCICIO COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+        Text(exerciseName, color = WildforceThemeTokens.textSecondary)
+        Spacer(Modifier.height(14.dp))
+        Text("¿Cómo ha ido?", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+        listOf("FÁCIL" to "Podía hacer bastante más", "CORRECTO" to "Esfuerzo adecuado", "DIFÍCIL" to "Casi no termino").forEach { (title, subtitle) ->
+            Row(
+                Modifier.fillMaxWidth().padding(vertical = 3.dp)
+                    .background(if (selected == title) WildforceThemeTokens.accentGold.copy(alpha = 0.16f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.06f), RoundedCornerShape(14.dp))
+                    .clickable { onSelected(title) }.padding(11.dp), verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(if (selected == title) "●" else "○", color = WildforceThemeTokens.accentGold)
+                Column(Modifier.padding(start = 12.dp)) {
+                    Text(title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text(subtitle, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                }
+            }
+        }
+        Spacer(Modifier.weight(1f))
+        Button(onClick = onContinue, enabled = selected != null, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) {
+            Text("CONTINUAR", fontWeight = FontWeight.Bold)
         }
     }
 }
