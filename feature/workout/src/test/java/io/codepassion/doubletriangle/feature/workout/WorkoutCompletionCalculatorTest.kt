@@ -2,6 +2,7 @@ package io.codepassion.doubletriangle.feature.workout
 
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
+import io.codepassion.doubletriangle.core.model.SetStyleParameters
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import java.time.DayOfWeek
@@ -49,5 +50,11 @@ class WorkoutCompletionCalculatorTest {
         assertEquals("SERIE BASE", setStyleInstruction(ExerciseSetStyle.DropSet, 2, 3))
         assertEquals("DROP SET · SIN DESCANSO", setStyleInstruction(ExerciseSetStyle.DropSet, 3, 3))
         assertEquals("PESO MÁXIMO", setStyleInstruction(ExerciseSetStyle.AscendingPyramid, 4, 4))
+    }
+
+    @Test fun styleParameterLabelsExposeThePlannedPrescription() {
+        val parameters = SetStyleParameters(dropCount = 3, dropWeightPercent = 25, targetRir = 0)
+        assertEquals(listOf("3 drops", "-25% por drop", "RIR 0"), styleParameterLabels(ExerciseSetStyle.DropSet, parameters))
+        assertEquals(listOf("Tempo 3-1-1-0", "RIR 2"), styleParameterLabels(ExerciseSetStyle.Tempo, SetStyleParameters()))
     }
 }

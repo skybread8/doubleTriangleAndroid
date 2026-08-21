@@ -28,6 +28,7 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
+import io.codepassion.doubletriangle.core.model.SetStyleParameters
 
 private data class SetStyleCopy(
     val meaning: String,
@@ -37,7 +38,7 @@ private data class SetStyleCopy(
 )
 
 @Composable
-internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, onBack: () -> Unit) {
+internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, parameters: SetStyleParameters, onBack: () -> Unit) {
     val copy = style.copyText()
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 18.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -49,6 +50,15 @@ internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, onBack:
             Column(Modifier.padding(start = 14.dp)) {
                 Text(style.label.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
                 Text(style.scopeLabel(totalSets), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
+            }
+        }
+        val planDetails = styleParameterLabels(style, parameters)
+        if (planDetails.isNotEmpty()) {
+            Text("DETALLES DE TU PLAN", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 8.dp, bottom = 6.dp))
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                planDetails.forEach { detail ->
+                    Text(detail, Modifier.background(WildforceThemeTokens.accentGold.copy(alpha = 0.12f), RoundedCornerShape(20.dp)).padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
+                }
             }
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
@@ -88,6 +98,17 @@ private fun ExerciseSetStyle.scopeLabel(totalSets: Int): String = when {
     this == ExerciseSetStyle.TopSetBackoff -> "Top set primero"
     this == ExerciseSetStyle.DropSet || this == ExerciseSetStyle.RestPause -> "Solo en la última serie"
     else -> "Se aplica en todas las series"
+}
+
+internal fun styleParameterLabels(style: ExerciseSetStyle, parameters: SetStyleParameters): List<String> = buildList {
+    when (style) {
+        ExerciseSetStyle.TopSetBackoff -> { add("${parameters.backoffSetCount} backoff"); add("-${parameters.backoffWeightPercent}% de carga") }
+        ExerciseSetStyle.DropSet -> { add("${parameters.dropCount} drops"); add("-${parameters.dropWeightPercent}% por drop") }
+        ExerciseSetStyle.RestPause, ExerciseSetStyle.Intervals -> add("${parameters.intraSetRestSeconds}s de pausa")
+        ExerciseSetStyle.Tempo -> add("Tempo ${parameters.tempo}")
+        else -> Unit
+    }
+    if (style != ExerciseSetStyle.Warmup) add("RIR ${parameters.targetRir}")
 }
 
 private fun ExerciseSetStyle.copyText(): SetStyleCopy = when (this) {

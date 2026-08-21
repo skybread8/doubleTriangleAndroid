@@ -23,4 +23,10 @@ class WorkoutModelsTest {
         assertEquals(false, ExerciseSetStyle.RestPause.appliesToSet(1, 4))
         assertEquals(true, ExerciseSetStyle.Tempo.appliesToSet(1, 4))
     }
+
+    @Test fun exercisesKeepIosStyleDefaults() {
+        val exercise = ExerciseSummary("Press", sets = 3, reps = "8", restSeconds = 90)
+        assertEquals(ExerciseSetStyle.Straight, exercise.setStyle)
+        assertEquals(SetStyleParameters(), exercise.setStyleParameters)
+    }
 }

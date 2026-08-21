@@ -417,7 +417,7 @@ fun ActiveWorkoutScreen(
     }
 
     if (showsSetStyleInfo && exercise != null) {
-        SetStyleInfoScreen(exercise.setStyle, exercise.sets) { showsSetStyleInfo = false }
+        SetStyleInfoScreen(exercise.setStyle, exercise.sets, exercise.setStyleParameters) { showsSetStyleInfo = false }
         return
     }
 
@@ -506,6 +506,7 @@ fun ActiveWorkoutScreen(
                             Text("SERIES", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
                             Text("Objetivo ${exercise.reps} reps · ${exercise.restSeconds}s descanso", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
                             Text("${exercise.setStyle.glyph}  ${exercise.setStyle.label}  ›", Modifier.clickable { showsSetStyleInfo = true }.padding(vertical = 4.dp), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+                            Text(styleParameterLabels(exercise.setStyle, exercise.setStyleParameters).joinToString(" · "), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
                         }
                         Text("${completedForExercise + 1}/${exercise.sets}", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
                     }

@@ -3,6 +3,7 @@ package io.codepassion.doubletriangle.feature.workout
 import android.content.Context
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
+import io.codepassion.doubletriangle.core.model.SetStyleParameters
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import java.time.DayOfWeek
@@ -24,11 +25,20 @@ internal object CustomWorkoutStore {
                 val exercises = buildList {
                     for (exerciseIndex in 0 until exercisesJson.length()) {
                         val exercise = exercisesJson.getJSONObject(exerciseIndex)
+                        val parameters = exercise.optJSONObject("setStyleParameters") ?: JSONObject()
                         add(
                             ExerciseSummary(
                                 exercise.getString("name"), exercise.optString("imageKey").takeIf(String::isNotBlank),
                                 exercise.getInt("sets"), exercise.getString("reps"), exercise.getInt("restSeconds"),
                                 runCatching { ExerciseSetStyle.valueOf(exercise.optString("setStyle")) }.getOrDefault(ExerciseSetStyle.Straight),
+                                SetStyleParameters(
+                                    dropCount = parameters.optInt("dropCount", 2),
+                                    dropWeightPercent = parameters.optInt("dropWeightPercent", 20),
+                                    backoffSetCount = parameters.optInt("backoffSetCount", 3),
+                                    backoffWeightPercent = parameters.optInt("backoffWeightPercent", 15),
+                                    intraSetRestSeconds = parameters.optInt("intraSetRestSeconds", 15),
+                                    tempo = parameters.optString("tempo", "3-1-1-0"), targetRir = parameters.optInt("targetRir", 2),
+                                ),
                             ),
                         )
                     }
@@ -83,6 +93,14 @@ internal object CustomWorkoutStore {
             workouts.forEach { workout ->
                 val exercises = JSONArray().apply {
                     workout.exercises.forEach { exercise ->
+                        val parameters = JSONObject()
+                            .put("dropCount", exercise.setStyleParameters.dropCount)
+                            .put("dropWeightPercent", exercise.setStyleParameters.dropWeightPercent)
+                            .put("backoffSetCount", exercise.setStyleParameters.backoffSetCount)
+                            .put("backoffWeightPercent", exercise.setStyleParameters.backoffWeightPercent)
+                            .put("intraSetRestSeconds", exercise.setStyleParameters.intraSetRestSeconds)
+                            .put("tempo", exercise.setStyleParameters.tempo)
+                            .put("targetRir", exercise.setStyleParameters.targetRir)
                         put(
                             JSONObject()
                                 .put("name", exercise.name)
@@ -90,7 +108,8 @@ internal object CustomWorkoutStore {
                                 .put("sets", exercise.sets)
                                 .put("reps", exercise.reps)
                                 .put("restSeconds", exercise.restSeconds)
-                                .put("setStyle", exercise.setStyle.name),
+                                .put("setStyle", exercise.setStyle.name)
+                                .put("setStyleParameters", parameters),
                         )
                     }
                 }

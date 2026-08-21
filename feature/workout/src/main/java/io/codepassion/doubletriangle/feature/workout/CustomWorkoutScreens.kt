@@ -204,6 +204,40 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
                 }
             }
         }
+        StyleParameterControls(exercise, onChange)
+}
+    }
+
+@Composable
+private fun StyleParameterControls(exercise: ExerciseSummary, onChange: (ExerciseSummary) -> Unit) {
+    val parameters = exercise.setStyleParameters
+    val update: (io.codepassion.doubletriangle.core.model.SetStyleParameters) -> Unit = { onChange(exercise.copy(setStyleParameters = it)) }
+    val minusPercent = { value: Int -> (value - 5).coerceAtLeast(5) }
+    val plusPercent = { value: Int -> (value + 5).coerceAtMost(50) }
+
+    when (exercise.setStyle) {
+        ExerciseSetStyle.TopSetBackoff -> Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+            EditorStepper("BACKOFF", parameters.backoffSetCount.toString(), { update(parameters.copy(backoffSetCount = (parameters.backoffSetCount - 1).coerceAtLeast(1))) }, { update(parameters.copy(backoffSetCount = parameters.backoffSetCount + 1)) }, Modifier.weight(1f))
+            EditorStepper("REDUCCIÓN", "${parameters.backoffWeightPercent}%", { update(parameters.copy(backoffWeightPercent = minusPercent(parameters.backoffWeightPercent))) }, { update(parameters.copy(backoffWeightPercent = plusPercent(parameters.backoffWeightPercent))) }, Modifier.weight(1f))
+        }
+        ExerciseSetStyle.DropSet -> Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+            EditorStepper("DROPS", parameters.dropCount.toString(), { update(parameters.copy(dropCount = (parameters.dropCount - 1).coerceAtLeast(1))) }, { update(parameters.copy(dropCount = parameters.dropCount + 1)) }, Modifier.weight(1f))
+            EditorStepper("REDUCCIÓN", "${parameters.dropWeightPercent}%", { update(parameters.copy(dropWeightPercent = minusPercent(parameters.dropWeightPercent))) }, { update(parameters.copy(dropWeightPercent = plusPercent(parameters.dropWeightPercent))) }, Modifier.weight(1f))
+        }
+        ExerciseSetStyle.RestPause, ExerciseSetStyle.Intervals -> Row(Modifier.fillMaxWidth().padding(top = 8.dp)) {
+            EditorStepper("PAUSA INTERNA", "${parameters.intraSetRestSeconds}s", { update(parameters.copy(intraSetRestSeconds = (parameters.intraSetRestSeconds - 5).coerceAtLeast(5))) }, { update(parameters.copy(intraSetRestSeconds = parameters.intraSetRestSeconds + 5)) }, Modifier.weight(1f))
+        }
+        ExerciseSetStyle.Tempo -> TextField(
+            value = parameters.tempo,
+            onValueChange = { value -> update(parameters.copy(tempo = value.filter { it.isDigit() || it == '-' }.take(9))) },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp), label = { Text("TEMPO · BAJADA-PAUSA-SUBIDA-PAUSA") }, singleLine = true,
+        )
+        else -> Unit
+    }
+    if (exercise.setStyle != ExerciseSetStyle.Warmup) {
+        Row(Modifier.fillMaxWidth().padding(top = 7.dp)) {
+            EditorStepper("REPETICIONES EN RESERVA (RIR)", parameters.targetRir.toString(), { update(parameters.copy(targetRir = (parameters.targetRir - 1).coerceAtLeast(0))) }, { update(parameters.copy(targetRir = (parameters.targetRir + 1).coerceAtMost(5))) }, Modifier.weight(1f))
+        }
     }
 }
 

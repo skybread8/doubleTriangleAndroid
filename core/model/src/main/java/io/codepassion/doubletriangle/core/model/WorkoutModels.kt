@@ -22,6 +22,16 @@ enum class ExerciseSetStyle(val label: String, val glyph: String) {
     Tempo("Tempo", "♩"),
 }
 
+data class SetStyleParameters(
+    val dropCount: Int = 2,
+    val dropWeightPercent: Int = 20,
+    val backoffSetCount: Int = 3,
+    val backoffWeightPercent: Int = 15,
+    val intraSetRestSeconds: Int = 15,
+    val tempo: String = "3-1-1-0",
+    val targetRir: Int = 2,
+)
+
 data class ExerciseSummary(
     val name: String,
     val imageKey: String? = null,
@@ -29,6 +39,7 @@ data class ExerciseSummary(
     val reps: String,
     val restSeconds: Int,
     val setStyle: ExerciseSetStyle = ExerciseSetStyle.Straight,
+    val setStyleParameters: SetStyleParameters = SetStyleParameters(),
 )
 
 fun ExerciseSetStyle.appliesToSet(setNumber: Int, totalSets: Int): Boolean =
