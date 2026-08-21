@@ -1,0 +1,351 @@
+{
+  "airSquat": {
+    "description": "Un movimiento fundamental de peso corporal que mejora la fuerza y movilidad del tren inferior.",
+    "instructions": [
+      "Stand with your feet shoulder-width apart, toes slightly pointed out.",
+      "Engage your core and keep your chest up as you begin to sit back into your hips.",
+      "Lower your body until your thighs are at least parallel to the floor.",
+      "Drive through your heels to return to the starting position."
+    ],
+    "tips": [
+      "Keep your weight on your heels, not your toes.",
+      "Ensure your knees stay in line with your toes and don't cave inward.",
+      "Maintain a neutral spine throughout the entire movement."
+    ]
+  },
+  "gobletSquat": {
+    "description": "Sostener un peso a la altura del pecho mientras se hace la sentadilla ayuda a mejorar la técnica y la estabilidad del core.",
+    "instructions": [
+      "Hold a dumbbell or kettlebell against your chest with both hands.",
+      "Stand with your feet slightly wider than shoulder-width apart.",
+      "Lower your hips back and down, keeping your chest up and the weight close to your body.",
+      "Push through your heels to return to the starting position."
+    ],
+    "tips": [
+      "Keep your elbows pointed down and inside your knees at the bottom of the squat.",
+      "Inhale as you lower and exhale as you push back up.",
+      "Maintain a neutral spine and avoid rounding your back."
+    ]
+  },
+  "barbellBackSquat": {
+    "description": "El estándar de oro para desarrollar la fuerza total del cuerpo y la masa de las piernas con barra.",
+    "instructions": [
+      "Position the barbell across your upper back, resting on your traps.",
+      "Stand with feet shoulder-width apart, toes slightly pointed out.",
+      "Brace your core and lower your hips until your thighs are at least parallel to the floor.",
+      "Drive through your heels to return to an upright position."
+    ],
+    "tips": [
+      "Keep your chest up and look slightly forward throughout the lift.",
+      "Avoid letting your knees cave inward.",
+      "Use a squat rack and a spotter for safety when lifting heavy."
+    ]
+  },
+  "walkingLunge": {
+    "description": "Un movimiento funcional que desarrolla la fuerza unilateral, el equilibrio y la coordinación.",
+    "instructions": [
+      "Step forward with one leg, lowering your hips until both knees are bent at about 90 degrees.",
+      "Ensure your front knee is directly above your ankle.",
+      "Drive through the front heel to stand up and step forward with the other leg.",
+      "Continue alternating legs as you walk forward."
+    ],
+    "tips": [
+      "Keep your torso upright and your core engaged.",
+      "Don't let your back knee touch the floor with impact.",
+      "Maintain your balance by focusing on a spot in front of you."
+    ]
+  },
+  "legPress": {
+    "description": "Una prensa en máquina que permite cargar el tren inferior con un peso elevado y una tensión mínima en la espalda.",
+    "instructions": [
+      "Sit in the machine with your back and head flat against the padded support.",
+      "Place your feet on the platform about shoulder-width apart.",
+      "Release the safety bars and lower the platform toward your chest by bending your knees.",
+      "Push the platform back to the starting position without locking your knees at the top."
+    ],
+    "tips": [
+      "Avoid lifting your lower back off the seat.",
+      "Keep your feet flat on the platform at all times.",
+      "Control the weight during both the lowering and pushing phases."
+    ]
+  },
+  "deadlift": {
+    "description": "Un levantamiento fundamental para la fuerza total del cuerpo, dirigido a toda la cadena posterior.",
+    "instructions": [
+      "Stand with your mid-foot under the barbell.",
+      "Hinge at the hips and bend your knees to grip the bar just outside your legs.",
+      "Keep your back flat and chest up as you drive through your heels to stand up.",
+      "Keep the bar close to your body throughout the movement and stand fully upright."
+    ],
+    "tips": [
+      "Don't round your back; maintain a neutral spine.",
+      "Inhale and brace your core before you pull the weight.",
+      "Lower the bar by hinging at the hips first, then bending your knees once the bar clears them."
+    ]
+  },
+  "romanianDeadlift": {
+    "description": "Una variante de peso muerto que enfatiza el estiramiento y la contracción de los isquiotibiales.",
+    "instructions": [
+      "Stand with feet hip-width apart, holding a barbell in front of your thighs.",
+      "Hinge at the hips and lower the bar toward the floor while keeping your legs mostly straight (slight bend in knees).",
+      "Lower the bar until you feel a stretch in your hamstrings, keeping your back flat.",
+      "Drive your hips forward to return to the starting position."
+    ],
+    "tips": [
+      "Keep the bar very close to your legs at all times.",
+      "Focus on pushing your hips back as far as possible.",
+      "Avoid rounding your shoulders or lower back."
+    ]
+  },
+  "pushUp": {
+    "description": "Un ejercicio clásico de peso corporal que desarrolla la fuerza del pecho, los hombros y los tríceps.",
+    "instructions": [
+      "Start in a high plank position with your hands slightly wider than shoulder-width.",
+      "Keep your body in a straight line from head to heels.",
+      "Lower your chest toward the floor, keeping your elbows at a 45-degree angle.",
+      "Push through your palms to return to the starting position."
+    ],
+    "tips": [
+      "Don't let your lower back sag; keep your core tight.",
+      "Focus on a full range of motion for better muscle engagement.",
+      "Breathe in as you lower and out as you push back up."
+    ]
+  },
+  "benchPress": {
+    "description": "El levantamiento fundamental de tren superior para desarrollar la máxima potencia de pecho y brazos.",
+    "instructions": [
+      "Lie flat on the bench with your feet firmly planted on the floor.",
+      "Grip the barbell slightly wider than shoulder-width.",
+      "Lower the bar to your mid-chest in a controlled manner.",
+      "Drive the bar back up until your arms are fully extended."
+    ],
+    "tips": [
+      "Keep your shoulder blades retracted (squeezed together) throughout the lift.",
+      "Maintain a slight arch in your lower back, but keep your glutes on the bench.",
+      "Use a spotter, especially when lifting heavy weights."
+    ]
+  },
+  "inclineBenchPress": {
+    "description": "Un press inclinado que se dirige a la parte superior del pecho y a los hombros.",
+    "instructions": [
+      "Set an adjustable bench to a 30-45 degree incline.",
+      "Sit with your back against the bench and feet flat on the floor.",
+      "Press the dumbbells upward from shoulder height until your arms are extended over your chest.",
+      "Lower the weights back to shoulder level with control."
+    ],
+    "tips": [
+      "Don't let the dumbbells drift too far forward or backward.",
+      "Focus on squeezing your upper chest at the top of the movement.",
+      "Maintain a stable core to avoid excessive arching."
+    ]
+  },
+  "overheadPress": {
+    "description": "Un press vertical potente que desarrolla hombros anchos y estabilidad en el tren superior.",
+    "instructions": [
+      "Stand with feet shoulder-width apart, holding a barbell at shoulder height with an overhand grip.",
+      "Brace your core and press the bar directly overhead until your arms are fully extended.",
+      "Lock out your elbows at the top and push your head slightly forward.",
+      "Lower the bar back to your shoulders with control."
+    ],
+    "tips": [
+      "Don't use your legs to help lift the weight (that's a push press).",
+      "Keep your core and glutes tight to stabilize your torso.",
+      "Focus on a vertical bar path."
+    ]
+  },
+  "lateralRaise": {
+    "description": "El ejercicio de aislamiento clave para desarrollar la anchura de los hombros.",
+    "instructions": [
+      "Stand with feet hip-width apart, holding dumbbells at your sides.",
+      "Raise your arms out to the sides with a slight bend in your elbows until they are level with your shoulders.",
+      "Pause for a second at the top, then slowly lower the weights back to your sides."
+    ],
+    "tips": [
+      "Don't swing the weights or use momentum.",
+      "Lead with your elbows, not your wrists.",
+      "Imagine you are pouring water out of a pitcher at the top of the movement."
+    ]
+  },
+  "chestDip": {
+    "description": "A dip variation where you lean your torso forward to shift the focus from the triceps to the chest muscles.",
+    "instructions": [
+      "Grip the parallel bars and push yourself up to the starting position.",
+      "Lean your torso forward at about a 45-degree angle as you lower your body.",
+      "Allow your elbows to flare out slightly as you descend.",
+      "Push back up to the starting position while maintaining the forward lean."
+    ],
+    "tips": [
+      "Squeeze your chest at the top of the movement.",
+      "Lower yourself until your shoulders are slightly below your elbows.",
+      "Control the descent to avoid shoulder strain."
+    ]
+  },
+  "tricepsPushdown": {
+    "description": "Un ejercicio popular en polea para aislar y desarrollar la parte posterior de los brazos.",
+    "instructions": [
+      "Attach a bar or rope to a high pulley on a cable machine.",
+      "Grip the attachment and pull it down until your elbows are at a 90-degree angle.",
+      "Push the attachment down until your arms are fully extended, squeezing your triceps at the bottom.",
+      "Slowly return to the 90-degree starting position."
+    ],
+    "tips": [
+      "Keep your elbows pinned to your sides throughout the set.",
+      "Avoid using your body weight to push the cable down.",
+      "Maintain a slight forward lean and engaged core."
+    ]
+  },
+  "pullUp": {
+    "description": "Un movimiento de peso corporal de élite para desarrollar una espalda ancha y potente y brazos fuertes.",
+    "instructions": [
+      "Grip the bar with your palms facing away from you, slightly wider than shoulder-width.",
+      "Hang with your arms fully extended and your core engaged.",
+      "Pull your chest toward the bar by driving your elbows down toward your hips.",
+      "Lower yourself back to the starting position with control."
+    ],
+    "tips": [
+      "Focus on pulling with your back muscles rather than just your arms.",
+      "Avoid swinging your legs or using momentum (kipping).",
+      "If you can't perform a full pull-up, start with assisted variations or negatives."
+    ]
+  },
+  "latPulldown": {
+    "description": "Un ejercicio en máquina que permite desarrollar la fuerza de tracción vertical de forma controlada.",
+    "instructions": [
+      "Sit in the machine and adjust the knee pads so you are securely held in place.",
+      "Grip the bar wider than shoulder-width and lean back slightly.",
+      "Pull the bar down toward your upper chest, focusing on squeezing your shoulder blades together.",
+      "Slowly return the bar to the starting position."
+    ],
+    "tips": [
+      "Don't pull the bar behind your neck; pull it to your upper chest.",
+      "Focus on leading with your elbows.",
+      "Control the weight on the way up to maintain tension in your lats."
+    ]
+  },
+  "seatedCableRow": {
+    "description": "Se dirige al grosor de la espalda tirando de las poleas hacia el torso en posición sentada.",
+    "instructions": [
+      "Sit with your feet on the platforms and your knees slightly bent.",
+      "Grip the handle and sit up straight with your arms extended.",
+      "Pull the handle toward your lower ribs, squeezing your shoulder blades together.",
+      "Slowly return to the starting position without letting the weight stack slam."
+    ],
+    "tips": [
+      "Keep your back straight and avoid rocking your torso back and forth.",
+      "Focus on pulling with your elbows rather than your hands.",
+      "Maintain a stable core throughout the movement."
+    ]
+  },
+  "bentOverRow": {
+    "description": "Un movimiento compuesto potente que desarrolla el grosor de la espalda y la fuerza general del tren superior.",
+    "instructions": [
+      "Stand with feet shoulder-width apart, holding a barbell with an overhand grip.",
+      "Hinge at the hips and bend your knees slightly, keeping your back flat.",
+      "Pull the barbell toward your lower ribs, keeping your elbows close to your body.",
+      "Lower the bar back to the starting position with control."
+    ],
+    "tips": [
+      "Maintain a neutral spine and avoid rounding your back.",
+      "Keep your core engaged to support your lower back.",
+      "Don't use momentum to 'cheat' the weight up."
+    ]
+  },
+  "facePull": {
+    "description": "Esencial para la salud del hombro, dirigido a los deltoides posteriores y los músculos de la parte superior de la espalda.",
+    "instructions": [
+      "Attach a rope to a cable pulley at upper-chest or eye level.",
+      "Grip the ends of the rope with your thumbs pointing back.",
+      "Pull the rope toward your forehead, pulling the ends apart as you get closer to your face.",
+      "Focus on squeezing your rear delts and mid-back at the end of the movement."
+    ],
+    "tips": [
+      "Keep your elbows high and out to the sides.",
+      "Avoid using your lower back to pull; stay upright and stable.",
+      "Use lighter weights and focus on the quality of the contraction."
+    ]
+  },
+  "bicepsCurl": {
+    "description": "El ejercicio de aislamiento clásico para desarrollar y definir los bíceps.",
+    "instructions": [
+      "Stand with feet hip-width apart, holding dumbbells at your sides with palms facing forward.",
+      "Curl the weights up toward your shoulders by bending your elbows.",
+      "Squeeze your biceps at the top, then slowly lower the weights back down.",
+      "Keep your upper arms stationary throughout the movement."
+    ],
+    "tips": [
+      "Avoid swinging your body or using momentum to lift the weights.",
+      "Keep your elbows tucked in close to your torso.",
+      "Full range of motion: extend your arms fully at the bottom."
+    ]
+  },
+  "hammerCurl": {
+    "description": "Un curl con agarre neutro que trabaja el bíceps y el braquial para conseguir unos brazos más gruesos.",
+    "instructions": [
+      "Stand with dumbbells at your sides, palms facing your torso (neutral grip).",
+      "Curl the weights up while maintaining the neutral grip.",
+      "Squeeze at the top and lower back down with control.",
+      "Keep your elbows pinned to your sides."
+    ],
+    "tips": [
+      "Focus on the contraction in your biceps and forearms.",
+      "Maintain an upright posture and avoid swaying.",
+      "Can be performed alternating arms or both together."
+    ]
+  },
+  "plank": {
+    "description": "Un ejercicio de core fundamental que desarrolla fuerza isométrica y estabilidad en toda la sección media.",
+    "instructions": [
+      "Place your forearms on the floor, elbows aligned under your shoulders.",
+      "Extend your legs behind you and balance on your toes.",
+      "Keep your body in a straight line from head to heels.",
+      "Engage your core and hold the position."
+    ],
+    "tips": [
+      "Avoid letting your hips sag or hike up too high.",
+      "Maintain a neutral neck position; look down at the floor.",
+      "Breathe steadily throughout the hold."
+    ]
+  },
+  "sidePlank": {
+    "description": "Se centra en los oblicuos y en la estabilidad lateral del core para mejorar el equilibrio y prevenir el dolor de espalda.",
+    "instructions": [
+      "Lie on your side with your legs straight and stack your feet.",
+      "Prop your upper body up on your forearm, with your elbow directly under your shoulder.",
+      "Lift your hips until your body forms a straight line from head to feet.",
+      "Hold the position while keeping your core engaged and hips level."
+    ],
+    "tips": [
+      "Don't let your hips sag toward the floor.",
+      "Keep your neck in a neutral position, looking straight ahead.",
+      "For an easier variation, perform the plank with your knees on the floor."
+    ]
+  },
+  "deadBug": {
+    "description": "Una forma segura y eficaz de desarrollar la estabilidad del core y la coordinación sin forzar la espalda.",
+    "instructions": [
+      "Lie on your back with your arms extended toward the ceiling and knees bent at 90 degrees (tabletop position).",
+      "Slowly lower your right arm behind your head while simultaneously extending your left leg toward the floor.",
+      "Keep your lower back pressed firmly into the floor throughout the movement.",
+      "Return to the starting position and repeat with the opposite arm and leg."
+    ],
+    "tips": [
+      "The key is to maintain a flat back; if your back arches, don't lower your leg as far.",
+      "Move slowly and with control.",
+      "Exhale as you extend your limbs."
+    ]
+  },
+  "mountainClimber": {
+    "description": "Un ejercicio dinámico que se dirige al core a la vez que proporciona un desafío cardiovascular importante.",
+    "instructions": [
+      "Start in a high plank position with your hands under your shoulders and your body in a straight line.",
+      "Drive one knee toward your chest, then quickly switch legs, as if you are running in place in a plank position.",
+      "Keep your hips low and your core tight.",
+      "Maintain a consistent and rapid pace."
+    ],
+    "tips": [
+      "Avoid letting your hips bounce up and down.",
+      "Focus on driving your knees straight forward.",
+      "Keep your weight centered over your hands."
+    ]
+  }
+}

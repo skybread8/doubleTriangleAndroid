@@ -274,6 +274,13 @@ private fun WorkoutHubPreview() = WildforceTheme { WorkoutHubScreen(PaddingValue
 @Composable
 fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -> Unit, onStart: () -> Unit) {
     var expandedExercise by remember { mutableStateOf<Int?>(null) }
+    val detailContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
+    val hasSavedSession = remember(workout.id) { WorkoutSessionStore.load(detailContext, workout.id) != null }
+    var guideExercise by remember { mutableStateOf<ExerciseSummary?>(null) }
+    guideExercise?.let { selected ->
+        ExerciseGuideScreen(selected, gender) { guideExercise = null }
+        return
+    }
     Box(Modifier.fillMaxSize().liquidGlassBackground()) {
         RemoteTrainingImage(
             url = workoutCoverUrl(workout.focus, gender, workout.order),
@@ -307,12 +314,13 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
                             Text("MÚSCULOS IMPLICADOS", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
                             MuscleStrip(exercise.imageKey, onDarkBackground = false, modifier = Modifier.padding(vertical = 5.dp))
                             Text("Objetivo: ${exercise.sets} series de ${exercise.reps} repeticiones con ${exercise.restSeconds}s de recuperación.", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                            Text("CÓMO HACERLO  →", Modifier.padding(top = 10.dp).clickable { guideExercise = exercise }, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
                         }
                     }
                 }
                 Spacer(Modifier.height(16.dp))
                 Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp)) {
-                    Text("EMPEZAR ENTRENAMIENTO", fontWeight = FontWeight.Bold)
+                    Text(if (hasSavedSession) "REANUDAR ENTRENAMIENTO" else "EMPEZAR ENTRENAMIENTO", fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -325,31 +333,55 @@ fun ActiveWorkoutScreen(
     onExit: () -> Unit,
     onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double) -> Unit,
 ) {
-    var exerciseIndex by remember { mutableStateOf(0) }
-    var completedByExercise by remember { mutableStateOf<Map<Int, Int>>(emptyMap()) }
-    var reps by remember { mutableStateOf(targetReps(workout.exercises.firstOrNull()?.reps)) }
-    var weightKg by remember { mutableStateOf(0.0) }
-    var restRemaining by remember { mutableStateOf<Int?>(null) }
-    var restInitialSeconds by remember { mutableStateOf(1) }
-    var restBetweenExercises by remember { mutableStateOf(false) }
-    var elapsedSeconds by remember { mutableStateOf(0) }
-    var totalCompletedSets by remember { mutableStateOf(0) }
-    var totalVolumeKg by remember { mutableStateOf(0.0) }
-    var showsSummary by remember { mutableStateOf(false) }
-    var pendingFeedback by remember { mutableStateOf(false) }
-    var selectedFeedback by remember { mutableStateOf<String?>(null) }
+    val context = androidx.compose.ui.platform.LocalContext.current.applicationContext
+    val restored = remember(workout.id) { WorkoutSessionStore.load(context, workout.id) }
+    var exerciseIndex by remember(workout.id) { mutableStateOf((restored?.exerciseIndex ?: 0).coerceIn(0, workout.exercises.lastIndex.coerceAtLeast(0))) }
+    var completedByExercise by remember(workout.id) { mutableStateOf(restored?.completedByExercise ?: emptyMap()) }
+    var reps by remember(workout.id) { mutableStateOf(restored?.reps ?: targetReps(workout.exercises.firstOrNull()?.reps)) }
+    var weightKg by remember(workout.id) { mutableStateOf(restored?.weightKg ?: 0.0) }
+    var restRemaining by remember(workout.id) { mutableStateOf(restored?.restRemaining) }
+    var restInitialSeconds by remember(workout.id) { mutableStateOf(restored?.restInitialSeconds ?: 1) }
+    var restBetweenExercises by remember(workout.id) { mutableStateOf(restored?.restBetweenExercises ?: false) }
+    var elapsedSeconds by remember(workout.id) { mutableStateOf(restored?.elapsedSeconds ?: 0) }
+    var totalCompletedSets by remember(workout.id) { mutableStateOf(restored?.totalCompletedSets ?: 0) }
+    var totalVolumeKg by remember(workout.id) { mutableStateOf(restored?.totalVolumeKg ?: 0.0) }
+    var showsSummary by remember(workout.id) { mutableStateOf(restored?.showsSummary ?: false) }
+    var pendingFeedback by remember(workout.id) { mutableStateOf(restored?.pendingFeedback ?: false) }
+    var selectedFeedback by remember(workout.id) { mutableStateOf(restored?.selectedFeedback) }
+    var showsExerciseGuide by remember { mutableStateOf(false) }
+    var initializedExerciseIndex by remember(workout.id) { mutableStateOf(restored?.exerciseIndex ?: -1) }
     val exercise = workout.exercises.getOrNull(exerciseIndex)
     val completedForExercise = completedByExercise[exerciseIndex] ?: 0
 
     LaunchedEffect(Unit) { while (true) { delay(1_000); elapsedSeconds++ } }
-    LaunchedEffect(exerciseIndex) { reps = targetReps(exercise?.reps); weightKg = 0.0 }
+    LaunchedEffect(exerciseIndex) {
+        if (initializedExerciseIndex != exerciseIndex) {
+            reps = targetReps(exercise?.reps)
+            weightKg = 0.0
+            initializedExerciseIndex = exerciseIndex
+        }
+    }
+    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, showsSummary) {
+        WorkoutSessionStore.save(
+            context, workout.id,
+            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback),
+        )
+    }
     LaunchedEffect(restRemaining) {
         val remaining = restRemaining ?: return@LaunchedEffect
         if (remaining > 0) { delay(1_000); restRemaining = remaining - 1 } else restRemaining = null
     }
 
+    if (showsExerciseGuide && exercise != null) {
+        ExerciseGuideScreen(exercise, gender) { showsExerciseGuide = false }
+        return
+    }
+
     if (showsSummary) {
-        WorkoutFinishedScreen(workout, elapsedSeconds, totalCompletedSets, totalVolumeKg) { onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg) }
+        WorkoutFinishedScreen(workout, elapsedSeconds, totalCompletedSets, totalVolumeKg) {
+            WorkoutSessionStore.clear(context, workout.id)
+            onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg)
+        }
         return
     }
 
@@ -374,7 +406,10 @@ fun ActiveWorkoutScreen(
             Column(Modifier.padding(horizontal = 10.dp, vertical = 14.dp)) {
                 Text("EJERCICIO ${exerciseIndex + 1} DE ${workout.exercises.size}", color = Color.White.copy(alpha = 0.72f), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
                 Text(exercise?.name?.uppercase().orEmpty(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
-                Text("FUERZA", Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.48f)).padding(horizontal = 10.dp, vertical = 5.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("FUERZA", Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.48f)).padding(horizontal = 10.dp, vertical = 5.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+                    Text("CÓMO HACERLO  ›", Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.48f)).clickable { showsExerciseGuide = true }.padding(horizontal = 10.dp, vertical = 5.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+                }
                 MuscleStrip(exercise?.imageKey, onDarkBackground = true, modifier = Modifier.padding(top = 8.dp))
             }
             Spacer(Modifier.weight(1f))

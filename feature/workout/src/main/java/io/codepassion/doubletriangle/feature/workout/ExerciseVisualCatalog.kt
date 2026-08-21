@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
-internal enum class MuscleVisual(val label: String, @DrawableRes val drawable: Int) {
+internal enum class MuscleVisual(val label: String, @param:DrawableRes val drawable: Int) {
     Abs("Abdominales", R.drawable.muscle_group_abs),
     Back("Espalda", R.drawable.muscle_group_back),
     Biceps("Bíceps", R.drawable.muscle_group_biceps),

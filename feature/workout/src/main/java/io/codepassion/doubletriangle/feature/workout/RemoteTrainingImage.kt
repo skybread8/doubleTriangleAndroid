@@ -50,6 +50,9 @@ internal fun RemoteTrainingImage(
 internal fun exerciseImageUrl(imageKey: String?, gender: String): String? =
     imageKey?.takeIf(String::isNotBlank)?.let { "$IMAGE_BASE/vertical/${it}_${gender}.jpeg" }
 
+internal fun exerciseTutorialImageUrl(imageKey: String?): String? =
+    imageKey?.takeIf(String::isNotBlank)?.let { "$IMAGE_BASE/tutorial/${it}_female.png" }
+
 internal fun workoutCoverUrl(focus: String, gender: String, order: Int): String {
     val normalized = focus.lowercase()
     val focusKey = when {
