@@ -1,6 +1,8 @@
 package io.codepassion.doubletriangle
 
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
+import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
+import io.codepassion.doubletriangle.core.model.SetStyleParameters
 import io.codepassion.doubletriangle.core.model.UserSummary
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
@@ -57,7 +59,18 @@ object WorkoutPlanGenerator {
                         val exercise = exercisesJson.getJSONObject(exerciseIndex)
                         val name = exercise.getString("name")
                         val imageKey = exercise.optString("imageKey").takeIf(String::isNotBlank) ?: legacyImageKey(name)
-                        add(ExerciseSummary(name, imageKey, exercise.getInt("sets").coerceIn(1, 10), exercise.getString("reps"), exercise.getInt("restSeconds").coerceIn(15, 600)))
+                        val style = parseSetStyle(exercise.optString("setStyle"))
+                        val details = exercise.optJSONObject("setStyleParameters") ?: JSONObject()
+                        val parameters = SetStyleParameters(
+                            dropCount = details.optInt("dropCount", 2).coerceIn(1, 5),
+                            dropWeightPercent = details.optInt("dropWeightPercent", 20).coerceIn(5, 50),
+                            backoffSetCount = details.optInt("backoffSetCount", 3).coerceIn(1, 6),
+                            backoffWeightPercent = details.optInt("backoffWeightPercent", 15).coerceIn(5, 50),
+                            intraSetRestSeconds = details.optInt("intraSetRestSeconds", 15).coerceIn(5, 120),
+                            tempo = details.optString("tempo", "3-1-1-0").take(9),
+                            targetRir = details.optInt("targetRir", 2).coerceIn(0, 5),
+                        )
+                        add(ExerciseSummary(name, imageKey, exercise.getInt("sets").coerceIn(1, 10), exercise.getString("reps"), exercise.getInt("restSeconds").coerceIn(15, 600), style, parameters))
                     }
                 }
                 add(WorkoutDaySummary("ai-${index + 1}", index + 1, day.getString("title"), day.getString("focus"), day.getString("dayType"), DayOfWeek.valueOf(day.getString("weekday").uppercase()), day.getInt("estimatedMinutes").coerceIn(15, 180), WorkoutStatus.Planned, exercises))
@@ -66,6 +79,17 @@ object WorkoutPlanGenerator {
         check(workouts.isNotEmpty()) { "La IA devolvió un plan vacío" }
         return WorkoutHubState(UserSummary(userName, goal, 0), workouts.mapTo(mutableSetOf()) { it.scheduledDay }, emptySet(), root.optString("planName", "Plan IA · Semana 1"), root.optString("phase", "Adaptación · Mesociclo 1"), workouts)
     }
+    internal fun parseSetStyle(value: String): ExerciseSetStyle = when (value.trim().lowercase()) {
+        "warmup" -> ExerciseSetStyle.Warmup
+        "topsetbackoff", "top_set_backoff" -> ExerciseSetStyle.TopSetBackoff
+        "ascendingpyramid", "ascending_pyramid" -> ExerciseSetStyle.AscendingPyramid
+        "dropset", "drop_set" -> ExerciseSetStyle.DropSet
+        "restpause", "rest_pause" -> ExerciseSetStyle.RestPause
+        "intervals" -> ExerciseSetStyle.Intervals
+        "tempo" -> ExerciseSetStyle.Tempo
+        else -> ExerciseSetStyle.Straight
+    }
+
 
     private fun legacyImageKey(name: String): String? {
         val value = name.lowercase()
@@ -86,5 +110,5 @@ object WorkoutPlanGenerator {
             else -> null
         }
     }
-    private const val SYSTEM_PROMPT = """Eres un entrenador profesional. Responde exclusivamente con JSON válido, sin markdown. Usa exactamente: {"planName":"...","phase":"...","workouts":[{"title":"...","focus":"...","dayType":"...","weekday":"MONDAY","estimatedMinutes":50,"exercises":[{"name":"...","imageKey":"benchPress","sets":3,"reps":"8-10","restSeconds":90}]}]}. weekday debe ser MONDAY, WEDNESDAY o FRIDAY. Incluye entre 4 y 6 ejercicios seguros por sesión. imageKey debe ser uno de: airSquat,gobletSquat,barbellBackSquat,walkingLunge,legPress,deadlift,romanianDeadlift,pushUp,benchPress,inclineBenchPress,overheadPress,lateralRaise,chestDip,tricepsPushdown,pullUp,latPulldown,seatedCableRow,bentOverRow,facePull,bicepsCurl,hammerCurl,plank,sidePlank,deadBug,mountainClimber."""
+    private const val SYSTEM_PROMPT = """Eres un entrenador profesional. Responde exclusivamente con JSON válido, sin markdown. Usa: {"planName":"...","phase":"...","workouts":[{"title":"...","focus":"...","dayType":"...","weekday":"MONDAY","estimatedMinutes":50,"exercises":[{"name":"...","imageKey":"benchPress","sets":3,"reps":"8-10","restSeconds":90,"setStyle":"straight","setStyleParameters":{"dropCount":2,"dropWeightPercent":20,"backoffSetCount":3,"backoffWeightPercent":15,"intraSetRestSeconds":15,"tempo":"3-1-1-0","targetRir":2}}]}]}. setStyle debe ser warmup, straight, topSetBackoff, ascendingPyramid, dropSet, restPause, intervals o tempo. Incluye setStyleParameters solo con valores relevantes al estilo. Drop set y rest-pause se aplican solo a la última serie; topSetBackoff empieza por el top set. weekday debe ser MONDAY, WEDNESDAY o FRIDAY. Incluye entre 4 y 6 ejercicios seguros por sesión y usa segundos en reps (por ejemplo 45 s) para ejercicios temporizados. imageKey debe ser uno de: airSquat,gobletSquat,barbellBackSquat,walkingLunge,legPress,deadlift,romanianDeadlift,pushUp,benchPress,inclineBenchPress,overheadPress,lateralRaise,chestDip,tricepsPushdown,pullUp,latPulldown,seatedCableRow,bentOverRow,facePull,bicepsCurl,hammerCurl,plank,sidePlank,deadBug,mountainClimber."""
 }
