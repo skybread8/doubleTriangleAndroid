@@ -153,6 +153,13 @@ private fun HistoryEntryRow(entry: ExerciseHistoryEntry) {
         Column(Modifier.weight(1f)) {
             Text(DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(entry.timestampMillis)), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Text("${entry.sets} series · ${entry.totalReps} repeticiones", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            if (entry.setDetails.isNotEmpty()) {
+                Text(
+                    entry.setDetails.joinToString("  ·  ") { set -> "${set.setStyle.glyph} S${set.setNumber}  ${set.reps}×${formatWeight(set.weightKg)}" },
+                    modifier = Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption,
+                    color = WildforceThemeTokens.textSecondary,
+                )
+            }
         }
         Column(horizontalAlignment = Alignment.End) {
             Text(formatWeight(entry.maxWeightKg), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)

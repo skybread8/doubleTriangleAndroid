@@ -1,8 +1,8 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import android.content.Context
-import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
+import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import org.json.JSONArray
 import org.json.JSONObject
@@ -22,12 +22,21 @@ internal data class CompletedSetRecord(
     val completedAtMillis: Long = System.currentTimeMillis(),
     val setStyle: ExerciseSetStyle = ExerciseSetStyle.Straight,
 )
+
+internal data class SetPerformance(
+    val setNumber: Int,
+    val reps: Int,
+    val weightKg: Double,
+    val setStyle: ExerciseSetStyle,
+)
+
 internal data class ExerciseHistoryEntry(
     val timestampMillis: Long,
     val sets: Int,
     val totalReps: Int,
     val maxWeightKg: Double,
     val volumeKg: Double,
+    val setDetails: List<SetPerformance> = emptyList(),
 )
 
 internal object WorkoutHistoryStore {
@@ -40,6 +49,20 @@ internal object WorkoutHistoryStore {
         buildList {
             for (index in 0 until array.length()) {
                 val item = array.getJSONObject(index)
+                val detailsJson = item.optJSONArray("setDetails")
+                val details = buildList {
+                    if (detailsJson != null) {
+                        for (setIndex in 0 until detailsJson.length()) {
+                            val set = detailsJson.getJSONObject(setIndex)
+                            add(
+                                SetPerformance(
+                                    set.getInt("setNumber"), set.getInt("reps"), set.getDouble("weightKg"),
+                                    runCatching { ExerciseSetStyle.valueOf(set.optString("setStyle")) }.getOrDefault(ExerciseSetStyle.Straight),
+                                ),
+                            )
+                        }
+                    }
+                }
                 add(
                     ExerciseHistoryEntry(
                         timestampMillis = item.getLong("timestamp"),
@@ -47,24 +70,44 @@ internal object WorkoutHistoryStore {
                         totalReps = item.getInt("reps"),
                         maxWeightKg = item.getDouble("maxWeightKg"),
                         volumeKg = item.getDouble("volumeKg"),
+                        setDetails = details,
                     ),
                 )
             }
         }
     }.getOrDefault(emptyList())
 
-    fun record(context: Context, workout: WorkoutDaySummary, stats: Map<Int, ExerciseSessionStats>) {
+    fun record(
+        context: Context,
+        workout: WorkoutDaySummary,
+        stats: Map<Int, ExerciseSessionStats>,
+        completedSets: List<CompletedSetRecord> = emptyList(),
+    ) {
+        val timestamp = System.currentTimeMillis()
         workout.exercises.forEachIndexed { index, exercise ->
             val result = stats[index] ?: return@forEachIndexed
             if (result.sets == 0) return@forEachIndexed
+            val details = completedSets
+                .filter { it.exerciseIndex == index }
+                .sortedBy { it.setNumber }
+                .map { SetPerformance(it.setNumber, it.reps, it.weightKg, it.setStyle) }
             val entries = listOf(
-                ExerciseHistoryEntry(System.currentTimeMillis(), result.sets, result.totalReps, result.maxWeightKg, result.volumeKg),
+                ExerciseHistoryEntry(timestamp, result.sets, result.totalReps, result.maxWeightKg, result.volumeKg, details),
             ) + history(context, exercise)
             val json = JSONArray().apply {
                 entries.take(MAX_ENTRIES).forEach { entry ->
+                    val detailsJson = JSONArray().apply {
+                        entry.setDetails.forEach { set ->
+                            put(
+                                JSONObject().put("setNumber", set.setNumber).put("reps", set.reps)
+                                    .put("weightKg", set.weightKg).put("setStyle", set.setStyle.name),
+                            )
+                        }
+                    }
                     put(
                         JSONObject().put("timestamp", entry.timestampMillis).put("sets", entry.sets)
-                            .put("reps", entry.totalReps).put("maxWeightKg", entry.maxWeightKg).put("volumeKg", entry.volumeKg),
+                            .put("reps", entry.totalReps).put("maxWeightKg", entry.maxWeightKg).put("volumeKg", entry.volumeKg)
+                            .put("setDetails", detailsJson),
                     )
                 }
             }

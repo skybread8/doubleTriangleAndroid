@@ -377,6 +377,7 @@ fun ActiveWorkoutScreen(
     var showsWorkoutPath by remember { mutableStateOf(false) }
     var showsExerciseHistory by remember { mutableStateOf(false) }
     var showsExerciseGuide by remember { mutableStateOf(false) }
+    var showsSetStyleInfo by remember { mutableStateOf(false) }
     var initializedExerciseIndex by remember(workout.id) { mutableStateOf(restored?.exerciseIndex ?: -1) }
     val exercise = workout.exercises.getOrNull(exerciseIndex)
     val completedForExercise = completedByExercise[exerciseIndex] ?: 0
@@ -415,11 +416,16 @@ fun ActiveWorkoutScreen(
         return
     }
 
+    if (showsSetStyleInfo && exercise != null) {
+        SetStyleInfoScreen(exercise.setStyle, exercise.sets) { showsSetStyleInfo = false }
+        return
+    }
+
     if (showsSummary) {
         val completionProgress = remember(workout.id) { CompletionProgressStore.preview(context, currentStreak) }
         val recordEvents = remember(workout.id, exerciseStats) { WorkoutCompletionCalculator.records(context, workout, exerciseStats) }
         WorkoutCompletionFlowScreen(workout, elapsedSeconds, exerciseStats, feedbackByExercise, recordEvents, completionProgress) {
-            WorkoutHistoryStore.record(context, workout, exerciseStats)
+            WorkoutHistoryStore.record(context, workout, exerciseStats, completedSetRecords)
             CompletionProgressStore.commit(context, completionProgress)
             WorkoutSessionStore.clear(context, workout.id)
             onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg, completionProgress.streakAfter)
@@ -499,7 +505,7 @@ fun ActiveWorkoutScreen(
                         Column(Modifier.weight(1f)) {
                             Text("SERIES", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
                             Text("Objetivo ${exercise.reps} reps · ${exercise.restSeconds}s descanso", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
-                            Text("${exercise.setStyle.glyph}  ${exercise.setStyle.label}", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+                            Text("${exercise.setStyle.glyph}  ${exercise.setStyle.label}  ›", Modifier.clickable { showsSetStyleInfo = true }.padding(vertical = 4.dp), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                         }
                         Text("${completedForExercise + 1}/${exercise.sets}", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
                     }
