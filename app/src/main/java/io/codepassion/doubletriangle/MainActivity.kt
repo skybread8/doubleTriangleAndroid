@@ -2,6 +2,7 @@ package io.codepassion.doubletriangle
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.clickable
@@ -25,6 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.PermissionController
+import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.WeightRecord
 import androidx.compose.ui.platform.LocalContext
 import io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository
 import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
@@ -36,6 +42,7 @@ import io.codepassion.doubletriangle.feature.onboarding.Equipment
 import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
 import io.codepassion.doubletriangle.feature.onboarding.GymType
 import io.codepassion.doubletriangle.feature.onboarding.LifestyleLevel
+import io.codepassion.doubletriangle.feature.onboarding.MovementRestriction
 import io.codepassion.doubletriangle.feature.onboarding.TrainingLevel
 import io.codepassion.doubletriangle.feature.onboarding.TrainingSplitPreference
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutFocus
@@ -66,6 +73,25 @@ private enum class RootDestination(val label: String, val glyph: String) {
 fun WildforceRoot() {
     val context = LocalContext.current
     val preferences = remember { context.getSharedPreferences("wildforce_profile", 0) }
+    val healthPermissions = remember {
+        setOf(
+            HealthPermission.getReadPermission(HeightRecord::class),
+            HealthPermission.getReadPermission(WeightRecord::class),
+        )
+    }
+    var pendingHealthResult by remember { mutableStateOf<((Boolean) -> Unit)?>(null) }
+    val healthPermissionLauncher = rememberLauncherForActivityResult(
+        PermissionController.createRequestPermissionResultContract(),
+    ) { granted ->
+        pendingHealthResult?.invoke(granted.containsAll(healthPermissions))
+        pendingHealthResult = null
+    }
+    val requestHealthConnect: (((Boolean) -> Unit) -> Unit) = { result ->
+        if (HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE) {
+            pendingHealthResult = result
+            healthPermissionLauncher.launch(healthPermissions)
+        } else result(false)
+    }
     var profile by remember {
         mutableStateOf(
             preferences.getString("name", null)?.let { name ->
@@ -87,6 +113,8 @@ fun WildforceRoot() {
                     gymType = GymType.fromStoredValue(preferences.getString("gym_type", "").orEmpty()),
                     availableEquipment = Equipment.fromStoredValues(preferences.getStringSet("equipment", null))
                         .ifEmpty { GymType.SmallGym.defaultEquipment },
+                    movementRestrictions = MovementRestriction.fromStoredValues(preferences.getStringSet("restrictions", null)),
+                    isHealthConnectEnabled = preferences.getBoolean("health_connect", false),
                 )
             },
         )
@@ -94,7 +122,7 @@ fun WildforceRoot() {
 
     val currentProfile = profile
     if (currentProfile == null) {
-        OnboardingScreen { completedProfile ->
+        OnboardingScreen(onRequestHealthConnect = requestHealthConnect) { completedProfile ->
             preferences.edit()
                 .putString("name", completedProfile.name)
                 .putString("goal", completedProfile.goal.storedValue)
@@ -107,6 +135,8 @@ fun WildforceRoot() {
                 .putStringSet("custom_focuses", completedProfile.customWorkoutFocuses.mapTo(mutableSetOf()) { (day, focus) -> "${day.storedValue}:${focus.storedValue}" })
                 .putString("gym_type", completedProfile.gymType.storedValue)
                 .putStringSet("equipment", completedProfile.availableEquipment.mapTo(mutableSetOf()) { it.storedValue })
+                .putStringSet("restrictions", completedProfile.movementRestrictions.mapTo(mutableSetOf()) { it.storedValue })
+                .putBoolean("health_connect", completedProfile.isHealthConnectEnabled)
                 .apply()
             profile = completedProfile
         }

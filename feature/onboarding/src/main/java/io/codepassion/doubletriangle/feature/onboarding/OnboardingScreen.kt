@@ -59,6 +59,8 @@ data class OnboardingProfile(
     val customWorkoutFocuses: Map<WorkoutWeekday, WorkoutFocus> = emptyMap(),
     val gymType: GymType = GymType.SmallGym,
     val availableEquipment: Set<Equipment> = GymType.SmallGym.defaultEquipment,
+    val movementRestrictions: Set<MovementRestriction> = emptySet(),
+    val isHealthConnectEnabled: Boolean = false,
 )
 
 enum class LifestyleLevel(val storedValue: String, val title: String, val description: String, val glyph: String) {
@@ -107,6 +109,10 @@ enum class GymType(val storedValue:String,val title:String,val glyph:String){
 BigGym("bigGym","Gimnasio grande","▦"),SmallGym("smallGym","Gimnasio pequeño","▤"),HomeGym("homeGym","Gimnasio en casa","⌂"),SomeAccessories("someAccessories","Algunos accesorios","◆"),BodyweightOnly("bodyweightOnly","Solo peso corporal","◎");
 val defaultEquipment:Set<Equipment> get()=when(this){BigGym->Equipment.entries.toSet();SmallGym->setOf(Equipment.Bodyweight,Equipment.ResistanceBands,Equipment.Dumbbells,Equipment.Kettlebells,Equipment.CableMachine,Equipment.SmithMachine,Equipment.LegPressMachine,Equipment.Treadmill,Equipment.StationaryBike,Equipment.FlatBench,Equipment.AdjustableBench,Equipment.SquatRack,Equipment.OlympicBarbell,Equipment.PullUpBar);HomeGym->setOf(Equipment.Bodyweight,Equipment.Dumbbells,Equipment.Kettlebells,Equipment.FlatBench,Equipment.AdjustableBench,Equipment.SquatRack,Equipment.OlympicBarbell,Equipment.PullUpBar);SomeAccessories->setOf(Equipment.Bodyweight,Equipment.ResistanceBands,Equipment.Dumbbells,Equipment.Kettlebells,Equipment.MedicineBall);BodyweightOnly->setOf(Equipment.Bodyweight)}
 companion object{fun fromStoredValue(value:String)=entries.firstOrNull{it.storedValue==value}?:SmallGym}}
+
+enum class MovementRestriction(val storedValue:String,val title:String){
+LowerBackPain("lowerBackPain","Dolor lumbar"),ShoulderPain("shoulderPain","Dolor de hombro"),KneePain("kneePain","Dolor de rodilla"),HipPain("hipPain","Dolor de cadera"),AnklePain("anklePain","Dolor de tobillo"),WristPain("wristPain","Dolor de muñeca"),ElbowPain("elbowPain","Dolor de codo"),NeckPain("neckPain","Dolor de cuello"),LimitedShoulderMobility("limitedShoulderMobility","Movilidad limitada de hombro"),LimitedHipMobility("limitedHipMobility","Movilidad limitada de cadera"),LimitedAnkleMobility("limitedAnkleMobility","Movilidad limitada de tobillo"),LimitedKneeFlexion("limitedKneeFlexion","Flexión limitada de rodilla"),OverheadMovementLimitation("overheadMovementLimitation","Limitación sobre la cabeza"),ImpactSensitivity("impactSensitivity","Sensibilidad al impacto");
+companion object{fun fromStoredValues(values:Set<String>?)=entries.filterTo(mutableSetOf()){it.storedValue in values.orEmpty()}}}
 
 enum class TrainingSplitPreference(val storedValue: String, val title: String, val description: String, val glyph: String) {
     Automatic("automatic", "Automático", "Elegiremos la estructura que mejor encaje con tu objetivo y recuperación.", "✦"),
@@ -162,7 +168,10 @@ enum class FitnessGoal(val storedValue: String, val title: String, val descripti
 }
 
 @Composable
-fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
+fun OnboardingScreen(
+    onRequestHealthConnect: (((Boolean) -> Unit) -> Unit) = { result -> result(false) },
+    onCompleted: (OnboardingProfile) -> Unit,
+) {
     var step by remember { mutableStateOf(0) }
     var name by remember { mutableStateOf("") }
     var goal by remember { mutableStateOf<FitnessGoal?>(null) }
@@ -176,12 +185,15 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
     var gymType by remember { mutableStateOf<GymType?>(null) }
     var equipment by remember { mutableStateOf(setOf(Equipment.Bodyweight)) }
     var equipmentSearch by remember { mutableStateOf("") }
+    var hasRestrictions by remember { mutableStateOf(false) }
+    var restrictions by remember { mutableStateOf(emptySet<MovementRestriction>()) }
+    var healthConnectEnabled by remember { mutableStateOf<Boolean?>(null) }
     val completeProfile = {
         val selectedGoal = goal
         val selectedLifestyle = lifestyle
         if (selectedGoal != null && selectedLifestyle != null) {
             val selectedBodyPhase = bodyPhase.takeIf { selectedGoal.supportsBodyComposition && trainingLevel.supportsBodyComposition }
-            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses, gymType ?: GymType.SmallGym, equipment))
+            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses, gymType ?: GymType.SmallGym, equipment, restrictions, healthConnectEnabled == true))
         }
     }
 
@@ -304,7 +316,7 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
             9 -> FormStep(progress=9f/16f,title="Gimnasio",subtitle="¿En qué entorno vas a entrenar?",canContinue=gymType!=null,onBack={step=if(goal?.supportsBodyComposition==true&&trainingLevel.supportsBodyComposition)8 else 7},onContinue={step=10}){
                 GymType.entries.forEach{gym->ChoiceOption(gym.title,null,gym.glyph,gymType==gym){gymType=gym;equipment=gym.defaultEquipment};Spacer(Modifier.height(10.dp))}
             }
-            else -> FormStep(progress=10f/16f,title="Equipamiento",subtitle="Ajusta el material al que realmente tienes acceso.",canContinue=true,onBack={step=9},onContinue=completeProfile,buttonTitle="CREAR PLAN"){
+            10 -> FormStep(progress=10f/16f,title="Equipamiento",subtitle="Ajusta el material al que realmente tienes acceso.",canContinue=true,onBack={step=9},onContinue={step=11}){
                 OutlinedTextField(value=equipmentSearch,onValueChange={equipmentSearch=it},modifier=Modifier.fillMaxWidth(),placeholder={Text("Buscar equipamiento")},singleLine=true,shape=RoundedCornerShape(14.dp))
                 Text("${equipment.size} seleccionados",Modifier.padding(vertical=12.dp),color=WildforceThemeTokens.textSecondary)
                 Equipment.entries.filter{it.title.contains(equipmentSearch.trim(),ignoreCase=true)}.chunked(2).forEach{items->
@@ -313,6 +325,22 @@ fun OnboardingScreen(onCompleted: (OnboardingProfile) -> Unit) {
                         if(items.size==1)Spacer(Modifier.weight(1f))
                     };Spacer(Modifier.height(10.dp))
                 }
+            }
+            11 -> FormStep(progress=11f/16f,title="Restricciones",subtitle="Indica cualquier lesión o limitación que debamos tener en cuenta.",canContinue=true,onBack={step=10},onContinue={step=12}){
+                ChoiceOption("No tengo restricciones","Podrás cambiarlo más adelante.","✓",!hasRestrictions){hasRestrictions=false;restrictions=emptySet()}
+                Spacer(Modifier.height(10.dp))
+                ChoiceOption("Sí, tengo restricciones",null,"!",hasRestrictions){hasRestrictions=true}
+                if(hasRestrictions){
+                    Spacer(Modifier.height(18.dp))
+                    MovementRestriction.entries.forEach{item->ChoiceOption(item.title,null,"•",item in restrictions){restrictions=if(item in restrictions)restrictions-item else restrictions+item};Spacer(Modifier.height(8.dp))}
+                }
+            }
+            else -> FormStep(progress=12f/16f,title="Health Connect",subtitle="Importa de forma segura tu altura y peso desde Android.",canContinue=healthConnectEnabled!=null,onBack={step=11},onContinue=completeProfile,buttonTitle="CREAR PLAN"){
+                ChoiceOption("Conectar Health Connect","Android mostrará los permisos de altura y peso.","+",healthConnectEnabled==true){
+                    onRequestHealthConnect{granted->healthConnectEnabled=granted}
+                }
+                Spacer(Modifier.height(10.dp))
+                ChoiceOption("Ahora no","Podrás conectarlo más adelante desde Perfil.","−",healthConnectEnabled==false){healthConnectEnabled=false}
             }
         }
     }
