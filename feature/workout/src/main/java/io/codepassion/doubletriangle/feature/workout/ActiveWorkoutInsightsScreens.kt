@@ -46,6 +46,7 @@ internal fun WorkoutPathScreen(
     gender: String,
     currentExerciseIndex: Int,
     completedByExercise: Map<Int, Int>,
+    addedSetsByExercise: Map<Int, Int>,
     elapsedSeconds: Int,
     onBack: () -> Unit,
 ) {
@@ -84,7 +85,7 @@ internal fun WorkoutPathScreen(
                 }
                 block.exercises.forEach { pathExercise ->
                     val exercise = pathExercise.exercise
-                    val completed = pathExercise.isCompleted(workout, completedByExercise)
+                    val completed = pathExercise.isCompleted(workout, completedByExercise, addedSetsByExercise)
                     val current = currentExerciseIndex in pathExercise.executionIndices
                     Row(
                         Modifier.fillMaxWidth().padding(vertical = 4.dp)

@@ -24,6 +24,7 @@ internal data class WorkoutSessionSnapshot(
     val exerciseTimeRemaining: Int? = null,
     val exerciseTimeInitial: Int = 0,
     val exerciseTimerRunning: Boolean = false,
+    val addedSetsByExercise: Map<Int, Int> = emptyMap(),
     val updatedAtMillis: Long = System.currentTimeMillis(),
 )
 
@@ -47,6 +48,8 @@ internal object WorkoutSessionStore {
         }
         val feedbackJson = json.optJSONObject("feedbackByExercise") ?: JSONObject()
         val feedback = buildMap { feedbackJson.keys().forEach { key -> put(key.toInt(), feedbackJson.getString(key)) } }
+        val addedSetsJson = json.optJSONObject("addedSetsByExercise") ?: JSONObject()
+        val addedSets = buildMap { addedSetsJson.keys().forEach { key -> put(key.toInt(), addedSetsJson.getInt(key)) } }
         val setRecordsJson = json.optJSONArray("completedSetRecords")
         val setRecords = buildList {
             if (setRecordsJson != null) for (index in 0 until setRecordsJson.length()) {
@@ -77,6 +80,7 @@ internal object WorkoutSessionStore {
             exerciseTimeRemaining = if (json.isNull("exerciseTimeRemaining")) null else json.optInt("exerciseTimeRemaining"),
             exerciseTimeInitial = json.optInt("exerciseTimeInitial"),
             exerciseTimerRunning = json.optBoolean("exerciseTimerRunning"),
+            addedSetsByExercise = addedSets,
             updatedAtMillis = System.currentTimeMillis(),
         )
     }.getOrNull()
@@ -89,6 +93,7 @@ internal object WorkoutSessionStore {
             }
         }
         val feedback = JSONObject().apply { snapshot.feedbackByExercise.forEach { (index, value) -> put(index.toString(), value) } }
+        val addedSets = JSONObject().apply { snapshot.addedSetsByExercise.forEach { (index, value) -> put(index.toString(), value) } }
         val setRecords = org.json.JSONArray().apply {
             snapshot.completedSetRecords.forEach { record ->
                 put(JSONObject().put("exerciseIndex", record.exerciseIndex).put("setNumber", record.setNumber)
@@ -108,6 +113,7 @@ internal object WorkoutSessionStore {
             .put("exerciseTimeRemaining", snapshot.exerciseTimeRemaining ?: JSONObject.NULL)
             .put("exerciseTimeInitial", snapshot.exerciseTimeInitial)
             .put("exerciseTimerRunning", snapshot.exerciseTimerRunning)
+            .put("addedSetsByExercise", addedSets)
         context.getSharedPreferences(PREFERENCES, 0).edit().putString(workoutId, json.toString()).apply()
     }
 

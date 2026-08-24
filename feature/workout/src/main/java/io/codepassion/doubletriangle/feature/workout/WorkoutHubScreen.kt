@@ -422,6 +422,7 @@ fun ActiveWorkoutScreen(
     var exerciseTimeRemaining by remember(workout.id) { mutableStateOf(restored?.exerciseTimeRemaining ?: initialExerciseDuration) }
     var exerciseTimeInitial by remember(workout.id) { mutableStateOf(restored?.exerciseTimeInitial?.takeIf { it > 0 } ?: (initialExerciseDuration ?: 0)) }
     var exerciseTimerRunning by remember(workout.id) { mutableStateOf(restored?.exerciseTimerRunning ?: false) }
+    var addedSetsByExercise by remember(workout.id) { mutableStateOf(restored?.addedSetsByExercise ?: emptyMap()) }
     var showsWorkoutPath by remember { mutableStateOf(false) }
     var showsExerciseHistory by remember { mutableStateOf(false) }
     var showsExerciseGuide by remember { mutableStateOf(false) }
@@ -429,8 +430,12 @@ fun ActiveWorkoutScreen(
     var initializedExerciseIndex by remember(workout.id) { mutableStateOf(restored?.exerciseIndex ?: -1) }
     val exercise = workout.exercises.getOrNull(exerciseIndex)
     val completedForExercise = completedByExercise[exerciseIndex] ?: 0
-    val logicalExercises = remember(workout) { workout.pathBlocks().flatMap { it.exercises } }
+    val effectiveSets = (exercise?.sets ?: 1) + (addedSetsByExercise[exerciseIndex] ?: 0)
+    val effectiveExercise = exercise?.copy(sets = effectiveSets)
+    val structuredPathBlocks = remember(workout) { workout.pathBlocks() }
+    val logicalExercises = remember(structuredPathBlocks) { structuredPathBlocks.flatMap { it.exercises } }
     val logicalExerciseIndex = logicalExercises.indexOfFirst { exerciseIndex in it.executionIndices }.coerceAtLeast(0)
+    val currentPathBlock = structuredPathBlocks.firstOrNull { block -> block.exercises.any { exerciseIndex in it.executionIndices } }
     fun advanceFromExercise(restSeconds: Int) {
         if (exerciseIndex < workout.exercises.lastIndex) {
             exerciseIndex++
@@ -458,10 +463,10 @@ fun ActiveWorkoutScreen(
             initializedExerciseIndex = exerciseIndex
         }
     }
-    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, showsSummary, exerciseStats, feedbackByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning) {
+    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, showsSummary, exerciseStats, feedbackByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning, addedSetsByExercise) {
         WorkoutSessionStore.save(
             context, workout.id,
-            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, exerciseStats, feedbackByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning),
+            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, exerciseStats, feedbackByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning, addedSetsByExercise),
         )
     }
     LaunchedEffect(restRemaining) {
@@ -476,7 +481,7 @@ fun ActiveWorkoutScreen(
     }
 
     if (showsWorkoutPath) {
-        WorkoutPathScreen(workout, gender, exerciseIndex, completedByExercise, elapsedSeconds) { showsWorkoutPath = false }
+        WorkoutPathScreen(workout, gender, exerciseIndex, completedByExercise, addedSetsByExercise, elapsedSeconds) { showsWorkoutPath = false }
         return
     }
 
@@ -491,7 +496,7 @@ fun ActiveWorkoutScreen(
     }
 
     if (showsSetStyleInfo && exercise != null) {
-        SetStyleInfoScreen(exercise.setStyle, exercise.sets, exercise.setStyleParameters) { showsSetStyleInfo = false }
+        SetStyleInfoScreen(exercise.setStyle, effectiveSets, exercise.setStyleParameters) { showsSetStyleInfo = false }
         return
     }
 
@@ -529,7 +534,7 @@ fun ActiveWorkoutScreen(
                 Text(formatClock(elapsedSeconds), Modifier.liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(horizontal = 14.dp, vertical = 7.dp), color = Color.White, fontWeight = FontWeight.Bold)
             }
             LinearProgressIndicator(
-                progress = if (workout.exercises.isEmpty()) 0f else (exerciseIndex + completedForExercise.toFloat() / (exercise?.sets ?: 1)) / workout.exercises.size,
+                progress = if (workout.exercises.isEmpty()) 0f else (exerciseIndex + completedForExercise.toFloat() / effectiveSets.coerceAtLeast(1)) / workout.exercises.size,
                 modifier = Modifier.fillMaxWidth().height(4.dp), color = Color.White,
                 backgroundColor = Color.White.copy(alpha = 0.28f),
             )
@@ -604,6 +609,10 @@ fun ActiveWorkoutScreen(
                             }
                         }
                     } else {
+                        if (exercise.blockType == WorkoutBlockType.Superset && currentPathBlock != null) {
+                            SupersetRoundMap(currentPathBlock, exerciseIndex, exercise.blockRound, gender)
+                            Spacer(Modifier.height(10.dp))
+                        }
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
                                 Text("SERIES", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
@@ -611,11 +620,16 @@ fun ActiveWorkoutScreen(
                                 Text("${exercise.setStyle.glyph}  ${exercise.setStyle.label}  ›", Modifier.clickable { showsSetStyleInfo = true }.padding(vertical = 4.dp), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                                 Text(styleParameterLabels(exercise.setStyle, exercise.setStyleParameters).joinToString(" · "), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
                             }
-                            Text("${completedForExercise + 1}/${exercise.sets}", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text("${completedForExercise + 1}/$effectiveSets", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+                                if (exercise.blockType == WorkoutBlockType.Standard && targetDurationSeconds(exercise.reps) == null && effectiveSets < 20) {
+                                    Text("＋ AÑADIR SERIE", Modifier.clickable { addedSetsByExercise = addedSetsByExercise + (exerciseIndex to ((addedSetsByExercise[exerciseIndex] ?: 0) + 1)) }.padding(top = 5.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+                                }
+                            }
                         }
                         Spacer(Modifier.height(10.dp))
                         Column(Modifier.weight(1f).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
-                            SetTrackingRows(exerciseIndex, exercise, completedForExercise, completedSetRecords) { original, changed ->
+                            SetTrackingRows(exerciseIndex, effectiveExercise ?: exercise, completedForExercise, completedSetRecords) { original, changed ->
                                 val updatedRecords = completedSetRecords.map { if (it.exerciseIndex == exerciseIndex && it.setNumber == original.setNumber) changed else it }
                                 totalVolumeKg += changed.reps * changed.weightKg - original.reps * original.weightKg
                                 completedSetRecords = updatedRecords
@@ -643,7 +657,7 @@ fun ActiveWorkoutScreen(
                     }
                     Button(
                         onClick = {
-                            val newCompleted = if (isWarmupOrCooldown) exercise.sets else completedForExercise + 1
+                            val newCompleted = if (isWarmupOrCooldown) effectiveSets else completedForExercise + 1
                             val timedDuration = targetDurationSeconds(exercise.reps)
                             val loggedReps = timedDuration?.let { (exerciseTimeInitial - (exerciseTimeRemaining ?: 0)).coerceAtLeast(0) } ?: reps
                             val loggedWeight = if (timedDuration != null) 0.0 else weightKg
@@ -657,7 +671,7 @@ fun ActiveWorkoutScreen(
                                 maxWeightKg = maxOf(previousStats.maxWeightKg, loggedWeight),
                                 volumeKg = previousStats.volumeKg + loggedReps * loggedWeight,
                             ))
-                            if (newCompleted < exercise.sets) {
+                            if (newCompleted < effectiveSets) {
                                 restInitialSeconds = exercise.restSeconds.coerceAtLeast(1)
                             exerciseTimerRunning = false
                             if (timedDuration != null) {
@@ -681,8 +695,37 @@ fun ActiveWorkoutScreen(
                         },
                         modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp),
-                    ) { Text(if (isWarmupOrCooldown || completedForExercise + 1 == exercise.sets) "COMPLETAR EJERCICIO" else "COMPLETAR SERIE", fontWeight = FontWeight.Bold) }
+                    ) { Text(if (isWarmupOrCooldown || completedForExercise + 1 == effectiveSets) "COMPLETAR EJERCICIO" else "COMPLETAR SERIE", fontWeight = FontWeight.Bold) }
                     workout.exercises.getOrNull(exerciseIndex + 1)?.let { Text("Siguiente ejercicio: ${it.name}", Modifier.fillMaxWidth().padding(top = 8.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SupersetRoundMap(block: WorkoutPathBlock, currentExerciseIndex: Int, currentRound: Int, gender: String) {
+    Column(Modifier.fillMaxWidth().background(WildforceThemeTokens.accentGold.copy(alpha = 0.09f), RoundedCornerShape(18.dp)).padding(12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("⛓  SUPERSET", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption)
+            Spacer(Modifier.weight(1f))
+            Text("RONDA $currentRound/${block.rounds}", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption)
+        }
+        Row(Modifier.fillMaxWidth().padding(top = 9.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            block.exercises.forEach { item ->
+                val roundIndex = item.executionIndices.getOrNull((currentRound - 1).coerceAtLeast(0))
+                val current = roundIndex == currentExerciseIndex
+                val completed = roundIndex != null && roundIndex < currentExerciseIndex
+                Row(
+                    Modifier.weight(1f).background(if (current) WildforceThemeTokens.accentGold.copy(alpha = 0.18f) else Color.Transparent, RoundedCornerShape(12.dp)).padding(6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RemoteTrainingImage(exerciseImageUrl(item.exercise.imageKey, gender), item.exercise.name, Modifier.size(38.dp).clip(RoundedCornerShape(9.dp)))
+                    Column(Modifier.weight(1f).padding(start = 7.dp)) {
+                        Text(item.label.orEmpty(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption)
+                        Text(item.exercise.name, maxLines = 1, overflow = TextOverflow.Ellipsis, color = if (completed) WildforceThemeTokens.textSecondary else WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption)
+                    }
+                    Text(if (completed) "✓" else if (current) "●" else "·", color = if (current) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary)
                 }
             }
         }
