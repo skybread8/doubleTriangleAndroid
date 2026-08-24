@@ -24,7 +24,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,16 +73,18 @@ fun ProfileScreen(
     var birthYearInput by remember(initial) { mutableStateOf(initial.birthYear.toString()) }
     var picker by remember { mutableStateOf<Picker?>(null) }
     var healthConnectMessage by remember { mutableStateOf<String?>(null) }
+    var entered by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { entered = true }
     LazyColumn(
         modifier = Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 16.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 16.dp, bottom = contentPadding.calculateBottomPadding() + 96.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, experienceXp, experienceLevel, experienceProgress)
+            ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, experienceXp, experienceLevel, experienceProgress) }
         }
         item {
-            Section("DATOS PERSONALES") {
+            ProfileEntrance(entered, 55) { Section("DATOS PERSONALES") {
                 OutlinedTextField(draft.name, { draft = draft.copy(name = it.take(60)) }, Modifier.fillMaxWidth(), label = { Text("Nombre") }, singleLine = true)
                 ChoiceButton("Mes de nacimiento", monthName(draft.birthMonth)) { picker = Picker.BirthMonth }
                 NumberField("Año de nacimiento", birthYearInput, { birthYearInput = it.filter(Char::isDigit).take(4) }, Modifier.fillMaxWidth())
@@ -104,18 +111,18 @@ fun ProfileScreen(
                     }
                 }
                 healthConnectMessage?.let { Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
-            }
+            } }
         }
         item {
-            Section("OBJETIVO Y NIVEL") {
+            ProfileEntrance(entered, 105) { Section("OBJETIVO Y NIVEL") {
                 ChoiceButton("Objetivo", draft.goal.title) { picker = Picker.Goal }
                 ChoiceButton("Nivel", draft.trainingLevel.title, draft.trainingLevel.description) { picker = Picker.Level }
                 ChoiceButton("Actividad diaria", draft.lifestyle.title, draft.lifestyle.description) { picker = Picker.Lifestyle }
                 if (draft.goal.supportsBodyComposition && draft.trainingLevel.supportsBodyComposition) ChoiceButton("Fase corporal", draft.bodyCompositionPhase?.title ?: "Automático") { picker = Picker.Body }
-            }
+            } }
         }
         item {
-            Section("ESTRUCTURA DEL PLAN") {
+            ProfileEntrance(entered, 155) { Section("ESTRUCTURA DEL PLAN") {
                 ChoiceButton("División semanal", draft.trainingSplitPreference.title) { picker = Picker.Split }
                 Text("Días de entrenamiento", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 draft.workoutDays.toList().let { days ->
@@ -134,16 +141,17 @@ fun ProfileScreen(
                 TogglePreference("Omitir vuelta a la calma", "Mantiene el plan dentro del tiempo indicado sin bloques finales.", draft.skipsCooldowns) { draft = draft.copy(skipsCooldowns = !draft.skipsCooldowns) }
                 TogglePreference("Omitir descansos", "Avanza directamente entre series y ejercicios durante la sesión.", draft.skipsRestPeriods) { draft = draft.copy(skipsRestPeriods = !draft.skipsRestPeriods) }
                 OutlinedTextField(draft.workoutPlannerNotes, { draft = draft.copy(workoutPlannerNotes = it.take(500)) }, Modifier.fillMaxWidth(), label = { Text("Notas para el planificador") }, minLines = 2, maxLines = 4)
-            }
+            } }
         }
         item {
-            Section("ENTORNO Y SEGURIDAD") {
+            ProfileEntrance(entered, 205) { Section("ENTORNO Y SEGURIDAD") {
                 ChoiceButton("Tipo de gimnasio", draft.gymType.title) { picker = Picker.Gym }
                 ChoiceButton("Equipamiento disponible", "${draft.availableEquipment.size} seleccionado(s)") { picker = Picker.Equipment }
                 ChoiceButton("Restricciones o molestias", draft.movementRestrictions.takeIf { it.isNotEmpty() }?.size?.let { "$it seleccionado(s)" } ?: "Ninguna") { picker = Picker.Restrictions }
-            }
+            } }
         }
         item {
+            ProfileEntrance(entered, 255) {
             generationError?.let { Text(it, Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).padding(12.dp), color = Color(0xFFC62828)) }
             Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("PLAN PERSONALIZADO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
@@ -152,6 +160,7 @@ fun ProfileScreen(
                 Button(onClick = { onSave(validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput)) }, modifier = Modifier.fillMaxWidth().height(46.dp), shape = RoundedCornerShape(14.dp), enabled = !isRegenerating, colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text("GUARDAR CAMBIOS SIN REGENERAR", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption) }
             }
             Spacer(Modifier.height(28.dp))
+            }
         }
     }
     picker?.let { current ->
@@ -170,6 +179,11 @@ fun ProfileScreen(
             }
         }
     }
+}
+
+@Composable
+private fun ProfileEntrance(visible: Boolean, delayMillis: Int, content: @Composable () -> Unit) {
+    AnimatedVisibility(visible = visible, enter = fadeIn(tween(330, delayMillis = delayMillis)) + slideInVertically(tween(330, delayMillis = delayMillis)) { it / 16 }) { content() }
 }
 
 @Composable
