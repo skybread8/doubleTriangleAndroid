@@ -237,6 +237,10 @@ fun WorkoutHubScreen(
 
 @Composable
 private fun PlanContextCard(state: WorkoutHubState, onClick: () -> Unit) {
+    val mesocycleProgress by animateFloatAsState(
+        (state.weekIndex.toFloat() / state.cycleLength.coerceAtLeast(1)).coerceIn(0f, 1f),
+        animationSpec = tween(500),
+    )
     Row(
         Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(15.dp)).clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -246,7 +250,7 @@ private fun PlanContextCard(state: WorkoutHubState, onClick: () -> Unit) {
             Text(state.phase, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text("Mesociclo ${state.mesocycleIndex} · Semana ${state.weekIndex}/${state.cycleLength}", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
             LinearProgressIndicator(
-                progress = (state.weekIndex.toFloat() / state.cycleLength.coerceAtLeast(1)).coerceIn(0f, 1f),
+                progress = mesocycleProgress,
                 modifier = Modifier.fillMaxWidth().padding(top = 5.dp).height(4.dp).clip(RoundedCornerShape(4.dp)),
                 color = WildforceThemeTokens.accentGold,
                 backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.14f),
