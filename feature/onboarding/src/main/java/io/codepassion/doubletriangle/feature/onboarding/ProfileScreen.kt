@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.time.Year
 import java.time.Month
@@ -219,8 +220,8 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Text(profile.name.take(1).uppercase().ifBlank { "W" }, Modifier.size(68.dp).background(WildforceThemeTokens.accentGold, CircleShape).padding(19.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
             Column {
-                Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-                Text("${profile.goal.title} · ${profile.trainingLevel.title}", color = WildforceThemeTokens.textSecondary)
+                Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text("${profile.goal.title} · ${profile.trainingLevel.title}", color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
@@ -242,7 +243,7 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
 private fun ProfileStat(label: String, value: String, modifier: Modifier) {
     Column(modifier.liquidGlass(RoundedCornerShape(13.dp)).padding(9.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(value, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
-        Text(label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1)
+        Text(label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
