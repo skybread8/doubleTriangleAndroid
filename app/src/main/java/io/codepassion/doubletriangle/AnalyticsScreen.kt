@@ -55,6 +55,7 @@ fun AnalyticsScreen(
     contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(),
 ) {
     var selectedExercise by remember { mutableStateOf<ExerciseAnalyticsSummary?>(null) }
+    var rangeDays by remember { mutableStateOf(7) }
     selectedExercise?.let { summary ->
         ExerciseAnalyticsDetailScreen(summary, WorkoutAnalyticsStore.history(context, summary.exercise), contentPadding) { selectedExercise = null }
         return
@@ -64,18 +65,11 @@ fun AnalyticsScreen(
     val lastDuration = preferences.getInt("last_workout_duration", 0)
     val lastSets = preferences.getInt("last_workout_sets", 0)
     val lastVolume = java.lang.Double.longBitsToDouble(preferences.getLong("last_workout_volume", 0L))
-    val weeklyVolumes = remember(exerciseSummaries) {
-        val startDate = LocalDate.now().minusDays(6)
-        val totals = MutableList(7) { 0.0 }
-        exerciseSummaries.flatMap { WorkoutAnalyticsStore.history(context, it.exercise) }.forEach { point ->
-            val pointDate = java.time.Instant.ofEpochMilli(point.timestampMillis).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
-            val day = java.time.temporal.ChronoUnit.DAYS.between(startDate, pointDate).toInt()
-            if (day in totals.indices) totals[day] += point.volumeKg
-        }
-        totals
+    val trendVolumes = remember(exerciseSummaries, rangeDays) {
+        volumeBuckets(context, exerciseSummaries, rangeDays)
     }
-    val sessionsLast7Days = remember(exerciseSummaries) {
-        val startDate = LocalDate.now().minusDays(6)
+    val sessionsInRange = remember(exerciseSummaries, rangeDays) {
+        val startDate = LocalDate.now().minusDays((rangeDays - 1).toLong())
         exerciseSummaries.flatMap { WorkoutAnalyticsStore.history(context, it.exercise) }
             .count { point ->
                 val date = java.time.Instant.ofEpochMilli(point.timestampMillis).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
@@ -95,7 +89,7 @@ fun AnalyticsScreen(
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             MetricCard("RACHA", state.user.currentStreak.toString(), "días", Modifier.weight(1f))
             MetricCard("SESIONES", completed.toString(), "completadas", Modifier.weight(1f))
-            MetricCard("FRECUENCIA", sessionsLast7Days.toString(), "últimos 7 días", Modifier.weight(1f))
+            MetricCard("FRECUENCIA", sessionsInRange.toString(), "últimos $rangeDays días", Modifier.weight(1f))
         }
         Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("ÚLTIMA SESIÓN", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
@@ -107,7 +101,12 @@ fun AnalyticsScreen(
                 }
             }
         }
-        VolumeTrend(weeklyVolumes)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(7, 30, 90).forEach { days ->
+                Text("$days DÍAS", Modifier.liquidGlass(RoundedCornerShape(12.dp), emphasized = rangeDays == days).clickable { rangeDays = days }.padding(horizontal = 12.dp, vertical = 9.dp), color = if (rangeDays == days) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
+            }
+        }
+        VolumeTrend(trendVolumes, rangeDays)
         Text("EJERCICIOS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
         if (exerciseSummaries.isEmpty()) {
             Text("Completa ejercicios para ver progresión, récords y volumen por movimiento.", color = WildforceThemeTokens.textSecondary)
@@ -141,6 +140,18 @@ private fun MuscleVolumeBreakdown(summaries: List<ExerciseAnalyticsSummary>) {
     }
 }
 
+private fun volumeBuckets(context: Context, summaries: List<ExerciseAnalyticsSummary>, rangeDays: Int): List<Double> {
+    val startDate = LocalDate.now().minusDays((rangeDays - 1).toLong())
+    val bucketSize = rangeDays.toDouble() / 7.0
+    val totals = MutableList(7) { 0.0 }
+    summaries.flatMap { WorkoutAnalyticsStore.history(context, it.exercise) }.forEach { point ->
+        val date = java.time.Instant.ofEpochMilli(point.timestampMillis).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+        val offset = java.time.temporal.ChronoUnit.DAYS.between(startDate, date).toInt()
+        if (offset in 0 until rangeDays) totals[(offset / bucketSize).toInt().coerceIn(0, 6)] += point.volumeKg
+    }
+    return totals
+}
+
 private fun muscleGroupFor(imageKey: String?, name: String): String {
     val key = "${imageKey.orEmpty()} ${name.lowercase()}"
     return when {
@@ -156,11 +167,11 @@ private fun muscleGroupFor(imageKey: String?, name: String): String {
 }
 
 @Composable
-private fun VolumeTrend(volumes: List<Double>) {
-    val labels = (6 downTo 0).map { LocalDate.now().minusDays(it.toLong()).dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.forLanguageTag("es-ES")).uppercase() }
+private fun VolumeTrend(volumes: List<Double>, rangeDays: Int) {
+    val labels = if (rangeDays == 7) (6 downTo 0).map { LocalDate.now().minusDays(it.toLong()).dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.forLanguageTag("es-ES")).uppercase() } else (1..7).map { "S$it" }
     val max = volumes.maxOrNull()?.takeIf { it > 0 } ?: 1.0
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("VOLUMEN · ÚLTIMOS 7 DÍAS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+        Text("VOLUMEN · ÚLTIMOS $rangeDays DÍAS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
         if (volumes.all { it <= 0.0 }) {
             Text("Todavía no hay sesiones registradas en este periodo.", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 20.dp))
         }
