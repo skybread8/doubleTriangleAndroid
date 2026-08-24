@@ -165,12 +165,34 @@ private fun ExerciseAnalyticsDetailScreen(summary: ExerciseAnalyticsSummary, his
             MetricCard("MEJOR MARCA", if (summary.personalBestKg > 0) String.format("%.1f kg", summary.personalBestKg) else "—", "peso", Modifier.weight(1f))
             MetricCard("VOLUMEN", String.format("%.0f", summary.totalVolumeKg), "kg total", Modifier.weight(1f))
         }
+        ExerciseWeightTrend(history)
         Text("SESIONES", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
         if (history.isEmpty()) Text("Todavía no hay sesiones para este ejercicio.", color = WildforceThemeTokens.textSecondary)
         history.take(12).forEach { point ->
             Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(14.dp)).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column { Text(DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(point.timestampMillis)), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary); Text("${point.sets} series · ${point.reps} reps${point.feedback?.let { " · $it" }.orEmpty()}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 Text(String.format("%.0f kg", point.volumeKg), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExerciseWeightTrend(history: List<ExerciseAnalyticsPoint>) {
+    val maxWeight = history.maxOfOrNull { it.maxWeightKg }?.takeIf { it > 0 } ?: 1.0
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("EVOLUCIÓN DE CARGA", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+        if (history.none { it.maxWeightKg > 0 }) {
+            Text("Completa series con peso para ver la progresión.", color = WildforceThemeTokens.textSecondary)
+        } else {
+            Row(Modifier.fillMaxWidth().height(100.dp), horizontalArrangement = Arrangement.spacedBy(7.dp), verticalAlignment = Alignment.Bottom) {
+                history.take(12).reversed().forEach { point ->
+                    val target = (12 + 70 * (point.maxWeightKg / maxWeight)).dp
+                    val height by animateDpAsState(target, animationSpec = tween(550), label = "exercise-weight")
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom, modifier = Modifier.weight(1f)) {
+                        Box(Modifier.fillMaxWidth().height(height).background(WildforceThemeTokens.accentGold, RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp)))
+                    }
+                }
             }
         }
     }
