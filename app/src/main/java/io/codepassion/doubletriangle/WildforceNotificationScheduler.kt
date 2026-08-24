@@ -69,7 +69,19 @@ internal class WildforceNotificationReceiver : BroadcastReceiver() {
         val body = intent.getStringExtra("body") ?: "Tienes una actividad pendiente."
         WildforceNotificationScheduler.ensureChannels(context)
         val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) android.app.Notification.Builder(context, channel) else @Suppress("DEPRECATION") android.app.Notification.Builder(context)
-        val built = notification.setSmallIcon(android.R.drawable.ic_popup_reminder).setContentTitle(title).setContentText(body).setAutoCancel(true).build()
+        val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val contentIntent = launchIntent?.let {
+            PendingIntent.getActivity(
+                context,
+                channel.hashCode(),
+                it,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+        }
+        val built = notification.setSmallIcon(android.R.drawable.ic_popup_reminder).setContentTitle(title).setContentText(body)
+            .setAutoCancel(true).apply { contentIntent?.let(::setContentIntent) }.build()
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(channel.hashCode(), built)
     }
 }
