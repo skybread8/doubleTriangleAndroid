@@ -41,6 +41,14 @@ internal data class ExerciseHistoryEntry(
     val note: String? = null,
 )
 
+data class ExerciseAnalyticsSummary(
+    val exercise: ExerciseSummary,
+    val sessions: Int,
+    val personalBestKg: Double,
+    val totalVolumeKg: Double,
+    val lastFeedback: String?,
+)
+
 internal fun ExerciseSummary.historyKey(): String = imageKey?.takeIf(String::isNotBlank)?.lowercase() ?: name.lowercase()
 
 internal object WorkoutHistoryStore {
@@ -136,4 +144,18 @@ internal object WorkoutHistoryStore {
             context.getSharedPreferences(PREFERENCES, 0).edit().putString(exercise.historyKey(), json.toString()).apply()
         }
     }
+}
+
+object WorkoutAnalyticsStore {
+    fun summaries(context: Context, exercises: List<ExerciseSummary>): List<ExerciseAnalyticsSummary> =
+        exercises.distinctBy { it.historyKey() }.mapNotNull { exercise ->
+            val entries = WorkoutHistoryStore.history(context, exercise)
+            if (entries.isEmpty()) null else ExerciseAnalyticsSummary(
+                exercise = exercise,
+                sessions = entries.size,
+                personalBestKg = entries.maxOfOrNull { it.maxWeightKg } ?: 0.0,
+                totalVolumeKg = entries.sumOf { it.volumeKg },
+                lastFeedback = entries.firstOrNull()?.feedback,
+            )
+        }.sortedByDescending { it.totalVolumeKg }
 }

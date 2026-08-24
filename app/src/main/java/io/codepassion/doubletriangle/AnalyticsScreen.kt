@@ -25,9 +25,10 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
+import io.codepassion.doubletriangle.feature.workout.ExerciseAnalyticsSummary
 
 @Composable
-fun AnalyticsScreen(state: WorkoutHubState, preferences: SharedPreferences) {
+fun AnalyticsScreen(state: WorkoutHubState, preferences: SharedPreferences, exerciseSummaries: List<ExerciseAnalyticsSummary> = emptyList()) {
     val completed = state.workouts.count { it.status.name == "Completed" }
     val total = state.workouts.size.coerceAtLeast(1)
     val lastDuration = preferences.getInt("last_workout_duration", 0)
@@ -57,8 +58,28 @@ fun AnalyticsScreen(state: WorkoutHubState, preferences: SharedPreferences) {
                 }
             }
         }
+        Text("EJERCICIOS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+        if (exerciseSummaries.isEmpty()) {
+            Text("Completa ejercicios para ver progresión, récords y volumen por movimiento.", color = WildforceThemeTokens.textSecondary)
+        } else {
+            exerciseSummaries.take(6).forEach { ExerciseAnalyticsCard(it) }
+        }
         Spacer(Modifier.height(4.dp))
         Text("Las analíticas detalladas por ejercicio y evolución histórica se añadirán sobre este resumen.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+    }
+}
+
+@Composable
+private fun ExerciseAnalyticsCard(summary: ExerciseAnalyticsSummary) {
+    Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(14.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(summary.exercise.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+            Text("${summary.sessions} sesiones · ${String.format("%.0f kg", summary.totalVolumeKg)} volumen", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        }
+        Column(horizontalAlignment = Alignment.End) {
+            Text(if (summary.personalBestKg > 0) String.format("%.1f kg", summary.personalBestKg) else "—", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+            Text("MEJOR MARCA", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
+        }
     }
 }
 

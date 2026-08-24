@@ -61,6 +61,7 @@ import io.codepassion.doubletriangle.feature.onboarding.ProfileScreen
 import io.codepassion.doubletriangle.feature.workout.ActiveWorkoutScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutDetailScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutHubScreen
+import io.codepassion.doubletriangle.feature.workout.WorkoutAnalyticsStore
 import io.codepassion.doubletriangle.nutrition.NutritionScreen
 import java.time.Instant
 import kotlinx.coroutines.launch
@@ -369,7 +370,8 @@ private fun WildforceApp(
         } else if (selected == RootDestination.Nutrition) {
             NutritionScreen()
         } else if (selected == RootDestination.Analytics) {
-            AnalyticsScreen(displayedWorkoutState, appPreferences)
+            val analyticsExercises = displayedWorkoutState.workouts.flatMap { it.exercises }
+            AnalyticsScreen(displayedWorkoutState, appPreferences, WorkoutAnalyticsStore.summaries(appContext, analyticsExercises))
         } else if (selected == RootDestination.Profile) {
             ProfileScreen(profile, onProfileUpdated, onRegenerateProfile)
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
