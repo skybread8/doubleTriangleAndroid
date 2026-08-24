@@ -103,6 +103,7 @@ fun WorkoutHubScreen(
     var showingPlanOverview by remember { mutableStateOf(false) }
     var generatingCustomWorkout by remember { mutableStateOf(false) }
     var customGenerationError by remember { mutableStateOf<String?>(null) }
+    var lastCustomRequest by remember { mutableStateOf<CustomWorkoutRequest?>(null) }
     val coroutineScope = rememberCoroutineScope()
     var hubEntered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { hubEntered = true }
@@ -166,6 +167,7 @@ fun WorkoutHubScreen(
                 equipmentPresets = customEquipmentPresets,
                 onCreateManual = { editingCustomWorkout = CustomWorkoutStore.empty(selectedDay ?: LocalDate.now().dayOfWeek) },
                 onCreateAutomatic = { request ->
+                    lastCustomRequest = request
                     customGenerationError = null
                     if (customAiGenerator == null) {
                         editingCustomWorkout = CustomWorkoutStore.automatic(selectedDay ?: LocalDate.now().dayOfWeek)
@@ -207,10 +209,26 @@ fun WorkoutHubScreen(
             title = { Text("NO SE PUDO GENERAR CON IA", fontFamily = AntonFontFamily) },
             text = { Text(error) },
             confirmButton = {
-                TextButton(onClick = {
-                    customGenerationError = null
-                    editingCustomWorkout = CustomWorkoutStore.automatic(selectedDay ?: LocalDate.now().dayOfWeek)
-                }) { Text("USAR PLANTILLA LOCAL", color = WildforceThemeTokens.accentGold) }
+                Row {
+                    lastCustomRequest?.let { request ->
+                        TextButton(onClick = {
+                            customGenerationError = null
+                            if (customAiGenerator != null) {
+                                generatingCustomWorkout = true
+                                coroutineScope.launch {
+                                    runCatching { customAiGenerator.invoke(request) }
+                                        .onSuccess { generated -> editingCustomWorkout = generated.copy(scheduledDay = selectedDay ?: LocalDate.now().dayOfWeek) }
+                                        .onFailure { retryError -> customGenerationError = retryError.message ?: "No se pudo generar el entrenamiento." }
+                                    generatingCustomWorkout = false
+                                }
+                            }
+                        }) { Text("REINTENTAR", color = WildforceThemeTokens.accentGold) }
+                    }
+                    TextButton(onClick = {
+                        customGenerationError = null
+                        editingCustomWorkout = CustomWorkoutStore.automatic(selectedDay ?: LocalDate.now().dayOfWeek)
+                    }) { Text("USAR PLANTILLA LOCAL", color = WildforceThemeTokens.accentGold) }
+                }
             },
             dismissButton = { TextButton(onClick = { customGenerationError = null }) { Text("CERRAR", color = WildforceThemeTokens.textSecondary) } },
         )
