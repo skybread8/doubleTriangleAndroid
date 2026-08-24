@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -36,6 +38,7 @@ import io.codepassion.doubletriangle.feature.workout.ExerciseAnalyticsPoint
 import io.codepassion.doubletriangle.feature.workout.WorkoutAnalyticsStore
 import java.text.DateFormat
 import java.util.Date
+import java.util.Calendar
 
 @Composable
 fun AnalyticsScreen(context: Context, state: WorkoutHubState, preferences: SharedPreferences, exerciseSummaries: List<ExerciseAnalyticsSummary> = emptyList()) {
@@ -49,6 +52,15 @@ fun AnalyticsScreen(context: Context, state: WorkoutHubState, preferences: Share
     val lastDuration = preferences.getInt("last_workout_duration", 0)
     val lastSets = preferences.getInt("last_workout_sets", 0)
     val lastVolume = java.lang.Double.longBitsToDouble(preferences.getLong("last_workout_volume", 0L))
+    val weeklyVolumes = remember(exerciseSummaries) {
+        val start = System.currentTimeMillis() - 6 * 86_400_000L
+        val totals = MutableList(7) { 0.0 }
+        exerciseSummaries.flatMap { WorkoutAnalyticsStore.history(context, it.exercise) }.forEach { point ->
+            val day = ((point.timestampMillis - start) / 86_400_000L).toInt()
+            if (day in totals.indices) totals[day] += point.volumeKg
+        }
+        totals
+    }
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("ANALÍTICAS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
         Text("Tu evolución y consistencia en un vistazo.", color = WildforceThemeTokens.textSecondary)
@@ -73,6 +85,7 @@ fun AnalyticsScreen(context: Context, state: WorkoutHubState, preferences: Share
                 }
             }
         }
+        VolumeTrend(weeklyVolumes)
         Text("EJERCICIOS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
         if (exerciseSummaries.isEmpty()) {
             Text("Completa ejercicios para ver progresión, récords y volumen por movimiento.", color = WildforceThemeTokens.textSecondary)
@@ -81,6 +94,24 @@ fun AnalyticsScreen(context: Context, state: WorkoutHubState, preferences: Share
         }
         Spacer(Modifier.height(4.dp))
         Text("Las analíticas detalladas por ejercicio y evolución histórica se añadirán sobre este resumen.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+    }
+}
+
+@Composable
+private fun VolumeTrend(volumes: List<Double>) {
+    val labels = listOf("L", "M", "X", "J", "V", "S", "D")
+    val max = volumes.maxOrNull()?.takeIf { it > 0 } ?: 1.0
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("VOLUMEN · ÚLTIMOS 7 DÍAS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+        Row(Modifier.fillMaxWidth().height(92.dp), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.Bottom) {
+            volumes.forEachIndexed { index, volume ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom) {
+                    Box(Modifier.width(20.dp).height((12 + 56 * (volume / max)).dp).background(if (volume > 0) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary.copy(alpha = .14f), RoundedCornerShape(8.dp)))
+                    Text(labels[index], Modifier.padding(top = 5.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                }
+            }
+        }
+        Text("${String.format("%.0f", volumes.sum())} kg acumulados", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
 }
 
