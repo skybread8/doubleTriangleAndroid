@@ -59,6 +59,7 @@ import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
 import io.codepassion.doubletriangle.feature.onboarding.ProfileScreen
 import io.codepassion.doubletriangle.feature.workout.ActiveWorkoutScreen
+import io.codepassion.doubletriangle.feature.workout.CompletionProgressStore
 import io.codepassion.doubletriangle.feature.workout.WorkoutDetailScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutHubScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutAnalyticsStore
@@ -237,8 +238,11 @@ fun WildforceRoot() {
             profile = currentProfile,
             workoutState = restoredState,
             onWorkoutCompleted = { id, duration, sets, volume ->
-                val completed = preferences.getStringSet("completed_workouts", emptySet()).orEmpty() + id
+                val previouslyCompleted = preferences.getStringSet("completed_workouts", emptySet()).orEmpty()
+                val completed = previouslyCompleted + id
+                val totalCompleted = preferences.getInt("total_completed_workouts", 0) + if (id in previouslyCompleted) 0 else 1
                 preferences.edit().putStringSet("completed_workouts", completed)
+                    .putInt("total_completed_workouts", totalCompleted)
                     .putInt("last_workout_duration", duration).putInt("last_workout_sets", sets)
                     .putLong("last_workout_volume", java.lang.Double.doubleToRawLongBits(volume)).apply()
             },
@@ -260,6 +264,7 @@ fun WildforceRoot() {
                     .putString("gym_type", updated.gymType.storedValue)
                     .putStringSet("equipment", updated.availableEquipment.mapTo(mutableSetOf()) { it.storedValue })
                     .putStringSet("restrictions", updated.movementRestrictions.mapTo(mutableSetOf()) { it.storedValue })
+                    .putBoolean("health_connect", updated.isHealthConnectEnabled)
                     .putInt("birth_month", updated.birthMonth).putInt("birth_year", updated.birthYear)
                     .putString("gender", updated.gender.storedValue).putString("metric_system", updated.metricSystem.storedValue)
                     .putInt("height_cm", updated.heightCm).putLong("weight_kg", java.lang.Double.doubleToRawLongBits(updated.weightKg))
@@ -287,6 +292,7 @@ fun WildforceRoot() {
             },
             isGeneratingProfilePlan = isGenerating,
             profileGenerationError = generationError,
+            onRequestHealthConnect = requestHealthConnect,
         )
     }
 }
@@ -301,9 +307,11 @@ private fun WildforceApp(
     onRegenerateProfile: (OnboardingProfile) -> Unit = {},
     isGeneratingProfilePlan: Boolean = false,
     profileGenerationError: String? = null,
+    onRequestHealthConnect: (((Boolean, Int?, Double?) -> Unit) -> Unit) = { _ -> },
 ) {
     val appContext = LocalContext.current.applicationContext
     val appPreferences = remember { appContext.getSharedPreferences("wildforce_profile", 0) }
+    val trainingProgress = CompletionProgressStore.progress(appContext)
     var selected by remember { mutableStateOf(RootDestination.Workout) }
     var displayedWorkoutState by remember(workoutState) { mutableStateOf(workoutState) }
     var workoutDetail by remember { mutableStateOf<WorkoutDaySummary?>(null) }
@@ -311,7 +319,7 @@ private fun WildforceApp(
     activeWorkout?.let { workout ->
         ActiveWorkoutScreen(
             workout = workout,
-                gender = "male",
+            gender = profile.gender.storedValue,
             skipRestPeriods = profile.skipsRestPeriods,
             currentStreak = displayedWorkoutState.user.currentStreak,
             onExit = { activeWorkout = null },
@@ -329,7 +337,7 @@ private fun WildforceApp(
         return
     }
     workoutDetail?.let { workout ->
-        WorkoutDetailScreen(workout, "male", onBack = { workoutDetail = null }, onStart = { activeWorkout = workout }, onSkip = {
+        WorkoutDetailScreen(workout, profile.gender.storedValue, onBack = { workoutDetail = null }, onStart = { activeWorkout = workout }, onSkip = {
             val skipped = appPreferences.getStringSet("skipped_workouts", emptySet()).orEmpty() + workout.id
             appPreferences.edit().putStringSet("skipped_workouts", skipped).apply()
             displayedWorkoutState = displayedWorkoutState.copy(
@@ -369,7 +377,7 @@ private fun WildforceApp(
                 contentPadding = padding,
                 state = displayedWorkoutState,
                 onWorkoutSelected = { workoutDetail = it },
-                gender = "male",
+                gender = profile.gender.storedValue,
                 customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile, request) },
             )
         } else if (selected == RootDestination.Nutrition) {
@@ -378,7 +386,21 @@ private fun WildforceApp(
             val analyticsExercises = displayedWorkoutState.workouts.flatMap { it.exercises }
             AnalyticsScreen(appContext, displayedWorkoutState, appPreferences, WorkoutAnalyticsStore.summaries(appContext, analyticsExercises), padding)
         } else if (selected == RootDestination.Profile) {
-            ProfileScreen(profile, padding, isGeneratingProfilePlan, profileGenerationError, onProfileUpdated, onRegenerateProfile)
+            ProfileScreen(
+                initial = profile,
+                contentPadding = padding,
+                isRegenerating = isGeneratingProfilePlan,
+                generationError = profileGenerationError,
+                currentStreak = trainingProgress.currentStreak.coerceAtLeast(displayedWorkoutState.user.currentStreak),
+                completedWorkouts = appPreferences.getInt("total_completed_workouts", 0),
+                longestStreak = trainingProgress.longestStreak,
+                experienceXp = trainingProgress.xp,
+                experienceLevel = trainingProgress.level,
+                experienceProgress = trainingProgress.levelProgress,
+                onRequestHealthConnect = onRequestHealthConnect,
+                onSave = onProfileUpdated,
+                onRegenerate = onRegenerateProfile,
+            )
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("${selected.label}\nPróxima vertical", color = WildforceThemeTokens.textSecondary)
         }

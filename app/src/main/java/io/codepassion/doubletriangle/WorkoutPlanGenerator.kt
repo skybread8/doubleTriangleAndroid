@@ -12,6 +12,7 @@ import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import io.codepassion.doubletriangle.core.model.executionExercises
 import io.codepassion.doubletriangle.feature.workout.CustomWorkoutRequest
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
+import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.DayOfWeek
@@ -28,8 +29,8 @@ object WorkoutPlanGenerator {
 
     suspend fun generateCustom(profile: OnboardingProfile, request: CustomWorkoutRequest): WorkoutDaySummary = withContext(Dispatchers.IO) {
         val (_, state) = generateWithInstruction(
-            profile,
-            "Genera UNA ÚNICA sesión personalizada. Enfoque: ${request.focus}. Duración objetivo: ${request.durationMinutes} minutos. Equipamiento disponible para esta sesión: ${request.equipment}. Devuelve un objeto de día dentro de `workouts` y aplica las mismas reglas de bloques, prescripciones y seguridad que el plan semanal.",
+            profile.copy(workoutDays = setOf(WorkoutWeekday.Monday)),
+            "Genera UNA ÚNICA sesión personalizada para MONDAY. Enfoque: ${request.focus}. Duración objetivo: ${request.durationMinutes} minutos. El equipamiento temporal de esta sesión es exactamente: ${request.equipment.ifBlank { "peso corporal" }}. Sustituye con él el equipamiento habitual del perfil: no añadas ni presupongas máquinas, barras o accesorios que no figuren en esta lista. Devuelve un único objeto dentro de `workouts` y aplica las mismas reglas de bloques, prescripciones y seguridad que el plan semanal.",
         )
         state.workouts.first().copy(id = "custom-ai-${UUID.randomUUID()}", order = 1, estimatedMinutes = request.durationMinutes, status = WorkoutStatus.Planned)
     }

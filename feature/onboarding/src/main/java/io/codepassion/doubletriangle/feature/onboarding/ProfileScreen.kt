@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +33,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import java.time.Year
+import java.time.Month
+import java.time.format.TextStyle
+import java.util.Locale
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
@@ -44,6 +49,13 @@ fun ProfileScreen(
     contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(),
     isRegenerating: Boolean = false,
     generationError: String? = null,
+    currentStreak: Int = 0,
+    completedWorkouts: Int = 0,
+    longestStreak: Int = 0,
+    experienceXp: Int = 0,
+    experienceLevel: Int = 1,
+    experienceProgress: Float = 0f,
+    onRequestHealthConnect: (((Boolean, Int?, Double?) -> Unit) -> Unit) = { _ -> },
     onSave: (OnboardingProfile) -> Unit,
     onRegenerate: (OnboardingProfile) -> Unit = {},
 ) {
@@ -51,24 +63,45 @@ fun ProfileScreen(
     var heightInput by remember(initial) { mutableStateOf(initial.heightCm.toString()) }
     var weightInput by remember(initial) { mutableStateOf(initial.weightKg.toString()) }
     var durationInput by remember(initial) { mutableStateOf(initial.preferredWorkoutDurationMinutes.toString()) }
+    var birthYearInput by remember(initial) { mutableStateOf(initial.birthYear.toString()) }
     var picker by remember { mutableStateOf<Picker?>(null) }
+    var healthConnectMessage by remember { mutableStateOf<String?>(null) }
     LazyColumn(
         modifier = Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 16.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 16.dp, bottom = contentPadding.calculateBottomPadding() + 96.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            ProfileHero(draft)
+            ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, experienceXp, experienceLevel, experienceProgress)
         }
         item {
             Section("DATOS PERSONALES") {
                 OutlinedTextField(draft.name, { draft = draft.copy(name = it.take(60)) }, Modifier.fillMaxWidth(), label = { Text("Nombre") }, singleLine = true)
+                ChoiceButton("Mes de nacimiento", monthName(draft.birthMonth)) { picker = Picker.BirthMonth }
+                NumberField("Año de nacimiento", birthYearInput, { birthYearInput = it.filter(Char::isDigit).take(4) }, Modifier.fillMaxWidth())
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     NumberField("Altura (cm)", heightInput, { heightInput = it.filter(Char::isDigit).take(3) }, Modifier.weight(1f))
                     NumberField("Peso (kg)", weightInput, { weightInput = it.filter { char -> char.isDigit() || char == ',' || char == '.' }.take(6) }, Modifier.weight(1f), decimal = true)
                 }
                 ChoiceButton("Sexo", draft.gender.title) { picker = Picker.Gender }
                 ChoiceButton("Unidades", draft.metricSystem.title) { picker = Picker.Metric }
+                ChoiceButton("Health Connect", if (draft.isHealthConnectEnabled) "Conectado" else "Conectar") {
+                    onRequestHealthConnect { granted, importedHeight, importedWeight ->
+                        if (granted) {
+                            importedHeight?.let { heightInput = it.toString() }
+                            importedWeight?.let { weightInput = "%.1f".format(Locale.US, it) }
+                            draft = draft.copy(
+                                isHealthConnectEnabled = true,
+                                heightCm = importedHeight ?: draft.heightCm,
+                                weightKg = importedWeight ?: draft.weightKg,
+                            )
+                            healthConnectMessage = if (importedHeight != null || importedWeight != null) "Medidas importadas. Guarda el perfil para aplicarlas al plan." else "Health Connect está conectado."
+                        } else {
+                            healthConnectMessage = "No se concedió el acceso a Health Connect."
+                        }
+                    }
+                }
+                healthConnectMessage?.let { Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
             }
         }
         item {
@@ -95,9 +128,9 @@ fun ProfileScreen(
                 draft.workoutDays.sortedBy { it.ordinal }.forEach { day ->
                     if (draft.trainingSplitPreference == TrainingSplitPreference.Custom) ChoiceButton(day.title, draft.customWorkoutFocuses[day]?.title ?: "Seleccionar foco") { picker = Picker.Focus(day) }
                 }
-                TogglePreference("Omitir calentamientos", draft.skipsWarmups) { draft = draft.copy(skipsWarmups = !draft.skipsWarmups) }
-                TogglePreference("Omitir vuelta a la calma", draft.skipsCooldowns) { draft = draft.copy(skipsCooldowns = !draft.skipsCooldowns) }
-                TogglePreference("Omitir descansos", draft.skipsRestPeriods) { draft = draft.copy(skipsRestPeriods = !draft.skipsRestPeriods) }
+                TogglePreference("Omitir calentamientos", "Oculta los bloques de activación y ajusta la duración objetivo.", draft.skipsWarmups) { draft = draft.copy(skipsWarmups = !draft.skipsWarmups) }
+                TogglePreference("Omitir vuelta a la calma", "Mantiene el plan dentro del tiempo indicado sin bloques finales.", draft.skipsCooldowns) { draft = draft.copy(skipsCooldowns = !draft.skipsCooldowns) }
+                TogglePreference("Omitir descansos", "Avanza directamente entre series y ejercicios durante la sesión.", draft.skipsRestPeriods) { draft = draft.copy(skipsRestPeriods = !draft.skipsRestPeriods) }
                 OutlinedTextField(draft.workoutPlannerNotes, { draft = draft.copy(workoutPlannerNotes = it.take(500)) }, Modifier.fillMaxWidth(), label = { Text("Notas para el planificador") }, minLines = 2, maxLines = 4)
             }
         }
@@ -110,8 +143,8 @@ fun ProfileScreen(
         }
         item {
             generationError?.let { Text(it, Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).padding(12.dp), color = Color(0xFFC62828)) }
-            Button(onClick = { onSave(validatedProfile(draft, heightInput, weightInput, durationInput)) }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), enabled = !isRegenerating, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text("GUARDAR PERFIL", fontWeight = FontWeight.Bold) }
-            Button(onClick = { val saved = validatedProfile(draft, heightInput, weightInput, durationInput); onSave(saved); onRegenerate(saved) }, modifier = Modifier.fillMaxWidth().height(50.dp), enabled = !isRegenerating, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text(if (isRegenerating) "REGENERANDO PLAN…" else "GUARDAR Y REGENERAR PLAN", fontWeight = FontWeight.Bold) }
+            Button(onClick = { onSave(validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput)) }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), enabled = !isRegenerating, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text("GUARDAR PERFIL", fontWeight = FontWeight.Bold) }
+            Button(onClick = { val saved = validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput); onSave(saved); onRegenerate(saved) }, modifier = Modifier.fillMaxWidth().height(50.dp), enabled = !isRegenerating, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text(if (isRegenerating) "REGENERANDO PLAN…" else "GUARDAR Y REGENERAR PLAN", fontWeight = FontWeight.Bold) }
             Spacer(Modifier.height(28.dp))
         }
     }
@@ -125,7 +158,7 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun ProfileHero(profile: OnboardingProfile) {
+private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, completedWorkouts: Int, longestStreak: Int, experienceXp: Int, experienceLevel: Int, experienceProgress: Float) {
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Text(profile.name.take(1).uppercase().ifBlank { "W" }, Modifier.size(68.dp).background(WildforceThemeTokens.accentGold, CircleShape).padding(19.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
@@ -135,9 +168,16 @@ private fun ProfileHero(profile: OnboardingProfile) {
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            ProfileStat("OBJETIVO", profile.goal.title, Modifier.weight(1f))
-            ProfileStat("NIVEL", profile.trainingLevel.title, Modifier.weight(1f))
-            ProfileStat("DÍAS", profile.workoutDays.size.toString(), Modifier.weight(1f))
+            ProfileStat("RACHA", currentStreak.toString(), Modifier.weight(1f))
+            ProfileStat("SESIONES", completedWorkouts.toString(), Modifier.weight(1f))
+            ProfileStat("MEJOR RACHA", longestStreak.toString(), Modifier.weight(1f))
+        }
+        Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(13.dp)).padding(11.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("NIVEL $experienceLevel", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                Text("$experienceXp XP", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            }
+            LinearProgressIndicator(experienceProgress.coerceIn(0f, 1f), Modifier.fillMaxWidth().height(8.dp), color = WildforceThemeTokens.accentGold, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = .16f))
         }
     }
 }
@@ -150,7 +190,7 @@ private fun ProfileStat(label: String, value: String, modifier: Modifier) {
     }
 }
 
-private sealed class Picker { data object Goal : Picker(); data object Level : Picker(); data object Lifestyle : Picker(); data object Split : Picker(); data object Body : Picker(); data object Gym : Picker(); data object Gender : Picker(); data object Metric : Picker(); data object Equipment : Picker(); data object Restrictions : Picker(); data class Focus(val day: WorkoutWeekday) : Picker() }
+private sealed class Picker { data object Goal : Picker(); data object Level : Picker(); data object Lifestyle : Picker(); data object Split : Picker(); data object Body : Picker(); data object Gym : Picker(); data object Gender : Picker(); data object Metric : Picker(); data object Equipment : Picker(); data object Restrictions : Picker(); data object BirthMonth : Picker(); data class Focus(val day: WorkoutWeekday) : Picker() }
 
 @Composable private fun PickerDialog(picker: Picker, profile: OnboardingProfile, onSelect: (OnboardingProfile) -> Unit) {
     val title: String
@@ -164,6 +204,7 @@ private sealed class Picker { data object Goal : Picker(); data object Level : P
         Picker.Gym -> { title = "Tipo de gimnasio"; values = GymType.entries.map { it.title to { p: OnboardingProfile -> p.copy(gymType = it, availableEquipment = it.defaultEquipment) } } }
         Picker.Gender -> { title = "Sexo"; values = Gender.entries.map { it.title to { p: OnboardingProfile -> p.copy(gender = it) } } }
         Picker.Metric -> { title = "Unidades"; values = MetricSystem.entries.map { it.title to { p: OnboardingProfile -> p.copy(metricSystem = it) } } }
+        Picker.BirthMonth -> { title = "Mes de nacimiento"; values = (1..12).map { month -> monthName(month) to { p: OnboardingProfile -> p.copy(birthMonth = month) } } }
         is Picker.Focus -> { title = "Foco de ${picker.day.title}"; values = WorkoutFocus.entries.map { it.title to { p: OnboardingProfile -> p.copy(customWorkoutFocuses = p.customWorkoutFocuses + (picker.day to it)) } } }
     }
     androidx.compose.material.AlertDialog(onDismissRequest = { onSelect(profile) }, title = { Text(title, fontFamily = AntonFontFamily) }, text = { Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { values.forEach { (label, transform) -> Text(label, Modifier.fillMaxWidth().clickable { onSelect(transform(profile)) }.padding(12.dp), color = WildforceThemeTokens.textPrimary) } } }, confirmButton = {})
@@ -204,10 +245,13 @@ private fun TogglePickerRow(label: String, selected: Boolean, onToggle: () -> Un
 @Composable private fun Section(title: String, content: @Composable () -> Unit) { Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) { Text(title, fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold); content() } }
 @Composable private fun ChoiceButton(label: String, value: String, onClick: () -> Unit, description: String? = null) { Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text(label, color = WildforceThemeTokens.textSecondary); description?.let { Text(it, Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }; Text(value, Modifier.padding(start = 10.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold) } }
 @Composable private fun NumberField(label: String, value: String, onValueChange: (String) -> Unit, modifier: Modifier, decimal: Boolean = false) { OutlinedTextField(value, onValueChange, modifier, label = { Text(label) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number)) }
-@Composable private fun TogglePreference(label: String, selected: Boolean, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Text(label, color = WildforceThemeTokens.textPrimary); Text(if (selected) "SÍ" else "NO", color = if (selected) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold) } }
+@Composable private fun TogglePreference(label: String, description: String, selected: Boolean, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text(label, color = WildforceThemeTokens.textPrimary); Text(description, Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }; Text(if (selected) "SÍ" else "NO", Modifier.padding(start = 10.dp), color = if (selected) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold) } }
 
-private fun validatedProfile(draft: OnboardingProfile, height: String, weight: String, duration: String): OnboardingProfile = draft.copy(
+private fun validatedProfile(draft: OnboardingProfile, height: String, weight: String, duration: String, birthYear: String = draft.birthYear.toString()): OnboardingProfile = draft.copy(
     heightCm = height.toIntOrNull()?.coerceIn(120, 230) ?: draft.heightCm,
     weightKg = weight.replace(',', '.').toDoubleOrNull()?.coerceIn(30.0, 300.0) ?: draft.weightKg,
     preferredWorkoutDurationMinutes = duration.toIntOrNull()?.coerceIn(15, 180) ?: draft.preferredWorkoutDurationMinutes,
+    birthYear = birthYear.toIntOrNull()?.coerceIn(1920, Year.now().value - 13) ?: draft.birthYear,
 )
+
+private fun monthName(month: Int): String = Month.of(month.coerceIn(1, 12)).getDisplayName(TextStyle.FULL, Locale.forLanguageTag("es-ES")).replaceFirstChar { it.titlecase(Locale.forLanguageTag("es-ES")) }

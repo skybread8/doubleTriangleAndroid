@@ -14,6 +14,14 @@ internal data class CompletionProgress(
     val streakIncreased: Boolean,
 )
 
+data class TrainingProgress(
+    val xp: Int,
+    val currentStreak: Int,
+    val longestStreak: Int,
+    val level: Int,
+    val levelProgress: Float,
+)
+
 internal data class ExerciseRecordEvent(
     val exerciseName: String,
     val label: String,
@@ -95,10 +103,10 @@ internal object WorkoutCompletionCalculator {
     }
 }
 
-internal object CompletionProgressStore {
+object CompletionProgressStore {
     private const val PREFERENCES = "wildforce_completion_progress"
 
-    fun preview(context: Context, fallbackStreak: Int): CompletionProgress {
+    internal fun preview(context: Context, fallbackStreak: Int): CompletionProgress {
         val preferences = context.getSharedPreferences(PREFERENCES, 0)
         val xpBefore = preferences.getInt("xp", 0)
         val today = LocalDate.now().toEpochDay()
@@ -114,9 +122,27 @@ internal object CompletionProgressStore {
         return CompletionProgress(xpBefore, xpAfter, WorkoutCompletionCalculator.level(xpBefore), WorkoutCompletionCalculator.level(xpAfter), streak, increased)
     }
 
-    fun commit(context: Context, progress: CompletionProgress) {
-        context.getSharedPreferences(PREFERENCES, 0).edit()
-            .putInt("xp", progress.xpAfter).putInt("streak", progress.streakAfter)
+    internal fun commit(context: Context, progress: CompletionProgress) {
+        val preferences = context.getSharedPreferences(PREFERENCES, 0)
+        preferences.edit()
+            .putInt("xp", progress.xpAfter)
+            .putInt("streak", progress.streakAfter)
+            .putInt("longestStreak", maxOf(preferences.getInt("longestStreak", 0), progress.streakAfter))
             .putLong("lastWorkoutDay", LocalDate.now().toEpochDay()).apply()
+    }
+
+    fun progress(context: Context): TrainingProgress {
+        val preferences = context.getSharedPreferences(PREFERENCES, 0)
+        val xp = preferences.getInt("xp", 0)
+        val level = WorkoutCompletionCalculator.level(xp)
+        val levelStart = WorkoutCompletionCalculator.minimumXp(level)
+        val levelEnd = WorkoutCompletionCalculator.minimumXp(level + 1)
+        return TrainingProgress(
+            xp = xp,
+            currentStreak = preferences.getInt("streak", 0),
+            longestStreak = preferences.getInt("longestStreak", 0),
+            level = level,
+            levelProgress = ((xp - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f),
+        )
     }
 }
