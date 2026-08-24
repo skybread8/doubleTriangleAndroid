@@ -1,6 +1,5 @@
 package io.codepassion.doubletriangle.feature.workout
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
@@ -709,7 +708,6 @@ fun ActiveWorkoutScreen(
     val logicalExercises = remember(structuredPathBlocks) { structuredPathBlocks.flatMap { it.exercises } }
     val logicalExerciseIndex = logicalExercises.indexOfFirst { exerciseIndex in it.executionIndices }.coerceAtLeast(0)
     val currentPathBlock = structuredPathBlocks.firstOrNull { block -> block.exercises.any { exerciseIndex in it.executionIndices } }
-    BackHandler(enabled = !showsSummary) { showsExitDialog = true }
     fun advanceFromExercise(restSeconds: Int) {
         if (exerciseIndex < workout.exercises.lastIndex) {
             exerciseIndex++
