@@ -44,6 +44,7 @@ import java.time.Year
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
+import kotlin.math.roundToInt
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
@@ -67,8 +68,8 @@ fun ProfileScreen(
     onRegenerate: (OnboardingProfile) -> Unit = {},
 ) {
     var draft by remember(initial) { mutableStateOf(initial) }
-    var heightInput by remember(initial) { mutableStateOf(initial.heightCm.toString()) }
-    var weightInput by remember(initial) { mutableStateOf(initial.weightKg.toString()) }
+    var heightInput by remember(initial) { mutableStateOf(displayHeight(initial.heightCm, initial.metricSystem)) }
+    var weightInput by remember(initial) { mutableStateOf(displayWeight(initial.weightKg, initial.metricSystem)) }
     var durationInput by remember(initial) { mutableStateOf(initial.preferredWorkoutDurationMinutes.toString()) }
     var birthYearInput by remember(initial) { mutableStateOf(initial.birthYear.toString()) }
     var picker by remember { mutableStateOf<Picker?>(null) }
@@ -90,16 +91,16 @@ fun ProfileScreen(
                 ChoiceButton("Mes de nacimiento", monthName(draft.birthMonth)) { picker = Picker.BirthMonth }
                 NumberField("Año de nacimiento", birthYearInput, { birthYearInput = it.filter(Char::isDigit).take(4) }, Modifier.fillMaxWidth())
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                    NumberField("Altura (cm)", heightInput, { heightInput = it.filter(Char::isDigit).take(3) }, Modifier.weight(1f))
-                    NumberField("Peso (kg)", weightInput, { weightInput = it.filter { char -> char.isDigit() || char == ',' || char == '.' }.take(6) }, Modifier.weight(1f), decimal = true)
+                    NumberField(if (draft.metricSystem == MetricSystem.Imperial) "Altura (in)" else "Altura (cm)", heightInput, { heightInput = it.filter(Char::isDigit).take(3) }, Modifier.weight(1f))
+                    NumberField(if (draft.metricSystem == MetricSystem.Imperial) "Peso (lb)" else "Peso (kg)", weightInput, { weightInput = it.filter { char -> char.isDigit() || char == ',' || char == '.' }.take(6) }, Modifier.weight(1f), decimal = true)
                 }
                 ChoiceButton("Sexo", draft.gender.title) { picker = Picker.Gender }
                 ChoiceButton("Unidades", draft.metricSystem.title) { picker = Picker.Metric }
                 ChoiceButton("Health Connect", if (draft.isHealthConnectEnabled) "Conectado" else "Conectar") {
                     onRequestHealthConnect { granted, importedHeight, importedWeight ->
                         if (granted) {
-                            importedHeight?.let { heightInput = it.toString() }
-                            importedWeight?.let { weightInput = "%.1f".format(Locale.US, it) }
+                            importedHeight?.let { heightInput = displayHeight(it, draft.metricSystem) }
+                            importedWeight?.let { weightInput = displayWeight(it, draft.metricSystem) }
                             draft = draft.copy(
                                 isHealthConnectEnabled = true,
                                 heightCm = importedHeight ?: draft.heightCm,
@@ -174,7 +175,15 @@ fun ProfileScreen(
                 draft = draft.copy(availableEquipment = selected, trainingLocations = locations)
             }) { picker = null }
             Picker.Restrictions -> RestrictionsPickerDialog(draft.movementRestrictions, { selected -> draft = draft.copy(movementRestrictions = selected) }) { picker = null }
-            else -> PickerDialog(current, draft) { updated -> draft = updated; picker = null }
+            else -> PickerDialog(current, draft) { updated ->
+                if (current == Picker.Metric && updated.metricSystem != draft.metricSystem) {
+                    val normalized = validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput)
+                    draft = normalized.copy(metricSystem = updated.metricSystem)
+                    heightInput = displayHeight(normalized.heightCm, updated.metricSystem)
+                    weightInput = displayWeight(normalized.weightKg, updated.metricSystem)
+                } else draft = updated
+                picker = null
+            }
         }
     }
     if (showsTrainingLocations) {
@@ -384,9 +393,21 @@ private fun TogglePickerRow(label: String, selected: Boolean, onToggle: () -> Un
 @Composable private fun NumberField(label: String, value: String, onValueChange: (String) -> Unit, modifier: Modifier, decimal: Boolean = false) { OutlinedTextField(value, onValueChange, modifier, label = { Text(label) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number)) }
 @Composable private fun TogglePreference(label: String, description: String, selected: Boolean, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text(label, color = WildforceThemeTokens.textPrimary); Text(description, Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }; Text(if (selected) "SÍ" else "NO", Modifier.padding(start = 10.dp), color = if (selected) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold) } }
 
+private const val PoundsPerKilogram = 2.2046226218
+
+private fun displayHeight(heightCm: Int, system: MetricSystem): String = when (system) {
+    MetricSystem.Metric -> heightCm.toString()
+    MetricSystem.Imperial -> (heightCm / 2.54).roundToInt().toString()
+}
+
+private fun displayWeight(weightKg: Double, system: MetricSystem): String = when (system) {
+    MetricSystem.Metric -> "%.1f".format(Locale.US, weightKg)
+    MetricSystem.Imperial -> "%.1f".format(Locale.US, weightKg * PoundsPerKilogram)
+}
+
 private fun validatedProfile(draft: OnboardingProfile, height: String, weight: String, duration: String, birthYear: String = draft.birthYear.toString()): OnboardingProfile = draft.copy(
-    heightCm = height.toIntOrNull()?.coerceIn(120, 230) ?: draft.heightCm,
-    weightKg = weight.replace(',', '.').toDoubleOrNull()?.coerceIn(30.0, 300.0) ?: draft.weightKg,
+    heightCm = height.toIntOrNull()?.let { entered -> if (draft.metricSystem == MetricSystem.Imperial) (entered * 2.54).roundToInt() else entered }?.coerceIn(120, 230) ?: draft.heightCm,
+    weightKg = weight.replace(',', '.').toDoubleOrNull()?.let { entered -> if (draft.metricSystem == MetricSystem.Imperial) entered / PoundsPerKilogram else entered }?.coerceIn(30.0, 300.0) ?: draft.weightKg,
     preferredWorkoutDurationMinutes = duration.toIntOrNull()?.coerceIn(15, 180) ?: draft.preferredWorkoutDurationMinutes,
     birthYear = birthYear.toIntOrNull()?.coerceIn(1920, Year.now().value - 13) ?: draft.birthYear,
 )
