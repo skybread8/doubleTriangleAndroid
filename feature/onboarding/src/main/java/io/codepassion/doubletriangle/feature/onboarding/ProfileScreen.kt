@@ -324,6 +324,14 @@ private fun TrainingLocationsDialog(
                             }
                         }
                     }
+                    if (locations.size > 1) {
+                        Text("ELIMINAR UBICACIÓN", Modifier.fillMaxWidth().clickable {
+                            val removedIndex = editingIndex ?: return@clickable
+                            val remaining = locations.filterIndexed { index, _ -> index != removedIndex }
+                            locations = if (remaining.any { it.isDefault }) remaining else remaining.mapIndexed { index, location -> location.copy(isDefault = index == 0) }
+                            editingIndex = null
+                        }.padding(10.dp), color = Color(0xFFC62828), fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    }
                 }
             }
         },
