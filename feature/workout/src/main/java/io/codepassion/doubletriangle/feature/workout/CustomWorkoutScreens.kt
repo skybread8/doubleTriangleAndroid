@@ -45,6 +45,8 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
+import io.codepassion.doubletriangle.core.model.WorkoutBlockSummary
+import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 
 @Composable
@@ -97,7 +99,7 @@ internal fun CustomWorkoutsScreen(
                         RemoteTrainingImage(workoutCoverUrl(workout.focus, gender, workout.order), workout.title, Modifier.size(70.dp).clip(RoundedCornerShape(14.dp)))
                         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                             Text(workout.title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
-                            Text("${workout.exercises.size} ejercicios · ${workout.estimatedMinutes} min", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                            Text("${workout.pathBlocks().flatMap { it.exercises }.size} ejercicios · ${workout.estimatedMinutes} min", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                             Text(workout.focus.uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -115,10 +117,11 @@ internal fun CustomWorkoutsScreen(
 @Composable
 internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: String, onCancel: () -> Unit, onSave: (WorkoutDaySummary) -> Unit) {
     var workout by remember(initial.id) { mutableStateOf(initial) }
+    var blocks by remember(initial.id) { mutableStateOf(initial.editableBlocks()) }
     var selectingExercise by remember { mutableStateOf(false) }
     if (selectingExercise) {
         ExercisePickerScreen(gender, onBack = { selectingExercise = false }) { choice ->
-            workout = workout.copy(exercises = workout.exercises + ExerciseSummary(choice.name, choice.imageKey, 3, "10", 90))
+            blocks = (blocks + WorkoutBlockSummary(WorkoutBlockType.Standard, exercises = listOf(ExerciseSummary(choice.name, choice.imageKey, 3, "10", 90)))).workoutOrder()
             selectingExercise = false
         }
         return
@@ -148,45 +151,91 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
             Row(Modifier.fillMaxWidth().padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text("EJERCICIOS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-                    Text("Duración estimada: ${CustomWorkoutStore.estimateMinutes(workout.exercises)} min", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    Text("Duración estimada: ${CustomWorkoutStore.estimateBlockMinutes(blocks)} min", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 }
                 Text("＋ AÑADIR", Modifier.clickable { selectingExercise = true }.padding(10.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
             }
-            if (workout.exercises.isEmpty()) {
+            if (blocks.isEmpty()) {
                 Text("Añade al menos un ejercicio para guardar.", Modifier.fillMaxWidth().padding(28.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
             }
-            workout.exercises.forEachIndexed { index, exercise ->
-                EditableExerciseCard(
-                    exercise, gender, index, workout.exercises.size,
-                    onChange = { changed -> workout = workout.copy(exercises = workout.exercises.toMutableList().also { it[index] = changed }) },
-                    onMoveUp = { workout = workout.copy(exercises = workout.exercises.swap(index, index - 1)) },
-                    onMoveDown = { workout = workout.copy(exercises = workout.exercises.swap(index, index + 1)) },
-                    onRemove = { workout = workout.copy(exercises = workout.exercises.filterIndexed { itemIndex, _ -> itemIndex != index }) },
-                )
+            blocks.forEachIndexed { blockIndex, block ->
+                if (block.type == WorkoutBlockType.Superset) {
+                    Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("⛓  SUPERSERIE", Modifier.weight(1f), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+                            Text("SEPARAR", Modifier.clickable { blocks = blocks.splitSupersetAt(blockIndex) }.padding(9.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color(0xFFC62828))
+                        }
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                            EditorStepper("RONDAS", block.rounds.toString(), {
+                                blocks = blocks.toMutableList().also { it[blockIndex] = block.copy(rounds = (block.rounds - 1).coerceAtLeast(1)) }
+                            }, {
+                                blocks = blocks.toMutableList().also { it[blockIndex] = block.copy(rounds = block.rounds + 1) }
+                            }, Modifier.weight(1f))
+                            EditorStepper("DESCANSO FINAL", "${block.restAfterBlockSeconds ?: 0}s", {
+                                blocks = blocks.toMutableList().also { it[blockIndex] = block.copy(restAfterBlockSeconds = ((block.restAfterBlockSeconds ?: 0) - 15).coerceAtLeast(0)) }
+                            }, {
+                                blocks = blocks.toMutableList().also { it[blockIndex] = block.copy(restAfterBlockSeconds = (block.restAfterBlockSeconds ?: 0) + 15) }
+                            }, Modifier.weight(1f))
+                        }
+                        block.exercises.forEachIndexed { exerciseIndex, exercise ->
+                            EditableExerciseCard(
+                                exercise, gender, exerciseIndex, block.exercises.size,
+                                label = "A${exerciseIndex + 1}",
+                                inSuperset = true,
+                                onChange = { changed -> blocks = blocks.updateBlockExercise(blockIndex, exerciseIndex) { changed.copy(sets = 1, restSeconds = 0) } },
+                                onMoveUp = { blocks = blocks.mapIndexed { index, item -> if (index == blockIndex) item.copy(exercises = item.exercises.move(exerciseIndex, exerciseIndex - 1)) else item } },
+                                onMoveDown = { blocks = blocks.mapIndexed { index, item -> if (index == blockIndex) item.copy(exercises = item.exercises.move(exerciseIndex, exerciseIndex + 1)) else item } },
+                                onRemove = { blocks = blocks.removeBlockExercise(blockIndex, exerciseIndex) },
+                            )
+                        }
+                    }
+                } else {
+                    val exercise = block.exercises.singleOrNull() ?: return@forEachIndexed
+                    val sectionColor = when (block.type) {
+                        WorkoutBlockType.Warmup -> Color(0xFFF08A24)
+                        WorkoutBlockType.Cooldown -> Color(0xFF4A8FE7)
+                        else -> WildforceThemeTokens.textSecondary
+                    }
+                    Text("SECCIÓN · ${block.type.label.uppercase()}  ›", Modifier.fillMaxWidth().clickable { blocks = blocks.cycleSectionAt(blockIndex) }.padding(top = 8.dp, bottom = 2.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = sectionColor)
+                    EditableExerciseCard(
+                        exercise, gender, blockIndex, blocks.size,
+                        onChange = { changed -> blocks = blocks.updateBlockExercise(blockIndex, 0) { changed } },
+                        onMoveUp = { blocks = blocks.move(blockIndex, blockIndex - 1).workoutOrder() },
+                        onMoveDown = { blocks = blocks.move(blockIndex, blockIndex + 1).workoutOrder() },
+                        onRemove = { blocks = blocks.removeBlockExercise(blockIndex, 0) },
+                    )
+                    val next = blocks.getOrNull(blockIndex + 1)
+                    if (next?.type == WorkoutBlockType.Standard && next.exercises.size == 1) {
+                        Text("⛓  CREAR SUPERSERIE CON EL SIGUIENTE", Modifier.fillMaxWidth().clickable { blocks = blocks.createSupersetAt(blockIndex) }.padding(vertical = 9.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+                    }
+                }
             }
         }
         Button(
-            onClick = { onSave(workout.copy(estimatedMinutes = CustomWorkoutStore.estimateMinutes(workout.exercises))) },
-            enabled = workout.title.isNotBlank() && workout.exercises.isNotEmpty(), modifier = Modifier.fillMaxWidth().height(54.dp),
+            onClick = { onSave(workout.withEditableBlocks(blocks).copy(estimatedMinutes = CustomWorkoutStore.estimateBlockMinutes(blocks))) },
+            enabled = workout.title.isNotBlank() && blocks.isNotEmpty(), modifier = Modifier.fillMaxWidth().height(54.dp),
             shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary),
         ) { Text("GUARDAR ENTRENAMIENTO", fontWeight = FontWeight.Bold) }
     }
 }
 
 @Composable
-private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, index: Int, count: Int, onChange: (ExerciseSummary) -> Unit, onMoveUp: () -> Unit, onMoveDown: () -> Unit, onRemove: () -> Unit) {
+private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, index: Int, count: Int, label: String? = null, inSuperset: Boolean = false, onChange: (ExerciseSummary) -> Unit, onMoveUp: () -> Unit, onMoveDown: () -> Unit, onRemove: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(vertical = 5.dp).liquidGlass(RoundedCornerShape(16.dp)).padding(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.size(54.dp).clip(RoundedCornerShape(12.dp)))
+            label?.let { Text(it, Modifier.padding(start = 9.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold) }
             Text(exercise.name, Modifier.weight(1f).padding(horizontal = 10.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Text("↑", Modifier.clickable(enabled = index > 0, onClick = onMoveUp).padding(8.dp), color = if (index > 0) WildforceThemeTokens.textPrimary else Color.Transparent)
             Text("↓", Modifier.clickable(enabled = index < count - 1, onClick = onMoveDown).padding(8.dp), color = if (index < count - 1) WildforceThemeTokens.textPrimary else Color.Transparent)
             Text("×", Modifier.clickable(onClick = onRemove).padding(8.dp), color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
         }
         Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-            EditorStepper("SERIES", exercise.sets.toString(), { onChange(exercise.copy(sets = (exercise.sets - 1).coerceAtLeast(1))) }, { onChange(exercise.copy(sets = exercise.sets + 1)) }, Modifier.weight(1f))
+            if (!inSuperset) {
+                EditorStepper("SERIES", exercise.sets.toString(), { onChange(exercise.copy(sets = (exercise.sets - 1).coerceAtLeast(1))) }, { onChange(exercise.copy(sets = exercise.sets + 1)) }, Modifier.weight(1f))
+            }
             EditorStepper("REPS", exercise.reps, { onChange(exercise.copy(reps = ((exercise.reps.toIntOrNull() ?: 10) - 1).coerceAtLeast(1).toString())) }, { onChange(exercise.copy(reps = ((exercise.reps.toIntOrNull() ?: 10) + 1).toString())) }, Modifier.weight(1f))
-            EditorStepper("DESCANSO", "${exercise.restSeconds}s", { onChange(exercise.copy(restSeconds = (exercise.restSeconds - 15).coerceAtLeast(0))) }, { onChange(exercise.copy(restSeconds = exercise.restSeconds + 15)) }, Modifier.weight(1f))
+            if (!inSuperset) EditorStepper("DESCANSO", "${exercise.restSeconds}s", { onChange(exercise.copy(restSeconds = (exercise.restSeconds - 15).coerceAtLeast(0))) }, { onChange(exercise.copy(restSeconds = exercise.restSeconds + 15)) }, Modifier.weight(1f))
         }
         Text("TIPO DE SERIE", Modifier.padding(top = 10.dp, bottom = 5.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
         LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
