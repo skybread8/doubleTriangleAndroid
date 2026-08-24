@@ -57,10 +57,13 @@ internal fun WorkoutCompletionFlowScreen(
 ) {
     var phase by remember(workout.id) { mutableStateOf(if (records.isEmpty()) CompletionPhase.Summary else CompletionPhase.Records) }
     val score = remember(workout.id, stats, feedback) { WorkoutCompletionCalculator.score(workout, stats, feedback) }
+    val mainExercises = remember(workout) { workout.pathBlocks().mainExercises() }
+    val completedSets = stats.mapValues { it.value.sets }
+    val completedMainExercises = mainExercises.count { it.isCompleted(workout, completedSets) }
     when (phase) {
         CompletionPhase.Records -> RecordsCelebration(records) { phase = CompletionPhase.Summary }
-        CompletionPhase.Summary -> CompletionSummary(workout, durationSeconds, stats) { phase = CompletionPhase.Score }
-        CompletionPhase.Score -> ScoreCelebration(score, stats.size, workout.exercises.size, dominantFeedback(feedback)) { phase = if (progress.streakIncreased) CompletionPhase.Streak else CompletionPhase.Xp }
+        CompletionPhase.Summary -> CompletionSummary(workout, durationSeconds, stats, completedMainExercises) { phase = CompletionPhase.Score }
+        CompletionPhase.Score -> ScoreCelebration(score, completedMainExercises, mainExercises.size, dominantFeedback(feedback)) { phase = if (progress.streakIncreased) CompletionPhase.Streak else CompletionPhase.Xp }
         CompletionPhase.Streak -> StreakCelebration(progress.streakAfter) { phase = CompletionPhase.Xp }
         CompletionPhase.Xp -> XpCelebration(progress) { if (progress.levelAfter > progress.levelBefore) phase = CompletionPhase.LevelUp else onDone() }
         CompletionPhase.LevelUp -> LevelUpCelebration(progress.levelAfter, onDone)
@@ -84,16 +87,18 @@ private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: (
 }
 
 @Composable
-private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, stats: Map<Int, ExerciseSessionStats>, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, stats: Map<Int, ExerciseSessionStats>, completedExercises: Int, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
     Text("✓", Modifier.size(76.dp).background(WildforceThemeTokens.accentGold.copy(alpha = 0.12f), CircleShape).padding(12.dp), style = MaterialTheme.typography.h3, color = WildforceThemeTokens.accentGold, textAlign = TextAlign.Center)
     Text("¡GRAN TRABAJO!", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text("Has completado ${workout.title}.", color = WildforceThemeTokens.textSecondary)
-    val sets = stats.values.sumOf { it.sets }
-    val volume = stats.values.sumOf { it.volumeKg }
-    val repetitions = stats.values.sumOf { it.totalReps }
+    val mainIndices = workout.pathBlocks().mainExercises().flatMap { it.executionIndices }.toSet()
+    val mainStats = stats.filterKeys { it in mainIndices }.values
+    val sets = mainStats.sumOf { it.sets }
+    val volume = mainStats.sumOf { it.volumeKg }
+    val repetitions = mainStats.sumOf { it.totalReps }
     Column(Modifier.fillMaxWidth().padding(top = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            CompletionStat("EJERCICIOS", stats.count { it.value.sets > 0 }.toString(), Modifier.weight(1f))
+            CompletionStat("EJERCICIOS", completedExercises.toString(), Modifier.weight(1f))
             CompletionStat("SERIES", sets.toString(), Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {

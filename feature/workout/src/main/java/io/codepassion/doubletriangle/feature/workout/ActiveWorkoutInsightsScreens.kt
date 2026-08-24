@@ -34,6 +34,7 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
+import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import java.text.DateFormat
 import java.util.Date
@@ -48,37 +49,59 @@ internal fun WorkoutPathScreen(
     elapsedSeconds: Int,
     onBack: () -> Unit,
 ) {
+    val pathBlocks = remember(workout) { workout.pathBlocks() }
+    val pathExercises = remember(pathBlocks) { pathBlocks.flatMap { it.exercises } }
+    val currentPathIndex = pathExercises.indexOfFirst { currentExerciseIndex in it.executionIndices }.coerceAtLeast(0)
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 18.dp, vertical = 12.dp)) {
         InsightHeader("RUTA DEL ENTRENAMIENTO", onBack)
         Text(workout.title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
             Text(formatInsightClock(elapsedSeconds), style = MaterialTheme.typography.h3, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Spacer(Modifier.weight(1f))
-            Text("${currentExerciseIndex + 1} de ${workout.exercises.size}", color = WildforceThemeTokens.textSecondary)
+            Text("${currentPathIndex + 1} de ${pathExercises.size}", color = WildforceThemeTokens.textSecondary)
         }
         LinearProgressIndicator(
-            progress = if (workout.exercises.isEmpty()) 0f else (currentExerciseIndex + 1f) / workout.exercises.size,
+            progress = if (pathExercises.isEmpty()) 0f else (currentPathIndex + 1f) / pathExercises.size,
             modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp).height(5.dp),
             color = WildforceThemeTokens.textPrimary,
             backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.18f),
         )
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            workout.exercises.forEachIndexed { index, exercise ->
-                val completed = index < currentExerciseIndex || (completedByExercise[index] ?: 0) >= exercise.sets
-                val current = index == currentExerciseIndex
-                Row(
-                    Modifier.fillMaxWidth().padding(vertical = 4.dp)
-                        .background(if (current) WildforceThemeTokens.accentGold.copy(alpha = 0.13f) else Color.Transparent, RoundedCornerShape(14.dp))
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(if (completed) "✓" else if (current) "●" else "·", Modifier.width(22.dp), color = if (current) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
-                    RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.size(width = 48.dp, height = 58.dp).clip(RoundedCornerShape(11.dp)))
-                    Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                        Text(exercise.name, fontWeight = if (current) FontWeight.Bold else FontWeight.Normal, color = if (completed) WildforceThemeTokens.textSecondary else WildforceThemeTokens.textPrimary, maxLines = 1)
-                        Text("${exercise.sets} × ${exercise.reps} · ${exercise.restSeconds}s", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            pathBlocks.forEach { block ->
+                Row(Modifier.fillMaxWidth().padding(start = 28.dp, top = 10.dp, bottom = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        block.type.label.uppercase(),
+                        style = MaterialTheme.typography.caption,
+                        fontWeight = FontWeight.Bold,
+                        color = when (block.type) {
+                            WorkoutBlockType.Warmup -> Color(0xFFF08A24)
+                            WorkoutBlockType.Cooldown -> Color(0xFF4A8FE7)
+                            WorkoutBlockType.Superset -> WildforceThemeTokens.accentGold
+                            WorkoutBlockType.Standard -> WildforceThemeTokens.textSecondary
+                        },
+                    )
+                    if (block.rounds > 1) Text(" · ${block.rounds} RONDAS", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                }
+                block.exercises.forEach { pathExercise ->
+                    val exercise = pathExercise.exercise
+                    val completed = pathExercise.isCompleted(workout, completedByExercise)
+                    val current = currentExerciseIndex in pathExercise.executionIndices
+                    Row(
+                        Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                            .background(if (current) WildforceThemeTokens.accentGold.copy(alpha = 0.13f) else Color.Transparent, RoundedCornerShape(14.dp))
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(if (completed) "✓" else if (current) "●" else "·", Modifier.width(22.dp), color = if (current) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+                        pathExercise.label?.let { Text(it, Modifier.width(28.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption) }
+                        RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.size(width = 48.dp, height = 58.dp).clip(RoundedCornerShape(11.dp)))
+                        Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                            Text(exercise.name, fontWeight = if (current) FontWeight.Bold else FontWeight.Normal, color = if (completed) WildforceThemeTokens.textSecondary else WildforceThemeTokens.textPrimary, maxLines = 1)
+                            val prescription = if (pathExercise.rounds > 1) "${pathExercise.rounds} rondas × ${exercise.reps}" else "${exercise.sets} × ${exercise.reps}"
+                            Text(prescription + if (exercise.restSeconds > 0) " · ${exercise.restSeconds}s" else "", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                        }
+                        if (current) Text("AHORA", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
                     }
-                    if (current) Text("AHORA", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
                 }
             }
         }

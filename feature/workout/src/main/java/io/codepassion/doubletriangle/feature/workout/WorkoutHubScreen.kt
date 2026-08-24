@@ -429,6 +429,8 @@ fun ActiveWorkoutScreen(
     var initializedExerciseIndex by remember(workout.id) { mutableStateOf(restored?.exerciseIndex ?: -1) }
     val exercise = workout.exercises.getOrNull(exerciseIndex)
     val completedForExercise = completedByExercise[exerciseIndex] ?: 0
+    val logicalExercises = remember(workout) { workout.pathBlocks().flatMap { it.exercises } }
+    val logicalExerciseIndex = logicalExercises.indexOfFirst { exerciseIndex in it.executionIndices }.coerceAtLeast(0)
     fun advanceFromExercise(restSeconds: Int) {
         if (exerciseIndex < workout.exercises.lastIndex) {
             exerciseIndex++
@@ -526,7 +528,7 @@ fun ActiveWorkoutScreen(
                 backgroundColor = Color.White.copy(alpha = 0.28f),
             )
             Column(Modifier.padding(horizontal = 10.dp, vertical = 14.dp)) {
-                Text("EJERCICIO ${exerciseIndex + 1} DE ${workout.exercises.size}", color = Color.White.copy(alpha = 0.72f), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
+                Text("EJERCICIO ${logicalExerciseIndex + 1} DE ${logicalExercises.size}", color = Color.White.copy(alpha = 0.72f), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
                 Text(exercise?.name?.uppercase().orEmpty(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
                 exercise?.takeIf { it.blockType != WorkoutBlockType.Standard }?.let { blockedExercise ->
                     val blockProgress = blockedExercise.blockLabel?.let { "$it · " }.orEmpty() +
