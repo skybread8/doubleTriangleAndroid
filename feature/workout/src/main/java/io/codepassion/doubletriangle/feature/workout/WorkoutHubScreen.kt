@@ -730,7 +730,7 @@ fun ActiveWorkoutScreen(
             val completed = completedByExercise.values.sum()
             val total = workout.exercises.sumOf { it.sets }.coerceAtLeast(1)
             val detail = if (restRemaining != null) "Descanso: ${restRemaining}s · ${completed}/${total} series" else "$currentName · ${completed}/${total} series"
-            WorkoutActiveNotification.show(context, workout.title, detail)
+            WorkoutActiveNotification.show(context, workout.title, detail, headsUp = restRemaining != null && restRemaining == restInitialSeconds)
         }
     }
     LaunchedEffect(exerciseIndex) {

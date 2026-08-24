@@ -6,13 +6,16 @@ import android.content.Context
 import android.os.Build
 
 internal object WorkoutActiveNotification {
-    private const val channelId = "active_workout"
+    private const val channelId = "active_workout_live"
     private const val notificationId = 4101
 
-    fun show(context: Context, title: String, detail: String = "Sesión activa") {
+    fun show(context: Context, title: String, detail: String = "Sesión activa", headsUp: Boolean = false) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_LOW))
+            manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "Progreso, descansos y ejercicio actual"
+                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+            })
         }
         val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             android.app.Notification.Builder(context, channelId)
@@ -22,7 +25,11 @@ internal object WorkoutActiveNotification {
             .setContentTitle("Entrenamiento activo")
             .setContentText(detail)
             .setOngoing(true)
+            .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
             .setCategory(android.app.Notification.CATEGORY_PROGRESS)
+            .setPriority(android.app.Notification.PRIORITY_HIGH)
+            .setOnlyAlertOnce(!headsUp)
+            .setShowWhen(false)
             .build()
         manager.notify(notificationId, notification)
     }
