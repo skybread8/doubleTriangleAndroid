@@ -26,10 +26,12 @@ internal object WorkoutActiveNotification {
     private var artwork: Bitmap? = null
 
     fun show(context: Context, title: String, detail: String = "Sesión activa", headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, chronometerBaseMillis: Long? = null) {
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        ensureChannel(manager)
-        val notification = build(context, title, detail, headsUp, progress, progressMax, isResting, artwork, chronometerBaseMillis)
-        manager.notify(notificationId, notification)
+        runCatching {
+            val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            ensureChannel(manager)
+            val notification = build(context, title, detail, headsUp, progress, progressMax, isResting, artwork, chronometerBaseMillis)
+            manager.notify(notificationId, notification)
+        }
     }
 
     fun build(context: Context, title: String, detail: String, headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, chronometerBaseMillis: Long? = null): android.app.Notification {
