@@ -126,6 +126,8 @@ object WorkoutPlanGenerator {
             }
         }
         check(workouts.isNotEmpty()) { "La IA devolvió un plan vacío" }
+        val cycleLength = root.optInt("cycleLength", 1).coerceAtLeast(1)
+        val weekIndex = root.optInt("weekIndex", 1).coerceIn(1, cycleLength)
         return WorkoutHubState(
             user = UserSummary(userName, goal, 0),
             trainingDays = workouts.mapTo(mutableSetOf()) { it.scheduledDay },
@@ -134,8 +136,8 @@ object WorkoutPlanGenerator {
             phase = root.optString("phase", "Adaptación · Mesociclo 1"),
             workouts = workouts,
             mesocycleIndex = root.optInt("mesocycleIndex", 1).coerceAtLeast(1),
-            cycleLength = root.optInt("cycleLength", 1).coerceAtLeast(1),
-            weekIndex = root.optInt("weekIndex", 1).coerceAtLeast(1),
+            cycleLength = cycleLength,
+            weekIndex = weekIndex,
         )
     }
 
