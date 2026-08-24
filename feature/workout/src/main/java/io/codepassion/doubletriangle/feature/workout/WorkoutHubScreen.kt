@@ -270,7 +270,7 @@ private fun WorkoutHeader(state: WorkoutHubState) {
             Text(state.user.name.take(1), color = Color.White, fontWeight = FontWeight.Bold)
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-            Text(state.user.name, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
+            Text(state.user.name, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text("▲ ${state.user.goal}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
         Text("🔥", style = MaterialTheme.typography.h6)
@@ -312,6 +312,7 @@ private fun WeekCalendar(
                     color = if (selected) MaterialTheme.colors.onPrimary
                     else if (date == today) WildforceThemeTokens.accentGold else WildforceThemeTokens.textPrimary,
                     fontWeight = FontWeight.Bold,
+                    maxLines = 1,
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
@@ -415,6 +416,8 @@ private fun StatusBadge(label: String, background: Color) {
         color = Color.White,
         style = MaterialTheme.typography.caption,
         fontWeight = FontWeight.Bold,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
     )
 }
 
@@ -424,8 +427,8 @@ private fun RestDayCard() {
         Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("DÍA DE DESCANSO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
-        Text("No hay entrenamiento planificado.", color = WildforceThemeTokens.textSecondary)
+        Text("DÍA DE DESCANSO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary, maxLines = 1)
+        Text("No hay entrenamiento planificado.", color = WildforceThemeTokens.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
 

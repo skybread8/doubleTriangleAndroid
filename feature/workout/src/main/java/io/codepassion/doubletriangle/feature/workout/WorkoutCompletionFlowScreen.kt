@@ -144,7 +144,7 @@ private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: (
                 enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 },
             ) {
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).padding(16.dp)) {
-                    Text(record.exerciseName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text(record.exerciseName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     Text(record.label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold)
                     Text(String.format(Locale.getDefault(), "%.1f %s", record.newValue, record.unit), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
                     Text(String.format(Locale.getDefault(), "Antes %.1f · +%.1f %s", record.previousValue, record.newValue - record.previousValue, record.unit), color = WildforceThemeTokens.textSecondary)

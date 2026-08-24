@@ -63,8 +63,8 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, contentPadding: a
                         }
                         Column(Modifier.padding(start = 14.dp)) {
                             Text("PROGRESO DEL MESOCICLO", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
-                            Text("$completed de ${state.workouts.size} sesiones completadas", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                            if (skipped > 0) Text("$skipped sesión(es) omitida(s)", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                            Text("$completed de ${state.workouts.size} sesiones completadas", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                            if (skipped > 0) Text("$skipped sesión(es) omitida(s)", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                         }
                     }
                     LinearProgressIndicator(progress = animatedProgress, Modifier.fillMaxWidth().padding(top = 16.dp).height(7.dp).clip(RoundedCornerShape(6.dp)), color = WildforceThemeTokens.accentGold, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.15f))
@@ -75,7 +75,7 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, contentPadding: a
             item {
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp)) {
                     Text("SIGUIENTE PASO", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
-                    Text(if (completed == state.workouts.size && state.workouts.isNotEmpty()) "Mesociclo completado. Ya puedes preparar la siguiente fase." else "Completa las sesiones previstas para avanzar en tu fase actual.", Modifier.padding(top = 5.dp), color = WildforceThemeTokens.textSecondary)
+                    Text(if (completed == state.workouts.size && state.workouts.isNotEmpty()) "Mesociclo completado. Ya puedes preparar la siguiente fase." else "Completa las sesiones previstas para avanzar en tu fase actual.", Modifier.padding(top = 5.dp), color = WildforceThemeTokens.textSecondary, maxLines = 3, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             }
         }

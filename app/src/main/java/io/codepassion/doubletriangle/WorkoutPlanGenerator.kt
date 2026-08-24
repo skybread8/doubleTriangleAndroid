@@ -275,8 +275,8 @@ Metadatos de progresión: incluye también mesocycleIndex, cycleLength y weekInd
     }
 
     private fun parseExercise(exercise: JSONObject): ExerciseSummary {
-        val name = exercise.optString("name", exercise.optString("exercise", "Ejercicio"))
-        val imageKey = exercise.optString("imageKey").takeIf(String::isNotBlank) ?: legacyImageKey(name)
+        val name = exercise.optString("name", exercise.optString("exercise", "Ejercicio")).trim().ifBlank { "Ejercicio" }
+        val imageKey = exercise.optString("imageKey").trim().takeIf(String::isNotBlank) ?: legacyImageKey(name)
         val details = exercise.optJSONObject("setStyleParameters") ?: JSONObject()
         val parameters = SetStyleParameters(
             dropCount = details.optInt("dropCount", 2).coerceIn(1, 5),
@@ -284,14 +284,14 @@ Metadatos de progresión: incluye también mesocycleIndex, cycleLength y weekInd
             backoffSetCount = details.optInt("backoffSetCount", 3).coerceIn(1, 6),
             backoffWeightPercent = details.optInt("backoffWeightPercent", 15).coerceIn(5, 50),
             intraSetRestSeconds = details.optInt("intraSetRestSeconds", 15).coerceIn(5, 120),
-            tempo = details.optString("tempo", "3-1-1-0").take(9),
+            tempo = details.optString("tempo", "3-1-1-0").trim().take(9),
             targetRir = details.optInt("targetRir", 2).coerceIn(0, 5),
         )
         return ExerciseSummary(
             name = name,
             imageKey = imageKey,
             sets = exercise.optInt("sets", 1).coerceIn(1, 10),
-            reps = exercise.optString("reps").ifBlank {
+            reps = exercise.optString("reps").trim().ifBlank {
                 val min = exercise.optInt("repsMin", 0)
                 val max = exercise.optInt("repsMax", min)
                 when {
