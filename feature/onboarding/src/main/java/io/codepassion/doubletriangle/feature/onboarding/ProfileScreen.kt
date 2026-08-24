@@ -184,6 +184,7 @@ fun ProfileScreen(
                 if (current == Picker.Metric && updated.metricSystem != draft.metricSystem) {
                     val normalized = validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput)
                     draft = normalized.copy(metricSystem = updated.metricSystem)
+                    saveMessage = null
                     heightInput = displayHeight(normalized.heightCm, updated.metricSystem)
                     weightInput = displayWeight(normalized.weightKg, updated.metricSystem)
                 } else draft = updated
