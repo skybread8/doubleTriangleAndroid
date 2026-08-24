@@ -17,6 +17,7 @@ import android.os.Build
 internal object WorkoutActiveNotification {
     const val ACTION_TOGGLE_TIMER = "io.codepassion.doubletriangle.ACTION_TOGGLE_TIMER"
     const val ACTION_SKIP_CURRENT = "io.codepassion.doubletriangle.ACTION_SKIP_CURRENT"
+    const val ACTION_ADD_REST = "io.codepassion.doubletriangle.ACTION_ADD_REST"
     private const val channelId = "active_workout_live"
     private const val notificationId = 4101
     private var mediaSession: MediaSession? = null
@@ -38,7 +39,10 @@ internal object WorkoutActiveNotification {
             android.app.PendingIntent.getActivity(context, notificationId, it, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
         }
         val session = mediaSession(context)
-        session.setMetadata(MediaMetadata.Builder().putString(MediaMetadata.METADATA_KEY_TITLE, title).putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, detail).build())
+        val displayTitle = if (isResting) detail.substringBefore(" ·") else title
+        val metadata = MediaMetadata.Builder().putString(MediaMetadata.METADATA_KEY_TITLE, displayTitle).putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, detail)
+        artwork?.let { metadata.putBitmap(MediaMetadata.METADATA_KEY_ART, it) }
+        session.setMetadata(metadata.build())
         session.setPlaybackState(PlaybackState.Builder().setActions(PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE or PlaybackState.ACTION_SKIP_TO_NEXT).setState(if (isResting) PlaybackState.STATE_PAUSED else PlaybackState.STATE_PLAYING, progress.toLong(), 1f).build())
         @Suppress("DEPRECATION")
         val builder: android.app.Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -46,8 +50,11 @@ internal object WorkoutActiveNotification {
         } else {
             android.app.Notification.Builder(context)
         }
+        val toggleIntent = actionIntent(context, ACTION_TOGGLE_TIMER, 4102)
+        val skipIntent = actionIntent(context, ACTION_SKIP_CURRENT, 4103)
+        val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
         builder.setSmallIcon(android.R.drawable.ic_media_play)
-            .setContentTitle(title)
+            .setContentTitle(displayTitle)
             .setContentText(detail)
             .setOngoing(true)
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
@@ -56,10 +63,13 @@ internal object WorkoutActiveNotification {
             .setShowWhen(false)
             .setAutoCancel(false)
             .setLargeIcon(artwork ?: exerciseArtwork(title))
+            .addAction(android.app.Notification.Action.Builder(android.R.drawable.ic_media_pause, "Pausar", toggleIntent).build())
+            .addAction(android.app.Notification.Action.Builder(android.R.drawable.ic_media_next, "Saltar", skipIntent).build())
+            .addAction(android.app.Notification.Action.Builder(android.R.drawable.ic_input_add, "+30 s", addRestIntent).build())
         if (contentIntent != null) builder.setContentIntent(contentIntent)
         if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setStyle(android.app.Notification.MediaStyle().setMediaSession(session.sessionToken).setShowActionsInCompactView(0))
+            builder.setStyle(android.app.Notification.MediaStyle().setMediaSession(session.sessionToken).setShowActionsInCompactView(0, 1, 2))
         }
         return builder.build()
     }
@@ -96,6 +106,9 @@ internal object WorkoutActiveNotification {
     private fun sendAction(context: Context, action: String) {
         context.sendBroadcast(Intent(action).setPackage(context.packageName))
     }
+
+    private fun actionIntent(context: Context, action: String, requestCode: Int): android.app.PendingIntent =
+        android.app.PendingIntent.getBroadcast(context, requestCode, Intent(action).setPackage(context.packageName), android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
 
     private fun ensureChannel(manager: NotificationManager) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_HIGH).apply {

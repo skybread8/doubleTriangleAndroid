@@ -741,12 +741,14 @@ fun ActiveWorkoutScreen(
                 when (intent?.action) {
                     WorkoutActiveNotification.ACTION_TOGGLE_TIMER -> if (restRemaining != null) restTimerPaused = !restTimerPaused else exerciseTimerRunning = !exerciseTimerRunning
                     WorkoutActiveNotification.ACTION_SKIP_CURRENT -> if (restRemaining != null) { restRemaining = null; restBetweenExercises = false; restTimerPaused = false } else advanceFromExercise(exercise?.restSeconds ?: 0)
+                    WorkoutActiveNotification.ACTION_ADD_REST -> if (restRemaining != null) restRemaining = restRemaining!! + 30
                 }
             }
         }
         val filter = android.content.IntentFilter().apply {
             addAction(WorkoutActiveNotification.ACTION_TOGGLE_TIMER)
             addAction(WorkoutActiveNotification.ACTION_SKIP_CURRENT)
+            addAction(WorkoutActiveNotification.ACTION_ADD_REST)
         }
         if (android.os.Build.VERSION.SDK_INT >= 33) context.registerReceiver(receiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED) else context.registerReceiver(receiver, filter)
         onDispose { runCatching { context.unregisterReceiver(receiver) } }
