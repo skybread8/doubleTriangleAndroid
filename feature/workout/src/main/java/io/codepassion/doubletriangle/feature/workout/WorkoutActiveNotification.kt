@@ -15,20 +15,22 @@ import android.media.session.PlaybackState
 import android.os.Build
 
 internal object WorkoutActiveNotification {
+    const val ACTION_TOGGLE_TIMER = "io.codepassion.doubletriangle.ACTION_TOGGLE_TIMER"
+    const val ACTION_SKIP_CURRENT = "io.codepassion.doubletriangle.ACTION_SKIP_CURRENT"
     private const val channelId = "active_workout_live"
     private const val notificationId = 4101
     private var mediaSession: MediaSession? = null
     private var artworkTitle: String? = null
     private var artwork: Bitmap? = null
 
-    fun show(context: Context, title: String, detail: String = "Sesión activa", headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false) {
+    fun show(context: Context, title: String, detail: String = "Sesión activa", headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         ensureChannel(manager)
-        val notification = build(context, title, detail, headsUp, progress, progressMax, isResting)
+        val notification = build(context, title, detail, headsUp, progress, progressMax, isResting, artwork)
         manager.notify(notificationId, notification)
     }
 
-    fun build(context: Context, title: String, detail: String, headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false): android.app.Notification {
+    fun build(context: Context, title: String, detail: String, headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null): android.app.Notification {
         val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
             flags = android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -53,7 +55,7 @@ internal object WorkoutActiveNotification {
             .setOnlyAlertOnce(true)
             .setShowWhen(false)
             .setAutoCancel(false)
-            .setLargeIcon(exerciseArtwork(title))
+            .setLargeIcon(artwork ?: exerciseArtwork(title))
         if (contentIntent != null) builder.setContentIntent(contentIntent)
         if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -77,9 +79,9 @@ internal object WorkoutActiveNotification {
 
     private fun mediaSession(context: Context): MediaSession = mediaSession ?: MediaSession(context, "WildforceWorkout").also { session ->
         session.setCallback(object : MediaSession.Callback() {
-            override fun onPlay() = openApp(context)
-            override fun onPause() = openApp(context)
-            override fun onSkipToNext() = openApp(context)
+            override fun onPlay() = sendAction(context, ACTION_TOGGLE_TIMER)
+            override fun onPause() = sendAction(context, ACTION_TOGGLE_TIMER)
+            override fun onSkipToNext() = sendAction(context, ACTION_SKIP_CURRENT)
         })
         session.isActive = true
         mediaSession = session
@@ -89,6 +91,10 @@ internal object WorkoutActiveNotification {
         context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }?.let(context::startActivity)
+    }
+
+    private fun sendAction(context: Context, action: String) {
+        context.sendBroadcast(Intent(action).setPackage(context.packageName))
     }
 
     private fun ensureChannel(manager: NotificationManager) {

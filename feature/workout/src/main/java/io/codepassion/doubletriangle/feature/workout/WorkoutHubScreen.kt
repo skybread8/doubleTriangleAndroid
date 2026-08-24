@@ -680,6 +680,7 @@ fun ActiveWorkoutScreen(
     var reps by remember(workout.id) { mutableStateOf(restored?.reps ?: targetReps(workout.exercises.firstOrNull()?.reps)) }
     var weightKg by remember(workout.id) { mutableStateOf(restored?.weightKg ?: workout.exercises.firstOrNull()?.targetWeightKg ?: 0.0) }
     var restRemaining by remember(workout.id) { mutableStateOf(restored?.restRemaining) }
+    var restTimerPaused by remember(workout.id) { mutableStateOf(false) }
     var restInitialSeconds by remember(workout.id) { mutableStateOf(restored?.restInitialSeconds ?: 1) }
     var restBetweenExercises by remember(workout.id) { mutableStateOf(restored?.restBetweenExercises ?: false) }
     var elapsedSeconds by remember(workout.id) { mutableStateOf(restored?.elapsedSeconds ?: 0) }
@@ -713,6 +714,11 @@ fun ActiveWorkoutScreen(
     val logicalExercises = remember(structuredPathBlocks) { structuredPathBlocks.flatMap { it.exercises } }
     val logicalExerciseIndex = logicalExercises.indexOfFirst { exerciseIndex in it.executionIndices }.coerceAtLeast(0)
     val currentPathBlock = structuredPathBlocks.firstOrNull { block -> block.exercises.any { exerciseIndex in it.executionIndices } }
+    var notificationArtwork by remember(workout.id) { mutableStateOf<android.graphics.Bitmap?>(null) }
+    LaunchedEffect(exercise?.imageKey, gender) {
+        val url = exerciseImageUrl(exercise?.imageKey, gender)
+        notificationArtwork = url?.let { loadTrainingBitmap(context, it) }
+    }
     fun advanceFromExercise(restSeconds: Int) {
         if (exerciseIndex < workout.exercises.lastIndex) {
             exerciseIndex++
@@ -720,6 +726,7 @@ fun ActiveWorkoutScreen(
                 restInitialSeconds = restSeconds
                 restBetweenExercises = true
                 restRemaining = restSeconds
+                restTimerPaused = false
             } else {
                 restRemaining = null
             }
@@ -728,13 +735,30 @@ fun ActiveWorkoutScreen(
         }
     }
 
+    DisposableEffect(workout.id) {
+        val receiver = object : android.content.BroadcastReceiver() {
+            override fun onReceive(receiverContext: android.content.Context?, intent: android.content.Intent?) {
+                when (intent?.action) {
+                    WorkoutActiveNotification.ACTION_TOGGLE_TIMER -> if (restRemaining != null) restTimerPaused = !restTimerPaused else exerciseTimerRunning = !exerciseTimerRunning
+                    WorkoutActiveNotification.ACTION_SKIP_CURRENT -> if (restRemaining != null) { restRemaining = null; restBetweenExercises = false; restTimerPaused = false } else advanceFromExercise(exercise?.restSeconds ?: 0)
+                }
+            }
+        }
+        val filter = android.content.IntentFilter().apply {
+            addAction(WorkoutActiveNotification.ACTION_TOGGLE_TIMER)
+            addAction(WorkoutActiveNotification.ACTION_SKIP_CURRENT)
+        }
+        if (android.os.Build.VERSION.SDK_INT >= 33) context.registerReceiver(receiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED) else context.registerReceiver(receiver, filter)
+        onDispose { runCatching { context.unregisterReceiver(receiver) } }
+    }
+
     LaunchedEffect(showsSummary) { while (!showsSummary) { delay(1_000); elapsedSeconds++ } }
     LaunchedEffect(exerciseIndex, completedByExercise, restRemaining, showsSummary) {
         if (!showsSummary) {
             val currentName = exercise?.name ?: "Entrenamiento"
             val completed = completedByExercise.values.sum()
             val total = workout.exercises.sumOf { it.sets }.coerceAtLeast(1)
-            val detail = if (restRemaining != null) "Descanso: ${restRemaining}s · ${completed}/${total} series" else "$currentName · ${completed}/${total} series"
+            val detail = if (restRemaining != null) "${if (restTimerPaused) "Descanso pausado" else "Descanso: ${restRemaining}s"} · ${completed}/${total} series" else "$currentName · ${completed}/${total} series"
             if (WorkoutNotificationPreferences.enabled(context)) {
                 WorkoutActiveNotification.show(
                     context,
@@ -744,6 +768,7 @@ fun ActiveWorkoutScreen(
                     progress = if (restRemaining != null) (restInitialSeconds - restRemaining!!).coerceAtLeast(0) else completed,
                     progressMax = if (restRemaining != null) restInitialSeconds else total,
                     isResting = restRemaining != null,
+                    artwork = notificationArtwork,
                 )
             }
         }
@@ -765,9 +790,10 @@ fun ActiveWorkoutScreen(
             WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, pendingNote, exerciseStats, feedbackByExercise, notesByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning, addedSetsByExercise),
         )
     }
-    LaunchedEffect(restRemaining) {
+    LaunchedEffect(restRemaining, restTimerPaused) {
         val remaining = restRemaining ?: return@LaunchedEffect
         if (remaining > 0) {
+            if (restTimerPaused) return@LaunchedEffect
             delay(1_000)
             restRemaining = remaining - 1
         } else {

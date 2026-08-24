@@ -79,7 +79,7 @@ internal fun workoutCoverUrl(focus: String, gender: String, order: Int): String 
     return "$IMAGE_BASE/covers/cover_${focusKey}_${gender}_$variant.png"
 }
 
-private suspend fun loadTrainingBitmap(context: Context, url: String): Bitmap? = withContext(Dispatchers.IO) {
+internal suspend fun loadTrainingBitmap(context: Context, url: String): Bitmap? = withContext(Dispatchers.IO) {
     memoryCache.get(url)?.let { return@withContext it }
     runCatching {
         val directory = File(context.cacheDir, "training-images").apply { mkdirs() }
