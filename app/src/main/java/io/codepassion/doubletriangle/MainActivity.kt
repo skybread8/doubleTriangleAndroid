@@ -154,6 +154,7 @@ fun WildforceRoot() {
                     weightKg = java.lang.Double.longBitsToDouble(preferences.getLong("weight_kg", java.lang.Double.doubleToRawLongBits(70.0))),
                     skipsWarmups = preferences.getBoolean("skips_warmups", false),
                     skipsCooldowns = preferences.getBoolean("skips_cooldowns", false),
+                    skipsRestPeriods = preferences.getBoolean("skips_rest_periods", false),
                     workoutPlannerNotes = preferences.getString("planner_notes", "").orEmpty(),
                 )
             },
@@ -193,6 +194,7 @@ fun WildforceRoot() {
                 .putLong("weight_kg", java.lang.Double.doubleToRawLongBits(completedProfile.weightKg))
                 .putBoolean("skips_warmups", completedProfile.skipsWarmups)
                 .putBoolean("skips_cooldowns", completedProfile.skipsCooldowns)
+                .putBoolean("skips_rest_periods", completedProfile.skipsRestPeriods)
                 .putString("planner_notes", completedProfile.workoutPlannerNotes)
                 .apply()
             generationError = null
@@ -262,6 +264,7 @@ fun WildforceRoot() {
                     .putInt("height_cm", updated.heightCm).putLong("weight_kg", java.lang.Double.doubleToRawLongBits(updated.weightKg))
                     .putBoolean("skips_warmups", updated.skipsWarmups)
                     .putBoolean("skips_cooldowns", updated.skipsCooldowns)
+                    .putBoolean("skips_rest_periods", updated.skipsRestPeriods)
                     .putString("planner_notes", updated.workoutPlannerNotes)
                     .remove("workout_plan_json")
                     .apply()
@@ -289,7 +292,8 @@ private fun WildforceApp(
     activeWorkout?.let { workout ->
         ActiveWorkoutScreen(
             workout = workout,
-            gender = "male",
+                gender = "male",
+            skipRestPeriods = profile.skipsRestPeriods,
             currentStreak = displayedWorkoutState.user.currentStreak,
             onExit = { activeWorkout = null },
             onFinish = { duration, sets, volume, streak ->

@@ -83,6 +83,7 @@ fun ProfileScreen(initial: OnboardingProfile, onSave: (OnboardingProfile) -> Uni
                 }
                 TogglePreference("Omitir calentamientos", draft.skipsWarmups) { draft = draft.copy(skipsWarmups = !draft.skipsWarmups) }
                 TogglePreference("Omitir vuelta a la calma", draft.skipsCooldowns) { draft = draft.copy(skipsCooldowns = !draft.skipsCooldowns) }
+                TogglePreference("Omitir descansos", draft.skipsRestPeriods) { draft = draft.copy(skipsRestPeriods = !draft.skipsRestPeriods) }
                 OutlinedTextField(draft.workoutPlannerNotes, { draft = draft.copy(workoutPlannerNotes = it.take(500)) }, Modifier.fillMaxWidth(), label = { Text("Notas para el planificador") }, minLines = 2, maxLines = 4)
             }
         }

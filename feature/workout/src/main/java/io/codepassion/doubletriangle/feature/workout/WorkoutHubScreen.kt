@@ -500,6 +500,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
 fun ActiveWorkoutScreen(
     workout: WorkoutDaySummary,
     gender: String,
+    skipRestPeriods: Boolean = false,
     currentStreak: Int = 0,
     onExit: () -> Unit,
     onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double, streak: Int) -> Unit,
@@ -546,7 +547,7 @@ fun ActiveWorkoutScreen(
     fun advanceFromExercise(restSeconds: Int) {
         if (exerciseIndex < workout.exercises.lastIndex) {
             exerciseIndex++
-            if (restSeconds > 0) {
+            if (!skipRestPeriods && restSeconds > 0) {
                 restInitialSeconds = restSeconds
                 restBetweenExercises = true
                 restRemaining = restSeconds
@@ -562,7 +563,7 @@ fun ActiveWorkoutScreen(
     LaunchedEffect(exerciseIndex) {
         if (initializedExerciseIndex != exerciseIndex) {
             reps = targetReps(exercise?.reps)
-            weightKg = 0.0
+            weightKg = exercise?.targetWeightKg ?: 0.0
             val duration = targetDurationSeconds(exercise?.reps)
             exerciseTimeRemaining = duration
             exerciseTimeInitial = duration ?: 0
@@ -809,7 +810,7 @@ fun ActiveWorkoutScreen(
                                 exerciseTimeRemaining = timedDuration; exerciseTimeInitial = timedDuration
                             }
                                 restBetweenExercises = false
-                                restRemaining = exercise.restSeconds
+                                restRemaining = if (skipRestPeriods) null else exercise.restSeconds
                             } else {
                                 val needsFeedback = when (exercise.blockType) {
                                     WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown -> false

@@ -69,6 +69,7 @@ data class OnboardingProfile(
     val weightKg: Double = 70.0,
     val skipsWarmups: Boolean = false,
     val skipsCooldowns: Boolean = false,
+    val skipsRestPeriods: Boolean = false,
     val workoutPlannerNotes: String = "",
 )
 
