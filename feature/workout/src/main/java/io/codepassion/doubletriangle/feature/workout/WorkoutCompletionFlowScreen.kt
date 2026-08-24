@@ -60,6 +60,7 @@ internal fun WorkoutCompletionFlowScreen(
     feedback: Map<Int, String>,
     records: List<ExerciseRecordEvent>,
     progress: CompletionProgress,
+    useImperial: Boolean = false,
     onCancelWorkout: () -> Unit,
     onDone: () -> Unit,
 ) {
@@ -80,7 +81,7 @@ internal fun WorkoutCompletionFlowScreen(
         when (currentPhase) {
             CompletionPhase.DurationWarning -> DurationWarning(onCancelWorkout) { phase = firstRegularPhase }
             CompletionPhase.Records -> RecordsCelebration(records) { phase = CompletionPhase.Summary }
-            CompletionPhase.Summary -> CompletionSummary(workout, durationSeconds, stats, completedMainExercises) { phase = CompletionPhase.Score }
+            CompletionPhase.Summary -> CompletionSummary(workout, durationSeconds, stats, completedMainExercises, useImperial) { phase = CompletionPhase.Score }
             CompletionPhase.Score -> ScoreCelebration(score, completedMainExercises, mainExercises.size, dominantFeedback(feedback)) { phase = if (progress.streakIncreased) CompletionPhase.Streak else CompletionPhase.Xp }
             CompletionPhase.Streak -> StreakCelebration(progress.streakAfter) { phase = CompletionPhase.Xp }
             CompletionPhase.Xp -> XpCelebration(progress) { if (progress.levelAfter > progress.levelBefore) phase = CompletionPhase.LevelUp else onDone() }
@@ -125,7 +126,7 @@ private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: (
 }
 
 @Composable
-private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, stats: Map<Int, ExerciseSessionStats>, completedExercises: Int, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, stats: Map<Int, ExerciseSessionStats>, completedExercises: Int, useImperial: Boolean, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
     Text("✓", Modifier.size(76.dp).background(WildforceThemeTokens.accentGold.copy(alpha = 0.12f), CircleShape).padding(12.dp), style = MaterialTheme.typography.h3, color = WildforceThemeTokens.accentGold, textAlign = TextAlign.Center)
     Text("¡GRAN TRABAJO!", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text("Has completado ${workout.title}.", color = WildforceThemeTokens.textSecondary)
@@ -141,7 +142,7 @@ private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, 
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             CompletionStat("REPETICIONES", repetitions.toString(), Modifier.weight(1f))
-            CompletionStat("VOLUMEN", String.format(Locale.getDefault(), "%.0f kg", volume), Modifier.weight(1f))
+            CompletionStat("VOLUMEN", String.format(Locale.getDefault(), "%.0f %s", if (useImperial) volume * KG_TO_LB else volume, if (useImperial) "lb" else "kg"), Modifier.weight(1f))
         }
         CompletionStat("TIEMPO", formatCompletionClock(durationSeconds), Modifier.fillMaxWidth())
     }
