@@ -10,10 +10,21 @@ import java.time.ZoneId
 internal enum class MealType(val title: String) { Breakfast("Desayuno"), Lunch("Comida"), Dinner("Cena"), Snack("Snack") }
 
 internal data class MealLog(val id: Long, val name: String, val calories: Int, val protein: Int, val carbs: Int, val fat: Int, val type: MealType = MealType.Snack)
+internal data class NutritionTargets(val calories: Int = 2350, val protein: Int = 165, val carbs: Int = 250, val fat: Int = 75)
 
 internal object NutritionStore {
     private const val PREFS = "wildforce_nutrition"
     private const val KEY = "today_meals"
+    private const val TARGETS_KEY = "nutrition_targets"
+
+    fun loadTargets(context: Context): NutritionTargets = runCatching {
+        val item = JSONObject(context.getSharedPreferences(PREFS, 0).getString(TARGETS_KEY, "{}"))
+        NutritionTargets(item.optInt("calories", 2350), item.optInt("protein", 165), item.optInt("carbs", 250), item.optInt("fat", 75))
+    }.getOrDefault(NutritionTargets())
+
+    fun saveTargets(context: Context, targets: NutritionTargets) {
+        context.getSharedPreferences(PREFS, 0).edit().putString(TARGETS_KEY, JSONObject().put("calories", targets.calories).put("protein", targets.protein).put("carbs", targets.carbs).put("fat", targets.fat).toString()).apply()
+    }
 
     fun load(context: Context, date: LocalDate = LocalDate.now()): List<MealLog> = runCatching {
         val raw = context.getSharedPreferences(PREFS, 0).getString(KEY, null) ?: return emptyList()

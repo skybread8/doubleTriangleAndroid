@@ -47,11 +47,6 @@ import java.util.Locale
 import java.time.LocalDate
 import java.time.format.TextStyle
 
-private const val DAILY_CALORIES = 2_350
-private const val DAILY_PROTEIN = 165
-private const val DAILY_CARBS = 250
-private const val DAILY_FAT = 75
-
 @Composable
 fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues()) {
     val context = androidx.compose.ui.platform.LocalContext.current.applicationContext
@@ -65,6 +60,8 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
     var mealCarbs by remember { mutableStateOf("") }
     var mealFat by remember { mutableStateOf("") }
     var mealType by remember { mutableStateOf(MealType.Snack) }
+    var targets by remember { mutableStateOf(NutritionStore.loadTargets(context)) }
+    var editingTargets by remember { mutableStateOf(false) }
     val calories = meals.sumOf { it.calories }
     val protein = meals.sumOf { it.protein }
     val carbs = meals.sumOf { it.carbs }
@@ -90,15 +87,15 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
                             }
                         }
                         Column(Modifier.padding(start = 18.dp)) {
-                            Text("OBJETIVO DIARIO", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
-                            Text("$DAILY_CALORIES kcal", style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
-                            Text(if (calories <= DAILY_CALORIES) "Te quedan ${DAILY_CALORIES - calories} kcal" else "Has superado el objetivo", style = MaterialTheme.typography.caption, color = if (calories <= DAILY_CALORIES) WildforceThemeTokens.accentGold else Color(0xFFC62828))
+                            Text("OBJETIVO DIARIO", Modifier.clickable { editingTargets = true }, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+                            Text("${targets.calories} kcal", style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
+                            Text(if (calories <= targets.calories) "Te quedan ${targets.calories - calories} kcal" else "Has superado el objetivo", style = MaterialTheme.typography.caption, color = if (calories <= targets.calories) WildforceThemeTokens.accentGold else Color(0xFFC62828))
                         }
                     }
                     Spacer(Modifier.height(16.dp))
-                    MacroRow("PROTEÍNA", protein, DAILY_PROTEIN, Color(0xFFE2B93B))
-                    MacroRow("CARBOHIDRATOS", carbs, DAILY_CARBS, Color(0xFF70A8DA))
-                    MacroRow("GRASAS", fat, DAILY_FAT, Color(0xFFB88BD8))
+                    MacroRow("PROTEÍNA", protein, targets.protein, Color(0xFFE2B93B))
+                    MacroRow("CARBOHIDRATOS", carbs, targets.carbs, Color(0xFF70A8DA))
+                    MacroRow("GRASAS", fat, targets.fat, Color(0xFFB88BD8))
                 }
             }
             item {
@@ -150,6 +147,16 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
             dismissButton = { Button(onClick = { addingMeal = false }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textSecondary), elevation = ButtonDefaults.elevation(0.dp)) { Text("CANCELAR") } },
         )
     }
+    if (editingTargets) NutritionTargetsDialog(targets, onDismiss = { editingTargets = false }) { updated -> targets = updated; NutritionStore.saveTargets(context, updated); editingTargets = false }
+}
+
+@Composable
+private fun NutritionTargetsDialog(initial: NutritionTargets, onDismiss: () -> Unit, onSave: (NutritionTargets) -> Unit) {
+    var calories by remember { mutableStateOf(initial.calories.toString()) }
+    var protein by remember { mutableStateOf(initial.protein.toString()) }
+    var carbs by remember { mutableStateOf(initial.carbs.toString()) }
+    var fat by remember { mutableStateOf(initial.fat.toString()) }
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("OBJETIVOS DIARIOS", fontFamily = AntonFontFamily) }, text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { NutritionNumberField("Calorías", calories, { calories = it.filter(Char::isDigit) }, Modifier.fillMaxWidth()); Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NutritionNumberField("Proteína", protein, { protein = it.filter(Char::isDigit) }, Modifier.weight(1f)); NutritionNumberField("Carbos", carbs, { carbs = it.filter(Char::isDigit) }, Modifier.weight(1f)); NutritionNumberField("Grasas", fat, { fat = it.filter(Char::isDigit) }, Modifier.weight(1f)) } } }, confirmButton = { Button(onClick = { onSave(NutritionTargets(calories.toIntOrNull()?.coerceIn(500, 8000) ?: initial.calories, protein.toIntOrNull()?.coerceIn(0, 500) ?: initial.protein, carbs.toIntOrNull()?.coerceIn(0, 1000) ?: initial.carbs, fat.toIntOrNull()?.coerceIn(0, 500) ?: initial.fat)) }) { Text("GUARDAR") } }, dismissButton = { Text("CANCELAR", Modifier.clickable(onClick = onDismiss).padding(12.dp), color = WildforceThemeTokens.textSecondary) })
 }
 
 @Composable
