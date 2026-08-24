@@ -666,9 +666,12 @@ fun ActiveWorkoutScreen(
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current.applicationContext
     DisposableEffect(workout.id) {
-        WorkoutActiveNotification.show(context, workout.title)
+        val notificationsEnabled = WorkoutNotificationPreferences.enabled(context)
         val serviceIntent = android.content.Intent(context, WorkoutForegroundService::class.java).putExtra("title", workout.title).putExtra("detail", "Sesión activa")
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) context.startForegroundService(serviceIntent) else context.startService(serviceIntent)
+        if (notificationsEnabled) {
+            WorkoutActiveNotification.show(context, workout.title)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) context.startForegroundService(serviceIntent) else context.startService(serviceIntent)
+        }
         onDispose { WorkoutActiveNotification.cancel(context); context.stopService(serviceIntent) }
     }
     val restored = remember(workout.id) { WorkoutSessionStore.load(context, workout.id) }
@@ -732,7 +735,14 @@ fun ActiveWorkoutScreen(
             val completed = completedByExercise.values.sum()
             val total = workout.exercises.sumOf { it.sets }.coerceAtLeast(1)
             val detail = if (restRemaining != null) "Descanso: ${restRemaining}s · ${completed}/${total} series" else "$currentName · ${completed}/${total} series"
-            WorkoutActiveNotification.show(context, workout.title, detail, headsUp = restRemaining != null && restRemaining == restInitialSeconds)
+            if (WorkoutNotificationPreferences.enabled(context)) {
+                WorkoutActiveNotification.show(
+                    context,
+                    workout.title,
+                    detail,
+                    headsUp = WorkoutNotificationPreferences.restAlertsEnabled(context) && restRemaining != null && restRemaining == restInitialSeconds,
+                )
+            }
         }
     }
     LaunchedEffect(exerciseIndex) {

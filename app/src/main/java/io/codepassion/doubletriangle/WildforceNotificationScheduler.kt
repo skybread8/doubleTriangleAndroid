@@ -10,6 +10,7 @@ import android.content.Intent
 import android.os.Build
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
+import io.codepassion.doubletriangle.feature.workout.WorkoutNotificationPreferences
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -32,12 +33,14 @@ internal object WildforceNotificationScheduler {
     }
 
     fun scheduleNextWorkout(context: Context, state: WorkoutHubState) {
+        if (!WorkoutNotificationPreferences.remindersEnabled(context)) return
         val next = state.workouts.filter { it.status == WorkoutStatus.Planned }.minByOrNull { daysUntil(it.scheduledDay) } ?: return
         val date = LocalDate.now().plusDays(daysUntil(next.scheduledDay).toLong())
         schedule(context, WORKOUT_ALARM, date.atTime(LocalTime.of(9, 0)), CHANNEL_WORKOUT, "Entrenamiento pendiente", "Hoy: ${next.title}")
     }
 
     fun scheduleNutritionReminder(context: Context) {
+        if (!WorkoutNotificationPreferences.remindersEnabled(context)) return
         schedule(context, NUTRITION_ALARM, LocalDate.now().atTime(LocalTime.of(20, 0)), CHANNEL_NUTRITION, "Registro nutricional", "¿Has registrado tus comidas de hoy?")
     }
 

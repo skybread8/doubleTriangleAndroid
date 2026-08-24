@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -89,6 +90,10 @@ fun ProfileScreen(
     var healthConnectMessage by remember { mutableStateOf<String?>(null) }
     var saveMessage by remember(initial) { mutableStateOf<String?>(null) }
     var entered by remember { mutableStateOf(false) }
+    val notificationPreferences = remember { LocalContext.current.getSharedPreferences("wildforce_notification_settings", 0) }
+    var notificationsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("enabled", true)) }
+    var restAlertsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("rest_alerts", true)) }
+    var reminderNotificationsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("reminders", true)) }
     LaunchedEffect(Unit) { entered = true }
     LazyColumn(
         modifier = Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 16.dp),
@@ -173,7 +178,23 @@ fun ProfileScreen(
             ProfileEntrance(entered, 235) { ProfileAchievements() }
         }
         item {
-            ProfileEntrance(entered, 255) {
+            ProfileEntrance(entered, 245) { Section("NOTIFICACIONES") {
+                TogglePreference("Notificaciones de entrenamiento", "Muestra la sesión activa en el panel y la pantalla bloqueada.", notificationsEnabled) {
+                    notificationsEnabled = !notificationsEnabled
+                    notificationPreferences.edit().putBoolean("enabled", notificationsEnabled).apply()
+                }
+                TogglePreference("Avisos al comenzar el descanso", "Emite un aviso cuando empieza el temporizador de descanso.", restAlertsEnabled) {
+                    restAlertsEnabled = !restAlertsEnabled
+                    notificationPreferences.edit().putBoolean("rest_alerts", restAlertsEnabled).apply()
+                }
+                TogglePreference("Recordatorios", "Permite recordatorios de entrenamientos y registro nutricional.", reminderNotificationsEnabled) {
+                    reminderNotificationsEnabled = !reminderNotificationsEnabled
+                    notificationPreferences.edit().putBoolean("reminders", reminderNotificationsEnabled).apply()
+                }
+            } }
+        }
+        item {
+            ProfileEntrance(entered, 265) {
             generationError?.let { Text(it, Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).padding(12.dp), color = Color(0xFFC62828)) }
             Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("PLAN PERSONALIZADO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)

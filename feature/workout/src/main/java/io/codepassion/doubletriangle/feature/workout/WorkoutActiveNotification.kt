@@ -3,11 +3,16 @@ package io.codepassion.doubletriangle.feature.workout
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
+import android.media.MediaMetadata
+import android.media.session.MediaSession
+import android.media.session.PlaybackState
 import android.os.Build
 
 internal object WorkoutActiveNotification {
     private const val channelId = "active_workout_live"
     private const val notificationId = 4101
+    private var mediaSession: MediaSession? = null
 
     fun show(context: Context, title: String, detail: String = "Sesión activa", headsUp: Boolean = false) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -23,11 +28,34 @@ internal object WorkoutActiveNotification {
         val contentIntent = launchIntent?.let {
             android.app.PendingIntent.getActivity(context, notificationId, it, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
         }
+        val session = mediaSession(context)
+        session.setMetadata(MediaMetadata.Builder().putString(MediaMetadata.METADATA_KEY_TITLE, title).putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, detail).build())
+        session.setPlaybackState(PlaybackState.Builder().setActions(PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE).setState(PlaybackState.STATE_PLAYING, 0L, 1f).build())
         return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) android.app.Notification.Builder(context, channelId) else @Suppress("DEPRECATION") android.app.Notification.Builder(context))
             .setSmallIcon(android.R.drawable.ic_media_play).setContentTitle(title).setContentText(detail).setOngoing(true)
-            .setVisibility(android.app.Notification.VISIBILITY_PUBLIC).setCategory(android.app.Notification.CATEGORY_PROGRESS)
-            .setPriority(android.app.Notification.PRIORITY_HIGH).setOnlyAlertOnce(!headsUp).setShowWhen(false)
-            .setAutoCancel(false).apply { contentIntent?.let(::setContentIntent) }.build()
+            .setVisibility(android.app.Notification.VISIBILITY_PUBLIC).setCategory(android.app.Notification.CATEGORY_TRANSPORT)
+            .setPriority(android.app.Notification.PRIORITY_HIGH).setOnlyAlertOnce(true).setSilent(!headsUp).setShowWhen(false)
+            .setAutoCancel(false).apply {
+                contentIntent?.let(::setContentIntent)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    setStyle(android.app.Notification.MediaStyle().setMediaSession(session.sessionToken).setShowActionsInCompactView(0))
+                }
+            }.build()
+    }
+
+    private fun mediaSession(context: Context): MediaSession = mediaSession ?: MediaSession(context, "WildforceWorkout").also { session ->
+        session.setCallback(object : MediaSession.Callback() {
+            override fun onPlay() = openApp(context)
+            override fun onPause() = openApp(context)
+        })
+        session.isActive = true
+        mediaSession = session
+    }
+
+    private fun openApp(context: Context) {
+        context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }?.let(context::startActivity)
     }
 
     private fun ensureChannel(manager: NotificationManager) {
@@ -39,5 +67,7 @@ internal object WorkoutActiveNotification {
 
     fun cancel(context: Context) {
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(notificationId)
+        mediaSession?.run { isActive = false; release() }
+        mediaSession = null
     }
 }
