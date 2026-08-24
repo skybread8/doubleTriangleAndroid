@@ -149,6 +149,9 @@ object WorkoutPlanGenerator {
             "La IA no respetó exactamente los días seleccionados. Vuelve a generar el plan."
         }
         state.workouts.forEach { workout ->
+            check(workout.exercises.isNotEmpty()) {
+                "La IA devolvió una sesión vacía para ${workout.scheduledDay}. Vuelve a generar el plan."
+            }
             val blocks = workout.displayBlocks()
             val hasWarmup = blocks.any { it.type == WorkoutBlockType.Warmup && it.exercises.isNotEmpty() }
             val hasCooldown = blocks.any { it.type == WorkoutBlockType.Cooldown && it.exercises.isNotEmpty() }
