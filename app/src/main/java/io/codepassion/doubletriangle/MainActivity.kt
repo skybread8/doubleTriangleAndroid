@@ -53,6 +53,8 @@ import io.codepassion.doubletriangle.feature.onboarding.MetricSystem
 import io.codepassion.doubletriangle.feature.onboarding.MovementRestriction
 import io.codepassion.doubletriangle.feature.onboarding.TrainingLevel
 import io.codepassion.doubletriangle.feature.onboarding.TrainingSplitPreference
+import io.codepassion.doubletriangle.feature.onboarding.TrainingLocationProfile
+import io.codepassion.doubletriangle.feature.onboarding.effectiveTrainingLocations
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutFocus
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
@@ -158,6 +160,7 @@ fun WildforceRoot() {
                     skipsCooldowns = preferences.getBoolean("skips_cooldowns", false),
                     skipsRestPeriods = preferences.getBoolean("skips_rest_periods", false),
                     workoutPlannerNotes = preferences.getString("planner_notes", "").orEmpty(),
+                    trainingLocations = decodeTrainingLocations(preferences.getStringSet("training_locations", emptySet()).orEmpty()),
                 )
             },
         )
@@ -198,6 +201,7 @@ fun WildforceRoot() {
                 .putBoolean("skips_cooldowns", completedProfile.skipsCooldowns)
                 .putBoolean("skips_rest_periods", completedProfile.skipsRestPeriods)
                 .putString("planner_notes", completedProfile.workoutPlannerNotes)
+                .putStringSet("training_locations", encodeTrainingLocations(completedProfile.trainingLocations))
                 .apply()
             generationError = null
             if (useAi) {
@@ -272,6 +276,7 @@ fun WildforceRoot() {
                     .putBoolean("skips_cooldowns", updated.skipsCooldowns)
                     .putBoolean("skips_rest_periods", updated.skipsRestPeriods)
                     .putString("planner_notes", updated.workoutPlannerNotes)
+                    .putStringSet("training_locations", encodeTrainingLocations(updated.trainingLocations))
                     .remove("workout_plan_json")
                     .apply()
                 profile = updated
@@ -366,7 +371,7 @@ private fun WildforceApp(
             displayedWorkoutState = updatedState
             workoutDetail = updated
             onPlanWorkoutUpdated(updatedState)
-        }, defaultAdaptEquipment = profile.availableEquipment.joinToString(", ") { it.title }, adaptAiGenerator = { request ->
+        }, defaultAdaptEquipment = profile.effectiveTrainingLocations().firstOrNull { it.isDefault }?.equipment?.joinToString(", ") { it.title }.orEmpty().ifBlank { profile.availableEquipment.joinToString(", ") { it.title } }, adaptEquipmentPresets = profile.effectiveTrainingLocations().map { location -> location.name to location.equipment.joinToString(", ") { it.title } }, adaptAiGenerator = { request ->
             WorkoutPlanGenerator.adaptWorkout(profile, workout, request, appContext)
         })
         return
@@ -434,4 +439,26 @@ private fun AppPreview() = WildforceTheme {
         workoutState = PreviewWorkoutRepository.load(),
         onWorkoutCompleted = { _, _, _, _ -> },
     )
+}
+
+private const val trainingLocationSeparator = "\u0001"
+
+private fun encodeTrainingLocations(locations: List<TrainingLocationProfile>): MutableSet<String> = locations.mapTo(mutableSetOf()) { location ->
+    listOf(
+        location.name.replace(trainingLocationSeparator, " "),
+        if (location.isDefault) "1" else "0",
+        location.equipment.joinToString(",") { it.storedValue },
+    ).joinToString(trainingLocationSeparator)
+}
+
+private fun decodeTrainingLocations(encoded: Set<String>): List<TrainingLocationProfile> = encoded.mapNotNull { value ->
+    val fields = value.split(trainingLocationSeparator, limit = 3)
+    val name = fields.getOrNull(0)?.trim().orEmpty()
+    if (name.isBlank()) null else TrainingLocationProfile(
+        name = name,
+        isDefault = fields.getOrNull(1) == "1",
+        equipment = Equipment.fromStoredValues(fields.getOrNull(2)?.split(',')?.filter(String::isNotBlank)?.toSet()).ifEmpty { setOf(Equipment.Bodyweight) },
+    )
+}.let { locations ->
+    if (locations.isEmpty() || locations.any { it.isDefault }) locations else locations.mapIndexed { index, location -> location.copy(isDefault = index == 0) }
 }

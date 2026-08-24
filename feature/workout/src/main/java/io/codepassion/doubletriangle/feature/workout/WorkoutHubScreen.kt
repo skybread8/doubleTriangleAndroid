@@ -387,7 +387,7 @@ private fun RestDayCard() {
 private fun WorkoutHubPreview() = WildforceTheme { WorkoutHubScreen(PaddingValues()) }
 
 @Composable
-fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial: Boolean = false, onBack: () -> Unit, onStart: () -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}, defaultAdaptEquipment: String = "Peso corporal", adaptAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null) {
+fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial: Boolean = false, onBack: () -> Unit, onStart: () -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}, defaultAdaptEquipment: String = "Peso corporal", adaptEquipmentPresets: List<Pair<String, String>> = emptyList(), adaptAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null) {
     var expandedExercise by remember { mutableStateOf<Int?>(null) }
     var collapsedBlocks by remember(workout.id) { mutableStateOf(emptySet<Int>()) }
     val detailContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
@@ -413,6 +413,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
     if (showingAdaptation) {
         AutomaticWorkoutRequestDialog(
             defaultEquipment = defaultAdaptEquipment,
+            equipmentPresets = adaptEquipmentPresets,
             initialFocus = workout.focus,
             initialDuration = workout.estimatedMinutes,
             title = "ADAPTAR ENTRENAMIENTO",

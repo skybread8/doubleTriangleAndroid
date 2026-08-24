@@ -303,7 +303,7 @@ private fun StyleParameterControls(exercise: ExerciseSummary, onChange: (Exercis
 }
 
 @Composable
-internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, onDismiss: () -> Unit, onGenerate: (CustomWorkoutRequest) -> Unit, initialFocus: String = "Full body", initialDuration: Int = 45, title: String = "CREAR CON IA") {
+internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, equipmentPresets: List<Pair<String, String>> = emptyList(), onDismiss: () -> Unit, onGenerate: (CustomWorkoutRequest) -> Unit, initialFocus: String = "Full body", initialDuration: Int = 45, title: String = "CREAR CON IA") {
     var focus by remember(initialFocus) { mutableStateOf(initialFocus) }
     var duration by remember(initialDuration) { mutableStateOf(initialDuration.toString()) }
     var equipment by remember(defaultEquipment) { mutableStateOf(defaultEquipment.ifBlank { "Peso corporal" }) }
@@ -320,6 +320,12 @@ internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, onDismiss: 
                     }
                 }
                 TextField(duration, { duration = it.filter(Char::isDigit).take(3) }, label = { Text("Duración (minutos)") }, singleLine = true)
+                if (equipmentPresets.isNotEmpty()) {
+                    Text("UBICACIÓN DE ENTRENAMIENTO", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+                    equipmentPresets.forEach { (name, presetEquipment) ->
+                        Text(name, Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(if (equipment == presetEquipment) WildforceThemeTokens.accentGold.copy(alpha = 0.16f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.07f)).clickable { equipment = presetEquipment }.padding(horizontal = 10.dp, vertical = 8.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
+                    }
+                }
                 TextField(equipment, { equipment = it.take(120) }, label = { Text("Equipamiento disponible") }, maxLines = 2)
             }
         },

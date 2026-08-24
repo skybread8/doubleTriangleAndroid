@@ -72,6 +72,7 @@ fun ProfileScreen(
     var durationInput by remember(initial) { mutableStateOf(initial.preferredWorkoutDurationMinutes.toString()) }
     var birthYearInput by remember(initial) { mutableStateOf(initial.birthYear.toString()) }
     var picker by remember { mutableStateOf<Picker?>(null) }
+    var showsTrainingLocations by remember { mutableStateOf(false) }
     var healthConnectMessage by remember { mutableStateOf<String?>(null) }
     var entered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { entered = true }
@@ -146,6 +147,7 @@ fun ProfileScreen(
         item {
             ProfileEntrance(entered, 205) { Section("ENTORNO Y SEGURIDAD") {
                 ChoiceButton("Tipo de gimnasio", draft.gymType.title) { picker = Picker.Gym }
+                ChoiceButton("Ubicaciones de entrenamiento", draft.effectiveTrainingLocations().joinToString(" · ") { if (it.isDefault) "${it.name} (principal)" else it.name }) { showsTrainingLocations = true }
                 ChoiceButton("Equipamiento disponible", "${draft.availableEquipment.size} seleccionado(s)") { picker = Picker.Equipment }
                 ChoiceButton("Restricciones o molestias", draft.movementRestrictions.takeIf { it.isNotEmpty() }?.size?.let { "$it seleccionado(s)" } ?: "Ninguna") { picker = Picker.Restrictions }
             } }
@@ -165,10 +167,26 @@ fun ProfileScreen(
     }
     picker?.let { current ->
         when (current) {
-            Picker.Equipment -> EquipmentPickerDialog(draft.availableEquipment, { selected -> draft = draft.copy(availableEquipment = selected) }) { picker = null }
+            Picker.Equipment -> EquipmentPickerDialog(draft.availableEquipment, { selected ->
+                val locations = draft.effectiveTrainingLocations().map { location ->
+                    if (location.isDefault) location.copy(equipment = selected) else location
+                }
+                draft = draft.copy(availableEquipment = selected, trainingLocations = locations)
+            }) { picker = null }
             Picker.Restrictions -> RestrictionsPickerDialog(draft.movementRestrictions, { selected -> draft = draft.copy(movementRestrictions = selected) }) { picker = null }
             else -> PickerDialog(current, draft) { updated -> draft = updated; picker = null }
         }
+    }
+    if (showsTrainingLocations) {
+        TrainingLocationsDialog(
+            initial = draft.effectiveTrainingLocations(),
+            onSave = { locations ->
+                val defaultLocation = locations.firstOrNull { it.isDefault } ?: locations.first()
+                draft = draft.copy(trainingLocations = locations, availableEquipment = defaultLocation.equipment)
+                showsTrainingLocations = false
+            },
+            onDismiss = { showsTrainingLocations = false },
+        )
     }
     if (isRegenerating) {
         Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.58f)).clickable { }, contentAlignment = Alignment.Center) {
@@ -230,7 +248,10 @@ private sealed class Picker { data object Goal : Picker(); data object Level : P
         Picker.Lifestyle -> { title = "Actividad diaria"; values = LifestyleLevel.entries.map { it.title to { p: OnboardingProfile -> p.copy(lifestyle = it) } } }
         Picker.Split -> { title = "División semanal"; values = TrainingSplitPreference.entries.map { it.title to { p: OnboardingProfile -> p.copy(trainingSplitPreference = it) } } }
         Picker.Body -> { title = "Fase corporal"; values = BodyCompositionPhase.entries.map { it.title to { p: OnboardingProfile -> p.copy(bodyCompositionPhase = it) } } }
-        Picker.Gym -> { title = "Tipo de gimnasio"; values = GymType.entries.map { it.title to { p: OnboardingProfile -> p.copy(gymType = it, availableEquipment = it.defaultEquipment) } } }
+        Picker.Gym -> { title = "Tipo de gimnasio"; values = GymType.entries.map { it.title to { p: OnboardingProfile ->
+            val locations = p.effectiveTrainingLocations().map { location -> if (location.isDefault) location.copy(equipment = it.defaultEquipment) else location }
+            p.copy(gymType = it, availableEquipment = it.defaultEquipment, trainingLocations = locations)
+        } } }
         Picker.Gender -> { title = "Sexo"; values = Gender.entries.map { it.title to { p: OnboardingProfile -> p.copy(gender = it) } } }
         Picker.Metric -> { title = "Unidades"; values = MetricSystem.entries.map { it.title to { p: OnboardingProfile -> p.copy(metricSystem = it) } } }
         Picker.BirthMonth -> { title = "Mes de nacimiento"; values = (1..12).map { month -> monthName(month) to { p: OnboardingProfile -> p.copy(birthMonth = month) } } }
@@ -249,6 +270,84 @@ private fun EquipmentPickerDialog(initial: Set<Equipment>, onSave: (Set<Equipmen
         text = { LazyColumn(Modifier.height(360.dp)) { items(Equipment.entries) { equipment -> TogglePickerRow(equipment.title, equipment in selected) { selected = if (equipment in selected) selected - equipment else selected + equipment } } } },
         confirmButton = { Button(onClick = { onSave(selected); onDismiss() }) { Text("GUARDAR") } },
         dismissButton = { Text("CANCELAR", Modifier.clickable(onClick = onDismiss).padding(12.dp), color = WildforceThemeTokens.textSecondary) },
+    )
+}
+
+@Composable
+private fun TrainingLocationsDialog(
+    initial: List<TrainingLocationProfile>,
+    onSave: (List<TrainingLocationProfile>) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var locations by remember(initial) { mutableStateOf(initial) }
+    var editingIndex by remember { mutableStateOf<Int?>(null) }
+    var editorName by remember { mutableStateOf("") }
+    var editorEquipment by remember { mutableStateOf(setOf<Equipment>()) }
+    val editing = editingIndex?.let(locations::getOrNull)
+    androidx.compose.material.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (editing == null) "UBICACIONES" else "EDITAR UBICACIÓN", fontFamily = AntonFontFamily) },
+        text = {
+            if (editing == null) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LazyColumn(Modifier.height(250.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        items(locations) { location ->
+                            Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable {
+                                locations = locations.map { it.copy(isDefault = it.name == location.name) }
+                            }.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Column(Modifier.weight(1f)) {
+                                    Text(location.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                                    Text("${location.equipment.size} elementos", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                                }
+                                Text(if (location.isDefault) "PRINCIPAL" else "EDITAR", Modifier.clickable {
+                                    editingIndex = locations.indexOf(location)
+                                    editorName = location.name
+                                    editorEquipment = location.equipment
+                                }.padding(6.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+                            }
+                        }
+                    }
+                    Text("＋ AÑADIR UBICACIÓN", Modifier.fillMaxWidth().clickable {
+                        editingIndex = -1
+                        editorName = ""
+                        editorEquipment = setOf(Equipment.Bodyweight)
+                    }.padding(10.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    Text("Toca una ubicación para marcarla como principal. Su equipamiento será el usado al generar planes.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(editorName, { editorName = it.take(50) }, Modifier.fillMaxWidth(), label = { Text("Nombre") }, singleLine = true)
+                    LazyColumn(Modifier.height(280.dp)) {
+                        items(Equipment.entries) { equipment ->
+                            TogglePickerRow(equipment.title, equipment in editorEquipment) {
+                                editorEquipment = if (equipment in editorEquipment) editorEquipment - equipment else editorEquipment + equipment
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                if (editing == null) onSave(locations)
+                else {
+                    val updated = TrainingLocationProfile(
+                        name = editorName.trim().ifBlank { "Ubicación ${locations.size + 1}" },
+                        equipment = editorEquipment.ifEmpty { setOf(Equipment.Bodyweight) },
+                        isDefault = editing.isDefault || locations.isEmpty(),
+                    )
+                    locations = if (editingIndex == -1) {
+                        if (locations.any { it.isDefault }) locations + updated else locations + updated.copy(isDefault = true)
+                    } else locations.mapIndexed { index, location -> if (index == editingIndex) updated else location }
+                    editingIndex = null
+                }
+            }) { Text(if (editing == null) "GUARDAR" else "LISTO") }
+        },
+        dismissButton = {
+            Text(if (editing == null) "CANCELAR" else "VOLVER", Modifier.clickable {
+                if (editing == null) onDismiss() else editingIndex = null
+            }.padding(12.dp), color = WildforceThemeTokens.textSecondary)
+        },
     )
 }
 
