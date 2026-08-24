@@ -734,8 +734,13 @@ fun ActiveWorkoutScreen(
                 MuscleStrip(exercise?.imageKey, onDarkBackground = true, modifier = Modifier.padding(top = 8.dp))
             }
             Spacer(Modifier.weight(1f))
+            val activePanelHeight = when {
+                restRemaining == null -> 438.dp
+                restBetweenExercises -> 390.dp
+                else -> 290.dp
+            }
             Column(
-                Modifier.fillMaxWidth().height(438.dp)
+                Modifier.fillMaxWidth().height(activePanelHeight)
                     .clip(RoundedCornerShape(topStart = 42.dp, topEnd = 42.dp, bottomStart = 30.dp, bottomEnd = 30.dp))
                     .background(WildforceThemeTokens.backgroundSecondary)
                     .padding(horizontal = 18.dp, vertical = 18.dp),
