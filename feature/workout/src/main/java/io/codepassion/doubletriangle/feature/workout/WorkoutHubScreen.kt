@@ -793,7 +793,7 @@ fun ActiveWorkoutScreen(
                     workout.title,
                     detail,
                     headsUp = WorkoutNotificationPreferences.restAlertsEnabled(context) && restRemaining != null && restRemaining == restInitialSeconds,
-                    progress = if (restRemaining != null) (restInitialSeconds - restRemaining!!).coerceAtLeast(0) else completed,
+                    progress = if (restRemaining != null) restRemaining!!.coerceIn(0, restInitialSeconds) else completed,
                     progressMax = if (restRemaining != null) restInitialSeconds else total,
                     isResting = restRemaining != null,
                     artwork = notificationArtwork,
