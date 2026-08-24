@@ -65,13 +65,22 @@ fun AnalyticsScreen(
     val lastSets = preferences.getInt("last_workout_sets", 0)
     val lastVolume = java.lang.Double.longBitsToDouble(preferences.getLong("last_workout_volume", 0L))
     val weeklyVolumes = remember(exerciseSummaries) {
-        val start = LocalDate.now().minusDays(6).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val startDate = LocalDate.now().minusDays(6)
         val totals = MutableList(7) { 0.0 }
         exerciseSummaries.flatMap { WorkoutAnalyticsStore.history(context, it.exercise) }.forEach { point ->
-            val day = ((point.timestampMillis - start) / 86_400_000L).toInt()
+            val pointDate = java.time.Instant.ofEpochMilli(point.timestampMillis).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+            val day = java.time.temporal.ChronoUnit.DAYS.between(startDate, pointDate).toInt()
             if (day in totals.indices) totals[day] += point.volumeKg
         }
         totals
+    }
+    val sessionsLast7Days = remember(exerciseSummaries) {
+        val startDate = LocalDate.now().minusDays(6)
+        exerciseSummaries.flatMap { WorkoutAnalyticsStore.history(context, it.exercise) }
+            .count { point ->
+                val date = java.time.Instant.ofEpochMilli(point.timestampMillis).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+                !date.isBefore(startDate)
+            }
     }
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(contentPadding).padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("ANALÍTICAS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
@@ -86,6 +95,7 @@ fun AnalyticsScreen(
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             MetricCard("RACHA", state.user.currentStreak.toString(), "días", Modifier.weight(1f))
             MetricCard("SESIONES", completed.toString(), "completadas", Modifier.weight(1f))
+            MetricCard("FRECUENCIA", sessionsLast7Days.toString(), "últimos 7 días", Modifier.weight(1f))
         }
         Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("ÚLTIMA SESIÓN", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
@@ -115,6 +125,9 @@ private fun VolumeTrend(volumes: List<Double>) {
     val max = volumes.maxOrNull()?.takeIf { it > 0 } ?: 1.0
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("VOLUMEN · ÚLTIMOS 7 DÍAS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+        if (volumes.all { it <= 0.0 }) {
+            Text("Todavía no hay sesiones registradas en este periodo.", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 20.dp))
+        }
         Row(Modifier.fillMaxWidth().height(92.dp), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.Bottom) {
             volumes.forEachIndexed { index, volume ->
                 val animatedHeight by animateDpAsState((12 + 56 * (volume / max)).dp, animationSpec = tween(650), label = "analytics-volume")
