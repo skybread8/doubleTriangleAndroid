@@ -57,6 +57,7 @@ import io.codepassion.doubletriangle.feature.onboarding.WorkoutFocus
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
+import io.codepassion.doubletriangle.feature.onboarding.ProfileScreen
 import io.codepassion.doubletriangle.feature.workout.ActiveWorkoutScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutDetailScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutHubScreen
@@ -236,6 +237,25 @@ fun WildforceRoot() {
                 preferences.edit().clear().apply()
                 profile = null
             },
+            onProfileUpdated = { updated ->
+                preferences.edit()
+                    .putString("name", updated.name)
+                    .putString("goal", updated.goal.storedValue)
+                    .putString("lifestyle", updated.lifestyle.storedValue)
+                    .putStringSet("workout_days", updated.workoutDays.mapTo(mutableSetOf()) { it.storedValue })
+                    .putInt("workout_duration", updated.preferredWorkoutDurationMinutes)
+                    .putString("training_level", updated.trainingLevel.storedValue)
+                    .putString("training_split", updated.trainingSplitPreference.storedValue)
+                    .putString("body_phase", updated.bodyCompositionPhase?.storedValue)
+                    .putStringSet("custom_focuses", updated.customWorkoutFocuses.mapTo(mutableSetOf()) { (day, focus) -> "${day.storedValue}:${focus.storedValue}" })
+                    .putString("gym_type", updated.gymType.storedValue)
+                    .putStringSet("equipment", updated.availableEquipment.mapTo(mutableSetOf()) { it.storedValue })
+                    .putStringSet("restrictions", updated.movementRestrictions.mapTo(mutableSetOf()) { it.storedValue })
+                    .putInt("birth_month", updated.birthMonth).putInt("birth_year", updated.birthYear)
+                    .putString("gender", updated.gender.storedValue).putString("metric_system", updated.metricSystem.storedValue)
+                    .putInt("height_cm", updated.heightCm).putLong("weight_kg", java.lang.Double.doubleToRawLongBits(updated.weightKg)).apply()
+                profile = updated
+            },
         )
     }
 }
@@ -245,7 +265,8 @@ private fun WildforceApp(
     profile: OnboardingProfile,
     workoutState: WorkoutHubState,
     onWorkoutCompleted: (String, Int, Int, Double) -> Unit,
-    onResetOnboarding: () -> Unit,
+    onResetOnboarding: () -> Unit = {},
+    onProfileUpdated: (OnboardingProfile) -> Unit = {},
 ) {
     val appContext = LocalContext.current.applicationContext
     val appPreferences = remember { appContext.getSharedPreferences("wildforce_profile", 0) }
@@ -318,12 +339,10 @@ private fun WildforceApp(
             )
         } else if (selected == RootDestination.Nutrition) {
             NutritionScreen()
+        } else if (selected == RootDestination.Profile) {
+            ProfileScreen(profile, onProfileUpdated)
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(
-                text = if (selected == RootDestination.Profile) "${selected.label}\nReiniciar onboarding" else "${selected.label}\nPróxima vertical",
-                color = WildforceThemeTokens.textSecondary,
-                modifier = if (selected == RootDestination.Profile) Modifier.clickable(onClick = onResetOnboarding) else Modifier,
-            )
+            Text("${selected.label}\nPróxima vertical", color = WildforceThemeTokens.textSecondary)
         }
     }
 }
