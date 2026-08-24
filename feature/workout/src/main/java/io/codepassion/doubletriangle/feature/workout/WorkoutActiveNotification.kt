@@ -4,6 +4,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.Shader
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -13,15 +18,17 @@ internal object WorkoutActiveNotification {
     private const val channelId = "active_workout_live"
     private const val notificationId = 4101
     private var mediaSession: MediaSession? = null
+    private var artworkTitle: String? = null
+    private var artwork: Bitmap? = null
 
-    fun show(context: Context, title: String, detail: String = "Sesión activa", headsUp: Boolean = false) {
+    fun show(context: Context, title: String, detail: String = "Sesión activa", headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         ensureChannel(manager)
-        val notification = build(context, title, detail, headsUp)
+        val notification = build(context, title, detail, headsUp, progress, progressMax, isResting)
         manager.notify(notificationId, notification)
     }
 
-    fun build(context: Context, title: String, detail: String, headsUp: Boolean = false): android.app.Notification {
+    fun build(context: Context, title: String, detail: String, headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false): android.app.Notification {
         val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
             flags = android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -30,7 +37,7 @@ internal object WorkoutActiveNotification {
         }
         val session = mediaSession(context)
         session.setMetadata(MediaMetadata.Builder().putString(MediaMetadata.METADATA_KEY_TITLE, title).putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, detail).build())
-        session.setPlaybackState(PlaybackState.Builder().setActions(PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE).setState(PlaybackState.STATE_PLAYING, 0L, 1f).build())
+        session.setPlaybackState(PlaybackState.Builder().setActions(PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE or PlaybackState.ACTION_SKIP_TO_NEXT).setState(if (isResting) PlaybackState.STATE_PAUSED else PlaybackState.STATE_PLAYING, progress.toLong(), 1f).build())
         @Suppress("DEPRECATION")
         val builder: android.app.Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             android.app.Notification.Builder(context, channelId)
@@ -46,17 +53,33 @@ internal object WorkoutActiveNotification {
             .setOnlyAlertOnce(true)
             .setShowWhen(false)
             .setAutoCancel(false)
+            .setLargeIcon(exerciseArtwork(title))
         if (contentIntent != null) builder.setContentIntent(contentIntent)
+        if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder.setStyle(android.app.Notification.MediaStyle().setMediaSession(session.sessionToken).setShowActionsInCompactView(0))
         }
         return builder.build()
     }
 
+    private fun exerciseArtwork(title: String): Bitmap {
+        if (artworkTitle == title && artwork != null) return artwork!!
+        val bitmap = Bitmap.createBitmap(720, 360, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val background = Paint().apply { shader = LinearGradient(0f, 0f, 720f, 360f, intArrayOf(0xFF171717.toInt(), 0xFF6A5A3E.toInt()), null, Shader.TileMode.CLAMP) }
+        canvas.drawRect(0f, 0f, 720f, 360f, background)
+        val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt(); textSize = 54f; typeface = android.graphics.Typeface.DEFAULT_BOLD }
+        canvas.drawText(title.take(26), 42f, 205f, text)
+        artworkTitle = title
+        artwork = bitmap
+        return bitmap
+    }
+
     private fun mediaSession(context: Context): MediaSession = mediaSession ?: MediaSession(context, "WildforceWorkout").also { session ->
         session.setCallback(object : MediaSession.Callback() {
             override fun onPlay() = openApp(context)
             override fun onPause() = openApp(context)
+            override fun onSkipToNext() = openApp(context)
         })
         session.isActive = true
         mediaSession = session
@@ -79,5 +102,8 @@ internal object WorkoutActiveNotification {
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(notificationId)
         mediaSession?.run { isActive = false; release() }
         mediaSession = null
+        artwork?.recycle()
+        artwork = null
+        artworkTitle = null
     }
 }
