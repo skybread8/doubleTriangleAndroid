@@ -33,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -54,6 +56,10 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
     var meals by remember { mutableStateOf(NutritionStore.load(context)) }
     var addingMeal by remember { mutableStateOf(false) }
     var mealName by remember { mutableStateOf("") }
+    var mealCalories by remember { mutableStateOf("") }
+    var mealProtein by remember { mutableStateOf("") }
+    var mealCarbs by remember { mutableStateOf("") }
+    var mealFat by remember { mutableStateOf("") }
     val calories = meals.sumOf { it.calories }
     val protein = meals.sumOf { it.protein }
     val carbs = meals.sumOf { it.carbs }
@@ -112,18 +118,35 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
         AlertDialog(
             onDismissRequest = { addingMeal = false },
             title = { Text("AÑADIR COMIDA", fontFamily = AntonFontFamily) },
-            text = { TextField(mealName, { mealName = it.take(60) }, label = { Text("Descripción") }, singleLine = true, colors = TextFieldDefaults.textFieldColors(focusedIndicatorColor = WildforceThemeTokens.accentGold)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextField(mealName, { mealName = it.take(60) }, label = { Text("Descripción") }, singleLine = true, colors = TextFieldDefaults.textFieldColors(focusedIndicatorColor = WildforceThemeTokens.accentGold))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        NutritionNumberField("kcal", mealCalories, { mealCalories = it.filter(Char::isDigit) }, Modifier.weight(1f))
+                        NutritionNumberField("Proteína", mealProtein, { mealProtein = it.filter(Char::isDigit) }, Modifier.weight(1f))
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        NutritionNumberField("Carbos", mealCarbs, { mealCarbs = it.filter(Char::isDigit) }, Modifier.weight(1f))
+                        NutritionNumberField("Grasas", mealFat, { mealFat = it.filter(Char::isDigit) }, Modifier.weight(1f))
+                    }
+                }
+            },
             confirmButton = {
                 Button(onClick = {
                     if (mealName.isNotBlank()) {
-                        val updated = meals + MealLog(System.currentTimeMillis(), mealName.trim(), 500, 30, 55, 18)
-                        meals = updated; NutritionStore.save(context, updated); mealName = ""; addingMeal = false
+                        val updated = meals + MealLog(System.currentTimeMillis(), mealName.trim(), mealCalories.toIntOrNull() ?: 0, mealProtein.toIntOrNull() ?: 0, mealCarbs.toIntOrNull() ?: 0, mealFat.toIntOrNull() ?: 0)
+                        meals = updated; NutritionStore.save(context, updated); mealName = ""; mealCalories = ""; mealProtein = ""; mealCarbs = ""; mealFat = ""; addingMeal = false
                     }
                 }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text("AÑADIR") }
             },
             dismissButton = { Button(onClick = { addingMeal = false }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textSecondary), elevation = ButtonDefaults.elevation(0.dp)) { Text("CANCELAR") } },
         )
     }
+}
+
+@Composable
+private fun NutritionNumberField(label: String, value: String, onValueChange: (String) -> Unit, modifier: Modifier) {
+    TextField(value, onValueChange, modifier, label = { Text(label) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), colors = TextFieldDefaults.textFieldColors(focusedIndicatorColor = WildforceThemeTokens.accentGold))
 }
 
 @Composable
