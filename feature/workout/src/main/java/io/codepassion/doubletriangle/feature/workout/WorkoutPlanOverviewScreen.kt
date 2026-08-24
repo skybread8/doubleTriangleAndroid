@@ -19,6 +19,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +43,7 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, contentPadding: a
     val completed = state.workouts.count { it.status == WorkoutStatus.Completed }
     val skipped = state.workouts.count { it.status == WorkoutStatus.Skipped }
     val progress = if (state.workouts.isEmpty()) 0f else completed.toFloat() / state.workouts.size
+    val animatedProgress by animateFloatAsState(progress, animationSpec = tween(650))
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(contentPadding).padding(horizontal = 18.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth().padding(bottom = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("‹ VOLVER", Modifier.clickable(onClick = onBack).padding(vertical = 9.dp, horizontal = 4.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
@@ -56,7 +59,7 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, contentPadding: a
                     Spacer(Modifier.height(18.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.size(64.dp).clip(CircleShape).background(WildforceThemeTokens.accentGold.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {
-                            Text("${(progress * 100).toInt()}%", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                            Text("${(animatedProgress * 100).toInt()}%", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                         }
                         Column(Modifier.padding(start = 14.dp)) {
                             Text("PROGRESO DEL MESOCICLO", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
@@ -64,7 +67,7 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, contentPadding: a
                             if (skipped > 0) Text("$skipped sesión(es) omitida(s)", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                         }
                     }
-                    LinearProgressIndicator(progress = progress, Modifier.fillMaxWidth().padding(top = 16.dp).height(7.dp).clip(RoundedCornerShape(6.dp)), color = WildforceThemeTokens.accentGold, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.15f))
+                    LinearProgressIndicator(progress = animatedProgress, Modifier.fillMaxWidth().padding(top = 16.dp).height(7.dp).clip(RoundedCornerShape(6.dp)), color = WildforceThemeTokens.accentGold, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.15f))
                 }
             }
             item { Text("SESIONES DE LA SEMANA", Modifier.padding(top = 4.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary) }
