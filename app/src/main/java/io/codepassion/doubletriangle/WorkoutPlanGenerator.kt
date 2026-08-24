@@ -123,7 +123,7 @@ object WorkoutPlanGenerator {
                 val weekday = day.optString("weekday", day.optString("intendedWeekday", "MONDAY"))
                     .uppercase().let { value -> runCatching { DayOfWeek.valueOf(value) }.getOrDefault(DayOfWeek.MONDAY) }
                 val estimatedMinutes = day.optInt("estimatedMinutes", day.optInt("estimatedDurationMinutes", 50))
-                add(WorkoutDaySummary("ai-${index + 1}", index + 1, day.optString("title").trim().ifBlank { "Sesión ${index + 1}" }, day.optString("focus").trim().ifBlank { "Fitness general" }, day.optString("dayType").trim().ifBlank { "strength" }, weekday, estimatedMinutes.coerceIn(15, 180), WorkoutStatus.Planned, exercises, blocks))
+                add(WorkoutDaySummary("ai-${index + 1}", index + 1, day.optString("title").trim().ifBlank { "Sesión ${index + 1}" }, day.optString("focus").trim().ifBlank { "Fitness general" }, day.optString("dayType").trim().lowercase().ifBlank { "strength" }, weekday, estimatedMinutes.coerceIn(15, 180), WorkoutStatus.Planned, exercises, blocks))
             }
         }
         check(workouts.isNotEmpty()) { "La IA devolvió un plan vacío" }

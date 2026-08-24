@@ -167,7 +167,7 @@ private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, 
     }
     Text("✓", Modifier.size(76.dp).background(WildforceThemeTokens.accentGold.copy(alpha = 0.12f), CircleShape).padding(12.dp), style = MaterialTheme.typography.h3, color = WildforceThemeTokens.accentGold, textAlign = TextAlign.Center)
     Text("¡GRAN TRABAJO!", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-    Text("Has completado ${workout.title}.", color = WildforceThemeTokens.textSecondary)
+    Text("Has completado ${workout.title}.", color = WildforceThemeTokens.textSecondary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, textAlign = TextAlign.Center)
     val mainIndices = workout.pathBlocks().mainExercises().flatMap { it.executionIndices }.toSet()
     val mainStats = stats.filterKeys { it in mainIndices }.values
     val sets = mainStats.sumOf { it.sets }

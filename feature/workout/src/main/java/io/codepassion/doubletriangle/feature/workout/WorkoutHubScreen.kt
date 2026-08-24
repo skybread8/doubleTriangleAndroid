@@ -271,7 +271,7 @@ private fun WorkoutHeader(state: WorkoutHubState) {
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(state.user.name, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text("▲ ${state.user.goal}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text("▲ ${state.user.goal}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Text("🔥", style = MaterialTheme.typography.h6)
         Text(
@@ -1137,7 +1137,7 @@ private fun RestTimerContent(
         Text(
             if (betweenExercises) "DESCANSO ANTES DEL SIGUIENTE EJERCICIO" else "DESCANSO ANTES DE LA SIGUIENTE SERIE",
             fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis,
         )
         Spacer(Modifier.height(14.dp))
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
