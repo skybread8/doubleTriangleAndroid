@@ -575,6 +575,10 @@ fun ActiveWorkoutScreen(
     skipRestPeriods: Boolean = false,
     currentStreak: Int = 0,
     isPlanCompletedAfterWorkout: Boolean = false,
+    planName: String = "",
+    completedPlanWorkouts: Int = 0,
+    totalPlanWorkouts: Int = 0,
+    totalPlanExercises: Int = 0,
     onExit: () -> Unit,
     onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double, streak: Int) -> Unit,
 ) {
@@ -698,7 +702,7 @@ fun ActiveWorkoutScreen(
     if (showsSummary) {
         val completionProgress = remember(workout.id) { CompletionProgressStore.preview(context, currentStreak) }
         val recordEvents = remember(workout.id, exerciseStats) { WorkoutCompletionCalculator.records(context, workout, exerciseStats) }
-        WorkoutCompletionFlowScreen(workout, elapsedSeconds, exerciseStats, feedbackByExercise, recordEvents, completionProgress, useImperial = useImperial, isPlanCompleted = isPlanCompletedAfterWorkout, onCancelWorkout = {
+        WorkoutCompletionFlowScreen(workout, elapsedSeconds, exerciseStats, feedbackByExercise, recordEvents, completionProgress, useImperial = useImperial, isPlanCompleted = isPlanCompletedAfterWorkout, planName = planName, completedPlanWorkouts = completedPlanWorkouts, totalPlanWorkouts = totalPlanWorkouts, totalPlanExercises = totalPlanExercises, onCancelWorkout = {
             WorkoutSessionStore.clear(context, workout.id)
             onExit()
         }) {

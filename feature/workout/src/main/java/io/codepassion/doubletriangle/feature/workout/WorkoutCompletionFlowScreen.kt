@@ -61,6 +61,10 @@ internal fun WorkoutCompletionFlowScreen(
     records: List<ExerciseRecordEvent>,
     progress: CompletionProgress,
     isPlanCompleted: Boolean = false,
+    planName: String = "",
+    completedPlanWorkouts: Int = 0,
+    totalPlanWorkouts: Int = 0,
+    totalPlanExercises: Int = 0,
     useImperial: Boolean = false,
     onCancelWorkout: () -> Unit,
     onDone: () -> Unit,
@@ -94,7 +98,7 @@ internal fun WorkoutCompletionFlowScreen(
             CompletionPhase.Streak -> StreakCelebration(progress.streakAfter) { phase = CompletionPhase.Xp }
             CompletionPhase.Xp -> XpCelebration(progress) { continueAfterXp() }
             CompletionPhase.LevelUp -> LevelUpCelebration(progress.levelAfter) { if (isPlanCompleted) phase = CompletionPhase.PlanComplete else onDone() }
-            CompletionPhase.PlanComplete -> PlanCompletedCelebration(workout, onDone)
+            CompletionPhase.PlanComplete -> PlanCompletedCelebration(planName.ifBlank { workout.title }, completedPlanWorkouts, totalPlanWorkouts, totalPlanExercises, onDone)
         }
     }
 }
@@ -236,13 +240,16 @@ private fun LevelUpCelebration(level: Int, onContinue: () -> Unit) = Celebration
 }
 
 @Composable
-private fun PlanCompletedCelebration(workout: WorkoutDaySummary, onContinue: () -> Unit) = CelebrationFrame("TERMINAR", onContinue) {
+private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, totalWorkouts: Int, totalExercises: Int, onContinue: () -> Unit) = CelebrationFrame("TERMINAR", onContinue) {
     Spacer(Modifier.weight(1f))
-    Text("✦", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
+    Text("🏆", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
     Text("PLAN COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-    Text("Ya no quedan sesiones pendientes en este plan.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
-    Text(workout.focus.uppercase(), Modifier.padding(top = 14.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold, textAlign = TextAlign.Center)
-    Text("Tómate un momento para recuperar y vuelve cuando estés listo para tu siguiente plan.", Modifier.padding(top = 8.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Text(planName, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Row(Modifier.fillMaxWidth().padding(top = 24.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        CompletionStat("SESIONES", "$completedWorkouts/$totalWorkouts", Modifier.weight(1f))
+        CompletionStat("EJERCICIOS", totalExercises.toString(), Modifier.weight(1f))
+    }
+    Text("Ya no quedan sesiones pendientes en este plan.", Modifier.padding(top = 18.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
 
