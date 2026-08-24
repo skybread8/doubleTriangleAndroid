@@ -160,7 +160,7 @@ object WorkoutHistoryStore {
     }
 
     /** Compact completed-session context used by every Android workout AI request. */
-    fun aiPlanningContext(context: Context, maxEntries: Int = 12): String {
+    fun aiPlanningContext(context: Context, maxEntries: Int = 48): String {
         val preferences = context.getSharedPreferences(PREFERENCES, 0)
         val storedKeys = preferences.getStringSet(HISTORY_KEYS, emptySet()).orEmpty()
         val keys = storedKeys.ifEmpty {
@@ -172,6 +172,12 @@ object WorkoutHistoryStore {
         }
         val entries = keys
             .flatMap { key -> historyForKey(context, key).map { key to it } }
+            .sortedByDescending { (_, entry) -> entry.timestampMillis }
+            // Keep several recent observations for every exercise instead of
+            // allowing one long session to hide feedback from the rest of the plan.
+            .groupBy { (exercise, _) -> exercise }
+            .values
+            .flatMap { it.take(4) }
             .sortedByDescending { (_, entry) -> entry.timestampMillis }
             .take(maxEntries)
         if (entries.isEmpty()) return "Historial de entrenamientos recientes: todavía no hay sesiones completadas."
