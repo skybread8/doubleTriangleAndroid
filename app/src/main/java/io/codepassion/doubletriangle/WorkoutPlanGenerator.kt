@@ -80,7 +80,9 @@ object WorkoutPlanGenerator {
                     ?: "OpenAI devolvió HTTP ${connection.responseCode}"
             }
             val planJson = JSONObject(response).getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content")
-            planJson to parse(planJson, profile.name, profile.goal.title)
+            val parsed = parse(planJson, profile.name, profile.goal.title)
+            validateGeneratedPlan(parsed, profile, enforceProfileSections = instruction.startsWith("Genera un plan semanal"))
+            planJson to parsed
         } finally {
             connection.disconnect()
         }
@@ -106,6 +108,25 @@ object WorkoutPlanGenerator {
         }
         check(workouts.isNotEmpty()) { "La IA devolvió un plan vacío" }
         return WorkoutHubState(UserSummary(userName, goal, 0), workouts.mapTo(mutableSetOf()) { it.scheduledDay }, emptySet(), root.optString("planName", "Plan IA · Semana 1"), root.optString("phase", "Adaptación · Mesociclo 1"), workouts)
+    }
+
+    private fun validateGeneratedPlan(state: WorkoutHubState, profile: OnboardingProfile, enforceProfileSections: Boolean) {
+        val expectedDays = profile.workoutDays.map { it.storedValue.uppercase() }.toSet()
+        val actualDays = state.workouts.map { it.scheduledDay.name }
+        check(actualDays.size == expectedDays.size && actualDays.toSet() == expectedDays) {
+            "La IA no respetó exactamente los días seleccionados. Vuelve a generar el plan."
+        }
+        state.workouts.forEach { workout ->
+            val blocks = workout.displayBlocks()
+            val hasWarmup = blocks.any { it.type == WorkoutBlockType.Warmup && it.exercises.isNotEmpty() }
+            val hasCooldown = blocks.any { it.type == WorkoutBlockType.Cooldown && it.exercises.isNotEmpty() }
+            if (enforceProfileSections) {
+                check(profile.skipsWarmups || hasWarmup) { "Falta calentamiento en ${workout.title}. Vuelve a generar el plan." }
+                check(profile.skipsCooldowns || hasCooldown) { "Falta vuelta a la calma en ${workout.title}. Vuelve a generar el plan." }
+                check(!profile.skipsWarmups || !blocks.any { it.type == WorkoutBlockType.Warmup }) { "El plan incluye calentamiento aunque está desactivado." }
+                check(!profile.skipsCooldowns || !blocks.any { it.type == WorkoutBlockType.Cooldown }) { "El plan incluye vuelta a la calma aunque está desactivada." }
+            }
+        }
     }
 
     fun serialize(state: WorkoutHubState): String {
