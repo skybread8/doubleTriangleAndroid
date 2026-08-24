@@ -176,7 +176,7 @@ fun WorkoutHubScreen(
                         coroutineScope.launch {
                             runCatching { customAiGenerator.invoke(request) }
                                 .onSuccess { generated -> lastCustomRequest = null; editingCustomWorkout = generated.copy(scheduledDay = selectedDay ?: LocalDate.now().dayOfWeek) }
-                                .onFailure { error -> customGenerationError = error.message ?: "No se pudo generar el entrenamiento." }
+                                .onFailure { error -> customGenerationError = error.message?.takeIf(String::isNotBlank) ?: "No se pudo generar el entrenamiento." }
                             generatingCustomWorkout = false
                         }
                     }
@@ -218,7 +218,7 @@ fun WorkoutHubScreen(
                                 coroutineScope.launch {
                                     runCatching { customAiGenerator.invoke(request) }
                                         .onSuccess { generated -> lastCustomRequest = null; editingCustomWorkout = generated.copy(scheduledDay = selectedDay ?: LocalDate.now().dayOfWeek) }
-                                        .onFailure { retryError -> customGenerationError = retryError.message ?: "No se pudo generar el entrenamiento." }
+                                        .onFailure { retryError -> customGenerationError = retryError.message?.takeIf(String::isNotBlank) ?: "No se pudo generar el entrenamiento." }
                                     generatingCustomWorkout = false
                                 }
                             }
@@ -1156,7 +1156,7 @@ private fun RestTimerContent(
             Row(Modifier.fillMaxWidth().padding(top = 6.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(16.dp)).padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
                 RemoteTrainingImage(exerciseImageUrl(nextExercise.imageKey, gender), null, Modifier.size(52.dp).clip(RoundedCornerShape(12.dp)))
                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                    Text(nextExercise.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
+                    Text(nextExercise.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text("${nextExercise.sets} series · ${nextExercise.reps} reps", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 }
             }
