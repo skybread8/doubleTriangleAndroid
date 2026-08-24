@@ -1,6 +1,8 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.core.LinearEasing
@@ -705,11 +707,18 @@ fun ActiveWorkoutScreen(
     }
 
     Box(Modifier.fillMaxSize().background(WildforceThemeTokens.backgroundSecondary)) {
-        RemoteTrainingImage(
-            url = exerciseImageUrl(exercise?.imageKey, gender),
-            contentDescription = exercise?.name,
-            modifier = Modifier.fillMaxWidth().height(610.dp),
-        )
+        Crossfade(
+            targetState = exerciseIndex,
+            animationSpec = tween(durationMillis = 360),
+            label = "exerciseHero",
+        ) { visibleExerciseIndex ->
+            val visibleExercise = workout.exercises.getOrNull(visibleExerciseIndex)
+            RemoteTrainingImage(
+                url = exerciseImageUrl(visibleExercise?.imageKey, gender),
+                contentDescription = visibleExercise?.name,
+                modifier = Modifier.fillMaxWidth().height(610.dp),
+            )
+        }
         Box(Modifier.fillMaxWidth().height(610.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.62f), Color.Transparent, WildforceThemeTokens.backgroundSecondary), startY = 0f)))
         Column(Modifier.fillMaxSize().padding(horizontal = 10.dp)) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -755,7 +764,7 @@ fun ActiveWorkoutScreen(
                 else -> 290.dp
             }
             Column(
-                Modifier.fillMaxWidth().height(activePanelHeight)
+                Modifier.fillMaxWidth().height(activePanelHeight).animateContentSize(animationSpec = tween(280))
                     .clip(RoundedCornerShape(topStart = 42.dp, topEnd = 42.dp, bottomStart = 30.dp, bottomEnd = 30.dp))
                     .background(WildforceThemeTokens.backgroundSecondary)
                     .padding(horizontal = 18.dp, vertical = 18.dp),
