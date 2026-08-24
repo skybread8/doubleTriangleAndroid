@@ -43,7 +43,6 @@ internal object WorkoutActiveNotification {
             .setOngoing(true)
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
             .setCategory(android.app.Notification.CATEGORY_TRANSPORT)
-            .setPriority(android.app.Notification.PRIORITY_HIGH)
             .setOnlyAlertOnce(true)
             .setShowWhen(false)
             .setAutoCancel(false)
@@ -51,7 +50,6 @@ internal object WorkoutActiveNotification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder.setStyle(android.app.Notification.MediaStyle().setMediaSession(session.sessionToken).setShowActionsInCompactView(0))
         }
-        if (headsUp) builder.setDefaults(android.app.Notification.DEFAULT_ALL)
         return builder.build()
     }
 
