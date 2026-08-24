@@ -745,7 +745,10 @@ fun ActiveWorkoutScreen(
                 when (intent?.action) {
                     WorkoutActiveNotification.ACTION_TOGGLE_TIMER -> if (restRemaining != null) restTimerPaused = !restTimerPaused else exerciseTimerRunning = !exerciseTimerRunning
                     WorkoutActiveNotification.ACTION_SKIP_CURRENT -> if (restRemaining != null) { restRemaining = null; restBetweenExercises = false; restTimerPaused = false } else advanceFromExercise(exercise?.restSeconds ?: 0)
-                    WorkoutActiveNotification.ACTION_ADD_REST -> if (restRemaining != null) restRemaining = restRemaining!! + 30
+                    WorkoutActiveNotification.ACTION_ADD_REST -> if (restRemaining != null) {
+                        restRemaining = restRemaining!! + 30
+                        restInitialSeconds += 30
+                    }
                 }
             }
         }
@@ -778,7 +781,7 @@ fun ActiveWorkoutScreen(
     }
 
     LaunchedEffect(showsSummary) { while (!showsSummary) { delay(1_000); elapsedSeconds++ } }
-    LaunchedEffect(exerciseIndex, completedByExercise, restRemaining, showsSummary, notificationArtwork) {
+    LaunchedEffect(exerciseIndex, completedByExercise, restRemaining != null, restInitialSeconds, restTimerPaused, showsSummary, notificationArtwork) {
         if (!showsSummary) {
             val currentName = exercise?.name ?: "Entrenamiento"
             val completed = completedByExercise.values.sum()
@@ -794,6 +797,7 @@ fun ActiveWorkoutScreen(
                     progressMax = if (restRemaining != null) restInitialSeconds else total,
                     isResting = restRemaining != null,
                     artwork = notificationArtwork,
+                    chronometerBaseMillis = restRemaining?.takeIf { !restTimerPaused }?.let { System.currentTimeMillis() + it * 1_000L },
                 )
             }
         }
