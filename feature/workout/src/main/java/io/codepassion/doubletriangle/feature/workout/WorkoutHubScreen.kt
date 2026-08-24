@@ -667,7 +667,9 @@ fun ActiveWorkoutScreen(
     val context = androidx.compose.ui.platform.LocalContext.current.applicationContext
     DisposableEffect(workout.id) {
         WorkoutActiveNotification.show(context, workout.title)
-        onDispose { WorkoutActiveNotification.cancel(context) }
+        val serviceIntent = android.content.Intent(context, WorkoutForegroundService::class.java).putExtra("title", workout.title).putExtra("detail", "Sesión activa")
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) context.startForegroundService(serviceIntent) else context.startService(serviceIntent)
+        onDispose { WorkoutActiveNotification.cancel(context); context.stopService(serviceIntent) }
     }
     val restored = remember(workout.id) { WorkoutSessionStore.load(context, workout.id) }
     var exerciseIndex by remember(workout.id) { mutableStateOf((restored?.exerciseIndex ?: 0).coerceIn(0, workout.exercises.lastIndex.coerceAtLeast(0))) }
