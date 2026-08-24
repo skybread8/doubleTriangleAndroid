@@ -141,7 +141,7 @@ fun WildforceRoot() {
                     goal = FitnessGoal.fromStoredValue(preferences.getString("goal", "").orEmpty()),
                     lifestyle = LifestyleLevel.fromStoredValue(preferences.getString("lifestyle", "").orEmpty()),
                     workoutDays = WorkoutWeekday.fromStoredValues(preferences.getStringSet("workout_days", null)),
-                    preferredWorkoutDurationMinutes = preferences.getInt("workout_duration", 50),
+                    preferredWorkoutDurationMinutes = preferences.getInt("workout_duration", 50).coerceIn(15, 180),
                     trainingLevel = TrainingLevel.fromStoredValue(preferences.getString("training_level", "").orEmpty()),
                     trainingSplitPreference = TrainingSplitPreference.fromStoredValue(preferences.getString("training_split", "").orEmpty()),
                     bodyCompositionPhase = preferences.getString("body_phase", null)?.let(BodyCompositionPhase::fromStoredValue),
@@ -156,12 +156,13 @@ fun WildforceRoot() {
                         .ifEmpty { GymType.SmallGym.defaultEquipment },
                     movementRestrictions = MovementRestriction.fromStoredValues(preferences.getStringSet("restrictions", null)),
                     isHealthConnectEnabled = preferences.getBoolean("health_connect", false),
-                    birthMonth = preferences.getInt("birth_month", 1),
-                    birthYear = preferences.getInt("birth_year", 1995),
+                    birthMonth = preferences.getInt("birth_month", 1).coerceIn(1, 12),
+                    birthYear = preferences.getInt("birth_year", 1995).coerceIn(1920, java.time.Year.now().value - 13),
                     gender = Gender.fromStoredValue(preferences.getString("gender", "").orEmpty()),
                     metricSystem = MetricSystem.fromStoredValue(preferences.getString("metric_system", "").orEmpty()),
-                    heightCm = preferences.getInt("height_cm", 175),
-                    weightKg = java.lang.Double.longBitsToDouble(preferences.getLong("weight_kg", java.lang.Double.doubleToRawLongBits(70.0))),
+                    heightCm = preferences.getInt("height_cm", 175).coerceIn(120, 230),
+                    weightKg = java.lang.Double.longBitsToDouble(preferences.getLong("weight_kg", java.lang.Double.doubleToRawLongBits(70.0)))
+                        .takeIf { it.isFinite() && it in 35.0..250.0 } ?: 70.0,
                     skipsWarmups = preferences.getBoolean("skips_warmups", false),
                     skipsCooldowns = preferences.getBoolean("skips_cooldowns", false),
                     skipsRestPeriods = preferences.getBoolean("skips_rest_periods", false),
@@ -185,6 +186,7 @@ fun WildforceRoot() {
             generationError = generationError,
         ) { completedProfile, useAi ->
             preferences.edit()
+                .putInt("profile_schema_version", PROFILE_SCHEMA_VERSION)
                 .putString("name", completedProfile.name)
                 .putString("goal", completedProfile.goal.storedValue)
                 .putString("lifestyle", completedProfile.lifestyle.storedValue)
@@ -263,6 +265,7 @@ fun WildforceRoot() {
             },
             onProfileUpdated = { updated ->
                 preferences.edit()
+                    .putInt("profile_schema_version", PROFILE_SCHEMA_VERSION)
                     .putString("name", updated.name)
                     .putString("goal", updated.goal.storedValue)
                     .putString("lifestyle", updated.lifestyle.storedValue)
@@ -506,6 +509,7 @@ private fun AppPreview() = WildforceTheme {
     )
 }
 
+private const val PROFILE_SCHEMA_VERSION = 2
 private const val trainingLocationSeparator = "\u0001"
 
 private fun encodeTrainingLocations(locations: List<TrainingLocationProfile>): MutableSet<String> = locations.mapTo(mutableSetOf()) { location ->
