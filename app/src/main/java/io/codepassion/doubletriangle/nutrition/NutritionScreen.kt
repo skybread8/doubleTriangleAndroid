@@ -30,6 +30,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -75,10 +77,10 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
             item {
                 Text("NUTRICIÓN", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("‹", Modifier.clickable { selectedDate = selectedDate.minusDays(1) }.padding(end = 14.dp), style = MaterialTheme.typography.h5, color = WildforceThemeTokens.accentGold)
+                    Text("‹", Modifier.semantics { contentDescription = "Día anterior" }.clickable { selectedDate = selectedDate.minusDays(1) }.padding(end = 14.dp), style = MaterialTheme.typography.h5, color = WildforceThemeTokens.accentGold)
                     Text("${selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.forLanguageTag("es-ES")).uppercase()}${if (canEdit) " · HOY" else " · ${selectedDate.dayOfMonth}/${selectedDate.monthValue}"}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.weight(1f))
-                    Text("›", Modifier.clickable(enabled = !canEdit) { selectedDate = selectedDate.plusDays(1) }.padding(horizontal = 10.dp), style = MaterialTheme.typography.h5, color = if (canEdit) WildforceThemeTokens.textSecondary.copy(alpha = .35f) else WildforceThemeTokens.accentGold)
+                    Text("›", Modifier.semantics { contentDescription = "Día siguiente" }.clickable(enabled = !canEdit) { selectedDate = selectedDate.plusDays(1) }.padding(horizontal = 10.dp), style = MaterialTheme.typography.h5, color = if (canEdit) WildforceThemeTokens.textSecondary.copy(alpha = .35f) else WildforceThemeTokens.accentGold)
                     if (!canEdit) Text("HOY", Modifier.clickable { selectedDate = LocalDate.now() }.padding(8.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
                 }
             }
@@ -109,7 +111,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text("COMIDAS DE HOY", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
                     Spacer(Modifier.weight(1f))
-                    if (canEdit) Text("+ AÑADIR", Modifier.clickable { editingMeal = null; addingMeal = true }.padding(8.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
+                    if (canEdit) Text("+ AÑADIR", Modifier.semantics { contentDescription = "Añadir comida" }.clickable { editingMeal = null; addingMeal = true }.padding(8.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
                 }
             }
             if (meals.isEmpty()) item { EmptyMealsCard(canEdit) { editingMeal = null; addingMeal = true } }
