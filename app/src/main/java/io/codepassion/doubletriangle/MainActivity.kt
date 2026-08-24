@@ -2,6 +2,7 @@ package io.codepassion.doubletriangle
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -78,6 +79,7 @@ import io.codepassion.doubletriangle.feature.workout.WorkoutHubScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutAnalyticsStore
 import io.codepassion.doubletriangle.nutrition.NutritionScreen
 import java.time.Instant
+import java.io.File
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -378,6 +380,16 @@ private fun WildforceApp(
 ) {
     val appContext = LocalContext.current.applicationContext
     val appPreferences = remember { appContext.getSharedPreferences("wildforce_profile", 0) }
+    var avatarPath by remember { mutableStateOf(appPreferences.getString("avatar_path", null)) }
+    val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        runCatching {
+            val destination = File(appContext.filesDir, "profile-avatar.jpg")
+            appContext.contentResolver.openInputStream(uri)?.use { input -> destination.writeBytes(input.readBytes()) }
+            avatarPath = destination.absolutePath
+            appPreferences.edit().putString("avatar_path", avatarPath).apply()
+        }
+    }
     LaunchedEffect(workoutState.planName, workoutState.workouts) {
         WildforceNotificationScheduler.scheduleNextWorkout(appContext, workoutState)
         WildforceNotificationScheduler.scheduleNutritionReminder(appContext)
@@ -499,9 +511,11 @@ private fun WildforceApp(
                 experienceXp = trainingProgress.xp,
                 experienceLevel = trainingProgress.level,
                 experienceProgress = trainingProgress.levelProgress,
+                avatarPath = avatarPath,
                 onRequestHealthConnect = onRequestHealthConnect,
                 onSave = onProfileUpdated,
                 onRegenerate = onRegenerateProfile,
+                onChangeAvatar = { avatarPicker.launch("image/*") },
             )
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("${selected.label}\nPróxima vertical", color = WildforceThemeTokens.textSecondary)

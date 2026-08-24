@@ -1,6 +1,9 @@
 package io.codepassion.doubletriangle.feature.onboarding
 
+import android.graphics.BitmapFactory
+
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.CircleShape
@@ -40,7 +43,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,9 +73,11 @@ fun ProfileScreen(
     experienceXp: Int = 0,
     experienceLevel: Int = 1,
     experienceProgress: Float = 0f,
+    avatarPath: String? = null,
     onRequestHealthConnect: (((Boolean, Int?, Double?) -> Unit) -> Unit) = { _ -> },
     onSave: (OnboardingProfile) -> Unit,
     onRegenerate: (OnboardingProfile) -> Unit = {},
+    onChangeAvatar: () -> Unit = {},
 ) {
     var draft by remember(initial) { mutableStateOf(initial) }
     var heightInput by remember(initial) { mutableStateOf(displayHeight(initial.heightCm, initial.metricSystem)) }
@@ -89,7 +96,7 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak) }
+            ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, avatarPath, onChangeAvatar) }
         }
         item {
             ProfileEntrance(entered, 35) { ProfileExperience(experienceXp, experienceLevel, experienceProgress) }
@@ -228,10 +235,12 @@ private fun ProfileEntrance(visible: Boolean, delayMillis: Int, content: @Compos
 }
 
 @Composable
-private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, completedWorkouts: Int, longestStreak: Int) {
+private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, completedWorkouts: Int, longestStreak: Int, avatarPath: String?, onChangeAvatar: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Box(Modifier.size(110.dp)) {
-                Text(profile.name.take(1).uppercase().ifBlank { "W" }, Modifier.fillMaxSize().background(WildforceThemeTokens.accentGold, CircleShape).padding(30.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
+            Box(Modifier.size(110.dp).clickable(onClick = onChangeAvatar)) {
+                val bitmap = remember(avatarPath) { avatarPath?.let { BitmapFactory.decodeFile(it) } }
+                if (bitmap != null) Image(bitmap.asImageBitmap(), profile.name, Modifier.fillMaxSize().clip(CircleShape), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+                else Text(profile.name.take(1).uppercase().ifBlank { "W" }, Modifier.fillMaxSize().background(WildforceThemeTokens.accentGold, CircleShape).padding(30.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
                 Text("⌁", Modifier.align(Alignment.BottomEnd).size(30.dp).background(WildforceThemeTokens.accentGold, CircleShape).padding(5.dp), color = Color.White, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
