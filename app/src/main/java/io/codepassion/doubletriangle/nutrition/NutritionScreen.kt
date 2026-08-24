@@ -108,7 +108,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
                     if (canEdit) Text("+ AÑADIR", Modifier.clickable { addingMeal = true }.padding(8.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
                 }
             }
-            if (meals.isEmpty()) item { EmptyMealsCard { if (canEdit) addingMeal = true } }
+            if (meals.isEmpty()) item { EmptyMealsCard(canEdit) { addingMeal = true } }
             MealType.entries.forEach { type ->
                 val grouped = meals.filter { it.type == type }
                 if (grouped.isNotEmpty()) {
@@ -180,11 +180,11 @@ private fun MacroRow(label: String, value: Int, target: Int, color: Color) {
     }
 }
 
-@Composable private fun EmptyMealsCard(onAdd: () -> Unit) {
+@Composable private fun EmptyMealsCard(canAdd: Boolean, onAdd: () -> Unit) {
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("AÚN NO HAS REGISTRADO COMIDAS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
-        Text("Añade una comida para empezar a ver tu progreso diario.", Modifier.padding(top = 5.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
-        Text("AÑADIR COMIDA", Modifier.clickable(onClick = onAdd).padding(top = 12.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+        Text(if (canAdd) "Añade una comida para empezar a ver tu progreso diario." else "No hay comidas registradas para este día.", Modifier.padding(top = 5.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+        if (canAdd) Text("AÑADIR COMIDA", Modifier.clickable(onClick = onAdd).padding(top = 12.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
     }
 }
 
