@@ -28,6 +28,8 @@ class WorkoutPathModelTest {
         assertEquals(listOf("Press", "Remo"), path.mainExercises().map { it.exercise.name })
         assertEquals(false, path[1].exercises[0].isCompleted(workout, mapOf(1 to 1, 3 to 1)))
         assertEquals(true, path[1].exercises[0].isCompleted(workout, mapOf(1 to 1, 3 to 1, 5 to 1)))
+        assertEquals(1, nextIndexAfterPreparationSection(workout.exercises, 0))
+        assertEquals(null, nextIndexAfterPreparationSection(workout.exercises, 7))
     }
 
     private fun exercise(name: String) = ExerciseSummary(name, sets = 1, reps = "10", restSeconds = 0)

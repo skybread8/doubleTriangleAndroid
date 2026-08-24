@@ -520,6 +520,12 @@ fun ActiveWorkoutScreen(
                 Spacer(Modifier.weight(1f))
                 Text("RUTA", Modifier.clickable { showsWorkoutPath = true }.padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 Text("DATOS", Modifier.clickable { showsExerciseHistory = true }.padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+                if (exercise?.blockType in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)) {
+                    Text("SALTAR", Modifier.clickable {
+                        val nextIndex = nextIndexAfterPreparationSection(workout.exercises, exerciseIndex)
+                        if (nextIndex == null) showsSummary = true else exerciseIndex = nextIndex
+                    }.padding(8.dp), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+                }
                 Text(formatClock(elapsedSeconds), Modifier.liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(horizontal = 14.dp, vertical = 7.dp), color = Color.White, fontWeight = FontWeight.Bold)
             }
             LinearProgressIndicator(
@@ -576,24 +582,46 @@ fun ActiveWorkoutScreen(
                         onSkip = { restRemaining = null },
                     )
                 } else if (exercise != null) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f)) {
-                            Text("SERIES", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-                            Text("Objetivo ${exercise.reps} reps · ${exercise.restSeconds}s descanso", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
-                            Text("${exercise.setStyle.glyph}  ${exercise.setStyle.label}  ›", Modifier.clickable { showsSetStyleInfo = true }.padding(vertical = 4.dp), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
-                            Text(styleParameterLabels(exercise.setStyle, exercise.setStyleParameters).joinToString(" · "), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                    val isWarmupOrCooldown = exercise.blockType == WorkoutBlockType.Warmup || exercise.blockType == WorkoutBlockType.Cooldown
+                    if (isWarmupOrCooldown) {
+                        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                            Text(if (exercise.blockType == WorkoutBlockType.Warmup) "PREPÁRATE PARA ENTRENAR" else "RECUPERA Y BAJA PULSACIONES", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            Text("Completa el movimiento con control y sin buscar fatiga.", Modifier.padding(top = 6.dp, bottom = 16.dp), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            if (targetDurationSeconds(exercise.reps) != null) {
+                                ExerciseWorkTimer(
+                                    seconds = exerciseTimeRemaining ?: exerciseTimeInitial,
+                                    initialSeconds = exerciseTimeInitial,
+                                    running = exerciseTimerRunning,
+                                    onToggle = { exerciseTimerRunning = !exerciseTimerRunning },
+                                    onAddTime = {
+                                        exerciseTimeRemaining = (exerciseTimeRemaining ?: 0) + 15
+                                        exerciseTimeInitial += 15
+                                    },
+                                )
+                            } else {
+                                Text(exercise.reps, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h2, color = WildforceThemeTokens.accentGold)
+                                Text("REPETICIONES OBJETIVO", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+                            }
                         }
-                        Text("${completedForExercise + 1}/${exercise.sets}", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
-                    }
-                    Spacer(Modifier.height(10.dp))
-                    Column(Modifier.weight(1f).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
-                        SetTrackingRows(exerciseIndex, exercise, completedForExercise, completedSetRecords) { original, changed ->
-                            val updatedRecords = completedSetRecords.map { if (it.exerciseIndex == exerciseIndex && it.setNumber == original.setNumber) changed else it }
-                            totalVolumeKg += changed.reps * changed.weightKg - original.reps * original.weightKg
-                            completedSetRecords = updatedRecords
-                            exerciseStats = exerciseStats + (exerciseIndex to statsForExercise(updatedRecords, exerciseIndex))
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text("SERIES", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+                                Text("Objetivo ${exercise.reps} reps · ${exercise.restSeconds}s descanso", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                                Text("${exercise.setStyle.glyph}  ${exercise.setStyle.label}  ›", Modifier.clickable { showsSetStyleInfo = true }.padding(vertical = 4.dp), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+                                Text(styleParameterLabels(exercise.setStyle, exercise.setStyleParameters).joinToString(" · "), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                            }
+                            Text("${completedForExercise + 1}/${exercise.sets}", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
                         }
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(10.dp))
+                        Column(Modifier.weight(1f).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
+                            SetTrackingRows(exerciseIndex, exercise, completedForExercise, completedSetRecords) { original, changed ->
+                                val updatedRecords = completedSetRecords.map { if (it.exerciseIndex == exerciseIndex && it.setNumber == original.setNumber) changed else it }
+                                totalVolumeKg += changed.reps * changed.weightKg - original.reps * original.weightKg
+                                completedSetRecords = updatedRecords
+                                exerciseStats = exerciseStats + (exerciseIndex to statsForExercise(updatedRecords, exerciseIndex))
+                            }
+                            Spacer(Modifier.height(8.dp))
                         if (targetDurationSeconds(exercise.reps) != null) {
                             ExerciseWorkTimer(
                                 seconds = exerciseTimeRemaining ?: exerciseTimeInitial,
@@ -611,16 +639,17 @@ fun ActiveWorkoutScreen(
                                 CompactMetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", weightKg), { weightKg = (weightKg - 2.5).coerceAtLeast(0.0) }, { weightKg += 2.5 }, Modifier.weight(1f))
                             }
                         }
+                        }
                     }
                     Button(
                         onClick = {
-                            val newCompleted = completedForExercise + 1
+                            val newCompleted = if (isWarmupOrCooldown) exercise.sets else completedForExercise + 1
                             val timedDuration = targetDurationSeconds(exercise.reps)
                             val loggedReps = timedDuration?.let { (exerciseTimeInitial - (exerciseTimeRemaining ?: 0)).coerceAtLeast(0) } ?: reps
                             val loggedWeight = if (timedDuration != null) 0.0 else weightKg
                             completedByExercise = completedByExercise + (exerciseIndex to newCompleted)
                             totalCompletedSets++; totalVolumeKg += loggedReps * loggedWeight
-                            completedSetRecords = completedSetRecords + CompletedSetRecord(exerciseIndex, newCompleted, loggedReps, loggedWeight, setStyle = exercise.setStyle)
+                            completedSetRecords = completedSetRecords + CompletedSetRecord(exerciseIndex, if (isWarmupOrCooldown) 1 else newCompleted, loggedReps, loggedWeight, setStyle = exercise.setStyle)
                             val previousStats = exerciseStats[exerciseIndex] ?: ExerciseSessionStats()
                             exerciseStats = exerciseStats + (exerciseIndex to previousStats.copy(
                                 sets = previousStats.sets + 1,
@@ -652,7 +681,7 @@ fun ActiveWorkoutScreen(
                         },
                         modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp),
-                    ) { Text(if (completedForExercise + 1 == exercise.sets) "COMPLETAR EJERCICIO" else "COMPLETAR SERIE", fontWeight = FontWeight.Bold) }
+                    ) { Text(if (isWarmupOrCooldown || completedForExercise + 1 == exercise.sets) "COMPLETAR EJERCICIO" else "COMPLETAR SERIE", fontWeight = FontWeight.Bold) }
                     workout.exercises.getOrNull(exerciseIndex + 1)?.let { Text("Siguiente ejercicio: ${it.name}", Modifier.fillMaxWidth().padding(top = 8.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 }
             }
