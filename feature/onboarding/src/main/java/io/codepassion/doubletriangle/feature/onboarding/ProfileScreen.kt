@@ -89,7 +89,10 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, experienceXp, experienceLevel, experienceProgress) }
+            ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak) }
+        }
+        item {
+            ProfileEntrance(entered, 35) { ProfileExperience(experienceXp, experienceLevel, experienceProgress) }
         }
         item {
             ProfileEntrance(entered, 55) { Section("DATOS PERSONALES") {
@@ -225,31 +228,33 @@ private fun ProfileEntrance(visible: Boolean, delayMillis: Int, content: @Compos
 }
 
 @Composable
-private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, completedWorkouts: Int, longestStreak: Int, experienceXp: Int, experienceLevel: Int, experienceProgress: Float) {
-    val animatedExperienceProgress by animateFloatAsState(experienceProgress.coerceIn(0f, 1f), animationSpec = tween(650), label = "profile-experience")
-    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, completedWorkouts: Int, longestStreak: Int) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Box(Modifier.size(110.dp)) {
                 Text(profile.name.take(1).uppercase().ifBlank { "W" }, Modifier.fillMaxSize().background(WildforceThemeTokens.accentGold, CircleShape).padding(30.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
                 Text("⌁", Modifier.align(Alignment.BottomEnd).size(30.dp).background(WildforceThemeTokens.accentGold, CircleShape).padding(5.dp), color = Color.White, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             }
-            Column {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text("${profile.goal.title} · ${profile.trainingLevel.title}", color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    ProfileStat("RACHA", currentStreak.toString(), Modifier.weight(1f))
+                    ProfileStat("MÁS LARGA", longestStreak.toString(), Modifier.weight(1f))
+                    ProfileStat("SESIONES", completedWorkouts.toString(), Modifier.weight(1f))
+                }
             }
+    }
+}
+
+@Composable
+private fun ProfileExperience(experienceXp: Int, experienceLevel: Int, experienceProgress: Float) {
+    val animatedExperienceProgress by animateFloatAsState(experienceProgress.coerceIn(0f, 1f), animationSpec = tween(650), label = "profile-experience")
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+            Text("NIVEL $experienceLevel", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+            Text("$experienceXp XP", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            ProfileStat("RACHA", currentStreak.toString(), Modifier.weight(1f))
-            ProfileStat("SESIONES", completedWorkouts.toString(), Modifier.weight(1f))
-            ProfileStat("MEJOR RACHA", longestStreak.toString(), Modifier.weight(1f))
-        }
-        Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(13.dp)).padding(11.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("NIVEL $experienceLevel", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                Text("$experienceXp XP", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
-            }
-            LinearProgressIndicator(animatedExperienceProgress, Modifier.fillMaxWidth().height(8.dp), color = WildforceThemeTokens.accentGold, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = .16f))
-        }
+        LinearProgressIndicator(animatedExperienceProgress, Modifier.fillMaxWidth().height(9.dp), color = WildforceThemeTokens.accentGold, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = .16f))
     }
 }
 
