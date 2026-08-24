@@ -121,6 +121,10 @@ internal object WorkoutActiveNotification {
         }
     }
 
+    fun cancelRestFinished(context: Context) {
+        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(restFinishedNotificationId)
+    }
+
     private fun exerciseArtwork(title: String): Bitmap {
         if (artworkTitle == title && artwork != null) return artwork!!
         val bitmap = Bitmap.createBitmap(720, 360, Bitmap.Config.ARGB_8888)

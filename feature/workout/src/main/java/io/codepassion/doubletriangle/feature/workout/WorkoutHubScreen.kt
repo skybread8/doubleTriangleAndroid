@@ -764,6 +764,8 @@ fun ActiveWorkoutScreen(
     DisposableEffect(lifecycleOwner, workout.id) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
+                context.getSharedPreferences("wildforce_notification_settings", 0).edit().putBoolean("app_foreground", true).apply()
+                WorkoutActiveNotification.cancelRestFinished(context)
                 WorkoutSessionStore.load(context, workout.id)?.let { latest ->
                     exerciseIndex = latest.exerciseIndex.coerceIn(0, workout.exercises.lastIndex.coerceAtLeast(0))
                     completedByExercise = latest.completedByExercise
@@ -774,6 +776,8 @@ fun ActiveWorkoutScreen(
                     exerciseTimeRemaining = latest.exerciseTimeRemaining
                     exerciseTimerRunning = latest.exerciseTimerRunning
                 }
+            } else if (event == Lifecycle.Event.ON_PAUSE) {
+                context.getSharedPreferences("wildforce_notification_settings", 0).edit().putBoolean("app_foreground", false).apply()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)

@@ -34,7 +34,8 @@ internal class WorkoutForegroundService : Service() {
                 if (restWasActive && (remaining == null || remaining <= 0)) {
                     restWasActive = false
                     lastNotifiedRemaining = null
-                    WorkoutActiveNotification.showRestFinished(this@WorkoutForegroundService)
+                    val appForeground = getSharedPreferences("wildforce_notification_settings", 0).getBoolean("app_foreground", false)
+                    if (!appForeground) WorkoutActiveNotification.showRestFinished(this@WorkoutForegroundService)
                 }
             }
             handler.postDelayed(this, 750L)
