@@ -77,6 +77,7 @@ fun ProfileScreen(
     var picker by remember { mutableStateOf<Picker?>(null) }
     var showsTrainingLocations by remember { mutableStateOf(false) }
     var healthConnectMessage by remember { mutableStateOf<String?>(null) }
+    var saveMessage by remember(initial) { mutableStateOf<String?>(null) }
     var entered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { entered = true }
     LazyColumn(
@@ -162,7 +163,8 @@ fun ProfileScreen(
                 Text("PLAN PERSONALIZADO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
                 Text("Genera un plan nuevo usando todas tus preferencias, medidas, equipamiento y restricciones.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 Button(onClick = { val saved = validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput); onSave(saved); onRegenerate(saved) }, modifier = Modifier.fillMaxWidth().height(56.dp), enabled = !isRegenerating, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.accentGold, contentColor = Color.White)) { Text(if (isRegenerating) "GENERANDO PLAN…" else "✦  REGENERAR PLAN CON IA", fontWeight = FontWeight.Bold) }
-                Button(onClick = { onSave(validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput)) }, modifier = Modifier.fillMaxWidth().height(46.dp), shape = RoundedCornerShape(14.dp), enabled = !isRegenerating, colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text("GUARDAR CAMBIOS SIN REGENERAR", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption) }
+                Button(onClick = { onSave(validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput)); saveMessage = "Cambios guardados en tu perfil." }, modifier = Modifier.fillMaxWidth().height(46.dp), shape = RoundedCornerShape(14.dp), enabled = !isRegenerating, colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text("GUARDAR CAMBIOS SIN REGENERAR", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption) }
+                saveMessage?.let { Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold) }
             }
             Spacer(Modifier.height(28.dp))
             }
