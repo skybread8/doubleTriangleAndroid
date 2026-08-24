@@ -49,12 +49,14 @@ import io.codepassion.doubletriangle.core.model.WorkoutBlockSummary
 import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 
+data class CustomWorkoutRequest(val focus: String, val durationMinutes: Int, val equipment: String)
+
 @Composable
 internal fun CustomWorkoutsScreen(
     workouts: List<WorkoutDaySummary>,
     gender: String,
     onCreateManual: () -> Unit,
-    onCreateAutomatic: () -> Unit,
+    onCreateAutomatic: (CustomWorkoutRequest) -> Unit,
     onOpen: (WorkoutDaySummary) -> Unit,
     onEdit: (WorkoutDaySummary) -> Unit,
     onDuplicate: (WorkoutDaySummary) -> Unit,
@@ -62,17 +64,24 @@ internal fun CustomWorkoutsScreen(
     modifier: Modifier = Modifier,
 ) {
     var showsCreationMode by remember { mutableStateOf(false) }
+    var showsAutomaticRequest by remember { mutableStateOf(false) }
     var deleting by remember { mutableStateOf<WorkoutDaySummary?>(null) }
     if (showsCreationMode) {
         AlertDialog(
             onDismissRequest = { showsCreationMode = false }, title = { Text("NUEVO ENTRENAMIENTO", fontFamily = AntonFontFamily) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    CreationOption("✦", "AUTOMÁTICO", "Crea una sesión completa que podrás editar.") { showsCreationMode = false; onCreateAutomatic() }
+                    CreationOption("✦", "AUTOMÁTICO", "Crea una sesión adaptada a tus objetivos con IA.") { showsCreationMode = false; showsAutomaticRequest = true }
                     CreationOption("✎", "MANUAL", "Añade y configura cada ejercicio a mano.") { showsCreationMode = false; onCreateManual() }
                 }
             },
             confirmButton = { TextButton(onClick = { showsCreationMode = false }) { Text("CANCELAR") } },
+        )
+    }
+    if (showsAutomaticRequest) {
+        AutomaticWorkoutRequestDialog(
+            onDismiss = { showsAutomaticRequest = false },
+            onGenerate = { request -> showsAutomaticRequest = false; onCreateAutomatic(request) },
         )
     }
     deleting?.let { workout ->
@@ -255,7 +264,8 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
         }
         StyleParameterControls(exercise, onChange)
 }
-    }
+
+}
 
 @Composable
 private fun StyleParameterControls(exercise: ExerciseSummary, onChange: (ExerciseSummary) -> Unit) {
@@ -288,6 +298,32 @@ private fun StyleParameterControls(exercise: ExerciseSummary, onChange: (Exercis
             EditorStepper("REPETICIONES EN RESERVA (RIR)", parameters.targetRir.toString(), { update(parameters.copy(targetRir = (parameters.targetRir - 1).coerceAtLeast(0))) }, { update(parameters.copy(targetRir = (parameters.targetRir + 1).coerceAtMost(5))) }, Modifier.weight(1f))
         }
     }
+}
+
+@Composable
+private fun AutomaticWorkoutRequestDialog(onDismiss: () -> Unit, onGenerate: (CustomWorkoutRequest) -> Unit) {
+    var focus by remember { mutableStateOf("Full body") }
+    var duration by remember { mutableStateOf("45") }
+    var equipment by remember { mutableStateOf("Peso corporal, mancuernas y banco") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("CREAR CON IA", fontFamily = AntonFontFamily) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+                Text("La IA adaptará la sesión a estos datos.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                Text("ENFOQUE", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    listOf("Full body", "Empuje", "Tirón", "Piernas").forEach { option ->
+                        Text(option, Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(if (focus == option) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary.copy(alpha = 0.08f)).clickable { focus = option }.padding(vertical = 8.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.overline, color = if (focus == option) Color.White else WildforceThemeTokens.textPrimary)
+                    }
+                }
+                TextField(duration, { duration = it.filter(Char::isDigit).take(3) }, label = { Text("Duración (minutos)") }, singleLine = true)
+                TextField(equipment, { equipment = it.take(120) }, label = { Text("Equipamiento disponible") }, maxLines = 2)
+            }
+        },
+        confirmButton = { TextButton(onClick = { onGenerate(CustomWorkoutRequest(focus, duration.toIntOrNull()?.coerceIn(15, 180) ?: 45, equipment.trim())) }) { Text("GENERAR", color = WildforceThemeTokens.accentGold) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+    )
 }
 
 @Composable

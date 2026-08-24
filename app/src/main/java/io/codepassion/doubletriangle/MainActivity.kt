@@ -309,7 +309,13 @@ private fun WildforceApp(
         },
     ) { padding ->
         if (selected == RootDestination.Workout) {
-            WorkoutHubScreen(contentPadding = padding, state = displayedWorkoutState, onWorkoutSelected = { workoutDetail = it }, gender = "male")
+            WorkoutHubScreen(
+                contentPadding = padding,
+                state = displayedWorkoutState,
+                onWorkoutSelected = { workoutDetail = it },
+                gender = "male",
+                customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile.name, profile.goal.title, request) },
+            )
         } else if (selected == RootDestination.Nutrition) {
             NutritionScreen()
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

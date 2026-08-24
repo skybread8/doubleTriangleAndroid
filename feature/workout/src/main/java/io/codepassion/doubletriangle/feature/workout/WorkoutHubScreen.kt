@@ -42,6 +42,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,6 +74,7 @@ import java.time.format.TextStyle
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun WorkoutHubScreen(
@@ -80,6 +82,7 @@ fun WorkoutHubScreen(
     state: WorkoutHubState = PreviewWorkoutRepository.load(),
 onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
     gender: String = "male",
+    customAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null,
 ) {
     var selectedDay by remember { mutableStateOf<DayOfWeek?>(null) }
     var mode by remember { mutableStateOf(WorkoutMode.Plan) }
@@ -87,6 +90,9 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
     var customWorkouts by remember { mutableStateOf(CustomWorkoutStore.load(customContext)) }
     var editingCustomWorkout by remember { mutableStateOf<WorkoutDaySummary?>(null) }
     var showingPlanOverview by remember { mutableStateOf(false) }
+    var generatingCustomWorkout by remember { mutableStateOf(false) }
+    var customGenerationError by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     editingCustomWorkout?.let { draft ->
         Box(Modifier.fillMaxSize().padding(contentPadding)) {
@@ -128,7 +134,20 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
             CustomWorkoutsScreen(
                 workouts = customWorkouts.filter { selectedDay == null || it.scheduledDay == selectedDay }, gender = gender,
                 onCreateManual = { editingCustomWorkout = CustomWorkoutStore.empty(selectedDay ?: LocalDate.now().dayOfWeek) },
-                onCreateAutomatic = { editingCustomWorkout = CustomWorkoutStore.automatic(selectedDay ?: LocalDate.now().dayOfWeek) },
+                onCreateAutomatic = { request ->
+                    customGenerationError = null
+                    if (customAiGenerator == null) {
+                        editingCustomWorkout = CustomWorkoutStore.automatic(selectedDay ?: LocalDate.now().dayOfWeek)
+                    } else {
+                        generatingCustomWorkout = true
+                        coroutineScope.launch {
+                            runCatching { customAiGenerator.invoke(request) }
+                                .onSuccess { generated -> editingCustomWorkout = generated.copy(scheduledDay = selectedDay ?: LocalDate.now().dayOfWeek) }
+                                .onFailure { error -> customGenerationError = error.message ?: "No se pudo generar el entrenamiento." }
+                            generatingCustomWorkout = false
+                        }
+                    }
+                },
                 onOpen = onWorkoutSelected, onEdit = { editingCustomWorkout = it },
                 onDuplicate = { source ->
                     editingCustomWorkout = CustomWorkoutStore.duplicate(customContext, source)
@@ -142,6 +161,28 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
                 modifier = Modifier.fillMaxSize(),
             )
         }
+    }
+    if (generatingCustomWorkout) {
+        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.35f)), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator(color = WildforceThemeTokens.accentGold)
+                Text("GENERANDO ENTRENAMIENTO CON IA…", Modifier.padding(top = 12.dp), color = Color.White, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+    customGenerationError?.let { error ->
+        AlertDialog(
+            onDismissRequest = { customGenerationError = null },
+            title = { Text("NO SE PUDO GENERAR CON IA", fontFamily = AntonFontFamily) },
+            text = { Text(error) },
+            confirmButton = {
+                TextButton(onClick = {
+                    customGenerationError = null
+                    editingCustomWorkout = CustomWorkoutStore.automatic(selectedDay ?: LocalDate.now().dayOfWeek)
+                }) { Text("USAR PLANTILLA LOCAL", color = WildforceThemeTokens.accentGold) }
+            },
+            dismissButton = { TextButton(onClick = { customGenerationError = null }) { Text("CERRAR", color = WildforceThemeTokens.textSecondary) } },
+        )
     }
 }
 

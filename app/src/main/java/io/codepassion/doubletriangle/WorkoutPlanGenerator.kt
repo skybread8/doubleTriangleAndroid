@@ -10,6 +10,7 @@ import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import io.codepassion.doubletriangle.core.model.executionExercises
+import io.codepassion.doubletriangle.feature.workout.CustomWorkoutRequest
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.DayOfWeek
@@ -17,15 +18,29 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.UUID
 
 object WorkoutPlanGenerator {
     suspend fun generate(userName: String, goal: String): Pair<String, WorkoutHubState> = withContext(Dispatchers.IO) {
+        generateWithInstruction(userName, goal, "Genera un plan general de iniciación de 3 días por semana, 45-55 minutos por sesión.")
+    }
+
+    suspend fun generateCustom(userName: String, goal: String, request: CustomWorkoutRequest): WorkoutDaySummary = withContext(Dispatchers.IO) {
+        val (_, state) = generateWithInstruction(
+            userName,
+            goal,
+            "Genera UNA ÚNICA sesión personalizada. Enfoque: ${request.focus}. Duración objetivo: ${request.durationMinutes} minutos. Equipamiento disponible: ${request.equipment}. Debe ser una sesión segura, concreta y editable.",
+        )
+        state.workouts.first().copy(id = "custom-ai-${UUID.randomUUID()}", order = 1, estimatedMinutes = request.durationMinutes, status = WorkoutStatus.Planned)
+    }
+
+    private suspend fun generateWithInstruction(userName: String, goal: String, instruction: String): Pair<String, WorkoutHubState> = withContext(Dispatchers.IO) {
         check(BuildConfig.OPENAI_API_KEY.isNotBlank()) { "Falta OPENAI_API_KEY en local.properties" }
         val body = JSONObject()
             .put("model", BuildConfig.OPENAI_MODEL)
             .put("messages", JSONArray()
                 .put(JSONObject().put("role", "system").put("content", SYSTEM_PROMPT))
-                .put(JSONObject().put("role", "user").put("content", "Genera un plan general de iniciación de 3 días por semana, 45-55 minutos por sesión.")))
+                .put(JSONObject().put("role", "user").put("content", instruction)))
             .put("response_format", JSONObject().put("type", "json_object"))
             .put("stream", false)
         val connection = URL("https://api.openai.com/v1/chat/completions").openConnection() as HttpURLConnection
