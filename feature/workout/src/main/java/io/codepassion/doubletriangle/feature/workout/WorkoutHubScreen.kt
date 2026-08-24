@@ -91,6 +91,7 @@ fun WorkoutHubScreen(
     gender: String = "male",
     defaultCustomEquipment: String = "Peso corporal",
     customEquipmentPresets: List<Pair<String, String>> = emptyList(),
+    generationError: String? = null,
     customAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null,
 ) {
     var selectedDay by remember { mutableStateOf<DayOfWeek?>(null) }
@@ -122,6 +123,9 @@ fun WorkoutHubScreen(
     Column(
         Modifier.fillMaxSize().padding(contentPadding).liquidGlassBackground(),
     ) {
+        generationError?.let { error ->
+            Text("No se pudo generar el plan: $error", Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 8.dp).liquidGlass(RoundedCornerShape(14.dp)).padding(12.dp), color = Color(0xFFC62828), style = MaterialTheme.typography.caption)
+        }
         AnimatedVisibility(visible = hubEntered, enter = fadeIn(tween(320)) + slideInVertically(tween(320)) { -it / 18 }) {
             Column(
                 Modifier.fillMaxWidth()
