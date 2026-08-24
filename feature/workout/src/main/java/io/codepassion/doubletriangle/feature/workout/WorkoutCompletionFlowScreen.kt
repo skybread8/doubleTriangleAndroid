@@ -226,7 +226,12 @@ private fun StreakCelebration(streak: Int, onContinue: () -> Unit) = Celebration
     Text("🔥", style = MaterialTheme.typography.h1)
     Text(displayedStreak.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
     Text(if (streak == 1) "DÍA DE RACHA" else "DÍAS DE RACHA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color(0xFFF07818))
-    Text(if (streak == 1) "¡El primer paso es el más importante!" else "¡Estás en llamas! Sigue manteniendo el ritmo.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    val streakMessage = when {
+        streak == 1 -> "¡El primer paso es el más importante!"
+        streak % 7 == 0 -> "¡Una semana completa! Tu constancia marca la diferencia."
+        else -> "¡Estás en llamas! Sigue manteniendo el ritmo."
+    }
+    Text(streakMessage, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
 
@@ -239,6 +244,7 @@ private fun XpCelebration(progress: CompletionProgress, onContinue: () -> Unit) 
     Text("XP TOTAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     val displayedXp by animateIntAsState(if (revealXp) progress.xpAfter else progress.xpBefore, animationSpec = tween(850, delayMillis = 140))
     Text(displayedXp.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
+    Text("Nivel ${progress.levelBefore}", color = WildforceThemeTokens.textSecondary)
     val levelStart = WorkoutCompletionCalculator.minimumXp(progress.levelBefore)
     val levelEnd = WorkoutCompletionCalculator.minimumXp(progress.levelBefore + 1)
     val xpBeforeProgress = ((progress.xpBefore - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f)
@@ -250,9 +256,9 @@ private fun XpCelebration(progress: CompletionProgress, onContinue: () -> Unit) 
         backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.18f),
     )
     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-        Text("Nivel ${progress.levelBefore}", style = MaterialTheme.typography.caption)
+        Text("${progress.xpBefore} XP", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Spacer(Modifier.weight(1f))
-        Text("+${WorkoutCompletionCalculator.WORKOUT_XP} XP", color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+        Text("+${progress.xpAfter - progress.xpBefore} XP", color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
     }
     Spacer(Modifier.weight(1f))
 }
@@ -280,6 +286,9 @@ private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, t
         CompletionStat("SESIONES", "$completedWorkouts/$totalWorkouts", Modifier.weight(1f))
         CompletionStat("EJERCICIOS", totalExercises.toString(), Modifier.weight(1f))
     }
+    val completionRatio = if (totalWorkouts > 0) (completedWorkouts.toFloat() / totalWorkouts).coerceIn(0f, 1f) else 1f
+    val animatedRatio by animateFloatAsState(completionRatio, animationSpec = tween(800, delayMillis = 180))
+    LinearProgressIndicator(animatedRatio, Modifier.fillMaxWidth().padding(top = 18.dp).height(10.dp), color = WildforceThemeTokens.accentGold, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.16f))
     Text("Ya no quedan sesiones pendientes en este plan.", Modifier.padding(top = 18.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }

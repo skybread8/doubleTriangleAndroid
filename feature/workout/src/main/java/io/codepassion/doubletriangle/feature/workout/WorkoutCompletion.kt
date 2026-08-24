@@ -74,8 +74,12 @@ internal object WorkoutCompletionCalculator {
             val previous = WorkoutHistoryStore.history(context, exercise)
             val previousWeight = previous.maxOfOrNull { it.maxWeightKg } ?: 0.0
             val previousVolume = previous.maxOfOrNull { it.volumeKg } ?: 0.0
-            if (previousWeight > 0 && current.maxWeightKg > previousWeight) add(ExerciseRecordEvent(exercise.name, "MEJOR PESO", previousWeight, current.maxWeightKg, "kg"))
-            if (previousVolume > 0 && current.volumeKg > previousVolume) add(ExerciseRecordEvent(exercise.name, "MEJOR VOLUMEN", previousVolume, current.volumeKg, "kg"))
+            if (current.maxWeightKg > 0 && current.maxWeightKg > previousWeight) {
+                add(ExerciseRecordEvent(exercise.name, if (previousWeight > 0) "MEJOR PESO" else "PRIMER REGISTRO DE PESO", previousWeight, current.maxWeightKg, "kg"))
+            }
+            if (current.volumeKg > 0 && current.volumeKg > previousVolume) {
+                add(ExerciseRecordEvent(exercise.name, if (previousVolume > 0) "MEJOR VOLUMEN" else "PRIMER REGISTRO DE VOLUMEN", previousVolume, current.volumeKg, "kg"))
+            }
         }
     }
 
