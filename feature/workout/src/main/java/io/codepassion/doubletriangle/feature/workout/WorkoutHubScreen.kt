@@ -26,6 +26,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.AlertDialog
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Card
@@ -304,10 +306,24 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
     var expandedExercise by remember { mutableStateOf<Int?>(null) }
     var collapsedBlocks by remember(workout.id) { mutableStateOf(emptySet<Int>()) }
     val detailContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
-    val hasSavedSession = remember(workout.id) { WorkoutSessionStore.load(detailContext, workout.id) != null }
+    var hasSavedSession by remember(workout.id) { mutableStateOf(WorkoutSessionStore.load(detailContext, workout.id) != null) }
     var guideExercise by remember { mutableStateOf<ExerciseSummary?>(null) }
+    var showMenu by remember { mutableStateOf(false) }
+    var showSkipConfirmation by remember { mutableStateOf(false) }
+    var skipped by remember(workout.id) { mutableStateOf(false) }
     guideExercise?.let { selected ->
         ExerciseGuideScreen(selected, gender) { guideExercise = null }
+        return
+    }
+    if (skipped) {
+        Box(Modifier.fillMaxSize().liquidGlassBackground(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
+                Text("‹ VOLVER", Modifier.clickable(onClick = onBack).padding(12.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+                Text("DÍA OMITIDO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+                Text("Este entrenamiento se ha marcado como descanso.", Modifier.padding(top = 8.dp), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                Text("DESHACER", Modifier.clickable { skipped = false }.padding(14.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+            }
+        }
         return
     }
     Box(Modifier.fillMaxSize().liquidGlassBackground()) {
@@ -318,7 +334,16 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
         )
         Box(Modifier.fillMaxWidth().height(390.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.48f), Color.Transparent, WildforceThemeTokens.backgroundSecondary))))
         Column(Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState())) {
-            Text("‹  VOLVER", Modifier.clickable(onClick = onBack).padding(horizontal = 18.dp, vertical = 18.dp), color = Color.White, fontWeight = FontWeight.Bold)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text("‹  VOLVER", Modifier.clickable(onClick = onBack).padding(horizontal = 18.dp, vertical = 18.dp), color = Color.White, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.weight(1f))
+                Box {
+                    Text("•••", Modifier.clickable { showMenu = true }.padding(horizontal = 18.dp, vertical = 18.dp), color = Color.White, fontWeight = FontWeight.Bold)
+                    DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                        DropdownMenuItem(onClick = { showMenu = false; showSkipConfirmation = true }) { Text("Omitir entrenamiento") }
+                    }
+                }
+            }
             Spacer(Modifier.height(190.dp))
             Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(topStart = 38.dp, topEnd = 38.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(22.dp)) {
                 Text("DÍA ${workout.order}", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
@@ -389,11 +414,20 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                Button(onClick = onStart, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp)) {
+                Button(onClick = { hasSavedSession = true; onStart() }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp)) {
                     Text(if (hasSavedSession) "REANUDAR ENTRENAMIENTO" else "EMPEZAR ENTRENAMIENTO", fontWeight = FontWeight.Bold)
                 }
             }
         }
+    }
+    if (showSkipConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showSkipConfirmation = false },
+            title = { Text("¿OMITIR ENTRENAMIENTO?", fontFamily = AntonFontFamily) },
+            text = { Text("El día quedará marcado como descanso y podrás volver a abrirlo después.") },
+            confirmButton = { TextButton(onClick = { skipped = true; showSkipConfirmation = false }) { Text("OMITIR", color = Color(0xFFC62828)) } },
+            dismissButton = { TextButton(onClick = { showSkipConfirmation = false }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+        )
     }
 }
 @Composable
