@@ -51,4 +51,26 @@ class WorkoutModelsTest {
         assertEquals(listOf("A1", "A2", "A1", "A2", "A1", "A2"), block.executionExercises().map { it.blockLabel })
         assertEquals(listOf(false, true, false, true, false, true), block.executionExercises().map { it.isLastInBlock })
     }
+
+    @Test fun fourWeekCycleUsesAccumulationThenDeload() {
+        assertEquals(MesocyclePhase.Accumulation, resolveMesocyclePhase(1, 4)?.phase)
+        assertEquals(MesocyclePhase.Accumulation, resolveMesocyclePhase(3, 4)?.phase)
+        assertEquals(MesocyclePhase.Deload, resolveMesocyclePhase(4, 4)?.phase)
+    }
+
+    @Test fun sixWeekCycleIncludesIntensification() {
+        val phase = resolveMesocyclePhase(4, 6)
+        assertEquals(MesocyclePhase.Intensification, phase?.phase)
+        assertEquals(1, phase?.weekInPhase)
+    }
+
+    @Test fun phasePositionWrapsIntoNextCycle() {
+        val phase = resolveMesocyclePhase(7, 6)
+        assertEquals(1, phase?.positionInCycle)
+        assertEquals(MesocyclePhase.Accumulation, phase?.phase)
+    }
+
+    @Test fun invalidCycleHasNoDerivedPhase() {
+        assertEquals(null, resolveMesocyclePhase(1, 1))
+    }
 }

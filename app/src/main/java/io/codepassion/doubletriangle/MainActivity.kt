@@ -325,6 +325,7 @@ fun WildforceRoot() {
                         Text(state.planName, fontWeight = FontWeight.Bold, maxLines = 2)
                         Text(state.phase, color = WildforceThemeTokens.textSecondary, maxLines = 2)
                         Text("Plan ${state.mesocycleNumber} · Mesociclo ${state.mesocycleIndex} · Semana ${state.weekIndex}/${state.cycleLength}", color = WildforceThemeTokens.accentGold, maxLines = 1)
+                        state.mesocyclePhase?.let { phase -> Text("${phase.label} · Semana de fase ${state.phaseWeek}", color = WildforceThemeTokens.textSecondary) }
                         state.workouts.take(6).forEach { workout ->
                             Text("• ${workout.scheduledDay}: ${workout.title} · ${workout.exercises.size} ejercicios · ${workout.estimatedMinutes} min", modifier = Modifier.padding(top = 6.dp), maxLines = 1)
                         }

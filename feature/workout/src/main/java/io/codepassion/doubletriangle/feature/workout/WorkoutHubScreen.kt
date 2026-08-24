@@ -249,6 +249,9 @@ private fun PlanContextCard(state: WorkoutHubState, onClick: () -> Unit) {
             Text(state.planName.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.subtitle1, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(state.phase, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text("Plan ${state.mesocycleNumber} · Mesociclo ${state.mesocycleIndex} · Semana ${state.weekIndex}/${state.cycleLength}", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            state.mesocyclePhase?.let { phase ->
+                Text("${phase.label} · Semana de fase ${state.phaseWeek}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
             LinearProgressIndicator(
                 progress = mesocycleProgress,
                 modifier = Modifier.fillMaxWidth().padding(top = 5.dp).height(4.dp).clip(RoundedCornerShape(4.dp)),

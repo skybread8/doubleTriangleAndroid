@@ -11,6 +11,31 @@ enum class WorkoutMode(val label: String) {
 
 enum class WorkoutStatus { Planned, Completed, Skipped }
 
+enum class MesocyclePhase(val label: String) {
+    Accumulation("Acumulación"),
+    Intensification("Intensificación"),
+    Deload("Descarga"),
+}
+
+data class MesocyclePhaseInfo(
+    val phase: MesocyclePhase,
+    val weekInPhase: Int,
+    val positionInCycle: Int,
+)
+
+fun resolveMesocyclePhase(mesocycleNumber: Int, cycleLength: Int): MesocyclePhaseInfo? {
+    if (mesocycleNumber <= 0 || cycleLength <= 1) return null
+    val accumulationLength = if (cycleLength <= 4) cycleLength - 1 else cycleLength / 2
+    val intensificationLength = (cycleLength - accumulationLength - 1).coerceAtLeast(0)
+    val position = ((mesocycleNumber - 1) % cycleLength) + 1
+    return when {
+        position <= accumulationLength -> MesocyclePhaseInfo(MesocyclePhase.Accumulation, position, position)
+        intensificationLength > 0 && position <= accumulationLength + intensificationLength ->
+            MesocyclePhaseInfo(MesocyclePhase.Intensification, position - accumulationLength, position)
+        else -> MesocyclePhaseInfo(MesocyclePhase.Deload, 1, position)
+    }
+}
+
 enum class ExerciseSetStyle(val label: String, val glyph: String) {
     Warmup("Calentamiento", "●"),
     Straight("Series normales", "="),
@@ -126,6 +151,9 @@ data class WorkoutHubState(
     val mesocycleNumber: Int = 1,
     val cycleLength: Int = 1,
     val weekIndex: Int = 1,
+    val mesocyclePhase: MesocyclePhase? = null,
+    val phaseWeek: Int = 1,
+    val positionInCycle: Int = 1,
 )
 
 fun WorkoutHubState.workoutsFor(dayOfWeek: DayOfWeek?): List<WorkoutDaySummary> =

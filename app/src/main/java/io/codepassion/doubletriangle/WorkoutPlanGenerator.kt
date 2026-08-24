@@ -10,6 +10,8 @@ import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
+import io.codepassion.doubletriangle.core.model.MesocyclePhase
+import io.codepassion.doubletriangle.core.model.resolveMesocyclePhase
 import io.codepassion.doubletriangle.core.model.executionExercises
 import io.codepassion.doubletriangle.core.model.displayBlocks
 import io.codepassion.doubletriangle.feature.workout.CustomWorkoutRequest
@@ -42,11 +44,16 @@ object WorkoutPlanGenerator {
         val nextWeek = previous.weekIndex + 1
         val effectiveCycleLength = if (previous.cycleLength <= 1) 4 else previous.cycleLength
         val startsNewMesocycle = nextWeek > effectiveCycleLength
+        val nextNumber = previous.mesocycleNumber + 1
+        val phaseInfo = resolveMesocyclePhase(nextNumber, effectiveCycleLength)
         val nextState = generated.copy(
             mesocycleIndex = if (startsNewMesocycle) previous.mesocycleIndex + 1 else previous.mesocycleIndex,
-            mesocycleNumber = previous.mesocycleNumber + 1,
+            mesocycleNumber = nextNumber,
             cycleLength = effectiveCycleLength,
             weekIndex = if (startsNewMesocycle) 1 else nextWeek,
+            mesocyclePhase = phaseInfo?.phase,
+            phaseWeek = phaseInfo?.weekInPhase ?: 1,
+            positionInCycle = phaseInfo?.positionInCycle ?: 1,
         )
         serialize(nextState) to nextState
     }
@@ -130,6 +137,14 @@ object WorkoutPlanGenerator {
         check(workouts.isNotEmpty()) { "La IA devolvió un plan vacío" }
         val cycleLength = root.optInt("cycleLength", 1).coerceAtLeast(1)
         val weekIndex = root.optInt("weekIndex", 1).coerceIn(1, cycleLength)
+        val mesocycleNumber = root.optInt("mesocycleNumber", root.optInt("planNumber", 1)).coerceAtLeast(1)
+        val derivedPhase = resolveMesocyclePhase(mesocycleNumber, cycleLength)
+        val parsedPhase = when (root.optString("mesocyclePhase").trim().lowercase()) {
+            "accumulation", "acumulación", "acumulacion" -> MesocyclePhase.Accumulation
+            "intensification", "intensificación", "intensificacion" -> MesocyclePhase.Intensification
+            "deload", "descarga" -> MesocyclePhase.Deload
+            else -> derivedPhase?.phase
+        }
         return WorkoutHubState(
             user = UserSummary(userName, goal, 0),
             trainingDays = workouts.mapTo(mutableSetOf()) { it.scheduledDay },
@@ -138,9 +153,12 @@ object WorkoutPlanGenerator {
             phase = root.optString("phase").trim().ifBlank { "Adaptación · Mesociclo 1" },
             workouts = workouts,
             mesocycleIndex = root.optInt("mesocycleIndex", 1).coerceAtLeast(1),
-            mesocycleNumber = root.optInt("mesocycleNumber", root.optInt("planNumber", 1)).coerceAtLeast(1),
+            mesocycleNumber = mesocycleNumber,
             cycleLength = cycleLength,
             weekIndex = weekIndex,
+            mesocyclePhase = parsedPhase,
+            phaseWeek = root.optInt("phaseWeek", derivedPhase?.weekInPhase ?: 1).coerceAtLeast(1),
+            positionInCycle = root.optInt("positionInCycle", derivedPhase?.positionInCycle ?: weekIndex).coerceIn(1, cycleLength),
         )
     }
 
@@ -217,6 +235,9 @@ object WorkoutPlanGenerator {
             .put("phase", state.phase)
             .put("mesocycleIndex", state.mesocycleIndex)
             .put("mesocycleNumber", state.mesocycleNumber)
+            .put("mesocyclePhase", state.mesocyclePhase?.name?.lowercase())
+            .put("phaseWeek", state.phaseWeek)
+            .put("positionInCycle", state.positionInCycle)
             .put("cycleLength", state.cycleLength)
             .put("weekIndex", state.weekIndex)
             .put("workouts", days)
@@ -245,7 +266,7 @@ Perfil obligatorio del usuario:
 - Omitir calentamiento: ${if (profile.skipsWarmups) "sí" else "no"}; omitir vuelta a la calma: ${if (profile.skipsCooldowns) "sí" else "no"}; omitir descansos: ${if (profile.skipsRestPeriods) "sí" else "no"}; notas del planificador: ${profile.workoutPlannerNotes.ifBlank { "ninguna" }}
 ${historyContext ?: "Historial de entrenamientos recientes: todavía no hay sesiones completadas."}
 Reglas estrictas: crea exactamente un workout por cada día disponible y no inventes días. Cada sesión debe respetar el presupuesto total de duración incluyendo calentamiento, trabajo principal y vuelta a la calma. Si se omite calentamiento o vuelta a la calma, devuelve cero ejercicios y cero bloques de ese tipo: nunca uses bloques vacíos, ocultos o de relleno. No uses ejercicios incompatibles con el equipamiento o las restricciones; prioriza sustituciones seguras y cercanas. Usa siempre bloques y prescripciones concretas, conserva el foco personalizado de cada día y distribuye el volumen de forma recuperable.
-Metadatos de progresión: incluye también mesocycleNumber, mesocycleIndex, cycleLength y weekIndex como enteros positivos en la raíz del JSON. mesocycleNumber aumenta en cada plan semanal; mesocycleIndex agrupa los planes dentro del ciclo. Mantén cycleLength normalmente entre 4 y 6 semanas y usa weekIndex para indicar la semana actual del mesociclo; si no hay contexto previo, empieza en mesocycleNumber=1, mesocycleIndex=1 y weekIndex=1.
+Metadatos de progresión: incluye también mesocycleNumber, mesocycleIndex, cycleLength, weekIndex, mesocyclePhase, phaseWeek y positionInCycle en la raíz del JSON. mesocycleNumber aumenta en cada plan semanal; mesocycleIndex agrupa los planes dentro del ciclo. mesocyclePhase debe ser accumulation, intensification o deload. Mantén cycleLength según el nivel y usa weekIndex para indicar la semana actual; si no hay contexto previo, empieza en mesocycleNumber=1, mesocycleIndex=1, weekIndex=1, phaseWeek=1 y positionInCycle=1.
 """
 
     internal fun parseBlockType(value: String): WorkoutBlockType = when (value.trim().lowercase()) {
