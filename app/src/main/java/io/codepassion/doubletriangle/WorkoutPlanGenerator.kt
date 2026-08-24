@@ -18,6 +18,7 @@ import io.codepassion.doubletriangle.feature.workout.CustomWorkoutRequest
 import io.codepassion.doubletriangle.feature.workout.WorkoutHistoryStore
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
+import io.codepassion.doubletriangle.feature.onboarding.TrainingSplitPreference
 import io.codepassion.doubletriangle.feature.onboarding.effectiveTrainingLocations
 import java.net.HttpURLConnection
 import java.net.URL
@@ -170,6 +171,16 @@ object WorkoutPlanGenerator {
         check(actualDays.size == expectedDays.size && actualDays.toSet() == expectedDays) {
             "La IA no respetó exactamente los días seleccionados. Vuelve a generar el plan."
         }
+        if (profile.trainingSplitPreference == TrainingSplitPreference.Custom) {
+            profile.workoutDays.forEach { day ->
+                val expected = profile.customWorkoutFocuses[day]
+                val generated = state.workouts.firstOrNull { it.scheduledDay.name == day.storedValue.uppercase() }
+                val generatedFocus = generated?.focus.orEmpty()
+                check(expected == null || generatedFocus.contains(expected.title, ignoreCase = true) || generatedFocus.contains(expected.storedValue, ignoreCase = true)) {
+                    "La IA no respetó el foco personalizado del ${day.title}. Vuelve a generar el plan."
+                }
+            }
+        }
         state.workouts.forEach { workout ->
             check(workout.exercises.isNotEmpty()) {
                 "La IA devolvió una sesión vacía para ${workout.scheduledDay}. Vuelve a generar el plan."
@@ -188,6 +199,10 @@ object WorkoutPlanGenerator {
                 check(profile.skipsCooldowns || hasCooldown) { "Falta vuelta a la calma en ${workout.title}. Vuelve a generar el plan." }
                 check(!profile.skipsWarmups || !blocks.any { it.type == WorkoutBlockType.Warmup }) { "El plan incluye calentamiento aunque está desactivado." }
                 check(!profile.skipsCooldowns || !blocks.any { it.type == WorkoutBlockType.Cooldown }) { "El plan incluye vuelta a la calma aunque está desactivada." }
+                if (profile.skipsRestPeriods) {
+                    check(workout.exercises.all { it.restSeconds == 0 }) { "El plan incluye descansos aunque están desactivados." }
+                    check(blocks.all { it.restAfterBlockSeconds == null }) { "El plan incluye descansos entre bloques aunque están desactivados." }
+                }
             }
         }
     }
