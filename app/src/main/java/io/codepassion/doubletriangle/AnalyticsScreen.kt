@@ -65,6 +65,10 @@ fun AnalyticsScreen(
     val lastDuration = preferences.getInt("last_workout_duration", 0)
     val lastSets = preferences.getInt("last_workout_sets", 0)
     val lastVolume = java.lang.Double.longBitsToDouble(preferences.getLong("last_workout_volume", 0L))
+    val sessionHistory = remember { TrainingSessionHistoryStore.load(preferences) }
+    val averageDuration = sessionHistory.takeIf { it.isNotEmpty() }?.map { it.durationSeconds }?.average()?.toInt() ?: lastDuration
+    val averageSets = sessionHistory.takeIf { it.isNotEmpty() }?.map { it.sets }?.average()?.toInt() ?: lastSets
+    val averageVolume = sessionHistory.takeIf { it.isNotEmpty() }?.map { it.volumeKg }?.average() ?: lastVolume
     val trendVolumes = remember(exerciseSummaries, rangeDays) {
         volumeBuckets(context, exerciseSummaries, rangeDays)
     }
@@ -97,7 +101,7 @@ fun AnalyticsScreen(
                 Text("Completa tu primer entrenamiento para desbloquear métricas detalladas.", color = WildforceThemeTokens.textSecondary)
             } else {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    MetricLine("Tiempo", formatDuration(lastDuration)); MetricLine("Series", lastSets.toString()); MetricLine("Volumen", String.format("%.0f kg", lastVolume))
+                    MetricLine("Tiempo medio", formatDuration(averageDuration)); MetricLine("Series medias", averageSets.toString()); MetricLine("Volumen medio", String.format("%.0f kg", averageVolume))
                 }
             }
         }

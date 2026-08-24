@@ -264,6 +264,7 @@ fun WildforceRoot() {
                     .putInt("total_completed_workouts", totalCompleted)
                     .putInt("last_workout_duration", duration).putInt("last_workout_sets", sets)
                     .putLong("last_workout_volume", java.lang.Double.doubleToRawLongBits(volume)).apply()
+                TrainingSessionHistoryStore.record(preferences, duration, sets, volume)
             },
             onResetOnboarding = {
                 preferences.edit().clear().apply()
