@@ -9,7 +9,7 @@ internal object WorkoutActiveNotification {
     private const val channelId = "active_workout"
     private const val notificationId = 4101
 
-    fun show(context: Context, title: String) {
+    fun show(context: Context, title: String, detail: String = "Sesión activa") {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_LOW))
@@ -20,7 +20,7 @@ internal object WorkoutActiveNotification {
             @Suppress("DEPRECATION") android.app.Notification.Builder(context)
         }.setSmallIcon(android.R.drawable.ic_media_play)
             .setContentTitle("Entrenamiento activo")
-            .setContentText(title)
+            .setContentText(detail)
             .setOngoing(true)
             .setCategory(android.app.Notification.CATEGORY_PROGRESS)
             .build()
