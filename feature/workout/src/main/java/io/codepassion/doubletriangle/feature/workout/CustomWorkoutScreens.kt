@@ -55,6 +55,7 @@ data class CustomWorkoutRequest(val focus: String, val durationMinutes: Int, val
 internal fun CustomWorkoutsScreen(
     workouts: List<WorkoutDaySummary>,
     gender: String,
+    defaultEquipment: String,
     onCreateManual: () -> Unit,
     onCreateAutomatic: (CustomWorkoutRequest) -> Unit,
     onOpen: (WorkoutDaySummary) -> Unit,
@@ -80,6 +81,7 @@ internal fun CustomWorkoutsScreen(
     }
     if (showsAutomaticRequest) {
         AutomaticWorkoutRequestDialog(
+            defaultEquipment = defaultEquipment,
             onDismiss = { showsAutomaticRequest = false },
             onGenerate = { request -> showsAutomaticRequest = false; onCreateAutomatic(request) },
         )
@@ -301,10 +303,10 @@ private fun StyleParameterControls(exercise: ExerciseSummary, onChange: (Exercis
 }
 
 @Composable
-private fun AutomaticWorkoutRequestDialog(onDismiss: () -> Unit, onGenerate: (CustomWorkoutRequest) -> Unit) {
+private fun AutomaticWorkoutRequestDialog(defaultEquipment: String, onDismiss: () -> Unit, onGenerate: (CustomWorkoutRequest) -> Unit) {
     var focus by remember { mutableStateOf("Full body") }
     var duration by remember { mutableStateOf("45") }
-    var equipment by remember { mutableStateOf("Peso corporal, mancuernas y banco") }
+    var equipment by remember(defaultEquipment) { mutableStateOf(defaultEquipment.ifBlank { "Peso corporal" }) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("CREAR CON IA", fontFamily = AntonFontFamily) },

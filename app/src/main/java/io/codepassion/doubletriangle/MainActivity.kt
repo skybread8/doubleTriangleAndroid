@@ -290,6 +290,10 @@ fun WildforceRoot() {
                     isGenerating = false
                 }
             },
+            onPlanWorkoutUpdated = { updatedState ->
+                generatedWorkoutState = updatedState
+                preferences.edit().putString("workout_plan_json", WorkoutPlanGenerator.serialize(updatedState)).apply()
+            },
             isGeneratingProfilePlan = isGenerating,
             profileGenerationError = generationError,
             onRequestHealthConnect = requestHealthConnect,
@@ -305,6 +309,7 @@ private fun WildforceApp(
     onResetOnboarding: () -> Unit = {},
     onProfileUpdated: (OnboardingProfile) -> Unit = {},
     onRegenerateProfile: (OnboardingProfile) -> Unit = {},
+    onPlanWorkoutUpdated: (WorkoutHubState) -> Unit = {},
     isGeneratingProfilePlan: Boolean = false,
     profileGenerationError: String? = null,
     onRequestHealthConnect: (((Boolean, Int?, Double?) -> Unit) -> Unit) = { _ -> },
@@ -350,6 +355,13 @@ private fun WildforceApp(
             displayedWorkoutState = displayedWorkoutState.copy(
                 workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Planned) else it },
             )
+        }, onWorkoutUpdated = { updated ->
+            val updatedState = displayedWorkoutState.copy(
+                workouts = displayedWorkoutState.workouts.map { existing -> if (existing.id == updated.id) updated else existing },
+            )
+            displayedWorkoutState = updatedState
+            workoutDetail = updated
+            onPlanWorkoutUpdated(updatedState)
         })
         return
     }
@@ -378,6 +390,7 @@ private fun WildforceApp(
                 state = displayedWorkoutState,
                 onWorkoutSelected = { workoutDetail = it },
                 gender = profile.gender.storedValue,
+                defaultCustomEquipment = profile.availableEquipment.joinToString(", ") { it.title },
                 customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile, request) },
             )
         } else if (selected == RootDestination.Nutrition) {

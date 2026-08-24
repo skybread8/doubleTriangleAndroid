@@ -80,8 +80,9 @@ import kotlinx.coroutines.launch
 fun WorkoutHubScreen(
     contentPadding: PaddingValues,
     state: WorkoutHubState = PreviewWorkoutRepository.load(),
-onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
+    onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
     gender: String = "male",
+    defaultCustomEquipment: String = "Peso corporal",
     customAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null,
 ) {
     var selectedDay by remember { mutableStateOf<DayOfWeek?>(null) }
@@ -133,6 +134,7 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
         AnimatedVisibility(mode == WorkoutMode.Custom) {
             CustomWorkoutsScreen(
                 workouts = customWorkouts.filter { selectedDay == null || it.scheduledDay == selectedDay }, gender = gender,
+                defaultEquipment = defaultCustomEquipment,
                 onCreateManual = { editingCustomWorkout = CustomWorkoutStore.empty(selectedDay ?: LocalDate.now().dayOfWeek) },
                 onCreateAutomatic = { request ->
                     customGenerationError = null
@@ -366,15 +368,25 @@ private fun RestDayCard() {
 private fun WorkoutHubPreview() = WildforceTheme { WorkoutHubScreen(PaddingValues()) }
 
 @Composable
-fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -> Unit, onStart: () -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}) {
+fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -> Unit, onStart: () -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}) {
     var expandedExercise by remember { mutableStateOf<Int?>(null) }
     var collapsedBlocks by remember(workout.id) { mutableStateOf(emptySet<Int>()) }
     val detailContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
     var hasSavedSession by remember(workout.id) { mutableStateOf(WorkoutSessionStore.load(detailContext, workout.id) != null) }
     var guideExercise by remember { mutableStateOf<ExerciseSummary?>(null) }
     var showMenu by remember { mutableStateOf(false) }
+    var showingEditor by remember(workout.id) { mutableStateOf(false) }
     var showSkipConfirmation by remember { mutableStateOf(false) }
     var skipped by remember(workout.id) { mutableStateOf(workout.status == WorkoutStatus.Skipped) }
+    if (showingEditor) {
+        CustomWorkoutEditorScreen(
+            initial = workout,
+            gender = gender,
+            onCancel = { showingEditor = false },
+            onSave = { updated -> showingEditor = false; onWorkoutUpdated(updated) },
+        )
+        return
+    }
     guideExercise?.let { selected ->
         ExerciseGuideScreen(selected, gender) { guideExercise = null }
         return
@@ -404,6 +416,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
                 Box {
                     Text("•••", Modifier.clickable { showMenu = true }.padding(horizontal = 18.dp, vertical = 18.dp), color = Color.White, fontWeight = FontWeight.Bold)
                     DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                        if (!workout.id.startsWith("custom-")) DropdownMenuItem(onClick = { showMenu = false; showingEditor = true }) { Text("Editar ejercicios") }
                         DropdownMenuItem(onClick = { showMenu = false; showSkipConfirmation = true }) { Text("Omitir entrenamiento") }
                     }
                 }

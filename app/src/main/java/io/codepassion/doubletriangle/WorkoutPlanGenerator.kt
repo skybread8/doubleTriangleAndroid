@@ -10,6 +10,7 @@ import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import io.codepassion.doubletriangle.core.model.executionExercises
+import io.codepassion.doubletriangle.core.model.displayBlocks
 import io.codepassion.doubletriangle.feature.workout.CustomWorkoutRequest
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
@@ -87,6 +88,48 @@ object WorkoutPlanGenerator {
         check(workouts.isNotEmpty()) { "La IA devolvió un plan vacío" }
         return WorkoutHubState(UserSummary(userName, goal, 0), workouts.mapTo(mutableSetOf()) { it.scheduledDay }, emptySet(), root.optString("planName", "Plan IA · Semana 1"), root.optString("phase", "Adaptación · Mesociclo 1"), workouts)
     }
+
+    fun serialize(state: WorkoutHubState): String = JSONObject()
+        .put("planName", state.planName)
+        .put("phase", state.phase)
+        .put("workouts", JSONArray().also { days ->
+            state.workouts.forEach { workout ->
+                days.put(JSONObject()
+                    .put("title", workout.title)
+                    .put("focus", workout.focus)
+                    .put("dayType", workout.dayType)
+                    .put("weekday", workout.scheduledDay.name)
+                    .put("estimatedDurationMinutes", workout.estimatedMinutes)
+                    .put("blocks", JSONArray().also { blocks -> workout.displayBlocks().forEach { block ->
+                        blocks.put(JSONObject()
+                            .put("type", block.type.name.lowercase())
+                            .put("rounds", block.rounds)
+                            .put("restAfterBlockSeconds", block.restAfterBlockSeconds)
+                            .put("notes", block.notes)
+                            .put("exercises", JSONArray().also { exercises -> block.exercises.forEach { exercise ->
+                                exercises.put(JSONObject()
+                                    .put("name", exercise.name)
+                                    .put("imageKey", exercise.imageKey)
+                                    .put("sets", exercise.sets)
+                                    .put("reps", exercise.reps)
+                                    .put("restSeconds", exercise.restSeconds)
+                                    .put("setStyle", exercise.setStyle.name)
+                                    .put("targetWeightKg", exercise.targetWeightKg)
+                                    .put("setStyleParameters", JSONObject()
+                                        .put("dropCount", exercise.setStyleParameters.dropCount)
+                                        .put("dropWeightPercent", exercise.setStyleParameters.dropWeightPercent)
+                                        .put("backoffSetCount", exercise.setStyleParameters.backoffSetCount)
+                                        .put("backoffWeightPercent", exercise.setStyleParameters.backoffWeightPercent)
+                                        .put("intraSetRestSeconds", exercise.setStyleParameters.intraSetRestSeconds)
+                                        .put("tempo", exercise.setStyleParameters.tempo)
+                                        .put("targetRir", exercise.setStyleParameters.targetRir),
+                                    )
+                            } })
+                        )
+                    } }),
+                )
+            }
+        }).toString()
     internal fun parseSetStyle(value: String): ExerciseSetStyle = when (value.trim().lowercase()) {
         "warmup" -> ExerciseSetStyle.Warmup
         "topsetbackoff", "top_set_backoff" -> ExerciseSetStyle.TopSetBackoff
