@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -171,6 +173,7 @@ fun WildforceRoot() {
     }
 
     var generatedWorkoutState by remember { mutableStateOf<WorkoutHubState?>(null) }
+    var pendingGeneratedPlan by remember { mutableStateOf<Pair<String, WorkoutHubState>?>(null) }
     var isGenerating by remember { mutableStateOf(false) }
     var generationError by remember { mutableStateOf<String?>(null) }
 
@@ -298,8 +301,7 @@ fun WildforceRoot() {
                         } else WorkoutPlanGenerator.generate(updated, context)
                     }
                         .onSuccess { (json, state) ->
-                            preferences.edit().putString("workout_plan_json", json).apply()
-                            generatedWorkoutState = state
+                            pendingGeneratedPlan = json to state
                         }
                         .onFailure { generationError = it.message ?: "No se pudo regenerar el plan" }
                     isGenerating = false
@@ -313,6 +315,30 @@ fun WildforceRoot() {
             profileGenerationError = generationError,
             onRequestHealthConnect = requestHealthConnect,
         )
+        pendingGeneratedPlan?.let { (json, state) ->
+            AlertDialog(
+                onDismissRequest = { pendingGeneratedPlan = null },
+                title = { Text("PREVISUALIZAR NUEVO PLAN", fontWeight = FontWeight.Bold) },
+                text = {
+                    Column {
+                        Text(state.planName, fontWeight = FontWeight.Bold)
+                        Text(state.phase, color = WildforceThemeTokens.textSecondary)
+                        Text("Plan ${state.mesocycleNumber} · Mesociclo ${state.mesocycleIndex} · Semana ${state.weekIndex}/${state.cycleLength}", color = WildforceThemeTokens.accentGold)
+                        state.workouts.take(6).forEach { workout ->
+                            Text("• ${workout.scheduledDay}: ${workout.title}", modifier = Modifier.padding(top = 6.dp), maxLines = 1)
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        preferences.edit().putString("workout_plan_json", json).apply()
+                        generatedWorkoutState = state
+                        pendingGeneratedPlan = null
+                    }) { Text("USAR ESTE PLAN") }
+                },
+                dismissButton = { Button(onClick = { pendingGeneratedPlan = null }) { Text("CANCELAR") } },
+            )
+        }
     }
 }
 
