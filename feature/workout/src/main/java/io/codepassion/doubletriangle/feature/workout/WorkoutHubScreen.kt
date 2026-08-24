@@ -726,12 +726,16 @@ fun ActiveWorkoutScreen(
                 Spacer(Modifier.weight(1f))
                 Text("RUTA", Modifier.clickable { showsWorkoutPath = true }.padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 Text("DATOS", Modifier.clickable { showsExerciseHistory = true }.padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
-                if (exercise?.blockType in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)) {
-                    Text("SALTAR", Modifier.clickable {
-                        val nextIndex = currentPathBlock?.exercises?.flatMap { it.executionIndices }?.maxOrNull()?.plus(1)
-                        if (nextIndex == null || nextIndex > workout.exercises.lastIndex) showsSummary = true else exerciseIndex = nextIndex
-                    }.padding(8.dp), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
-                }
+                Text("SALTAR", Modifier.clickable {
+                    val skipsWholeBlock = exercise?.blockType in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)
+                    val nextIndex = if (skipsWholeBlock) {
+                        currentPathBlock?.exercises?.flatMap { it.executionIndices }?.maxOrNull()?.plus(1)
+                    } else {
+                        exerciseIndex + 1
+                    }
+                    restRemaining = null
+                    if (nextIndex == null || nextIndex > workout.exercises.lastIndex) showsSummary = true else exerciseIndex = nextIndex
+                }.padding(8.dp), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 Text(formatClock(elapsedSeconds), Modifier.liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(horizontal = 14.dp, vertical = 7.dp), color = Color.White, fontWeight = FontWeight.Bold)
             }
             LinearProgressIndicator(
