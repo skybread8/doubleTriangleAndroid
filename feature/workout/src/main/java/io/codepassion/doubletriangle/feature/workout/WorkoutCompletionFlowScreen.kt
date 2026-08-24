@@ -1,6 +1,11 @@
 package io.codepassion.doubletriangle.feature.workout
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +29,7 @@ import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,14 +72,19 @@ internal fun WorkoutCompletionFlowScreen(
     val mainExercises = remember(workout) { workout.pathBlocks().mainExercises() }
     val completedSets = stats.mapValues { it.value.sets }
     val completedMainExercises = mainExercises.count { it.isCompleted(workout, completedSets) }
-    when (phase) {
-        CompletionPhase.DurationWarning -> DurationWarning(onCancelWorkout) { phase = firstRegularPhase }
-        CompletionPhase.Records -> RecordsCelebration(records) { phase = CompletionPhase.Summary }
-        CompletionPhase.Summary -> CompletionSummary(workout, durationSeconds, stats, completedMainExercises) { phase = CompletionPhase.Score }
-        CompletionPhase.Score -> ScoreCelebration(score, completedMainExercises, mainExercises.size, dominantFeedback(feedback)) { phase = if (progress.streakIncreased) CompletionPhase.Streak else CompletionPhase.Xp }
-        CompletionPhase.Streak -> StreakCelebration(progress.streakAfter) { phase = CompletionPhase.Xp }
-        CompletionPhase.Xp -> XpCelebration(progress) { if (progress.levelAfter > progress.levelBefore) phase = CompletionPhase.LevelUp else onDone() }
-        CompletionPhase.LevelUp -> LevelUpCelebration(progress.levelAfter, onDone)
+    // iOS presents the finish flow as a sequence of soft, progressive transitions.
+    // Keep the phase state machine intact, but animate each screen change so the
+    // completion experience does not snap from one celebration to the next.
+    Crossfade(targetState = phase, animationSpec = tween(durationMillis = 420), label = "completion-phase") { currentPhase ->
+        when (currentPhase) {
+            CompletionPhase.DurationWarning -> DurationWarning(onCancelWorkout) { phase = firstRegularPhase }
+            CompletionPhase.Records -> RecordsCelebration(records) { phase = CompletionPhase.Summary }
+            CompletionPhase.Summary -> CompletionSummary(workout, durationSeconds, stats, completedMainExercises) { phase = CompletionPhase.Score }
+            CompletionPhase.Score -> ScoreCelebration(score, completedMainExercises, mainExercises.size, dominantFeedback(feedback)) { phase = if (progress.streakIncreased) CompletionPhase.Streak else CompletionPhase.Xp }
+            CompletionPhase.Streak -> StreakCelebration(progress.streakAfter) { phase = CompletionPhase.Xp }
+            CompletionPhase.Xp -> XpCelebration(progress) { if (progress.levelAfter > progress.levelBefore) phase = CompletionPhase.LevelUp else onDone() }
+            CompletionPhase.LevelUp -> LevelUpCelebration(progress.levelAfter, onDone)
+        }
     }
 }
 
@@ -200,12 +211,24 @@ private fun LevelUpCelebration(level: Int, onContinue: () -> Unit) = Celebration
 
 @Composable
 private fun CelebrationFrame(buttonLabel: String = "CONTINUAR", onContinue: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    var entered by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { entered = true }
     Column(
         Modifier.fillMaxSize().liquidGlassBackground().background(Brush.radialGradient(listOf(WildforceThemeTokens.accentGold.copy(alpha = 0.10f), Color.Transparent))).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        content()
-        Spacer(Modifier.weight(1f))
+        // The iOS finish flow reveals the celebration content progressively.
+        // Animate the body independently from the persistent action button.
+        AnimatedVisibility(
+            visible = entered,
+            modifier = Modifier.weight(1f),
+            enter = fadeIn(tween(450)) + slideInVertically(tween(450)) { it / 12 },
+        ) {
+            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                content()
+                Spacer(Modifier.weight(1f))
+            }
+        }
         Button(onClick = onContinue, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) {
             Text(buttonLabel, fontWeight = FontWeight.Bold)
         }
