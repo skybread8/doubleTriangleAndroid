@@ -13,7 +13,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Build
-import android.widget.RemoteViews
+import android.graphics.drawable.Icon
 
 internal object WorkoutActiveNotification {
     const val ACTION_TOGGLE_TIMER = "io.codepassion.doubletriangle.ACTION_TOGGLE_TIMER"
@@ -61,20 +61,10 @@ internal object WorkoutActiveNotification {
         val toggleIntent = actionIntent(context, ACTION_TOGGLE_TIMER, 4102)
         val skipIntent = actionIntent(context, ACTION_SKIP_CURRENT, 4103)
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
-        val custom = RemoteViews(context.packageName, R.layout.notification_workout).apply {
-            setTextViewText(R.id.workout_title, displayTitle)
-            setTextViewText(R.id.workout_detail, detail)
-            setProgressBar(R.id.workout_progress, progressMax.coerceAtLeast(1), progress.coerceIn(0, progressMax.coerceAtLeast(1)), false)
-            resolvedArtwork?.let { setImageViewBitmap(R.id.workout_art, it) }
-            if (isResting && chronometerBaseMillis != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                setChronometer(R.id.workout_detail, chronometerBaseMillis, "Descanso: %s", true)
-            }
-        }
         builder.setSmallIcon(android.R.drawable.ic_media_play)
             .setContentTitle(displayTitle)
             .setContentText(detail)
             .setSubText(if (isResting) "Temporizador de descanso" else "Sesión activa")
-            .setContentInfo(detail)
             .setOngoing(true)
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
             .setCategory(android.app.Notification.CATEGORY_TRANSPORT)
@@ -82,22 +72,15 @@ internal object WorkoutActiveNotification {
             .setShowWhen(isResting)
             .setAutoCancel(false)
             .setLargeIcon(resolvedArtwork ?: exerciseArtwork(title))
-            .setCustomContentView(custom)
-            .setCustomBigContentView(custom)
-            .addAction(android.app.Notification.Action.Builder(android.R.drawable.ic_media_pause, "Pausar", toggleIntent).build())
-            .addAction(android.app.Notification.Action.Builder(android.R.drawable.ic_media_next, "Saltar", skipIntent).build())
-            .addAction(android.app.Notification.Action.Builder(android.R.drawable.ic_input_add, "+30 s", addRestIntent).build())
+            .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_pause), "Pausar", toggleIntent).build())
+            .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Saltar", skipIntent).build())
+            .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
         if (contentIntent != null) builder.setContentIntent(contentIntent)
         if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
         if (isResting && chronometerBaseMillis != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             builder.setWhen(chronometerBaseMillis).setUsesChronometer(true).setChronometerCountDown(true)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            // La vista decorada estándar respeta RemoteViews, cronómetro y barra en más fabricantes.
-            builder.setStyle(android.app.Notification.DecoratedCustomViewStyle())
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setStyle(android.app.Notification.BigTextStyle().bigText(detail))
-        }
+        builder.setStyle(android.app.Notification.BigTextStyle().bigText(if (progressMax > 0) "$detail\nProgreso: $progress/$progressMax" else detail))
         return builder.build()
     }
 
