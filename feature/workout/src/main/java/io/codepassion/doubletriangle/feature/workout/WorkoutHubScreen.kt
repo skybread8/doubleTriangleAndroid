@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -304,6 +305,8 @@ private fun WorkoutModeSelector(
 @Composable
 private fun WorkoutPlan(state: WorkoutHubState, selectedDay: DayOfWeek?, onWorkoutSelected: (WorkoutDaySummary) -> Unit, gender: String, modifier: Modifier = Modifier) {
     val workouts = state.workoutsFor(selectedDay)
+    var cardsEntered by remember(selectedDay, state.planName) { mutableStateOf(false) }
+    LaunchedEffect(selectedDay, state.planName) { cardsEntered = true }
     LazyColumn(
         modifier,
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
@@ -314,7 +317,11 @@ private fun WorkoutPlan(state: WorkoutHubState, selectedDay: DayOfWeek?, onWorko
             Text(state.phase, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
         if (workouts.isEmpty()) item { RestDayCard() }
-        else items(workouts, key = { it.id }) { workout -> WorkoutCard(workout, gender) { onWorkoutSelected(workout) } }
+        else itemsIndexed(workouts, key = { _, workout -> workout.id }) { index, workout ->
+            AnimatedVisibility(visible = cardsEntered, enter = fadeIn(tween(280, delayMillis = 70 + index * 55)) + slideInVertically(tween(280, delayMillis = 70 + index * 55)) { it / 16 }) {
+                WorkoutCard(workout, gender) { onWorkoutSelected(workout) }
+            }
+        }
     }
 }
 
