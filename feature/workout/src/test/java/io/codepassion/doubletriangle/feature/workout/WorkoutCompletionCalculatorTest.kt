@@ -77,4 +77,10 @@ class WorkoutCompletionCalculatorTest {
         assertEquals(30, targetDurationSeconds("30 segundos"))
         assertEquals(null, targetDurationSeconds("8-10"))
     }
+
+    @Test fun workTimerMatchesIosClockFormatting() {
+        assertEquals("0:45", formatWorkDuration(45))
+        assertEquals("2:00", formatWorkDuration(120))
+        assertEquals("1:01:01", formatWorkDuration(3_661))
+    }
 }

@@ -65,10 +65,13 @@ internal object WorkoutSessionStore {
         }
         val updatedAt = json.optLong("updatedAt", System.currentTimeMillis())
         val elapsedWhileAway = ((System.currentTimeMillis() - updatedAt) / 1_000).coerceAtLeast(0).toInt()
+        val savedRestRemaining = if (json.isNull("restRemaining")) null else json.getInt("restRemaining")
+        val savedExerciseTime = if (json.isNull("exerciseTimeRemaining")) null else json.optInt("exerciseTimeRemaining")
+        val exerciseTimerWasRunning = json.optBoolean("exerciseTimerRunning")
         WorkoutSessionSnapshot(
             exerciseIndex = json.getInt("exerciseIndex"), completedByExercise = completed,
             reps = json.getInt("reps"), weightKg = json.getDouble("weightKg"),
-            restRemaining = if (json.isNull("restRemaining")) null else json.getInt("restRemaining"),
+            restRemaining = savedRestRemaining?.let { (it - elapsedWhileAway).coerceAtLeast(0) },
             restInitialSeconds = json.optInt("restInitialSeconds", 1),
             restBetweenExercises = json.optBoolean("restBetweenExercises"),
             elapsedSeconds = json.getInt("elapsedSeconds") + elapsedWhileAway,
@@ -77,9 +80,9 @@ internal object WorkoutSessionStore {
             exerciseStats = stats,
             feedbackByExercise = feedback,
             completedSetRecords = setRecords,
-            exerciseTimeRemaining = if (json.isNull("exerciseTimeRemaining")) null else json.optInt("exerciseTimeRemaining"),
+            exerciseTimeRemaining = savedExerciseTime?.let { if (exerciseTimerWasRunning) (it - elapsedWhileAway).coerceAtLeast(0) else it },
             exerciseTimeInitial = json.optInt("exerciseTimeInitial"),
-            exerciseTimerRunning = json.optBoolean("exerciseTimerRunning"),
+            exerciseTimerRunning = exerciseTimerWasRunning && (savedExerciseTime ?: 0) > elapsedWhileAway,
             addedSetsByExercise = addedSets,
             updatedAtMillis = System.currentTimeMillis(),
         )

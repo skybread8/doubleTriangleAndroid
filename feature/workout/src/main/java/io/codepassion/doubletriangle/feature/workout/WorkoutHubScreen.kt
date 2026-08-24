@@ -25,12 +25,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -427,6 +429,7 @@ fun ActiveWorkoutScreen(
     var showsExerciseHistory by remember { mutableStateOf(false) }
     var showsExerciseGuide by remember { mutableStateOf(false) }
     var showsSetStyleInfo by remember { mutableStateOf(false) }
+    var showsExitDialog by remember { mutableStateOf(false) }
     var initializedExerciseIndex by remember(workout.id) { mutableStateOf(restored?.exerciseIndex ?: -1) }
     val exercise = workout.exercises.getOrNull(exerciseIndex)
     val completedForExercise = completedByExercise[exerciseIndex] ?: 0
@@ -500,6 +503,20 @@ fun ActiveWorkoutScreen(
         return
     }
 
+    if (showsExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showsExitDialog = false },
+            title = { Text("¿SALIR DEL ENTRENAMIENTO?", fontFamily = AntonFontFamily) },
+            text = { Text("Puedes guardar el progreso para continuar más tarde o descartar esta sesión.") },
+            confirmButton = {
+                TextButton(onClick = { showsExitDialog = false; onExit() }) { Text("GUARDAR Y SALIR", color = WildforceThemeTokens.accentGold) }
+            },
+            dismissButton = {
+                TextButton(onClick = { WorkoutSessionStore.clear(context, workout.id); showsExitDialog = false; onExit() }) { Text("DESCARTAR", color = Color(0xFFC62828)) }
+            },
+        )
+    }
+
     if (showsSummary) {
         val completionProgress = remember(workout.id) { CompletionProgressStore.preview(context, currentStreak) }
         val recordEvents = remember(workout.id, exerciseStats) { WorkoutCompletionCalculator.records(context, workout, exerciseStats) }
@@ -521,14 +538,14 @@ fun ActiveWorkoutScreen(
         Box(Modifier.fillMaxWidth().height(610.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.62f), Color.Transparent, WildforceThemeTokens.backgroundSecondary), startY = 0f)))
         Column(Modifier.fillMaxSize().padding(horizontal = 10.dp)) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text("‹ SALIR", Modifier.clickable(onClick = onExit).padding(10.dp), color = Color.White, fontWeight = FontWeight.Bold)
+                Text("‹ SALIR", Modifier.clickable { showsExitDialog = true }.padding(10.dp), color = Color.White, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.weight(1f))
                 Text("RUTA", Modifier.clickable { showsWorkoutPath = true }.padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 Text("DATOS", Modifier.clickable { showsExerciseHistory = true }.padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 if (exercise?.blockType in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)) {
                     Text("SALTAR", Modifier.clickable {
-                        val nextIndex = nextIndexAfterPreparationSection(workout.exercises, exerciseIndex)
-                        if (nextIndex == null) showsSummary = true else exerciseIndex = nextIndex
+                        val nextIndex = currentPathBlock?.exercises?.flatMap { it.executionIndices }?.maxOrNull()?.plus(1)
+                        if (nextIndex == null || nextIndex > workout.exercises.lastIndex) showsSummary = true else exerciseIndex = nextIndex
                     }.padding(8.dp), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 }
                 Text(formatClock(elapsedSeconds), Modifier.liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(horizontal = 14.dp, vertical = 7.dp), color = Color.White, fontWeight = FontWeight.Bold)

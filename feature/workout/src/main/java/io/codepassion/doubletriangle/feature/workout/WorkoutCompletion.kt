@@ -49,9 +49,16 @@ internal object WorkoutCompletionCalculator {
     }
 
     fun records(context: Context, workout: WorkoutDaySummary, stats: Map<Int, ExerciseSessionStats>): List<ExerciseRecordEvent> = buildList {
-        workout.exercises.forEachIndexed { index, exercise ->
-            if (exercise.blockType in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)) return@forEachIndexed
-            val current = stats[index] ?: return@forEachIndexed
+        val completed = workout.exercises.withIndex()
+            .filter { (index, exercise) -> exercise.blockType !in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown) && stats[index] != null }
+            .groupBy { it.value.historyKey() }
+        completed.values.forEach { occurrences ->
+            val exercise = occurrences.first().value
+            val results = occurrences.mapNotNull { stats[it.index] }
+            val current = ExerciseSessionStats(
+                sets = results.sumOf { it.sets }, totalReps = results.sumOf { it.totalReps },
+                maxWeightKg = results.maxOfOrNull { it.maxWeightKg } ?: 0.0, volumeKg = results.sumOf { it.volumeKg },
+            )
             val previous = WorkoutHistoryStore.history(context, exercise)
             val previousWeight = previous.maxOfOrNull { it.maxWeightKg } ?: 0.0
             val previousVolume = previous.maxOfOrNull { it.volumeKg } ?: 0.0

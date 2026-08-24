@@ -39,12 +39,14 @@ internal data class ExerciseHistoryEntry(
     val setDetails: List<SetPerformance> = emptyList(),
 )
 
+internal fun ExerciseSummary.historyKey(): String = imageKey?.takeIf(String::isNotBlank)?.lowercase() ?: name.lowercase()
+
 internal object WorkoutHistoryStore {
     private const val PREFERENCES = "wildforce_exercise_history"
     private const val MAX_ENTRIES = 24
 
     fun history(context: Context, exercise: ExerciseSummary): List<ExerciseHistoryEntry> = runCatching {
-        val raw = context.getSharedPreferences(PREFERENCES, 0).getString(key(exercise), null) ?: return emptyList()
+        val raw = context.getSharedPreferences(PREFERENCES, 0).getString(exercise.historyKey(), null) ?: return emptyList()
         val array = JSONArray(raw)
         buildList {
             for (index in 0 until array.length()) {
@@ -84,13 +86,23 @@ internal object WorkoutHistoryStore {
         completedSets: List<CompletedSetRecord> = emptyList(),
     ) {
         val timestamp = System.currentTimeMillis()
-        workout.exercises.forEachIndexed { index, exercise ->
-            val result = stats[index] ?: return@forEachIndexed
-            if (result.sets == 0) return@forEachIndexed
+        val completedExercises = workout.exercises.withIndex()
+            .filter { (index, _) -> (stats[index]?.sets ?: 0) > 0 }
+            .groupBy { (_, exercise) -> exercise.historyKey() }
+        completedExercises.values.forEach { occurrences ->
+            val exercise = occurrences.first().value
+            val exerciseIndices = occurrences.map { it.index }.toSet()
+            val results = exerciseIndices.mapNotNull(stats::get)
+            val result = ExerciseSessionStats(
+                sets = results.sumOf { it.sets },
+                totalReps = results.sumOf { it.totalReps },
+                maxWeightKg = results.maxOfOrNull { it.maxWeightKg } ?: 0.0,
+                volumeKg = results.sumOf { it.volumeKg },
+            )
             val details = completedSets
-                .filter { it.exerciseIndex == index }
-                .sortedBy { it.setNumber }
-                .map { SetPerformance(it.setNumber, it.reps, it.weightKg, it.setStyle) }
+                .filter { it.exerciseIndex in exerciseIndices }
+                .sortedWith(compareBy(CompletedSetRecord::exerciseIndex, CompletedSetRecord::setNumber))
+                .mapIndexed { index, set -> SetPerformance(index + 1, set.reps, set.weightKg, set.setStyle) }
             val entries = listOf(
                 ExerciseHistoryEntry(timestamp, result.sets, result.totalReps, result.maxWeightKg, result.volumeKg, details),
             ) + history(context, exercise)
@@ -111,9 +123,7 @@ internal object WorkoutHistoryStore {
                     )
                 }
             }
-            context.getSharedPreferences(PREFERENCES, 0).edit().putString(key(exercise), json.toString()).apply()
+            context.getSharedPreferences(PREFERENCES, 0).edit().putString(exercise.historyKey(), json.toString()).apply()
         }
     }
-
-    private fun key(exercise: ExerciseSummary): String = exercise.imageKey?.takeIf(String::isNotBlank)?.lowercase() ?: exercise.name.lowercase()
 }

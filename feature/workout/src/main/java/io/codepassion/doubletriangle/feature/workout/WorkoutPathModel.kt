@@ -46,10 +46,3 @@ internal fun List<WorkoutPathBlock>.mainExercises(): List<WorkoutPathExercise> =
 
 internal fun WorkoutPathExercise.isCompleted(workout: WorkoutDaySummary, completedSets: Map<Int, Int>, addedSets: Map<Int, Int> = emptyMap()): Boolean =
     executionIndices.all { index -> (completedSets[index] ?: 0) >= workout.exercises[index].sets + (addedSets[index] ?: 0) }
-
-internal fun nextIndexAfterPreparationSection(exercises: List<ExerciseSummary>, currentIndex: Int): Int? {
-    val type = exercises.getOrNull(currentIndex)?.blockType ?: return null
-    if (type !in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)) return currentIndex
-    return ((currentIndex + 1)..exercises.size).firstOrNull { index -> exercises.getOrNull(index)?.blockType != type }
-        ?.takeIf { it < exercises.size }
-}

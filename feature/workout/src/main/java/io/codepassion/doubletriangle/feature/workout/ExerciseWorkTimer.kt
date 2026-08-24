@@ -36,7 +36,7 @@ internal fun ExerciseWorkTimer(seconds: Int, initialSeconds: Int, running: Boole
         Box(Modifier.padding(horizontal = 16.dp).size(132.dp), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(progress, Modifier.fillMaxSize(), WildforceThemeTokens.accentGold, 8.dp, WildforceThemeTokens.textSecondary.copy(alpha = 0.12f))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(seconds.toString().padStart(2, '0'), style = MaterialTheme.typography.h3, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                Text(formatWorkDuration(seconds), style = MaterialTheme.typography.h3, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 Text("RESTANTE", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
             }
         }
@@ -53,6 +53,14 @@ private fun TimerButton(glyph: String, label: String, primary: Boolean, onClick:
         Text(glyph, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
         Text(label, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
     }
+}
+
+internal fun formatWorkDuration(totalSeconds: Int): String {
+    val safeSeconds = totalSeconds.coerceAtLeast(0)
+    val hours = safeSeconds / 3_600
+    val minutes = (safeSeconds % 3_600) / 60
+    val seconds = safeSeconds % 60
+    return if (hours > 0) "%d:%02d:%02d".format(hours, minutes, seconds) else "%d:%02d".format(minutes, seconds)
 }
 
 internal fun targetDurationSeconds(value: String?): Int? {
