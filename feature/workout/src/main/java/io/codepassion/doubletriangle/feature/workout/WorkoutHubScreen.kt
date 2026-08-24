@@ -50,6 +50,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -793,8 +795,8 @@ fun ActiveWorkoutScreen(
                             )
                         } else {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                CompactMetricStepper("REPS", reps.toString(), { reps = (reps - 1).coerceAtLeast(0) }, { reps++ }, Modifier.weight(1f))
-                                CompactMetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", weightKg), { weightKg = (weightKg - 2.5).coerceAtLeast(0.0) }, { weightKg += 2.5 }, Modifier.weight(1f))
+                                CompactMetricStepper("REPS", reps.toString(), { reps = (reps - 1).coerceAtLeast(0) }, { reps++ }, Modifier.weight(1f), onValueEntered = { value -> reps = value.toIntOrNull()?.coerceIn(0, 999) ?: reps })
+                                CompactMetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", weightKg), { weightKg = (weightKg - 2.5).coerceAtLeast(0.0) }, { weightKg += 2.5 }, Modifier.weight(1f), inputValue = weightKg.toString(), decimalInput = true, onValueEntered = { value -> weightKg = value.replace(',', '.').toDoubleOrNull()?.coerceIn(0.0, 750.0) ?: weightKg })
                             }
                         }
                         }
@@ -915,8 +917,8 @@ private fun SetTrackingRows(
             Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 7.dp).background(WildforceThemeTokens.accentGold.copy(alpha = 0.08f), RoundedCornerShape(14.dp)).padding(10.dp)) {
                 Text("CORREGIR SERIE $setNumber", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
                 Row(Modifier.padding(top = 7.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    CompactMetricStepper("REPS", editReps.toString(), { editReps = (editReps - 1).coerceAtLeast(0) }, { editReps++ }, Modifier.weight(1f))
-                    CompactMetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", editWeightKg), { editWeightKg = (editWeightKg - 2.5).coerceAtLeast(0.0) }, { editWeightKg += 2.5 }, Modifier.weight(1f))
+                    CompactMetricStepper("REPS", editReps.toString(), { editReps = (editReps - 1).coerceAtLeast(0) }, { editReps++ }, Modifier.weight(1f), onValueEntered = { value -> editReps = value.toIntOrNull()?.coerceIn(0, 999) ?: editReps })
+                    CompactMetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", editWeightKg), { editWeightKg = (editWeightKg - 2.5).coerceAtLeast(0.0) }, { editWeightKg += 2.5 }, Modifier.weight(1f), inputValue = editWeightKg.toString(), decimalInput = true, onValueEntered = { value -> editWeightKg = value.replace(',', '.').toDoubleOrNull()?.coerceIn(0.0, 750.0) ?: editWeightKg })
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     Text("CANCELAR", Modifier.clickable { editingSetNumber = null }.padding(10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
@@ -1040,14 +1042,25 @@ private fun RestActionButton(glyph: String, label: String, primary: Boolean, onC
     }
 }
 @Composable
-private fun CompactMetricStepper(title: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit, modifier: Modifier = Modifier) {
+private fun CompactMetricStepper(title: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit, modifier: Modifier = Modifier, inputValue: String = value, decimalInput: Boolean = false, onValueEntered: ((String) -> Unit)? = null) {
+    var showManualInput by remember { mutableStateOf(false) }
+    var manualInput by remember(inputValue) { mutableStateOf(inputValue) }
     Column(modifier.background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(14.dp)).padding(10.dp)) {
         Text(title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Text("−", Modifier.size(32.dp).clickable(onClick = onMinus), textAlign = androidx.compose.ui.text.style.TextAlign.Center, style = MaterialTheme.typography.h6)
-            Text(value, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
+            Text(value, Modifier.clickable(enabled = onValueEntered != null) { manualInput = inputValue; showManualInput = true }.padding(horizontal = 3.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
             Text("+", Modifier.size(32.dp).clickable(onClick = onPlus), textAlign = androidx.compose.ui.text.style.TextAlign.Center, style = MaterialTheme.typography.h6)
         }
+    }
+    if (showManualInput && onValueEntered != null) {
+        AlertDialog(
+            onDismissRequest = { showManualInput = false },
+            title = { Text("EDITAR $title", fontFamily = AntonFontFamily) },
+            text = { TextField(manualInput, { value -> manualInput = value.filter { it.isDigit() || (decimalInput && (it == ',' || it == '.')) }.take(8) }, label = { Text(if (decimalInput) "Valor" else "Repeticiones") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = if (decimalInput) KeyboardType.Decimal else KeyboardType.Number)) },
+            confirmButton = { TextButton(onClick = { onValueEntered(manualInput); showManualInput = false }) { Text("GUARDAR", color = WildforceThemeTokens.accentGold) } },
+            dismissButton = { TextButton(onClick = { showManualInput = false }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+        )
     }
 }
 @Composable
