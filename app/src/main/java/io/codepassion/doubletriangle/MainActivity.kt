@@ -118,9 +118,14 @@ fun WildforceRoot() {
                     val weight = client.readRecords(ReadRecordsRequest(WeightRecord::class, timeRangeFilter = timeRange, ascendingOrder = false, pageSize = 1))
                         .records.firstOrNull()?.weight?.inKilograms
                     height to weight
-                }.getOrDefault(null to null)
-                pendingHealthResult?.invoke(true, imported.first, imported.second)
-                pendingHealthResult = null
+                }
+                imported.onSuccess { (height, weight) ->
+                    pendingHealthResult?.invoke(true, height, weight)
+                    pendingHealthResult = null
+                }.onFailure {
+                    pendingHealthResult?.invoke(false, null, null)
+                    pendingHealthResult = null
+                }
             }
         } else {
             pendingHealthResult?.invoke(false, null, null)
