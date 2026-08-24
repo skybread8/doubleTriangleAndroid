@@ -50,6 +50,7 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import java.util.Locale
+import kotlinx.coroutines.delay
 
 private enum class CompletionPhase { DurationWarning, Records, Summary, Score, Streak, Xp, LevelUp, PlanComplete }
 
@@ -126,15 +127,28 @@ private fun DurationWarning(onCancel: () -> Unit, onContinue: () -> Unit) {
 
 @Composable
 private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    var visibleRecords by remember { mutableStateOf(0) }
+    LaunchedEffect(records) {
+        visibleRecords = 0
+        records.indices.forEach { index ->
+            delay(if (index == 0) 180 else 260)
+            visibleRecords = index + 1
+        }
+    }
     Text("🏅", style = MaterialTheme.typography.h2)
     Text(if (records.size == 1) "NUEVO RÉCORD" else "NUEVOS RÉCORDS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(top = 18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        records.forEach { record ->
-            Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).padding(16.dp)) {
-                Text(record.exerciseName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                Text(record.label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold)
-                Text(String.format(Locale.getDefault(), "%.1f %s", record.newValue, record.unit), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-                Text(String.format(Locale.getDefault(), "Antes %.1f · +%.1f %s", record.previousValue, record.newValue - record.previousValue, record.unit), color = WildforceThemeTokens.textSecondary)
+        records.forEachIndexed { index, record ->
+            AnimatedVisibility(
+                visible = index < visibleRecords,
+                enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 },
+            ) {
+                Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).padding(16.dp)) {
+                    Text(record.exerciseName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text(record.label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold)
+                    Text(String.format(Locale.getDefault(), "%.1f %s", record.newValue, record.unit), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+                    Text(String.format(Locale.getDefault(), "Antes %.1f · +%.1f %s", record.previousValue, record.newValue - record.previousValue, record.unit), color = WildforceThemeTokens.textSecondary)
+                }
             }
         }
     }
