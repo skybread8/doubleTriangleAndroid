@@ -1,6 +1,8 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -96,6 +98,8 @@ fun WorkoutHubScreen(
     var generatingCustomWorkout by remember { mutableStateOf(false) }
     var customGenerationError by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
+    var hubEntered by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { hubEntered = true }
 
     editingCustomWorkout?.let { draft ->
         Box(Modifier.fillMaxSize().padding(contentPadding)) {
@@ -114,22 +118,26 @@ fun WorkoutHubScreen(
     Column(
         Modifier.fillMaxSize().padding(contentPadding).liquidGlassBackground(),
     ) {
-        Column(
-            Modifier.fillMaxWidth()
-                .liquidGlass(RoundedCornerShape(bottomStart = 18.dp, bottomEnd = 18.dp), emphasized = true)
-                .padding(horizontal = 20.dp, vertical = 14.dp),
-        ) {
-            WorkoutHeader(state)
-            PlanContextCard(state) { showingPlanOverview = true }
-            Spacer(Modifier.height(16.dp))
-            WeekCalendar(state, selectedDay) { selectedDay = if (selectedDay == it) null else it }
+        AnimatedVisibility(visible = hubEntered, enter = fadeIn(tween(320)) + slideInVertically(tween(320)) { -it / 18 }) {
+            Column(
+                Modifier.fillMaxWidth()
+                    .liquidGlass(RoundedCornerShape(bottomStart = 18.dp, bottomEnd = 18.dp), emphasized = true)
+                    .padding(horizontal = 20.dp, vertical = 14.dp),
+            ) {
+                WorkoutHeader(state)
+                PlanContextCard(state) { showingPlanOverview = true }
+                Spacer(Modifier.height(16.dp))
+                WeekCalendar(state, selectedDay) { selectedDay = if (selectedDay == it) null else it }
+            }
         }
 
-        WorkoutModeSelector(
-            selected = mode,
-            onSelected = { mode = it },
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
-        )
+        AnimatedVisibility(visible = hubEntered, enter = fadeIn(tween(320, delayMillis = 70)) + slideInVertically(tween(320, delayMillis = 70)) { it / 18 }) {
+            WorkoutModeSelector(
+                selected = mode,
+                onSelected = { mode = it },
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+            )
+        }
         AnimatedVisibility(mode == WorkoutMode.Plan) {
             WorkoutPlan(state, selectedDay, onWorkoutSelected, gender, Modifier.fillMaxSize())
         }
