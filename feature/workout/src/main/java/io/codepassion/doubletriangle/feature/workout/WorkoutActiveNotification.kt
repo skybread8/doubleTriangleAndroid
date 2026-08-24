@@ -31,16 +31,28 @@ internal object WorkoutActiveNotification {
         val session = mediaSession(context)
         session.setMetadata(MediaMetadata.Builder().putString(MediaMetadata.METADATA_KEY_TITLE, title).putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, detail).build())
         session.setPlaybackState(PlaybackState.Builder().setActions(PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE).setState(PlaybackState.STATE_PLAYING, 0L, 1f).build())
-        return (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) android.app.Notification.Builder(context, channelId) else @Suppress("DEPRECATION") android.app.Notification.Builder(context))
-            .setSmallIcon(android.R.drawable.ic_media_play).setContentTitle(title).setContentText(detail).setOngoing(true)
-            .setVisibility(android.app.Notification.VISIBILITY_PUBLIC).setCategory(android.app.Notification.CATEGORY_TRANSPORT)
-            .setPriority(android.app.Notification.PRIORITY_HIGH).setOnlyAlertOnce(true).setSilent(!headsUp).setShowWhen(false)
-            .setAutoCancel(false).apply {
-                contentIntent?.let(::setContentIntent)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    setStyle(android.app.Notification.MediaStyle().setMediaSession(session.sessionToken).setShowActionsInCompactView(0))
-                }
-            }.build()
+        @Suppress("DEPRECATION")
+        val builder: android.app.Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            android.app.Notification.Builder(context, channelId)
+        } else {
+            android.app.Notification.Builder(context)
+        }
+        builder.setSmallIcon(android.R.drawable.ic_media_play)
+            .setContentTitle(title)
+            .setContentText(detail)
+            .setOngoing(true)
+            .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
+            .setCategory(android.app.Notification.CATEGORY_TRANSPORT)
+            .setPriority(android.app.Notification.PRIORITY_HIGH)
+            .setOnlyAlertOnce(true)
+            .setShowWhen(false)
+            .setAutoCancel(false)
+        if (contentIntent != null) builder.setContentIntent(contentIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder.setStyle(android.app.Notification.MediaStyle().setMediaSession(session.sessionToken).setShowActionsInCompactView(0))
+        }
+        if (headsUp) builder.setDefaults(android.app.Notification.DEFAULT_ALL)
+        return builder.build()
     }
 
     private fun mediaSession(context: Context): MediaSession = mediaSession ?: MediaSession(context, "WildforceWorkout").also { session ->
