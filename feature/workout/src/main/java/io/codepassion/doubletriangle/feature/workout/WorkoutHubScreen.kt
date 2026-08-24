@@ -690,7 +690,13 @@ fun ActiveWorkoutScreen(
     }
     LaunchedEffect(restRemaining) {
         val remaining = restRemaining ?: return@LaunchedEffect
-        if (remaining > 0) { delay(1_000); restRemaining = remaining - 1 } else restRemaining = null
+        if (remaining > 0) {
+            delay(1_000)
+            restRemaining = remaining - 1
+        } else {
+            restRemaining = null
+            restBetweenExercises = false
+        }
     }
     LaunchedEffect(exerciseTimerRunning, exerciseTimeRemaining) {
         val remaining = exerciseTimeRemaining ?: return@LaunchedEffect
@@ -848,7 +854,7 @@ fun ActiveWorkoutScreen(
                             restInitialSeconds += 30
                             restRemaining = resting + 30
                         },
-                        onSkip = { restRemaining = null },
+                        onSkip = { restRemaining = null; restBetweenExercises = false },
                     )
                 } else if (exercise != null) {
                     val isWarmupOrCooldown = exercise.blockType == WorkoutBlockType.Warmup || exercise.blockType == WorkoutBlockType.Cooldown
