@@ -67,6 +67,9 @@ data class OnboardingProfile(
     val metricSystem: MetricSystem = MetricSystem.Metric,
     val heightCm: Int = 175,
     val weightKg: Double = 70.0,
+    val skipsWarmups: Boolean = false,
+    val skipsCooldowns: Boolean = false,
+    val workoutPlannerNotes: String = "",
 )
 
 enum class LifestyleLevel(val storedValue: String, val title: String, val description: String, val glyph: String) {

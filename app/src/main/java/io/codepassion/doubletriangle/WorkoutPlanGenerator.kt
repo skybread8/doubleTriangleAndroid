@@ -105,6 +105,7 @@ Perfil obligatorio del usuario:
 - Estructura: ${profile.trainingSplitPreference.title}; focos personalizados: ${profile.customWorkoutFocuses.entries.joinToString { "${it.key.storedValue}=${it.value.storedValue}" }.ifBlank { "ninguno" }}
 - Equipamiento: ${profile.availableEquipment.joinToString { it.storedValue }}; restricciones: ${profile.movementRestrictions.joinToString { it.storedValue }.ifBlank { "ninguna" }}
 - Composición corporal: ${profile.bodyCompositionPhase?.storedValue ?: "no especificada"}; edad aproximada: ${(java.time.Year.now().value - profile.birthYear).coerceAtLeast(13)}; altura: ${profile.heightCm} cm; peso: ${profile.weightKg} kg
+- Omitir calentamiento: ${if (profile.skipsWarmups) "sí" else "no"}; omitir vuelta a la calma: ${if (profile.skipsCooldowns) "sí" else "no"}; notas del planificador: ${profile.workoutPlannerNotes.ifBlank { "ninguna" }}
 Reglas: crea exactamente un workout por cada día disponible, no inventes días, no uses ejercicios incompatibles con equipamiento/restricciones y mantén el volumen dentro de la duración indicada. Usa siempre bloques y prescripciones concretas.
 """
 
@@ -167,6 +168,8 @@ Reglas: crea exactamente un workout por cada día disponible, no inventes días,
             restSeconds = exercise.optInt("restSeconds", 60).coerceIn(0, 600),
             setStyle = parseSetStyle(exercise.optString("setStyle")),
             setStyleParameters = parameters,
+            targetWeightKg = exercise.optDouble("targetWeightKg", Double.NaN).takeUnless { it.isNaN() }
+                ?: exercise.optJSONArray("targetWeightsKg")?.optDouble(0, Double.NaN)?.takeUnless { it.isNaN() },
         )
     }
 

@@ -53,6 +53,7 @@ data class ExerciseSummary(
     val blockRounds: Int = 1,
     val isLastInBlock: Boolean = true,
     val restAfterBlockSeconds: Int? = null,
+    val targetWeightKg: Double? = null,
 )
 
 fun ExerciseSetStyle.appliesToSet(setNumber: Int, totalSets: Int): Boolean =

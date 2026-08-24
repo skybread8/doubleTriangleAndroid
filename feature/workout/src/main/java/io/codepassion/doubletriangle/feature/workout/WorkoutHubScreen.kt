@@ -460,7 +460,8 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
                                     Text(exercise.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                                     val setText = if (block.type == WorkoutBlockType.Superset) "${block.rounds} rondas" else "${exercise.sets} series"
                                     val restText = if (exercise.restSeconds > 0) " · ${exercise.restSeconds}s" else ""
-                                    Text("$setText · ${exercise.reps} reps$restText", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                                    val targetWeightText = exercise.targetWeightKg?.let { " · ${String.format(Locale.getDefault(), "%.1f kg", it)}" }.orEmpty()
+                                    Text("$setText · ${exercise.reps} reps$restText$targetWeightText", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                                 }
                                 Text(if (expandedExercise == itemKey) "⌃" else "⌄", color = WildforceThemeTokens.accentGold)
                             }
@@ -508,7 +509,7 @@ fun ActiveWorkoutScreen(
     var exerciseIndex by remember(workout.id) { mutableStateOf((restored?.exerciseIndex ?: 0).coerceIn(0, workout.exercises.lastIndex.coerceAtLeast(0))) }
     var completedByExercise by remember(workout.id) { mutableStateOf(restored?.completedByExercise ?: emptyMap()) }
     var reps by remember(workout.id) { mutableStateOf(restored?.reps ?: targetReps(workout.exercises.firstOrNull()?.reps)) }
-    var weightKg by remember(workout.id) { mutableStateOf(restored?.weightKg ?: 0.0) }
+    var weightKg by remember(workout.id) { mutableStateOf(restored?.weightKg ?: workout.exercises.firstOrNull()?.targetWeightKg ?: 0.0) }
     var restRemaining by remember(workout.id) { mutableStateOf(restored?.restRemaining) }
     var restInitialSeconds by remember(workout.id) { mutableStateOf(restored?.restInitialSeconds ?: 1) }
     var restBetweenExercises by remember(workout.id) { mutableStateOf(restored?.restBetweenExercises ?: false) }

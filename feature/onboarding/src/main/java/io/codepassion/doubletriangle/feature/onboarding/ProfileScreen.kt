@@ -81,6 +81,9 @@ fun ProfileScreen(initial: OnboardingProfile, onSave: (OnboardingProfile) -> Uni
                 draft.workoutDays.sortedBy { it.ordinal }.forEach { day ->
                     if (draft.trainingSplitPreference == TrainingSplitPreference.Custom) ChoiceButton(day.title, draft.customWorkoutFocuses[day]?.title ?: "Seleccionar foco") { picker = Picker.Focus(day) }
                 }
+                TogglePreference("Omitir calentamientos", draft.skipsWarmups) { draft = draft.copy(skipsWarmups = !draft.skipsWarmups) }
+                TogglePreference("Omitir vuelta a la calma", draft.skipsCooldowns) { draft = draft.copy(skipsCooldowns = !draft.skipsCooldowns) }
+                OutlinedTextField(draft.workoutPlannerNotes, { draft = draft.copy(workoutPlannerNotes = it.take(500)) }, Modifier.fillMaxWidth(), label = { Text("Notas para el planificador") }, minLines = 2, maxLines = 4)
             }
         }
         item {
@@ -124,3 +127,4 @@ private sealed class Picker { data object Goal : Picker(); data object Level : P
 @Composable private fun ChoiceButton(label: String, value: String, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween) { Text(label, color = WildforceThemeTokens.textSecondary); Text(value, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold) } }
 @Composable private fun ToggleChip(label: String, selected: Boolean, onClick: () -> Unit) { Text(label, Modifier.fillMaxWidth(.5f).liquidGlass(RoundedCornerShape(10.dp), emphasized = selected).clickable(onClick = onClick).padding(10.dp), color = if (selected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary) }
 @Composable private fun NumberField(label: String, value: String, onValueChange: (String) -> Unit, modifier: Modifier) { OutlinedTextField(value, onValueChange, modifier, label = { Text(label) }, singleLine = true) }
+@Composable private fun TogglePreference(label: String, selected: Boolean, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Text(label, color = WildforceThemeTokens.textPrimary); Text(if (selected) "SÍ" else "NO", color = if (selected) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold) } }

@@ -152,6 +152,9 @@ fun WildforceRoot() {
                     metricSystem = MetricSystem.fromStoredValue(preferences.getString("metric_system", "").orEmpty()),
                     heightCm = preferences.getInt("height_cm", 175),
                     weightKg = java.lang.Double.longBitsToDouble(preferences.getLong("weight_kg", java.lang.Double.doubleToRawLongBits(70.0))),
+                    skipsWarmups = preferences.getBoolean("skips_warmups", false),
+                    skipsCooldowns = preferences.getBoolean("skips_cooldowns", false),
+                    workoutPlannerNotes = preferences.getString("planner_notes", "").orEmpty(),
                 )
             },
         )
@@ -188,6 +191,9 @@ fun WildforceRoot() {
                 .putString("metric_system", completedProfile.metricSystem.storedValue)
                 .putInt("height_cm", completedProfile.heightCm)
                 .putLong("weight_kg", java.lang.Double.doubleToRawLongBits(completedProfile.weightKg))
+                .putBoolean("skips_warmups", completedProfile.skipsWarmups)
+                .putBoolean("skips_cooldowns", completedProfile.skipsCooldowns)
+                .putString("planner_notes", completedProfile.workoutPlannerNotes)
                 .apply()
             generationError = null
             if (useAi) {
@@ -253,8 +259,14 @@ fun WildforceRoot() {
                     .putStringSet("restrictions", updated.movementRestrictions.mapTo(mutableSetOf()) { it.storedValue })
                     .putInt("birth_month", updated.birthMonth).putInt("birth_year", updated.birthYear)
                     .putString("gender", updated.gender.storedValue).putString("metric_system", updated.metricSystem.storedValue)
-                    .putInt("height_cm", updated.heightCm).putLong("weight_kg", java.lang.Double.doubleToRawLongBits(updated.weightKg)).apply()
+                    .putInt("height_cm", updated.heightCm).putLong("weight_kg", java.lang.Double.doubleToRawLongBits(updated.weightKg))
+                    .putBoolean("skips_warmups", updated.skipsWarmups)
+                    .putBoolean("skips_cooldowns", updated.skipsCooldowns)
+                    .putString("planner_notes", updated.workoutPlannerNotes)
+                    .remove("workout_plan_json")
+                    .apply()
                 profile = updated
+                generatedWorkoutState = null
             },
         )
     }
