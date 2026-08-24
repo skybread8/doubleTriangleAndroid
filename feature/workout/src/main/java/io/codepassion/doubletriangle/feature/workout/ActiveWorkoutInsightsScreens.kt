@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
@@ -119,8 +120,8 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
         Row(verticalAlignment = Alignment.CenterVertically) {
             RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.size(72.dp).clip(RoundedCornerShape(16.dp)))
             Column(Modifier.padding(start = 14.dp)) {
-                Text(exercise.name.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-                Text("Progreso y ejecuciones anteriores", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                Text(exercise.name.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text("Progreso y ejecuciones anteriores", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         if (history.isEmpty()) {
