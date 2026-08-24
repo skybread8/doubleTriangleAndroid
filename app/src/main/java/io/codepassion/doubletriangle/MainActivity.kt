@@ -371,7 +371,7 @@ private fun WildforceApp(
             NutritionScreen()
         } else if (selected == RootDestination.Analytics) {
             val analyticsExercises = displayedWorkoutState.workouts.flatMap { it.exercises }
-            AnalyticsScreen(displayedWorkoutState, appPreferences, WorkoutAnalyticsStore.summaries(appContext, analyticsExercises))
+            AnalyticsScreen(appContext, displayedWorkoutState, appPreferences, WorkoutAnalyticsStore.summaries(appContext, analyticsExercises))
         } else if (selected == RootDestination.Profile) {
             ProfileScreen(profile, onProfileUpdated, onRegenerateProfile)
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

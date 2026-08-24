@@ -49,6 +49,15 @@ data class ExerciseAnalyticsSummary(
     val lastFeedback: String?,
 )
 
+data class ExerciseAnalyticsPoint(
+    val timestampMillis: Long,
+    val sets: Int,
+    val reps: Int,
+    val maxWeightKg: Double,
+    val volumeKg: Double,
+    val feedback: String?,
+)
+
 internal fun ExerciseSummary.historyKey(): String = imageKey?.takeIf(String::isNotBlank)?.lowercase() ?: name.lowercase()
 
 internal object WorkoutHistoryStore {
@@ -158,4 +167,9 @@ object WorkoutAnalyticsStore {
                 lastFeedback = entries.firstOrNull()?.feedback,
             )
         }.sortedByDescending { it.totalVolumeKg }
+
+    fun history(context: Context, exercise: ExerciseSummary): List<ExerciseAnalyticsPoint> =
+        WorkoutHistoryStore.history(context, exercise).map {
+            ExerciseAnalyticsPoint(it.timestampMillis, it.sets, it.totalReps, it.maxWeightKg, it.volumeKg, it.feedback)
+        }
 }

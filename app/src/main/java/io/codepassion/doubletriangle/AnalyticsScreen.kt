@@ -1,7 +1,9 @@
 package io.codepassion.doubletriangle
 
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +17,10 @@ import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,9 +32,18 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
 import io.codepassion.doubletriangle.feature.workout.ExerciseAnalyticsSummary
+import io.codepassion.doubletriangle.feature.workout.ExerciseAnalyticsPoint
+import io.codepassion.doubletriangle.feature.workout.WorkoutAnalyticsStore
+import java.text.DateFormat
+import java.util.Date
 
 @Composable
-fun AnalyticsScreen(state: WorkoutHubState, preferences: SharedPreferences, exerciseSummaries: List<ExerciseAnalyticsSummary> = emptyList()) {
+fun AnalyticsScreen(context: Context, state: WorkoutHubState, preferences: SharedPreferences, exerciseSummaries: List<ExerciseAnalyticsSummary> = emptyList()) {
+    var selectedExercise by remember { mutableStateOf<ExerciseAnalyticsSummary?>(null) }
+    selectedExercise?.let { summary ->
+        ExerciseAnalyticsDetailScreen(summary, WorkoutAnalyticsStore.history(context, summary.exercise)) { selectedExercise = null }
+        return
+    }
     val completed = state.workouts.count { it.status.name == "Completed" }
     val total = state.workouts.size.coerceAtLeast(1)
     val lastDuration = preferences.getInt("last_workout_duration", 0)
@@ -62,7 +77,7 @@ fun AnalyticsScreen(state: WorkoutHubState, preferences: SharedPreferences, exer
         if (exerciseSummaries.isEmpty()) {
             Text("Completa ejercicios para ver progresión, récords y volumen por movimiento.", color = WildforceThemeTokens.textSecondary)
         } else {
-            exerciseSummaries.take(6).forEach { ExerciseAnalyticsCard(it) }
+            exerciseSummaries.take(6).forEach { summary -> ExerciseAnalyticsCard(summary) { selectedExercise = summary } }
         }
         Spacer(Modifier.height(4.dp))
         Text("Las analíticas detalladas por ejercicio y evolución histórica se añadirán sobre este resumen.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
@@ -70,8 +85,8 @@ fun AnalyticsScreen(state: WorkoutHubState, preferences: SharedPreferences, exer
 }
 
 @Composable
-private fun ExerciseAnalyticsCard(summary: ExerciseAnalyticsSummary) {
-    Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(14.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+private fun ExerciseAnalyticsCard(summary: ExerciseAnalyticsSummary, onClick: () -> Unit) {
+    Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).clickable(onClick = onClick).padding(14.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(summary.exercise.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Text("${summary.sessions} sesiones · ${String.format("%.0f kg", summary.totalVolumeKg)} volumen", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
@@ -79,6 +94,27 @@ private fun ExerciseAnalyticsCard(summary: ExerciseAnalyticsSummary) {
         Column(horizontalAlignment = Alignment.End) {
             Text(if (summary.personalBestKg > 0) String.format("%.1f kg", summary.personalBestKg) else "—", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
             Text("MEJOR MARCA", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
+        }
+    }
+}
+
+@Composable
+private fun ExerciseAnalyticsDetailScreen(summary: ExerciseAnalyticsSummary, history: List<ExerciseAnalyticsPoint>, onBack: () -> Unit) {
+    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text("‹ VOLVER", Modifier.clickable(onClick = onBack).padding(vertical = 8.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+        Text(summary.exercise.name, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+        Text("${summary.sessions} sesiones registradas", color = WildforceThemeTokens.textSecondary)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            MetricCard("MEJOR MARCA", if (summary.personalBestKg > 0) String.format("%.1f kg", summary.personalBestKg) else "—", "peso", Modifier.weight(1f))
+            MetricCard("VOLUMEN", String.format("%.0f", summary.totalVolumeKg), "kg total", Modifier.weight(1f))
+        }
+        Text("SESIONES", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+        if (history.isEmpty()) Text("Todavía no hay sesiones para este ejercicio.", color = WildforceThemeTokens.textSecondary)
+        history.take(12).forEach { point ->
+            Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(14.dp)).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column { Text(DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(point.timestampMillis)), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary); Text("${point.sets} series · ${point.reps} reps${point.feedback?.let { " · $it" }.orEmpty()}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                Text(String.format("%.0f kg", point.volumeKg), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
