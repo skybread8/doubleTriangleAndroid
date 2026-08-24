@@ -56,6 +56,7 @@ internal fun CustomWorkoutsScreen(
     workouts: List<WorkoutDaySummary>,
     gender: String,
     defaultEquipment: String,
+    equipmentPresets: List<Pair<String, String>> = emptyList(),
     onCreateManual: () -> Unit,
     onCreateAutomatic: (CustomWorkoutRequest) -> Unit,
     onOpen: (WorkoutDaySummary) -> Unit,
@@ -82,6 +83,7 @@ internal fun CustomWorkoutsScreen(
     if (showsAutomaticRequest) {
         AutomaticWorkoutRequestDialog(
             defaultEquipment = defaultEquipment,
+            equipmentPresets = equipmentPresets,
             onDismiss = { showsAutomaticRequest = false },
             onGenerate = { request -> showsAutomaticRequest = false; onCreateAutomatic(request) },
         )

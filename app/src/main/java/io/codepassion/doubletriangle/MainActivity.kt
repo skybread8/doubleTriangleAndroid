@@ -402,6 +402,7 @@ private fun WildforceApp(
                 onWorkoutSelected = { workoutDetail = it },
                 gender = profile.gender.storedValue,
                 defaultCustomEquipment = profile.availableEquipment.joinToString(", ") { it.title },
+                customEquipmentPresets = profile.effectiveTrainingLocations().map { location -> location.name to location.equipment.joinToString(", ") { it.title } },
                 customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile, request, appContext) },
             )
         } else if (selected == RootDestination.Nutrition) {

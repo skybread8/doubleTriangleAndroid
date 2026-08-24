@@ -90,6 +90,7 @@ fun WorkoutHubScreen(
     onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
     gender: String = "male",
     defaultCustomEquipment: String = "Peso corporal",
+    customEquipmentPresets: List<Pair<String, String>> = emptyList(),
     customAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null,
 ) {
     var selectedDay by remember { mutableStateOf<DayOfWeek?>(null) }
@@ -148,6 +149,7 @@ fun WorkoutHubScreen(
             CustomWorkoutsScreen(
                 workouts = customWorkouts.filter { selectedDay == null || it.scheduledDay == selectedDay }, gender = gender,
                 defaultEquipment = defaultCustomEquipment,
+                equipmentPresets = customEquipmentPresets,
                 onCreateManual = { editingCustomWorkout = CustomWorkoutStore.empty(selectedDay ?: LocalDate.now().dayOfWeek) },
                 onCreateAutomatic = { request ->
                     customGenerationError = null
