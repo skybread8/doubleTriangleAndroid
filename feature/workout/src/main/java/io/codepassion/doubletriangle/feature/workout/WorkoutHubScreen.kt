@@ -86,6 +86,7 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
     val customContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
     var customWorkouts by remember { mutableStateOf(CustomWorkoutStore.load(customContext)) }
     var editingCustomWorkout by remember { mutableStateOf<WorkoutDaySummary?>(null) }
+    var showingPlanOverview by remember { mutableStateOf(false) }
 
     editingCustomWorkout?.let { draft ->
         Box(Modifier.fillMaxSize().padding(contentPadding)) {
@@ -97,6 +98,10 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
         }
         return
     }
+    if (showingPlanOverview) {
+        WorkoutPlanOverviewScreen(state, onBack = { showingPlanOverview = false }, onWorkoutSelected = onWorkoutSelected)
+        return
+    }
     Column(
         Modifier.fillMaxSize().padding(contentPadding).liquidGlassBackground(),
     ) {
@@ -106,7 +111,7 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
                 .padding(horizontal = 20.dp, vertical = 14.dp),
         ) {
             WorkoutHeader(state)
-            PlanContextCard(state)
+            PlanContextCard(state) { showingPlanOverview = true }
             Spacer(Modifier.height(16.dp))
             WeekCalendar(state, selectedDay) { selectedDay = if (selectedDay == it) null else it }
         }
@@ -141,9 +146,9 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
 }
 
 @Composable
-private fun PlanContextCard(state: WorkoutHubState) {
+private fun PlanContextCard(state: WorkoutHubState, onClick: () -> Unit) {
     Row(
-        Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(15.dp)).padding(horizontal = 14.dp, vertical = 11.dp),
+        Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(15.dp)).clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
