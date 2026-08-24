@@ -91,9 +91,10 @@ internal object WorkoutActiveNotification {
             builder.setWhen(chronometerBaseMillis).setUsesChronometer(true).setChronometerCountDown(true)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            builder.setStyle(android.app.Notification.DecoratedMediaCustomViewStyle().setMediaSession(session.sessionToken).setShowActionsInCompactView(0, 1, 2))
+            // La vista decorada estándar respeta RemoteViews, cronómetro y barra en más fabricantes.
+            builder.setStyle(android.app.Notification.DecoratedCustomViewStyle())
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setStyle(android.app.Notification.MediaStyle().setMediaSession(session.sessionToken).setShowActionsInCompactView(0, 1, 2))
+            builder.setStyle(android.app.Notification.BigTextStyle().bigText(detail))
         }
         return builder.build()
     }
