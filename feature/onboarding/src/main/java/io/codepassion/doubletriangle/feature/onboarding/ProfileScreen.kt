@@ -26,6 +26,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.runtime.Composable
@@ -216,6 +217,7 @@ private fun ProfileEntrance(visible: Boolean, delayMillis: Int, content: @Compos
 
 @Composable
 private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, completedWorkouts: Int, longestStreak: Int, experienceXp: Int, experienceLevel: Int, experienceProgress: Float) {
+    val animatedExperienceProgress by animateFloatAsState(experienceProgress.coerceIn(0f, 1f), animationSpec = tween(650), label = "profile-experience")
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Text(profile.name.take(1).uppercase().ifBlank { "W" }, Modifier.size(68.dp).background(WildforceThemeTokens.accentGold, CircleShape).padding(19.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
@@ -234,7 +236,7 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
                 Text("NIVEL $experienceLevel", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 Text("$experienceXp XP", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
             }
-            LinearProgressIndicator(experienceProgress.coerceIn(0f, 1f), Modifier.fillMaxWidth().height(8.dp), color = WildforceThemeTokens.accentGold, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = .16f))
+            LinearProgressIndicator(animatedExperienceProgress, Modifier.fillMaxWidth().height(8.dp), color = WildforceThemeTokens.accentGold, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = .16f))
         }
     }
 }
