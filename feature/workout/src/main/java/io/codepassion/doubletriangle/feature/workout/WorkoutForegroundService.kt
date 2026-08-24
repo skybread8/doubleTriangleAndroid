@@ -17,7 +17,7 @@ internal class WorkoutForegroundService : Service() {
                 if (remaining != null && remaining > 0) restWasActive = true
                 if (restWasActive && (remaining == null || remaining <= 0)) {
                     restWasActive = false
-                    WorkoutActiveNotification.show(this@WorkoutForegroundService, "Descanso terminado", "Puedes continuar con el siguiente ejercicio", headsUp = true)
+                    WorkoutActiveNotification.showRestFinished(this@WorkoutForegroundService)
                 }
             }
             handler.postDelayed(this, 750L)

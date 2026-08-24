@@ -21,6 +21,7 @@ internal object WorkoutActiveNotification {
     const val ACTION_ADD_REST = "io.codepassion.doubletriangle.ACTION_ADD_REST"
     private const val channelId = "active_workout_live"
     private const val notificationId = 4101
+    private const val restFinishedNotificationId = 4105
     private var mediaSession: MediaSession? = null
     private var artworkTitle: String? = null
     private var artwork: Bitmap? = null
@@ -81,7 +82,42 @@ internal object WorkoutActiveNotification {
             builder.setWhen(chronometerBaseMillis).setUsesChronometer(true).setChronometerCountDown(true)
         }
         builder.setStyle(android.app.Notification.BigTextStyle().bigText(if (progressMax > 0) "$detail\nProgreso: $progress/$progressMax" else detail))
+        val publicVersion = android.app.Notification.Builder(context, channelId)
+            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setContentTitle(displayTitle)
+            .setContentText(detail)
+            .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setStyle(android.app.Notification.BigTextStyle().bigText(if (progressMax > 0) "$detail\nProgreso: $progress/$progressMax" else detail))
+            .build()
+        builder.setPublicVersion(publicVersion)
         return builder.build()
+    }
+
+    fun showRestFinished(context: Context) {
+        runCatching {
+            val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            ensureChannel(manager)
+            val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val contentIntent = launchIntent?.let {
+                android.app.PendingIntent.getActivity(context, restFinishedNotificationId, it, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
+            }
+            val notification = android.app.Notification.Builder(context, channelId)
+                .setSmallIcon(android.R.drawable.ic_media_play)
+                .setContentTitle("Descanso terminado")
+                .setContentText("Puedes continuar con el siguiente ejercicio")
+                .setStyle(android.app.Notification.BigTextStyle().bigText("Descanso terminado\nPuedes continuar con el siguiente ejercicio"))
+                .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
+                .setCategory(android.app.Notification.CATEGORY_EVENT)
+                .setAutoCancel(true)
+                .setOnlyAlertOnce(false)
+                .apply { contentIntent?.let(::setContentIntent) }
+                .build()
+            manager.notify(restFinishedNotificationId, notification)
+        }
     }
 
     private fun exerciseArtwork(title: String): Bitmap {
@@ -129,6 +165,7 @@ internal object WorkoutActiveNotification {
 
     fun cancel(context: Context) {
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(notificationId)
+        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(restFinishedNotificationId)
         mediaSession?.run { isActive = false; release() }
         mediaSession = null
         artwork?.recycle()
