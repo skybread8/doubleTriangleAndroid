@@ -230,7 +230,7 @@ fun OnboardingScreen(
         when (currentStep) {
             0 -> CoverStep { step = 1 }
             1 -> FormStep(
-                progress = 1f / 16f,
+                progress = 1f / 17f,
                 title = "Bienvenido",
                 subtitle = "¿Cómo quieres que te llamemos?",
                 canContinue = name.isNotBlank(),
@@ -248,7 +248,7 @@ fun OnboardingScreen(
                 )
             }
             2 -> FormStep(
-                progress = 2f / 16f,
+                progress = 2f / 17f,
                 title = "Tus objetivos",
                 subtitle = "Elige el objetivo de entrenamiento que mejor encaja contigo.",
                 canContinue = goal != null,
@@ -261,7 +261,7 @@ fun OnboardingScreen(
                 }
             }
             3 -> FormStep(
-                progress = 3f / 16f,
+                progress = 3f / 17f,
                 title = "Estilo de vida",
                 subtitle = "Cuéntanos cuál es tu actividad durante un día normal.",
                 canContinue = lifestyle != null,
@@ -274,7 +274,7 @@ fun OnboardingScreen(
                 }
             }
             4 -> FormStep(
-                progress = 4f / 16f,
+                progress = 4f / 17f,
                 title = "Disponibilidad",
                 subtitle = "Selecciona cuándo quieres entrenar cada semana.",
                 canContinue = workoutDays.isNotEmpty(),
@@ -289,7 +289,7 @@ fun OnboardingScreen(
                 }
             }
             5 -> FormStep(
-                progress = 5f / 16f,
+                progress = 5f / 17f,
                 title = "Duración del entrenamiento",
                 subtitle = "Indica la duración de sesión que quieres que optimicemos.",
                 canContinue = true,
@@ -307,7 +307,7 @@ fun OnboardingScreen(
                 }
             }
             6 -> FormStep(
-                progress = 6f / 16f,
+                progress = 6f / 17f,
                 title = "Experiencia",
                 subtitle = "Selecciona el nivel que mejor describe tu experiencia entrenando.",
                 canContinue = true,
@@ -320,7 +320,7 @@ fun OnboardingScreen(
                 }
             }
             7 -> FormStep(
-                progress=7f/16f,title="Programa",subtitle="Elige la estructura de entrenamiento que prefieres.",
+                progress=7f/17f,title="Programa",subtitle="Elige la estructura de entrenamiento que prefieres.",
                 canContinue=trainingSplit!=TrainingSplitPreference.Custom||workoutDays.all{it in customFocuses},
                 onBack={step=6},onContinue={step=if(goal?.supportsBodyComposition==true&&trainingLevel.supportsBodyComposition)8 else 9},
             ){
@@ -339,13 +339,13 @@ fun OnboardingScreen(
                     }
                 }
             }
-            8 -> FormStep(progress=8f/16f,title="Fase corporal",subtitle="Elige cómo debe influir tu objetivo corporal en el plan.",canContinue=true,onBack={step=7},onContinue={step=9}){
+            8 -> FormStep(progress=8f/17f,title="Fase corporal",subtitle="Elige cómo debe influir tu objetivo corporal en el plan.",canContinue=true,onBack={step=7},onContinue={step=9}){
                 BodyCompositionPhase.entries.forEach{phase->ChoiceOption(phase.title,phase.description,phase.glyph,bodyPhase==phase){bodyPhase=phase};Spacer(Modifier.height(10.dp))}
             }
-            9 -> FormStep(progress=9f/16f,title="Gimnasio",subtitle="¿En qué entorno vas a entrenar?",canContinue=gymType!=null,onBack={step=if(goal?.supportsBodyComposition==true&&trainingLevel.supportsBodyComposition)8 else 7},onContinue={step=10}){
+            9 -> FormStep(progress=9f/17f,title="Gimnasio",subtitle="¿En qué entorno vas a entrenar?",canContinue=gymType!=null,onBack={step=if(goal?.supportsBodyComposition==true&&trainingLevel.supportsBodyComposition)8 else 7},onContinue={step=10}){
                 GymType.entries.forEach{gym->ChoiceOption(gym.title,null,gym.glyph,gymType==gym){gymType=gym;equipment=gym.defaultEquipment};Spacer(Modifier.height(10.dp))}
             }
-            10 -> FormStep(progress=10f/16f,title="Equipamiento",subtitle="Ajusta el material al que realmente tienes acceso.",canContinue=true,onBack={step=9},onContinue={step=11}){
+            10 -> FormStep(progress=10f/17f,title="Equipamiento",subtitle="Ajusta el material al que realmente tienes acceso.",canContinue=true,onBack={step=9},onContinue={step=11}){
                 OutlinedTextField(value=equipmentSearch,onValueChange={equipmentSearch=it},modifier=Modifier.fillMaxWidth(),placeholder={Text("Buscar equipamiento")},singleLine=true,shape=RoundedCornerShape(14.dp))
                 Text("${equipment.size} seleccionados",Modifier.padding(vertical=12.dp),color=WildforceThemeTokens.textSecondary)
                 Equipment.entries.filter{it.title.contains(equipmentSearch.trim(),ignoreCase=true)}.chunked(2).forEach{items->
@@ -355,7 +355,7 @@ fun OnboardingScreen(
                     };Spacer(Modifier.height(10.dp))
                 }
             }
-            11 -> FormStep(progress=11f/16f,title="Restricciones",subtitle="Indica cualquier lesión o limitación que debamos tener en cuenta.",canContinue=true,onBack={step=10},onContinue={step=12}){
+            11 -> FormStep(progress=11f/17f,title="Restricciones",subtitle="Indica cualquier lesión o limitación que debamos tener en cuenta.",canContinue=true,onBack={step=10},onContinue={step=12}){
                 ChoiceOption("No tengo restricciones","Podrás cambiarlo más adelante.","✓",!hasRestrictions){hasRestrictions=false;restrictions=emptySet()}
                 Spacer(Modifier.height(10.dp))
                 ChoiceOption("Sí, tengo restricciones",null,"!",hasRestrictions){hasRestrictions=true}
@@ -364,22 +364,22 @@ fun OnboardingScreen(
                     MovementRestriction.entries.forEach{item->ChoiceOption(item.title,null,"•",item in restrictions){restrictions=if(item in restrictions)restrictions-item else restrictions+item};Spacer(Modifier.height(8.dp))}
                 }
             }
-            12 -> FormStep(progress=12f/16f,title="Health Connect",subtitle="Importa de forma segura tu altura y peso desde Android.",canContinue=healthConnectEnabled!=null,onBack={step=11},onContinue={step=13}){
+            12 -> FormStep(progress=12f/17f,title="Health Connect",subtitle="Importa de forma segura tu altura y peso desde Android.",canContinue=healthConnectEnabled!=null,onBack={step=11},onContinue={step=13}){
                 ChoiceOption("Conectar Health Connect","Android mostrará los permisos de altura y peso.","+",healthConnectEnabled==true){onRequestHealthConnect{granted,h,w->healthConnectEnabled=granted;h?.let{heightCm=it};w?.let{weightKg=it}}}
                 Spacer(Modifier.height(10.dp));ChoiceOption("Ahora no","Podrás conectarlo más adelante desde Perfil.","−",healthConnectEnabled==false){healthConnectEnabled=false}
             }
-            13 -> FormStep(progress=13f/16f,title="Fecha de nacimiento",subtitle="Esto nos ayuda a adaptar volumen, intensidad y recuperación.",canContinue=true,onBack={step=12},onContinue={step=14}){
+            13 -> FormStep(progress=13f/17f,title="Fecha de nacimiento",subtitle="Esto nos ayuda a adaptar volumen, intensidad y recuperación.",canContinue=true,onBack={step=12},onContinue={step=14}){
                 ValueStepper("Mes",monthNames[birthMonth-1],{birthMonth=if(birthMonth==1)12 else birthMonth-1},{birthMonth=if(birthMonth==12)1 else birthMonth+1});Spacer(Modifier.height(12.dp))
                 ValueStepper("Año",birthYear.toString(),{birthYear=(birthYear-1).coerceAtLeast(1920)},{birthYear=(birthYear+1).coerceAtMost(currentYear-13)})
             }
-            14 -> FormStep(progress=14f/16f,title="¿Cuál es tu sexo?",subtitle="Se utiliza para ajustar los cálculos físicos del plan.",canContinue=gender!=null,onBack={step=13},onContinue={step=15}){Gender.entries.forEach{item->ChoiceOption(item.title,null,item.glyph,gender==item){gender=item};Spacer(Modifier.height(10.dp))}}
-            15 -> FormStep(progress=15f/16f,title="Altura",subtitle="Esto nos ayuda a calcular tus necesidades con precisión.",canContinue=true,onBack={step=14},onContinue={step=16}){
+            14 -> FormStep(progress=14f/17f,title="¿Cuál es tu sexo?",subtitle="Se utiliza para ajustar los cálculos físicos del plan.",canContinue=gender!=null,onBack={step=13},onContinue={step=15}){Gender.entries.forEach{item->ChoiceOption(item.title,null,item.glyph,gender==item){gender=item};Spacer(Modifier.height(10.dp))}}
+            15 -> FormStep(progress=15f/17f,title="Altura",subtitle="Esto nos ayuda a calcular tus necesidades con precisión.",canContinue=true,onBack={step=14},onContinue={step=16}){
                 Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){MetricSystem.entries.forEach{system->Box(Modifier.weight(1f)){CompactOption(system.title,metricSystem==system){metricSystem=system}}}}
                 Spacer(Modifier.height(20.dp))
                 val heightLabel=if(metricSystem==MetricSystem.Metric)"$heightCm cm" else {val inches=(heightCm/2.54).toInt();"${inches/12} ft ${inches%12} in"}
                 ValueStepper("Altura",heightLabel,{heightCm=(heightCm-1).coerceAtLeast(120)},{heightCm=(heightCm+1).coerceAtMost(230)})
             }
-            16 -> FormStep(progress=1f,title="Peso",subtitle="Esto nos ayuda a calcular tus necesidades con precisión.",canContinue=true,onBack={step=15},onContinue={step=18}){
+            16 -> FormStep(progress=16f/17f,title="Peso",subtitle="Esto nos ayuda a calcular tus necesidades con precisión.",canContinue=true,onBack={step=15},onContinue={step=18}){
                 val weightLabel=if(metricSystem==MetricSystem.Metric)String.format("%.1f kg",weightKg) else String.format("%.1f lb",weightKg*2.20462)
                 ValueStepper("Peso",weightLabel,{weightKg=(weightKg-.5).coerceAtLeast(35.0)},{weightKg=(weightKg+.5).coerceAtMost(250.0)})
             }
