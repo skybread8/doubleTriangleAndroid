@@ -39,9 +39,13 @@ internal object WorkoutActiveNotification {
             android.app.PendingIntent.getActivity(context, notificationId, it, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
         }
         val session = mediaSession(context)
+        if (artwork != null) this.artwork = artwork
         val resolvedArtwork = artwork ?: this.artwork
         val displayTitle = if (isResting) detail.substringBefore(" ·") else title
-        val metadata = MediaMetadata.Builder().putString(MediaMetadata.METADATA_KEY_TITLE, displayTitle).putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, detail)
+        val metadata = MediaMetadata.Builder()
+            .putString(MediaMetadata.METADATA_KEY_TITLE, displayTitle)
+            .putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, detail)
+            .putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION, detail)
         resolvedArtwork?.let { metadata.putBitmap(MediaMetadata.METADATA_KEY_ART, it) }
         session.setMetadata(metadata.build())
         session.setPlaybackState(PlaybackState.Builder().setActions(PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE or PlaybackState.ACTION_SKIP_TO_NEXT).setState(if (isResting) PlaybackState.STATE_PAUSED else PlaybackState.STATE_PLAYING, progress.toLong(), 1f).build())
@@ -57,6 +61,8 @@ internal object WorkoutActiveNotification {
         builder.setSmallIcon(android.R.drawable.ic_media_play)
             .setContentTitle(displayTitle)
             .setContentText(detail)
+            .setSubText(if (isResting) "Temporizador de descanso" else "Sesión activa")
+            .setContentInfo(detail)
             .setOngoing(true)
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
             .setCategory(android.app.Notification.CATEGORY_TRANSPORT)
