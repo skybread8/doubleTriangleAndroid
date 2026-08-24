@@ -28,7 +28,12 @@ internal class WorkoutForegroundService : Service() {
         val title = intent?.getStringExtra("title") ?: "Entrenamiento activo"
         val detail = intent?.getStringExtra("detail") ?: "Sesión activa"
         workoutId = intent?.getStringExtra("workoutId")
-        startForeground(4101, WorkoutActiveNotification.build(this, title, detail))
+        val notification = runCatching { WorkoutActiveNotification.build(this, title, detail) }.getOrElse {
+            @Suppress("DEPRECATION")
+            (if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) android.app.Notification.Builder(this, "active_workout_live") else android.app.Notification.Builder(this))
+                .setSmallIcon(android.R.drawable.ic_media_play).setContentTitle(title).setContentText(detail).setOngoing(true).build()
+        }
+        startForeground(4101, notification)
         handler.removeCallbacks(restMonitor)
         handler.post(restMonitor)
         return START_STICKY
