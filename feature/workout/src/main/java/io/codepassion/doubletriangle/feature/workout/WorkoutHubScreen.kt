@@ -1,5 +1,6 @@
 package io.codepassion.doubletriangle.feature.workout
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
@@ -43,6 +44,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -664,6 +666,10 @@ fun ActiveWorkoutScreen(
     onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double, streak: Int) -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current.applicationContext
+    DisposableEffect(workout.id) {
+        WorkoutActiveNotification.show(context, workout.title)
+        onDispose { WorkoutActiveNotification.cancel(context) }
+    }
     val restored = remember(workout.id) { WorkoutSessionStore.load(context, workout.id) }
     var exerciseIndex by remember(workout.id) { mutableStateOf((restored?.exerciseIndex ?: 0).coerceIn(0, workout.exercises.lastIndex.coerceAtLeast(0))) }
     var completedByExercise by remember(workout.id) { mutableStateOf(restored?.completedByExercise ?: emptyMap()) }
@@ -693,6 +699,7 @@ fun ActiveWorkoutScreen(
     var showsExerciseGuide by remember { mutableStateOf(false) }
     var showsSetStyleInfo by remember { mutableStateOf(false) }
     var showsExitDialog by remember { mutableStateOf(false) }
+    var showsSkipExerciseConfirmation by remember { mutableStateOf(false) }
     var initializedExerciseIndex by remember(workout.id) { mutableStateOf(restored?.exerciseIndex ?: -1) }
     val exercise = workout.exercises.getOrNull(exerciseIndex)
     val completedForExercise = completedByExercise[exerciseIndex] ?: 0
@@ -702,6 +709,7 @@ fun ActiveWorkoutScreen(
     val logicalExercises = remember(structuredPathBlocks) { structuredPathBlocks.flatMap { it.exercises } }
     val logicalExerciseIndex = logicalExercises.indexOfFirst { exerciseIndex in it.executionIndices }.coerceAtLeast(0)
     val currentPathBlock = structuredPathBlocks.firstOrNull { block -> block.exercises.any { exerciseIndex in it.executionIndices } }
+    BackHandler(enabled = !showsSummary) { showsExitDialog = true }
     fun advanceFromExercise(restSeconds: Int) {
         if (exerciseIndex < workout.exercises.lastIndex) {
             exerciseIndex++
@@ -786,6 +794,22 @@ fun ActiveWorkoutScreen(
         )
     }
 
+    if (showsSkipExerciseConfirmation) {
+        val skipsWholeBlock = exercise?.blockType in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)
+        AlertDialog(
+            onDismissRequest = { showsSkipExerciseConfirmation = false },
+            title = { Text(if (skipsWholeBlock) "¿SALTAR BLOQUE?" else "¿SALTAR EJERCICIO?", fontFamily = AntonFontFamily) },
+            text = { Text(if (skipsWholeBlock) "Se omitirá todo el bloque actual y pasarás al siguiente." else "Este ejercicio quedará sin completar y pasarás al siguiente.") },
+            confirmButton = { TextButton(onClick = {
+                showsSkipExerciseConfirmation = false
+                val nextIndex = if (skipsWholeBlock) currentPathBlock?.exercises?.flatMap { it.executionIndices }?.maxOrNull()?.plus(1) else exerciseIndex + 1
+                restRemaining = null
+                if (nextIndex == null || nextIndex > workout.exercises.lastIndex) showsSummary = true else exerciseIndex = nextIndex
+            }) { Text("SALTAR", color = WildforceThemeTokens.accentGold) } },
+            dismissButton = { TextButton(onClick = { showsSkipExerciseConfirmation = false }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+        )
+    }
+
     fun commitCompletedSession(progress: CompletionProgress) {
         WorkoutHistoryStore.record(context, workout, exerciseStats, completedSetRecords, feedbackByExercise, notesByExercise)
         CompletionProgressStore.commit(context, progress)
@@ -826,16 +850,7 @@ fun ActiveWorkoutScreen(
                 Spacer(Modifier.weight(1f))
                 Text("RUTA", Modifier.clickable { showsWorkoutPath = true }.padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 Text("DATOS", Modifier.clickable { showsExerciseHistory = true }.padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
-                Text("SALTAR", Modifier.clickable {
-                    val skipsWholeBlock = exercise?.blockType in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)
-                    val nextIndex = if (skipsWholeBlock) {
-                        currentPathBlock?.exercises?.flatMap { it.executionIndices }?.maxOrNull()?.plus(1)
-                    } else {
-                        exerciseIndex + 1
-                    }
-                    restRemaining = null
-                    if (nextIndex == null || nextIndex > workout.exercises.lastIndex) showsSummary = true else exerciseIndex = nextIndex
-                }.padding(8.dp), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+                Text("SALTAR", Modifier.clickable { showsSkipExerciseConfirmation = true }.padding(8.dp), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 Text(formatClock(elapsedSeconds), Modifier.liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(horizontal = 14.dp, vertical = 7.dp), color = Color.White, fontWeight = FontWeight.Bold)
             }
             LinearProgressIndicator(
