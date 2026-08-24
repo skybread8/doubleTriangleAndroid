@@ -2,6 +2,9 @@ package io.codepassion.doubletriangle
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -23,6 +26,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,6 +83,9 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 7203)
+        }
         setContent {
             WildforceTheme {
                 Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
@@ -371,6 +378,10 @@ private fun WildforceApp(
 ) {
     val appContext = LocalContext.current.applicationContext
     val appPreferences = remember { appContext.getSharedPreferences("wildforce_profile", 0) }
+    LaunchedEffect(workoutState.planName, workoutState.workouts) {
+        WildforceNotificationScheduler.scheduleNextWorkout(appContext, workoutState)
+        WildforceNotificationScheduler.scheduleNutritionReminder(appContext)
+    }
     val trainingProgress = CompletionProgressStore.progress(appContext)
     var selected by remember { mutableStateOf(RootDestination.Workout) }
     var displayedWorkoutState by remember(workoutState) { mutableStateOf(workoutState) }
