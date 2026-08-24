@@ -61,6 +61,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
     var mealFat by remember { mutableStateOf("") }
     var mealType by remember { mutableStateOf(MealType.Snack) }
     var editingMeal by remember { mutableStateOf<MealLog?>(null) }
+    var mealToDelete by remember { mutableStateOf<MealLog?>(null) }
     var targets by remember(profile) { mutableStateOf(NutritionStore.loadTargets(context, profile)) }
     var editingTargets by remember { mutableStateOf(false) }
     val calories = meals.sumOf { it.calories }
@@ -117,7 +118,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
                 if (grouped.isNotEmpty()) {
                     item { Text(type.title.uppercase(), Modifier.padding(top = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary) }
                     items(grouped, key = { it.id }) { meal ->
-                        MealRow(meal, canEdit, onDelete = { meals = meals.filterNot { it.id == meal.id }; NutritionStore.save(context, meals) }, onEdit = {
+                        MealRow(meal, canEdit, onDelete = { mealToDelete = meal }, onEdit = {
                             editingMeal = meal
                             mealName = meal.name; mealCalories = meal.calories.toString(); mealProtein = meal.protein.toString(); mealCarbs = meal.carbs.toString(); mealFat = meal.fat.toString(); mealType = meal.type
                             addingMeal = true
@@ -161,6 +162,15 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
         )
     }
     if (editingTargets) NutritionTargetsDialog(targets, onDismiss = { editingTargets = false }) { updated -> targets = updated; NutritionStore.saveTargets(context, updated); editingTargets = false }
+    mealToDelete?.let { meal ->
+        AlertDialog(
+            onDismissRequest = { mealToDelete = null },
+            title = { Text("¿ELIMINAR COMIDA?", fontFamily = AntonFontFamily) },
+            text = { Text("Se eliminará «${meal.name}» del registro de hoy.") },
+            confirmButton = { androidx.compose.material.TextButton(onClick = { meals = meals.filterNot { it.id == meal.id }; NutritionStore.save(context, meals); mealToDelete = null }) { Text("ELIMINAR", color = Color(0xFFC62828)) } },
+            dismissButton = { androidx.compose.material.TextButton(onClick = { mealToDelete = null }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+        )
+    }
 }
 
 @Composable
