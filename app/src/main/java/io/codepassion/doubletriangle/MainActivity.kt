@@ -284,10 +284,8 @@ fun WildforceRoot() {
                     .putBoolean("skips_rest_periods", updated.skipsRestPeriods)
                     .putString("planner_notes", updated.workoutPlannerNotes)
                     .putStringSet("training_locations", encodeTrainingLocations(updated.trainingLocations))
-                    .remove("workout_plan_json")
                     .apply()
                 profile = updated
-                generatedWorkoutState = null
             },
             onRegenerateProfile = { updated ->
                 generationError = null
@@ -298,7 +296,7 @@ fun WildforceRoot() {
                 coroutineScope.launch {
                     runCatching {
                         if (nextPlanRequested) {
-                            WorkoutPlanGenerator.generateNext(updated, generatedWorkoutState ?: PreviewWorkoutRepository.load(updated.name, updated.goal.title), context)
+                            WorkoutPlanGenerator.generateNext(updated, restoredState, context)
                         } else WorkoutPlanGenerator.generate(updated, context)
                     }
                         .onSuccess { (json, state) ->
@@ -333,7 +331,11 @@ fun WildforceRoot() {
                 },
                 confirmButton = {
                     Button(onClick = {
+                        preferences.getString("workout_plan_json", null)?.let { currentJson ->
+                            WorkoutPlanArchiveStore.archive(preferences, currentJson)
+                        }
                         preferences.edit().putString("workout_plan_json", json).apply()
+                        preferences.edit().remove("completed_workouts").remove("skipped_workouts").apply()
                         generatedWorkoutState = state
                         pendingGeneratedPlan = null
                     }) { Text("USAR ESTE PLAN") }
@@ -422,6 +424,11 @@ private fun WildforceApp(
         })
         return
     }
+    val archivedWorkoutStates = remember(displayedWorkoutState.mesocycleNumber, displayedWorkoutState.planName) {
+        WorkoutPlanArchiveStore.load(appPreferences).mapNotNull { archived ->
+            runCatching { WorkoutPlanGenerator.parse(archived.rawJson, profile.name, profile.goal.title) }.getOrNull()
+        }
+    }
     Scaffold(
         modifier = Modifier.liquidGlassBackground(),
         backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -445,6 +452,7 @@ private fun WildforceApp(
             WorkoutHubScreen(
                 contentPadding = padding,
                 state = displayedWorkoutState,
+                planHistory = archivedWorkoutStates,
                 onWorkoutSelected = { workoutDetail = it },
                 gender = profile.gender.storedValue,
                 defaultCustomEquipment = profile.availableEquipment.joinToString(", ") { it.title },

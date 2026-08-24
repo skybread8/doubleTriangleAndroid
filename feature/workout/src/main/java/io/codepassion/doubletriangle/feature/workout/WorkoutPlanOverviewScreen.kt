@@ -40,7 +40,7 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
-internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(), onBack: () -> Unit, onWorkoutSelected: (WorkoutDaySummary) -> Unit) {
+internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, planHistory: List<WorkoutHubState> = emptyList(), contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(), onBack: () -> Unit, onWorkoutSelected: (WorkoutDaySummary) -> Unit) {
     val completed = state.workouts.count { it.status == WorkoutStatus.Completed }
     val skipped = state.workouts.count { it.status == WorkoutStatus.Skipped }
     val progress = if (state.workouts.isEmpty()) 0f else completed.toFloat() / state.workouts.size
@@ -78,6 +78,16 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, contentPadding: a
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp)) {
                     Text("SIGUIENTE PASO", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
                     Text(if (completed == state.workouts.size && state.workouts.isNotEmpty()) "Mesociclo completado. Ya puedes preparar la siguiente fase." else "Completa las sesiones previstas para avanzar en tu fase actual.", Modifier.padding(top = 5.dp), color = WildforceThemeTokens.textSecondary, maxLines = 3, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                }
+            }
+            if (planHistory.isNotEmpty()) {
+                item { Text("PLANES ANTERIORES", Modifier.padding(top = 4.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary) }
+                items(planHistory.sortedByDescending { it.mesocycleNumber }.take(8), key = { "archive-${it.mesocycleNumber}-${it.planName}" }) { archived ->
+                    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(14.dp)) {
+                        Text(archived.planName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                        Text("Plan ${archived.mesocycleNumber} · Mesociclo ${archived.mesocycleIndex} · Semana ${archived.weekIndex}/${archived.cycleLength}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold)
+                        Text("${archived.workouts.size} sesiones · ${archived.mesocyclePhase?.label ?: archived.phase}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                    }
                 }
             }
         }

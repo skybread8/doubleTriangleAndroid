@@ -87,6 +87,7 @@ import kotlinx.coroutines.launch
 fun WorkoutHubScreen(
     contentPadding: PaddingValues,
     state: WorkoutHubState = PreviewWorkoutRepository.load(),
+    planHistory: List<WorkoutHubState> = emptyList(),
     onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
     gender: String = "male",
     defaultCustomEquipment: String = "Peso corporal",
@@ -119,7 +120,7 @@ fun WorkoutHubScreen(
         return
     }
     if (showingPlanOverview) {
-        WorkoutPlanOverviewScreen(state, contentPadding, onBack = { showingPlanOverview = false }, onWorkoutSelected = onWorkoutSelected)
+        WorkoutPlanOverviewScreen(state, planHistory, contentPadding, onBack = { showingPlanOverview = false }, onWorkoutSelected = onWorkoutSelected)
         return
     }
     Column(
