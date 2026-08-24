@@ -68,6 +68,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
     val carbs = meals.sumOf { it.carbs }
     val fat = meals.sumOf { it.fat }
     val macroCalories = protein * 4 + carbs * 4 + fat * 9
+    val recentCalories = remember(selectedDate, meals) { (0..6).map { offset -> NutritionStore.load(context, selectedDate.minusDays(offset.toLong())).sumOf { it.calories } }.reversed() }
     Box(Modifier.fillMaxSize().padding(contentPadding).liquidGlassBackground()) {
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 18.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             item {
@@ -102,6 +103,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
                     MacroRow("GRASAS", fat, targets.fat, Color(0xFFB88BD8))
                 }
             }
+            item { NutritionWeekSummary(recentCalories, targets.calories) }
             item {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text("COMIDAS DE HOY", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
@@ -159,6 +161,26 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
         )
     }
     if (editingTargets) NutritionTargetsDialog(targets, onDismiss = { editingTargets = false }) { updated -> targets = updated; NutritionStore.saveTargets(context, updated); editingTargets = false }
+}
+
+@Composable
+private fun NutritionWeekSummary(calories: List<Int>, target: Int) {
+    val loggedDays = calories.count { it > 0 }
+    val average = if (loggedDays > 0) calories.filter { it > 0 }.average().toInt() else 0
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("ÚLTIMOS 7 DÍAS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+            Text("$loggedDays/7 registrados", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        }
+        if (loggedDays == 0) Text("Registra comidas para ver tu media semanal.", color = WildforceThemeTokens.textSecondary)
+        else {
+            Text("Media: $average kcal", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+            val progress = if (target > 0) (average.toFloat() / target).coerceIn(0f, 1f) else 0f
+            Box(Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(8.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = .14f))) {
+                Box(Modifier.fillMaxWidth(progress).height(8.dp).background(WildforceThemeTokens.accentGold))
+            }
+        }
+    }
 }
 
 @Composable
