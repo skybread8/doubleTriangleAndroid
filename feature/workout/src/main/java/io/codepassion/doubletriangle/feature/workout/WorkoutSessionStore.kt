@@ -18,8 +18,10 @@ internal data class WorkoutSessionSnapshot(
     val pendingFeedback: Boolean,
     val showsSummary: Boolean,
     val selectedFeedback: String?,
+    val pendingNote: String = "",
     val exerciseStats: Map<Int, ExerciseSessionStats> = emptyMap(),
     val feedbackByExercise: Map<Int, String> = emptyMap(),
+    val notesByExercise: Map<Int, String> = emptyMap(),
     val completedSetRecords: List<CompletedSetRecord> = emptyList(),
     val exerciseTimeRemaining: Int? = null,
     val exerciseTimeInitial: Int = 0,
@@ -48,6 +50,8 @@ internal object WorkoutSessionStore {
         }
         val feedbackJson = json.optJSONObject("feedbackByExercise") ?: JSONObject()
         val feedback = buildMap { feedbackJson.keys().forEach { key -> put(key.toInt(), feedbackJson.getString(key)) } }
+        val notesJson = json.optJSONObject("notesByExercise") ?: JSONObject()
+        val notes = buildMap { notesJson.keys().forEach { key -> put(key.toInt(), notesJson.getString(key)) } }
         val addedSetsJson = json.optJSONObject("addedSetsByExercise") ?: JSONObject()
         val addedSets = buildMap { addedSetsJson.keys().forEach { key -> put(key.toInt(), addedSetsJson.getInt(key)) } }
         val setRecordsJson = json.optJSONArray("completedSetRecords")
@@ -77,8 +81,10 @@ internal object WorkoutSessionStore {
             elapsedSeconds = json.getInt("elapsedSeconds") + elapsedWhileAway,
             totalCompletedSets = json.getInt("totalCompletedSets"), totalVolumeKg = json.getDouble("totalVolumeKg"),
             pendingFeedback = json.optBoolean("pendingFeedback"), showsSummary = json.optBoolean("showsSummary"), selectedFeedback = json.optString("selectedFeedback").takeIf(String::isNotBlank),
+            pendingNote = json.optString("pendingNote"),
             exerciseStats = stats,
             feedbackByExercise = feedback,
+            notesByExercise = notes,
             completedSetRecords = setRecords,
             exerciseTimeRemaining = savedExerciseTime?.let { if (exerciseTimerWasRunning) (it - elapsedWhileAway).coerceAtLeast(0) else it },
             exerciseTimeInitial = json.optInt("exerciseTimeInitial"),
@@ -96,6 +102,7 @@ internal object WorkoutSessionStore {
             }
         }
         val feedback = JSONObject().apply { snapshot.feedbackByExercise.forEach { (index, value) -> put(index.toString(), value) } }
+        val notes = JSONObject().apply { snapshot.notesByExercise.forEach { (index, value) -> put(index.toString(), value) } }
         val addedSets = JSONObject().apply { snapshot.addedSetsByExercise.forEach { (index, value) -> put(index.toString(), value) } }
         val setRecords = org.json.JSONArray().apply {
             snapshot.completedSetRecords.forEach { record ->
@@ -112,7 +119,8 @@ internal object WorkoutSessionStore {
             .put("elapsedSeconds", snapshot.elapsedSeconds).put("totalCompletedSets", snapshot.totalCompletedSets)
             .put("totalVolumeKg", snapshot.totalVolumeKg).put("pendingFeedback", snapshot.pendingFeedback).put("showsSummary", snapshot.showsSummary)
             .put("selectedFeedback", snapshot.selectedFeedback ?: JSONObject.NULL).put("updatedAt", System.currentTimeMillis())
-            .put("exerciseStats", stats).put("feedbackByExercise", feedback).put("completedSetRecords", setRecords)
+            .put("pendingNote", snapshot.pendingNote)
+            .put("exerciseStats", stats).put("feedbackByExercise", feedback).put("notesByExercise", notes).put("completedSetRecords", setRecords)
             .put("exerciseTimeRemaining", snapshot.exerciseTimeRemaining ?: JSONObject.NULL)
             .put("exerciseTimeInitial", snapshot.exerciseTimeInitial)
             .put("exerciseTimerRunning", snapshot.exerciseTimerRunning)

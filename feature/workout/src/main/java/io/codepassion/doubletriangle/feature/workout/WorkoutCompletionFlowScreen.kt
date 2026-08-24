@@ -43,7 +43,7 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import java.util.Locale
 
-private enum class CompletionPhase { Records, Summary, Score, Streak, Xp, LevelUp }
+private enum class CompletionPhase { DurationWarning, Records, Summary, Score, Streak, Xp, LevelUp }
 
 @Composable
 internal fun WorkoutCompletionFlowScreen(
@@ -53,20 +53,46 @@ internal fun WorkoutCompletionFlowScreen(
     feedback: Map<Int, String>,
     records: List<ExerciseRecordEvent>,
     progress: CompletionProgress,
+    onCancelWorkout: () -> Unit,
     onDone: () -> Unit,
 ) {
-    var phase by remember(workout.id) { mutableStateOf(if (records.isEmpty()) CompletionPhase.Summary else CompletionPhase.Records) }
+    val firstRegularPhase = if (records.isEmpty()) CompletionPhase.Summary else CompletionPhase.Records
+    var phase by remember(workout.id) {
+        mutableStateOf(
+            if (durationSeconds < workout.estimatedMinutes * 60 / 4) CompletionPhase.DurationWarning else firstRegularPhase,
+        )
+    }
     val score = remember(workout.id, stats, feedback) { WorkoutCompletionCalculator.score(workout, stats, feedback) }
     val mainExercises = remember(workout) { workout.pathBlocks().mainExercises() }
     val completedSets = stats.mapValues { it.value.sets }
     val completedMainExercises = mainExercises.count { it.isCompleted(workout, completedSets) }
     when (phase) {
+        CompletionPhase.DurationWarning -> DurationWarning(onCancelWorkout) { phase = firstRegularPhase }
         CompletionPhase.Records -> RecordsCelebration(records) { phase = CompletionPhase.Summary }
         CompletionPhase.Summary -> CompletionSummary(workout, durationSeconds, stats, completedMainExercises) { phase = CompletionPhase.Score }
         CompletionPhase.Score -> ScoreCelebration(score, completedMainExercises, mainExercises.size, dominantFeedback(feedback)) { phase = if (progress.streakIncreased) CompletionPhase.Streak else CompletionPhase.Xp }
         CompletionPhase.Streak -> StreakCelebration(progress.streakAfter) { phase = CompletionPhase.Xp }
         CompletionPhase.Xp -> XpCelebration(progress) { if (progress.levelAfter > progress.levelBefore) phase = CompletionPhase.LevelUp else onDone() }
         CompletionPhase.LevelUp -> LevelUpCelebration(progress.levelAfter, onDone)
+    }
+}
+
+@Composable
+private fun DurationWarning(onCancel: () -> Unit, onContinue: () -> Unit) {
+    Column(
+        Modifier.fillMaxSize().liquidGlassBackground().padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text("⚠", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
+        Text("LA DURACIÓN NO PARECE CORRECTA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
+        Text("Has terminado mucho antes de lo previsto. ¿Quieres cancelar el entrenamiento?", Modifier.padding(top = 10.dp, bottom = 28.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+        Button(onClick = onCancel, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFC62828), contentColor = Color.White)) {
+            Text("CANCELAR ENTRENAMIENTO", fontWeight = FontWeight.Bold)
+        }
+        Button(onClick = onContinue, modifier = Modifier.fillMaxWidth().padding(top = 10.dp).height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) {
+            Text("CONTINUAR", fontWeight = FontWeight.Bold)
+        }
     }
 }
 

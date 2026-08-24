@@ -33,6 +33,8 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -417,8 +419,10 @@ fun ActiveWorkoutScreen(
     var showsSummary by remember(workout.id) { mutableStateOf(restored?.showsSummary ?: false) }
     var pendingFeedback by remember(workout.id) { mutableStateOf(restored?.pendingFeedback ?: false) }
     var selectedFeedback by remember(workout.id) { mutableStateOf(restored?.selectedFeedback) }
+    var pendingNote by remember(workout.id) { mutableStateOf(restored?.pendingNote.orEmpty()) }
     var exerciseStats by remember(workout.id) { mutableStateOf(restored?.exerciseStats ?: emptyMap()) }
     var feedbackByExercise by remember(workout.id) { mutableStateOf(restored?.feedbackByExercise ?: emptyMap()) }
+    var notesByExercise by remember(workout.id) { mutableStateOf(restored?.notesByExercise ?: emptyMap()) }
     var completedSetRecords by remember(workout.id) { mutableStateOf(restored?.completedSetRecords ?: emptyList()) }
     val initialExerciseDuration = targetDurationSeconds(workout.exercises.firstOrNull()?.reps)
     var exerciseTimeRemaining by remember(workout.id) { mutableStateOf(restored?.exerciseTimeRemaining ?: initialExerciseDuration) }
@@ -466,10 +470,10 @@ fun ActiveWorkoutScreen(
             initializedExerciseIndex = exerciseIndex
         }
     }
-    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, showsSummary, exerciseStats, feedbackByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning, addedSetsByExercise) {
+    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, pendingNote, showsSummary, exerciseStats, feedbackByExercise, notesByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning, addedSetsByExercise) {
         WorkoutSessionStore.save(
             context, workout.id,
-            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, exerciseStats, feedbackByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning, addedSetsByExercise),
+            WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, pendingNote, exerciseStats, feedbackByExercise, notesByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning, addedSetsByExercise),
         )
     }
     LaunchedEffect(restRemaining) {
@@ -520,8 +524,11 @@ fun ActiveWorkoutScreen(
     if (showsSummary) {
         val completionProgress = remember(workout.id) { CompletionProgressStore.preview(context, currentStreak) }
         val recordEvents = remember(workout.id, exerciseStats) { WorkoutCompletionCalculator.records(context, workout, exerciseStats) }
-        WorkoutCompletionFlowScreen(workout, elapsedSeconds, exerciseStats, feedbackByExercise, recordEvents, completionProgress) {
-            WorkoutHistoryStore.record(context, workout, exerciseStats, completedSetRecords)
+        WorkoutCompletionFlowScreen(workout, elapsedSeconds, exerciseStats, feedbackByExercise, recordEvents, completionProgress, onCancelWorkout = {
+            WorkoutSessionStore.clear(context, workout.id)
+            onExit()
+        }) {
+            WorkoutHistoryStore.record(context, workout, exerciseStats, completedSetRecords, feedbackByExercise, notesByExercise)
             CompletionProgressStore.commit(context, completionProgress)
             WorkoutSessionStore.clear(context, workout.id)
             onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg, completionProgress.streakAfter)
@@ -582,11 +589,15 @@ fun ActiveWorkoutScreen(
                     ExerciseFeedbackContent(
                         exerciseName = exercise.name,
                         selected = selectedFeedback,
+                        note = pendingNote,
                         onSelected = { selectedFeedback = it },
+                        onNoteChanged = { pendingNote = it },
                         onContinue = {
                             selectedFeedback?.let { feedbackByExercise = feedbackByExercise + (exerciseIndex to it) }
+                            pendingNote.trim().takeIf(String::isNotEmpty)?.let { notesByExercise = notesByExercise + (exerciseIndex to it) }
                             pendingFeedback = false
                             selectedFeedback = null
+                            pendingNote = ""
                             advanceFromExercise(exercise.restSeconds)
                         },
                     )
@@ -806,30 +817,50 @@ private fun SetTrackingRows(
 private fun ExerciseFeedbackContent(
     exerciseName: String,
     selected: String?,
+    note: String,
     onSelected: (String) -> Unit,
+    onNoteChanged: (String) -> Unit,
     onContinue: () -> Unit,
 ) {
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    val choices = listOf(
+        Triple("🥱", "MUY FÁCIL", "Podías haber hecho muchas más repeticiones."),
+        Triple("😌", "FÁCIL", "Te quedaban varias repeticiones en reserva."),
+        Triple("💪", "JUSTO", "El esfuerzo y la técnica han sido adecuados."),
+        Triple("🥵", "DIFÍCIL", "Has terminado cerca de tu límite."),
+        Triple("🤯", "MUY DIFÍCIL", "No habrías podido completar otra repetición."),
+    )
+    Column(Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally) {
         Text("EJERCICIO COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
         Text(exerciseName, color = WildforceThemeTokens.textSecondary)
-        Spacer(Modifier.height(14.dp))
-        Text("¿Cómo ha ido?", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-        listOf("FÁCIL" to "Podía hacer bastante más", "CORRECTO" to "Esfuerzo adecuado", "DIFÍCIL" to "Casi no termino").forEach { (title, subtitle) ->
-            Row(
-                Modifier.fillMaxWidth().padding(vertical = 3.dp)
-                    .background(if (selected == title) WildforceThemeTokens.accentGold.copy(alpha = 0.16f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.06f), RoundedCornerShape(14.dp))
-                    .clickable { onSelected(title) }.padding(11.dp), verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(if (selected == title) "●" else "○", color = WildforceThemeTokens.accentGold)
-                Column(Modifier.padding(start = 12.dp)) {
-                    Text(title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                    Text(subtitle, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Text("¿CÓMO HA IDO?", Modifier.fillMaxWidth().padding(top = 12.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+        Text("Esta información ayudará a personalizar las siguientes sesiones.", Modifier.fillMaxWidth().padding(top = 2.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Row(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+            choices.forEach { (emoji, title, _) ->
+                Column(
+                    Modifier.weight(1f).height(70.dp).clip(RoundedCornerShape(13.dp))
+                        .background(if (selected == title) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary.copy(alpha = 0.08f))
+                        .clickable { onSelected(title) }.padding(horizontal = 2.dp, vertical = 7.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(emoji, style = MaterialTheme.typography.h6)
+                    Text(title, style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = if (selected == title) Color.White else WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2)
                 }
             }
         }
-        Spacer(Modifier.weight(1f))
+        val description = choices.firstOrNull { it.second == selected }?.third ?: "Selecciona la sensación que mejor describa el ejercicio."
+        Text(description, Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        TextField(
+            value = note,
+            onValueChange = { onNoteChanged(it.take(300)) },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Añadir notas…") },
+            maxLines = 3,
+            colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent),
+            shape = RoundedCornerShape(13.dp),
+        )
+        Spacer(Modifier.height(10.dp))
         Button(onClick = onContinue, enabled = selected != null, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) {
-            Text("CONTINUAR", fontWeight = FontWeight.Bold)
+            Text("MARCAR COMO COMPLETADO", fontWeight = FontWeight.Bold)
         }
     }
 }

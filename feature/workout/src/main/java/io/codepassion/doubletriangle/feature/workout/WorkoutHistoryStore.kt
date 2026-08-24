@@ -37,6 +37,8 @@ internal data class ExerciseHistoryEntry(
     val maxWeightKg: Double,
     val volumeKg: Double,
     val setDetails: List<SetPerformance> = emptyList(),
+    val feedback: String? = null,
+    val note: String? = null,
 )
 
 internal fun ExerciseSummary.historyKey(): String = imageKey?.takeIf(String::isNotBlank)?.lowercase() ?: name.lowercase()
@@ -73,6 +75,8 @@ internal object WorkoutHistoryStore {
                         maxWeightKg = item.getDouble("maxWeightKg"),
                         volumeKg = item.getDouble("volumeKg"),
                         setDetails = details,
+                        feedback = item.optString("feedback").takeIf(String::isNotBlank),
+                        note = item.optString("note").takeIf(String::isNotBlank),
                     ),
                 )
             }
@@ -84,6 +88,8 @@ internal object WorkoutHistoryStore {
         workout: WorkoutDaySummary,
         stats: Map<Int, ExerciseSessionStats>,
         completedSets: List<CompletedSetRecord> = emptyList(),
+        feedbackByExercise: Map<Int, String> = emptyMap(),
+        notesByExercise: Map<Int, String> = emptyMap(),
     ) {
         val timestamp = System.currentTimeMillis()
         val completedExercises = workout.exercises.withIndex()
@@ -103,8 +109,10 @@ internal object WorkoutHistoryStore {
                 .filter { it.exerciseIndex in exerciseIndices }
                 .sortedWith(compareBy(CompletedSetRecord::exerciseIndex, CompletedSetRecord::setNumber))
                 .mapIndexed { index, set -> SetPerformance(index + 1, set.reps, set.weightKg, set.setStyle) }
+            val feedback = exerciseIndices.mapNotNull(feedbackByExercise::get).lastOrNull()
+            val note = exerciseIndices.mapNotNull(notesByExercise::get).lastOrNull()
             val entries = listOf(
-                ExerciseHistoryEntry(timestamp, result.sets, result.totalReps, result.maxWeightKg, result.volumeKg, details),
+                ExerciseHistoryEntry(timestamp, result.sets, result.totalReps, result.maxWeightKg, result.volumeKg, details, feedback, note),
             ) + history(context, exercise)
             val json = JSONArray().apply {
                 entries.take(MAX_ENTRIES).forEach { entry ->
@@ -119,7 +127,9 @@ internal object WorkoutHistoryStore {
                     put(
                         JSONObject().put("timestamp", entry.timestampMillis).put("sets", entry.sets)
                             .put("reps", entry.totalReps).put("maxWeightKg", entry.maxWeightKg).put("volumeKg", entry.volumeKg)
-                            .put("setDetails", detailsJson),
+                            .put("setDetails", detailsJson)
+                            .put("feedback", entry.feedback ?: JSONObject.NULL)
+                            .put("note", entry.note ?: JSONObject.NULL),
                     )
                 }
             }

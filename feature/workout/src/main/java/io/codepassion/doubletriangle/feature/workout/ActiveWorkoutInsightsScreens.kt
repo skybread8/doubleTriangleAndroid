@@ -184,6 +184,12 @@ private fun HistoryEntryRow(entry: ExerciseHistoryEntry) {
                     color = WildforceThemeTokens.textSecondary,
                 )
             }
+            entry.feedback?.let {
+                Text("● $it", modifier = Modifier.padding(top = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+            }
+            entry.note?.let {
+                Text("“$it”", modifier = Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            }
         }
         Column(horizontalAlignment = Alignment.End) {
             Text(formatWeight(entry.maxWeightKg), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
