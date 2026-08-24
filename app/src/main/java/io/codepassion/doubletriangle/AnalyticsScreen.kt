@@ -113,9 +113,45 @@ fun AnalyticsScreen(
             Text("Completa ejercicios para ver progresión, récords y volumen por movimiento.", color = WildforceThemeTokens.textSecondary)
         } else {
             exerciseSummaries.take(6).forEach { summary -> ExerciseAnalyticsCard(summary) { selectedExercise = summary } }
+            MuscleVolumeBreakdown(exerciseSummaries)
         }
         Spacer(Modifier.height(4.dp))
         Text("Toca un ejercicio para ver sus sesiones, volumen y mejor marca.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+    }
+}
+
+@Composable
+private fun MuscleVolumeBreakdown(summaries: List<ExerciseAnalyticsSummary>) {
+    val grouped = summaries.groupBy { muscleGroupFor(it.exercise.imageKey, it.exercise.name) }
+        .mapValues { (_, items) -> items.sumOf { it.totalVolumeKg } }
+        .toList().sortedByDescending { it.second }.take(6)
+    val max = grouped.maxOfOrNull { it.second }?.takeIf { it > 0 } ?: 1.0
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+        Text("VOLUMEN POR GRUPO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+        if (grouped.isEmpty() || grouped.all { it.second <= 0 }) {
+            Text("Aún no hay volumen suficiente para comparar grupos musculares.", color = WildforceThemeTokens.textSecondary)
+        } else grouped.forEach { (group, volume) ->
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(group, Modifier.width(82.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1)
+                val fraction = (volume / max).toFloat().coerceIn(0f, 1f)
+                LinearProgressIndicator(fraction, Modifier.weight(1f).height(8.dp), WildforceThemeTokens.accentGold, WildforceThemeTokens.textSecondary.copy(alpha = .14f))
+                Text(String.format("%.0f", volume), Modifier.width(38.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
+            }
+        }
+    }
+}
+
+private fun muscleGroupFor(imageKey: String?, name: String): String {
+    val key = "${imageKey.orEmpty()} ${name.lowercase()}"
+    return when {
+        listOf("squat", "lunge", "legpress", "legcurl", "quad", "sentadilla", "zancada", "pierna").any { it in key } -> "Piernas"
+        listOf("deadlift", "row", "pull", "lat", "back", "remo", "dominada", "espalda").any { it in key } -> "Espalda"
+        listOf("shoulder", "overhead", "lateral", "facepull", "hombro", "militar").any { it in key } -> "Hombros"
+        listOf("bench", "pushup", "chest", "pec", "pecho", "flexión").any { it in key } -> "Pecho"
+        listOf("curl", "biceps", "bíceps").any { it in key } -> "Bíceps"
+        listOf("triceps", "pushdown", "tríceps").any { it in key } -> "Tríceps"
+        listOf("plank", "bug", "core", "abs", "abdominal", "plancha").any { it in key } -> "Core"
+        else -> "General"
     }
 }
 
