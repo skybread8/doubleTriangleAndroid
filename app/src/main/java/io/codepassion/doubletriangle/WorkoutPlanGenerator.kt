@@ -40,10 +40,11 @@ object WorkoutPlanGenerator {
             context,
         )
         val nextWeek = previous.weekIndex + 1
-        val startsNewMesocycle = nextWeek > previous.cycleLength
+        val effectiveCycleLength = if (previous.cycleLength <= 1) 4 else previous.cycleLength
+        val startsNewMesocycle = nextWeek > effectiveCycleLength
         val nextState = generated.copy(
             mesocycleIndex = if (startsNewMesocycle) previous.mesocycleIndex + 1 else previous.mesocycleIndex,
-            cycleLength = previous.cycleLength,
+            cycleLength = effectiveCycleLength,
             weekIndex = if (startsNewMesocycle) 1 else nextWeek,
         )
         serialize(nextState) to nextState
