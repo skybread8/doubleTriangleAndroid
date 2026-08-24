@@ -303,13 +303,13 @@ private fun StyleParameterControls(exercise: ExerciseSummary, onChange: (Exercis
 }
 
 @Composable
-private fun AutomaticWorkoutRequestDialog(defaultEquipment: String, onDismiss: () -> Unit, onGenerate: (CustomWorkoutRequest) -> Unit) {
-    var focus by remember { mutableStateOf("Full body") }
-    var duration by remember { mutableStateOf("45") }
+internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, onDismiss: () -> Unit, onGenerate: (CustomWorkoutRequest) -> Unit, initialFocus: String = "Full body", initialDuration: Int = 45, title: String = "CREAR CON IA") {
+    var focus by remember(initialFocus) { mutableStateOf(initialFocus) }
+    var duration by remember(initialDuration) { mutableStateOf(initialDuration.toString()) }
     var equipment by remember(defaultEquipment) { mutableStateOf(defaultEquipment.ifBlank { "Peso corporal" }) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("CREAR CON IA", fontFamily = AntonFontFamily) },
+        title = { Text(title, fontFamily = AntonFontFamily) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                 Text("La IA adaptará la sesión a estos datos.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)

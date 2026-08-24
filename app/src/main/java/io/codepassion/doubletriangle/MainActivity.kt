@@ -203,7 +203,7 @@ fun WildforceRoot() {
             if (useAi) {
                 isGenerating = true
                 coroutineScope.launch {
-                    runCatching { WorkoutPlanGenerator.generate(completedProfile) }
+                    runCatching { WorkoutPlanGenerator.generate(completedProfile, context) }
                         .onSuccess { (json, state) ->
                             preferences.edit().putString("workout_plan_json", json).apply()
                             generatedWorkoutState = state
@@ -281,7 +281,7 @@ fun WildforceRoot() {
                 generationError = null
                 isGenerating = true
                 coroutineScope.launch {
-                    runCatching { WorkoutPlanGenerator.generate(updated) }
+                    runCatching { WorkoutPlanGenerator.generate(updated, context) }
                         .onSuccess { (json, state) ->
                             preferences.edit().putString("workout_plan_json", json).apply()
                             generatedWorkoutState = state
@@ -362,6 +362,8 @@ private fun WildforceApp(
             displayedWorkoutState = updatedState
             workoutDetail = updated
             onPlanWorkoutUpdated(updatedState)
+        }, defaultAdaptEquipment = profile.availableEquipment.joinToString(", ") { it.title }, adaptAiGenerator = { request ->
+            WorkoutPlanGenerator.adaptWorkout(profile, workout, request, appContext)
         })
         return
     }
@@ -391,7 +393,7 @@ private fun WildforceApp(
                 onWorkoutSelected = { workoutDetail = it },
                 gender = profile.gender.storedValue,
                 defaultCustomEquipment = profile.availableEquipment.joinToString(", ") { it.title },
-                customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile, request) },
+                customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile, request, appContext) },
             )
         } else if (selected == RootDestination.Nutrition) {
             NutritionScreen(padding)

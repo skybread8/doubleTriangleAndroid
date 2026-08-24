@@ -60,12 +60,15 @@ data class ExerciseAnalyticsPoint(
 
 internal fun ExerciseSummary.historyKey(): String = imageKey?.takeIf(String::isNotBlank)?.lowercase() ?: name.lowercase()
 
-internal object WorkoutHistoryStore {
+object WorkoutHistoryStore {
     private const val PREFERENCES = "wildforce_exercise_history"
+    private const val HISTORY_KEYS = "exercise_history_keys"
     private const val MAX_ENTRIES = 24
 
-    fun history(context: Context, exercise: ExerciseSummary): List<ExerciseHistoryEntry> = runCatching {
-        val raw = context.getSharedPreferences(PREFERENCES, 0).getString(exercise.historyKey(), null) ?: return emptyList()
+    internal fun history(context: Context, exercise: ExerciseSummary): List<ExerciseHistoryEntry> = historyForKey(context, exercise.historyKey())
+
+    private fun historyForKey(context: Context, key: String): List<ExerciseHistoryEntry> = runCatching {
+        val raw = context.getSharedPreferences(PREFERENCES, 0).getString(key, null) ?: return emptyList()
         val array = JSONArray(raw)
         buildList {
             for (index in 0 until array.length()) {
@@ -100,7 +103,7 @@ internal object WorkoutHistoryStore {
         }
     }.getOrDefault(emptyList())
 
-    fun record(
+    internal fun record(
         context: Context,
         workout: WorkoutDaySummary,
         stats: Map<Int, ExerciseSessionStats>,
@@ -150,7 +153,37 @@ internal object WorkoutHistoryStore {
                     )
                 }
             }
-            context.getSharedPreferences(PREFERENCES, 0).edit().putString(exercise.historyKey(), json.toString()).apply()
+            val preferences = context.getSharedPreferences(PREFERENCES, 0)
+            val keys = preferences.getStringSet(HISTORY_KEYS, emptySet()).orEmpty() + exercise.historyKey()
+            preferences.edit().putString(exercise.historyKey(), json.toString()).putStringSet(HISTORY_KEYS, keys).apply()
+        }
+    }
+
+    /** Compact completed-session context used by every Android workout AI request. */
+    fun aiPlanningContext(context: Context, maxEntries: Int = 12): String {
+        val preferences = context.getSharedPreferences(PREFERENCES, 0)
+        val storedKeys = preferences.getStringSet(HISTORY_KEYS, emptySet()).orEmpty()
+        val keys = storedKeys.ifEmpty {
+            preferences.all.mapNotNull { (key, value) ->
+                key.takeIf { it != HISTORY_KEYS && value is String && runCatching { JSONArray(value) }.isSuccess }
+            }.toSet().also { migrated ->
+                if (migrated.isNotEmpty()) preferences.edit().putStringSet(HISTORY_KEYS, migrated).apply()
+            }
+        }
+        val entries = keys
+            .flatMap { key -> historyForKey(context, key).map { key to it } }
+            .sortedByDescending { (_, entry) -> entry.timestampMillis }
+            .take(maxEntries)
+        if (entries.isEmpty()) return "Historial de entrenamientos recientes: todavía no hay sesiones completadas."
+        return buildString {
+            appendLine("Historial de entrenamientos recientes (usa estos resultados para progresar o ajustar):")
+            entries.forEach { (exercise, entry) ->
+                append("- $exercise: ${entry.sets} series, ${entry.totalReps} reps, máximo ${"%.1f".format(java.util.Locale.US, entry.maxWeightKg)} kg, volumen ${"%.0f".format(java.util.Locale.US, entry.volumeKg)} kg")
+                entry.feedback?.let { append(", feedback: $it") }
+                entry.note?.takeIf(String::isNotBlank)?.let { append(", nota: $it") }
+                appendLine()
+            }
+            appendLine("Reglas de progresión: con feedback MUY FÁCIL o FÁCIL puedes subir carga, repeticiones o volumen de forma moderada; con JUSTO mantén o progresa hasta un 10%; con DIFÍCIL o MUY DIFÍCIL reduce la exigencia, mantiene la carga o usa una alternativa segura. Nunca ignores restricciones o molestias.")
         }
     }
 }

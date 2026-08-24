@@ -370,7 +370,7 @@ private fun RestDayCard() {
 private fun WorkoutHubPreview() = WildforceTheme { WorkoutHubScreen(PaddingValues()) }
 
 @Composable
-fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -> Unit, onStart: () -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}) {
+fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -> Unit, onStart: () -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}, defaultAdaptEquipment: String = "Peso corporal", adaptAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null) {
     var expandedExercise by remember { mutableStateOf<Int?>(null) }
     var collapsedBlocks by remember(workout.id) { mutableStateOf(emptySet<Int>()) }
     val detailContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
@@ -378,6 +378,10 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
     var guideExercise by remember { mutableStateOf<ExerciseSummary?>(null) }
     var showMenu by remember { mutableStateOf(false) }
     var showingEditor by remember(workout.id) { mutableStateOf(false) }
+    var showingAdaptation by remember(workout.id) { mutableStateOf(false) }
+    var adapting by remember(workout.id) { mutableStateOf(false) }
+    var adaptationError by remember(workout.id) { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
     var showSkipConfirmation by remember { mutableStateOf(false) }
     var skipped by remember(workout.id) { mutableStateOf(workout.status == WorkoutStatus.Skipped) }
     if (showingEditor) {
@@ -388,6 +392,26 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
             onSave = { updated -> showingEditor = false; onWorkoutUpdated(updated) },
         )
         return
+    }
+    if (showingAdaptation) {
+        AutomaticWorkoutRequestDialog(
+            defaultEquipment = defaultAdaptEquipment,
+            initialFocus = workout.focus,
+            initialDuration = workout.estimatedMinutes,
+            title = "ADAPTAR ENTRENAMIENTO",
+            onDismiss = { showingAdaptation = false },
+            onGenerate = { request ->
+                showingAdaptation = false
+                val generator = adaptAiGenerator ?: return@AutomaticWorkoutRequestDialog
+                adapting = true
+                coroutineScope.launch {
+                    runCatching { generator(request) }
+                        .onSuccess(onWorkoutUpdated)
+                        .onFailure { adaptationError = it.message ?: "No se pudo adaptar el entrenamiento." }
+                    adapting = false
+                }
+            },
+        )
     }
     guideExercise?.let { selected ->
         ExerciseGuideScreen(selected, gender) { guideExercise = null }
@@ -419,6 +443,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
                     Text("•••", Modifier.clickable { showMenu = true }.padding(horizontal = 18.dp, vertical = 18.dp), color = Color.White, fontWeight = FontWeight.Bold)
                     DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                         if (!workout.id.startsWith("custom-")) DropdownMenuItem(onClick = { showMenu = false; showingEditor = true }) { Text("Editar ejercicios") }
+                        if (adaptAiGenerator != null) DropdownMenuItem(onClick = { showMenu = false; showingAdaptation = true }) { Text("Adaptar al equipamiento") }
                         DropdownMenuItem(onClick = { showMenu = false; showSkipConfirmation = true }) { Text("Omitir entrenamiento") }
                     }
                 }
@@ -508,6 +533,18 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
             confirmButton = { TextButton(onClick = { skipped = true; showSkipConfirmation = false; onSkip() }) { Text("OMITIR", color = Color(0xFFC62828)) } },
             dismissButton = { TextButton(onClick = { showSkipConfirmation = false }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
         )
+    }
+    if (adapting) {
+        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.58f)).clickable { }, contentAlignment = Alignment.Center) {
+            Column(Modifier.liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(26.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                CircularProgressIndicator(color = WildforceThemeTokens.accentGold)
+                Text("ADAPTANDO ENTRENAMIENTO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+                Text("La IA conserva el objetivo de la sesión y sustituye solo lo necesario.", color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            }
+        }
+    }
+    adaptationError?.let { error ->
+        AlertDialog(onDismissRequest = { adaptationError = null }, title = { Text("NO SE PUDO ADAPTAR") }, text = { Text(error) }, confirmButton = { TextButton(onClick = { adaptationError = null }) { Text("CERRAR") } })
     }
 }
 @Composable

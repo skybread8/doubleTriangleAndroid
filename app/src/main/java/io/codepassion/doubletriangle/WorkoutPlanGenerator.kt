@@ -1,5 +1,6 @@
 package io.codepassion.doubletriangle
 
+import android.content.Context
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
 import io.codepassion.doubletriangle.core.model.SetStyleParameters
@@ -12,6 +13,7 @@ import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import io.codepassion.doubletriangle.core.model.executionExercises
 import io.codepassion.doubletriangle.core.model.displayBlocks
 import io.codepassion.doubletriangle.feature.workout.CustomWorkoutRequest
+import io.codepassion.doubletriangle.feature.workout.WorkoutHistoryStore
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import java.net.HttpURLConnection
@@ -24,24 +26,41 @@ import org.json.JSONObject
 import java.util.UUID
 
 object WorkoutPlanGenerator {
-    suspend fun generate(profile: OnboardingProfile): Pair<String, WorkoutHubState> = withContext(Dispatchers.IO) {
-        generateWithInstruction(profile, "Genera un plan semanal progresivo respetando exactamente los días seleccionados, el objetivo, nivel, restricciones, equipamiento y duración del perfil.")
+    suspend fun generate(profile: OnboardingProfile, context: Context? = null): Pair<String, WorkoutHubState> = withContext(Dispatchers.IO) {
+        generateWithInstruction(profile, "Genera un plan semanal progresivo respetando exactamente los días seleccionados, el objetivo, nivel, restricciones, equipamiento y duración del perfil.", context)
     }
 
-    suspend fun generateCustom(profile: OnboardingProfile, request: CustomWorkoutRequest): WorkoutDaySummary = withContext(Dispatchers.IO) {
+    suspend fun generateCustom(profile: OnboardingProfile, request: CustomWorkoutRequest, context: Context? = null): WorkoutDaySummary = withContext(Dispatchers.IO) {
         val (_, state) = generateWithInstruction(
             profile.copy(workoutDays = setOf(WorkoutWeekday.Monday)),
             "Genera UNA ÚNICA sesión personalizada para MONDAY. Enfoque: ${request.focus}. Duración objetivo: ${request.durationMinutes} minutos. El equipamiento temporal de esta sesión es exactamente: ${request.equipment.ifBlank { "peso corporal" }}. Sustituye con él el equipamiento habitual del perfil: no añadas ni presupongas máquinas, barras o accesorios que no figuren en esta lista. Devuelve un único objeto dentro de `workouts` y aplica las mismas reglas de bloques, prescripciones y seguridad que el plan semanal.",
+            context,
         )
         state.workouts.first().copy(id = "custom-ai-${UUID.randomUUID()}", order = 1, estimatedMinutes = request.durationMinutes, status = WorkoutStatus.Planned)
     }
 
-    private suspend fun generateWithInstruction(profile: OnboardingProfile, instruction: String): Pair<String, WorkoutHubState> = withContext(Dispatchers.IO) {
+    suspend fun adaptWorkout(profile: OnboardingProfile, workout: WorkoutDaySummary, request: CustomWorkoutRequest, context: Context? = null): WorkoutDaySummary = withContext(Dispatchers.IO) {
+        val (_, state) = generateWithInstruction(
+            profile.copy(workoutDays = setOf(WorkoutWeekday.Monday)),
+            "Adapta UNA ÚNICA sesión existente para MONDAY. Equipamiento disponible en esta ubicación: ${request.equipment.ifBlank { "peso corporal" }}. Conserva el foco (${workout.focus}), tipo (${workout.dayType}), duración aproximada (${workout.estimatedMinutes} min), intención, patrones de movimiento y dificultad de la sesión original; sustituye solo lo que el nuevo equipamiento o la seguridad requieran. No inventes equipamiento. Sesión original:\n${workoutPromptSummary(workout)}\nDevuelve un único objeto dentro de `workouts`.",
+            context,
+        )
+        state.workouts.first().copy(
+            id = workout.id,
+            order = workout.order,
+            focus = workout.focus,
+            dayType = workout.dayType,
+            scheduledDay = workout.scheduledDay,
+            status = workout.status,
+        )
+    }
+
+    private suspend fun generateWithInstruction(profile: OnboardingProfile, instruction: String, context: Context?): Pair<String, WorkoutHubState> = withContext(Dispatchers.IO) {
         check(BuildConfig.OPENAI_API_KEY.isNotBlank()) { "Falta OPENAI_API_KEY en local.properties" }
         val body = JSONObject()
             .put("model", BuildConfig.OPENAI_MODEL)
             .put("messages", JSONArray()
-                .put(JSONObject().put("role", "system").put("content", systemPrompt(profile)))
+                .put(JSONObject().put("role", "system").put("content", systemPrompt(profile, context?.let { WorkoutHistoryStore.aiPlanningContext(it.applicationContext) })))
                 .put(JSONObject().put("role", "user").put("content", instruction)))
             .put("response_format", JSONObject().put("type", "json_object"))
             .put("stream", false)
@@ -142,7 +161,7 @@ object WorkoutPlanGenerator {
         else -> ExerciseSetStyle.Straight
     }
 
-    private fun systemPrompt(profile: OnboardingProfile): String = SYSTEM_PROMPT + """
+    private fun systemPrompt(profile: OnboardingProfile, historyContext: String?): String = SYSTEM_PROMPT + """
 
 Perfil obligatorio del usuario:
 - Nombre: ${profile.name}; objetivo: ${profile.goal.title}; nivel: ${profile.trainingLevel.title}; estilo de vida: ${profile.lifestyle.title}
@@ -151,6 +170,7 @@ Perfil obligatorio del usuario:
 - Equipamiento: ${profile.availableEquipment.joinToString { it.storedValue }}; restricciones: ${profile.movementRestrictions.joinToString { it.storedValue }.ifBlank { "ninguna" }}
 - Composición corporal: ${profile.bodyCompositionPhase?.storedValue ?: "no especificada"}; edad aproximada: ${(java.time.Year.now().value - profile.birthYear).coerceAtLeast(13)}; altura: ${profile.heightCm} cm; peso: ${profile.weightKg} kg
 - Omitir calentamiento: ${if (profile.skipsWarmups) "sí" else "no"}; omitir vuelta a la calma: ${if (profile.skipsCooldowns) "sí" else "no"}; omitir descansos: ${if (profile.skipsRestPeriods) "sí" else "no"}; notas del planificador: ${profile.workoutPlannerNotes.ifBlank { "ninguna" }}
+${historyContext ?: "Historial de entrenamientos recientes: todavía no hay sesiones completadas."}
 Reglas: crea exactamente un workout por cada día disponible, no inventes días, no uses ejercicios incompatibles con equipamiento/restricciones y mantén el volumen dentro de la duración indicada. Usa siempre bloques y prescripciones concretas.
 """
 
@@ -236,6 +256,13 @@ Reglas: crea exactamente un workout por cada día disponible, no inventes días,
             "plancha" in value || "plank" in value -> "plank"
             "flexion" in value || "flexión" in value || "push-up" in value -> "pushUp"
             else -> null
+        }
+    }
+
+    private fun workoutPromptSummary(workout: WorkoutDaySummary): String = buildString {
+        appendLine("- Título: ${workout.title}")
+        workout.displayBlocks().forEach { block ->
+            appendLine("- ${block.type.label}: ${block.exercises.joinToString { exercise -> "${exercise.name} (${exercise.sets}×${exercise.reps}, descanso ${exercise.restSeconds}s)" }}")
         }
     }
     private const val SYSTEM_PROMPT = """Eres un entrenador profesional y el planificador de Wildforce. Responde exclusivamente con JSON válido, sin markdown. Usa esta forma: {"planName":"...","phase":"...","workouts":[{"title":"...","focus":"...","dayType":"strength|hypertrophy|technique|volume|deload|recovery|conditioning","weekday":"MONDAY","estimatedDurationMinutes":50,"blocks":[{"type":"warmup|standard|superset|cooldown","orderIndex":0,"rounds":1,"restAfterBlockSeconds":90,"notes":"...","exercises":[{"name":"...","imageKey":"benchPress","sets":3,"reps":"8-12","repsMin":8,"repsMax":12,"targetWeightKg":20,"restSeconds":90,"setStyle":"straight","setStyleParameters":{"targetRir":2}}]}]}]}. Usa los días indicados en el perfil, no una lista fija. Cada día debe tener calentamiento, trabajo principal y vuelta a la calma salvo que el perfil indique lo contrario. Usa bloques standard para ejercicios individuales y superset solo para parejas seguras; en superserie cada ejercicio tiene sets=1 y rounds contiene repeticiones del bloque. Incluye entre 4 y 7 ejercicios seguros por sesión, mantén la duración solicitada, usa metric kg y segundos en reps para ejercicios temporizados. Respeta equipamiento, nivel, objetivo y restricciones. imageKey debe ser uno de: airSquat,gobletSquat,barbellBackSquat,walkingLunge,legPress,deadlift,romanianDeadlift,pushUp,benchPress,inclineBenchPress,overheadPress,lateralRaise,chestDip,tricepsPushdown,pullUp,latPulldown,seatedCableRow,bentOverRow,facePull,bicepsCurl,hammerCurl,plank,sidePlank,deadBug,mountainClimber."""
