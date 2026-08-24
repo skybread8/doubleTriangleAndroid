@@ -250,6 +250,16 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
             EditorStepper("REPS", exercise.reps, { onChange(exercise.copy(reps = ((exercise.reps.toIntOrNull() ?: 10) - 1).coerceAtLeast(1).toString())) }, { onChange(exercise.copy(reps = ((exercise.reps.toIntOrNull() ?: 10) + 1).toString())) }, Modifier.weight(1f))
             if (!inSuperset) EditorStepper("DESCANSO", "${exercise.restSeconds}s", { onChange(exercise.copy(restSeconds = (exercise.restSeconds - 15).coerceAtLeast(0))) }, { onChange(exercise.copy(restSeconds = exercise.restSeconds + 15)) }, Modifier.weight(1f))
         }
+        TextField(
+            value = exercise.targetWeightKg?.let { if (it % 1.0 == 0.0) it.toInt().toString() else it.toString() }.orEmpty(),
+            onValueChange = { value ->
+                val clean = value.filter { it.isDigit() || it == ',' || it == '.' }.take(7)
+                onChange(exercise.copy(targetWeightKg = clean.replace(',', '.').toDoubleOrNull()?.coerceIn(0.0, 750.0)))
+            },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            label = { Text("PESO OBJETIVO (KG) · OPCIONAL") },
+            singleLine = true,
+        )
         Text("TIPO DE SERIE", Modifier.padding(top = 10.dp, bottom = 5.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
         LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             items(ExerciseSetStyle.values()) { style ->
