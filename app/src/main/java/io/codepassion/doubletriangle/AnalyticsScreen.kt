@@ -20,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -115,8 +117,9 @@ private fun VolumeTrend(volumes: List<Double>) {
         Text("VOLUMEN · ÚLTIMOS 7 DÍAS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
         Row(Modifier.fillMaxWidth().height(92.dp), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.Bottom) {
             volumes.forEachIndexed { index, volume ->
+                val animatedHeight by animateDpAsState((12 + 56 * (volume / max)).dp, animationSpec = tween(650), label = "analytics-volume")
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom) {
-                    Box(Modifier.width(20.dp).height((12 + 56 * (volume / max)).dp).background(if (volume > 0) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary.copy(alpha = .14f), RoundedCornerShape(8.dp)))
+                    Box(Modifier.width(20.dp).height(animatedHeight).background(if (volume > 0) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary.copy(alpha = .14f), RoundedCornerShape(8.dp)))
                     Text(labels[index], Modifier.padding(top = 5.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 }
             }
