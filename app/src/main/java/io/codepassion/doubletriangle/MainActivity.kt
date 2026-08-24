@@ -368,6 +368,8 @@ private fun WildforceApp(
             )
         } else if (selected == RootDestination.Nutrition) {
             NutritionScreen()
+        } else if (selected == RootDestination.Analytics) {
+            AnalyticsScreen(displayedWorkoutState, appPreferences)
         } else if (selected == RootDestination.Profile) {
             ProfileScreen(profile, onProfileUpdated, onRegenerateProfile)
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
