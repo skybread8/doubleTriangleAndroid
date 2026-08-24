@@ -866,7 +866,7 @@ fun ActiveWorkoutScreen(
                             } else {
                                 val needsFeedback = when (exercise.blockType) {
                                     WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown -> false
-                                    WorkoutBlockType.Superset -> exercise.isLastInBlock && exercise.blockRound == exercise.blockRounds
+                                    WorkoutBlockType.Superset -> exercise.blockRound == exercise.blockRounds
                                     WorkoutBlockType.Standard -> true
                                 }
                                 if (needsFeedback) {
