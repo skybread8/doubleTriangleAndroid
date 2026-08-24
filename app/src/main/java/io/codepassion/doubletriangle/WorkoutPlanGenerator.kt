@@ -109,8 +109,9 @@ object WorkoutPlanGenerator {
             }
             val planJson = JSONObject(response).getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content")
             val parsed = parse(planJson, profile.name, profile.goal.title)
-            validateGeneratedPlan(parsed, profile, enforceProfileSections = instruction.startsWith("Genera un plan semanal"))
-            planJson to parsed
+            val normalized = normalizeProgression(parsed, profile)
+            validateGeneratedPlan(normalized, profile, enforceProfileSections = instruction.startsWith("Genera un plan semanal"))
+            serialize(normalized) to normalized
         } finally {
             connection.disconnect()
         }
@@ -267,7 +268,32 @@ Perfil obligatorio del usuario:
 ${historyContext ?: "Historial de entrenamientos recientes: todavía no hay sesiones completadas."}
 Reglas estrictas: crea exactamente un workout por cada día disponible y no inventes días. Cada sesión debe respetar el presupuesto total de duración incluyendo calentamiento, trabajo principal y vuelta a la calma. Si se omite calentamiento o vuelta a la calma, devuelve cero ejercicios y cero bloques de ese tipo: nunca uses bloques vacíos, ocultos o de relleno. No uses ejercicios incompatibles con el equipamiento o las restricciones; prioriza sustituciones seguras y cercanas. Usa siempre bloques y prescripciones concretas, conserva el foco personalizado de cada día y distribuye el volumen de forma recuperable.
 Metadatos de progresión: incluye también mesocycleNumber, mesocycleIndex, cycleLength, weekIndex, mesocyclePhase, phaseWeek y positionInCycle en la raíz del JSON. mesocycleNumber aumenta en cada plan semanal; mesocycleIndex agrupa los planes dentro del ciclo. mesocyclePhase debe ser accumulation, intensification o deload. Mantén cycleLength según el nivel y usa weekIndex para indicar la semana actual; si no hay contexto previo, empieza en mesocycleNumber=1, mesocycleIndex=1, weekIndex=1, phaseWeek=1 y positionInCycle=1.
+Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación prioriza volumen y técnica; en intensificación prioriza carga y menor volumen; en descarga reduce volumen y fatiga manteniendo patrones y técnica.
 """
+
+    private fun cycleLengthFor(profile: OnboardingProfile): Int = when (profile.trainingLevel.storedValue) {
+        "completeBeginner" -> 1
+        "beginner", "novice" -> 4
+        "intermediate" -> 6
+        "advanced" -> 8
+        "elite" -> 10
+        else -> 4
+    }
+
+    private fun normalizeProgression(state: WorkoutHubState, profile: OnboardingProfile): WorkoutHubState {
+        val cycleLength = if (state.cycleLength <= 1) cycleLengthFor(profile) else state.cycleLength.coerceIn(2, 10)
+        val number = state.mesocycleNumber.coerceAtLeast(1)
+        val phaseInfo = resolveMesocyclePhase(number, cycleLength)
+        return state.copy(
+            mesocycleNumber = number,
+            mesocycleIndex = phaseInfo?.let { ((number - 1) / cycleLength) + 1 } ?: state.mesocycleIndex.coerceAtLeast(1),
+            cycleLength = cycleLength,
+            weekIndex = state.weekIndex.coerceIn(1, cycleLength),
+            mesocyclePhase = phaseInfo?.phase ?: state.mesocyclePhase,
+            phaseWeek = phaseInfo?.weekInPhase ?: state.phaseWeek.coerceAtLeast(1),
+            positionInCycle = phaseInfo?.positionInCycle ?: state.positionInCycle.coerceIn(1, cycleLength),
+        )
+    }
 
     internal fun parseBlockType(value: String): WorkoutBlockType = when (value.trim().lowercase()) {
         "warmup" -> WorkoutBlockType.Warmup
