@@ -60,6 +60,7 @@ import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
 import io.codepassion.doubletriangle.feature.workout.ActiveWorkoutScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutDetailScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutHubScreen
+import io.codepassion.doubletriangle.nutrition.NutritionScreen
 import java.time.Instant
 import kotlinx.coroutines.launch
 
@@ -287,6 +288,8 @@ private fun WildforceApp(
     ) { padding ->
         if (selected == RootDestination.Workout) {
             WorkoutHubScreen(contentPadding = padding, state = displayedWorkoutState, onWorkoutSelected = { workoutDetail = it }, gender = "male")
+        } else if (selected == RootDestination.Nutrition) {
+            NutritionScreen()
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
                 text = if (selected == RootDestination.Profile) "${selected.label}\nReiniciar onboarding" else "${selected.label}\nPróxima vertical",
