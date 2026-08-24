@@ -394,11 +394,13 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, onClick: () 
                         WorkoutStatus.Planned -> Unit
                     }
                 }
-                Text(workout.title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = Color.White)
+                Text(workout.title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
                     "◎ ${workout.focus}   ◆ ${workout.dayType}   ◷ ${workout.estimatedMinutes} min",
                     style = MaterialTheme.typography.caption,
                     color = Color.White.copy(alpha = 0.82f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
