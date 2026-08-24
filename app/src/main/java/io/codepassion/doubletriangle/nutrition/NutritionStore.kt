@@ -19,7 +19,12 @@ internal object NutritionStore {
 
     fun loadTargets(context: Context): NutritionTargets = runCatching {
         val item = JSONObject(context.getSharedPreferences(PREFS, 0).getString(TARGETS_KEY, "{}") ?: "{}")
-        NutritionTargets(item.optInt("calories", 2350), item.optInt("protein", 165), item.optInt("carbs", 250), item.optInt("fat", 75))
+        NutritionTargets(
+            calories = item.optInt("calories", 2350).coerceIn(500, 8000),
+            protein = item.optInt("protein", 165).coerceIn(0, 500),
+            carbs = item.optInt("carbs", 250).coerceIn(0, 1000),
+            fat = item.optInt("fat", 75).coerceIn(0, 500),
+        )
     }.getOrDefault(NutritionTargets())
 
     fun saveTargets(context: Context, targets: NutritionTargets) {
@@ -33,7 +38,7 @@ internal object NutritionStore {
             for (index in 0 until array.length()) {
                 val item = array.getJSONObject(index)
                 val type = runCatching { MealType.valueOf(item.optString("type")) }.getOrDefault(MealType.Snack)
-                val meal = MealLog(item.getLong("id"), item.getString("name"), item.getInt("calories"), item.getInt("protein"), item.getInt("carbs"), item.getInt("fat"), type)
+                val meal = MealLog(item.optLong("id"), item.optString("name").trim().takeIf(String::isNotBlank) ?: "Comida", item.optInt("calories").coerceIn(0, 8000), item.optInt("protein").coerceIn(0, 500), item.optInt("carbs").coerceIn(0, 1000), item.optInt("fat").coerceIn(0, 500), type)
                 if (isOnDate(meal.id, date)) add(meal)
             }
         }

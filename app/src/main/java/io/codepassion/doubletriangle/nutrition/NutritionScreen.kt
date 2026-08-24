@@ -183,7 +183,8 @@ private fun NutritionNumberField(label: String, value: String, onValueChange: (S
 private fun MacroRow(label: String, value: Int, target: Int, color: Color) {
     Column(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
         Row { Text(label, style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary); Spacer(Modifier.weight(1f)); Text("${value} / ${target} g", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary) }
-        Box(Modifier.fillMaxWidth().height(7.dp).clip(RoundedCornerShape(8.dp)).background(color.copy(alpha = 0.16f))) { Box(Modifier.fillMaxWidth((value.toFloat() / target).coerceIn(0f, 1f)).height(7.dp).clip(RoundedCornerShape(8.dp)).background(color)) }
+        val progress = if (target > 0) (value.toFloat() / target).coerceIn(0f, 1f) else 0f
+        Box(Modifier.fillMaxWidth().height(7.dp).clip(RoundedCornerShape(8.dp)).background(color.copy(alpha = 0.16f))) { Box(Modifier.fillMaxWidth(progress).height(7.dp).clip(RoundedCornerShape(8.dp)).background(color)) }
     }
 }
 
