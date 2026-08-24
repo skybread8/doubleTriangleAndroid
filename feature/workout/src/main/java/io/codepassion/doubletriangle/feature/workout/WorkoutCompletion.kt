@@ -38,9 +38,13 @@ internal object WorkoutCompletionCalculator {
         }.average()
         val effortValues = feedback.values.map {
             when (it) {
+                "MUY FÁCIL" -> 0.55
                 "FÁCIL" -> 0.70
+                "JUSTO" -> 0.85
                 "DIFÍCIL" -> 0.94
-                else -> 1.0
+                "MUY DIFÍCIL" -> 1.0
+                "CORRECTO" -> 1.0
+                else -> 0.85
             }
         }
         val weighted = 0.30 * completion + 0.35 * adherence + if (effortValues.isNotEmpty()) 0.20 * effortValues.average() else 0.0

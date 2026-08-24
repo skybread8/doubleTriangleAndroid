@@ -36,6 +36,15 @@ class WorkoutCompletionCalculatorTest {
         assertTrue(score >= 0.0)
     }
 
+    @Test fun effortScaleRecognizesAllFiveFeedbackLevels() {
+        val stats = mapOf(0 to ExerciseSessionStats(3, 24, 50.0, 1_200.0), 1 to ExerciseSessionStats(3, 24, 0.0, 0.0))
+        val veryEasy = WorkoutCompletionCalculator.score(workout, stats, mapOf(0 to "MUY FÁCIL", 1 to "MUY FÁCIL"))
+        val right = WorkoutCompletionCalculator.score(workout, stats, mapOf(0 to "JUSTO", 1 to "JUSTO"))
+        val veryHard = WorkoutCompletionCalculator.score(workout, stats, mapOf(0 to "MUY DIFÍCIL", 1 to "MUY DIFÍCIL"))
+        assertTrue(veryEasy < right)
+        assertTrue(right < veryHard)
+    }
+
     @Test fun warmupAndCooldownDoNotLowerTheIosWorkoutScore() {
         val sectioned = workout.copy(
             exercises = listOf(
