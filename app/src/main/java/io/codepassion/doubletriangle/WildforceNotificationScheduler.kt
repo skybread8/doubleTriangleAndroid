@@ -67,6 +67,7 @@ internal object WildforceNotificationScheduler {
 
 internal class WildforceNotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (!WorkoutNotificationPreferences.remindersEnabled(context)) return
         val channel = intent.getStringExtra("channel") ?: WildforceNotificationScheduler.CHANNEL_WORKOUT
         val title = intent.getStringExtra("title") ?: "Wildforce"
         val body = intent.getStringExtra("body") ?: "Tienes una actividad pendiente."
