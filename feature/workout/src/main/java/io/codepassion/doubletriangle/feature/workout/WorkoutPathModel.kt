@@ -16,6 +16,8 @@ internal data class WorkoutPathBlock(
     val type: WorkoutBlockType,
     val rounds: Int,
     val exercises: List<WorkoutPathExercise>,
+    val notes: String? = null,
+    val restAfterBlockSeconds: Int? = null,
 )
 
 internal fun WorkoutDaySummary.pathBlocks(): List<WorkoutPathBlock> {
@@ -35,7 +37,7 @@ internal fun WorkoutDaySummary.pathBlocks(): List<WorkoutPathBlock> {
                 WorkoutPathExercise(exercise, null, 1, listOf(executionCursor++))
             }
         }
-        WorkoutPathBlock(block.type, block.rounds.coerceAtLeast(1), items)
+        WorkoutPathBlock(block.type, block.rounds.coerceAtLeast(1), items, block.notes, block.restAfterBlockSeconds)
     }
 }
 

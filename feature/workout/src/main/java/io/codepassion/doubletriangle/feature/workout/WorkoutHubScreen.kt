@@ -570,6 +570,9 @@ fun ActiveWorkoutScreen(
                         if (blockedExercise.blockRounds > 1) "RONDA ${blockedExercise.blockRound}/${blockedExercise.blockRounds}" else blockedExercise.blockType.label.uppercase()
                     Text(blockProgress, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
                 }
+                currentPathBlock?.notes?.let { note ->
+                    Text(note, Modifier.fillMaxWidth().padding(top = 5.dp), style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = 0.78f), maxLines = 3)
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     val contextLabel = exercise?.blockType?.takeIf { it != WorkoutBlockType.Standard }?.label?.uppercase() ?: "FUERZA"
                     Text(contextLabel, Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.48f)).padding(horizontal = 10.dp, vertical = 5.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)

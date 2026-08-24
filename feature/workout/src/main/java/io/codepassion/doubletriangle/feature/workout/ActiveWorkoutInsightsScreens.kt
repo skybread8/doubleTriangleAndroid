@@ -83,6 +83,7 @@ internal fun WorkoutPathScreen(
                     )
                     if (block.rounds > 1) Text(" · ${block.rounds} RONDAS", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 }
+                block.notes?.let { Text(it, Modifier.fillMaxWidth().padding(start = 28.dp, bottom = 4.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 block.exercises.forEach { pathExercise ->
                     val exercise = pathExercise.exercise
                     val completed = pathExercise.isCompleted(workout, completedByExercise, addedSetsByExercise)
