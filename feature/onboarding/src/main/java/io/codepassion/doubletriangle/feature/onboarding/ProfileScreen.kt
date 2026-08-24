@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -305,9 +306,9 @@ private fun TrainingLocationsDialog(
             if (editing == null) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     LazyColumn(Modifier.height(250.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        items(locations) { location ->
+                        itemsIndexed(locations) { index, location ->
                             Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable {
-                                locations = locations.map { it.copy(isDefault = it.name == location.name) }
+                                locations = locations.mapIndexed { itemIndex, item -> item.copy(isDefault = itemIndex == index) }
                             }.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Column(Modifier.weight(1f)) {
                                     Text(location.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
