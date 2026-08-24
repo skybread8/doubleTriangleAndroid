@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -442,7 +443,7 @@ private fun WildforceApp(
         backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
         bottomBar = {
             BottomNavigation(
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp).liquidGlass(RoundedCornerShape(18.dp), emphasized = true),
+                modifier = Modifier.navigationBarsPadding().padding(horizontal = 10.dp, vertical = 6.dp).liquidGlass(RoundedCornerShape(18.dp), emphasized = true),
                 backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
                 elevation = 0.dp,
             ) {
