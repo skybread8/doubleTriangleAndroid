@@ -105,7 +105,7 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
         return
     }
     if (showingPlanOverview) {
-        WorkoutPlanOverviewScreen(state, onBack = { showingPlanOverview = false }, onWorkoutSelected = onWorkoutSelected)
+        WorkoutPlanOverviewScreen(state, contentPadding, onBack = { showingPlanOverview = false }, onWorkoutSelected = onWorkoutSelected)
         return
     }
     Column(
@@ -196,7 +196,7 @@ private fun PlanContextCard(state: WorkoutHubState, onClick: () -> Unit) {
             Text(state.planName.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.subtitle1, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(state.phase, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        Text("PLAN", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+        Text("VER PLAN  ›", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
     }
 }
 
@@ -220,7 +220,6 @@ private fun WorkoutHeader(state: WorkoutHubState) {
             color = WildforceThemeTokens.textPrimary,
             fontWeight = FontWeight.Bold,
         )
-        Text("•••", Modifier.padding(start = 16.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
     }
 }
 

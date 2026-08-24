@@ -37,11 +37,11 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
-internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, onBack: () -> Unit, onWorkoutSelected: (WorkoutDaySummary) -> Unit) {
+internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(), onBack: () -> Unit, onWorkoutSelected: (WorkoutDaySummary) -> Unit) {
     val completed = state.workouts.count { it.status == WorkoutStatus.Completed }
     val skipped = state.workouts.count { it.status == WorkoutStatus.Skipped }
     val progress = if (state.workouts.isEmpty()) 0f else completed.toFloat() / state.workouts.size
-    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 18.dp, vertical = 12.dp)) {
+    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(contentPadding).padding(horizontal = 18.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth().padding(bottom = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("‹ VOLVER", Modifier.clickable(onClick = onBack).padding(vertical = 9.dp, horizontal = 4.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
             Spacer(Modifier.weight(1f))
@@ -87,7 +87,7 @@ private fun PlanSessionRow(workout: WorkoutDaySummary, onClick: () -> Unit) {
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(workout.title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
-            Text(workout.scheduledDay.getDisplayName(TextStyle.SHORT, Locale("es", "ES")) + " · ${workout.estimatedMinutes} min", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(workout.scheduledDay.getDisplayName(TextStyle.SHORT, Locale.forLanguageTag("es-ES")) + " · ${workout.estimatedMinutes} min", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
         Text(when (workout.status) { WorkoutStatus.Completed -> "COMPLETADO"; WorkoutStatus.Skipped -> "OMITIDO"; WorkoutStatus.Planned -> "ABRIR" }, style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = statusColor)
     }

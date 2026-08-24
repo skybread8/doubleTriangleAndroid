@@ -40,7 +40,9 @@ import io.codepassion.doubletriangle.feature.workout.ExerciseAnalyticsPoint
 import io.codepassion.doubletriangle.feature.workout.WorkoutAnalyticsStore
 import java.text.DateFormat
 import java.util.Date
-import java.util.Calendar
+import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 
 @Composable
 fun AnalyticsScreen(
@@ -61,7 +63,7 @@ fun AnalyticsScreen(
     val lastSets = preferences.getInt("last_workout_sets", 0)
     val lastVolume = java.lang.Double.longBitsToDouble(preferences.getLong("last_workout_volume", 0L))
     val weeklyVolumes = remember(exerciseSummaries) {
-        val start = System.currentTimeMillis() - 6 * 86_400_000L
+        val start = LocalDate.now().minusDays(6).atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
         val totals = MutableList(7) { 0.0 }
         exerciseSummaries.flatMap { WorkoutAnalyticsStore.history(context, it.exercise) }.forEach { point ->
             val day = ((point.timestampMillis - start) / 86_400_000L).toInt()
@@ -101,13 +103,13 @@ fun AnalyticsScreen(
             exerciseSummaries.take(6).forEach { summary -> ExerciseAnalyticsCard(summary) { selectedExercise = summary } }
         }
         Spacer(Modifier.height(4.dp))
-        Text("Las analíticas detalladas por ejercicio y evolución histórica se añadirán sobre este resumen.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Text("Toca un ejercicio para ver sus sesiones, volumen y mejor marca.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
 }
 
 @Composable
 private fun VolumeTrend(volumes: List<Double>) {
-    val labels = listOf("L", "M", "X", "J", "V", "S", "D")
+    val labels = (6 downTo 0).map { LocalDate.now().minusDays(it.toLong()).dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.forLanguageTag("es-ES")).uppercase() }
     val max = volumes.maxOrNull()?.takeIf { it > 0 } ?: 1.0
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("VOLUMEN · ÚLTIMOS 7 DÍAS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
