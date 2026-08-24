@@ -50,6 +50,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -665,6 +668,7 @@ fun ActiveWorkoutScreen(
     onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double, streak: Int) -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current.applicationContext
+    val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(workout.id) {
         val notificationsEnabled = WorkoutNotificationPreferences.enabled(context)
         val serviceIntent = android.content.Intent(context, WorkoutForegroundService::class.java).putExtra("title", workout.title).putExtra("detail", "Sesión activa")
@@ -752,6 +756,25 @@ fun ActiveWorkoutScreen(
         }
         if (android.os.Build.VERSION.SDK_INT >= 33) context.registerReceiver(receiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED) else context.registerReceiver(receiver, filter)
         onDispose { runCatching { context.unregisterReceiver(receiver) } }
+    }
+
+    DisposableEffect(lifecycleOwner, workout.id) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                WorkoutSessionStore.load(context, workout.id)?.let { latest ->
+                    exerciseIndex = latest.exerciseIndex.coerceIn(0, workout.exercises.lastIndex.coerceAtLeast(0))
+                    completedByExercise = latest.completedByExercise
+                    restRemaining = latest.restRemaining
+                    restInitialSeconds = latest.restInitialSeconds
+                    restBetweenExercises = latest.restBetweenExercises
+                    elapsedSeconds = latest.elapsedSeconds
+                    exerciseTimeRemaining = latest.exerciseTimeRemaining
+                    exerciseTimerRunning = latest.exerciseTimerRunning
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     LaunchedEffect(showsSummary) { while (!showsSummary) { delay(1_000); elapsedSeconds++ } }
