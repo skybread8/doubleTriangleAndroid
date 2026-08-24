@@ -13,6 +13,7 @@ import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Build
+import android.widget.RemoteViews
 
 internal object WorkoutActiveNotification {
     const val ACTION_TOGGLE_TIMER = "io.codepassion.doubletriangle.ACTION_TOGGLE_TIMER"
@@ -58,6 +59,15 @@ internal object WorkoutActiveNotification {
         val toggleIntent = actionIntent(context, ACTION_TOGGLE_TIMER, 4102)
         val skipIntent = actionIntent(context, ACTION_SKIP_CURRENT, 4103)
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
+        val custom = RemoteViews(context.packageName, R.layout.notification_workout).apply {
+            setTextViewText(R.id.workout_title, displayTitle)
+            setTextViewText(R.id.workout_detail, detail)
+            setProgressBar(R.id.workout_progress, progressMax.coerceAtLeast(1), progress.coerceIn(0, progressMax.coerceAtLeast(1)), false)
+            resolvedArtwork?.let { setImageViewBitmap(R.id.workout_art, it) }
+            if (isResting && chronometerBaseMillis != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                setChronometer(R.id.workout_detail, chronometerBaseMillis, "Descanso: %s", true)
+            }
+        }
         builder.setSmallIcon(android.R.drawable.ic_media_play)
             .setContentTitle(displayTitle)
             .setContentText(detail)
@@ -70,6 +80,8 @@ internal object WorkoutActiveNotification {
             .setShowWhen(isResting)
             .setAutoCancel(false)
             .setLargeIcon(resolvedArtwork ?: exerciseArtwork(title))
+            .setCustomContentView(custom)
+            .setCustomBigContentView(custom)
             .addAction(android.app.Notification.Action.Builder(android.R.drawable.ic_media_pause, "Pausar", toggleIntent).build())
             .addAction(android.app.Notification.Action.Builder(android.R.drawable.ic_media_next, "Saltar", skipIntent).build())
             .addAction(android.app.Notification.Action.Builder(android.R.drawable.ic_input_add, "+30 s", addRestIntent).build())
@@ -78,7 +90,9 @@ internal object WorkoutActiveNotification {
         if (isResting && chronometerBaseMillis != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             builder.setWhen(chronometerBaseMillis).setUsesChronometer(true).setChronometerCountDown(true)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            builder.setStyle(android.app.Notification.DecoratedMediaCustomViewStyle().setMediaSession(session.sessionToken).setShowActionsInCompactView(0, 1, 2))
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder.setStyle(android.app.Notification.MediaStyle().setMediaSession(session.sessionToken).setShowActionsInCompactView(0, 1, 2))
         }
         return builder.build()
