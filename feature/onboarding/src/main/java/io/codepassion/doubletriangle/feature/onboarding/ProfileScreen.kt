@@ -2,6 +2,7 @@ package io.codepassion.doubletriangle.feature.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,8 +44,7 @@ fun ProfileScreen(initial: OnboardingProfile, onSave: (OnboardingProfile) -> Uni
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            Text("PERFIL", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-            Text("Estas preferencias se utilizan para personalizar tus planes y progresiones.", color = WildforceThemeTokens.textSecondary)
+            ProfileHero(draft)
         }
         item {
             Section("DATOS PERSONALES") {
@@ -102,6 +102,32 @@ fun ProfileScreen(initial: OnboardingProfile, onSave: (OnboardingProfile) -> Uni
         }
     }
     picker?.let { current -> PickerDialog(current, draft) { updated -> draft = updated; picker = null } }
+}
+
+@Composable
+private fun ProfileHero(profile: OnboardingProfile) {
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            Text(profile.name.take(1).uppercase().ifBlank { "W" }, Modifier.size(68.dp).background(WildforceThemeTokens.accentGold, CircleShape).padding(19.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
+            Column {
+                Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+                Text("${profile.goal.title} · ${profile.trainingLevel.title}", color = WildforceThemeTokens.textSecondary)
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            ProfileStat("OBJETIVO", profile.goal.title, Modifier.weight(1f))
+            ProfileStat("NIVEL", profile.trainingLevel.title, Modifier.weight(1f))
+            ProfileStat("DÍAS", profile.workoutDays.size.toString(), Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun ProfileStat(label: String, value: String, modifier: Modifier) {
+    Column(modifier.liquidGlass(RoundedCornerShape(13.dp)).padding(9.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(value, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
+        Text(label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1)
+    }
 }
 
 private sealed class Picker { data object Goal : Picker(); data object Level : Picker(); data object Lifestyle : Picker(); data object Split : Picker(); data object Body : Picker(); data object Gym : Picker(); data object Gender : Picker(); data object Metric : Picker(); data class Focus(val day: WorkoutWeekday) : Picker() }
