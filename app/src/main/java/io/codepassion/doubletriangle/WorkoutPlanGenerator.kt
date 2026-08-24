@@ -165,13 +165,14 @@ object WorkoutPlanGenerator {
 
 Perfil obligatorio del usuario:
 - Nombre: ${profile.name}; objetivo: ${profile.goal.title}; nivel: ${profile.trainingLevel.title}; estilo de vida: ${profile.lifestyle.title}
+- Sexo: ${profile.gender.title}; idioma de salida: español; todas las cadenas visibles, títulos, notas y explicaciones deben estar en español.
 - Días disponibles: ${profile.workoutDays.joinToString { it.storedValue }}; duración preferida: ${profile.preferredWorkoutDurationMinutes} minutos
 - Estructura: ${profile.trainingSplitPreference.title}; focos personalizados: ${profile.customWorkoutFocuses.entries.joinToString { "${it.key.storedValue}=${it.value.storedValue}" }.ifBlank { "ninguno" }}
 - Equipamiento: ${profile.availableEquipment.joinToString { it.storedValue }}; restricciones: ${profile.movementRestrictions.joinToString { it.storedValue }.ifBlank { "ninguna" }}
 - Composición corporal: ${profile.bodyCompositionPhase?.storedValue ?: "no especificada"}; edad aproximada: ${(java.time.Year.now().value - profile.birthYear).coerceAtLeast(13)}; altura: ${profile.heightCm} cm; peso: ${profile.weightKg} kg
 - Omitir calentamiento: ${if (profile.skipsWarmups) "sí" else "no"}; omitir vuelta a la calma: ${if (profile.skipsCooldowns) "sí" else "no"}; omitir descansos: ${if (profile.skipsRestPeriods) "sí" else "no"}; notas del planificador: ${profile.workoutPlannerNotes.ifBlank { "ninguna" }}
 ${historyContext ?: "Historial de entrenamientos recientes: todavía no hay sesiones completadas."}
-Reglas: crea exactamente un workout por cada día disponible, no inventes días, no uses ejercicios incompatibles con equipamiento/restricciones y mantén el volumen dentro de la duración indicada. Usa siempre bloques y prescripciones concretas.
+Reglas estrictas: crea exactamente un workout por cada día disponible y no inventes días. Cada sesión debe respetar el presupuesto total de duración incluyendo calentamiento, trabajo principal y vuelta a la calma. Si se omite calentamiento o vuelta a la calma, devuelve cero ejercicios y cero bloques de ese tipo: nunca uses bloques vacíos, ocultos o de relleno. No uses ejercicios incompatibles con el equipamiento o las restricciones; prioriza sustituciones seguras y cercanas. Usa siempre bloques y prescripciones concretas, conserva el foco personalizado de cada día y distribuye el volumen de forma recuperable.
 """
 
     internal fun parseBlockType(value: String): WorkoutBlockType = when (value.trim().lowercase()) {
