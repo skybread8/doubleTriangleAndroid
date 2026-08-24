@@ -62,6 +62,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
     var mealProtein by remember { mutableStateOf("") }
     var mealCarbs by remember { mutableStateOf("") }
     var mealFat by remember { mutableStateOf("") }
+    var mealType by remember { mutableStateOf(MealType.Snack) }
     val calories = meals.sumOf { it.calories }
     val protein = meals.sumOf { it.protein }
     val carbs = meals.sumOf { it.carbs }
@@ -101,17 +102,11 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
                 }
             }
             if (meals.isEmpty()) item { EmptyMealsCard { addingMeal = true } }
-            items(meals, key = { it.id }) { meal ->
-                Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text("◉", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.h6)
-                    Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                        Text(meal.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                        Text("${meal.protein}g proteína · ${meal.carbs}g carbos · ${meal.fat}g grasa", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
-                    }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text("${meal.calories} kcal", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                        Text("ELIMINAR", Modifier.clickable { meals = meals.filterNot { it.id == meal.id }; NutritionStore.save(context, meals) }.padding(top = 3.dp), style = MaterialTheme.typography.overline, color = Color(0xFFC62828))
-                    }
+            MealType.entries.forEach { type ->
+                val grouped = meals.filter { it.type == type }
+                if (grouped.isNotEmpty()) {
+                    item { Text(type.title.uppercase(), Modifier.padding(top = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary) }
+                    items(grouped, key = { it.id }) { meal -> MealRow(meal) { meals = meals.filterNot { it.id == meal.id }; NutritionStore.save(context, meals) } }
                 }
             }
         }
@@ -127,6 +122,10 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
                         NutritionNumberField("kcal", mealCalories, { mealCalories = it.filter(Char::isDigit) }, Modifier.weight(1f))
                         NutritionNumberField("Proteína", mealProtein, { mealProtein = it.filter(Char::isDigit) }, Modifier.weight(1f))
                     }
+                    Text("MOMENTO DEL DÍA", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+                        MealType.entries.forEach { type -> Text(type.title, Modifier.weight(1f).liquidGlass(RoundedCornerShape(10.dp), emphasized = mealType == type).clickable { mealType = type }.padding(vertical = 9.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.caption, color = if (mealType == type) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary) }
+                    }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         NutritionNumberField("Carbos", mealCarbs, { mealCarbs = it.filter(Char::isDigit) }, Modifier.weight(1f))
                         NutritionNumberField("Grasas", mealFat, { mealFat = it.filter(Char::isDigit) }, Modifier.weight(1f))
@@ -136,13 +135,28 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
             confirmButton = {
                 Button(onClick = {
                     if (mealName.isNotBlank()) {
-                        val updated = meals + MealLog(System.currentTimeMillis(), mealName.trim(), mealCalories.toIntOrNull() ?: 0, mealProtein.toIntOrNull() ?: 0, mealCarbs.toIntOrNull() ?: 0, mealFat.toIntOrNull() ?: 0)
-                        meals = updated; NutritionStore.save(context, updated); mealName = ""; mealCalories = ""; mealProtein = ""; mealCarbs = ""; mealFat = ""; addingMeal = false
+                        val updated = meals + MealLog(System.currentTimeMillis(), mealName.trim(), mealCalories.toIntOrNull() ?: 0, mealProtein.toIntOrNull() ?: 0, mealCarbs.toIntOrNull() ?: 0, mealFat.toIntOrNull() ?: 0, mealType)
+                        meals = updated; NutritionStore.save(context, updated); mealName = ""; mealCalories = ""; mealProtein = ""; mealCarbs = ""; mealFat = ""; mealType = MealType.Snack; addingMeal = false
                     }
                 }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text("AÑADIR") }
             },
             dismissButton = { Button(onClick = { addingMeal = false }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textSecondary), elevation = ButtonDefaults.elevation(0.dp)) { Text("CANCELAR") } },
         )
+    }
+}
+
+@Composable
+private fun MealRow(meal: MealLog, onDelete: () -> Unit) {
+    Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text("◉", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.h6)
+        Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+            Text(meal.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+            Text("${meal.protein}g proteína · ${meal.carbs}g carbos · ${meal.fat}g grasa", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        }
+        Column(horizontalAlignment = Alignment.End) {
+            Text("${meal.calories} kcal", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+            Text("ELIMINAR", Modifier.clickable(onClick = onDelete).padding(top = 3.dp), style = MaterialTheme.typography.overline, color = Color(0xFFC62828))
+        }
     }
 }
 
