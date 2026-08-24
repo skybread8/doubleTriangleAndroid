@@ -30,6 +30,25 @@ object WorkoutPlanGenerator {
         generateWithInstruction(profile, "Genera un plan semanal progresivo respetando exactamente los días seleccionados, el objetivo, nivel, restricciones, equipamiento y duración del perfil.", context)
     }
 
+    suspend fun generateNext(profile: OnboardingProfile, previous: WorkoutHubState, context: Context? = null): Pair<String, WorkoutHubState> = withContext(Dispatchers.IO) {
+        val previousStructure = previous.workouts.joinToString("; ") { workout ->
+            "${workout.scheduledDay}: ${workout.focus}, ${workout.exercises.joinToString(", ") { it.name }}"
+        }
+        val (rawJson, generated) = generateWithInstruction(
+            profile,
+            "Genera la SIGUIENTE semana progresiva del plan anterior. Mantén exactamente los mismos días, objetivo, división y restricciones. Ajusta cargas, repeticiones, volumen o sustituciones usando el historial y feedback disponible; no repitas ciegamente la semana anterior. Semana anterior (${previous.weekIndex}/${previous.cycleLength}, mesociclo ${previous.mesocycleIndex}): $previousStructure",
+            context,
+        )
+        val nextWeek = previous.weekIndex + 1
+        val startsNewMesocycle = nextWeek > previous.cycleLength
+        val nextState = generated.copy(
+            mesocycleIndex = if (startsNewMesocycle) previous.mesocycleIndex + 1 else previous.mesocycleIndex,
+            cycleLength = previous.cycleLength,
+            weekIndex = if (startsNewMesocycle) 1 else nextWeek,
+        )
+        serialize(nextState) to nextState
+    }
+
     suspend fun generateCustom(profile: OnboardingProfile, request: CustomWorkoutRequest, context: Context? = null): WorkoutDaySummary = withContext(Dispatchers.IO) {
         val (_, state) = generateWithInstruction(
             profile.copy(workoutDays = setOf(WorkoutWeekday.Monday)),

@@ -288,9 +288,15 @@ fun WildforceRoot() {
             },
             onRegenerateProfile = { updated ->
                 generationError = null
+                val nextPlanRequested = preferences.getBoolean("generate_next_plan", false)
+                preferences.edit().remove("generate_next_plan").apply()
                 isGenerating = true
                 coroutineScope.launch {
-                    runCatching { WorkoutPlanGenerator.generate(updated, context) }
+                    runCatching {
+                        if (nextPlanRequested) {
+                            WorkoutPlanGenerator.generateNext(updated, generatedWorkoutState ?: PreviewWorkoutRepository.load(updated.name, updated.goal.title), context)
+                        } else WorkoutPlanGenerator.generate(updated, context)
+                    }
                         .onSuccess { (json, state) ->
                             preferences.edit().putString("workout_plan_json", json).apply()
                             generatedWorkoutState = state
@@ -344,7 +350,10 @@ private fun WildforceApp(
             completedPlanWorkouts = displayedWorkoutState.workouts.count { it.status == WorkoutStatus.Completed } + 1,
             totalPlanWorkouts = displayedWorkoutState.workouts.size,
             totalPlanExercises = displayedWorkoutState.workouts.sumOf { it.exercises.size },
-            onGenerateNextPlan = { onRegenerateProfile(profile) },
+            onGenerateNextPlan = {
+                appPreferences.edit().putBoolean("generate_next_plan", true).apply()
+                onRegenerateProfile(profile)
+            },
             onExit = { activeWorkout = null },
             onFinish = { duration, sets, volume, streak ->
                 displayedWorkoutState = displayedWorkoutState.copy(
