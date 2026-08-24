@@ -38,13 +38,21 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 
 /** Editable fitness profile. These are the same inputs consumed by the iOS planner. */
 @Composable
-fun ProfileScreen(initial: OnboardingProfile, onSave: (OnboardingProfile) -> Unit, onRegenerate: (OnboardingProfile) -> Unit = {}) {
+fun ProfileScreen(
+    initial: OnboardingProfile,
+    contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(),
+    isRegenerating: Boolean = false,
+    generationError: String? = null,
+    onSave: (OnboardingProfile) -> Unit,
+    onRegenerate: (OnboardingProfile) -> Unit = {},
+) {
     var draft by remember(initial) { mutableStateOf(initial) }
     var heightInput by remember(initial) { mutableStateOf(initial.heightCm.toString()) }
     var weightInput by remember(initial) { mutableStateOf(initial.weightKg.toString()) }
     var picker by remember { mutableStateOf<Picker?>(null) }
     LazyColumn(
         modifier = Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 16.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 16.dp, bottom = contentPadding.calculateBottomPadding() + 96.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
@@ -102,8 +110,9 @@ fun ProfileScreen(initial: OnboardingProfile, onSave: (OnboardingProfile) -> Uni
             }
         }
         item {
-            Button(onClick = { onSave(validatedProfile(draft, heightInput, weightInput)) }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text("GUARDAR PERFIL", fontWeight = FontWeight.Bold) }
-            Button(onClick = { val saved = validatedProfile(draft, heightInput, weightInput); onSave(saved); onRegenerate(saved) }, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text("GUARDAR Y REGENERAR PLAN", fontWeight = FontWeight.Bold) }
+            generationError?.let { Text(it, Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).padding(12.dp), color = Color(0xFFC62828)) }
+            Button(onClick = { onSave(validatedProfile(draft, heightInput, weightInput)) }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), enabled = !isRegenerating, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text("GUARDAR PERFIL", fontWeight = FontWeight.Bold) }
+            Button(onClick = { val saved = validatedProfile(draft, heightInput, weightInput); onSave(saved); onRegenerate(saved) }, modifier = Modifier.fillMaxWidth().height(50.dp), enabled = !isRegenerating, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text(if (isRegenerating) "REGENERANDO PLAN…" else "GUARDAR Y REGENERAR PLAN", fontWeight = FontWeight.Bold) }
             Spacer(Modifier.height(28.dp))
         }
     }

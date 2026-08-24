@@ -273,6 +273,7 @@ fun WildforceRoot() {
                 generatedWorkoutState = null
             },
             onRegenerateProfile = { updated ->
+                generationError = null
                 isGenerating = true
                 coroutineScope.launch {
                     runCatching { WorkoutPlanGenerator.generate(updated) }
@@ -284,6 +285,8 @@ fun WildforceRoot() {
                     isGenerating = false
                 }
             },
+            isGeneratingProfilePlan = isGenerating,
+            profileGenerationError = generationError,
         )
     }
 }
@@ -296,6 +299,8 @@ private fun WildforceApp(
     onResetOnboarding: () -> Unit = {},
     onProfileUpdated: (OnboardingProfile) -> Unit = {},
     onRegenerateProfile: (OnboardingProfile) -> Unit = {},
+    isGeneratingProfilePlan: Boolean = false,
+    profileGenerationError: String? = null,
 ) {
     val appContext = LocalContext.current.applicationContext
     val appPreferences = remember { appContext.getSharedPreferences("wildforce_profile", 0) }
@@ -373,7 +378,7 @@ private fun WildforceApp(
             val analyticsExercises = displayedWorkoutState.workouts.flatMap { it.exercises }
             AnalyticsScreen(appContext, displayedWorkoutState, appPreferences, WorkoutAnalyticsStore.summaries(appContext, analyticsExercises))
         } else if (selected == RootDestination.Profile) {
-            ProfileScreen(profile, onProfileUpdated, onRegenerateProfile)
+            ProfileScreen(profile, padding, isGeneratingProfilePlan, profileGenerationError, onProfileUpdated, onRegenerateProfile)
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("${selected.label}\nPróxima vertical", color = WildforceThemeTokens.textSecondary)
         }
@@ -383,5 +388,9 @@ private fun WildforceApp(
 @Preview(showBackground = true)
 @Composable
 private fun AppPreview() = WildforceTheme {
-    WildforceApp(OnboardingProfile("Jordi", FitnessGoal.BuildMuscle), PreviewWorkoutRepository.load(), { _, _, _, _ -> }) {}
+    WildforceApp(
+        profile = OnboardingProfile("Jordi", FitnessGoal.BuildMuscle),
+        workoutState = PreviewWorkoutRepository.load(),
+        onWorkoutCompleted = { _, _, _, _ -> },
+    )
 }
