@@ -106,6 +106,7 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
                 .padding(horizontal = 20.dp, vertical = 14.dp),
         ) {
             WorkoutHeader(state)
+            PlanContextCard(state)
             Spacer(Modifier.height(16.dp))
             WeekCalendar(state, selectedDay) { selectedDay = if (selectedDay == it) null else it }
         }
@@ -136,6 +137,20 @@ onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
                 modifier = Modifier.fillMaxSize(),
             )
         }
+    }
+}
+
+@Composable
+private fun PlanContextCard(state: WorkoutHubState) {
+    Row(
+        Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(15.dp)).padding(horizontal = 14.dp, vertical = 11.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(state.planName.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.subtitle1, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(state.phase, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        Text("PLAN", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
     }
 }
 
