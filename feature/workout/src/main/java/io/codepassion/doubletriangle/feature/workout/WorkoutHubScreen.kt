@@ -92,6 +92,7 @@ fun WorkoutHubScreen(
     defaultCustomEquipment: String = "Peso corporal",
     customEquipmentPresets: List<Pair<String, String>> = emptyList(),
     generationError: String? = null,
+    onRetryGeneration: () -> Unit = {},
     customAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null,
 ) {
     var selectedDay by remember { mutableStateOf<DayOfWeek?>(null) }
@@ -124,7 +125,16 @@ fun WorkoutHubScreen(
         Modifier.fillMaxSize().padding(contentPadding).liquidGlassBackground(),
     ) {
         generationError?.let { error ->
-            Text("No se pudo generar el plan: $error", Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 8.dp).liquidGlass(RoundedCornerShape(14.dp)).padding(12.dp), color = Color(0xFFC62828), style = MaterialTheme.typography.caption)
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 8.dp)
+                    .liquidGlass(RoundedCornerShape(14.dp)).padding(start = 12.dp, end = 6.dp, top = 10.dp, bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("No se pudo generar el plan: $error", Modifier.weight(1f), color = Color(0xFFC62828), style = MaterialTheme.typography.caption)
+                TextButton(onClick = onRetryGeneration) {
+                    Text("REINTENTAR", color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+                }
+            }
         }
         AnimatedVisibility(visible = hubEntered, enter = fadeIn(tween(320)) + slideInVertically(tween(320)) { -it / 18 }) {
             Column(
