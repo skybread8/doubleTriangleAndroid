@@ -311,8 +311,8 @@ private fun TrainingLocationsDialog(
                                 locations = locations.mapIndexed { itemIndex, item -> item.copy(isDefault = itemIndex == index) }
                             }.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Column(Modifier.weight(1f)) {
-                                    Text(location.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                                    Text("${location.equipment.size} elementos", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                                    Text(location.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    Text("${location.equipment.size} elementos", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1)
                                 }
                                 Text(if (location.isDefault) "PRINCIPAL" else "EDITAR", Modifier.clickable {
                                     editingIndex = locations.indexOf(location)
