@@ -671,7 +671,7 @@ fun ActiveWorkoutScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(workout.id) {
         val notificationsEnabled = WorkoutNotificationPreferences.enabled(context)
-        val serviceIntent = android.content.Intent(context, WorkoutForegroundService::class.java).putExtra("title", workout.title).putExtra("detail", "Sesión activa")
+        val serviceIntent = android.content.Intent(context, WorkoutForegroundService::class.java).putExtra("title", workout.title).putExtra("detail", "Sesión activa").putExtra("workoutId", workout.id)
         if (notificationsEnabled) {
             WorkoutActiveNotification.show(context, workout.title)
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) context.startForegroundService(serviceIntent) else context.startService(serviceIntent)

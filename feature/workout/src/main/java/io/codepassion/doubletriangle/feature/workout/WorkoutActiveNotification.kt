@@ -39,9 +39,10 @@ internal object WorkoutActiveNotification {
             android.app.PendingIntent.getActivity(context, notificationId, it, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
         }
         val session = mediaSession(context)
+        val resolvedArtwork = artwork ?: this.artwork
         val displayTitle = if (isResting) detail.substringBefore(" ·") else title
         val metadata = MediaMetadata.Builder().putString(MediaMetadata.METADATA_KEY_TITLE, displayTitle).putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, detail)
-        artwork?.let { metadata.putBitmap(MediaMetadata.METADATA_KEY_ART, it) }
+        resolvedArtwork?.let { metadata.putBitmap(MediaMetadata.METADATA_KEY_ART, it) }
         session.setMetadata(metadata.build())
         session.setPlaybackState(PlaybackState.Builder().setActions(PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE or PlaybackState.ACTION_SKIP_TO_NEXT).setState(if (isResting) PlaybackState.STATE_PAUSED else PlaybackState.STATE_PLAYING, progress.toLong(), 1f).build())
         @Suppress("DEPRECATION")
@@ -62,7 +63,7 @@ internal object WorkoutActiveNotification {
             .setOnlyAlertOnce(true)
             .setShowWhen(false)
             .setAutoCancel(false)
-            .setLargeIcon(artwork ?: exerciseArtwork(title))
+            .setLargeIcon(resolvedArtwork ?: exerciseArtwork(title))
             .addAction(android.app.Notification.Action.Builder(android.R.drawable.ic_media_pause, "Pausar", toggleIntent).build())
             .addAction(android.app.Notification.Action.Builder(android.R.drawable.ic_media_next, "Saltar", skipIntent).build())
             .addAction(android.app.Notification.Action.Builder(android.R.drawable.ic_input_add, "+30 s", addRestIntent).build())
