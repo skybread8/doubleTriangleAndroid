@@ -28,6 +28,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -68,6 +69,7 @@ internal fun WorkoutCompletionFlowScreen(
     useImperial: Boolean = false,
     onCancelWorkout: () -> Unit,
     onDone: () -> Unit,
+    onGenerateNextPlan: () -> Unit = {},
 ) {
     val firstRegularPhase = if (records.isEmpty()) CompletionPhase.Summary else CompletionPhase.Records
     var phase by remember(workout.id) {
@@ -98,7 +100,7 @@ internal fun WorkoutCompletionFlowScreen(
             CompletionPhase.Streak -> StreakCelebration(progress.streakAfter) { phase = CompletionPhase.Xp }
             CompletionPhase.Xp -> XpCelebration(progress) { continueAfterXp() }
             CompletionPhase.LevelUp -> LevelUpCelebration(progress.levelAfter) { if (isPlanCompleted) phase = CompletionPhase.PlanComplete else onDone() }
-            CompletionPhase.PlanComplete -> PlanCompletedCelebration(planName.ifBlank { workout.title }, completedPlanWorkouts, totalPlanWorkouts, totalPlanExercises, onDone)
+            CompletionPhase.PlanComplete -> PlanCompletedCelebration(planName.ifBlank { workout.title }, completedPlanWorkouts, totalPlanWorkouts, totalPlanExercises, onDone, onGenerateNextPlan)
         }
     }
 }
@@ -240,7 +242,7 @@ private fun LevelUpCelebration(level: Int, onContinue: () -> Unit) = Celebration
 }
 
 @Composable
-private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, totalWorkouts: Int, totalExercises: Int, onContinue: () -> Unit) = CelebrationFrame("TERMINAR", onContinue) {
+private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, totalWorkouts: Int, totalExercises: Int, onContinue: () -> Unit, onGenerateNextPlan: () -> Unit) = CelebrationFrame("TERMINAR", onContinue, secondaryLabel = "GENERAR SIGUIENTE PLAN", onSecondary = onGenerateNextPlan) {
     Spacer(Modifier.weight(1f))
     Text("🏆", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
     Text("PLAN COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
@@ -254,7 +256,7 @@ private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, t
 }
 
 @Composable
-private fun CelebrationFrame(buttonLabel: String = "CONTINUAR", onContinue: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+private fun CelebrationFrame(buttonLabel: String = "CONTINUAR", onContinue: () -> Unit, secondaryLabel: String? = null, onSecondary: () -> Unit = {}, content: @Composable ColumnScope.() -> Unit) {
     var entered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { entered = true }
     Column(
@@ -273,8 +275,15 @@ private fun CelebrationFrame(buttonLabel: String = "CONTINUAR", onContinue: () -
                 Spacer(Modifier.weight(1f))
             }
         }
-        Button(onClick = onContinue, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) {
-            Text(buttonLabel, fontWeight = FontWeight.Bold)
+        Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            secondaryLabel?.let { label ->
+                OutlinedButton(onClick = onSecondary, modifier = Modifier.fillMaxWidth().height(48.dp), shape = RoundedCornerShape(16.dp)) {
+                    Text(label, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+                }
+            }
+            Button(onClick = onContinue, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) {
+                Text(buttonLabel, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }

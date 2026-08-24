@@ -340,6 +340,7 @@ private fun WildforceApp(
             completedPlanWorkouts = displayedWorkoutState.workouts.count { it.status == WorkoutStatus.Completed } + 1,
             totalPlanWorkouts = displayedWorkoutState.workouts.size,
             totalPlanExercises = displayedWorkoutState.workouts.sumOf { it.exercises.size },
+            onGenerateNextPlan = { onRegenerateProfile(profile) },
             onExit = { activeWorkout = null },
             onFinish = { duration, sets, volume, streak ->
                 displayedWorkoutState = displayedWorkoutState.copy(

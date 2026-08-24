@@ -580,6 +580,7 @@ fun ActiveWorkoutScreen(
     completedPlanWorkouts: Int = 0,
     totalPlanWorkouts: Int = 0,
     totalPlanExercises: Int = 0,
+    onGenerateNextPlan: () -> Unit = {},
     onExit: () -> Unit,
     onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double, streak: Int) -> Unit,
 ) {
@@ -700,18 +701,23 @@ fun ActiveWorkoutScreen(
         )
     }
 
+    fun commitCompletedSession(progress: CompletionProgress) {
+        WorkoutHistoryStore.record(context, workout, exerciseStats, completedSetRecords, feedbackByExercise, notesByExercise)
+        CompletionProgressStore.commit(context, progress)
+        WorkoutSessionStore.clear(context, workout.id)
+        onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg, progress.streakAfter)
+    }
+
     if (showsSummary) {
         val completionProgress = remember(workout.id) { CompletionProgressStore.preview(context, currentStreak) }
         val recordEvents = remember(workout.id, exerciseStats) { WorkoutCompletionCalculator.records(context, workout, exerciseStats) }
-        WorkoutCompletionFlowScreen(workout, elapsedSeconds, exerciseStats, feedbackByExercise, recordEvents, completionProgress, useImperial = useImperial, isPlanCompleted = isPlanCompletedAfterWorkout, planName = planName, completedPlanWorkouts = completedPlanWorkouts, totalPlanWorkouts = totalPlanWorkouts, totalPlanExercises = totalPlanExercises, onCancelWorkout = {
+        WorkoutCompletionFlowScreen(workout, elapsedSeconds, exerciseStats, feedbackByExercise, recordEvents, completionProgress, useImperial = useImperial, isPlanCompleted = isPlanCompletedAfterWorkout, planName = planName, completedPlanWorkouts = completedPlanWorkouts, totalPlanWorkouts = totalPlanWorkouts, totalPlanExercises = totalPlanExercises, onGenerateNextPlan = {
+            commitCompletedSession(completionProgress)
+            onGenerateNextPlan()
+        }, onCancelWorkout = {
             WorkoutSessionStore.clear(context, workout.id)
             onExit()
-        }) {
-            WorkoutHistoryStore.record(context, workout, exerciseStats, completedSetRecords, feedbackByExercise, notesByExercise)
-            CompletionProgressStore.commit(context, completionProgress)
-            WorkoutSessionStore.clear(context, workout.id)
-            onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg, completionProgress.streakAfter)
-        }
+        }, onDone = { commitCompletedSession(completionProgress) })
         return
     }
 
