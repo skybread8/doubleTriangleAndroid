@@ -230,6 +230,7 @@ Perfil obligatorio del usuario:
 - Omitir calentamiento: ${if (profile.skipsWarmups) "sí" else "no"}; omitir vuelta a la calma: ${if (profile.skipsCooldowns) "sí" else "no"}; omitir descansos: ${if (profile.skipsRestPeriods) "sí" else "no"}; notas del planificador: ${profile.workoutPlannerNotes.ifBlank { "ninguna" }}
 ${historyContext ?: "Historial de entrenamientos recientes: todavía no hay sesiones completadas."}
 Reglas estrictas: crea exactamente un workout por cada día disponible y no inventes días. Cada sesión debe respetar el presupuesto total de duración incluyendo calentamiento, trabajo principal y vuelta a la calma. Si se omite calentamiento o vuelta a la calma, devuelve cero ejercicios y cero bloques de ese tipo: nunca uses bloques vacíos, ocultos o de relleno. No uses ejercicios incompatibles con el equipamiento o las restricciones; prioriza sustituciones seguras y cercanas. Usa siempre bloques y prescripciones concretas, conserva el foco personalizado de cada día y distribuye el volumen de forma recuperable.
+Metadatos de progresión: incluye también mesocycleIndex, cycleLength y weekIndex como enteros positivos en la raíz del JSON. Mantén cycleLength normalmente entre 4 y 6 semanas y usa weekIndex para indicar la semana actual del mesociclo; si no hay contexto previo, empieza en mesocycleIndex=1 y weekIndex=1.
 """
 
     internal fun parseBlockType(value: String): WorkoutBlockType = when (value.trim().lowercase()) {
