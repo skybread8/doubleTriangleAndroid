@@ -111,7 +111,7 @@ internal fun WorkoutPathScreen(
 }
 
 @Composable
-internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, history: List<ExerciseHistoryEntry>, onBack: () -> Unit) {
+internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, history: List<ExerciseHistoryEntry>, useImperial: Boolean = false, onBack: () -> Unit) {
     val best = history.maxByOrNull { it.maxWeightKg }
     val maxVolume = (history.maxOfOrNull { it.volumeKg } ?: 1.0).coerceAtLeast(1.0)
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 18.dp, vertical = 12.dp)) {
@@ -132,8 +132,8 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
             return
         }
         Row(Modifier.fillMaxWidth().padding(vertical = 14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            HistoryMetric("PR", formatWeight(best?.maxWeightKg ?: 0.0), "MEJOR PESO", Modifier.weight(1f))
-            HistoryMetric("ÚLTIMO", formatWeight(history.first().maxWeightKg), "MEJOR PESO", Modifier.weight(1f))
+            HistoryMetric("PR", formatTrainingWeight(best?.maxWeightKg ?: 0.0, useImperial), "MEJOR PESO", Modifier.weight(1f))
+            HistoryMetric("ÚLTIMO", formatTrainingWeight(history.first().maxWeightKg, useImperial), "MEJOR PESO", Modifier.weight(1f))
         }
         Text("VOLUMEN POR SESIÓN", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
         Row(
@@ -149,7 +149,7 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
         }
         Text("EJECUCIONES ANTERIORES", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 4.dp, bottom = 6.dp))
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            history.forEach { entry -> HistoryEntryRow(entry) }
+            history.forEach { entry -> HistoryEntryRow(entry, useImperial) }
         }
     }
 }
@@ -173,14 +173,14 @@ private fun HistoryMetric(prefix: String, value: String, subtitle: String, modif
 }
 
 @Composable
-private fun HistoryEntryRow(entry: ExerciseHistoryEntry) {
+private fun HistoryEntryRow(entry: ExerciseHistoryEntry, useImperial: Boolean) {
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(14.dp)).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(entry.timestampMillis)), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Text("${entry.sets} series · ${entry.totalReps} repeticiones", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
             if (entry.setDetails.isNotEmpty()) {
                 Text(
-                    entry.setDetails.joinToString("  ·  ") { set -> "${set.setStyle.glyph} S${set.setNumber}  ${set.reps}×${formatWeight(set.weightKg)}" },
+                    entry.setDetails.joinToString("  ·  ") { set -> "${set.setStyle.glyph} S${set.setNumber}  ${set.reps}×${formatTrainingWeight(set.weightKg, useImperial)}" },
                     modifier = Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption,
                     color = WildforceThemeTokens.textSecondary,
                 )
@@ -193,11 +193,10 @@ private fun HistoryEntryRow(entry: ExerciseHistoryEntry) {
             }
         }
         Column(horizontalAlignment = Alignment.End) {
-            Text(formatWeight(entry.maxWeightKg), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-            Text(String.format(Locale.getDefault(), "%.0f kg vol.", entry.volumeKg), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(formatTrainingWeight(entry.maxWeightKg, useImperial), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+            Text(String.format(Locale.getDefault(), "%.0f %s vol.", if (useImperial) entry.volumeKg * KG_TO_LB else entry.volumeKg, if (useImperial) "lb" else "kg"), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
     }
 }
 
-private fun formatWeight(value: Double): String = String.format(Locale.getDefault(), "%.1f kg", value)
 private fun formatInsightClock(seconds: Int): String = if (seconds >= 3600) "%d:%02d:%02d".format(seconds / 3600, seconds / 60 % 60, seconds % 60) else "%d:%02d".format(seconds / 60, seconds % 60)

@@ -325,6 +325,7 @@ private fun WildforceApp(
         ActiveWorkoutScreen(
             workout = workout,
             gender = profile.gender.storedValue,
+            useImperial = profile.metricSystem == MetricSystem.Imperial,
             skipRestPeriods = profile.skipsRestPeriods,
             currentStreak = displayedWorkoutState.user.currentStreak,
             onExit = { activeWorkout = null },
@@ -342,7 +343,7 @@ private fun WildforceApp(
         return
     }
     workoutDetail?.let { workout ->
-        WorkoutDetailScreen(workout, profile.gender.storedValue, onBack = { workoutDetail = null }, onStart = { activeWorkout = workout }, onSkip = {
+        WorkoutDetailScreen(workout, profile.gender.storedValue, useImperial = profile.metricSystem == MetricSystem.Imperial, onBack = { workoutDetail = null }, onStart = { activeWorkout = workout }, onSkip = {
             val skipped = appPreferences.getStringSet("skipped_workouts", emptySet()).orEmpty() + workout.id
             appPreferences.edit().putStringSet("skipped_workouts", skipped).apply()
             displayedWorkoutState = displayedWorkoutState.copy(

@@ -370,7 +370,7 @@ private fun RestDayCard() {
 private fun WorkoutHubPreview() = WildforceTheme { WorkoutHubScreen(PaddingValues()) }
 
 @Composable
-fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -> Unit, onStart: () -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}, defaultAdaptEquipment: String = "Peso corporal", adaptAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null) {
+fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial: Boolean = false, onBack: () -> Unit, onStart: () -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}, defaultAdaptEquipment: String = "Peso corporal", adaptAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null) {
     var expandedExercise by remember { mutableStateOf<Int?>(null) }
     var collapsedBlocks by remember(workout.id) { mutableStateOf(emptySet<Int>()) }
     val detailContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
@@ -499,7 +499,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
                                     Text(exercise.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                                     val setText = if (block.type == WorkoutBlockType.Superset) "${block.rounds} rondas" else "${exercise.sets} series"
                                     val restText = if (exercise.restSeconds > 0) " · ${exercise.restSeconds}s" else ""
-                                    val targetWeightText = exercise.targetWeightKg?.let { " · ${String.format(Locale.getDefault(), "%.1f kg", it)}" }.orEmpty()
+                                    val targetWeightText = exercise.targetWeightKg?.let { " · ${formatTrainingWeight(it, useImperial)}" }.orEmpty()
                                     Text("$setText · ${exercise.reps} reps$restText$targetWeightText", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                                 }
                                 Text(if (expandedExercise == itemKey) "⌃" else "⌄", color = WildforceThemeTokens.accentGold)
@@ -551,6 +551,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
 fun ActiveWorkoutScreen(
     workout: WorkoutDaySummary,
     gender: String,
+    useImperial: Boolean = false,
     skipRestPeriods: Boolean = false,
     currentStreak: Int = 0,
     onExit: () -> Unit,
@@ -645,7 +646,7 @@ fun ActiveWorkoutScreen(
     }
 
     if (showsExerciseHistory && exercise != null) {
-        ExerciseHistoryScreen(exercise, gender, WorkoutHistoryStore.history(context, exercise)) { showsExerciseHistory = false }
+        ExerciseHistoryScreen(exercise, gender, WorkoutHistoryStore.history(context, exercise), useImperial) { showsExerciseHistory = false }
         return
     }
 
@@ -812,7 +813,7 @@ fun ActiveWorkoutScreen(
                         }
                         Spacer(Modifier.height(10.dp))
                         Column(Modifier.weight(1f).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
-                            SetTrackingRows(exerciseIndex, effectiveExercise ?: exercise, completedForExercise, completedSetRecords) { original, changed ->
+                            SetTrackingRows(exerciseIndex, effectiveExercise ?: exercise, completedForExercise, completedSetRecords, useImperial) { original, changed ->
                                 val updatedRecords = completedSetRecords.map { if (it.exerciseIndex == exerciseIndex && it.setNumber == original.setNumber) changed else it }
                                 totalVolumeKg += changed.reps * changed.weightKg - original.reps * original.weightKg
                                 completedSetRecords = updatedRecords
@@ -834,7 +835,7 @@ fun ActiveWorkoutScreen(
                         } else {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 CompactMetricStepper("REPS", reps.toString(), { reps = (reps - 1).coerceAtLeast(0) }, { reps++ }, Modifier.weight(1f), onValueEntered = { value -> reps = value.toIntOrNull()?.coerceIn(0, 999) ?: reps })
-                                CompactMetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", weightKg), { weightKg = (weightKg - 2.5).coerceAtLeast(0.0) }, { weightKg += 2.5 }, Modifier.weight(1f), inputValue = weightKg.toString(), decimalInput = true, onValueEntered = { value -> weightKg = value.replace(',', '.').toDoubleOrNull()?.coerceIn(0.0, 750.0) ?: weightKg })
+                                CompactMetricStepper("PESO", formatTrainingWeight(weightKg, useImperial), { weightKg = (weightKg - if (useImperial) 5.0 / KG_TO_LB else 2.5).coerceAtLeast(0.0) }, { weightKg += if (useImperial) 5.0 / KG_TO_LB else 2.5 }, Modifier.weight(1f), inputValue = if (useImperial) "%.1f".format(Locale.US, weightKg * KG_TO_LB) else weightKg.toString(), decimalInput = true, onValueEntered = { value -> weightKg = (value.replace(',', '.').toDoubleOrNull()?.let { if (useImperial) it / KG_TO_LB else it })?.coerceIn(0.0, 750.0) ?: weightKg })
                             }
                         }
                     }
@@ -921,6 +922,7 @@ private fun SetTrackingRows(
     exercise: ExerciseSummary,
     completedSets: Int,
     records: List<CompletedSetRecord>,
+    useImperial: Boolean,
     onRecordChanged: (CompletedSetRecord, CompletedSetRecord) -> Unit,
 ) {
     var editingSetNumber by remember(exerciseIndex) { mutableStateOf<Int?>(null) }
@@ -946,7 +948,7 @@ private fun SetTrackingRows(
                 if (record != null) Text(if (targetDurationSeconds(exercise.reps) != null) "Objetivo ${exercise.reps} → ${record.reps}s" else "Objetivo ${exercise.reps} → ${record.reps} reps", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
             }
             Text(
-                if (record != null && targetDurationSeconds(exercise.reps) != null) "${record.reps}s" else if (record != null) String.format(Locale.getDefault(), "%.1f kg", record.weightKg) else exercise.reps,
+                if (record != null && targetDurationSeconds(exercise.reps) != null) "${record.reps}s" else if (record != null) formatTrainingWeight(record.weightKg, useImperial) else exercise.reps,
                 color = WildforceThemeTokens.textPrimary, fontWeight = if (record != null) FontWeight.Bold else FontWeight.Normal,
             )
         }
@@ -955,7 +957,7 @@ private fun SetTrackingRows(
                 Text("CORREGIR SERIE $setNumber", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
                 Row(Modifier.padding(top = 7.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     CompactMetricStepper("REPS", editReps.toString(), { editReps = (editReps - 1).coerceAtLeast(0) }, { editReps++ }, Modifier.weight(1f), onValueEntered = { value -> editReps = value.toIntOrNull()?.coerceIn(0, 999) ?: editReps })
-                    CompactMetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", editWeightKg), { editWeightKg = (editWeightKg - 2.5).coerceAtLeast(0.0) }, { editWeightKg += 2.5 }, Modifier.weight(1f), inputValue = editWeightKg.toString(), decimalInput = true, onValueEntered = { value -> editWeightKg = value.replace(',', '.').toDoubleOrNull()?.coerceIn(0.0, 750.0) ?: editWeightKg })
+                    CompactMetricStepper("PESO", formatTrainingWeight(editWeightKg, useImperial), { editWeightKg = (editWeightKg - if (useImperial) 5.0 / KG_TO_LB else 2.5).coerceAtLeast(0.0) }, { editWeightKg += if (useImperial) 5.0 / KG_TO_LB else 2.5 }, Modifier.weight(1f), inputValue = if (useImperial) "%.1f".format(Locale.US, editWeightKg * KG_TO_LB) else editWeightKg.toString(), decimalInput = true, onValueEntered = { value -> editWeightKg = (value.replace(',', '.').toDoubleOrNull()?.let { if (useImperial) it / KG_TO_LB else it })?.coerceIn(0.0, 750.0) ?: editWeightKg })
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     Text("CANCELAR", Modifier.clickable { editingSetNumber = null }.padding(10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
@@ -1114,6 +1116,8 @@ private fun MetricStepper(title: String, value: String, onMinus: () -> Unit, onP
 
 private fun targetReps(value: String?): Int = Regex("\\d+").find(value.orEmpty())?.value?.toIntOrNull() ?: 10
 private fun formatClock(seconds: Int): String = "%d:%02d".format(seconds / 60, seconds % 60)
+internal const val KG_TO_LB = 2.20462262
+internal fun formatTrainingWeight(kilograms: Double, useImperial: Boolean): String = if (useImperial) String.format(Locale.getDefault(), "%.1f lb", kilograms * KG_TO_LB) else String.format(Locale.getDefault(), "%.1f kg", kilograms)
 
 
 internal fun setStyleInstruction(style: ExerciseSetStyle, setNumber: Int, totalSets: Int): String = when (style) {
