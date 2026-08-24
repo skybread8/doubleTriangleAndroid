@@ -148,7 +148,7 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
                 val targetHeight = (22 + 78 * entry.volumeKg / maxVolume).dp
                 val animatedHeight by animateDpAsState(targetHeight, animationSpec = tween(650), label = "history-volume")
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom) {
-                    Text(String.format(Locale.getDefault(), "%.0f", entry.volumeKg), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    Text(String.format(Locale.getDefault(), "%.0f", if (useImperial) entry.volumeKg * KG_TO_LB else entry.volumeKg), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                     Box(Modifier.width(24.dp).height(animatedHeight).background(WildforceThemeTokens.accentGold, RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp)))
                 }
             }

@@ -129,8 +129,8 @@ object WorkoutHistoryStore {
                 .filter { it.exerciseIndex in exerciseIndices }
                 .sortedWith(compareBy(CompletedSetRecord::exerciseIndex, CompletedSetRecord::setNumber))
                 .mapIndexed { index, set -> SetPerformance(index + 1, set.reps, set.weightKg, set.setStyle) }
-            val feedback = exerciseIndices.mapNotNull(feedbackByExercise::get).lastOrNull()
-            val note = exerciseIndices.mapNotNull(notesByExercise::get).lastOrNull()
+            val feedback = exerciseIndices.mapNotNull(feedbackByExercise::get).lastOrNull()?.trim()?.uppercase()?.takeIf(String::isNotBlank)
+            val note = exerciseIndices.mapNotNull(notesByExercise::get).lastOrNull()?.trim()?.take(500)?.takeIf(String::isNotBlank)
             val entries = listOf(
                 ExerciseHistoryEntry(timestamp, result.sets, result.totalReps, result.maxWeightKg, result.volumeKg, details, feedback, note),
             ) + history(context, exercise)

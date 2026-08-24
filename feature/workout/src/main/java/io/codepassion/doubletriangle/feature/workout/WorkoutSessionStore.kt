@@ -73,13 +73,13 @@ internal object WorkoutSessionStore {
         val savedExerciseTime = if (json.isNull("exerciseTimeRemaining")) null else json.optInt("exerciseTimeRemaining")
         val exerciseTimerWasRunning = json.optBoolean("exerciseTimerRunning")
         WorkoutSessionSnapshot(
-            exerciseIndex = json.getInt("exerciseIndex"), completedByExercise = completed,
-            reps = json.getInt("reps"), weightKg = json.getDouble("weightKg"),
+            exerciseIndex = json.optInt("exerciseIndex", 0), completedByExercise = completed,
+            reps = json.optInt("reps", 1), weightKg = json.optDouble("weightKg", 0.0),
             restRemaining = savedRestRemaining?.let { (it - elapsedWhileAway).coerceAtLeast(0) },
             restInitialSeconds = json.optInt("restInitialSeconds", 1),
             restBetweenExercises = json.optBoolean("restBetweenExercises"),
-            elapsedSeconds = json.getInt("elapsedSeconds") + elapsedWhileAway,
-            totalCompletedSets = json.getInt("totalCompletedSets"), totalVolumeKg = json.getDouble("totalVolumeKg"),
+            elapsedSeconds = json.optInt("elapsedSeconds", 0) + elapsedWhileAway,
+            totalCompletedSets = json.optInt("totalCompletedSets", 0), totalVolumeKg = json.optDouble("totalVolumeKg", 0.0),
             pendingFeedback = json.optBoolean("pendingFeedback"), showsSummary = json.optBoolean("showsSummary"), selectedFeedback = json.optString("selectedFeedback").takeIf(String::isNotBlank),
             pendingNote = json.optString("pendingNote"),
             exerciseStats = stats,
