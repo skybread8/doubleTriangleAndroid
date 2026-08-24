@@ -38,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
@@ -143,7 +144,7 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("‹ CERRAR", Modifier.clickable(onClick = onCancel).padding(10.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
             Spacer(Modifier.weight(1f))
-            Text("EDITOR MANUAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text("EDITOR MANUAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             TextField(
@@ -169,7 +170,7 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
                 Text("＋ AÑADIR", Modifier.clickable { selectingExercise = true }.padding(10.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
             }
             if (blocks.isEmpty()) {
-                Text("Añade al menos un ejercicio para guardar.", Modifier.fillMaxWidth().padding(28.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+            Text("Añade al menos un ejercicio para guardar.", Modifier.fillMaxWidth().padding(28.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center, maxLines = 2)
             }
             blocks.forEachIndexed { blockIndex, block ->
                 if (block.type == WorkoutBlockType.Superset) {
@@ -228,7 +229,7 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
             onClick = { onSave(workout.withEditableBlocks(blocks).copy(estimatedMinutes = CustomWorkoutStore.estimateBlockMinutes(blocks))) },
             enabled = workout.title.isNotBlank() && blocks.isNotEmpty(), modifier = Modifier.fillMaxWidth().height(54.dp),
             shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary),
-        ) { Text("GUARDAR ENTRENAMIENTO", fontWeight = FontWeight.Bold) }
+        ) { Text("GUARDAR ENTRENAMIENTO", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis) }
     }
 }
 
@@ -238,7 +239,7 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
         Row(verticalAlignment = Alignment.CenterVertically) {
             RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.size(54.dp).clip(RoundedCornerShape(12.dp)))
             label?.let { Text(it, Modifier.padding(start = 9.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold) }
-            Text(exercise.name, Modifier.weight(1f).padding(horizontal = 10.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+            Text(exercise.name, Modifier.weight(1f).padding(horizontal = 10.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text("↑", Modifier.clickable(enabled = index > 0, onClick = onMoveUp).padding(8.dp), color = if (index > 0) WildforceThemeTokens.textPrimary else Color.Transparent)
             Text("↓", Modifier.clickable(enabled = index < count - 1, onClick = onMoveDown).padding(8.dp), color = if (index < count - 1) WildforceThemeTokens.textPrimary else Color.Transparent)
             Text("×", Modifier.clickable(onClick = onRemove).padding(8.dp), color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
@@ -341,7 +342,7 @@ internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, equipmentPr
                 TextField(equipment, { equipment = it.take(120) }, label = { Text("Equipamiento disponible") }, maxLines = 2)
             }
         },
-        confirmButton = { TextButton(onClick = { onGenerate(CustomWorkoutRequest(focus, duration.toIntOrNull()?.coerceIn(15, 180) ?: 45, equipment.trim())) }) { Text("GENERAR", color = WildforceThemeTokens.accentGold) } },
+        confirmButton = { TextButton(onClick = { onGenerate(CustomWorkoutRequest(focus.trim().ifBlank { "Full body" }, duration.toIntOrNull()?.coerceIn(15, 180) ?: 45, equipment.trim().ifBlank { defaultEquipment.ifBlank { "Peso corporal" } })) }) { Text("GENERAR", color = WildforceThemeTokens.accentGold) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
     )
 }

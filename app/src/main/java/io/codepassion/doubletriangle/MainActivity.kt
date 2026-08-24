@@ -220,7 +220,7 @@ fun WildforceRoot() {
                             generatedWorkoutState = state
                             profile = completedProfile
                         }
-                        .onFailure { generationError = it.message ?: "No se pudo generar el plan" }
+                        .onFailure { generationError = it.message?.takeIf(String::isNotBlank) ?: "No se pudo generar el plan" }
                     isGenerating = false
                 }
             } else {
@@ -291,6 +291,7 @@ fun WildforceRoot() {
             },
             onRegenerateProfile = { updated ->
                 generationError = null
+                pendingGeneratedPlan = null
                 val nextPlanRequested = preferences.getBoolean("generate_next_plan", false)
                 preferences.edit().remove("generate_next_plan").apply()
                 isGenerating = true
@@ -303,7 +304,7 @@ fun WildforceRoot() {
                         .onSuccess { (json, state) ->
                             pendingGeneratedPlan = json to state
                         }
-                        .onFailure { generationError = it.message ?: "No se pudo regenerar el plan" }
+                        .onFailure { generationError = it.message?.takeIf(String::isNotBlank) ?: "No se pudo regenerar el plan" }
                     isGenerating = false
                 }
             },
@@ -318,14 +319,14 @@ fun WildforceRoot() {
         pendingGeneratedPlan?.let { (json, state) ->
             AlertDialog(
                 onDismissRequest = { pendingGeneratedPlan = null },
-                title = { Text("PREVISUALIZAR NUEVO PLAN", fontWeight = FontWeight.Bold) },
+                title = { Text("PREVISUALIZAR NUEVO PLAN", fontWeight = FontWeight.Bold, maxLines = 2) },
                 text = {
                     Column {
-                        Text(state.planName, fontWeight = FontWeight.Bold)
-                        Text(state.phase, color = WildforceThemeTokens.textSecondary)
-                        Text("Plan ${state.mesocycleNumber} · Mesociclo ${state.mesocycleIndex} · Semana ${state.weekIndex}/${state.cycleLength}", color = WildforceThemeTokens.accentGold)
+                        Text(state.planName, fontWeight = FontWeight.Bold, maxLines = 2)
+                        Text(state.phase, color = WildforceThemeTokens.textSecondary, maxLines = 2)
+                        Text("Plan ${state.mesocycleNumber} · Mesociclo ${state.mesocycleIndex} · Semana ${state.weekIndex}/${state.cycleLength}", color = WildforceThemeTokens.accentGold, maxLines = 1)
                         state.workouts.take(6).forEach { workout ->
-                            Text("• ${workout.scheduledDay}: ${workout.title}", modifier = Modifier.padding(top = 6.dp), maxLines = 1)
+                            Text("• ${workout.scheduledDay}: ${workout.title} · ${workout.exercises.size} ejercicios · ${workout.estimatedMinutes} min", modifier = Modifier.padding(top = 6.dp), maxLines = 1)
                         }
                     }
                 },

@@ -32,11 +32,11 @@ object WorkoutPlanGenerator {
 
     suspend fun generateNext(profile: OnboardingProfile, previous: WorkoutHubState, context: Context? = null): Pair<String, WorkoutHubState> = withContext(Dispatchers.IO) {
         val previousStructure = previous.workouts.joinToString("; ") { workout ->
-            "${workout.scheduledDay}: ${workout.focus}, ${workout.exercises.joinToString(", ") { it.name }}"
+            "${workout.scheduledDay}: ${workout.focus}, ${workout.exercises.joinToString(", ") { "${it.name} ${it.sets}x${it.reps}${it.targetWeightKg?.let { weight -> " @${weight}kg" }.orEmpty()}" }}"
         }
         val (rawJson, generated) = generateWithInstruction(
             profile,
-            "Genera la SIGUIENTE semana progresiva del plan anterior. Mantén exactamente los mismos días, objetivo, división y restricciones. Ajusta cargas, repeticiones, volumen o sustituciones usando el historial y feedback disponible; no repitas ciegamente la semana anterior. Semana anterior (${previous.weekIndex}/${previous.cycleLength}, mesociclo ${previous.mesocycleIndex}): $previousStructure",
+            "Genera la SIGUIENTE semana progresiva del plan anterior. Mantén exactamente los mismos días, objetivo, división y restricciones. Ajusta cargas, repeticiones, volumen o sustituciones usando el historial y feedback disponible; no repitas ciegamente la semana anterior. Usa la semana anterior como referencia de cargas y repeticiones, y conserva los feedbacks del historial como restricciones de progresión. Plan anterior ${previous.mesocycleNumber}, semana ${previous.weekIndex}/${previous.cycleLength}, mesociclo ${previous.mesocycleIndex}: $previousStructure",
             context,
         )
         val nextWeek = previous.weekIndex + 1
