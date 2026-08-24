@@ -212,9 +212,16 @@ fun WildforceRoot() {
             runCatching { WorkoutPlanGenerator.parse(json, currentProfile.name, currentProfile.goal.title) }.getOrNull()
         } ?: PreviewWorkoutRepository.load(currentProfile.name, currentProfile.goal.title)
         val completedIds = preferences.getStringSet("completed_workouts", emptySet()).orEmpty()
+        val skippedIds = preferences.getStringSet("skipped_workouts", emptySet()).orEmpty()
         val restoredState = baseState.copy(
             completedDays = baseState.workouts.filter { it.id in completedIds }.mapTo(mutableSetOf()) { it.scheduledDay },
-            workouts = baseState.workouts.map { if (it.id in completedIds) it.copy(status = WorkoutStatus.Completed) else it },
+            workouts = baseState.workouts.map {
+                when {
+                    it.id in completedIds -> it.copy(status = WorkoutStatus.Completed)
+                    it.id in skippedIds -> it.copy(status = WorkoutStatus.Skipped)
+                    else -> it
+                }
+            },
         )
         WildforceApp(
             profile = currentProfile,
@@ -240,6 +247,8 @@ private fun WildforceApp(
     onWorkoutCompleted: (String, Int, Int, Double) -> Unit,
     onResetOnboarding: () -> Unit,
 ) {
+    val appContext = LocalContext.current.applicationContext
+    val appPreferences = remember { appContext.getSharedPreferences("wildforce_profile", 0) }
     var selected by remember { mutableStateOf(RootDestination.Workout) }
     var displayedWorkoutState by remember(workoutState) { mutableStateOf(workoutState) }
     var workoutDetail by remember { mutableStateOf<WorkoutDaySummary?>(null) }
@@ -264,7 +273,20 @@ private fun WildforceApp(
         return
     }
     workoutDetail?.let { workout ->
-        WorkoutDetailScreen(workout, "male", onBack = { workoutDetail = null }, onStart = { activeWorkout = workout })
+        WorkoutDetailScreen(workout, "male", onBack = { workoutDetail = null }, onStart = { activeWorkout = workout }, onSkip = {
+            val skipped = appPreferences.getStringSet("skipped_workouts", emptySet()).orEmpty() + workout.id
+            appPreferences.edit().putStringSet("skipped_workouts", skipped).apply()
+            displayedWorkoutState = displayedWorkoutState.copy(
+                workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Skipped) else it },
+            )
+            workoutDetail = null
+        }, onUnskip = {
+            val skipped = appPreferences.getStringSet("skipped_workouts", emptySet()).orEmpty() - workout.id
+            appPreferences.edit().putStringSet("skipped_workouts", skipped).apply()
+            displayedWorkoutState = displayedWorkoutState.copy(
+                workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Planned) else it },
+            )
+        })
         return
     }
     Scaffold(

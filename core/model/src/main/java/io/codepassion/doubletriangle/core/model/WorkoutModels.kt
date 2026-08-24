@@ -9,7 +9,7 @@ enum class WorkoutMode(val label: String) {
     Custom("Entrenamientos personalizados"),
 }
 
-enum class WorkoutStatus { Planned, Completed }
+enum class WorkoutStatus { Planned, Completed, Skipped }
 
 enum class ExerciseSetStyle(val label: String, val glyph: String) {
     Warmup("Calentamiento", "●"),

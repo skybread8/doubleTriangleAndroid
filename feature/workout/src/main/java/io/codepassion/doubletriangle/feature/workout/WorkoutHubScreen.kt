@@ -262,7 +262,11 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, onClick: () 
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("DÍA ${workout.order}", Modifier.weight(1f), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
-                    if (workout.status == WorkoutStatus.Completed) StatusBadge()
+                    when (workout.status) {
+                        WorkoutStatus.Completed -> StatusBadge("COMPLETADO", Color(0xFF26A269))
+                        WorkoutStatus.Skipped -> StatusBadge("OMITIDO", WildforceThemeTokens.textSecondary)
+                        WorkoutStatus.Planned -> Unit
+                    }
                 }
                 Text(workout.title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = Color.White)
                 Text(
@@ -276,10 +280,10 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, onClick: () 
 }
 
 @Composable
-private fun StatusBadge() {
+private fun StatusBadge(label: String, background: Color) {
     Text(
-        "COMPLETADO",
-        Modifier.clip(RoundedCornerShape(12.dp)).background(Color(0xFF26A269)).padding(horizontal = 9.dp, vertical = 4.dp),
+        label,
+        Modifier.clip(RoundedCornerShape(12.dp)).background(background).padding(horizontal = 9.dp, vertical = 4.dp),
         color = Color.White,
         style = MaterialTheme.typography.caption,
         fontWeight = FontWeight.Bold,
@@ -302,7 +306,7 @@ private fun RestDayCard() {
 private fun WorkoutHubPreview() = WildforceTheme { WorkoutHubScreen(PaddingValues()) }
 
 @Composable
-fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -> Unit, onStart: () -> Unit) {
+fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -> Unit, onStart: () -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}) {
     var expandedExercise by remember { mutableStateOf<Int?>(null) }
     var collapsedBlocks by remember(workout.id) { mutableStateOf(emptySet<Int>()) }
     val detailContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
@@ -310,7 +314,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
     var guideExercise by remember { mutableStateOf<ExerciseSummary?>(null) }
     var showMenu by remember { mutableStateOf(false) }
     var showSkipConfirmation by remember { mutableStateOf(false) }
-    var skipped by remember(workout.id) { mutableStateOf(false) }
+    var skipped by remember(workout.id) { mutableStateOf(workout.status == WorkoutStatus.Skipped) }
     guideExercise?.let { selected ->
         ExerciseGuideScreen(selected, gender) { guideExercise = null }
         return
@@ -321,7 +325,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
                 Text("‹ VOLVER", Modifier.clickable(onClick = onBack).padding(12.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
                 Text("DÍA OMITIDO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
                 Text("Este entrenamiento se ha marcado como descanso.", Modifier.padding(top = 8.dp), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                Text("DESHACER", Modifier.clickable { skipped = false }.padding(14.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+                Text("DESHACER", Modifier.clickable { skipped = false; onUnskip() }.padding(14.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
             }
         }
         return
@@ -425,7 +429,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
             onDismissRequest = { showSkipConfirmation = false },
             title = { Text("¿OMITIR ENTRENAMIENTO?", fontFamily = AntonFontFamily) },
             text = { Text("El día quedará marcado como descanso y podrás volver a abrirlo después.") },
-            confirmButton = { TextButton(onClick = { skipped = true; showSkipConfirmation = false }) { Text("OMITIR", color = Color(0xFFC62828)) } },
+            confirmButton = { TextButton(onClick = { skipped = true; showSkipConfirmation = false; onSkip() }) { Text("OMITIR", color = Color(0xFFC62828)) } },
             dismissButton = { TextButton(onClick = { showSkipConfirmation = false }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
         )
     }
