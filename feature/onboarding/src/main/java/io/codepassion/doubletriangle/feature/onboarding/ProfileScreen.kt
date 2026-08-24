@@ -90,7 +90,8 @@ fun ProfileScreen(
     var healthConnectMessage by remember { mutableStateOf<String?>(null) }
     var saveMessage by remember(initial) { mutableStateOf<String?>(null) }
     var entered by remember { mutableStateOf(false) }
-    val notificationPreferences = remember { LocalContext.current.getSharedPreferences("wildforce_notification_settings", 0) }
+    val profileContext = LocalContext.current
+    val notificationPreferences = remember(profileContext) { profileContext.getSharedPreferences("wildforce_notification_settings", 0) }
     var notificationsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("enabled", true)) }
     var restAlertsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("rest_alerts", true)) }
     var reminderNotificationsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("reminders", true)) }
