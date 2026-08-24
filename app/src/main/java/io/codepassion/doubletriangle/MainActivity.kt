@@ -192,7 +192,7 @@ fun WildforceRoot() {
             if (useAi) {
                 isGenerating = true
                 coroutineScope.launch {
-                    runCatching { WorkoutPlanGenerator.generate(completedProfile.name, completedProfile.goal.title) }
+                    runCatching { WorkoutPlanGenerator.generate(completedProfile) }
                         .onSuccess { (json, state) ->
                             preferences.edit().putString("workout_plan_json", json).apply()
                             generatedWorkoutState = state
@@ -314,7 +314,7 @@ private fun WildforceApp(
                 state = displayedWorkoutState,
                 onWorkoutSelected = { workoutDetail = it },
                 gender = "male",
-                customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile.name, profile.goal.title, request) },
+                customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile, request) },
             )
         } else if (selected == RootDestination.Nutrition) {
             NutritionScreen()
