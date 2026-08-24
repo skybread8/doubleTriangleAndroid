@@ -4,6 +4,7 @@ import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
 import io.codepassion.doubletriangle.core.model.SetStyleParameters
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
+import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import java.time.DayOfWeek
 import org.junit.Assert.assertEquals
@@ -33,6 +34,18 @@ class WorkoutCompletionCalculatorTest {
         val score = WorkoutCompletionCalculator.score(workout, mapOf(0 to ExerciseSessionStats(1, 8, 40.0, 320.0)), emptyMap())
         assertTrue(score < 65.0)
         assertTrue(score >= 0.0)
+    }
+
+    @Test fun warmupAndCooldownDoNotLowerTheIosWorkoutScore() {
+        val sectioned = workout.copy(
+            exercises = listOf(
+                ExerciseSummary("Movilidad", sets = 1, reps = "10", restSeconds = 0, blockType = WorkoutBlockType.Warmup),
+                ExerciseSummary("Press", sets = 3, reps = "8", restSeconds = 90),
+                ExerciseSummary("Estiramiento", sets = 1, reps = "30 s", restSeconds = 0, blockType = WorkoutBlockType.Cooldown),
+            ),
+        )
+        val score = WorkoutCompletionCalculator.score(sectioned, mapOf(1 to ExerciseSessionStats(3, 24, 50.0, 1_200.0)), mapOf(1 to "CORRECTO"))
+        assertEquals(100.0, score, 0.01)
     }
 
     @Test fun experienceThresholdsMatchIos() {

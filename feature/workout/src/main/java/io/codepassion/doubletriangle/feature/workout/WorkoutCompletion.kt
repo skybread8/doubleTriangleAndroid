@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import android.content.Context
+import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import java.time.LocalDate
 
@@ -25,10 +26,11 @@ internal object WorkoutCompletionCalculator {
     const val WORKOUT_XP = 25
 
     fun score(workout: WorkoutDaySummary, stats: Map<Int, ExerciseSessionStats>, feedback: Map<Int, String>): Double {
-        if (workout.exercises.isEmpty()) return 0.0
-        val completion = workout.exercises.indices.count { (stats[it]?.sets ?: 0) > 0 }.toDouble() / workout.exercises.size
-        val adherence = workout.exercises.mapIndexed { index, exercise ->
-            val result = stats[index] ?: return@mapIndexed 0.0
+        val scoredExercises = workout.exercises.withIndex().filter { it.value.blockType !in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown) }
+        if (scoredExercises.isEmpty()) return 0.0
+        val completion = scoredExercises.count { (stats[it.index]?.sets ?: 0) > 0 }.toDouble() / scoredExercises.size
+        val adherence = scoredExercises.map { (index, exercise) ->
+            val result = stats[index] ?: return@map 0.0
             val setScore = ratio(result.sets.toDouble(), exercise.sets.coerceAtLeast(1).toDouble())
             val targetReps = targetReps(exercise.reps) * exercise.sets.coerceAtLeast(1)
             val repScore = ratio(result.totalReps.toDouble(), targetReps.toDouble())
@@ -48,6 +50,7 @@ internal object WorkoutCompletionCalculator {
 
     fun records(context: Context, workout: WorkoutDaySummary, stats: Map<Int, ExerciseSessionStats>): List<ExerciseRecordEvent> = buildList {
         workout.exercises.forEachIndexed { index, exercise ->
+            if (exercise.blockType in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)) return@forEachIndexed
             val current = stats[index] ?: return@forEachIndexed
             val previous = WorkoutHistoryStore.history(context, exercise)
             val previousWeight = previous.maxOfOrNull { it.maxWeightKg } ?: 0.0

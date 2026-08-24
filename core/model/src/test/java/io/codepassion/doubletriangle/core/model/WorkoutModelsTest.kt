@@ -29,4 +29,26 @@ class WorkoutModelsTest {
         assertEquals(ExerciseSetStyle.Straight, exercise.setStyle)
         assertEquals(SetStyleParameters(), exercise.setStyleParameters)
     }
+
+    @Test fun legacyWorkoutsBecomeAStandardDisplayBlock() {
+        val workout = state.workouts.first { it.id == "legs" }
+        assertEquals(WorkoutBlockType.Standard, workout.displayBlocks().single().type)
+        assertEquals(workout.exercises, workout.displayBlocks().single().exercises)
+    }
+
+    @Test fun fakePlanExposesEveryIosBlockType() {
+        assertEquals(WorkoutBlockType.entries, state.workouts.first().blocks.map { it.type })
+    }
+
+    @Test fun supersetsAlternateExercisesForEveryRound() {
+        val first = ExerciseSummary("Press", sets = 3, reps = "8", restSeconds = 0)
+        val second = ExerciseSummary("Remo", sets = 3, reps = "10", restSeconds = 0)
+        val block = WorkoutBlockSummary(WorkoutBlockType.Superset, rounds = 3, exercises = listOf(first, second))
+
+        assertEquals(listOf("Press", "Remo", "Press", "Remo", "Press", "Remo"), block.executionExercises().map { it.name })
+        assertEquals(List(6) { 1 }, block.executionExercises().map { it.sets })
+        assertEquals(listOf(1, 1, 2, 2, 3, 3), block.executionExercises().map { it.blockRound })
+        assertEquals(listOf("A1", "A2", "A1", "A2", "A1", "A2"), block.executionExercises().map { it.blockLabel })
+        assertEquals(listOf(false, true, false, true, false, true), block.executionExercises().map { it.isLastInBlock })
+    }
 }

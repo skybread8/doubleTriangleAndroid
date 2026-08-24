@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle
 
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
+import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -24,5 +25,14 @@ class WorkoutPlanGeneratorTest {
         styles.forEach { (wireValue, expected) ->
             assertEquals(expected, WorkoutPlanGenerator.parseSetStyle(wireValue))
         }
+    }
+
+    @Test
+    fun `maps iOS workout block wire values`() {
+        assertEquals(WorkoutBlockType.Warmup, WorkoutPlanGenerator.parseBlockType("warmup"))
+        assertEquals(WorkoutBlockType.Standard, WorkoutPlanGenerator.parseBlockType("standard"))
+        assertEquals(WorkoutBlockType.Superset, WorkoutPlanGenerator.parseBlockType("SUPERSET"))
+        assertEquals(WorkoutBlockType.Cooldown, WorkoutPlanGenerator.parseBlockType("cooldown"))
+        assertEquals(WorkoutBlockType.Standard, WorkoutPlanGenerator.parseBlockType("unknown"))
     }
 }

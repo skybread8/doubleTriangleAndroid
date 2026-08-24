@@ -55,9 +55,11 @@ import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
 import io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
+import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
 import io.codepassion.doubletriangle.core.model.WorkoutMode
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
+import io.codepassion.doubletriangle.core.model.displayBlocks
 import io.codepassion.doubletriangle.core.model.workoutsFor
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -296,6 +298,7 @@ private fun WorkoutHubPreview() = WildforceTheme { WorkoutHubScreen(PaddingValue
 @Composable
 fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -> Unit, onStart: () -> Unit) {
     var expandedExercise by remember { mutableStateOf<Int?>(null) }
+    var collapsedBlocks by remember(workout.id) { mutableStateOf(emptySet<Int>()) }
     val detailContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
     val hasSavedSession = remember(workout.id) { WorkoutSessionStore.load(detailContext, workout.id) != null }
     var guideExercise by remember { mutableStateOf<ExerciseSummary?>(null) }
@@ -318,25 +321,66 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, onBack: () -
                 Text(workout.title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
                 Text("${workout.focus} · ${workout.dayType} · ${workout.estimatedMinutes} min", color = WildforceThemeTokens.textSecondary)
                 Spacer(Modifier.height(20.dp))
-                workout.exercises.forEachIndexed { index, exercise ->
-                    Row(
-                        Modifier.fillMaxWidth().padding(vertical = 5.dp).liquidGlass(RoundedCornerShape(14.dp))
-                            .clickable { expandedExercise = if (expandedExercise == index) null else index }.padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), null, Modifier.size(58.dp).clip(RoundedCornerShape(12.dp)))
-                        Column(Modifier.weight(1f).padding(horizontal = 13.dp)) {
-                            Text(exercise.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                            Text("${exercise.sets} series · ${exercise.reps} reps · ${exercise.restSeconds}s", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                workout.displayBlocks().forEachIndexed { blockIndex, block ->
+                    val collapsible = block.type == WorkoutBlockType.Warmup || block.type == WorkoutBlockType.Cooldown
+                    val collapsed = blockIndex in collapsedBlocks
+                    val showHeader = block.type != WorkoutBlockType.Standard || !block.notes.isNullOrBlank()
+                    if (showHeader) {
+                        Column(
+                            Modifier.fillMaxWidth().clickable(enabled = collapsible) {
+                                collapsedBlocks = if (collapsed) collapsedBlocks - blockIndex else collapsedBlocks + blockIndex
+                            }.padding(top = 14.dp, bottom = 8.dp),
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (collapsible) Text(if (collapsed) "›" else "⌄", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(end = 8.dp))
+                                Box(
+                                    Modifier.size(width = 4.dp, height = 24.dp).clip(RoundedCornerShape(3.dp)).background(
+                                        when (block.type) {
+                                            WorkoutBlockType.Warmup -> Color(0xFFF08A24)
+                                            WorkoutBlockType.Cooldown -> Color(0xFF4A8FE7)
+                                            else -> WildforceThemeTokens.accentGold
+                                        },
+                                    ),
+                                )
+                                Text(block.type.label.uppercase(), Modifier.padding(start = 10.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                                if (block.rounds > 1) {
+                                    Text("${block.rounds} RONDAS", Modifier.padding(start = 9.dp).background(WildforceThemeTokens.accentGold.copy(alpha = 0.13f), RoundedCornerShape(12.dp)).padding(horizontal = 8.dp, vertical = 3.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+                                }
+                            }
+                            block.notes?.let { Text(it, Modifier.padding(top = 5.dp, start = if (collapsible) 22.dp else 14.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                         }
-                        Text(if (expandedExercise == index) "⌃" else "⌄", color = WildforceThemeTokens.accentGold)
                     }
-                    if (expandedExercise == index) {
-                        Column(Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, bottom = 10.dp)) {
-                            Text("MÚSCULOS IMPLICADOS", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
-                            MuscleStrip(exercise.imageKey, onDarkBackground = false, modifier = Modifier.padding(vertical = 5.dp))
-                            Text("Objetivo: ${exercise.sets} series de ${exercise.reps} repeticiones con ${exercise.restSeconds}s de recuperación.", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
-                            Text("CÓMO HACERLO  →", Modifier.padding(top = 10.dp).clickable { guideExercise = exercise }, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
+                    if (!collapsed) {
+                        block.exercises.forEachIndexed { exerciseIndex, exercise ->
+                            val itemKey = blockIndex * 1000 + exerciseIndex
+                            Row(
+                                Modifier.fillMaxWidth().padding(vertical = 5.dp, horizontal = if (block.type == WorkoutBlockType.Superset) 8.dp else 0.dp).liquidGlass(RoundedCornerShape(14.dp))
+                                    .clickable { expandedExercise = if (expandedExercise == itemKey) null else itemKey }.padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                if (block.type == WorkoutBlockType.Superset) {
+                                    Text("A${exerciseIndex + 1}", Modifier.padding(end = 9.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+                                }
+                                RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), null, Modifier.size(58.dp).clip(RoundedCornerShape(12.dp)))
+                                Column(Modifier.weight(1f).padding(horizontal = 13.dp)) {
+                                    Text(exercise.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                                    val setText = if (block.type == WorkoutBlockType.Superset) "${block.rounds} rondas" else "${exercise.sets} series"
+                                    val restText = if (exercise.restSeconds > 0) " · ${exercise.restSeconds}s" else ""
+                                    Text("$setText · ${exercise.reps} reps$restText", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                                }
+                                Text(if (expandedExercise == itemKey) "⌃" else "⌄", color = WildforceThemeTokens.accentGold)
+                            }
+                            if (expandedExercise == itemKey) {
+                                Column(Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, bottom = 10.dp)) {
+                                    Text("MÚSCULOS IMPLICADOS", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+                                    MuscleStrip(exercise.imageKey, onDarkBackground = false, modifier = Modifier.padding(vertical = 5.dp))
+                                    Text("Objetivo: ${exercise.reps} repeticiones${if (exercise.restSeconds > 0) " con ${exercise.restSeconds}s de recuperación" else ""}.", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                                    Text("CÓMO HACERLO  →", Modifier.padding(top = 10.dp).clickable { guideExercise = exercise }, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
+                                }
+                            }
+                        }
+                        block.restAfterBlockSeconds?.let { rest ->
+                            Text("◷  Descansa ${rest}s al terminar el bloque", Modifier.padding(horizontal = 14.dp, vertical = 7.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
                         }
                     }
                 }
@@ -385,6 +429,20 @@ fun ActiveWorkoutScreen(
     var initializedExerciseIndex by remember(workout.id) { mutableStateOf(restored?.exerciseIndex ?: -1) }
     val exercise = workout.exercises.getOrNull(exerciseIndex)
     val completedForExercise = completedByExercise[exerciseIndex] ?: 0
+    fun advanceFromExercise(restSeconds: Int) {
+        if (exerciseIndex < workout.exercises.lastIndex) {
+            exerciseIndex++
+            if (restSeconds > 0) {
+                restInitialSeconds = restSeconds
+                restBetweenExercises = true
+                restRemaining = restSeconds
+            } else {
+                restRemaining = null
+            }
+        } else {
+            showsSummary = true
+        }
+    }
 
     LaunchedEffect(showsSummary) { while (!showsSummary) { delay(1_000); elapsedSeconds++ } }
     LaunchedEffect(exerciseIndex) {
@@ -470,8 +528,14 @@ fun ActiveWorkoutScreen(
             Column(Modifier.padding(horizontal = 10.dp, vertical = 14.dp)) {
                 Text("EJERCICIO ${exerciseIndex + 1} DE ${workout.exercises.size}", color = Color.White.copy(alpha = 0.72f), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
                 Text(exercise?.name?.uppercase().orEmpty(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
+                exercise?.takeIf { it.blockType != WorkoutBlockType.Standard }?.let { blockedExercise ->
+                    val blockProgress = blockedExercise.blockLabel?.let { "$it · " }.orEmpty() +
+                        if (blockedExercise.blockRounds > 1) "RONDA ${blockedExercise.blockRound}/${blockedExercise.blockRounds}" else blockedExercise.blockType.label.uppercase()
+                    Text(blockProgress, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
+                }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("FUERZA", Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.48f)).padding(horizontal = 10.dp, vertical = 5.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+                    val contextLabel = exercise?.blockType?.takeIf { it != WorkoutBlockType.Standard }?.label?.uppercase() ?: "FUERZA"
+                    Text(contextLabel, Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.48f)).padding(horizontal = 10.dp, vertical = 5.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                     Text("CÓMO HACERLO  ›", Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.48f)).clickable { showsExerciseGuide = true }.padding(horizontal = 10.dp, vertical = 5.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 }
                 MuscleStrip(exercise?.imageKey, onDarkBackground = true, modifier = Modifier.padding(top = 8.dp))
@@ -493,12 +557,7 @@ fun ActiveWorkoutScreen(
                             selectedFeedback?.let { feedbackByExercise = feedbackByExercise + (exerciseIndex to it) }
                             pendingFeedback = false
                             selectedFeedback = null
-                            if (exerciseIndex < workout.exercises.lastIndex) {
-                                exerciseIndex++
-                                restInitialSeconds = exercise.restSeconds.coerceAtLeast(1)
-                                restBetweenExercises = true
-                                restRemaining = exercise.restSeconds
-                            } else showsSummary = true
+                            advanceFromExercise(exercise.restSeconds)
                         },
                     )
                 } else if (resting != null) {
@@ -575,7 +634,19 @@ fun ActiveWorkoutScreen(
                             }
                                 restBetweenExercises = false
                                 restRemaining = exercise.restSeconds
-                            } else pendingFeedback = true
+                            } else {
+                                val needsFeedback = when (exercise.blockType) {
+                                    WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown -> false
+                                    WorkoutBlockType.Superset -> exercise.isLastInBlock && exercise.blockRound == exercise.blockRounds
+                                    WorkoutBlockType.Standard -> true
+                                }
+                                if (needsFeedback) {
+                                    pendingFeedback = true
+                                } else {
+                                    val transitionRest = if (exercise.isLastInBlock) exercise.restAfterBlockSeconds ?: 0 else exercise.restSeconds
+                                    advanceFromExercise(transitionRest)
+                                }
+                            }
                         },
                         modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp),
