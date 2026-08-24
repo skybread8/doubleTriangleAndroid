@@ -6,6 +6,7 @@ import org.json.JSONObject
 import java.util.Calendar
 import java.time.LocalDate
 import java.time.ZoneId
+import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 
 internal enum class MealType(val title: String) { Breakfast("Desayuno"), Lunch("Comida"), Dinner("Cena"), Snack("Snack") }
 
@@ -17,8 +18,10 @@ internal object NutritionStore {
     private const val KEY = "today_meals"
     private const val TARGETS_KEY = "nutrition_targets"
 
-    fun loadTargets(context: Context): NutritionTargets = runCatching {
-        val item = JSONObject(context.getSharedPreferences(PREFS, 0).getString(TARGETS_KEY, "{}") ?: "{}")
+    fun loadTargets(context: Context, profile: OnboardingProfile? = null): NutritionTargets = runCatching {
+        val stored = context.getSharedPreferences(PREFS, 0).getString(TARGETS_KEY, null)
+        if (stored == null && profile != null) return@runCatching targetsFor(profile)
+        val item = JSONObject(stored ?: "{}")
         NutritionTargets(
             calories = item.optInt("calories", 2350).coerceIn(500, 8000),
             protein = item.optInt("protein", 165).coerceIn(0, 500),
@@ -26,6 +29,25 @@ internal object NutritionStore {
             fat = item.optInt("fat", 75).coerceIn(0, 500),
         )
     }.getOrDefault(NutritionTargets())
+
+    private fun targetsFor(profile: OnboardingProfile): NutritionTargets {
+        val activityFactor = when (profile.lifestyle.storedValue) {
+            "sedentary" -> 28.0
+            "lightlyActive" -> 30.0
+            "veryActive" -> 35.0
+            else -> 32.0
+        }
+        val goalAdjustment = when (profile.goal.storedValue) {
+            "buildMuscle", "gainStrength" -> 250
+            "bodyRecomposition" -> -100
+            else -> 0
+        }
+        val calories = (profile.weightKg * activityFactor + goalAdjustment).toInt().coerceIn(1200, 5000)
+        val protein = (profile.weightKg * if (profile.goal.storedValue == "improveEndurance") 1.5 else 1.8).toInt().coerceIn(60, 350)
+        val fat = (calories * 0.25 / 9).toInt().coerceIn(30, 180)
+        val carbs = ((calories - protein * 4 - fat * 9) / 4).coerceAtLeast(0).coerceAtMost(700)
+        return NutritionTargets(calories, protein, carbs, fat)
+    }
 
     fun saveTargets(context: Context, targets: NutritionTargets) {
         context.getSharedPreferences(PREFS, 0).edit().putString(TARGETS_KEY, JSONObject().put("calories", targets.calories).put("protein", targets.protein).put("carbs", targets.carbs).put("fat", targets.fat).toString()).apply()

@@ -48,7 +48,7 @@ import java.time.LocalDate
 import java.time.format.TextStyle
 
 @Composable
-fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues()) {
+fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(), profile: io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile? = null) {
     val context = androidx.compose.ui.platform.LocalContext.current.applicationContext
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     val canEdit = selectedDate == LocalDate.now()
@@ -61,7 +61,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
     var mealFat by remember { mutableStateOf("") }
     var mealType by remember { mutableStateOf(MealType.Snack) }
     var editingMeal by remember { mutableStateOf<MealLog?>(null) }
-    var targets by remember { mutableStateOf(NutritionStore.loadTargets(context)) }
+    var targets by remember(profile) { mutableStateOf(NutritionStore.loadTargets(context, profile)) }
     var editingTargets by remember { mutableStateOf(false) }
     val calories = meals.sumOf { it.calories }
     val protein = meals.sumOf { it.protein }

@@ -472,7 +472,7 @@ private fun WildforceApp(
                 customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile, request, appContext) },
             )
         } else if (selected == RootDestination.Nutrition) {
-            NutritionScreen(padding)
+            NutritionScreen(padding, profile)
         } else if (selected == RootDestination.Analytics) {
             val analyticsExercises = displayedWorkoutState.workouts.flatMap { it.exercises }
             AnalyticsScreen(appContext, displayedWorkoutState, appPreferences, WorkoutAnalyticsStore.summaries(appContext, analyticsExercises), padding)
