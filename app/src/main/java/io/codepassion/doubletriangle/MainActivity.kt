@@ -328,6 +328,9 @@ private fun WildforceApp(
             useImperial = profile.metricSystem == MetricSystem.Imperial,
             skipRestPeriods = profile.skipsRestPeriods,
             currentStreak = displayedWorkoutState.user.currentStreak,
+            isPlanCompletedAfterWorkout = displayedWorkoutState.workouts.none { candidate ->
+                candidate.id != workout.id && candidate.status == WorkoutStatus.Planned
+            },
             onExit = { activeWorkout = null },
             onFinish = { duration, sets, volume, streak ->
                 displayedWorkoutState = displayedWorkoutState.copy(

@@ -50,7 +50,7 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import java.util.Locale
 
-private enum class CompletionPhase { DurationWarning, Records, Summary, Score, Streak, Xp, LevelUp }
+private enum class CompletionPhase { DurationWarning, Records, Summary, Score, Streak, Xp, LevelUp, PlanComplete }
 
 @Composable
 internal fun WorkoutCompletionFlowScreen(
@@ -60,6 +60,7 @@ internal fun WorkoutCompletionFlowScreen(
     feedback: Map<Int, String>,
     records: List<ExerciseRecordEvent>,
     progress: CompletionProgress,
+    isPlanCompleted: Boolean = false,
     useImperial: Boolean = false,
     onCancelWorkout: () -> Unit,
     onDone: () -> Unit,
@@ -74,6 +75,13 @@ internal fun WorkoutCompletionFlowScreen(
     val mainExercises = remember(workout) { workout.pathBlocks().mainExercises() }
     val completedSets = stats.mapValues { it.value.sets }
     val completedMainExercises = mainExercises.count { it.isCompleted(workout, completedSets) }
+    fun continueAfterXp() {
+        when {
+            progress.levelAfter > progress.levelBefore -> phase = CompletionPhase.LevelUp
+            isPlanCompleted -> phase = CompletionPhase.PlanComplete
+            else -> onDone()
+        }
+    }
     // iOS presents the finish flow as a sequence of soft, progressive transitions.
     // Keep the phase state machine intact, but animate each screen change so the
     // completion experience does not snap from one celebration to the next.
@@ -84,8 +92,9 @@ internal fun WorkoutCompletionFlowScreen(
             CompletionPhase.Summary -> CompletionSummary(workout, durationSeconds, stats, completedMainExercises, useImperial) { phase = CompletionPhase.Score }
             CompletionPhase.Score -> ScoreCelebration(score, completedMainExercises, mainExercises.size, dominantFeedback(feedback)) { phase = if (progress.streakIncreased) CompletionPhase.Streak else CompletionPhase.Xp }
             CompletionPhase.Streak -> StreakCelebration(progress.streakAfter) { phase = CompletionPhase.Xp }
-            CompletionPhase.Xp -> XpCelebration(progress) { if (progress.levelAfter > progress.levelBefore) phase = CompletionPhase.LevelUp else onDone() }
-            CompletionPhase.LevelUp -> LevelUpCelebration(progress.levelAfter, onDone)
+            CompletionPhase.Xp -> XpCelebration(progress) { continueAfterXp() }
+            CompletionPhase.LevelUp -> LevelUpCelebration(progress.levelAfter) { if (isPlanCompleted) phase = CompletionPhase.PlanComplete else onDone() }
+            CompletionPhase.PlanComplete -> PlanCompletedCelebration(workout, onDone)
         }
     }
 }
@@ -214,7 +223,7 @@ private fun XpCelebration(progress: CompletionProgress, onContinue: () -> Unit) 
 }
 
 @Composable
-private fun LevelUpCelebration(level: Int, onContinue: () -> Unit) = CelebrationFrame("TERMINAR", onContinue) {
+private fun LevelUpCelebration(level: Int, onContinue: () -> Unit) = CelebrationFrame("CONTINUAR", onContinue) {
     var revealLevel by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { revealLevel = true }
     val displayedLevel by animateIntAsState(if (revealLevel) level else (level - 1).coerceAtLeast(1), animationSpec = tween(750, delayMillis = 150))
@@ -223,6 +232,17 @@ private fun LevelUpCelebration(level: Int, onContinue: () -> Unit) = Celebration
     Text("NUEVO NIVEL", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text(displayedLevel.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
     Text("Tu constancia sigue dando resultados.", color = WildforceThemeTokens.textSecondary)
+    Spacer(Modifier.weight(1f))
+}
+
+@Composable
+private fun PlanCompletedCelebration(workout: WorkoutDaySummary, onContinue: () -> Unit) = CelebrationFrame("TERMINAR", onContinue) {
+    Spacer(Modifier.weight(1f))
+    Text("✦", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
+    Text("PLAN COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text("Ya no quedan sesiones pendientes en este plan.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Text(workout.focus.uppercase(), Modifier.padding(top = 14.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold, textAlign = TextAlign.Center)
+    Text("Tómate un momento para recuperar y vuelve cuando estés listo para tu siguiente plan.", Modifier.padding(top = 8.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
 
