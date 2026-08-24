@@ -44,6 +44,8 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import java.util.Locale
+import java.time.LocalDate
+import java.time.format.TextStyle
 
 private const val DAILY_CALORIES = 2_350
 private const val DAILY_PROTEIN = 165
@@ -68,7 +70,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 18.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             item {
                 Text("NUTRICIÓN", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-                Text("LUNES · HOY", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+                Text("${LocalDate.now().dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es", "ES")).uppercase()} · HOY", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
             }
             item {
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(18.dp)) {
