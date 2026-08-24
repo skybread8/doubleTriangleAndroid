@@ -155,6 +155,9 @@ object WorkoutPlanGenerator {
             check(workout.exercises.none { it.name.isBlank() }) {
                 "La IA devolvió un ejercicio sin nombre en ${workout.title}. Vuelve a generar el plan."
             }
+            check(workout.exercises.map { it.name.trim().lowercase() }.distinct().size == workout.exercises.size) {
+                "La IA repitió ejercicios dentro de ${workout.title}. Vuelve a generar el plan."
+            }
             val blocks = workout.displayBlocks()
             val hasWarmup = blocks.any { it.type == WorkoutBlockType.Warmup && it.exercises.isNotEmpty() }
             val hasCooldown = blocks.any { it.type == WorkoutBlockType.Cooldown && it.exercises.isNotEmpty() }

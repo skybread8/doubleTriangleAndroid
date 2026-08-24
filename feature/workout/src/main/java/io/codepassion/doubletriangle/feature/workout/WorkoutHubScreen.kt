@@ -175,7 +175,7 @@ fun WorkoutHubScreen(
                         generatingCustomWorkout = true
                         coroutineScope.launch {
                             runCatching { customAiGenerator.invoke(request) }
-                                .onSuccess { generated -> editingCustomWorkout = generated.copy(scheduledDay = selectedDay ?: LocalDate.now().dayOfWeek) }
+                                .onSuccess { generated -> lastCustomRequest = null; editingCustomWorkout = generated.copy(scheduledDay = selectedDay ?: LocalDate.now().dayOfWeek) }
                                 .onFailure { error -> customGenerationError = error.message ?: "No se pudo generar el entrenamiento." }
                             generatingCustomWorkout = false
                         }
@@ -217,7 +217,7 @@ fun WorkoutHubScreen(
                                 generatingCustomWorkout = true
                                 coroutineScope.launch {
                                     runCatching { customAiGenerator.invoke(request) }
-                                        .onSuccess { generated -> editingCustomWorkout = generated.copy(scheduledDay = selectedDay ?: LocalDate.now().dayOfWeek) }
+                                        .onSuccess { generated -> lastCustomRequest = null; editingCustomWorkout = generated.copy(scheduledDay = selectedDay ?: LocalDate.now().dayOfWeek) }
                                         .onFailure { retryError -> customGenerationError = retryError.message ?: "No se pudo generar el entrenamiento." }
                                     generatingCustomWorkout = false
                                 }
@@ -1173,7 +1173,7 @@ private fun RestActionButton(glyph: String, label: String, primary: Boolean, onC
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
     ) {
         Text(glyph, style = MaterialTheme.typography.h6, fontWeight = FontWeight.Bold, color = if (primary) Color.White else WildforceThemeTokens.textPrimary)
-        Text(label, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = if (primary) Color.White else WildforceThemeTokens.textPrimary)
+        Text(label, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = if (primary) Color.White else WildforceThemeTokens.textPrimary, maxLines = 1, softWrap = false, overflow = TextOverflow.Clip)
     }
 }
 @Composable

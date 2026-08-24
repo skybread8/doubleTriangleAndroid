@@ -156,6 +156,15 @@ private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: (
 
 @Composable
 private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, stats: Map<Int, ExerciseSessionStats>, completedExercises: Int, useImperial: Boolean, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    var visibleRows by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        delay(180)
+        visibleRows = 1
+        delay(180)
+        visibleRows = 2
+        delay(180)
+        visibleRows = 3
+    }
     Text("✓", Modifier.size(76.dp).background(WildforceThemeTokens.accentGold.copy(alpha = 0.12f), CircleShape).padding(12.dp), style = MaterialTheme.typography.h3, color = WildforceThemeTokens.accentGold, textAlign = TextAlign.Center)
     Text("¡GRAN TRABAJO!", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text("Has completado ${workout.title}.", color = WildforceThemeTokens.textSecondary)
@@ -165,15 +174,21 @@ private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, 
     val volume = mainStats.sumOf { it.volumeKg }
     val repetitions = mainStats.sumOf { it.totalReps }
     Column(Modifier.fillMaxWidth().padding(top = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            CompletionStat("EJERCICIOS", completedExercises.toString(), Modifier.weight(1f))
-            CompletionStat("SERIES", sets.toString(), Modifier.weight(1f))
+        AnimatedVisibility(visibleRows >= 1, enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 }) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                CompletionStat("EJERCICIOS", completedExercises.toString(), Modifier.weight(1f))
+                CompletionStat("SERIES", sets.toString(), Modifier.weight(1f))
+            }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            CompletionStat("REPETICIONES", repetitions.toString(), Modifier.weight(1f))
-            CompletionStat("VOLUMEN", String.format(Locale.getDefault(), "%.0f %s", if (useImperial) volume * KG_TO_LB else volume, if (useImperial) "lb" else "kg"), Modifier.weight(1f))
+        AnimatedVisibility(visibleRows >= 2, enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 }) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                CompletionStat("REPETICIONES", repetitions.toString(), Modifier.weight(1f))
+                CompletionStat("VOLUMEN", String.format(Locale.getDefault(), "%.0f %s", if (useImperial) volume * KG_TO_LB else volume, if (useImperial) "lb" else "kg"), Modifier.weight(1f))
+            }
         }
-        CompletionStat("TIEMPO", formatCompletionClock(durationSeconds), Modifier.fillMaxWidth())
+        AnimatedVisibility(visibleRows >= 3, enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 }) {
+            CompletionStat("TIEMPO", formatCompletionClock(durationSeconds), Modifier.fillMaxWidth())
+        }
     }
 }
 
