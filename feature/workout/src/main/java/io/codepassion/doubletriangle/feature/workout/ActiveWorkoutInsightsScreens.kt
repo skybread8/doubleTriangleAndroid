@@ -17,10 +17,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -142,9 +145,11 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
             horizontalArrangement = Arrangement.spacedBy(9.dp), verticalAlignment = Alignment.Bottom,
         ) {
             history.take(12).reversed().forEach { entry ->
+                val targetHeight = (22 + 78 * entry.volumeKg / maxVolume).dp
+                val animatedHeight by animateDpAsState(targetHeight, animationSpec = tween(650), label = "history-volume")
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom) {
                     Text(String.format(Locale.getDefault(), "%.0f", entry.volumeKg), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
-                    Box(Modifier.width(24.dp).height((22 + 78 * entry.volumeKg / maxVolume).dp).background(WildforceThemeTokens.accentGold, RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp)))
+                    Box(Modifier.width(24.dp).height(animatedHeight).background(WildforceThemeTokens.accentGold, RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp)))
                 }
             }
         }
