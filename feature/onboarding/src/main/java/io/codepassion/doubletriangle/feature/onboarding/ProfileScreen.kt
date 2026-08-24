@@ -2,6 +2,7 @@ package io.codepassion.doubletriangle.feature.onboarding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
@@ -38,6 +40,8 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 @Composable
 fun ProfileScreen(initial: OnboardingProfile, onSave: (OnboardingProfile) -> Unit, onRegenerate: (OnboardingProfile) -> Unit = {}) {
     var draft by remember(initial) { mutableStateOf(initial) }
+    var heightInput by remember(initial) { mutableStateOf(initial.heightCm.toString()) }
+    var weightInput by remember(initial) { mutableStateOf(initial.weightKg.toString()) }
     var picker by remember { mutableStateOf<Picker?>(null) }
     LazyColumn(
         modifier = Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 16.dp),
@@ -50,8 +54,8 @@ fun ProfileScreen(initial: OnboardingProfile, onSave: (OnboardingProfile) -> Uni
             Section("DATOS PERSONALES") {
                 OutlinedTextField(draft.name, { draft = draft.copy(name = it.take(60)) }, Modifier.fillMaxWidth(), label = { Text("Nombre") }, singleLine = true)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                    NumberField("Altura (cm)", draft.heightCm.toString(), { draft = draft.copy(heightCm = it.toIntOrNull()?.coerceIn(120, 230) ?: draft.heightCm) }, Modifier.weight(1f))
-                    NumberField("Peso (kg)", draft.weightKg.toString(), { draft = draft.copy(weightKg = it.replace(',', '.').toDoubleOrNull()?.coerceIn(30.0, 300.0) ?: draft.weightKg) }, Modifier.weight(1f))
+                    NumberField("Altura (cm)", heightInput, { heightInput = it.filter(Char::isDigit).take(3) }, Modifier.weight(1f))
+                    NumberField("Peso (kg)", weightInput, { weightInput = it.filter { char -> char.isDigit() || char == ',' || char == '.' }.take(6) }, Modifier.weight(1f), decimal = true)
                 }
                 ChoiceButton("Sexo", draft.gender.title) { picker = Picker.Gender }
                 ChoiceButton("Unidades", draft.metricSystem.title) { picker = Picker.Metric }
@@ -98,8 +102,8 @@ fun ProfileScreen(initial: OnboardingProfile, onSave: (OnboardingProfile) -> Uni
             }
         }
         item {
-            Button(onClick = { onSave(draft) }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text("GUARDAR PERFIL", fontWeight = FontWeight.Bold) }
-            Button(onClick = { onSave(draft); onRegenerate(draft) }, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text("GUARDAR Y REGENERAR PLAN", fontWeight = FontWeight.Bold) }
+            Button(onClick = { onSave(validatedProfile(draft, heightInput, weightInput)) }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text("GUARDAR PERFIL", fontWeight = FontWeight.Bold) }
+            Button(onClick = { val saved = validatedProfile(draft, heightInput, weightInput); onSave(saved); onRegenerate(saved) }, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text("GUARDAR Y REGENERAR PLAN", fontWeight = FontWeight.Bold) }
             Spacer(Modifier.height(28.dp))
         }
     }
@@ -154,5 +158,10 @@ private sealed class Picker { data object Goal : Picker(); data object Level : P
 @Composable private fun Section(title: String, content: @Composable () -> Unit) { Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) { Text(title, fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold); content() } }
 @Composable private fun ChoiceButton(label: String, value: String, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween) { Text(label, color = WildforceThemeTokens.textSecondary); Text(value, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold) } }
 @Composable private fun ToggleChip(label: String, selected: Boolean, onClick: () -> Unit) { Text(label, Modifier.fillMaxWidth(.5f).liquidGlass(RoundedCornerShape(10.dp), emphasized = selected).clickable(onClick = onClick).padding(10.dp), color = if (selected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary) }
-@Composable private fun NumberField(label: String, value: String, onValueChange: (String) -> Unit, modifier: Modifier) { OutlinedTextField(value, onValueChange, modifier, label = { Text(label) }, singleLine = true) }
+@Composable private fun NumberField(label: String, value: String, onValueChange: (String) -> Unit, modifier: Modifier, decimal: Boolean = false) { OutlinedTextField(value, onValueChange, modifier, label = { Text(label) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number)) }
 @Composable private fun TogglePreference(label: String, selected: Boolean, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Text(label, color = WildforceThemeTokens.textPrimary); Text(if (selected) "SÍ" else "NO", color = if (selected) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold) } }
+
+private fun validatedProfile(draft: OnboardingProfile, height: String, weight: String): OnboardingProfile = draft.copy(
+    heightCm = height.toIntOrNull()?.coerceIn(120, 230) ?: draft.heightCm,
+    weightKg = weight.replace(',', '.').toDoubleOrNull()?.coerceIn(30.0, 300.0) ?: draft.weightKg,
+)
