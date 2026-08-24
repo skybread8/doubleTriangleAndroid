@@ -185,11 +185,14 @@ object WorkoutHistoryStore {
             appendLine("Historial de entrenamientos recientes (usa estos resultados para progresar o ajustar):")
             entries.forEach { (exercise, entry) ->
                 append("- $exercise: ${entry.sets} series, ${entry.totalReps} reps, máximo ${"%.1f".format(java.util.Locale.US, entry.maxWeightKg)} kg, volumen ${"%.0f".format(java.util.Locale.US, entry.volumeKg)} kg")
+                if (entry.setDetails.isNotEmpty()) {
+                    append(", series registradas: ${entry.setDetails.joinToString("; ") { "${it.reps} reps @${"%.1f".format(java.util.Locale.US, it.weightKg)}kg (${it.setStyle})" }}")
+                }
                 entry.feedback?.let { append(", feedback: $it") }
                 entry.note?.takeIf(String::isNotBlank)?.let { append(", nota: $it") }
                 appendLine()
             }
-            appendLine("Reglas de progresión: con feedback MUY FÁCIL o FÁCIL puedes subir carga, repeticiones o volumen de forma moderada; con JUSTO mantén o progresa hasta un 10%; con DIFÍCIL o MUY DIFÍCIL reduce la exigencia, mantiene la carga o usa una alternativa segura. Nunca ignores restricciones o molestias.")
+            appendLine("Reglas de progresión: prioriza las entradas más recientes y usa el feedback y las notas como restricciones de la siguiente semana. Con feedback MUY FÁCIL o FÁCIL puedes subir carga, repeticiones o volumen de forma moderada; con JUSTO mantén o progresa hasta un 10%; con DIFÍCIL o MUY DIFÍCIL reduce la exigencia, mantiene la carga o usa una alternativa segura. Nunca ignores restricciones, molestias ni una nota explícita del usuario.")
         }
     }
 }

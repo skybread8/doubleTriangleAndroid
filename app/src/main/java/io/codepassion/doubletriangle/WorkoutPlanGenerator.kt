@@ -18,6 +18,7 @@ import io.codepassion.doubletriangle.feature.workout.CustomWorkoutRequest
 import io.codepassion.doubletriangle.feature.workout.WorkoutHistoryStore
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
+import io.codepassion.doubletriangle.feature.onboarding.effectiveTrainingLocations
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.DayOfWeek
@@ -262,11 +263,12 @@ Perfil obligatorio del usuario:
 - Sexo: ${profile.gender.title}; idioma de salida: español; todas las cadenas visibles, títulos, notas y explicaciones deben estar en español.
 - Días disponibles: ${profile.workoutDays.joinToString { it.storedValue }}; duración preferida: ${profile.preferredWorkoutDurationMinutes} minutos
 - Estructura: ${profile.trainingSplitPreference.title}; focos personalizados: ${profile.customWorkoutFocuses.entries.joinToString { "${it.key.storedValue}=${it.value.storedValue}" }.ifBlank { "ninguno" }}
-- Equipamiento: ${profile.availableEquipment.joinToString { it.storedValue }}; restricciones: ${profile.movementRestrictions.joinToString { it.storedValue }.ifBlank { "ninguna" }}
+- Equipamiento: ${profile.availableEquipment.joinToString { it.title }.ifBlank { "peso corporal" }}; restricciones: ${profile.movementRestrictions.joinToString { it.title }.ifBlank { "ninguna" }}
+- Ubicaciones: ${profile.effectiveTrainingLocations().joinToString { location -> "${location.name} [${location.equipment.joinToString { it.title }}]" }.ifBlank { "sin ubicación adicional" }}
 - Composición corporal: ${profile.bodyCompositionPhase?.storedValue ?: "no especificada"}; edad aproximada: ${(java.time.Year.now().value - profile.birthYear).coerceAtLeast(13)}; altura: ${profile.heightCm} cm; peso: ${profile.weightKg} kg
 - Omitir calentamiento: ${if (profile.skipsWarmups) "sí" else "no"}; omitir vuelta a la calma: ${if (profile.skipsCooldowns) "sí" else "no"}; omitir descansos: ${if (profile.skipsRestPeriods) "sí" else "no"}; notas del planificador: ${profile.workoutPlannerNotes.ifBlank { "ninguna" }}
 ${historyContext ?: "Historial de entrenamientos recientes: todavía no hay sesiones completadas."}
-Reglas estrictas: crea exactamente un workout por cada día disponible y no inventes días. Cada sesión debe respetar el presupuesto total de duración incluyendo calentamiento, trabajo principal y vuelta a la calma. Si se omite calentamiento o vuelta a la calma, devuelve cero ejercicios y cero bloques de ese tipo: nunca uses bloques vacíos, ocultos o de relleno. No uses ejercicios incompatibles con el equipamiento o las restricciones; prioriza sustituciones seguras y cercanas. Usa siempre bloques y prescripciones concretas, conserva el foco personalizado de cada día y distribuye el volumen de forma recuperable.
+Reglas estrictas: crea exactamente un workout por cada día disponible y no inventes días. Cada sesión debe respetar el presupuesto total de duración incluyendo calentamiento, trabajo principal y vuelta a la calma. Si se omite calentamiento o vuelta a la calma, devuelve cero ejercicios y cero bloques de ese tipo: nunca uses bloques vacíos, ocultos o de relleno. No uses ejercicios incompatibles con el equipamiento, las ubicaciones o las restricciones; prioriza sustituciones seguras y cercanas. Usa siempre bloques y prescripciones concretas, conserva el foco personalizado de cada día y distribuye el volumen de forma recuperable. Las molestias y restricciones tienen prioridad sobre el objetivo de volumen.
 Metadatos de progresión: incluye también mesocycleNumber, mesocycleIndex, cycleLength, weekIndex, mesocyclePhase, phaseWeek y positionInCycle en la raíz del JSON. mesocycleNumber aumenta en cada plan semanal; mesocycleIndex agrupa los planes dentro del ciclo. mesocyclePhase debe ser accumulation, intensification o deload. Mantén cycleLength según el nivel y usa weekIndex para indicar la semana actual; si no hay contexto previo, empieza en mesocycleNumber=1, mesocycleIndex=1, weekIndex=1, phaseWeek=1 y positionInCycle=1.
 Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación prioriza volumen y técnica; en intensificación prioriza carga y menor volumen; en descarga reduce volumen y fatiga manteniendo patrones y técnica.
 """
