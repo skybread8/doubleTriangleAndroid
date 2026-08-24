@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,10 +43,16 @@ import java.util.Date
 import java.util.Calendar
 
 @Composable
-fun AnalyticsScreen(context: Context, state: WorkoutHubState, preferences: SharedPreferences, exerciseSummaries: List<ExerciseAnalyticsSummary> = emptyList()) {
+fun AnalyticsScreen(
+    context: Context,
+    state: WorkoutHubState,
+    preferences: SharedPreferences,
+    exerciseSummaries: List<ExerciseAnalyticsSummary> = emptyList(),
+    contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(),
+) {
     var selectedExercise by remember { mutableStateOf<ExerciseAnalyticsSummary?>(null) }
     selectedExercise?.let { summary ->
-        ExerciseAnalyticsDetailScreen(summary, WorkoutAnalyticsStore.history(context, summary.exercise)) { selectedExercise = null }
+        ExerciseAnalyticsDetailScreen(summary, WorkoutAnalyticsStore.history(context, summary.exercise), contentPadding) { selectedExercise = null }
         return
     }
     val completed = state.workouts.count { it.status.name == "Completed" }
@@ -61,7 +69,7 @@ fun AnalyticsScreen(context: Context, state: WorkoutHubState, preferences: Share
         }
         totals
     }
-    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(contentPadding).padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("ANALÍTICAS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
         Text("Tu evolución y consistencia en un vistazo.", color = WildforceThemeTokens.textSecondary)
         Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(22.dp), emphasized = true).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -130,8 +138,8 @@ private fun ExerciseAnalyticsCard(summary: ExerciseAnalyticsSummary, onClick: ()
 }
 
 @Composable
-private fun ExerciseAnalyticsDetailScreen(summary: ExerciseAnalyticsSummary, history: List<ExerciseAnalyticsPoint>, onBack: () -> Unit) {
-    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+private fun ExerciseAnalyticsDetailScreen(summary: ExerciseAnalyticsSummary, history: List<ExerciseAnalyticsPoint>, contentPadding: androidx.compose.foundation.layout.PaddingValues, onBack: () -> Unit) {
+    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(contentPadding).padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("‹ VOLVER", Modifier.clickable(onClick = onBack).padding(vertical = 8.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
         Text(summary.exercise.name, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
         Text("${summary.sessions} sesiones registradas", color = WildforceThemeTokens.textSecondary)

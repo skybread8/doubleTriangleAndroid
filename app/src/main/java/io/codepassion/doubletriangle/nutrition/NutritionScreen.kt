@@ -72,7 +72,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
                 Text("NUTRICIÓN", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("‹", Modifier.clickable { selectedDate = selectedDate.minusDays(1) }.padding(end = 14.dp), style = MaterialTheme.typography.h5, color = WildforceThemeTokens.accentGold)
-                    Text("${selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es", "ES")).uppercase()}${if (canEdit) " · HOY" else " · ${selectedDate.dayOfMonth}/${selectedDate.monthValue}"}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+                    Text("${selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.forLanguageTag("es-ES")).uppercase()}${if (canEdit) " · HOY" else " · ${selectedDate.dayOfMonth}/${selectedDate.monthValue}"}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.weight(1f))
                     if (!canEdit) Text("HOY", Modifier.clickable { selectedDate = LocalDate.now() }.padding(8.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
                 }

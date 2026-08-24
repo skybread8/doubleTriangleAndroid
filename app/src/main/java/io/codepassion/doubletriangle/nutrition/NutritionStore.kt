@@ -18,7 +18,7 @@ internal object NutritionStore {
     private const val TARGETS_KEY = "nutrition_targets"
 
     fun loadTargets(context: Context): NutritionTargets = runCatching {
-        val item = JSONObject(context.getSharedPreferences(PREFS, 0).getString(TARGETS_KEY, "{}"))
+        val item = JSONObject(context.getSharedPreferences(PREFS, 0).getString(TARGETS_KEY, "{}") ?: "{}")
         NutritionTargets(item.optInt("calories", 2350), item.optInt("protein", 165), item.optInt("carbs", 250), item.optInt("fat", 75))
     }.getOrDefault(NutritionTargets())
 
