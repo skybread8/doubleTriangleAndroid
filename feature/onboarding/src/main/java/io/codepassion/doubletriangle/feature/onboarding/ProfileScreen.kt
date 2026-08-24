@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -158,6 +160,9 @@ fun ProfileScreen(
             } }
         }
         item {
+            ProfileEntrance(entered, 235) { ProfileAchievements() }
+        }
+        item {
             ProfileEntrance(entered, 255) {
             generationError?.let { Text(it, Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).padding(12.dp), color = Color(0xFFC62828)) }
             Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -224,7 +229,10 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
     val animatedExperienceProgress by animateFloatAsState(experienceProgress.coerceIn(0f, 1f), animationSpec = tween(650), label = "profile-experience")
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            Text(profile.name.take(1).uppercase().ifBlank { "W" }, Modifier.size(68.dp).background(WildforceThemeTokens.accentGold, CircleShape).padding(19.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
+            Box(Modifier.size(110.dp)) {
+                Text(profile.name.take(1).uppercase().ifBlank { "W" }, Modifier.fillMaxSize().background(WildforceThemeTokens.accentGold, CircleShape).padding(30.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
+                Text("⌁", Modifier.align(Alignment.BottomEnd).size(30.dp).background(WildforceThemeTokens.accentGold, CircleShape).padding(5.dp), color = Color.White, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            }
             Column {
                 Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text("${profile.goal.title} · ${profile.trainingLevel.title}", color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -241,6 +249,21 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
                 Text("$experienceXp XP", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
             }
             LinearProgressIndicator(animatedExperienceProgress, Modifier.fillMaxWidth().height(8.dp), color = WildforceThemeTokens.accentGold, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = .16f))
+        }
+    }
+}
+
+@Composable
+private fun ProfileAchievements() {
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(14.dp)) {
+        Text("LOGROS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
+        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            listOf("🔥", "★", "⚡", "◆", "♛", "◈", "✦").forEachIndexed { index, glyph ->
+                Column(Modifier.size(76.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(Modifier.size(54.dp).background(if (index < 2) WildforceThemeTokens.accentGold.copy(alpha = .22f) else WildforceThemeTokens.textSecondary.copy(alpha = .10f), CircleShape), contentAlignment = Alignment.Center) { Text(glyph, style = MaterialTheme.typography.h5, color = if (index < 2) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary) }
+                    Text(if (index < 2) "DESBLOQUEADO" else "PRÓXIMO", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Clip)
+                }
+            }
         }
     }
 }
