@@ -44,6 +44,7 @@ object WorkoutPlanGenerator {
         val startsNewMesocycle = nextWeek > effectiveCycleLength
         val nextState = generated.copy(
             mesocycleIndex = if (startsNewMesocycle) previous.mesocycleIndex + 1 else previous.mesocycleIndex,
+            mesocycleNumber = previous.mesocycleNumber + 1,
             cycleLength = effectiveCycleLength,
             weekIndex = if (startsNewMesocycle) 1 else nextWeek,
         )
@@ -137,6 +138,7 @@ object WorkoutPlanGenerator {
             phase = root.optString("phase").trim().ifBlank { "Adaptación · Mesociclo 1" },
             workouts = workouts,
             mesocycleIndex = root.optInt("mesocycleIndex", 1).coerceAtLeast(1),
+            mesocycleNumber = root.optInt("mesocycleNumber", root.optInt("planNumber", 1)).coerceAtLeast(1),
             cycleLength = cycleLength,
             weekIndex = weekIndex,
         )
@@ -214,6 +216,7 @@ object WorkoutPlanGenerator {
             .put("planName", state.planName)
             .put("phase", state.phase)
             .put("mesocycleIndex", state.mesocycleIndex)
+            .put("mesocycleNumber", state.mesocycleNumber)
             .put("cycleLength", state.cycleLength)
             .put("weekIndex", state.weekIndex)
             .put("workouts", days)
@@ -242,7 +245,7 @@ Perfil obligatorio del usuario:
 - Omitir calentamiento: ${if (profile.skipsWarmups) "sí" else "no"}; omitir vuelta a la calma: ${if (profile.skipsCooldowns) "sí" else "no"}; omitir descansos: ${if (profile.skipsRestPeriods) "sí" else "no"}; notas del planificador: ${profile.workoutPlannerNotes.ifBlank { "ninguna" }}
 ${historyContext ?: "Historial de entrenamientos recientes: todavía no hay sesiones completadas."}
 Reglas estrictas: crea exactamente un workout por cada día disponible y no inventes días. Cada sesión debe respetar el presupuesto total de duración incluyendo calentamiento, trabajo principal y vuelta a la calma. Si se omite calentamiento o vuelta a la calma, devuelve cero ejercicios y cero bloques de ese tipo: nunca uses bloques vacíos, ocultos o de relleno. No uses ejercicios incompatibles con el equipamiento o las restricciones; prioriza sustituciones seguras y cercanas. Usa siempre bloques y prescripciones concretas, conserva el foco personalizado de cada día y distribuye el volumen de forma recuperable.
-Metadatos de progresión: incluye también mesocycleIndex, cycleLength y weekIndex como enteros positivos en la raíz del JSON. Mantén cycleLength normalmente entre 4 y 6 semanas y usa weekIndex para indicar la semana actual del mesociclo; si no hay contexto previo, empieza en mesocycleIndex=1 y weekIndex=1.
+Metadatos de progresión: incluye también mesocycleNumber, mesocycleIndex, cycleLength y weekIndex como enteros positivos en la raíz del JSON. mesocycleNumber aumenta en cada plan semanal; mesocycleIndex agrupa los planes dentro del ciclo. Mantén cycleLength normalmente entre 4 y 6 semanas y usa weekIndex para indicar la semana actual del mesociclo; si no hay contexto previo, empieza en mesocycleNumber=1, mesocycleIndex=1 y weekIndex=1.
 """
 
     internal fun parseBlockType(value: String): WorkoutBlockType = when (value.trim().lowercase()) {

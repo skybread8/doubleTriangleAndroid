@@ -56,7 +56,7 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, contentPadding: a
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(22.dp), emphasized = true).padding(20.dp)) {
                     Text(state.planName.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     Text(state.phase, Modifier.padding(top = 3.dp), color = WildforceThemeTokens.textSecondary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                    Text("MESOCICLO ${state.mesocycleIndex}  ·  SEMANA ${state.weekIndex}/${state.cycleLength}", Modifier.padding(top = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+                    Text("PLAN ${state.mesocycleNumber}  ·  MESOCICLO ${state.mesocycleIndex}  ·  SEMANA ${state.weekIndex}/${state.cycleLength}", Modifier.padding(top = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     Spacer(Modifier.height(18.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.size(64.dp).clip(CircleShape).background(WildforceThemeTokens.accentGold.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {

@@ -123,6 +123,7 @@ data class WorkoutHubState(
     val phase: String,
     val workouts: List<WorkoutDaySummary>,
     val mesocycleIndex: Int = 1,
+    val mesocycleNumber: Int = 1,
     val cycleLength: Int = 1,
     val weekIndex: Int = 1,
 )
