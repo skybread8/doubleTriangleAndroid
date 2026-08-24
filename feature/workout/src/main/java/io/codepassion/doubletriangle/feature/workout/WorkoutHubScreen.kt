@@ -1135,9 +1135,9 @@ private fun RestTimerContent(
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         )
         Spacer(Modifier.height(14.dp))
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             RestActionButton("+", "+30s", primary = false, onClick = onAddTime)
-            Box(Modifier.padding(horizontal = 16.dp).size(148.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.padding(horizontal = 8.dp).size(132.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(
                     progress = animatedProgress,
                     modifier = Modifier.fillMaxSize(), color = WildforceThemeTokens.accentGold,
