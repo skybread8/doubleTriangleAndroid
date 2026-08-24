@@ -30,6 +30,7 @@ internal object WorkoutActiveNotification {
         runCatching {
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             ensureChannel(manager)
+            manager.cancel(restFinishedNotificationId)
             val notification = build(context, title, detail, headsUp, progress, progressMax, isResting, artwork, chronometerBaseMillis)
             manager.notify(notificationId, notification)
         }
@@ -83,7 +84,7 @@ internal object WorkoutActiveNotification {
         }
         builder.setStyle(android.app.Notification.BigTextStyle().bigText(if (progressMax > 0) "$detail\nProgreso: $progress/$progressMax" else detail))
         val publicVersion = android.app.Notification.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
             .setContentText(detail)
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
@@ -106,7 +107,7 @@ internal object WorkoutActiveNotification {
                 android.app.PendingIntent.getActivity(context, restFinishedNotificationId, it, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
             }
             val notification = android.app.Notification.Builder(context, channelId)
-                .setSmallIcon(android.R.drawable.ic_media_play)
+            .setSmallIcon(R.drawable.ic_workout_live)
                 .setContentTitle("Descanso terminado")
                 .setContentText("Puedes continuar con el siguiente ejercicio")
                 .setStyle(android.app.Notification.BigTextStyle().bigText("Descanso terminado\nPuedes continuar con el siguiente ejercicio"))

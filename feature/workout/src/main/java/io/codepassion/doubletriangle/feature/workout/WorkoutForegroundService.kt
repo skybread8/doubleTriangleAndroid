@@ -9,14 +9,31 @@ import android.os.Looper
 internal class WorkoutForegroundService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private var workoutId: String? = null
+    private var currentTitle: String = "Entrenamiento activo"
     private var restWasActive = false
+    private var lastNotifiedRemaining: Int? = null
     private val restMonitor = object : Runnable {
         override fun run() {
             workoutId?.let { id ->
                 val remaining = WorkoutSessionStore.load(this@WorkoutForegroundService, id)?.restRemaining
-                if (remaining != null && remaining > 0) restWasActive = true
+                val snapshot = WorkoutSessionStore.load(this@WorkoutForegroundService, id)
+                if (remaining != null && remaining > 0) {
+                    restWasActive = true
+                    if (remaining != lastNotifiedRemaining) {
+                        lastNotifiedRemaining = remaining
+                        WorkoutActiveNotification.show(
+                            this@WorkoutForegroundService,
+                            currentTitle,
+                            "Descanso: ${remaining}s",
+                            progress = remaining,
+                            progressMax = snapshot?.restInitialSeconds ?: remaining,
+                            isResting = true,
+                        )
+                    }
+                }
                 if (restWasActive && (remaining == null || remaining <= 0)) {
                     restWasActive = false
+                    lastNotifiedRemaining = null
                     WorkoutActiveNotification.showRestFinished(this@WorkoutForegroundService)
                 }
             }
@@ -28,6 +45,7 @@ internal class WorkoutForegroundService : Service() {
         val title = intent?.getStringExtra("title") ?: "Entrenamiento activo"
         val detail = intent?.getStringExtra("detail") ?: "Sesión activa"
         workoutId = intent?.getStringExtra("workoutId")
+        currentTitle = title
         val notification = runCatching { WorkoutActiveNotification.build(this, title, detail) }.getOrElse {
             @Suppress("DEPRECATION")
             (if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) android.app.Notification.Builder(this, "active_workout_live") else android.app.Notification.Builder(this))
