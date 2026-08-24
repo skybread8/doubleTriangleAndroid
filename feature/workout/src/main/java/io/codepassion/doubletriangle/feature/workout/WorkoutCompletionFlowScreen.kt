@@ -3,6 +3,7 @@ package io.codepassion.doubletriangle.feature.workout
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -148,7 +149,10 @@ private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, 
 
 @Composable
 private fun ScoreCelebration(score: Double, completedExercises: Int, totalExercises: Int, effort: String, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
-    val animated by animateFloatAsState(score.toFloat() / 100f)
+    var revealScore by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { revealScore = true }
+    val animated by animateFloatAsState(if (revealScore) score.toFloat() / 100f else 0f, animationSpec = tween(1_000, delayMillis = 160))
+    val displayedScore by animateIntAsState(if (revealScore) score.toInt() else 0, animationSpec = tween(900, delayMillis = 170))
     val tier = when {
         score >= 95 -> "SESIÓN DE ÉLITE" to "Has clavado el entrenamiento y mantenido un esfuerzo excelente."
         score >= 80 -> "SESIÓN POTENTE" to "Muy cerca de la prescripción y con un esfuerzo sólido."
@@ -160,7 +164,7 @@ private fun ScoreCelebration(score: Double, completedExercises: Int, totalExerci
     Text(tier.second, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Box(Modifier.padding(24.dp).size(230.dp), contentAlignment = Alignment.Center) {
         CircularProgressIndicator(animated, Modifier.fillMaxSize(), WildforceThemeTokens.textPrimary, strokeWidth = 18.dp)
-        Text("${score.toInt()}%", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h2, color = WildforceThemeTokens.textPrimary)
+        Text("$displayedScore%", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h2, color = WildforceThemeTokens.textPrimary)
     }
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         CompletionStat("EJERCICIOS", "$completedExercises/$totalExercises", Modifier.weight(1f))
@@ -170,9 +174,12 @@ private fun ScoreCelebration(score: Double, completedExercises: Int, totalExerci
 
 @Composable
 private fun StreakCelebration(streak: Int, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    var revealStreak by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { revealStreak = true }
+    val displayedStreak by animateIntAsState(if (revealStreak) streak else (streak - 1).coerceAtLeast(0), animationSpec = tween(700, delayMillis = 120))
     Spacer(Modifier.weight(1f))
     Text("🔥", style = MaterialTheme.typography.h1)
-    Text(streak.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
+    Text(displayedStreak.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
     Text(if (streak == 1) "DÍA DE RACHA" else "DÍAS DE RACHA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color(0xFFF07818))
     Text(if (streak == 1) "¡El primer paso es el más importante!" else "¡Estás en llamas! Sigue manteniendo el ritmo.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
@@ -180,14 +187,20 @@ private fun StreakCelebration(streak: Int, onContinue: () -> Unit) = Celebration
 
 @Composable
 private fun XpCelebration(progress: CompletionProgress, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    var revealXp by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { revealXp = true }
     Spacer(Modifier.weight(1f))
     Text("⚡", style = MaterialTheme.typography.h1)
     Text("XP TOTAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
-    Text(progress.xpAfter.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
+    val displayedXp by animateIntAsState(if (revealXp) progress.xpAfter else progress.xpBefore, animationSpec = tween(850, delayMillis = 140))
+    Text(displayedXp.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
     val levelStart = WorkoutCompletionCalculator.minimumXp(progress.levelBefore)
     val levelEnd = WorkoutCompletionCalculator.minimumXp(progress.levelBefore + 1)
+    val xpBeforeProgress = ((progress.xpBefore - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f)
+    val xpAfterProgress = ((progress.xpAfter - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f)
+    val animatedXpProgress by animateFloatAsState(if (revealXp) xpAfterProgress else xpBeforeProgress, animationSpec = tween(950, delayMillis = 150))
     LinearProgressIndicator(
-        progress = ((progress.xpAfter - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f),
+        progress = animatedXpProgress,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(14.dp), color = WildforceThemeTokens.accentGold,
         backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.18f),
     )
@@ -201,10 +214,13 @@ private fun XpCelebration(progress: CompletionProgress, onContinue: () -> Unit) 
 
 @Composable
 private fun LevelUpCelebration(level: Int, onContinue: () -> Unit) = CelebrationFrame("TERMINAR", onContinue) {
+    var revealLevel by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { revealLevel = true }
+    val displayedLevel by animateIntAsState(if (revealLevel) level else (level - 1).coerceAtLeast(1), animationSpec = tween(750, delayMillis = 150))
     Spacer(Modifier.weight(1f))
     Text("★", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
     Text("NUEVO NIVEL", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-    Text(level.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
+    Text(displayedLevel.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
     Text("Tu constancia sigue dando resultados.", color = WildforceThemeTokens.textSecondary)
     Spacer(Modifier.weight(1f))
 }
