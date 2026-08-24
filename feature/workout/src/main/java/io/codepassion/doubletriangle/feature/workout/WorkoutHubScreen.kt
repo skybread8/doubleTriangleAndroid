@@ -452,6 +452,8 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
     var showingAdaptation by remember(workout.id) { mutableStateOf(false) }
     var adapting by remember(workout.id) { mutableStateOf(false) }
     var adaptationError by remember(workout.id) { mutableStateOf<String?>(null) }
+    var pendingAdapted by remember(workout.id) { mutableStateOf<WorkoutDaySummary?>(null) }
+    var lastAdaptRequest by remember(workout.id) { mutableStateOf<CustomWorkoutRequest?>(null) }
     val coroutineScope = rememberCoroutineScope()
     var showSkipConfirmation by remember { mutableStateOf(false) }
     var skipped by remember(workout.id) { mutableStateOf(workout.status == WorkoutStatus.Skipped) }
@@ -475,10 +477,12 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
             onGenerate = { request ->
                 showingAdaptation = false
                 val generator = adaptAiGenerator ?: return@AutomaticWorkoutRequestDialog
+                lastAdaptRequest = request
+                adaptationError = null
                 adapting = true
                 coroutineScope.launch {
                     runCatching { generator(request) }
-                        .onSuccess(onWorkoutUpdated)
+                        .onSuccess { pendingAdapted = it }
                         .onFailure { adaptationError = it.message ?: "No se pudo adaptar el entrenamiento." }
                     adapting = false
                 }
@@ -616,7 +620,31 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
         }
     }
     adaptationError?.let { error ->
-        AlertDialog(onDismissRequest = { adaptationError = null }, title = { Text("NO SE PUDO ADAPTAR") }, text = { Text(error) }, confirmButton = { TextButton(onClick = { adaptationError = null }) { Text("CERRAR") } })
+        AlertDialog(onDismissRequest = { adaptationError = null }, title = { Text("NO SE PUDO ADAPTAR") }, text = { Text(error) }, confirmButton = {
+            TextButton(onClick = {
+                val request = lastAdaptRequest
+                val generator = adaptAiGenerator
+                if (request != null && generator != null) {
+                    adaptationError = null; adapting = true
+                    coroutineScope.launch {
+                        runCatching { generator(request) }
+                            .onSuccess { pendingAdapted = it }
+                            .onFailure { adaptationError = it.message ?: "No se pudo adaptar el entrenamiento." }
+                        adapting = false
+                    }
+                } else adaptationError = null
+            }) { Text("REINTENTAR", color = WildforceThemeTokens.accentGold) }
+        }, dismissButton = { TextButton(onClick = { adaptationError = null }) { Text("CERRAR", color = WildforceThemeTokens.textSecondary) } })
+    }
+    pendingAdapted?.let { adapted ->
+        AlertDialog(onDismissRequest = { pendingAdapted = null }, title = { Text("ENTRENAMIENTO ADAPTADO", fontFamily = AntonFontFamily) }, text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Revisa los cambios antes de sustituir la sesión actual.", color = WildforceThemeTokens.textSecondary)
+                Text(adapted.title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                Text("${adapted.exercises.size} ejercicios · ${adapted.estimatedMinutes} min", color = WildforceThemeTokens.textSecondary)
+                Text("La sesión original se conservará hasta confirmar.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold)
+            }
+        }, confirmButton = { TextButton(onClick = { pendingAdapted = null; onWorkoutUpdated(adapted) }) { Text("APLICAR", color = WildforceThemeTokens.accentGold) } }, dismissButton = { TextButton(onClick = { pendingAdapted = null }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } })
     }
 }
 @Composable

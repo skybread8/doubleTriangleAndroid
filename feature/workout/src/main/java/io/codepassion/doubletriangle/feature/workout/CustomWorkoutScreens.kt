@@ -226,8 +226,8 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
             }
         }
         Button(
-            onClick = { onSave(workout.withEditableBlocks(blocks).copy(estimatedMinutes = CustomWorkoutStore.estimateBlockMinutes(blocks))) },
-            enabled = workout.title.isNotBlank() && blocks.isNotEmpty(), modifier = Modifier.fillMaxWidth().height(54.dp),
+            onClick = { onSave(workout.withEditableBlocks(blocks).copy(title = workout.title.trim(), estimatedMinutes = CustomWorkoutStore.estimateBlockMinutes(blocks))) },
+            enabled = workout.title.trim().isNotBlank() && blocks.any { it.exercises.isNotEmpty() }, modifier = Modifier.fillMaxWidth().height(54.dp),
             shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary),
         ) { Text("GUARDAR ENTRENAMIENTO", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis) }
     }
@@ -269,7 +269,10 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
                     Modifier
                         .clip(RoundedCornerShape(11.dp))
                         .background(if (selected) WildforceThemeTokens.accentGold.copy(alpha = 0.18f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.07f))
-                        .clickable { onChange(exercise.copy(setStyle = style)) }
+                        .clickable {
+                            val parameters = if (style == exercise.setStyle) exercise.setStyleParameters else io.codepassion.doubletriangle.core.model.SetStyleParameters()
+                            onChange(exercise.copy(setStyle = style, setStyleParameters = parameters))
+                        }
                         .padding(horizontal = 10.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -308,6 +311,16 @@ private fun StyleParameterControls(exercise: ExerciseSummary, onChange: (Exercis
         )
         else -> Unit
     }
+    val hint = when (exercise.setStyle) {
+        ExerciseSetStyle.TopSetBackoff -> "Una serie pesada y series de descarga."
+        ExerciseSetStyle.DropSet -> "Reduce la carga al terminar cada caída."
+        ExerciseSetStyle.RestPause -> "Pausa breve dentro de la misma serie."
+        ExerciseSetStyle.Intervals -> "Alterna trabajo y pausa interna."
+        ExerciseSetStyle.Tempo -> "Controla el ritmo de cada repetición."
+        ExerciseSetStyle.AscendingPyramid -> "Aumenta la carga progresivamente."
+        else -> null
+    }
+    hint?.let { Text(it, Modifier.padding(top = 4.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
     if (exercise.setStyle != ExerciseSetStyle.Warmup) {
         Row(Modifier.fillMaxWidth().padding(top = 7.dp)) {
             EditorStepper("REPETICIONES EN RESERVA (RIR)", parameters.targetRir.toString(), { update(parameters.copy(targetRir = (parameters.targetRir - 1).coerceAtLeast(0))) }, { update(parameters.copy(targetRir = (parameters.targetRir + 1).coerceAtMost(5))) }, Modifier.weight(1f))
