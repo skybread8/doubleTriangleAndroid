@@ -107,8 +107,8 @@ fun ProfileScreen(
         item {
             Section("OBJETIVO Y NIVEL") {
                 ChoiceButton("Objetivo", draft.goal.title) { picker = Picker.Goal }
-                ChoiceButton("Nivel", draft.trainingLevel.title, { picker = Picker.Level }, draft.trainingLevel.description)
-                ChoiceButton("Actividad diaria", draft.lifestyle.title, { picker = Picker.Lifestyle }, draft.lifestyle.description)
+                ChoiceButton("Nivel", draft.trainingLevel.title, draft.trainingLevel.description) { picker = Picker.Level }
+                ChoiceButton("Actividad diaria", draft.lifestyle.title, draft.lifestyle.description) { picker = Picker.Lifestyle }
                 if (draft.goal.supportsBodyComposition && draft.trainingLevel.supportsBodyComposition) ChoiceButton("Fase corporal", draft.bodyCompositionPhase?.title ?: "Automático") { picker = Picker.Body }
             }
         }
@@ -205,6 +205,7 @@ private sealed class Picker { data object Goal : Picker(); data object Level : P
         Picker.Gender -> { title = "Sexo"; values = Gender.entries.map { it.title to { p: OnboardingProfile -> p.copy(gender = it) } } }
         Picker.Metric -> { title = "Unidades"; values = MetricSystem.entries.map { it.title to { p: OnboardingProfile -> p.copy(metricSystem = it) } } }
         Picker.BirthMonth -> { title = "Mes de nacimiento"; values = (1..12).map { month -> monthName(month) to { p: OnboardingProfile -> p.copy(birthMonth = month) } } }
+        Picker.Equipment, Picker.Restrictions -> { title = ""; values = emptyList() }
         is Picker.Focus -> { title = "Foco de ${picker.day.title}"; values = WorkoutFocus.entries.map { it.title to { p: OnboardingProfile -> p.copy(customWorkoutFocuses = p.customWorkoutFocuses + (picker.day to it)) } } }
     }
     androidx.compose.material.AlertDialog(onDismissRequest = { onSelect(profile) }, title = { Text(title, fontFamily = AntonFontFamily) }, text = { Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { values.forEach { (label, transform) -> Text(label, Modifier.fillMaxWidth().clickable { onSelect(transform(profile)) }.padding(12.dp), color = WildforceThemeTokens.textPrimary) } } }, confirmButton = {})
@@ -243,7 +244,7 @@ private fun TogglePickerRow(label: String, selected: Boolean, onToggle: () -> Un
 }
 
 @Composable private fun Section(title: String, content: @Composable () -> Unit) { Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) { Text(title, fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold); content() } }
-@Composable private fun ChoiceButton(label: String, value: String, onClick: () -> Unit, description: String? = null) { Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text(label, color = WildforceThemeTokens.textSecondary); description?.let { Text(it, Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }; Text(value, Modifier.padding(start = 10.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold) } }
+@Composable private fun ChoiceButton(label: String, value: String, description: String? = null, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text(label, color = WildforceThemeTokens.textSecondary); description?.let { Text(it, Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }; Text(value, Modifier.padding(start = 10.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold) } }
 @Composable private fun NumberField(label: String, value: String, onValueChange: (String) -> Unit, modifier: Modifier, decimal: Boolean = false) { OutlinedTextField(value, onValueChange, modifier, label = { Text(label) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number)) }
 @Composable private fun TogglePreference(label: String, description: String, selected: Boolean, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text(label, color = WildforceThemeTokens.textPrimary); Text(description, Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }; Text(if (selected) "SÍ" else "NO", Modifier.padding(start = 10.dp), color = if (selected) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold) } }
 
