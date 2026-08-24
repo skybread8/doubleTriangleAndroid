@@ -55,7 +55,9 @@ private const val DAILY_FAT = 75
 @Composable
 fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues()) {
     val context = androidx.compose.ui.platform.LocalContext.current.applicationContext
-    var meals by remember { mutableStateOf(NutritionStore.load(context)) }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    val canEdit = selectedDate == LocalDate.now()
+    var meals by remember(selectedDate) { mutableStateOf(NutritionStore.load(context, selectedDate)) }
     var addingMeal by remember { mutableStateOf(false) }
     var mealName by remember { mutableStateOf("") }
     var mealCalories by remember { mutableStateOf("") }
@@ -71,7 +73,12 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 18.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             item {
                 Text("NUTRICIÓN", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-                Text("${LocalDate.now().dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es", "ES")).uppercase()} · HOY", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("‹", Modifier.clickable { selectedDate = selectedDate.minusDays(1) }.padding(end = 14.dp), style = MaterialTheme.typography.h5, color = WildforceThemeTokens.accentGold)
+                    Text("${selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es", "ES")).uppercase()}${if (canEdit) " · HOY" else " · ${selectedDate.dayOfMonth}/${selectedDate.monthValue}"}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.weight(1f))
+                    if (!canEdit) Text("HOY", Modifier.clickable { selectedDate = LocalDate.now() }.padding(8.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+                }
             }
             item {
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(18.dp)) {
@@ -98,15 +105,15 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text("COMIDAS DE HOY", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
                     Spacer(Modifier.weight(1f))
-                    Text("+ AÑADIR", Modifier.clickable { addingMeal = true }.padding(8.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
+                    if (canEdit) Text("+ AÑADIR", Modifier.clickable { addingMeal = true }.padding(8.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
                 }
             }
-            if (meals.isEmpty()) item { EmptyMealsCard { addingMeal = true } }
+            if (meals.isEmpty()) item { EmptyMealsCard { if (canEdit) addingMeal = true } }
             MealType.entries.forEach { type ->
                 val grouped = meals.filter { it.type == type }
                 if (grouped.isNotEmpty()) {
                     item { Text(type.title.uppercase(), Modifier.padding(top = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary) }
-                    items(grouped, key = { it.id }) { meal -> MealRow(meal) { meals = meals.filterNot { it.id == meal.id }; NutritionStore.save(context, meals) } }
+                    items(grouped, key = { it.id }) { meal -> MealRow(meal, canEdit) { meals = meals.filterNot { it.id == meal.id }; NutritionStore.save(context, meals) } }
                 }
             }
         }
@@ -146,7 +153,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
 }
 
 @Composable
-private fun MealRow(meal: MealLog, onDelete: () -> Unit) {
+private fun MealRow(meal: MealLog, canEdit: Boolean, onDelete: () -> Unit) {
     Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
         Text("◉", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.h6)
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -155,7 +162,7 @@ private fun MealRow(meal: MealLog, onDelete: () -> Unit) {
         }
         Column(horizontalAlignment = Alignment.End) {
             Text("${meal.calories} kcal", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-            Text("ELIMINAR", Modifier.clickable(onClick = onDelete).padding(top = 3.dp), style = MaterialTheme.typography.overline, color = Color(0xFFC62828))
+            if (canEdit) Text("ELIMINAR", Modifier.clickable(onClick = onDelete).padding(top = 3.dp), style = MaterialTheme.typography.overline, color = Color(0xFFC62828))
         }
     }
 }

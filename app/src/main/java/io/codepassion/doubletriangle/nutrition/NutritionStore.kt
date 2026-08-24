@@ -4,6 +4,8 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.Calendar
+import java.time.LocalDate
+import java.time.ZoneId
 
 internal enum class MealType(val title: String) { Breakfast("Desayuno"), Lunch("Comida"), Dinner("Cena"), Snack("Snack") }
 
@@ -13,7 +15,7 @@ internal object NutritionStore {
     private const val PREFS = "wildforce_nutrition"
     private const val KEY = "today_meals"
 
-    fun load(context: Context): List<MealLog> = runCatching {
+    fun load(context: Context, date: LocalDate = LocalDate.now()): List<MealLog> = runCatching {
         val raw = context.getSharedPreferences(PREFS, 0).getString(KEY, null) ?: return emptyList()
         val array = JSONArray(raw)
         buildList {
@@ -21,7 +23,7 @@ internal object NutritionStore {
                 val item = array.getJSONObject(index)
                 val type = runCatching { MealType.valueOf(item.optString("type")) }.getOrDefault(MealType.Snack)
                 val meal = MealLog(item.getLong("id"), item.getString("name"), item.getInt("calories"), item.getInt("protein"), item.getInt("carbs"), item.getInt("fat"), type)
-                if (isToday(meal.id)) add(meal)
+                if (isOnDate(meal.id, date)) add(meal)
             }
         }
     }.getOrDefault(emptyList())
@@ -41,7 +43,11 @@ internal object NutritionStore {
 }
 
 private fun isToday(timestamp: Long): Boolean {
-    val today = Calendar.getInstance()
-    val date = Calendar.getInstance().apply { timeInMillis = timestamp }
-    return today.get(Calendar.YEAR) == date.get(Calendar.YEAR) && today.get(Calendar.DAY_OF_YEAR) == date.get(Calendar.DAY_OF_YEAR)
+    return isOnDate(timestamp, LocalDate.now())
+}
+
+private fun isOnDate(timestamp: Long, date: LocalDate): Boolean {
+    val today = Calendar.getInstance().apply { timeInMillis = date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli() }
+    val mealDate = Calendar.getInstance().apply { timeInMillis = timestamp }
+    return today.get(Calendar.YEAR) == mealDate.get(Calendar.YEAR) && today.get(Calendar.DAY_OF_YEAR) == mealDate.get(Calendar.DAY_OF_YEAR)
 }
