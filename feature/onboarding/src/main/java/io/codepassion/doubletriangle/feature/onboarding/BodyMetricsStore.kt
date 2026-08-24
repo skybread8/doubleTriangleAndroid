@@ -14,7 +14,7 @@ internal object BodyMetricsStore {
         val entries = load(context).toMutableList()
         val today = java.time.LocalDate.now().toString()
         entries.removeAll { it.date == today }
-        entries += BodyMetricEntry(today, profile.heightCm, profile.weightKg)
+        entries += BodyMetricEntry(today, profile.heightCm.toDouble(), profile.weightKg)
         val array = JSONArray().apply {
             entries.takeLast(60).forEach { put(JSONObject().put("date", it.date).put("heightCm", it.heightCm).put("weightKg", it.weightKg)) }
         }
