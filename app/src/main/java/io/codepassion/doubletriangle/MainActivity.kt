@@ -271,6 +271,18 @@ fun WildforceRoot() {
                 profile = updated
                 generatedWorkoutState = null
             },
+            onRegenerateProfile = { updated ->
+                isGenerating = true
+                coroutineScope.launch {
+                    runCatching { WorkoutPlanGenerator.generate(updated) }
+                        .onSuccess { (json, state) ->
+                            preferences.edit().putString("workout_plan_json", json).apply()
+                            generatedWorkoutState = state
+                        }
+                        .onFailure { generationError = it.message ?: "No se pudo regenerar el plan" }
+                    isGenerating = false
+                }
+            },
         )
     }
 }
@@ -282,6 +294,7 @@ private fun WildforceApp(
     onWorkoutCompleted: (String, Int, Int, Double) -> Unit,
     onResetOnboarding: () -> Unit = {},
     onProfileUpdated: (OnboardingProfile) -> Unit = {},
+    onRegenerateProfile: (OnboardingProfile) -> Unit = {},
 ) {
     val appContext = LocalContext.current.applicationContext
     val appPreferences = remember { appContext.getSharedPreferences("wildforce_profile", 0) }
@@ -356,7 +369,7 @@ private fun WildforceApp(
         } else if (selected == RootDestination.Nutrition) {
             NutritionScreen()
         } else if (selected == RootDestination.Profile) {
-            ProfileScreen(profile, onProfileUpdated)
+            ProfileScreen(profile, onProfileUpdated, onRegenerateProfile)
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("${selected.label}\nPróxima vertical", color = WildforceThemeTokens.textSecondary)
         }

@@ -36,7 +36,7 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 
 /** Editable fitness profile. These are the same inputs consumed by the iOS planner. */
 @Composable
-fun ProfileScreen(initial: OnboardingProfile, onSave: (OnboardingProfile) -> Unit) {
+fun ProfileScreen(initial: OnboardingProfile, onSave: (OnboardingProfile) -> Unit, onRegenerate: (OnboardingProfile) -> Unit = {}) {
     var draft by remember(initial) { mutableStateOf(initial) }
     var picker by remember { mutableStateOf<Picker?>(null) }
     LazyColumn(
@@ -99,6 +99,7 @@ fun ProfileScreen(initial: OnboardingProfile, onSave: (OnboardingProfile) -> Uni
         }
         item {
             Button(onClick = { onSave(draft) }, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text("GUARDAR PERFIL", fontWeight = FontWeight.Bold) }
+            Button(onClick = { onSave(draft); onRegenerate(draft) }, modifier = Modifier.fillMaxWidth().height(50.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text("GUARDAR Y REGENERAR PLAN", fontWeight = FontWeight.Bold) }
             Spacer(Modifier.height(28.dp))
         }
     }
