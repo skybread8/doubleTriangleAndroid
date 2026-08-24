@@ -67,6 +67,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
     val protein = meals.sumOf { it.protein }
     val carbs = meals.sumOf { it.carbs }
     val fat = meals.sumOf { it.fat }
+    val macroCalories = protein * 4 + carbs * 4 + fat * 9
     Box(Modifier.fillMaxSize().padding(contentPadding).liquidGlassBackground()) {
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 18.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             item {
@@ -75,6 +76,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
                     Text("‹", Modifier.clickable { selectedDate = selectedDate.minusDays(1) }.padding(end = 14.dp), style = MaterialTheme.typography.h5, color = WildforceThemeTokens.accentGold)
                     Text("${selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.forLanguageTag("es-ES")).uppercase()}${if (canEdit) " · HOY" else " · ${selectedDate.dayOfMonth}/${selectedDate.monthValue}"}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.weight(1f))
+                    Text("›", Modifier.clickable(enabled = !canEdit) { selectedDate = selectedDate.plusDays(1) }.padding(horizontal = 10.dp), style = MaterialTheme.typography.h5, color = if (canEdit) WildforceThemeTokens.textSecondary.copy(alpha = .35f) else WildforceThemeTokens.accentGold)
                     if (!canEdit) Text("HOY", Modifier.clickable { selectedDate = LocalDate.now() }.padding(8.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
                 }
             }
@@ -91,6 +93,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
                             Text("OBJETIVO DIARIO", Modifier.clickable { editingTargets = true }, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
                             Text("${targets.calories} kcal", style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
                             Text(if (calories <= targets.calories) "Te quedan ${targets.calories - calories} kcal" else "Has superado el objetivo", style = MaterialTheme.typography.caption, color = if (calories <= targets.calories) WildforceThemeTokens.accentGold else Color(0xFFC62828))
+                            Text("${macroCalories} kcal de macros", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                         }
                     }
                     Spacer(Modifier.height(16.dp))
