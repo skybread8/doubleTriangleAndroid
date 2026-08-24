@@ -122,6 +122,9 @@ data class WorkoutHubState(
     val planName: String,
     val phase: String,
     val workouts: List<WorkoutDaySummary>,
+    val mesocycleIndex: Int = 1,
+    val cycleLength: Int = 1,
+    val weekIndex: Int = 1,
 )
 
 fun WorkoutHubState.workoutsFor(dayOfWeek: DayOfWeek?): List<WorkoutDaySummary> =

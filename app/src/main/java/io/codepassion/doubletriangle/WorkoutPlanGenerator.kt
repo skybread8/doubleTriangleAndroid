@@ -107,7 +107,17 @@ object WorkoutPlanGenerator {
             }
         }
         check(workouts.isNotEmpty()) { "La IA devolvió un plan vacío" }
-        return WorkoutHubState(UserSummary(userName, goal, 0), workouts.mapTo(mutableSetOf()) { it.scheduledDay }, emptySet(), root.optString("planName", "Plan IA · Semana 1"), root.optString("phase", "Adaptación · Mesociclo 1"), workouts)
+        return WorkoutHubState(
+            user = UserSummary(userName, goal, 0),
+            trainingDays = workouts.mapTo(mutableSetOf()) { it.scheduledDay },
+            completedDays = emptySet(),
+            planName = root.optString("planName", "Plan IA · Semana 1"),
+            phase = root.optString("phase", "Adaptación · Mesociclo 1"),
+            workouts = workouts,
+            mesocycleIndex = root.optInt("mesocycleIndex", 1).coerceAtLeast(1),
+            cycleLength = root.optInt("cycleLength", 1).coerceAtLeast(1),
+            weekIndex = root.optInt("weekIndex", 1).coerceAtLeast(1),
+        )
     }
 
     private fun validateGeneratedPlan(state: WorkoutHubState, profile: OnboardingProfile, enforceProfileSections: Boolean) {
@@ -169,7 +179,14 @@ object WorkoutPlanGenerator {
                 .put("estimatedDurationMinutes", workout.estimatedMinutes)
                 .put("blocks", blocks))
         }
-        return JSONObject().put("planName", state.planName).put("phase", state.phase).put("workouts", days).toString()
+        return JSONObject()
+            .put("planName", state.planName)
+            .put("phase", state.phase)
+            .put("mesocycleIndex", state.mesocycleIndex)
+            .put("cycleLength", state.cycleLength)
+            .put("weekIndex", state.weekIndex)
+            .put("workouts", days)
+            .toString()
     }
     internal fun parseSetStyle(value: String): ExerciseSetStyle = when (value.trim().lowercase()) {
         "warmup" -> ExerciseSetStyle.Warmup
