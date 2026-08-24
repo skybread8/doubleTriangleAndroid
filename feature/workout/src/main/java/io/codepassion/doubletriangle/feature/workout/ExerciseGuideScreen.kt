@@ -76,17 +76,16 @@ internal fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBa
                 Spacer(Modifier.height(22.dp))
                 Text("MÚSCULOS", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 MuscleStrip(exercise.imageKey, onDarkBackground = false, modifier = Modifier.padding(vertical = 8.dp))
-                guide?.description?.takeIf(String::isNotBlank)?.let {
-                    Text(it, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 12.dp))
-                }
-                RemoteTrainingImage(
+                Text(guide?.description?.takeIf(String::isNotBlank) ?: "Ejecuta el movimiento con control y mantén una postura estable.", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 12.dp))
+                if (!exercise.imageKey.isNullOrBlank()) RemoteTrainingImage(
                     url = exerciseTutorialImageUrl(exercise.imageKey), contentDescription = "Tutorial de ${exercise.name}",
                     modifier = Modifier.fillMaxWidth().height(230.dp).clip(RoundedCornerShape(24.dp)),
                     contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                 )
-                if (!guide?.instructions.isNullOrEmpty()) {
+                val instructions = guide?.instructions?.takeIf { it.isNotEmpty() } ?: listOf("Coloca el cuerpo en la posición inicial.", "Realiza el recorrido sin rebotes.", "Vuelve lentamente a la posición inicial.")
+                if (instructions.isNotEmpty()) {
                     SectionTitle("PASOS")
-                    guide.instructions.forEachIndexed { index, instruction ->
+                    instructions.forEachIndexed { index, instruction ->
                         Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.Top) {
                             Box(Modifier.size(24.dp).clip(CircleShape).background(WildforceThemeTokens.accentGold), contentAlignment = Alignment.Center) {
                                 Text("${index + 1}", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)

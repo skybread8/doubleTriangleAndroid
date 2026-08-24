@@ -68,12 +68,17 @@ internal object ExerciseVisualCatalog {
         "mountainClimber" to ExerciseVisualMetadata(listOf(MuscleVisual.Cardio), listOf(MuscleVisual.Abs, MuscleVisual.Shoulders)),
     )
 
-    fun metadata(imageKey: String?): ExerciseVisualMetadata? = definitions[imageKey]
+    fun metadata(imageKey: String?): ExerciseVisualMetadata? = imageKey?.let { key ->
+        definitions[key] ?: definitions.entries.firstOrNull { it.key.equals(key, ignoreCase = true) }?.value
+    }
 }
 
 @Composable
 internal fun MuscleStrip(imageKey: String?, onDarkBackground: Boolean, modifier: Modifier = Modifier) {
-    val metadata = ExerciseVisualCatalog.metadata(imageKey) ?: return
+    val metadata = ExerciseVisualCatalog.metadata(imageKey) ?: run {
+        androidx.compose.material.Text("Músculos no catalogados", modifier.padding(vertical = 8.dp), color = if (onDarkBackground) Color.White.copy(alpha = 0.7f) else Color.Gray, style = androidx.compose.material.MaterialTheme.typography.caption)
+        return
+    }
     val tint = if (onDarkBackground) Color.White else Color.Unspecified
     Row(modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically) {
         metadata.primary.forEach { muscle -> MuscleIcon(muscle, true) }

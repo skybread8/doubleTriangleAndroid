@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -17,6 +18,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material.Text
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -43,7 +47,11 @@ internal fun RemoteTrainingImage(
     if (bitmap != null) {
         Image(bitmap = bitmap!!.asImageBitmap(), contentDescription = contentDescription, modifier = modifier, contentScale = contentScale)
     } else {
-        Box(modifier.background(Brush.linearGradient(listOf(Color(0xFF171717), Color(0xFF5A5141), Color(0xFF8B7A5C)))))
+        Box(modifier.background(Brush.linearGradient(listOf(Color(0xFF171717), Color(0xFF5A5141), Color(0xFF8B7A5C))))) {
+            contentDescription?.takeIf(String::isNotBlank)?.let {
+                Text("$it\nImagen no disponible", modifier = Modifier.fillMaxSize().padding(12.dp), color = Color.White.copy(alpha = 0.72f), textAlign = TextAlign.Center)
+            }
+        }
     }
 }
 
