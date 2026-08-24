@@ -95,6 +95,11 @@ fun ProfileScreen(
     var notificationsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("enabled", true)) }
     var restAlertsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("rest_alerts", true)) }
     var reminderNotificationsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("reminders", true)) }
+    val bodyMetrics = remember(profileContext, initial) { BodyMetricsStore.load(profileContext) }
+    fun saveProfile(value: OnboardingProfile) {
+        BodyMetricsStore.record(profileContext, value)
+        onSave(value)
+    }
     LaunchedEffect(Unit) { entered = true }
     LazyColumn(
         modifier = Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 16.dp),
@@ -106,6 +111,9 @@ fun ProfileScreen(
         }
         item {
             ProfileEntrance(entered, 35) { ProfileExperience(experienceXp, experienceLevel, experienceProgress) }
+        }
+        item {
+            ProfileEntrance(entered, 45) { ProfileBodyMetrics(initial, bodyMetrics) }
         }
         item {
             ProfileEntrance(entered, 55) { Section("DATOS PERSONALES") {
@@ -200,8 +208,8 @@ fun ProfileScreen(
             Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("PLAN PERSONALIZADO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
                 Text("Genera un plan nuevo usando todas tus preferencias, medidas, equipamiento y restricciones.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
-                Button(onClick = { val saved = validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput); saveMessage = null; onSave(saved); onRegenerate(saved) }, modifier = Modifier.fillMaxWidth().height(56.dp), enabled = !isRegenerating, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.accentGold, contentColor = Color.White)) { Text(if (isRegenerating) "GENERANDO PLAN…" else "✦  REGENERAR PLAN CON IA", fontWeight = FontWeight.Bold) }
-                Button(onClick = { onSave(validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput)); saveMessage = "Cambios guardados en tu perfil." }, modifier = Modifier.fillMaxWidth().height(46.dp), shape = RoundedCornerShape(14.dp), enabled = !isRegenerating, colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text("GUARDAR CAMBIOS SIN REGENERAR", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                Button(onClick = { val saved = validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput); saveMessage = null; saveProfile(saved); onRegenerate(saved) }, modifier = Modifier.fillMaxWidth().height(56.dp), enabled = !isRegenerating, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.accentGold, contentColor = Color.White)) { Text(if (isRegenerating) "GENERANDO PLAN…" else "✦  REGENERAR PLAN CON IA", fontWeight = FontWeight.Bold) }
+                Button(onClick = { saveProfile(validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput)); saveMessage = "Cambios guardados en tu perfil." }, modifier = Modifier.fillMaxWidth().height(46.dp), shape = RoundedCornerShape(14.dp), enabled = !isRegenerating, colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text("GUARDAR CAMBIOS SIN REGENERAR", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 saveMessage?.let { Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold) }
             }
             Spacer(Modifier.height(28.dp))
@@ -254,6 +262,40 @@ fun ProfileScreen(
 @Composable
 private fun ProfileEntrance(visible: Boolean, delayMillis: Int, content: @Composable () -> Unit) {
     AnimatedVisibility(visible = visible, enter = fadeIn(tween(330, delayMillis = delayMillis)) + slideInVertically(tween(330, delayMillis = delayMillis)) { it / 16 }) { content() }
+}
+
+@Composable
+private fun ProfileBodyMetrics(profile: OnboardingProfile, history: List<BodyMetricEntry>) {
+    Section("PERFIL CORPORAL") {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MetricTile("ALTURA", "${profile.heightCm.toInt()} cm", Modifier.weight(1f))
+            MetricTile("PESO", "${"%.1f".format(profile.weightKg)} kg", Modifier.weight(1f))
+            MetricTile("REGISTROS", history.size.toString(), Modifier.weight(1f))
+        }
+        if (history.isEmpty()) {
+            Text("Guarda el perfil para comenzar el historial corporal.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        } else {
+            Text("EVOLUCIÓN DEL PESO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
+            val visible = history.takeLast(8)
+            val min = visible.minOf { it.weightKg }.coerceAtLeast(1.0)
+            val max = visible.maxOf { it.weightKg }.coerceAtLeast(min + 1.0)
+            visible.forEach { entry ->
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(entry.date.takeLast(5), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.size(width = 44.dp, height = 24.dp))
+                    LinearProgressIndicator(((entry.weightKg - min) / (max - min)).toFloat().coerceIn(0f, 1f), Modifier.weight(1f), color = WildforceThemeTokens.accentGold)
+                    Text("${"%.1f".format(entry.weightKg)} kg", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MetricTile(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier.liquidGlass(RoundedCornerShape(12.dp)).padding(10.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        Text(label, style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
+        Text(value, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+    }
 }
 
 @Composable
