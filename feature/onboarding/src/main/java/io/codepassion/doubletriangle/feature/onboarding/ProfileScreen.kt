@@ -164,7 +164,7 @@ fun ProfileScreen(
                 Text("PLAN PERSONALIZADO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
                 Text("Genera un plan nuevo usando todas tus preferencias, medidas, equipamiento y restricciones.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 Button(onClick = { val saved = validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput); onSave(saved); onRegenerate(saved) }, modifier = Modifier.fillMaxWidth().height(56.dp), enabled = !isRegenerating, shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.accentGold, contentColor = Color.White)) { Text(if (isRegenerating) "GENERANDO PLAN…" else "✦  REGENERAR PLAN CON IA", fontWeight = FontWeight.Bold) }
-                Button(onClick = { onSave(validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput)); saveMessage = "Cambios guardados en tu perfil." }, modifier = Modifier.fillMaxWidth().height(46.dp), shape = RoundedCornerShape(14.dp), enabled = !isRegenerating, colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text("GUARDAR CAMBIOS SIN REGENERAR", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption) }
+                Button(onClick = { onSave(validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput)); saveMessage = "Cambios guardados en tu perfil." }, modifier = Modifier.fillMaxWidth().height(46.dp), shape = RoundedCornerShape(14.dp), enabled = !isRegenerating, colors = ButtonDefaults.outlinedButtonColors(backgroundColor = Color.Transparent, contentColor = WildforceThemeTokens.textPrimary)) { Text("GUARDAR CAMBIOS SIN REGENERAR", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption, maxLines = 1, overflow = TextOverflow.Ellipsis) }
                 saveMessage?.let { Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold) }
             }
             Spacer(Modifier.height(28.dp))
@@ -207,7 +207,7 @@ fun ProfileScreen(
             Column(Modifier.padding(28.dp).liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(26.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 CircularProgressIndicator(color = WildforceThemeTokens.accentGold)
                 Text("CREANDO TU PLAN", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-                Text("La IA está organizando tus sesiones y ajustándolas a tu perfil.", style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                Text("La IA está organizando tus sesiones y ajustándolas a tu perfil.", style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
         }
     }
@@ -273,7 +273,7 @@ private sealed class Picker { data object Goal : Picker(); data object Level : P
         Picker.Equipment, Picker.Restrictions -> { title = ""; values = emptyList() }
         is Picker.Focus -> { title = "Foco de ${picker.day.title}"; values = WorkoutFocus.entries.map { it.title to { p: OnboardingProfile -> p.copy(customWorkoutFocuses = p.customWorkoutFocuses + (picker.day to it)) } } }
     }
-    androidx.compose.material.AlertDialog(onDismissRequest = { onSelect(profile) }, title = { Text(title, fontFamily = AntonFontFamily) }, text = { Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { values.forEach { (label, transform) -> Text(label, Modifier.fillMaxWidth().clickable { onSelect(transform(profile)) }.padding(12.dp), color = WildforceThemeTokens.textPrimary) } } }, confirmButton = {})
+            androidx.compose.material.AlertDialog(onDismissRequest = { onSelect(profile) }, title = { Text(title, fontFamily = AntonFontFamily) }, text = { Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { values.forEach { (label, transform) -> Text(label, Modifier.fillMaxWidth().clickable { onSelect(transform(profile)) }.padding(12.dp), color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis) } } }, confirmButton = {})
 }
 
 @Composable
@@ -327,7 +327,7 @@ private fun TrainingLocationsDialog(
                         editorName = ""
                         editorEquipment = setOf(Equipment.Bodyweight)
                     }.padding(10.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                    Text("Toca una ubicación para marcarla como principal. Su equipamiento será el usado al generar planes.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    Text("Toca una ubicación para marcarla como principal. Su equipamiento será el usado al generar planes.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 3, overflow = TextOverflow.Ellipsis)
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

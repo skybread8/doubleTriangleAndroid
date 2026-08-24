@@ -102,9 +102,9 @@ internal fun WorkoutPathScreen(
                         pathExercise.label?.let { Text(it, Modifier.width(28.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption) }
                         RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.size(width = 48.dp, height = 58.dp).clip(RoundedCornerShape(11.dp)))
                         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                            Text(exercise.name, fontWeight = if (current) FontWeight.Bold else FontWeight.Normal, color = if (completed) WildforceThemeTokens.textSecondary else WildforceThemeTokens.textPrimary, maxLines = 1)
+                            Text(exercise.name, fontWeight = if (current) FontWeight.Bold else FontWeight.Normal, color = if (completed) WildforceThemeTokens.textSecondary else WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             val prescription = if (pathExercise.rounds > 1) "${pathExercise.rounds} rondas × ${exercise.reps}" else "${exercise.sets} × ${exercise.reps}"
-                            Text(prescription + if (exercise.restSeconds > 0) " · ${exercise.restSeconds}s" else "", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                            Text(prescription + if (exercise.restSeconds > 0) " · ${exercise.restSeconds}s" else "", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                         if (current) Text("AHORA", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
                     }
@@ -131,7 +131,7 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
             Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Text("▥", style = MaterialTheme.typography.h2, color = WildforceThemeTokens.textSecondary)
                 Text("SIN EJECUCIONES ANTERIORES", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-                Text("Completa este ejercicio para desbloquear su historial.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+                Text("Completa este ejercicio para desbloquear su historial.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
             return
         }
@@ -165,7 +165,7 @@ private fun InsightHeader(title: String, onBack: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
         Text("‹ VOLVER", Modifier.clickable(onClick = onBack).padding(top = 8.dp, end = 12.dp, bottom = 8.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
         Spacer(Modifier.weight(1f))
-        Text(title, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+        Text(title, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -173,7 +173,7 @@ private fun InsightHeader(title: String, onBack: () -> Unit) {
 private fun HistoryMetric(prefix: String, value: String, subtitle: String, modifier: Modifier) {
     Column(modifier.liquidGlass(RoundedCornerShape(15.dp)).padding(12.dp)) {
         Text(prefix, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
-        Text(value, style = MaterialTheme.typography.h6, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+        Text(value, style = MaterialTheme.typography.h6, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(subtitle, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
 }
@@ -182,7 +182,7 @@ private fun HistoryMetric(prefix: String, value: String, subtitle: String, modif
 private fun HistoryEntryRow(entry: ExerciseHistoryEntry, useImperial: Boolean) {
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(14.dp)).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text(DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(entry.timestampMillis)), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+            Text(DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(entry.timestampMillis)), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text("${entry.sets} series · ${entry.totalReps} repeticiones", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
             if (entry.setDetails.isNotEmpty()) {
                 Text(
@@ -195,7 +195,7 @@ private fun HistoryEntryRow(entry: ExerciseHistoryEntry, useImperial: Boolean) {
                 Text("● $it", modifier = Modifier.padding(top = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
             }
             entry.note?.let {
-                Text("“$it”", modifier = Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                Text("“$it”", modifier = Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
         }
         Column(horizontalAlignment = Alignment.End) {

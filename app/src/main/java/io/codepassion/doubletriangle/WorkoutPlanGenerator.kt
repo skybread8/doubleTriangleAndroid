@@ -261,7 +261,7 @@ Metadatos de progresión: incluye también mesocycleIndex, cycleLength y weekInd
                     type = type,
                     rounds = block.optInt("rounds", 1).coerceIn(1, 10),
                     restAfterBlockSeconds = block.optInt("restAfterBlockSeconds").takeIf { it > 0 }?.coerceIn(15, 600),
-                    notes = block.optString("notes").takeIf(String::isNotBlank),
+                    notes = block.optString("notes").trim().takeIf(String::isNotBlank),
                     exercises = parseExercises(block.getJSONArray("exercises")).map {
                         if (type == WorkoutBlockType.Superset) it.copy(sets = 1) else it
                     },

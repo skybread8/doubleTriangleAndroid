@@ -91,7 +91,7 @@ private fun PlanSessionRow(workout: WorkoutDaySummary, onClick: () -> Unit) {
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(workout.title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-            Text(workout.scheduledDay.getDisplayName(TextStyle.SHORT, Locale.forLanguageTag("es-ES")) + " · ${workout.estimatedMinutes} min", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(workout.scheduledDay.getDisplayName(TextStyle.SHORT, Locale.forLanguageTag("es-ES")) + " · ${workout.estimatedMinutes} min", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
         }
         Text(when (workout.status) { WorkoutStatus.Completed -> "COMPLETADO"; WorkoutStatus.Skipped -> "OMITIDO"; WorkoutStatus.Planned -> "ABRIR" }, style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = statusColor)
     }
