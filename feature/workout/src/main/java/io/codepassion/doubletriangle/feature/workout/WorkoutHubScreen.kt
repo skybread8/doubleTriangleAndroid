@@ -782,6 +782,7 @@ fun ActiveWorkoutScreen(
                                 exerciseStats = exerciseStats + (exerciseIndex to statsForExercise(updatedRecords, exerciseIndex))
                             }
                             Spacer(Modifier.height(8.dp))
+                        }
                         if (targetDurationSeconds(exercise.reps) != null) {
                             ExerciseWorkTimer(
                                 seconds = exerciseTimeRemaining ?: exerciseTimeInitial,
@@ -798,7 +799,6 @@ fun ActiveWorkoutScreen(
                                 CompactMetricStepper("REPS", reps.toString(), { reps = (reps - 1).coerceAtLeast(0) }, { reps++ }, Modifier.weight(1f), onValueEntered = { value -> reps = value.toIntOrNull()?.coerceIn(0, 999) ?: reps })
                                 CompactMetricStepper("PESO", String.format(Locale.getDefault(), "%.1f kg", weightKg), { weightKg = (weightKg - 2.5).coerceAtLeast(0.0) }, { weightKg += 2.5 }, Modifier.weight(1f), inputValue = weightKg.toString(), decimalInput = true, onValueEntered = { value -> weightKg = value.replace(',', '.').toDoubleOrNull()?.coerceIn(0.0, 750.0) ?: weightKg })
                             }
-                        }
                         }
                     }
                     Button(
