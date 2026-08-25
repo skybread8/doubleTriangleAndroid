@@ -10,8 +10,6 @@ import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Shader
 import android.graphics.RectF
-import android.media.MediaMetadata
-import android.media.session.MediaSession
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -29,7 +27,6 @@ internal object WorkoutActiveNotification {
     private const val channelId = "active_workout_live_v3"
     private const val notificationId = 4101
     private const val restFinishedNotificationId = 4105
-    private var mediaSession: MediaSession? = null
     private var artworkTitle: String? = null
     private var artwork: Bitmap? = null
     private var liveArtworkSource: Bitmap? = null
@@ -86,17 +83,10 @@ internal object WorkoutActiveNotification {
         val contentIntent = launchIntent?.let {
             android.app.PendingIntent.getActivity(context, notificationId, it, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
         }
-        val session = mediaSession(context)
         if (artwork != null) this.artwork = artwork
         val resolvedArtwork = artwork ?: this.artwork
         val displayTitle = if (isResting) "Descanso · $detail" else title
         val displayDetail = if (isResting) "" else detail
-        val metadata = MediaMetadata.Builder()
-            .putString(MediaMetadata.METADATA_KEY_TITLE, displayTitle)
-            .putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, displayDetail)
-            .putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION, displayDetail)
-        resolvedArtwork?.let { metadata.putBitmap(MediaMetadata.METADATA_KEY_ART, it) }
-        session.setMetadata(metadata.build())
         @Suppress("DEPRECATION")
         val builder: android.app.Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             android.app.Notification.Builder(context, channelId)
@@ -117,11 +107,10 @@ internal object WorkoutActiveNotification {
             .setSubText(if (isResting) "" else "Sesión activa")
             .setOngoing(true)
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
-            .setCategory(android.app.Notification.CATEGORY_TRANSPORT)
+            .setCategory(android.app.Notification.CATEGORY_WORKOUT)
             .setOnlyAlertOnce(true)
             .setShowWhen(isResting)
             .setAutoCancel(false)
-            .setLargeIcon(systemArtwork)
             .setColor(0xFFD9A441.toInt())
         if (useLiveUpdate) {
             // EXTRA_REQUEST_PROMOTED_ONGOING funciona también en las primeras
@@ -129,12 +118,12 @@ internal object WorkoutActiveNotification {
             builder.extras.putBoolean("android.requestPromotedOngoing", true)
             runCatching {
                 builder.setRequestPromotedOngoing(true)
-                if (!isResting && progressMax > 0) {
-                    builder.setShortCriticalText("$progress/$progressMax")
-                }
+                val criticalText = if (isResting) "${progress}s" else if (progressMax > 0) "$progress/$progressMax" else "ACTIVO"
+                builder.setShortCriticalText(criticalText.take(7))
             }
             val liveStyle = android.app.Notification.ProgressStyle()
                 .setStyledByProgress(true)
+                .setProgressStartIcon(Icon.createWithBitmap(systemArtwork))
                 .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.ic_workout_live))
             if (progressMax > 0) {
                 if (segmentedProgress) {
@@ -163,7 +152,8 @@ internal object WorkoutActiveNotification {
                 builder.setShowWhen(false)
             }
         } else {
-            builder.setCustomContentView(compactView)
+            builder.setLargeIcon(notificationArtwork)
+                .setCustomContentView(compactView)
                 .setCustomBigContentView(expandedView)
         }
         if (contentIntent != null) builder.setContentIntent(contentIntent)
@@ -186,16 +176,18 @@ internal object WorkoutActiveNotification {
             if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
             builder.setStyle(android.app.Notification.BigTextStyle().bigText(displayDetail))
         }
-        val publicVersion = android.app.Notification.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_workout_live)
-            .setContentTitle(displayTitle)
-            .setContentText(if (displayDetail.isBlank()) detail else displayDetail)
-            .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
-            .setOngoing(true)
-            .setShowWhen(false)
-            .setOnlyAlertOnce(true)
-            .build()
-        builder.setPublicVersion(publicVersion)
+        if (!useLiveUpdate) {
+            val publicVersion = android.app.Notification.Builder(context, channelId)
+                .setSmallIcon(R.drawable.ic_workout_live)
+                .setContentTitle(displayTitle)
+                .setContentText(if (displayDetail.isBlank()) detail else displayDetail)
+                .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
+                .setOngoing(true)
+                .setShowWhen(false)
+                .setOnlyAlertOnce(true)
+                .build()
+            builder.setPublicVersion(publicVersion)
+        }
         return builder.build()
     }
 
@@ -340,26 +332,6 @@ internal object WorkoutActiveNotification {
         return result
     }
 
-    private fun mediaSession(context: Context): MediaSession = mediaSession ?: MediaSession(context, "WildforceWorkout").also { session ->
-        session.setCallback(object : MediaSession.Callback() {
-            override fun onPlay() = sendAction(context, ACTION_TOGGLE_TIMER)
-            override fun onPause() = sendAction(context, ACTION_TOGGLE_TIMER)
-            override fun onSkipToNext() = sendAction(context, ACTION_SKIP_CURRENT)
-        })
-        session.isActive = true
-        mediaSession = session
-    }
-
-    private fun openApp(context: Context) {
-        context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }?.let(context::startActivity)
-    }
-
-    private fun sendAction(context: Context, action: String) {
-        context.sendBroadcast(Intent(action).setPackage(context.packageName))
-    }
-
     private fun actionIntent(context: Context, action: String, requestCode: Int): android.app.PendingIntent =
         android.app.PendingIntent.getBroadcast(context, requestCode, Intent(context, WorkoutNotificationActionReceiver::class.java).setAction(action), android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
 
@@ -375,8 +347,6 @@ internal object WorkoutActiveNotification {
     fun cancel(context: Context) {
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(notificationId)
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(restFinishedNotificationId)
-        mediaSession?.run { isActive = false; release() }
-        mediaSession = null
         artwork = null
         artworkTitle = null
     }
