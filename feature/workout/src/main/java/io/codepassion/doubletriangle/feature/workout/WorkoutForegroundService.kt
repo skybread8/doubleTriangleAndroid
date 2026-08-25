@@ -10,6 +10,7 @@ internal class WorkoutForegroundService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private var workoutId: String? = null
     private var currentTitle: String = "Entrenamiento activo"
+    private var totalExercises: Int = 0
     private var restWasActive = false
     private var lastNotifiedRemaining: Int? = null
     private var restEndAtMillis: Long? = null
@@ -50,6 +51,15 @@ internal class WorkoutForegroundService : Service() {
                     restEndAtMillis = null
                     lastObservedRest = null
                     val appForeground = getSharedPreferences("wildforce_notification_settings", 0).getBoolean("app_foreground", false)
+                    val currentExercise = snapshot?.exerciseIndex ?: 0
+                    WorkoutActiveNotification.show(
+                        this@WorkoutForegroundService,
+                        currentTitle,
+                        "Ejercicio ${currentExercise + 1}/${totalExercises.coerceAtLeast(1)}",
+                        progress = currentExercise.coerceIn(0, totalExercises.coerceAtLeast(1)),
+                        progressMax = totalExercises.coerceAtLeast(1),
+                        segmentedProgress = true,
+                    )
                     if (!appForeground) WorkoutActiveNotification.showRestFinished(this@WorkoutForegroundService)
                 }
             }
@@ -61,6 +71,7 @@ internal class WorkoutForegroundService : Service() {
         val title = intent?.getStringExtra("title") ?: "Entrenamiento activo"
         val detail = intent?.getStringExtra("detail") ?: "Sesión activa"
         workoutId = intent?.getStringExtra("workoutId")
+        totalExercises = intent?.getIntExtra("totalExercises", 0) ?: 0
         currentTitle = title
         val notification = runCatching { WorkoutActiveNotification.build(this, title, detail) }.getOrElse {
             @Suppress("DEPRECATION")
