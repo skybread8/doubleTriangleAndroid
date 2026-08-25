@@ -195,6 +195,13 @@ fun ProfileScreen(
         }
         item {
             if (selectedSection == ProfileSection.Settings) ProfileEntrance(entered, 245) { Section("NOTIFICACIONES") {
+                if (android.os.Build.VERSION.SDK_INT >= 36) {
+                    val notificationManager = profileContext.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                    val promotedEnabled = notificationManager.canPostPromotedNotifications()
+                    ChoiceButton("Live Update de entrenamiento", if (promotedEnabled) "Activada" else "Activar en Ajustes", "Muestra la sesión como tarjeta/chip cuando Android 16 lo permita.") {
+                        profileContext.startActivity(android.content.Intent(android.provider.Settings.ACTION_MANAGE_APP_PROMOTED_NOTIFICATIONS).apply { data = android.net.Uri.parse("package:${profileContext.packageName}") })
+                    }
+                }
                 TogglePreference("Notificaciones de entrenamiento", "Muestra la sesión activa en el panel y la pantalla bloqueada.", notificationsEnabled) {
                     notificationsEnabled = !notificationsEnabled
                     notificationPreferences.edit().putBoolean("enabled", notificationsEnabled).apply()
