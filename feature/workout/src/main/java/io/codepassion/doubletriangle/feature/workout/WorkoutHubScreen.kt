@@ -1131,7 +1131,9 @@ fun ActiveWorkoutScreen(
                                 exerciseTimeRemaining = timedDuration; exerciseTimeInitial = timedDuration
                             }
                                 restBetweenExercises = false
-                                restRemaining = if (skipRestPeriods) null else exercise.restSeconds
+                                restTimerPaused = false
+                                restRemaining = if (skipRestPeriods) null else exercise.restSeconds.coerceAtLeast(1)
+                                restEndsAtMillis = if (skipRestPeriods) null else System.currentTimeMillis() + exercise.restSeconds.coerceAtLeast(1) * 1_000L
                             } else {
                                 val needsFeedback = when (exercise.blockType) {
                                     WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown -> false
