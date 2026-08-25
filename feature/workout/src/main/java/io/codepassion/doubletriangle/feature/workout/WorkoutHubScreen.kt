@@ -760,13 +760,12 @@ fun ActiveWorkoutScreen(
                     } else exerciseTimerRunning = !exerciseTimerRunning
                     WorkoutActiveNotification.ACTION_SKIP_CURRENT -> if (restRemaining != null) { restRemaining = null; restEndsAtMillis = null; restBetweenExercises = false; restTimerPaused = false } else advanceFromExercise(exercise?.restSeconds ?: 0)
                     WorkoutActiveNotification.ACTION_ADD_REST -> if (restRemaining != null) {
-                        if (restTimerPaused) {
-                            restRemaining = restRemaining!! + 30
-                        } else {
-                            val base = restEndsAtMillis ?: System.currentTimeMillis()
-                            restEndsAtMillis = base + 30_000L
-                            restRemaining = ((restEndsAtMillis!! - System.currentTimeMillis()).coerceAtLeast(0L) / 1_000L).toInt()
-                        }
+                        val now = System.currentTimeMillis()
+                        val current = restRemaining!!.coerceAtLeast(0)
+                        restEndsAtMillis = if (restTimerPaused) now + (current + 30) * 1_000L
+                        else (restEndsAtMillis ?: now) + 30_000L
+                        restTimerPaused = false
+                        restRemaining = ((restEndsAtMillis!! - now).coerceAtLeast(0L) / 1_000L).toInt()
                         restInitialSeconds += 30
                     }
                     }
@@ -1015,13 +1014,12 @@ fun ActiveWorkoutScreen(
                         gender = gender,
                         onAddTime = {
                             restInitialSeconds += 30
-                            if (restTimerPaused) {
-                                restRemaining = resting + 30
-                            } else {
-                                val base = restEndsAtMillis ?: System.currentTimeMillis()
-                                restEndsAtMillis = base + 30_000L
-                                restRemaining = ((restEndsAtMillis!! - System.currentTimeMillis()).coerceAtLeast(0L) / 1_000L).toInt()
-                            }
+                            val now = System.currentTimeMillis()
+                            val current = resting.coerceAtLeast(0)
+                            restEndsAtMillis = if (restTimerPaused) now + (current + 30) * 1_000L
+                            else (restEndsAtMillis ?: now) + 30_000L
+                            restTimerPaused = false
+                            restRemaining = ((restEndsAtMillis!! - now).coerceAtLeast(0L) / 1_000L).toInt()
                         },
                         onSkip = { restRemaining = null; restEndsAtMillis = null; restTimerPaused = false; restBetweenExercises = false },
                     )
