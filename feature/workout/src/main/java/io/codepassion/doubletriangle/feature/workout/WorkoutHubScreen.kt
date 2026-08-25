@@ -784,9 +784,11 @@ fun ActiveWorkoutScreen(
                 WorkoutSessionStore.load(context, workout.id)?.let { latest ->
                     exerciseIndex = latest.exerciseIndex.coerceIn(0, workout.exercises.lastIndex.coerceAtLeast(0))
                     completedByExercise = latest.completedByExercise
-                    restRemaining = latest.restRemaining
+                    val resumedRest = latest.restRemaining?.takeIf { it > 0 }
+                    restRemaining = resumedRest
+                    restEndsAtMillis = resumedRest?.let { System.currentTimeMillis() + it * 1_000L }
                     restInitialSeconds = latest.restInitialSeconds
-                    restBetweenExercises = latest.restBetweenExercises
+                    restBetweenExercises = latest.restBetweenExercises && resumedRest != null
                     elapsedSeconds = latest.elapsedSeconds
                     exerciseTimeRemaining = latest.exerciseTimeRemaining
                     exerciseTimerRunning = latest.exerciseTimerRunning
