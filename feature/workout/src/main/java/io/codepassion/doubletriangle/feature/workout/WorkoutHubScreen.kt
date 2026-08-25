@@ -847,7 +847,7 @@ fun ActiveWorkoutScreen(
             val remaining = ((end - System.currentTimeMillis()).coerceAtLeast(0L) / 1_000L).toInt()
             restRemaining = remaining
             if (remaining <= 0) break
-            delay(250)
+            delay(50)
         }
         delay(150)
         restRemaining = null
