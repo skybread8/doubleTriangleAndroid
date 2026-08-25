@@ -40,10 +40,6 @@ internal object WorkoutActiveNotification {
             manager.cancel(restFinishedNotificationId)
             val notification = build(context, title, detail, headsUp, progress, progressMax, isResting, artwork, segmentedProgress)
             manager.notify(notificationId, notification)
-            runCatching {
-                val ringtone = RingtoneManager.getRingtone(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                ringtone?.play()
-            }
         }
     }
 
@@ -111,6 +107,7 @@ internal object WorkoutActiveNotification {
         val progressText = displayDetail
         val compactView = notificationView(context, R.layout.notification_workout_compact, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
         val expandedView = notificationView(context, R.layout.notification_workout_expanded, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
+        val useLiveUpdate = Build.VERSION.SDK_INT >= 36 && !alert
         builder.setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
             .setContentText(displayDetail)
@@ -122,8 +119,44 @@ internal object WorkoutActiveNotification {
             .setShowWhen(isResting)
             .setAutoCancel(false)
             .setLargeIcon(notificationArtwork)
-            .setCustomContentView(compactView)
-            .setCustomBigContentView(expandedView)
+            .setColor(0xFFD9A441.toInt())
+        if (useLiveUpdate) {
+            // EXTRA_REQUEST_PROMOTED_ONGOING funciona también en las primeras
+            // revisiones de Android 16, anteriores al método 36.1 del Builder.
+            builder.extras.putBoolean("android.requestPromotedOngoing", true)
+            val liveStyle = android.app.Notification.ProgressStyle()
+                .setStyledByProgress(true)
+                .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.ic_workout_live))
+            if (progressMax > 0) {
+                if (segmentedProgress) {
+                    repeat(progressMax.coerceAtLeast(1)) {
+                        liveStyle.addProgressSegment(
+                            android.app.Notification.ProgressStyle.Segment(1).setColor(0xFFD9A441.toInt())
+                        )
+                    }
+                    liveStyle.setProgress(progress.coerceIn(0, progressMax))
+                } else {
+                    liveStyle.addProgressSegment(
+                        android.app.Notification.ProgressStyle.Segment(progressMax.coerceAtLeast(1)).setColor(0xFFD9A441.toInt())
+                    )
+                    liveStyle.setProgress((progressMax - progress).coerceIn(0, progressMax))
+                }
+            } else {
+                liveStyle.setProgressIndeterminate(true)
+            }
+            builder.setStyle(liveStyle)
+            if (isResting && progress > 0) {
+                builder.setWhen(System.currentTimeMillis() + progress * 1_000L)
+                    .setUsesChronometer(true)
+                    .setChronometerCountDown(true)
+                    .setShowWhen(true)
+            } else {
+                builder.setShowWhen(false)
+            }
+        } else {
+            builder.setCustomContentView(compactView)
+                .setCustomBigContentView(expandedView)
+        }
         if (contentIntent != null) builder.setContentIntent(contentIntent)
         if (alert) {
             @Suppress("DEPRECATION")
@@ -140,8 +173,10 @@ internal object WorkoutActiveNotification {
             builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Omitir", skipIntent).build())
             builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
         }
-        if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
-        builder.setStyle(android.app.Notification.BigTextStyle().bigText(displayDetail))
+        if (!useLiveUpdate) {
+            if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
+            builder.setStyle(android.app.Notification.BigTextStyle().bigText(displayDetail))
+        }
         val publicVersion = android.app.Notification.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
