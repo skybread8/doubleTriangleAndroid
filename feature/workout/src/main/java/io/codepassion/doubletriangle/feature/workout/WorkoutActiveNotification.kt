@@ -298,11 +298,43 @@ internal object WorkoutActiveNotification {
 
     private fun centeredSquareArtwork(source: Bitmap): Bitmap {
         if (liveArtworkSource === source && liveArtwork != null) return liveArtwork!!
-        val side = minOf(source.width, source.height).coerceAtLeast(1)
-        val left = ((source.width - side) / 2).coerceAtLeast(0)
-        val top = ((source.height - side) / 2).coerceAtLeast(0)
-        val cropped = Bitmap.createBitmap(source, left, top, side, side)
-        val result = if (side > 384) Bitmap.createScaledBitmap(cropped, 384, 384, true) else cropped
+        val size = 384
+        val result = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(result)
+
+        // Fondo integrado con la propia imagen, cubriendo el cuadrado sin
+        // deformarla. Se oscurece para que el ejercicio principal destaque.
+        val backgroundScale = maxOf(size.toFloat() / source.width, size.toFloat() / source.height)
+        val backgroundWidth = source.width * backgroundScale
+        val backgroundHeight = source.height * backgroundScale
+        canvas.drawBitmap(
+            source,
+            null,
+            RectF(
+                (size - backgroundWidth) / 2f,
+                (size - backgroundHeight) / 2f,
+                (size + backgroundWidth) / 2f,
+                (size + backgroundHeight) / 2f,
+            ),
+            Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply { alpha = 115 },
+        )
+        canvas.drawColor(0x66000000)
+
+        // La fotografía completa queda centrada, sin recorte ni estiramiento.
+        val foregroundScale = minOf(size.toFloat() / source.width, size.toFloat() / source.height)
+        val foregroundWidth = source.width * foregroundScale
+        val foregroundHeight = source.height * foregroundScale
+        canvas.drawBitmap(
+            source,
+            null,
+            RectF(
+                (size - foregroundWidth) / 2f,
+                (size - foregroundHeight) / 2f,
+                (size + foregroundWidth) / 2f,
+                (size + foregroundHeight) / 2f,
+            ),
+            Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG),
+        )
         liveArtworkSource = source
         liveArtwork = result
         return result
