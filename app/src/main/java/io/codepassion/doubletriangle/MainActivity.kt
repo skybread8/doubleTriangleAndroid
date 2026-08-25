@@ -390,12 +390,14 @@ private fun WildforceApp(
     val appContext = LocalContext.current.applicationContext
     val appPreferences = remember { appContext.getSharedPreferences("wildforce_profile", 0) }
     var avatarPath by remember { mutableStateOf(appPreferences.getString("avatar_path", null)) }
+    var avatarRevision by remember { mutableStateOf(0) }
     val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri ?: return@rememberLauncherForActivityResult
         runCatching {
             val destination = File(appContext.filesDir, "profile-avatar.jpg")
             appContext.contentResolver.openInputStream(uri)?.use { input -> destination.writeBytes(input.readBytes()) }
             avatarPath = destination.absolutePath
+            avatarRevision++
             appPreferences.edit().putString("avatar_path", avatarPath).apply()
         }
     }
@@ -529,6 +531,7 @@ private fun WildforceApp(
                 experienceLevel = trainingProgress.level,
                 experienceProgress = trainingProgress.levelProgress,
                 avatarPath = avatarPath,
+                avatarRevision = avatarRevision,
                 onRequestHealthConnect = onRequestHealthConnect,
                 onSave = onProfileUpdated,
                 onRegenerate = onRegenerateProfile,

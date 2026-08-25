@@ -75,6 +75,7 @@ fun ProfileScreen(
     experienceLevel: Int = 1,
     experienceProgress: Float = 0f,
     avatarPath: String? = null,
+    avatarRevision: Int = 0,
     onRequestHealthConnect: (((Boolean, Int?, Double?) -> Unit) -> Unit) = { _ -> },
     onSave: (OnboardingProfile) -> Unit,
     onRegenerate: (OnboardingProfile) -> Unit = {},
@@ -113,7 +114,7 @@ fun ProfileScreen(
             }
         }
         item {
-            if (selectedSection == null) ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, avatarPath, onChangeAvatar) }
+            if (selectedSection == null) ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, avatarPath, avatarRevision, onChangeAvatar) }
         }
         item {
             if (selectedSection == null) ProfileEntrance(entered, 35) { ProfileExperience(experienceXp, experienceLevel, experienceProgress) }
@@ -347,10 +348,10 @@ private fun MetricTile(label: String, value: String, modifier: Modifier = Modifi
 }
 
 @Composable
-private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, completedWorkouts: Int, longestStreak: Int, avatarPath: String?, onChangeAvatar: () -> Unit) {
+private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, completedWorkouts: Int, longestStreak: Int, avatarPath: String?, avatarRevision: Int, onChangeAvatar: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Box(Modifier.size(110.dp).clickable(onClick = onChangeAvatar)) {
-                val bitmap = remember(avatarPath) { avatarPath?.let { BitmapFactory.decodeFile(it) } }
+                val bitmap = remember(avatarPath, avatarRevision) { avatarPath?.let { BitmapFactory.decodeFile(it) } }
                 if (bitmap != null) Image(bitmap.asImageBitmap(), profile.name, Modifier.fillMaxSize().clip(CircleShape), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
                 else Text(profile.name.take(1).uppercase().ifBlank { "W" }, Modifier.fillMaxSize().background(WildforceThemeTokens.accentGold, CircleShape).padding(30.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
                 Text("⌁", Modifier.align(Alignment.BottomEnd).size(30.dp).background(WildforceThemeTokens.accentGold, CircleShape).padding(5.dp), color = Color.White, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
