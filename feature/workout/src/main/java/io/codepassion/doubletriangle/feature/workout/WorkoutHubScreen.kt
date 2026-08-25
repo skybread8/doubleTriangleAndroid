@@ -817,7 +817,11 @@ fun ActiveWorkoutScreen(
             } else {
                 "$currentName · $completedForExercise/$effectiveSets series"
             }
-            if (WorkoutNotificationPreferences.enabled(context)) {
+            // Mientras la app está en segundo plano, el servicio foreground es el
+            // único dueño de la notificación. Evita que Compose publique otra
+            // versión del contador y produzca dos temporizadores visibles.
+            val appIsForeground = lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+            if (WorkoutNotificationPreferences.enabled(context) && appIsForeground) {
                 WorkoutActiveNotification.show(
                     context,
                     workout.title,
