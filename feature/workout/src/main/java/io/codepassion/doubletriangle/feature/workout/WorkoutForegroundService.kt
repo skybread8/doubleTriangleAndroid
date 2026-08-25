@@ -100,7 +100,7 @@ internal class WorkoutForegroundService : Service() {
         lastActionTimestamp = WorkoutNotificationActionStore.read(this)?.second ?: 0L
         val notification = runCatching { WorkoutActiveNotification.build(this, title, detail) }.getOrElse {
             @Suppress("DEPRECATION")
-            (if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) android.app.Notification.Builder(this, "active_workout_live_v2") else android.app.Notification.Builder(this))
+            (if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) android.app.Notification.Builder(this, "active_workout_live_v3") else android.app.Notification.Builder(this))
                 .setSmallIcon(android.R.drawable.ic_media_play).setContentTitle(title).setContentText(detail).setOngoing(true).build()
         }
         startForeground(4101, notification)

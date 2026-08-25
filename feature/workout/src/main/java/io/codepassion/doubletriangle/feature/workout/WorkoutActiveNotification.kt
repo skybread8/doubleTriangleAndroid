@@ -24,7 +24,9 @@ internal object WorkoutActiveNotification {
     const val ACTION_TOGGLE_TIMER = "io.codepassion.doubletriangle.ACTION_TOGGLE_TIMER"
     const val ACTION_SKIP_CURRENT = "io.codepassion.doubletriangle.ACTION_SKIP_CURRENT"
     const val ACTION_ADD_REST = "io.codepassion.doubletriangle.ACTION_ADD_REST"
-    private const val channelId = "active_workout_live_v2"
+    // Canal nuevo para que Android 16 no herede la configuración silenciosa
+    // del canal anterior, que algunos dispositivos ocultaban en lockscreen.
+    private const val channelId = "active_workout_live_v3"
     private const val notificationId = 4101
     private const val restFinishedNotificationId = 4105
     private var mediaSession: MediaSession? = null
@@ -269,9 +271,11 @@ internal object WorkoutActiveNotification {
         android.app.PendingIntent.getBroadcast(context, requestCode, Intent(context, WorkoutNotificationActionReceiver::class.java).setAction(action), android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
 
     private fun ensureChannel(manager: NotificationManager) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_LOW).apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_DEFAULT).apply {
             description = "Progreso, descansos y ejercicio actual"
             lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+            setSound(null, null)
+            enableVibration(false)
         })
     }
 
