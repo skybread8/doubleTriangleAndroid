@@ -28,17 +28,17 @@ internal object WorkoutActiveNotification {
     private var artworkTitle: String? = null
     private var artwork: Bitmap? = null
 
-    fun show(context: Context, title: String, detail: String = "Sesión activa", headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, chronometerBaseMillis: Long? = null) {
+    fun show(context: Context, title: String, detail: String = "Sesión activa", headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, chronometerBaseMillis: Long? = null, segmentedProgress: Boolean = false) {
         runCatching {
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             ensureChannel(manager)
             manager.cancel(restFinishedNotificationId)
-            val notification = build(context, title, detail, headsUp, progress, progressMax, isResting, artwork, chronometerBaseMillis)
+            val notification = build(context, title, detail, headsUp, progress, progressMax, isResting, artwork, chronometerBaseMillis, segmentedProgress)
             manager.notify(notificationId, notification)
         }
     }
 
-    fun build(context: Context, title: String, detail: String, headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, chronometerBaseMillis: Long? = null): android.app.Notification {
+    fun build(context: Context, title: String, detail: String, headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, chronometerBaseMillis: Long? = null, segmentedProgress: Boolean = false): android.app.Notification {
         val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
             flags = android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -67,8 +67,8 @@ internal object WorkoutActiveNotification {
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
         val notificationArtwork = resolvedArtwork ?: exerciseArtwork(title)
         val progressText = if (progressMax > 0) "$detail · $progress/$progressMax" else detail
-        val compactView = notificationView(context, R.layout.notification_workout_compact, notificationArtwork, displayTitle, progressText, progress, progressMax)
-        val expandedView = notificationView(context, R.layout.notification_workout_expanded, notificationArtwork, displayTitle, progressText, progress, progressMax)
+        val compactView = notificationView(context, R.layout.notification_workout_compact, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress)
+        val expandedView = notificationView(context, R.layout.notification_workout_expanded, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress)
         builder.setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
             .setContentText(detail)
@@ -114,14 +114,15 @@ internal object WorkoutActiveNotification {
         detail: String,
         progress: Int,
         progressMax: Int,
+        segmentedProgress: Boolean,
     ): RemoteViews = RemoteViews(context.packageName, layout).apply {
         setImageViewBitmap(R.id.notification_artwork, artwork)
-        setImageViewBitmap(R.id.notification_progress_visual, progressArtwork(context, progress, progressMax))
+        setImageViewBitmap(R.id.notification_progress_visual, progressArtwork(context, progress, progressMax, segmentedProgress))
         setTextViewText(R.id.notification_title, title)
         setTextViewText(R.id.notification_detail, detail)
     }
 
-    private fun progressArtwork(context: Context, progress: Int, progressMax: Int): Bitmap {
+    private fun progressArtwork(context: Context, progress: Int, progressMax: Int, segmented: Boolean): Bitmap {
         val width: Int = 640
         val height: Int = 24
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -133,7 +134,17 @@ internal object WorkoutActiveNotification {
         if (progressMax <= 0) return bitmap
         val ratio: Float = (progress.toFloat() / progressMax.toFloat()).coerceIn(0f, 1f)
         val end: Float = (width.toFloat() * ratio).coerceIn(10f, width.toFloat() - 10f)
-        canvas.drawRoundRect(RectF(0f, 7f, end, 17f), radius, radius, fill)
+        if (segmented) {
+            val gap = 6f
+            val segmentWidth = (width - gap * (progressMax - 1).coerceAtLeast(0)) / progressMax.toFloat()
+            repeat(progressMax) { index ->
+                val left = index * (segmentWidth + gap)
+                val right = left + segmentWidth
+                canvas.drawRoundRect(RectF(left, 7f, right, 17f), radius, radius, if (index < progress) fill else track)
+            }
+        } else {
+            canvas.drawRoundRect(RectF(0f, 7f, end, 17f), radius, radius, fill)
+        }
         context.getDrawable(R.drawable.ic_workout_live)?.let { icon ->
             val iconSize: Int = 24
             icon.setTint(0xFFFFD77A.toInt())

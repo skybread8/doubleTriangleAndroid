@@ -807,6 +807,9 @@ fun ActiveWorkoutScreen(
             val currentName = exercise?.name ?: "Entrenamiento"
             val completed = completedByExercise.values.sum()
             val total = workout.exercises.sumOf { it.sets }.coerceAtLeast(1)
+            val completedExercises = workout.exercises.indices.count { index ->
+                index < exerciseIndex || (completedByExercise[index] ?: 0) >= (workout.exercises[index].sets + (addedSetsByExercise[index] ?: 0)).coerceAtLeast(1)
+            }
             val detail = if (restRemaining != null) "${if (restTimerPaused) "Descanso pausado" else "Descanso: ${restRemaining}s"} · ${completed}/${total} series" else "$currentName · ${completed}/${total} series"
             if (WorkoutNotificationPreferences.enabled(context)) {
                 WorkoutActiveNotification.show(
@@ -814,11 +817,12 @@ fun ActiveWorkoutScreen(
                     workout.title,
                     detail,
                     headsUp = WorkoutNotificationPreferences.restAlertsEnabled(context) && restRemaining != null && restRemaining == restInitialSeconds,
-                    progress = if (restRemaining != null) restRemaining!!.coerceIn(0, restInitialSeconds) else completed,
-                    progressMax = if (restRemaining != null) restInitialSeconds else total,
+                    progress = if (restRemaining != null) restRemaining!!.coerceIn(0, restInitialSeconds) else completedExercises,
+                    progressMax = if (restRemaining != null) restInitialSeconds else workout.exercises.size.coerceAtLeast(1),
                     isResting = restRemaining != null,
                     artwork = notificationArtwork,
                     chronometerBaseMillis = restRemaining?.takeIf { !restTimerPaused }?.let { System.currentTimeMillis() + it * 1_000L },
+                    segmentedProgress = restRemaining == null,
                 )
             }
         }
