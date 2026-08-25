@@ -48,7 +48,7 @@ internal class WorkoutForegroundService : Service() {
                     lastObservedRest = storedRemaining
                 }
                 val remaining = restEndAtMillis?.let { ((it - now).coerceAtLeast(0L) / 1_000L).toInt() }
-                if (remaining != null && remaining > 0) {
+                if (!appForeground && remaining != null && remaining > 0) {
                     restWasActive = true
                     if (remaining != lastNotifiedRemaining) {
                         lastNotifiedRemaining = remaining
@@ -62,7 +62,7 @@ internal class WorkoutForegroundService : Service() {
                         )
                     }
                 }
-                if (restWasActive && (remaining == null || remaining <= 0)) {
+                if (!appForeground && restWasActive && (remaining == null || remaining <= 0)) {
                     restWasActive = false
                     lastNotifiedRemaining = null
                     restEndAtMillis = null
