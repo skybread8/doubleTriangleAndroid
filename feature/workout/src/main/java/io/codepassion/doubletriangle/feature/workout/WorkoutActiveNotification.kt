@@ -14,6 +14,7 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Build
 import android.graphics.drawable.Icon
+import android.widget.RemoteViews
 
 internal object WorkoutActiveNotification {
     const val ACTION_TOGGLE_TIMER = "io.codepassion.doubletriangle.ACTION_TOGGLE_TIMER"
@@ -63,6 +64,10 @@ internal object WorkoutActiveNotification {
         val toggleIntent = actionIntent(context, ACTION_TOGGLE_TIMER, 4102)
         val skipIntent = actionIntent(context, ACTION_SKIP_CURRENT, 4103)
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
+        val notificationArtwork = resolvedArtwork ?: exerciseArtwork(title)
+        val progressText = if (progressMax > 0) "$detail · $progress/$progressMax" else detail
+        val compactView = notificationView(context, R.layout.notification_workout_compact, notificationArtwork, displayTitle, progressText, progress, progressMax)
+        val expandedView = notificationView(context, R.layout.notification_workout_expanded, notificationArtwork, displayTitle, progressText, progress, progressMax)
         builder.setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
             .setContentText(detail)
@@ -73,7 +78,9 @@ internal object WorkoutActiveNotification {
             .setOnlyAlertOnce(true)
             .setShowWhen(isResting)
             .setAutoCancel(false)
-            .setLargeIcon(resolvedArtwork ?: exerciseArtwork(title))
+            .setLargeIcon(notificationArtwork)
+            .setCustomContentView(compactView)
+            .setCustomBigContentView(expandedView)
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_pause), "Pausar", toggleIntent).build())
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Saltar", skipIntent).build())
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
@@ -87,6 +94,8 @@ internal object WorkoutActiveNotification {
             .setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
             .setContentText(detail)
+            .setLargeIcon(notificationArtwork)
+            .setCustomContentView(compactView)
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -94,6 +103,22 @@ internal object WorkoutActiveNotification {
             .build()
         builder.setPublicVersion(publicVersion)
         return builder.build()
+    }
+
+    private fun notificationView(
+        context: Context,
+        layout: Int,
+        artwork: Bitmap,
+        title: String,
+        detail: String,
+        progress: Int,
+        progressMax: Int,
+    ): RemoteViews = RemoteViews(context.packageName, layout).apply {
+        setImageViewBitmap(R.id.notification_artwork, artwork)
+        setTextViewText(R.id.notification_title, title)
+        setTextViewText(R.id.notification_detail, detail)
+        setProgressBar(R.id.notification_progress, progressMax.coerceAtLeast(1), progress.coerceIn(0, progressMax.coerceAtLeast(1)), false)
+        setViewVisibility(R.id.notification_progress, if (progressMax > 0) android.view.View.VISIBLE else android.view.View.GONE)
     }
 
     fun showRestFinished(context: Context) {
