@@ -27,17 +27,17 @@ internal object WorkoutActiveNotification {
     private var artworkTitle: String? = null
     private var artwork: Bitmap? = null
 
-    fun show(context: Context, title: String, detail: String = "Sesión activa", headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, chronometerBaseMillis: Long? = null, segmentedProgress: Boolean = false) {
+    fun show(context: Context, title: String, detail: String = "Sesión activa", headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, segmentedProgress: Boolean = false) {
         runCatching {
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             ensureChannel(manager)
             manager.cancel(restFinishedNotificationId)
-            val notification = build(context, title, detail, headsUp, progress, progressMax, isResting, artwork, chronometerBaseMillis, segmentedProgress)
+            val notification = build(context, title, detail, headsUp, progress, progressMax, isResting, artwork, segmentedProgress)
             manager.notify(notificationId, notification)
         }
     }
 
-    fun build(context: Context, title: String, detail: String, headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, chronometerBaseMillis: Long? = null, segmentedProgress: Boolean = false): android.app.Notification {
+    fun build(context: Context, title: String, detail: String, headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, segmentedProgress: Boolean = false): android.app.Notification {
         val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
             flags = android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -85,9 +85,6 @@ internal object WorkoutActiveNotification {
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
         if (contentIntent != null) builder.setContentIntent(contentIntent)
         if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
-        if (isResting && chronometerBaseMillis != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            builder.setWhen(chronometerBaseMillis).setUsesChronometer(true).setChronometerCountDown(true)
-        }
         builder.setStyle(android.app.Notification.BigTextStyle().bigText(if (progressMax > 0) "$detail\nProgreso: $progress/$progressMax" else detail))
         val publicVersion = android.app.Notification.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_workout_live)

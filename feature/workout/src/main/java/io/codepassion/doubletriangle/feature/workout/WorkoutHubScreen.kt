@@ -825,7 +825,6 @@ fun ActiveWorkoutScreen(
                     progressMax = if (restRemaining != null) restInitialSeconds else workout.exercises.size.coerceAtLeast(1),
                     isResting = restRemaining != null,
                     artwork = notificationArtwork,
-                    chronometerBaseMillis = restRemaining?.takeIf { !restTimerPaused }?.let { System.currentTimeMillis() + it * 1_000L },
                     segmentedProgress = restRemaining == null,
                 )
             }
