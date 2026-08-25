@@ -77,13 +77,16 @@ internal object WorkoutActiveNotification {
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Saltar", skipIntent).build())
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
         if (contentIntent != null) builder.setContentIntent(contentIntent)
-        if (Build.VERSION.SDK_INT < 36) builder.setLargeIcon(resolvedArtwork ?: exerciseArtwork(title))
+        val promotedAllowed = Build.VERSION.SDK_INT >= 36 && runCatching {
+            (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).canPostPromotedNotifications()
+        }.getOrDefault(false)
+        if (!promotedAllowed) builder.setLargeIcon(resolvedArtwork ?: exerciseArtwork(title))
         if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
         if (isResting && chronometerBaseMillis != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             builder.setWhen(chronometerBaseMillis).setUsesChronometer(true).setChronometerCountDown(true)
         }
         builder.setStyle(android.app.Notification.BigTextStyle().bigText(if (progressMax > 0) "$detail\nProgreso: $progress/$progressMax" else detail))
-        if (Build.VERSION.SDK_INT >= 36 && progressMax > 0) {
+        if (promotedAllowed && progressMax > 0) {
             val liveProgress = if (isResting) (progressMax - progress).coerceIn(0, progressMax) else progress.coerceIn(0, progressMax)
             val liveStyle = android.app.Notification.ProgressStyle()
                 .setProgress(liveProgress)
