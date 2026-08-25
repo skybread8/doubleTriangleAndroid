@@ -9,6 +9,7 @@ import android.graphics.Canvas
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Shader
+import android.graphics.drawable.Icon
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -82,6 +83,16 @@ internal object WorkoutActiveNotification {
             builder.setWhen(chronometerBaseMillis).setUsesChronometer(true).setChronometerCountDown(true)
         }
         builder.setStyle(android.app.Notification.BigTextStyle().bigText(if (progressMax > 0) "$detail\nProgreso: $progress/$progressMax" else detail))
+        if (Build.VERSION.SDK_INT >= 36 && progressMax > 0) {
+            val liveProgress = if (isResting) (progressMax - progress).coerceIn(0, progressMax) else progress.coerceIn(0, progressMax)
+            val liveStyle = android.app.Notification.ProgressStyle()
+                .setProgress(liveProgress)
+                .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.ic_workout_live))
+                .setProgressSegments(listOf(android.app.Notification.ProgressStyle.Segment(progressMax).setColor(0xFFD5A928.toInt())))
+            builder.setStyle(liveStyle)
+            builder.extras.putBoolean(android.app.Notification.EXTRA_REQUEST_PROMOTED_ONGOING, true)
+            if (isResting) builder.setShortCriticalText(detail.substringBefore(" ·").take(7))
+        }
         val publicVersion = android.app.Notification.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
