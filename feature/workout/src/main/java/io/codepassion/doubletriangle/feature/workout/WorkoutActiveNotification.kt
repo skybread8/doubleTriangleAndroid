@@ -32,6 +32,8 @@ internal object WorkoutActiveNotification {
     private var mediaSession: MediaSession? = null
     private var artworkTitle: String? = null
     private var artwork: Bitmap? = null
+    private var liveArtworkSource: Bitmap? = null
+    private var liveArtwork: Bitmap? = null
 
     fun show(context: Context, title: String, detail: String = "Sesión activa", headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, segmentedProgress: Boolean = false) {
         runCatching {
@@ -104,6 +106,7 @@ internal object WorkoutActiveNotification {
         val skipIntent = actionIntent(context, ACTION_SKIP_CURRENT, 4103)
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
         val notificationArtwork = resolvedArtwork ?: exerciseArtwork(title)
+        val systemArtwork = if (Build.VERSION.SDK_INT >= 36) centeredSquareArtwork(notificationArtwork) else notificationArtwork
         val progressText = displayDetail
         val compactView = notificationView(context, R.layout.notification_workout_compact, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
         val expandedView = notificationView(context, R.layout.notification_workout_expanded, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
@@ -118,12 +121,18 @@ internal object WorkoutActiveNotification {
             .setOnlyAlertOnce(true)
             .setShowWhen(isResting)
             .setAutoCancel(false)
-            .setLargeIcon(notificationArtwork)
+            .setLargeIcon(systemArtwork)
             .setColor(0xFFD9A441.toInt())
         if (useLiveUpdate) {
             // EXTRA_REQUEST_PROMOTED_ONGOING funciona también en las primeras
             // revisiones de Android 16, anteriores al método 36.1 del Builder.
             builder.extras.putBoolean("android.requestPromotedOngoing", true)
+            runCatching {
+                builder.setRequestPromotedOngoing(true)
+                if (!isResting && progressMax > 0) {
+                    builder.setShortCriticalText("$progress/$progressMax")
+                }
+            }
             val liveStyle = android.app.Notification.ProgressStyle()
                 .setStyledByProgress(true)
                 .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.ic_workout_live))
@@ -285,6 +294,18 @@ internal object WorkoutActiveNotification {
         artworkTitle = title
         artwork = bitmap
         return bitmap
+    }
+
+    private fun centeredSquareArtwork(source: Bitmap): Bitmap {
+        if (liveArtworkSource === source && liveArtwork != null) return liveArtwork!!
+        val side = minOf(source.width, source.height).coerceAtLeast(1)
+        val left = ((source.width - side) / 2).coerceAtLeast(0)
+        val top = ((source.height - side) / 2).coerceAtLeast(0)
+        val cropped = Bitmap.createBitmap(source, left, top, side, side)
+        val result = if (side > 384) Bitmap.createScaledBitmap(cropped, 384, 384, true) else cropped
+        liveArtworkSource = source
+        liveArtwork = result
+        return result
     }
 
     private fun mediaSession(context: Context): MediaSession = mediaSession ?: MediaSession(context, "WildforceWorkout").also { session ->

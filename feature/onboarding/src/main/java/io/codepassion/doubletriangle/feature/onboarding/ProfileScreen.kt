@@ -200,7 +200,9 @@ fun ProfileScreen(
                     val notificationManager = profileContext.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
                     val promotedEnabled = runCatching { notificationManager.canPostPromotedNotifications() }.getOrDefault(false)
                     ChoiceButton("Live Update de entrenamiento", if (promotedEnabled) "Activada" else "Activar en Ajustes", "Muestra la sesión como tarjeta/chip cuando Android 16 lo permita.") {
-                        val promotedIntent = android.content.Intent("android.settings.MANAGE_APP_PROMOTED_NOTIFICATIONS").apply { setData(android.net.Uri.parse("package:${profileContext.packageName}")) }
+                        val promotedIntent = android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_PROMOTION_SETTINGS).apply {
+                            data = android.net.Uri.parse("package:${profileContext.packageName}")
+                        }
                         val fallbackIntent = android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
                             putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, profileContext.packageName)
                         }
