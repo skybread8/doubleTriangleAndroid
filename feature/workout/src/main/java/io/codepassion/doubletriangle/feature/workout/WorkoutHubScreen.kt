@@ -808,12 +808,14 @@ fun ActiveWorkoutScreen(
     LaunchedEffect(exerciseIndex, completedByExercise, restRemaining, restInitialSeconds, restTimerPaused, restBetweenExercises, showsSummary, notificationArtwork) {
         if (!showsSummary) {
             val currentName = exercise?.name ?: "Entrenamiento"
-            val completed = completedByExercise.values.sum()
-            val total = workout.exercises.sumOf { it.sets }.coerceAtLeast(1)
             val completedExercises = workout.exercises.indices.count { index ->
                 index < exerciseIndex || (completedByExercise[index] ?: 0) >= (workout.exercises[index].sets + (addedSetsByExercise[index] ?: 0)).coerceAtLeast(1)
             }
-            val detail = if (restRemaining != null) "${if (restTimerPaused) "Descanso pausado" else "Descanso: ${restRemaining}s"} · ${completed}/${total} series" else "$currentName · ${completed}/${total} series"
+            val detail = if (restRemaining != null) {
+                if (restTimerPaused) "Descanso pausado" else "Descanso: ${restRemaining}s"
+            } else {
+                "$currentName · $completedForExercise/$effectiveSets series"
+            }
             if (WorkoutNotificationPreferences.enabled(context)) {
                 WorkoutActiveNotification.show(
                     context,

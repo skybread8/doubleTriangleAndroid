@@ -87,7 +87,7 @@ internal object WorkoutActiveNotification {
         val skipIntent = actionIntent(context, ACTION_SKIP_CURRENT, 4103)
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
         val notificationArtwork = resolvedArtwork ?: exerciseArtwork(title)
-        val progressText = if (progressMax > 0) "$detail · $progress/$progressMax" else detail
+        val progressText = detail
         val compactView = notificationView(context, R.layout.notification_workout_compact, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
         val expandedView = notificationView(context, R.layout.notification_workout_expanded, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
         builder.setSmallIcon(R.drawable.ic_workout_live)
@@ -115,7 +115,7 @@ internal object WorkoutActiveNotification {
             builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
         }
         if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
-        builder.setStyle(android.app.Notification.BigTextStyle().bigText(if (progressMax > 0) "$detail\nProgreso: $progress/$progressMax" else detail))
+        builder.setStyle(android.app.Notification.BigTextStyle().bigText(detail))
         val publicVersion = android.app.Notification.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
@@ -125,7 +125,7 @@ internal object WorkoutActiveNotification {
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setStyle(android.app.Notification.BigTextStyle().bigText(if (progressMax > 0) "$detail\nProgreso: $progress/$progressMax" else detail))
+            .setStyle(android.app.Notification.BigTextStyle().bigText(detail))
             .build()
         builder.setPublicVersion(publicVersion)
         return builder.build()
