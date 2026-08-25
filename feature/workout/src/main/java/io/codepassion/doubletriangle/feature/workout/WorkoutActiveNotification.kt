@@ -12,7 +12,6 @@ import android.graphics.Shader
 import android.graphics.RectF
 import android.media.MediaMetadata
 import android.media.session.MediaSession
-import android.media.session.PlaybackState
 import android.os.Build
 import android.graphics.drawable.Icon
 import android.widget.RemoteViews
@@ -55,7 +54,6 @@ internal object WorkoutActiveNotification {
             .putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION, detail)
         resolvedArtwork?.let { metadata.putBitmap(MediaMetadata.METADATA_KEY_ART, it) }
         session.setMetadata(metadata.build())
-        session.setPlaybackState(PlaybackState.Builder().setActions(PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE or PlaybackState.ACTION_SKIP_TO_NEXT).setState(if (isResting) PlaybackState.STATE_PAUSED else PlaybackState.STATE_PLAYING, progress.toLong(), 1f).build())
         @Suppress("DEPRECATION")
         val builder: android.app.Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             android.app.Notification.Builder(context, channelId)
