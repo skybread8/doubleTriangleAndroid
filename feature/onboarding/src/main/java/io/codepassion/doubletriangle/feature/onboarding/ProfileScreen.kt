@@ -95,6 +95,7 @@ fun ProfileScreen(
     var notificationsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("enabled", true)) }
     var restAlertsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("rest_alerts", true)) }
     var reminderNotificationsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("reminders", true)) }
+    var selectedSection by remember { mutableStateOf<ProfileSection?>(null) }
     val bodyMetrics = remember(profileContext, initial) { BodyMetricsStore.load(profileContext) }
     fun saveProfile(value: OnboardingProfile) {
         BodyMetricsStore.record(profileContext, value)
@@ -106,17 +107,23 @@ fun ProfileScreen(
         contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 16.dp, bottom = contentPadding.calculateBottomPadding() + 96.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item {
-            ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, avatarPath, onChangeAvatar) }
+        if (selectedSection != null) {
+            item {
+                Text("‹  PERFIL", Modifier.fillMaxWidth().clickable { selectedSection = null }.padding(vertical = 8.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+            }
         }
         item {
-            ProfileEntrance(entered, 35) { ProfileExperience(experienceXp, experienceLevel, experienceProgress) }
+            if (selectedSection == null) ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, avatarPath, onChangeAvatar) }
         }
         item {
-            ProfileEntrance(entered, 45) { ProfileBodyMetrics(initial, bodyMetrics) }
+            if (selectedSection == null) ProfileEntrance(entered, 35) { ProfileExperience(experienceXp, experienceLevel, experienceProgress) }
+        }
+        if (selectedSection == null) item { ProfileCategoryTree { selectedSection = it } }
+        item {
+            if (selectedSection == ProfileSection.Body) ProfileEntrance(entered, 45) { ProfileBodyMetrics(initial, bodyMetrics) }
         }
         item {
-            ProfileEntrance(entered, 55) { Section("DATOS PERSONALES") {
+            if (selectedSection == ProfileSection.Personal) ProfileEntrance(entered, 55) { Section("DATOS PERSONALES") {
                 OutlinedTextField(draft.name, { draft = draft.copy(name = it.take(60)) }, Modifier.fillMaxWidth(), label = { Text("Nombre") }, singleLine = true)
                 ChoiceButton("Mes de nacimiento", monthName(draft.birthMonth)) { picker = Picker.BirthMonth }
                 NumberField("Año de nacimiento", birthYearInput, { birthYearInput = it.filter(Char::isDigit).take(4) }, Modifier.fillMaxWidth())
@@ -146,7 +153,7 @@ fun ProfileScreen(
             } }
         }
         item {
-            ProfileEntrance(entered, 105) { Section("OBJETIVO Y NIVEL") {
+            if (selectedSection == ProfileSection.Goal) ProfileEntrance(entered, 105) { Section("OBJETIVO Y NIVEL") {
                 ChoiceButton("Objetivo", draft.goal.title) { picker = Picker.Goal }
                 ChoiceButton("Nivel", draft.trainingLevel.title, draft.trainingLevel.description) { picker = Picker.Level }
                 ChoiceButton("Actividad diaria", draft.lifestyle.title, draft.lifestyle.description) { picker = Picker.Lifestyle }
@@ -154,7 +161,7 @@ fun ProfileScreen(
             } }
         }
         item {
-            ProfileEntrance(entered, 155) { Section("ESTRUCTURA DEL PLAN") {
+            if (selectedSection == ProfileSection.Training) ProfileEntrance(entered, 155) { Section("ESTRUCTURA DEL PLAN") {
                 ChoiceButton("División semanal", draft.trainingSplitPreference.title) { picker = Picker.Split }
                 Text("Días de entrenamiento", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 draft.workoutDays.toList().let { days ->
@@ -176,7 +183,7 @@ fun ProfileScreen(
             } }
         }
         item {
-            ProfileEntrance(entered, 205) { Section("ENTORNO Y SEGURIDAD") {
+            if (selectedSection == ProfileSection.Environment) ProfileEntrance(entered, 205) { Section("ENTORNO Y SEGURIDAD") {
                 ChoiceButton("Tipo de gimnasio", draft.gymType.title) { picker = Picker.Gym }
                 ChoiceButton("Ubicaciones de entrenamiento", draft.effectiveTrainingLocations().joinToString(" · ") { if (it.isDefault) "${it.name} (principal)" else it.name }) { showsTrainingLocations = true }
                 ChoiceButton("Equipamiento disponible", "${draft.availableEquipment.size} seleccionado(s)") { picker = Picker.Equipment }
@@ -184,10 +191,10 @@ fun ProfileScreen(
             } }
         }
         item {
-            ProfileEntrance(entered, 235) { ProfileAchievements() }
+            if (selectedSection == ProfileSection.Achievements) ProfileEntrance(entered, 235) { ProfileAchievements() }
         }
         item {
-            ProfileEntrance(entered, 245) { Section("NOTIFICACIONES") {
+            if (selectedSection == ProfileSection.Settings) ProfileEntrance(entered, 245) { Section("NOTIFICACIONES") {
                 TogglePreference("Notificaciones de entrenamiento", "Muestra la sesión activa en el panel y la pantalla bloqueada.", notificationsEnabled) {
                     notificationsEnabled = !notificationsEnabled
                     notificationPreferences.edit().putBoolean("enabled", notificationsEnabled).apply()
@@ -203,7 +210,7 @@ fun ProfileScreen(
             } }
         }
         item {
-            ProfileEntrance(entered, 265) {
+            if (selectedSection == ProfileSection.Training) ProfileEntrance(entered, 265) {
             generationError?.let { Text(it, Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(12.dp)).padding(12.dp), color = Color(0xFFC62828)) }
             Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("PLAN PERSONALIZADO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
@@ -262,6 +269,36 @@ fun ProfileScreen(
 @Composable
 private fun ProfileEntrance(visible: Boolean, delayMillis: Int, content: @Composable () -> Unit) {
     AnimatedVisibility(visible = visible, enter = fadeIn(tween(330, delayMillis = delayMillis)) + slideInVertically(tween(330, delayMillis = delayMillis)) { it / 16 }) { content() }
+}
+
+private enum class ProfileSection(val title: String, val subtitle: String) {
+    Personal("Datos personales", "Nombre, medidas, unidades y Health Connect"),
+    Body("Perfil corporal", "Historial de peso, altura y evolución"),
+    Goal("Objetivo y nivel", "Objetivo, nivel y fase corporal"),
+    Training("Entrenamiento", "Días, división, duración y preferencias"),
+    Environment("Entorno y seguridad", "Gimnasio, ubicaciones, equipamiento y restricciones"),
+    Achievements("Logros y rachas", "Experiencia, logros y progreso"),
+    Settings("Ajustes y notificaciones", "Avisos, descansos y recordatorios"),
+}
+
+@Composable
+private fun ProfileCategoryTree(onSelect: (ProfileSection) -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("PERFIL", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
+        ProfileSection.entries.forEach { section ->
+            Row(
+                Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).clickable { onSelect(section) }.padding(horizontal = 16.dp, vertical = 13.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(13.dp),
+            ) {
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(section.title, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
+                    Text(section.subtitle, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                Text("›", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.h5)
+            }
+        }
+    }
 }
 
 @Composable
