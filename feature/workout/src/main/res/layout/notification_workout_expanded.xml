@@ -50,8 +50,7 @@
             android:layout_marginTop="6dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
-            <TextView android:id="@+id/notification_toggle" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="PAUSAR" android:textColor="#FFFFFFFF" android:textSize="12sp" android:background="#55333333" />
-            <TextView android:id="@+id/notification_skip" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="6dp" android:gravity="center" android:text="SALTAR" android:textColor="#FFFFFFFF" android:textSize="12sp" android:background="#55333333" />
+            <TextView android:id="@+id/notification_skip" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="OMITIR" android:textColor="#FFFFFFFF" android:textSize="12sp" android:background="#55333333" />
             <TextView android:id="@+id/notification_add" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="6dp" android:gravity="center" android:text="+30 s" android:textColor="#FFFFD77A" android:textSize="12sp" android:background="#55333333" />
         </LinearLayout>
     </LinearLayout>

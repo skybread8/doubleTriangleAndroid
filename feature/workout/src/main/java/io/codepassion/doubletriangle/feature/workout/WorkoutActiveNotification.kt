@@ -60,12 +60,10 @@ internal object WorkoutActiveNotification {
         } else {
             android.app.Notification.Builder(context)
         }
-        val toggleIntent = actionIntent(context, ACTION_TOGGLE_TIMER, 4102)
         val skipIntent = actionIntent(context, ACTION_SKIP_CURRENT, 4103)
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
         val notificationArtwork = resolvedArtwork ?: exerciseArtwork(title)
         val progressText = if (progressMax > 0) "$detail · $progress/$progressMax" else detail
-        val compactView = notificationView(context, R.layout.notification_workout_compact, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress)
         val expandedView = notificationView(context, R.layout.notification_workout_expanded, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress)
         builder.setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
@@ -78,9 +76,8 @@ internal object WorkoutActiveNotification {
             .setShowWhen(isResting)
             .setAutoCancel(false)
             .setLargeIcon(notificationArtwork)
-            .setCustomContentView(compactView)
+            .setCustomContentView(expandedView)
             .setCustomBigContentView(expandedView)
-            .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_pause), "Pausar", toggleIntent).build())
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Saltar", skipIntent).build())
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
         if (contentIntent != null) builder.setContentIntent(contentIntent)
@@ -91,7 +88,7 @@ internal object WorkoutActiveNotification {
             .setContentTitle(displayTitle)
             .setContentText(detail)
             .setLargeIcon(notificationArtwork)
-            .setCustomContentView(compactView)
+            .setCustomContentView(expandedView)
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -115,7 +112,6 @@ internal object WorkoutActiveNotification {
         setImageViewBitmap(R.id.notification_progress_visual, progressArtwork(context, progress, progressMax, segmentedProgress))
         setTextViewText(R.id.notification_title, title)
         setTextViewText(R.id.notification_detail, detail)
-        setOnClickPendingIntent(R.id.notification_toggle, actionIntent(context, ACTION_TOGGLE_TIMER, 4202))
         setOnClickPendingIntent(R.id.notification_skip, actionIntent(context, ACTION_SKIP_CURRENT, 4203))
         setOnClickPendingIntent(R.id.notification_add, actionIntent(context, ACTION_ADD_REST, 4204))
     }

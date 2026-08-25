@@ -12,11 +12,24 @@ internal class WorkoutForegroundService : Service() {
     private var currentTitle: String = "Entrenamiento activo"
     private var restWasActive = false
     private var lastNotifiedRemaining: Int? = null
+    private var restEndAtMillis: Long? = null
+    private var lastObservedRest: Int? = null
     private val restMonitor = object : Runnable {
         override fun run() {
             workoutId?.let { id ->
-                val remaining = WorkoutSessionStore.load(this@WorkoutForegroundService, id)?.restRemaining
                 val snapshot = WorkoutSessionStore.load(this@WorkoutForegroundService, id)
+                val storedRemaining = snapshot?.restRemaining
+                val now = System.currentTimeMillis()
+                if (storedRemaining != null && storedRemaining > 0) {
+                    val previous = lastObservedRest
+                    if (restEndAtMillis == null || previous == null) {
+                        restEndAtMillis = now + storedRemaining * 1_000L
+                    } else if (storedRemaining > previous + 1) {
+                        restEndAtMillis = (restEndAtMillis ?: now) + (storedRemaining - previous) * 1_000L
+                    }
+                    lastObservedRest = storedRemaining
+                }
+                val remaining = restEndAtMillis?.let { ((it - now).coerceAtLeast(0L) / 1_000L).toInt() }
                 if (remaining != null && remaining > 0) {
                     restWasActive = true
                     if (remaining != lastNotifiedRemaining) {
@@ -34,6 +47,8 @@ internal class WorkoutForegroundService : Service() {
                 if (restWasActive && (remaining == null || remaining <= 0)) {
                     restWasActive = false
                     lastNotifiedRemaining = null
+                    restEndAtMillis = null
+                    lastObservedRest = null
                     val appForeground = getSharedPreferences("wildforce_notification_settings", 0).getBoolean("app_foreground", false)
                     if (!appForeground) WorkoutActiveNotification.showRestFinished(this@WorkoutForegroundService)
                 }
