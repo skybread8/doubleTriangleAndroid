@@ -953,11 +953,26 @@ fun ActiveWorkoutScreen(
                 Text("SALTAR", Modifier.clickable { showsSkipExerciseConfirmation = true }.padding(8.dp), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 Text(formatClock(elapsedSeconds), Modifier.liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(horizontal = 14.dp, vertical = 7.dp), color = Color.White, fontWeight = FontWeight.Bold)
             }
-            LinearProgressIndicator(
-                progress = if (workout.exercises.isEmpty()) 0f else (exerciseIndex + completedForExercise.toFloat() / effectiveSets.coerceAtLeast(1)) / workout.exercises.size,
-                modifier = Modifier.fillMaxWidth().height(4.dp), color = Color.White,
-                backgroundColor = Color.White.copy(alpha = 0.28f),
-            )
+            Row(
+                Modifier.fillMaxWidth().height(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                workout.exercises.forEachIndexed { index, item ->
+                    val setsForItem = (item.sets + (addedSetsByExercise[index] ?: 0)).coerceAtLeast(1)
+                    val completedSets = completedByExercise[index] ?: 0
+                    val completed = index < exerciseIndex || completedSets >= setsForItem
+                    val current = index == exerciseIndex
+                    Box(
+                        Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(3.dp)).background(
+                            when {
+                                completed -> WildforceThemeTokens.accentGold
+                                current && completedSets > 0 -> WildforceThemeTokens.accentGold.copy(alpha = 0.55f)
+                                else -> Color.White.copy(alpha = 0.28f)
+                            },
+                        ),
+                    )
+                }
+            }
             Column(Modifier.padding(horizontal = 10.dp, vertical = 14.dp)) {
                 Text("EJERCICIO ${logicalExerciseIndex + 1} DE ${logicalExercises.size}", color = Color.White.copy(alpha = 0.72f), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
                 Text(exercise?.name?.uppercase().orEmpty(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
