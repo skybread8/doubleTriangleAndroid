@@ -741,10 +741,13 @@ fun ActiveWorkoutScreen(
         }
     }
 
-    DisposableEffect(workout.id) {
-        val receiver = object : android.content.BroadcastReceiver() {
-            override fun onReceive(receiverContext: android.content.Context?, intent: android.content.Intent?) {
-                when (intent?.action) {
+    var lastNotificationActionTimestamp by remember(workout.id) { mutableStateOf(WorkoutNotificationActionStore.read(context)?.second ?: 0L) }
+    LaunchedEffect(workout.id) {
+        while (true) {
+            WorkoutNotificationActionStore.read(context)?.let { (action, timestamp) ->
+                if (timestamp > lastNotificationActionTimestamp) {
+                    lastNotificationActionTimestamp = timestamp
+                    when (action) {
                     WorkoutActiveNotification.ACTION_TOGGLE_TIMER -> if (restRemaining != null) {
                         if (restTimerPaused) {
                             restEndsAtMillis = System.currentTimeMillis() + restRemaining!!.coerceAtLeast(0) * 1_000L
@@ -768,14 +771,9 @@ fun ActiveWorkoutScreen(
                     }
                 }
             }
+            }
+            delay(250)
         }
-        val filter = android.content.IntentFilter().apply {
-            addAction(WorkoutActiveNotification.ACTION_TOGGLE_TIMER)
-            addAction(WorkoutActiveNotification.ACTION_SKIP_CURRENT)
-            addAction(WorkoutActiveNotification.ACTION_ADD_REST)
-        }
-        if (android.os.Build.VERSION.SDK_INT >= 33) context.registerReceiver(receiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED) else context.registerReceiver(receiver, filter)
-        onDispose { runCatching { context.unregisterReceiver(receiver) } }
     }
 
     DisposableEffect(lifecycleOwner, workout.id) {

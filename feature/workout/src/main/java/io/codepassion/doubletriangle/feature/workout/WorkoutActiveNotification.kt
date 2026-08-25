@@ -87,11 +87,11 @@ internal object WorkoutActiveNotification {
             val liveProgress = if (isResting) (progressMax - progress).coerceIn(0, progressMax) else progress.coerceIn(0, progressMax)
             val liveStyle = android.app.Notification.ProgressStyle()
                 .setProgress(liveProgress)
-                .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.ic_workout_live))
+                .setProgressTrackerIcon(resolvedArtwork?.let { Icon.createWithBitmap(it) } ?: Icon.createWithResource(context, R.drawable.ic_workout_live))
                 .setProgressSegments(listOf(android.app.Notification.ProgressStyle.Segment(progressMax).setColor(0xFFD5A928.toInt())))
             builder.setStyle(liveStyle)
             builder.extras.putBoolean(android.app.Notification.EXTRA_REQUEST_PROMOTED_ONGOING, true)
-            if (isResting) builder.setShortCriticalText(detail.substringBefore(" ·").take(7))
+            if (isResting) builder.setShortCriticalText(detail.substringAfter("Descanso:").substringBefore(" ").trim().take(7))
         }
         val publicVersion = android.app.Notification.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_workout_live)
@@ -169,7 +169,7 @@ internal object WorkoutActiveNotification {
     }
 
     private fun actionIntent(context: Context, action: String, requestCode: Int): android.app.PendingIntent =
-        android.app.PendingIntent.getBroadcast(context, requestCode, Intent(action).setPackage(context.packageName), android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
+        android.app.PendingIntent.getBroadcast(context, requestCode, Intent(context, WorkoutNotificationActionReceiver::class.java).setAction(action), android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
 
     private fun ensureChannel(manager: NotificationManager) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_HIGH).apply {
