@@ -115,6 +115,9 @@ internal object WorkoutActiveNotification {
         setImageViewBitmap(R.id.notification_progress_visual, progressArtwork(context, progress, progressMax, segmentedProgress))
         setTextViewText(R.id.notification_title, title)
         setTextViewText(R.id.notification_detail, detail)
+        setOnClickPendingIntent(R.id.notification_toggle, actionIntent(context, ACTION_TOGGLE_TIMER, 4202))
+        setOnClickPendingIntent(R.id.notification_skip, actionIntent(context, ACTION_SKIP_CURRENT, 4203))
+        setOnClickPendingIntent(R.id.notification_add, actionIntent(context, ACTION_ADD_REST, 4204))
     }
 
     private fun progressArtwork(context: Context, progress: Int, progressMax: Int, segmented: Boolean): Bitmap {
@@ -140,8 +143,12 @@ internal object WorkoutActiveNotification {
         } else {
             canvas.drawRoundRect(RectF(0f, 7f, end, 17f), radius, radius, fill)
         }
-        val marker = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFD77A.toInt() }
-        canvas.drawCircle(end, height / 2f, 8f, marker)
+        context.getDrawable(R.drawable.ic_workout_live)?.let { icon ->
+            val iconSize: Int = 24
+            icon.setTint(0xFFFFD77A.toInt())
+            icon.setBounds((end - iconSize / 2).toInt(), 0, (end + iconSize / 2).toInt(), iconSize)
+            icon.draw(canvas)
+        }
         return bitmap
     }
 

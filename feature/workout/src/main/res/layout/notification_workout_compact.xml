@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="64dp"
+    android:layout_height="92dp"
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:paddingStart="12dp"
@@ -43,6 +43,17 @@
             android:layout_marginTop="1dp"
             android:scaleType="fitXY"
             android:contentDescription="@null" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView android:id="@+id/notification_toggle" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:text="PAUSAR" android:textColor="#FFFFFFFF" android:textSize="10sp" android:background="#55333333" />
+            <TextView android:id="@+id/notification_skip" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="4dp" android:gravity="center" android:text="SALTAR" android:textColor="#FFFFFFFF" android:textSize="10sp" android:background="#55333333" />
+            <TextView android:id="@+id/notification_add" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginStart="4dp" android:gravity="center" android:text="+30 s" android:textColor="#FFFFD77A" android:textSize="10sp" android:background="#55333333" />
+        </LinearLayout>
     </LinearLayout>
 
     <ImageView
