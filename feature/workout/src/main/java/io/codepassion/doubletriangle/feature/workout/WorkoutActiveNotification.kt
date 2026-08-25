@@ -115,6 +115,7 @@ internal object WorkoutActiveNotification {
         progressMax: Int,
     ): RemoteViews = RemoteViews(context.packageName, layout).apply {
         setImageViewBitmap(R.id.notification_artwork, artwork)
+        setImageViewResource(R.id.notification_live_icon, R.drawable.ic_workout_live)
         setTextViewText(R.id.notification_title, title)
         setTextViewText(R.id.notification_detail, detail)
         setProgressBar(R.id.notification_progress, progressMax.coerceAtLeast(1), progress.coerceIn(0, progressMax.coerceAtLeast(1)), false)
