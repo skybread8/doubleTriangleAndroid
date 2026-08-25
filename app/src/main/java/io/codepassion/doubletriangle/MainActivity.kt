@@ -26,6 +26,12 @@ import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Insights
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
@@ -98,9 +105,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class RootDestination(val label: String, val glyph: String) {
-    Workout("Entrenamiento", "W"), Nutrition("Nutrición", "N"),
-    Analytics("Analíticas", "A"), Profile("Perfil", "P"),
+private enum class RootDestination(val label: String, val icon: ImageVector) {
+    Workout("Entrenamiento", Icons.Filled.FitnessCenter), Nutrition("Nutrición", Icons.Filled.Restaurant),
+    Analytics("Analíticas", Icons.Filled.Insights), Profile("Perfil", Icons.Filled.Person),
 }
 
 @Composable
@@ -474,7 +481,7 @@ private fun WildforceApp(
                 RootDestination.values().forEach { destination ->
                     BottomNavigationItem(
                         selected = selected == destination, onClick = { selected = destination },
-                        icon = { Text(destination.glyph, fontWeight = FontWeight.Bold) }, label = { Text(destination.label) },
+                        icon = { Icon(destination.icon, contentDescription = destination.label) }, label = { Text(destination.label) },
                         selectedContentColor = WildforceThemeTokens.accentGold, unselectedContentColor = WildforceThemeTokens.textSecondary,
                     )
                 }
