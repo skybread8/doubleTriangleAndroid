@@ -161,21 +161,21 @@ internal object WorkoutActiveNotification {
         val canvas = Canvas(bitmap)
         val track = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xAA888888.toInt() }
         val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFD9A441.toInt() }
-        val radius: Float = 8f
-        canvas.drawRoundRect(RectF(0f, 24f, width.toFloat(), 40f), radius, radius, track)
+        val radius: Float = 12f
+        canvas.drawRoundRect(RectF(0f, 20f, width.toFloat(), 44f), radius, radius, track)
         if (progressMax <= 0) return bitmap
         val ratio: Float = (progress.toFloat() / progressMax.toFloat()).coerceIn(0f, 1f)
         val end: Float = (width.toFloat() * ratio).coerceIn(10f, width.toFloat() - 10f)
         if (segmented) {
-            val gap = 14f
+            val gap = 20f
             val segmentWidth = (width - gap * (progressMax - 1).coerceAtLeast(0)) / progressMax.toFloat()
             repeat(progressMax) { index ->
                 val left = index * (segmentWidth + gap)
                 val right = left + segmentWidth
-                canvas.drawRoundRect(RectF(left, 24f, right, 40f), radius, radius, if (index < progress) fill else track)
+                canvas.drawRoundRect(RectF(left, 20f, right, 44f), radius, radius, if (index < progress) fill else track)
             }
         } else {
-            canvas.drawRoundRect(RectF(0f, 24f, end, 40f), radius, radius, fill)
+            canvas.drawRoundRect(RectF(0f, 20f, end, 44f), radius, radius, fill)
         }
         context.getDrawable(R.drawable.ic_workout_live)?.let { icon ->
             val iconSize: Int = 64
