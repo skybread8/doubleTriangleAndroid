@@ -9,6 +9,7 @@ import android.graphics.Canvas
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Shader
+import android.graphics.RectF
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -115,11 +116,31 @@ internal object WorkoutActiveNotification {
         progressMax: Int,
     ): RemoteViews = RemoteViews(context.packageName, layout).apply {
         setImageViewBitmap(R.id.notification_artwork, artwork)
-        setImageViewResource(R.id.notification_live_icon, R.drawable.ic_workout_live)
+        setImageViewBitmap(R.id.notification_progress_visual, progressArtwork(context, progress, progressMax))
         setTextViewText(R.id.notification_title, title)
         setTextViewText(R.id.notification_detail, detail)
-        setProgressBar(R.id.notification_progress, progressMax.coerceAtLeast(1), progress.coerceIn(0, progressMax.coerceAtLeast(1)), false)
-        setViewVisibility(R.id.notification_progress, if (progressMax > 0) android.view.View.VISIBLE else android.view.View.GONE)
+    }
+
+    private fun progressArtwork(context: Context, progress: Int, progressMax: Int): Bitmap {
+        val width = 640
+        val height = 24
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val track = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x55666666 }
+        val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFD9A441 }
+        val radius = height / 2f
+        canvas.drawRoundRect(RectF(0f, 7f, width.toFloat(), 17f), radius, radius, track)
+        if (progressMax <= 0) return bitmap
+        val ratio = (progress.toFloat() / progressMax.toFloat()).coerceIn(0f, 1f)
+        val end = (width * ratio).coerceIn(10f, width - 10f)
+        canvas.drawRoundRect(RectF(0f, 7f, end, 17f), radius, radius, fill)
+        context.getDrawable(R.drawable.ic_workout_live)?.let { icon ->
+            val iconSize = 24
+            icon.setTint(0xFFFFD77A.toInt())
+            icon.setBounds((end - iconSize / 2).toInt(), 0, (end + iconSize / 2).toInt(), iconSize)
+            icon.draw(canvas)
+        }
+        return bitmap
     }
 
     fun showRestFinished(context: Context) {
