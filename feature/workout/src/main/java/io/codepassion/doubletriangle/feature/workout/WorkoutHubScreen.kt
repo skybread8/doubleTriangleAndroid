@@ -1015,9 +1015,15 @@ fun ActiveWorkoutScreen(
                         gender = gender,
                         onAddTime = {
                             restInitialSeconds += 30
-                            restRemaining = resting + 30
+                            if (restTimerPaused) {
+                                restRemaining = resting + 30
+                            } else {
+                                val base = restEndsAtMillis ?: System.currentTimeMillis()
+                                restEndsAtMillis = base + 30_000L
+                                restRemaining = ((restEndsAtMillis!! - System.currentTimeMillis()).coerceAtLeast(0L) / 1_000L).toInt()
+                            }
                         },
-                        onSkip = { restRemaining = null; restBetweenExercises = false },
+                        onSkip = { restRemaining = null; restEndsAtMillis = null; restTimerPaused = false; restBetweenExercises = false },
                     )
                 } else if (exercise != null) {
                     val isWarmupOrCooldown = exercise.blockType == WorkoutBlockType.Warmup || exercise.blockType == WorkoutBlockType.Cooldown
