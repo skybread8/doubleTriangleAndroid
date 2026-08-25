@@ -605,7 +605,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                Button(onClick = { startingWorkout = true }, enabled = !startingWorkout, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp)) {
+                Button(onClick = { onStart(); startingWorkout = true }, enabled = !startingWorkout, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp)) {
                     Text(if (startingWorkout) "ABRIENDO ENTRENAMIENTO…" else if (hasSavedSession) "REANUDAR ENTRENAMIENTO" else "EMPEZAR ENTRENAMIENTO", fontWeight = FontWeight.Bold)
                 }
             }
@@ -1046,7 +1046,25 @@ fun ActiveWorkoutScreen(
                             restTimerPaused = false
                             restRemaining = ((restEndsAtMillis!! - now).coerceAtLeast(0L) / 1_000L).toInt()
                         },
-                        onSkip = { restRemaining = null; restEndsAtMillis = null; restTimerPaused = false; restBetweenExercises = false },
+                        onSkip = {
+                            restRemaining = null
+                            restEndsAtMillis = null
+                            restTimerPaused = false
+                            restBetweenExercises = false
+                            val completedExercises = workout.exercises.indices.count { index ->
+                                index < exerciseIndex || (completedByExercise[index] ?: 0) >= (workout.exercises[index].sets + (addedSetsByExercise[index] ?: 0)).coerceAtLeast(1)
+                            }
+                            WorkoutActiveNotification.show(
+                                context,
+                                workout.title,
+                                "${exercise?.name ?: "Entrenamiento"} · ${completedExercises}/${workout.exercises.size} ejercicios",
+                                progress = completedExercises,
+                                progressMax = workout.exercises.size.coerceAtLeast(1),
+                                isResting = false,
+                                artwork = notificationArtwork,
+                                segmentedProgress = true,
+                            )
+                        },
                     )
                 } else if (exercise != null) {
                     val isWarmupOrCooldown = exercise.blockType == WorkoutBlockType.Warmup || exercise.blockType == WorkoutBlockType.Cooldown
