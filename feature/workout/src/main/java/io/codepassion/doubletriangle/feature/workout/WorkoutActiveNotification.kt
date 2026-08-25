@@ -64,6 +64,7 @@ internal object WorkoutActiveNotification {
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
         val notificationArtwork = resolvedArtwork ?: exerciseArtwork(title)
         val progressText = if (progressMax > 0) "$detail · $progress/$progressMax" else detail
+        val compactView = notificationView(context, R.layout.notification_workout_compact, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
         val expandedView = notificationView(context, R.layout.notification_workout_expanded, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
         builder.setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
@@ -76,7 +77,7 @@ internal object WorkoutActiveNotification {
             .setShowWhen(isResting)
             .setAutoCancel(false)
             .setLargeIcon(notificationArtwork)
-            .setCustomContentView(expandedView)
+            .setCustomContentView(compactView)
             .setCustomBigContentView(expandedView)
         if (contentIntent != null) builder.setContentIntent(contentIntent)
         if (isResting) {
@@ -90,7 +91,7 @@ internal object WorkoutActiveNotification {
             .setContentTitle(displayTitle)
             .setContentText(detail)
             .setLargeIcon(notificationArtwork)
-            .setCustomContentView(expandedView)
+            .setCustomContentView(compactView)
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
