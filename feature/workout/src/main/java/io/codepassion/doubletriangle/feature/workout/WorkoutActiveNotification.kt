@@ -167,7 +167,7 @@ internal object WorkoutActiveNotification {
         val ratio: Float = (progress.toFloat() / progressMax.toFloat()).coerceIn(0f, 1f)
         val end: Float = (width.toFloat() * ratio).coerceIn(10f, width.toFloat() - 10f)
         if (segmented) {
-            val gap = 6f
+            val gap = 14f
             val segmentWidth = (width - gap * (progressMax - 1).coerceAtLeast(0)) / progressMax.toFloat()
             repeat(progressMax) { index ->
                 val left = index * (segmentWidth + gap)
