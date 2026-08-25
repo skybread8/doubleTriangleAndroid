@@ -128,6 +128,11 @@ internal object WorkoutActiveNotification {
         if (alert) {
             @Suppress("DEPRECATION")
             builder.setOnlyAlertOnce(false)
+                .setPriority(android.app.Notification.PRIORITY_HIGH)
+                .setTicker("Descanso terminado")
+                .setWhen(System.currentTimeMillis())
+                .setShowWhen(true)
+                .setLights(0xFFD9A441.toInt(), 500, 500)
         } else {
             builder.setSound(null).setVibrate(null)
         }
