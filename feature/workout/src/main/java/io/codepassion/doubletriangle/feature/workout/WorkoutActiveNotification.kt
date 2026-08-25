@@ -145,12 +145,8 @@ internal object WorkoutActiveNotification {
         } else {
             canvas.drawRoundRect(RectF(0f, 7f, end, 17f), radius, radius, fill)
         }
-        context.getDrawable(R.drawable.ic_workout_live)?.let { icon ->
-            val iconSize: Int = 24
-            icon.setTint(0xFFFFD77A.toInt())
-            icon.setBounds((end - iconSize / 2).toInt(), 0, (end + iconSize / 2).toInt(), iconSize)
-            icon.draw(canvas)
-        }
+        val marker = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFD77A.toInt() }
+        canvas.drawCircle(end, height / 2f, 8f, marker)
         return bitmap
     }
 
