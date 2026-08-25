@@ -685,6 +685,7 @@ fun ActiveWorkoutScreen(
     var weightKg by remember(workout.id) { mutableStateOf(restored?.weightKg ?: workout.exercises.firstOrNull()?.targetWeightKg ?: 0.0) }
     var restRemaining by remember(workout.id) { mutableStateOf(restored?.restRemaining) }
     var restTimerPaused by remember(workout.id) { mutableStateOf(false) }
+    var restEndsAtMillis by remember(workout.id) { mutableStateOf(restored?.restRemaining?.let { System.currentTimeMillis() + it * 1_000L }) }
     var restInitialSeconds by remember(workout.id) { mutableStateOf(restored?.restInitialSeconds ?: 1) }
     var restBetweenExercises by remember(workout.id) { mutableStateOf(restored?.restBetweenExercises ?: false) }
     var elapsedSeconds by remember(workout.id) { mutableStateOf(restored?.elapsedSeconds ?: 0) }
@@ -731,6 +732,7 @@ fun ActiveWorkoutScreen(
                 restBetweenExercises = true
                 restRemaining = restSeconds
                 restTimerPaused = false
+                restEndsAtMillis = System.currentTimeMillis() + restSeconds * 1_000L
             } else {
                 restRemaining = null
             }
@@ -743,10 +745,25 @@ fun ActiveWorkoutScreen(
         val receiver = object : android.content.BroadcastReceiver() {
             override fun onReceive(receiverContext: android.content.Context?, intent: android.content.Intent?) {
                 when (intent?.action) {
-                    WorkoutActiveNotification.ACTION_TOGGLE_TIMER -> if (restRemaining != null) restTimerPaused = !restTimerPaused else exerciseTimerRunning = !exerciseTimerRunning
-                    WorkoutActiveNotification.ACTION_SKIP_CURRENT -> if (restRemaining != null) { restRemaining = null; restBetweenExercises = false; restTimerPaused = false } else advanceFromExercise(exercise?.restSeconds ?: 0)
+                    WorkoutActiveNotification.ACTION_TOGGLE_TIMER -> if (restRemaining != null) {
+                        if (restTimerPaused) {
+                            restEndsAtMillis = System.currentTimeMillis() + restRemaining!!.coerceAtLeast(0) * 1_000L
+                            restTimerPaused = false
+                        } else {
+                            restRemaining = ((restEndsAtMillis ?: System.currentTimeMillis()) - System.currentTimeMillis()).div(1_000L).coerceAtLeast(0L).toInt()
+                            restEndsAtMillis = null
+                            restTimerPaused = true
+                        }
+                    } else exerciseTimerRunning = !exerciseTimerRunning
+                    WorkoutActiveNotification.ACTION_SKIP_CURRENT -> if (restRemaining != null) { restRemaining = null; restEndsAtMillis = null; restBetweenExercises = false; restTimerPaused = false } else advanceFromExercise(exercise?.restSeconds ?: 0)
                     WorkoutActiveNotification.ACTION_ADD_REST -> if (restRemaining != null) {
-                        restRemaining = restRemaining!! + 30
+                        if (restTimerPaused) {
+                            restRemaining = restRemaining!! + 30
+                        } else {
+                            val base = restEndsAtMillis ?: System.currentTimeMillis()
+                            restEndsAtMillis = base + 30_000L
+                            restRemaining = ((restEndsAtMillis!! - System.currentTimeMillis()).coerceAtLeast(0L) / 1_000L).toInt()
+                        }
                         restInitialSeconds += 30
                     }
                 }
@@ -823,16 +840,19 @@ fun ActiveWorkoutScreen(
             WorkoutSessionSnapshot(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, showsSummary, selectedFeedback, pendingNote, exerciseStats, feedbackByExercise, notesByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning, addedSetsByExercise),
         )
     }
-    LaunchedEffect(restRemaining, restTimerPaused) {
-        val remaining = restRemaining ?: return@LaunchedEffect
-        if (remaining > 0) {
-            if (restTimerPaused) return@LaunchedEffect
-            delay(1_000)
-            restRemaining = remaining - 1
-        } else {
-            restRemaining = null
-            restBetweenExercises = false
+    LaunchedEffect(restEndsAtMillis, restTimerPaused) {
+        val end = restEndsAtMillis ?: return@LaunchedEffect
+        if (restTimerPaused) return@LaunchedEffect
+        while (true) {
+            val remaining = ((end - System.currentTimeMillis()).coerceAtLeast(0L) / 1_000L).toInt()
+            restRemaining = remaining
+            if (remaining <= 0) break
+            delay(250)
         }
+        delay(150)
+        restRemaining = null
+        restEndsAtMillis = null
+        restBetweenExercises = false
     }
     LaunchedEffect(exerciseTimerRunning, exerciseTimeRemaining) {
         val remaining = exerciseTimeRemaining ?: return@LaunchedEffect
