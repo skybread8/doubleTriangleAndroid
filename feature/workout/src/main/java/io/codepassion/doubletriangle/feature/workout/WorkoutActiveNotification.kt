@@ -124,13 +124,13 @@ internal object WorkoutActiveNotification {
 
     private fun progressArtwork(context: Context, progress: Int, progressMax: Int, segmented: Boolean): Bitmap {
         val width: Int = 640
-        val height: Int = 24
+        val height: Int = 48
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        val track = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x55666666 }
+        val track = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xAA888888.toInt() }
         val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFD9A441.toInt() }
-        val radius: Float = height / 2f
-        canvas.drawRoundRect(RectF(0f, 7f, width.toFloat(), 17f), radius, radius, track)
+        val radius: Float = 4f
+        canvas.drawRoundRect(RectF(0f, 20f, width.toFloat(), 28f), radius, radius, track)
         if (progressMax <= 0) return bitmap
         val ratio: Float = (progress.toFloat() / progressMax.toFloat()).coerceIn(0f, 1f)
         val end: Float = (width.toFloat() * ratio).coerceIn(10f, width.toFloat() - 10f)
@@ -140,13 +140,13 @@ internal object WorkoutActiveNotification {
             repeat(progressMax) { index ->
                 val left = index * (segmentWidth + gap)
                 val right = left + segmentWidth
-                canvas.drawRoundRect(RectF(left, 7f, right, 17f), radius, radius, if (index < progress) fill else track)
+                canvas.drawRoundRect(RectF(left, 20f, right, 28f), radius, radius, if (index < progress) fill else track)
             }
         } else {
-            canvas.drawRoundRect(RectF(0f, 7f, end, 17f), radius, radius, fill)
+            canvas.drawRoundRect(RectF(0f, 20f, end, 28f), radius, radius, fill)
         }
         context.getDrawable(R.drawable.ic_workout_live)?.let { icon ->
-            val iconSize: Int = 24
+            val iconSize: Int = 48
             icon.setTint(0xFFFFD77A.toInt())
             icon.setBounds((end - iconSize / 2).toInt(), 0, (end + iconSize / 2).toInt(), iconSize)
             icon.draw(canvas)
