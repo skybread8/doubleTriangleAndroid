@@ -748,9 +748,13 @@ fun ActiveWorkoutScreen(
     var lastNotificationActionTimestamp by remember(workout.id) { mutableStateOf(WorkoutNotificationActionStore.read(context)?.second ?: 0L) }
     LaunchedEffect(workout.id) {
         while (true) {
-            WorkoutNotificationActionStore.read(context)?.let { (action, timestamp) ->
-                if (timestamp > lastNotificationActionTimestamp) {
-                    lastNotificationActionTimestamp = timestamp
+            // En segundo plano el servicio foreground es quien consume los
+            // botones de la notificación. Si Compose los leyera aquí primero,
+            // "OMITIR" podría desaparecer sin actualizar el temporizador remoto.
+            if (lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                WorkoutNotificationActionStore.read(context)?.let { (action, timestamp) ->
+                    if (timestamp > lastNotificationActionTimestamp) {
+                        lastNotificationActionTimestamp = timestamp
                         when (action) {
                     WorkoutActiveNotification.ACTION_TOGGLE_TIMER -> if (restRemaining != null) {
                         if (restTimerPaused) {
@@ -773,7 +777,8 @@ fun ActiveWorkoutScreen(
                         restInitialSeconds += 30
                     }
                     }
-                    WorkoutNotificationActionStore.clear(context)
+                        WorkoutNotificationActionStore.clear(context)
+                    }
                 }
             }
             delay(250)

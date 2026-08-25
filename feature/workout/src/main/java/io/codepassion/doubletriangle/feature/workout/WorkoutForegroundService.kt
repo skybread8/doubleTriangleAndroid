@@ -33,6 +33,13 @@ internal class WorkoutForegroundService : Service() {
                                 }
                                 snapshot?.let { WorkoutSessionStore.save(this@WorkoutForegroundService, id, it) }
                                 WorkoutNotificationActionStore.clear(this@WorkoutForegroundService)
+                                if (action == WorkoutActiveNotification.ACTION_SKIP_CURRENT) {
+                                    // El contador anterior no puede seguir siendo
+                                    // válido después de omitir el descanso.
+                                    restEndAtMillis = null
+                                    lastObservedRest = null
+                                    lastNotifiedRemaining = null
+                                }
                             }
                         }
                     }
