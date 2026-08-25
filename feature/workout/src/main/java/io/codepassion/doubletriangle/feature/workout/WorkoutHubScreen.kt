@@ -808,7 +808,7 @@ fun ActiveWorkoutScreen(
     }
 
     LaunchedEffect(showsSummary) { while (!showsSummary) { delay(1_000); elapsedSeconds++ } }
-    LaunchedEffect(exerciseIndex, completedByExercise, restRemaining != null, restInitialSeconds, restTimerPaused, showsSummary, notificationArtwork) {
+    LaunchedEffect(exerciseIndex, completedByExercise, restRemaining, restInitialSeconds, restTimerPaused, restBetweenExercises, showsSummary, notificationArtwork) {
         if (!showsSummary) {
             val currentName = exercise?.name ?: "Entrenamiento"
             val completed = completedByExercise.values.sum()

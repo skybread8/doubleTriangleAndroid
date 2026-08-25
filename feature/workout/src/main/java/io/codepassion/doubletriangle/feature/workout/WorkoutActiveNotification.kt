@@ -116,10 +116,12 @@ internal object WorkoutActiveNotification {
         setImageViewBitmap(R.id.notification_progress_visual, progressArtwork(context, progress, progressMax, segmentedProgress))
         setTextViewText(R.id.notification_title, title)
         setTextViewText(R.id.notification_detail, detail)
-        setOnClickPendingIntent(R.id.notification_skip, actionIntent(context, ACTION_SKIP_CURRENT, 4203))
-        setOnClickPendingIntent(R.id.notification_add, actionIntent(context, ACTION_ADD_REST, 4204))
-        setViewVisibility(R.id.notification_skip, if (isResting) android.view.View.VISIBLE else android.view.View.GONE)
-        setViewVisibility(R.id.notification_add, if (isResting) android.view.View.VISIBLE else android.view.View.GONE)
+        if (layout == R.layout.notification_workout_expanded) {
+            setOnClickPendingIntent(R.id.notification_skip, actionIntent(context, ACTION_SKIP_CURRENT, 4203))
+            setOnClickPendingIntent(R.id.notification_add, actionIntent(context, ACTION_ADD_REST, 4204))
+            setViewVisibility(R.id.notification_skip, if (isResting) android.view.View.VISIBLE else android.view.View.GONE)
+            setViewVisibility(R.id.notification_add, if (isResting) android.view.View.VISIBLE else android.view.View.GONE)
+        }
     }
 
     private fun progressArtwork(context: Context, progress: Int, progressMax: Int, segmented: Boolean): Bitmap {
