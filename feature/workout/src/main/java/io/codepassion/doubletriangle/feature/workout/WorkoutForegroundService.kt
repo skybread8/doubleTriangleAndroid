@@ -7,7 +7,6 @@ import android.os.Handler
 import android.os.Looper
 
 internal class WorkoutForegroundService : Service() {
-    private var stopping = false
     private val handler = Handler(Looper.getMainLooper())
     private var workoutId: String? = null
     private var currentTitle: String = "Entrenamiento activo"
@@ -15,7 +14,6 @@ internal class WorkoutForegroundService : Service() {
     private var lastNotifiedRemaining: Int? = null
     private val restMonitor = object : Runnable {
         override fun run() {
-            if (stopping) return
             workoutId?.let { id ->
                 val remaining = WorkoutSessionStore.load(this@WorkoutForegroundService, id)?.restRemaining
                 val snapshot = WorkoutSessionStore.load(this@WorkoutForegroundService, id)
@@ -61,7 +59,6 @@ internal class WorkoutForegroundService : Service() {
     }
 
     override fun onDestroy() {
-        stopping = true
         handler.removeCallbacks(restMonitor)
         super.onDestroy()
     }

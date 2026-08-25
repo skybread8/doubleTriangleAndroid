@@ -7,6 +7,5 @@
             android:name=".WorkoutForegroundService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
-        <receiver android:name=".WorkoutNotificationActionReceiver" android:exported="false" />
     </application>
 </manifest>

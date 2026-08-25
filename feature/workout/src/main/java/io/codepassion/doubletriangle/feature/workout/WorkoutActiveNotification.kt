@@ -9,11 +9,11 @@ import android.graphics.Canvas
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Shader
-import android.graphics.drawable.Icon
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Build
+import android.graphics.drawable.Icon
 
 internal object WorkoutActiveNotification {
     const val ACTION_TOGGLE_TIMER = "io.codepassion.doubletriangle.ACTION_TOGGLE_TIMER"
@@ -73,29 +73,16 @@ internal object WorkoutActiveNotification {
             .setOnlyAlertOnce(true)
             .setShowWhen(isResting)
             .setAutoCancel(false)
+            .setLargeIcon(resolvedArtwork ?: exerciseArtwork(title))
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_pause), "Pausar", toggleIntent).build())
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Saltar", skipIntent).build())
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
         if (contentIntent != null) builder.setContentIntent(contentIntent)
-        val promotedAllowed = Build.VERSION.SDK_INT >= 36 && runCatching {
-            (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).canPostPromotedNotifications()
-        }.getOrDefault(false)
-        if (!promotedAllowed) builder.setLargeIcon(resolvedArtwork ?: exerciseArtwork(title))
         if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
         if (isResting && chronometerBaseMillis != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             builder.setWhen(chronometerBaseMillis).setUsesChronometer(true).setChronometerCountDown(true)
         }
         builder.setStyle(android.app.Notification.BigTextStyle().bigText(if (progressMax > 0) "$detail\nProgreso: $progress/$progressMax" else detail))
-        if (promotedAllowed && progressMax > 0) {
-            val liveProgress = if (isResting) (progressMax - progress).coerceIn(0, progressMax) else progress.coerceIn(0, progressMax)
-            val liveStyle = android.app.Notification.ProgressStyle()
-                .setProgress(liveProgress)
-                .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.ic_workout_live))
-                .setProgressSegments(listOf(android.app.Notification.ProgressStyle.Segment(progressMax).setColor(0xFFD5A928.toInt())))
-            builder.setStyle(liveStyle)
-            builder.extras.putBoolean(android.app.Notification.EXTRA_REQUEST_PROMOTED_ONGOING, true)
-            if (isResting) builder.setShortCriticalText(detail.substringAfter("Descanso:").substringBefore(" ").trim().take(7))
-        }
         val publicVersion = android.app.Notification.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
@@ -172,7 +159,7 @@ internal object WorkoutActiveNotification {
     }
 
     private fun actionIntent(context: Context, action: String, requestCode: Int): android.app.PendingIntent =
-        android.app.PendingIntent.getBroadcast(context, requestCode, Intent(context, WorkoutNotificationActionReceiver::class.java).setAction(action), android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
+        android.app.PendingIntent.getBroadcast(context, requestCode, Intent(action).setPackage(context.packageName), android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
 
     private fun ensureChannel(manager: NotificationManager) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_HIGH).apply {
@@ -186,6 +173,7 @@ internal object WorkoutActiveNotification {
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(restFinishedNotificationId)
         mediaSession?.run { isActive = false; release() }
         mediaSession = null
+        artwork?.recycle()
         artwork = null
         artworkTitle = null
     }
