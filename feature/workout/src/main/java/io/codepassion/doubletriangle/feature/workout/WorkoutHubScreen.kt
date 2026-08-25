@@ -751,7 +751,7 @@ fun ActiveWorkoutScreen(
             WorkoutNotificationActionStore.read(context)?.let { (action, timestamp) ->
                 if (timestamp > lastNotificationActionTimestamp) {
                     lastNotificationActionTimestamp = timestamp
-                    when (action) {
+                        when (action) {
                     WorkoutActiveNotification.ACTION_TOGGLE_TIMER -> if (restRemaining != null) {
                         if (restTimerPaused) {
                             restEndsAtMillis = System.currentTimeMillis() + restRemaining!!.coerceAtLeast(0) * 1_000L
@@ -773,6 +773,7 @@ fun ActiveWorkoutScreen(
                         restInitialSeconds += 30
                     }
                     }
+                    WorkoutNotificationActionStore.clear(context)
                 }
             }
             delay(250)

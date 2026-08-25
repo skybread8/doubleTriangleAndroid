@@ -32,6 +32,7 @@ internal class WorkoutForegroundService : Service() {
                                     else -> current
                                 }
                                 snapshot?.let { WorkoutSessionStore.save(this@WorkoutForegroundService, id, it) }
+                                WorkoutNotificationActionStore.clear(this@WorkoutForegroundService)
                             }
                         }
                     }

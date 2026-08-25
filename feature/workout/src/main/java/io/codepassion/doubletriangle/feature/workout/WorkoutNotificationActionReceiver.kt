@@ -16,6 +16,9 @@ internal object WorkoutNotificationActionStore {
         val preferences = context.getSharedPreferences(PREFS, 0)
         return preferences.getString("action", null)?.let { it to preferences.getLong("timestamp", 0L) }
     }
+    fun clear(context: Context) {
+        context.getSharedPreferences(PREFS, 0).edit().remove("action").remove("timestamp").apply()
+    }
 }
 
 internal class WorkoutNotificationActionReceiver : BroadcastReceiver() {
