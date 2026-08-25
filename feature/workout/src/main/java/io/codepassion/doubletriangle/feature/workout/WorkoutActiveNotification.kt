@@ -63,7 +63,7 @@ internal object WorkoutActiveNotification {
         val toggleIntent = actionIntent(context, ACTION_TOGGLE_TIMER, 4102)
         val skipIntent = actionIntent(context, ACTION_SKIP_CURRENT, 4103)
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
-        builder.setSmallIcon(android.R.drawable.ic_media_play)
+        builder.setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
             .setContentText(detail)
             .setSubText(if (isResting) "Temporizador de descanso" else "Sesión activa")
@@ -159,7 +159,7 @@ internal object WorkoutActiveNotification {
     }
 
     private fun actionIntent(context: Context, action: String, requestCode: Int): android.app.PendingIntent =
-        android.app.PendingIntent.getBroadcast(context, requestCode, Intent(action).setPackage(context.packageName), android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
+        android.app.PendingIntent.getBroadcast(context, requestCode, Intent(context, WorkoutNotificationActionReceiver::class.java).setAction(action), android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
 
     private fun ensureChannel(manager: NotificationManager) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_HIGH).apply {

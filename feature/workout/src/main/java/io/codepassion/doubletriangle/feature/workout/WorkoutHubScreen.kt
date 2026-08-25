@@ -769,8 +769,8 @@ fun ActiveWorkoutScreen(
                         }
                         restInitialSeconds += 30
                     }
+                    }
                 }
-            }
             }
             delay(250)
         }
