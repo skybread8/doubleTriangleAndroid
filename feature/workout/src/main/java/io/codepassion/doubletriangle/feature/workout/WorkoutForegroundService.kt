@@ -56,7 +56,7 @@ internal class WorkoutForegroundService : Service() {
                         WorkoutActiveNotification.show(
                             this@WorkoutForegroundService,
                             currentTitle,
-                            "Descanso: ${remaining}s",
+                            "${remaining}s restantes",
                             progress = remaining,
                             progressMax = snapshot?.restInitialSeconds ?: remaining,
                             isResting = true,

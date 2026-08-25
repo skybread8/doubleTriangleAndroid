@@ -71,7 +71,7 @@ internal object WorkoutActiveNotification {
         val session = mediaSession(context)
         if (artwork != null) this.artwork = artwork
         val resolvedArtwork = artwork ?: this.artwork
-        val displayTitle = if (isResting) detail.substringBefore(" ·") else title
+        val displayTitle = if (isResting) "DESCANSO" else title
         val metadata = MediaMetadata.Builder()
             .putString(MediaMetadata.METADATA_KEY_TITLE, displayTitle)
             .putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, detail)

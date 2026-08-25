@@ -813,7 +813,7 @@ fun ActiveWorkoutScreen(
                 index < exerciseIndex || (completedByExercise[index] ?: 0) >= (workout.exercises[index].sets + (addedSetsByExercise[index] ?: 0)).coerceAtLeast(1)
             }
             val detail = if (restRemaining != null) {
-                if (restTimerPaused) "Descanso pausado" else "Descanso: ${restRemaining}s"
+                if (restTimerPaused) "Descanso pausado" else "${restRemaining}s restantes"
             } else {
                 "$currentName · $completedForExercise/$effectiveSets series"
             }
