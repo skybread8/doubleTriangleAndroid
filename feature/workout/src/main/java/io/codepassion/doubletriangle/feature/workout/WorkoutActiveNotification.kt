@@ -123,7 +123,7 @@ internal object WorkoutActiveNotification {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val track = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x55666666 }
-        val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFD9A441 }
+        val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFD9A441.toInt() }
         val radius: Float = height / 2f
         canvas.drawRoundRect(RectF(0f, 7f, width.toFloat(), 17f), radius, radius, track)
         if (progressMax <= 0) return bitmap
