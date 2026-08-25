@@ -849,7 +849,7 @@ fun ActiveWorkoutScreen(
             if (remaining <= 0) break
             delay(250)
         }
-        delay(150)
+        delay(800)
         restRemaining = null
         restEndsAtMillis = null
         restBetweenExercises = false
