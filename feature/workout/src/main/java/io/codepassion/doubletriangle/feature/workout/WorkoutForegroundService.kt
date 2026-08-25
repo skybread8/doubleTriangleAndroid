@@ -63,7 +63,7 @@ internal class WorkoutForegroundService : Service() {
                         WorkoutActiveNotification.show(
                             this@WorkoutForegroundService,
                             currentTitle,
-                            "${remaining}s restantes",
+                            "${remaining}s",
                             progress = remaining,
                             progressMax = snapshot?.restInitialSeconds ?: remaining,
                             isResting = true,

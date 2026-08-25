@@ -71,11 +71,12 @@ internal object WorkoutActiveNotification {
         val session = mediaSession(context)
         if (artwork != null) this.artwork = artwork
         val resolvedArtwork = artwork ?: this.artwork
-        val displayTitle = if (isResting) "DESCANSO" else title
+        val displayTitle = if (isResting) "Descanso · $detail" else title
+        val displayDetail = if (isResting) "" else detail
         val metadata = MediaMetadata.Builder()
             .putString(MediaMetadata.METADATA_KEY_TITLE, displayTitle)
-            .putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, detail)
-            .putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION, detail)
+            .putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, displayDetail)
+            .putString(MediaMetadata.METADATA_KEY_DISPLAY_DESCRIPTION, displayDetail)
         resolvedArtwork?.let { metadata.putBitmap(MediaMetadata.METADATA_KEY_ART, it) }
         session.setMetadata(metadata.build())
         @Suppress("DEPRECATION")
@@ -87,13 +88,13 @@ internal object WorkoutActiveNotification {
         val skipIntent = actionIntent(context, ACTION_SKIP_CURRENT, 4103)
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
         val notificationArtwork = resolvedArtwork ?: exerciseArtwork(title)
-        val progressText = detail
+        val progressText = displayDetail
         val compactView = notificationView(context, R.layout.notification_workout_compact, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
         val expandedView = notificationView(context, R.layout.notification_workout_expanded, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
         builder.setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
-            .setContentText(detail)
-            .setSubText(if (isResting) "Temporizador de descanso" else "Sesión activa")
+            .setContentText(displayDetail)
+            .setSubText(if (isResting) "" else "Sesión activa")
             .setOngoing(true)
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
             .setCategory(android.app.Notification.CATEGORY_TRANSPORT)
@@ -115,17 +116,17 @@ internal object WorkoutActiveNotification {
             builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
         }
         if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
-        builder.setStyle(android.app.Notification.BigTextStyle().bigText(detail))
+        builder.setStyle(android.app.Notification.BigTextStyle().bigText(displayDetail))
         val publicVersion = android.app.Notification.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
-            .setContentText(detail)
+            .setContentText(displayDetail)
             .setLargeIcon(notificationArtwork)
             .setCustomContentView(compactView)
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setStyle(android.app.Notification.BigTextStyle().bigText(detail))
+            .setStyle(android.app.Notification.BigTextStyle().bigText(displayDetail))
             .build()
         builder.setPublicVersion(publicVersion)
         return builder.build()
