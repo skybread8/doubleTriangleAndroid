@@ -56,6 +56,7 @@ internal object WorkoutActiveNotification {
         }
     }
 
+    @Suppress("DEPRECATION")
     fun build(context: Context, title: String, detail: String, headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, segmentedProgress: Boolean = false, alert: Boolean = false): android.app.Notification {
         val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
             flags = android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
