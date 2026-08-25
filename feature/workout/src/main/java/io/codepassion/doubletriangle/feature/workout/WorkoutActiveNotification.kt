@@ -13,6 +13,7 @@ import android.graphics.RectF
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.os.Build
+import android.media.RingtoneManager
 import android.graphics.drawable.Icon
 import android.widget.RemoteViews
 
@@ -37,7 +38,25 @@ internal object WorkoutActiveNotification {
         }
     }
 
-    fun build(context: Context, title: String, detail: String, headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, segmentedProgress: Boolean = false): android.app.Notification {
+    fun showRestCompletedInPlace(context: Context, title: String) {
+        runCatching {
+            val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            ensureChannel(manager)
+            val notification = build(
+                context,
+                title,
+                "DESCANSO TERMINADO · Continúa con el siguiente ejercicio",
+                progress = 0,
+                progressMax = 0,
+                isResting = false,
+                segmentedProgress = false,
+                alert = true,
+            )
+            manager.notify(notificationId, notification)
+        }
+    }
+
+    fun build(context: Context, title: String, detail: String, headsUp: Boolean = false, progress: Int = 0, progressMax: Int = 0, isResting: Boolean = false, artwork: Bitmap? = null, segmentedProgress: Boolean = false, alert: Boolean = false): android.app.Notification {
         val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
             flags = android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -80,6 +99,12 @@ internal object WorkoutActiveNotification {
             .setCustomContentView(compactView)
             .setCustomBigContentView(expandedView)
         if (contentIntent != null) builder.setContentIntent(contentIntent)
+        if (alert) {
+            @Suppress("DEPRECATION")
+            builder.setDefaults(android.app.Notification.DEFAULT_SOUND or android.app.Notification.DEFAULT_VIBRATE)
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setOnlyAlertOnce(false)
+        }
         if (isResting) {
             builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Omitir", skipIntent).build())
             builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())

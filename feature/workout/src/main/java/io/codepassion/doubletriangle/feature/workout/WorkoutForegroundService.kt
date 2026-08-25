@@ -60,7 +60,7 @@ internal class WorkoutForegroundService : Service() {
                         progressMax = totalExercises.coerceAtLeast(1),
                         segmentedProgress = true,
                     )
-                    if (!appForeground) WorkoutActiveNotification.showRestFinished(this@WorkoutForegroundService)
+                    if (!appForeground) WorkoutActiveNotification.showRestCompletedInPlace(this@WorkoutForegroundService, currentTitle)
                 }
             }
             handler.postDelayed(this, 750L)
