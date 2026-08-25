@@ -547,6 +547,7 @@ private fun WildforceApp(
         }
     }
     if (showExitAppDialog) {
+        val hostActivity = LocalContext.current as? Activity
         AlertDialog(
             onDismissRequest = { showExitAppDialog = false },
             title = { Text("¿SALIR DE LA APLICACIÓN?", fontWeight = FontWeight.Bold) },
@@ -554,7 +555,7 @@ private fun WildforceApp(
             confirmButton = {
                 androidx.compose.material.TextButton(onClick = {
                     showExitAppDialog = false
-                    (context as? Activity)?.finish()
+                    hostActivity?.finish()
                 }) { Text("SALIR", color = Color(0xFFC62828)) }
             },
             dismissButton = {
