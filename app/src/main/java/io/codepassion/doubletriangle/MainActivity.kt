@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle
 
 import android.os.Bundle
+import android.app.Activity
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
@@ -8,6 +9,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.clickable
@@ -406,6 +408,14 @@ private fun WildforceApp(
     var displayedWorkoutState by remember(workoutState) { mutableStateOf(workoutState) }
     var workoutDetail by remember { mutableStateOf<WorkoutDaySummary?>(null) }
     var activeWorkout by remember { mutableStateOf<WorkoutDaySummary?>(null) }
+    var showExitAppDialog by remember { mutableStateOf(false) }
+    BackHandler(enabled = activeWorkout == null) {
+        when {
+            workoutDetail != null -> workoutDetail = null
+            selected != RootDestination.Workout -> selected = RootDestination.Workout
+            else -> showExitAppDialog = true
+        }
+    }
     activeWorkout?.let { workout ->
         ActiveWorkoutScreen(
             workout = workout,
@@ -535,6 +545,22 @@ private fun WildforceApp(
                 Text("CREANDO TU SIGUIENTE PLAN", Modifier.padding(top = 14.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
             }
         }
+    }
+    if (showExitAppDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitAppDialog = false },
+            title = { Text("¿SALIR DE LA APLICACIÓN?", fontWeight = FontWeight.Bold) },
+            text = { Text("¿Seguro que quieres salir de Wildforce?") },
+            confirmButton = {
+                androidx.compose.material.TextButton(onClick = {
+                    showExitAppDialog = false
+                    (context as? Activity)?.finish()
+                }) { Text("SALIR", color = Color(0xFFC62828)) }
+            },
+            dismissButton = {
+                androidx.compose.material.TextButton(onClick = { showExitAppDialog = false }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) }
+            },
+        )
     }
 }
 
