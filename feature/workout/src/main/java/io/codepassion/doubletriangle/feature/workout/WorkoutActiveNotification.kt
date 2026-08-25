@@ -73,11 +73,11 @@ internal object WorkoutActiveNotification {
             .setOnlyAlertOnce(true)
             .setShowWhen(isResting)
             .setAutoCancel(false)
-            .setLargeIcon(resolvedArtwork ?: exerciseArtwork(title))
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_pause), "Pausar", toggleIntent).build())
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Saltar", skipIntent).build())
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
         if (contentIntent != null) builder.setContentIntent(contentIntent)
+        if (Build.VERSION.SDK_INT < 36) builder.setLargeIcon(resolvedArtwork ?: exerciseArtwork(title))
         if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
         if (isResting && chronometerBaseMillis != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             builder.setWhen(chronometerBaseMillis).setUsesChronometer(true).setChronometerCountDown(true)
@@ -87,7 +87,7 @@ internal object WorkoutActiveNotification {
             val liveProgress = if (isResting) (progressMax - progress).coerceIn(0, progressMax) else progress.coerceIn(0, progressMax)
             val liveStyle = android.app.Notification.ProgressStyle()
                 .setProgress(liveProgress)
-                .setProgressTrackerIcon(resolvedArtwork?.let { Icon.createWithBitmap(it) } ?: Icon.createWithResource(context, R.drawable.ic_workout_live))
+                .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.ic_workout_live))
                 .setProgressSegments(listOf(android.app.Notification.ProgressStyle.Segment(progressMax).setColor(0xFFD5A928.toInt())))
             builder.setStyle(liveStyle)
             builder.extras.putBoolean(android.app.Notification.EXTRA_REQUEST_PROMOTED_ONGOING, true)
@@ -183,7 +183,6 @@ internal object WorkoutActiveNotification {
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(restFinishedNotificationId)
         mediaSession?.run { isActive = false; release() }
         mediaSession = null
-        artwork?.recycle()
         artwork = null
         artworkTitle = null
     }
