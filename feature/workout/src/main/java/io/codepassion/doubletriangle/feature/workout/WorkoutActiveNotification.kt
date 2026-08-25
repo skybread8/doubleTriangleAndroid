@@ -78,6 +78,15 @@ internal object WorkoutActiveNotification {
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Saltar", skipIntent).build())
             .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
         if (contentIntent != null) builder.setContentIntent(contentIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && contentIntent != null) {
+            val bubbleIcon = Icon.createWithResource(context, R.drawable.ic_workout_live)
+            val bubble = android.app.Notification.BubbleMetadata.Builder(contentIntent, bubbleIcon)
+                .setDesiredHeight(360)
+                .setAutoExpandBubble(false)
+                .setSuppressNotification(false)
+                .build()
+            builder.setBubbleMetadata(bubble)
+        }
         if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
         if (isResting && chronometerBaseMillis != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             builder.setWhen(chronometerBaseMillis).setUsesChronometer(true).setChronometerCountDown(true)
@@ -165,6 +174,7 @@ internal object WorkoutActiveNotification {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_HIGH).apply {
             description = "Progreso, descansos y ejercicio actual"
             lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) setAllowBubbles(true)
         })
     }
 
