@@ -462,9 +462,6 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
     var pendingAdapted by remember(workout.id) { mutableStateOf<WorkoutDaySummary?>(null) }
     var lastAdaptRequest by remember(workout.id) { mutableStateOf<CustomWorkoutRequest?>(null) }
     val coroutineScope = rememberCoroutineScope()
-    LaunchedEffect(startingWorkout) {
-        if (startingWorkout) onStart()
-    }
     var showSkipConfirmation by remember { mutableStateOf(false) }
     var skipped by remember(workout.id) { mutableStateOf(workout.status == WorkoutStatus.Skipped) }
     if (showingEditor) {
@@ -605,7 +602,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                Button(onClick = { onStart(); startingWorkout = true }, enabled = !startingWorkout, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp)) {
+                Button(onClick = { if (!startingWorkout) { startingWorkout = true; onStart() } }, enabled = !startingWorkout, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(0.dp)) {
                     Text(if (startingWorkout) "ABRIENDO ENTRENAMIENTO…" else if (hasSavedSession) "REANUDAR ENTRENAMIENTO" else "EMPEZAR ENTRENAMIENTO", fontWeight = FontWeight.Bold)
                 }
             }
