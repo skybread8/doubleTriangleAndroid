@@ -21,7 +21,7 @@ internal object WorkoutActiveNotification {
     const val ACTION_TOGGLE_TIMER = "io.codepassion.doubletriangle.ACTION_TOGGLE_TIMER"
     const val ACTION_SKIP_CURRENT = "io.codepassion.doubletriangle.ACTION_SKIP_CURRENT"
     const val ACTION_ADD_REST = "io.codepassion.doubletriangle.ACTION_ADD_REST"
-    private const val channelId = "active_workout_live"
+    private const val channelId = "active_workout_live_v2"
     private const val notificationId = 4101
     private const val restFinishedNotificationId = 4105
     private var mediaSession: MediaSession? = null
@@ -35,6 +35,10 @@ internal object WorkoutActiveNotification {
             manager.cancel(restFinishedNotificationId)
             val notification = build(context, title, detail, headsUp, progress, progressMax, isResting, artwork, segmentedProgress)
             manager.notify(notificationId, notification)
+            runCatching {
+                val ringtone = RingtoneManager.getRingtone(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                ringtone?.play()
+            }
         }
     }
 
@@ -102,9 +106,7 @@ internal object WorkoutActiveNotification {
         if (contentIntent != null) builder.setContentIntent(contentIntent)
         if (alert) {
             @Suppress("DEPRECATION")
-            builder.setDefaults(android.app.Notification.DEFAULT_SOUND or android.app.Notification.DEFAULT_VIBRATE)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setOnlyAlertOnce(false)
+            builder.setOnlyAlertOnce(false)
         } else {
             builder.setSound(null).setVibrate(null)
         }
@@ -250,7 +252,7 @@ internal object WorkoutActiveNotification {
         android.app.PendingIntent.getBroadcast(context, requestCode, Intent(context, WorkoutNotificationActionReceiver::class.java).setAction(action), android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
 
     private fun ensureChannel(manager: NotificationManager) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_HIGH).apply {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_LOW).apply {
             description = "Progreso, descansos y ejercicio actual"
             lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
         })

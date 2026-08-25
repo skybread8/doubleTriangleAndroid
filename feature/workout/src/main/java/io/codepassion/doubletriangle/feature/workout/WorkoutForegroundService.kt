@@ -15,10 +15,27 @@ internal class WorkoutForegroundService : Service() {
     private var lastNotifiedRemaining: Int? = null
     private var restEndAtMillis: Long? = null
     private var lastObservedRest: Int? = null
+    private var lastActionTimestamp: Long = 0L
     private val restMonitor = object : Runnable {
         override fun run() {
             workoutId?.let { id ->
-                val snapshot = WorkoutSessionStore.load(this@WorkoutForegroundService, id)
+                var snapshot = WorkoutSessionStore.load(this@WorkoutForegroundService, id)
+                val appForeground = getSharedPreferences("wildforce_notification_settings", 0).getBoolean("app_foreground", false)
+                if (!appForeground) {
+                    WorkoutNotificationActionStore.read(this@WorkoutForegroundService)?.let { (action, timestamp) ->
+                        if (timestamp > lastActionTimestamp) {
+                            lastActionTimestamp = timestamp
+                            snapshot?.let { current ->
+                                snapshot = when (action) {
+                                    WorkoutActiveNotification.ACTION_ADD_REST -> current.restRemaining?.let { current.copy(restRemaining = it + 30, restInitialSeconds = current.restInitialSeconds + 30) } ?: current
+                                    WorkoutActiveNotification.ACTION_SKIP_CURRENT -> current.copy(restRemaining = null, restBetweenExercises = false)
+                                    else -> current
+                                }
+                                snapshot?.let { WorkoutSessionStore.save(this@WorkoutForegroundService, id, it) }
+                            }
+                        }
+                    }
+                }
                 val storedRemaining = snapshot?.restRemaining
                 val now = System.currentTimeMillis()
                 if (storedRemaining != null && storedRemaining > 0) {
@@ -50,7 +67,6 @@ internal class WorkoutForegroundService : Service() {
                     lastNotifiedRemaining = null
                     restEndAtMillis = null
                     lastObservedRest = null
-                    val appForeground = getSharedPreferences("wildforce_notification_settings", 0).getBoolean("app_foreground", false)
                     val currentExercise = snapshot?.exerciseIndex ?: 0
                     WorkoutActiveNotification.show(
                         this@WorkoutForegroundService,
@@ -73,9 +89,10 @@ internal class WorkoutForegroundService : Service() {
         workoutId = intent?.getStringExtra("workoutId")
         totalExercises = intent?.getIntExtra("totalExercises", 0) ?: 0
         currentTitle = title
+        lastActionTimestamp = WorkoutNotificationActionStore.read(this)?.second ?: 0L
         val notification = runCatching { WorkoutActiveNotification.build(this, title, detail) }.getOrElse {
             @Suppress("DEPRECATION")
-            (if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) android.app.Notification.Builder(this, "active_workout_live") else android.app.Notification.Builder(this))
+            (if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) android.app.Notification.Builder(this, "active_workout_live_v2") else android.app.Notification.Builder(this))
                 .setSmallIcon(android.R.drawable.ic_media_play).setContentTitle(title).setContentText(detail).setOngoing(true).build()
         }
         startForeground(4101, notification)
