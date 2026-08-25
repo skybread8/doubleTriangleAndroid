@@ -105,7 +105,7 @@ internal object WorkoutActiveNotification {
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                 .setOnlyAlertOnce(false)
         } else {
-            builder.setSilent(true)
+            builder.setSound(null).setVibrate(null)
         }
         if (isResting) {
             builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Omitir", skipIntent).build())
