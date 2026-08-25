@@ -198,7 +198,6 @@ internal object WorkoutActiveNotification {
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(restFinishedNotificationId)
         mediaSession?.run { isActive = false; release() }
         mediaSession = null
-        artwork?.recycle()
         artwork = null
         artworkTitle = null
     }
