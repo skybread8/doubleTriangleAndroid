@@ -64,7 +64,7 @@ internal object WorkoutActiveNotification {
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
         val notificationArtwork = resolvedArtwork ?: exerciseArtwork(title)
         val progressText = if (progressMax > 0) "$detail · $progress/$progressMax" else detail
-        val expandedView = notificationView(context, R.layout.notification_workout_expanded, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress)
+        val expandedView = notificationView(context, R.layout.notification_workout_expanded, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
         builder.setSmallIcon(R.drawable.ic_workout_live)
             .setContentTitle(displayTitle)
             .setContentText(detail)
@@ -78,9 +78,11 @@ internal object WorkoutActiveNotification {
             .setLargeIcon(notificationArtwork)
             .setCustomContentView(expandedView)
             .setCustomBigContentView(expandedView)
-            .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Saltar", skipIntent).build())
-            .addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
         if (contentIntent != null) builder.setContentIntent(contentIntent)
+        if (isResting) {
+            builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Omitir", skipIntent).build())
+            builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
+        }
         if (progressMax > 0) builder.setProgress(progressMax, progress.coerceIn(0, progressMax), false)
         builder.setStyle(android.app.Notification.BigTextStyle().bigText(if (progressMax > 0) "$detail\nProgreso: $progress/$progressMax" else detail))
         val publicVersion = android.app.Notification.Builder(context, channelId)
@@ -107,6 +109,7 @@ internal object WorkoutActiveNotification {
         progress: Int,
         progressMax: Int,
         segmentedProgress: Boolean,
+        isResting: Boolean,
     ): RemoteViews = RemoteViews(context.packageName, layout).apply {
         setImageViewBitmap(R.id.notification_artwork, artwork)
         setImageViewBitmap(R.id.notification_progress_visual, progressArtwork(context, progress, progressMax, segmentedProgress))
@@ -114,6 +117,8 @@ internal object WorkoutActiveNotification {
         setTextViewText(R.id.notification_detail, detail)
         setOnClickPendingIntent(R.id.notification_skip, actionIntent(context, ACTION_SKIP_CURRENT, 4203))
         setOnClickPendingIntent(R.id.notification_add, actionIntent(context, ACTION_ADD_REST, 4204))
+        setViewVisibility(R.id.notification_skip, if (isResting) android.view.View.VISIBLE else android.view.View.GONE)
+        setViewVisibility(R.id.notification_add, if (isResting) android.view.View.VISIBLE else android.view.View.GONE)
     }
 
     private fun progressArtwork(context: Context, progress: Int, progressMax: Int, segmented: Boolean): Bitmap {
