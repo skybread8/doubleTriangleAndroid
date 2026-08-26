@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -15,11 +16,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
@@ -29,10 +35,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
+import androidx.compose.ui.unit.sp
+import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
@@ -43,6 +56,7 @@ import io.codepassion.doubletriangle.feature.workout.WorkoutAnalyticsStore
 import java.text.DateFormat
 import java.util.Date
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -55,7 +69,8 @@ fun AnalyticsScreen(
     contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(),
 ) {
     var selectedExercise by remember { mutableStateOf<ExerciseAnalyticsSummary?>(null) }
-    var rangeDays by remember { mutableStateOf(7) }
+    var rangeDays by remember { mutableStateOf(30) }
+    val rangeOptions = listOf(7 to "7D", 14 to "2S", 30 to "30D", 84 to "12S", ALL_HISTORY_DAYS to "TODO")
     selectedExercise?.let { summary ->
         ExerciseAnalyticsDetailScreen(summary, WorkoutAnalyticsStore.history(context, summary.exercise), contentPadding) { selectedExercise = null }
         return
@@ -69,6 +84,8 @@ fun AnalyticsScreen(
     val averageDuration = sessionHistory.takeIf { it.isNotEmpty() }?.map { it.durationSeconds }?.average()?.toInt() ?: lastDuration
     val averageSets = sessionHistory.takeIf { it.isNotEmpty() }?.map { it.sets }?.average()?.toInt() ?: lastSets
     val averageVolume = sessionHistory.takeIf { it.isNotEmpty() }?.map { it.volumeKg }?.average() ?: lastVolume
+    val totalRecordedSessions = sessionHistory.size
+    val totalRecordedVolume = sessionHistory.sumOf { it.volumeKg }
     val trendVolumes = remember(exerciseSummaries, rangeDays) {
         volumeBuckets(context, exerciseSummaries, rangeDays)
     }
@@ -81,14 +98,27 @@ fun AnalyticsScreen(
             }
     }
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(contentPadding).padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("ANALÍTICAS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-        Text("Tu evolución y consistencia en un vistazo.", color = WildforceThemeTokens.textSecondary)
+        Text("ESTADÍSTICAS", fontFamily = Exo2FontFamily, fontSize = 34.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+        Text("Se muestran tus resultados del periodo seleccionado.", color = WildforceThemeTokens.textSecondary)
+        Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).padding(4.dp), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+            rangeOptions.forEach { (days, label) ->
+                val selected = rangeDays == days
+                Text(label, Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(if (selected) WildforceThemeTokens.textPrimary else Color.Transparent).clickable { rangeDays = days }.padding(vertical = 10.dp), color = if (selected) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            }
+        }
+        sessionHistory.firstOrNull()?.let { latest ->
+            Text("◴  Último entrenamiento: ${DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(latest.timestampMillis))}", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+        }
         Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(22.dp), emphasized = true).padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
-                Column { Text("PROGRESO SEMANAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); Text("$completed / ${state.workouts.size} sesiones", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary) }
-                Text("${(completed * 100 / total)}%", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.accentGold)
+                Column { Text("PROGRESO SEMANAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); Text("$completed / ${state.workouts.size} sesiones", fontFamily = Exo2FontFamily, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary) }
+                Text("${(completed * 100 / total)}%", fontFamily = Exo2FontFamily, fontSize = 30.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
             }
             LinearProgressIndicator(completed.toFloat() / total, Modifier.fillMaxWidth().height(10.dp), WildforceThemeTokens.accentGold, WildforceThemeTokens.textSecondary.copy(alpha = .15f))
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            MetricCard("ENTRENAMIENTOS", totalRecordedSessions.toString(), "registrados", Modifier.weight(1f))
+            MetricCard("VOLUMEN TOTAL", String.format("%.0f kg", totalRecordedVolume), "acumulado", Modifier.weight(1f))
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             MetricCard("RACHA", state.user.currentStreak.toString(), "días", Modifier.weight(1f))
@@ -96,7 +126,7 @@ fun AnalyticsScreen(
             MetricCard("FRECUENCIA", sessionsInRange.toString(), "últimos $rangeDays días", Modifier.weight(1f))
         }
         Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("ÚLTIMA SESIÓN", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+            Text("ÚLTIMA SESIÓN", fontFamily = Exo2FontFamily, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
             if (lastDuration == 0 && lastSets == 0) {
                 Text("Completa tu primer entrenamiento para desbloquear métricas detalladas.", color = WildforceThemeTokens.textSecondary)
             } else {
@@ -105,13 +135,8 @@ fun AnalyticsScreen(
                 }
             }
         }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf(7, 30, 90).forEach { days ->
-                Text("$days DÍAS", Modifier.liquidGlass(RoundedCornerShape(12.dp), emphasized = rangeDays == days).clickable { rangeDays = days }.padding(horizontal = 12.dp, vertical = 9.dp), color = if (rangeDays == days) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
-            }
-        }
         VolumeTrend(trendVolumes, rangeDays)
-        Text("EJERCICIOS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+        Text("EJERCICIOS", fontFamily = Exo2FontFamily, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
         if (exerciseSummaries.isEmpty()) {
             Text("Completa ejercicios para ver progresión, récords y volumen por movimiento.", color = WildforceThemeTokens.textSecondary)
         } else {
@@ -130,7 +155,7 @@ private fun MuscleVolumeBreakdown(summaries: List<ExerciseAnalyticsSummary>) {
         .toList().sortedByDescending { it.second }.take(6)
     val max = grouped.maxOfOrNull { it.second }?.takeIf { it > 0 } ?: 1.0
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
-        Text("VOLUMEN POR GRUPO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+        Text("VOLUMEN POR GRUPO", fontFamily = Exo2FontFamily, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
         if (grouped.isEmpty() || grouped.all { it.second <= 0 }) {
             Text("Aún no hay volumen suficiente para comparar grupos musculares.", color = WildforceThemeTokens.textSecondary)
         } else grouped.forEach { (group, volume) ->
@@ -143,6 +168,8 @@ private fun MuscleVolumeBreakdown(summaries: List<ExerciseAnalyticsSummary>) {
         }
     }
 }
+
+private const val ALL_HISTORY_DAYS = 3650
 
 private fun volumeBuckets(context: Context, summaries: List<ExerciseAnalyticsSummary>, rangeDays: Int): List<Double> {
     val startDate = LocalDate.now().minusDays((rangeDays - 1).toLong())
@@ -172,21 +199,54 @@ private fun muscleGroupFor(imageKey: String?, name: String): String {
 
 @Composable
 private fun VolumeTrend(volumes: List<Double>, rangeDays: Int) {
-    val labels = if (rangeDays == 7) (6 downTo 0).map { LocalDate.now().minusDays(it.toLong()).dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.forLanguageTag("es-ES")).uppercase() } else (1..7).map { "S$it" }
+    val rangeLabel = when (rangeDays) {
+        7 -> "7 DÍAS"
+        14 -> "2 SEMANAS"
+        30 -> "30 DÍAS"
+        84 -> "12 SEMANAS"
+        else -> "TODO EL HISTORIAL"
+    }
+    val labels = if (rangeDays == 7) {
+        (6 downTo 0).map { LocalDate.now().minusDays(it.toLong()).dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.forLanguageTag("es-ES")).uppercase() }
+    } else if (rangeDays <= 84) {
+        val startDate = LocalDate.now().minusDays((rangeDays - 1).toLong())
+        val formatter = DateTimeFormatter.ofPattern("d MMM", Locale.forLanguageTag("es-ES"))
+        (0..6).map { bucket -> startDate.plusDays((bucket * rangeDays / 7.0).toLong()).format(formatter) }
+    } else {
+        (1..7).map { "·" }
+    }
     val max = volumes.maxOrNull()?.takeIf { it > 0 } ?: 1.0
+    val barColor = WildforceThemeTokens.textPrimary.copy(alpha = 0.86f)
+    val gridColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.16f)
+    val trendColor = WildforceThemeTokens.accentGold
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("VOLUMEN · ÚLTIMOS $rangeDays DÍAS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+        Text("VOLUMEN · $rangeLabel", fontFamily = Exo2FontFamily, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
         if (volumes.all { it <= 0.0 }) {
             Text("Todavía no hay sesiones registradas en este periodo.", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 20.dp))
         }
-        Row(Modifier.fillMaxWidth().height(92.dp), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.Bottom) {
-            volumes.forEachIndexed { index, volume ->
-                val animatedHeight by animateDpAsState((12 + 56 * (volume / max)).dp, animationSpec = tween(650), label = "analytics-volume")
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom) {
-                    Box(Modifier.width(20.dp).height(animatedHeight).background(if (volume > 0) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary.copy(alpha = .14f), RoundedCornerShape(8.dp)))
-                    Text(labels[index], Modifier.padding(top = 5.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Box(Modifier.fillMaxWidth().height(142.dp)) {
+            Canvas(Modifier.fillMaxSize()) {
+                val chartHeight = size.height - 12.dp.toPx()
+                val step = size.width / volumes.size.coerceAtLeast(1)
+                val barWidth = 13.dp.toPx()
+                repeat(3) { index ->
+                    val y = chartHeight * index / 2f
+                    drawLine(gridColor, start = androidx.compose.ui.geometry.Offset(0f, y), end = androidx.compose.ui.geometry.Offset(size.width, y), strokeWidth = 1.dp.toPx())
                 }
+                val trend = Path()
+                volumes.forEachIndexed { index, volume ->
+                    val fraction = (volume / max).toFloat().coerceIn(0f, 1f)
+                    val x = step * (index + 0.5f)
+                    val y = chartHeight - chartHeight * fraction
+                    val barHeight = (chartHeight * fraction).coerceAtLeast(if (volume > 0) 7.dp.toPx() else 0f)
+                    if (barHeight > 0f) drawRoundRect(barColor, topLeft = androidx.compose.ui.geometry.Offset(x - barWidth / 2f, chartHeight - barHeight), size = androidx.compose.ui.geometry.Size(barWidth, barHeight), cornerRadius = androidx.compose.ui.geometry.CornerRadius(barWidth / 2f, barWidth / 2f))
+                    if (index == 0) trend.moveTo(x, y) else trend.lineTo(x, y)
+                }
+                drawPath(trend, trendColor, style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round, pathEffect = PathEffect.dashPathEffect(floatArrayOf(8.dp.toPx(), 6.dp.toPx()))))
             }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            labels.forEach { label -> Text(label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
         }
         Text("${String.format("%.0f", volumes.sum())} kg acumulados", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
@@ -200,7 +260,7 @@ private fun ExerciseAnalyticsCard(summary: ExerciseAnalyticsSummary, onClick: ()
             Text("${summary.sessions} sesiones · ${String.format("%.0f kg", summary.totalVolumeKg)} volumen", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
         Column(horizontalAlignment = Alignment.End) {
-            Text(if (summary.personalBestKg > 0) String.format("%.1f kg", summary.personalBestKg) else "—", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+            Text(if (summary.personalBestKg > 0) String.format("%.1f kg", summary.personalBestKg) else "—", fontFamily = Exo2FontFamily, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
             Text("MEJOR MARCA", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
         }
     }
@@ -209,15 +269,17 @@ private fun ExerciseAnalyticsCard(summary: ExerciseAnalyticsSummary, onClick: ()
 @Composable
 private fun ExerciseAnalyticsDetailScreen(summary: ExerciseAnalyticsSummary, history: List<ExerciseAnalyticsPoint>, contentPadding: androidx.compose.foundation.layout.PaddingValues, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(contentPadding).padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("‹ VOLVER", Modifier.clickable(onClick = onBack).padding(vertical = 8.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
-        Text(summary.exercise.name, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+        Box(Modifier.size(48.dp).clip(CircleShape).background(Color.White).clickable(onClick = onBack), contentAlignment = Alignment.Center) {
+            Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(24.dp))
+        }
+        Text(summary.exercise.name, fontFamily = Exo2FontFamily, fontSize = 30.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 2)
         Text("${summary.sessions} sesiones registradas", color = WildforceThemeTokens.textSecondary)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             MetricCard("MEJOR MARCA", if (summary.personalBestKg > 0) String.format("%.1f kg", summary.personalBestKg) else "—", "peso", Modifier.weight(1f))
             MetricCard("VOLUMEN", String.format("%.0f", summary.totalVolumeKg), "kg total", Modifier.weight(1f))
         }
         ExerciseWeightTrend(history)
-        Text("SESIONES", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+        Text("SESIONES", fontFamily = Exo2FontFamily, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
         if (history.isEmpty()) Text("Todavía no hay sesiones para este ejercicio.", color = WildforceThemeTokens.textSecondary)
         history.take(12).forEach { point ->
             Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(14.dp)).padding(13.dp), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -232,7 +294,7 @@ private fun ExerciseAnalyticsDetailScreen(summary: ExerciseAnalyticsSummary, his
 private fun ExerciseWeightTrend(history: List<ExerciseAnalyticsPoint>) {
     val maxWeight = history.maxOfOrNull { it.maxWeightKg }?.takeIf { it > 0 } ?: 1.0
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("EVOLUCIÓN DE CARGA", fontFamily = AntonFontFamily, color = WildforceThemeTokens.accentGold)
+        Text("EVOLUCIÓN DE CARGA", fontFamily = Exo2FontFamily, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
         if (history.none { it.maxWeightKg > 0 }) {
             Text("Completa series con peso para ver la progresión.", color = WildforceThemeTokens.textSecondary)
         } else {
@@ -249,6 +311,27 @@ private fun ExerciseWeightTrend(history: List<ExerciseAnalyticsPoint>) {
     }
 }
 
-@Composable private fun MetricCard(title: String, value: String, suffix: String, modifier: Modifier) { Column(modifier.liquidGlass(RoundedCornerShape(16.dp)).padding(14.dp)) { Text(title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); Text(value, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary); Text(suffix, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }
+@Composable
+private fun MetricCard(title: String, value: String, suffix: String, modifier: Modifier) {
+    val glyph = when (title) {
+        "ENTRENAMIENTOS", "SESIONES" -> "✓"
+        "VOLUMEN TOTAL", "VOLUMEN" -> "▥"
+        "RACHA" -> "♨"
+        "FRECUENCIA" -> "◷"
+        "MEJOR MARCA" -> "★"
+        else -> "•"
+    }
+    Column(modifier.liquidGlass(RoundedCornerShape(16.dp)).padding(14.dp)) {
+        Box(
+            Modifier.size(34.dp).clip(RoundedCornerShape(11.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.10f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(glyph, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
+        }
+        Text(title, Modifier.padding(top = 10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+        Text(value, fontFamily = Exo2FontFamily, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+        Text(suffix, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+    }
+}
 @Composable private fun MetricLine(title: String, value: String) { Column(horizontalAlignment = Alignment.CenterHorizontally) { Text(value, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary); Text(title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }
 private fun formatDuration(seconds: Int): String = if (seconds >= 3600) "%d h %02d".format(seconds / 3600, seconds / 60 % 60) else "%d min".format(seconds / 60)

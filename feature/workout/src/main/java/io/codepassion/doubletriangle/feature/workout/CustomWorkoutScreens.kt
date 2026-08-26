@@ -3,6 +3,7 @@ package io.codepassion.doubletriangle.feature.workout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
@@ -28,6 +30,14 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +76,7 @@ internal fun CustomWorkoutsScreen(
     onEdit: (WorkoutDaySummary) -> Unit,
     onDuplicate: (WorkoutDaySummary) -> Unit,
     onDelete: (WorkoutDaySummary) -> Unit,
+    onAdapt: (WorkoutDaySummary) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showsCreationMode by remember { mutableStateOf(false) }
@@ -100,29 +111,42 @@ internal fun CustomWorkoutsScreen(
         )
     }
     if (workouts.isEmpty()) {
-        Column(modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Text("◆", style = MaterialTheme.typography.h2, color = WildforceThemeTokens.accentGold)
-            Text("SIN ENTRENAMIENTOS PERSONALIZADOS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
-            Text("Crea una sesión para entrenar fuera de tu gimnasio habitual o probar algo nuevo.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center, modifier = Modifier.padding(vertical = 12.dp))
-            PrimaryAction("CREAR PRIMER ENTRENAMIENTO") { showsCreationMode = true }
+        Column(modifier.padding(horizontal = 24.dp, vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("ENTRENAMIENTOS PERSONALIZADOS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
+            Text("Crea una sesión a tu medida y guárdala para repetirla cuando quieras.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+            PrimaryAction("＋  CREAR ENTRENAMIENTO") { showsCreationMode = true }
         }
     } else {
         LazyColumn(modifier, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            item { PrimaryAction("＋ NUEVO ENTRENAMIENTO") { showsCreationMode = true } }
+            item {
+                Column(Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
+                    Text("ENTRENAMIENTOS PERSONALIZADOS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+                    Text("Tus sesiones guardadas", style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
+                    PrimaryAction("＋  NUEVO ENTRENAMIENTO", Modifier.padding(top = 12.dp)) { showsCreationMode = true }
+                }
+            }
             items(workouts, key = { it.id }) { workout ->
-                Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).clickable { onOpen(workout) }.padding(12.dp)) {
+                var menuExpanded by remember(workout.id) { mutableStateOf(false) }
+                Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).clickable { onOpen(workout) }.padding(14.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        RemoteTrainingImage(workoutCoverUrl(workout.focus, gender, workout.order), workout.title, Modifier.size(70.dp).clip(RoundedCornerShape(14.dp)))
+                        RemoteTrainingImage(workoutCoverUrl(workout.focus, gender, workout.order), workout.title, Modifier.size(86.dp).clip(RoundedCornerShape(18.dp)))
                         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                            Text(workout.title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
-                            Text("${workout.pathBlocks().flatMap { it.exercises }.size} ejercicios · ${workout.estimatedMinutes} min", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
-                            Text(workout.focus.uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+                            Text(workout.title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                            Text(workout.focus, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+                            Text("${workout.pathBlocks().flatMap { it.exercises }.size} ejercicios  ·  ${workout.estimatedMinutes} min", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                         }
-                    }
-                    Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.End) {
-                        SmallAction("EDITAR") { onEdit(workout) }
-                        SmallAction("DUPLICAR") { onDuplicate(workout) }
-                        SmallAction("BORRAR") { deleting = workout }
+                        Box {
+                            Box(Modifier.size(44.dp).clickable { menuExpanded = true }, contentAlignment = Alignment.Center) {
+                                Box(Modifier.size(30.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.20f)), contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Filled.MoreHoriz, contentDescription = "Acciones", tint = Color.White, modifier = Modifier.size(19.dp))
+                                }
+                            }
+                            DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                                DropdownMenuItem(onClick = { menuExpanded = false; onEdit(workout) }) { Text("Editar") }
+                                DropdownMenuItem(onClick = { menuExpanded = false; onDuplicate(workout) }) { Text("Duplicar") }
+                                DropdownMenuItem(onClick = { menuExpanded = false; onAdapt(workout) }) { Text("Adaptar a otra ubicación") }
+                            }
+                        }
                     }
                 }
             }
@@ -135,6 +159,7 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
     var workout by remember(initial.id) { mutableStateOf(initial) }
     var blocks by remember(initial.id) { mutableStateOf(initial.editableBlocks()) }
     var selectingExercise by remember { mutableStateOf(false) }
+    var focusMenuExpanded by remember { mutableStateOf(false) }
     if (selectingExercise) {
         ExercisePickerScreen(gender, onBack = { selectingExercise = false }) { choice ->
             blocks = (blocks + WorkoutBlockSummary(WorkoutBlockType.Standard, exercises = listOf(ExerciseSummary(choice.name, choice.imageKey, 3, "10", 90)))).workoutOrder()
@@ -144,9 +169,23 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
     }
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 16.dp, vertical = 10.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("‹ CERRAR", Modifier.clickable(onClick = onCancel).padding(10.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.weight(1f))
-            Text("EDITOR MANUAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Box(Modifier.size(44.dp).clip(CircleShape).background(WildforceThemeTokens.textPrimary).clickable(onClick = onCancel), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = "Cerrar", tint = WildforceThemeTokens.backgroundSecondary, modifier = Modifier.size(22.dp))
+            }
+            Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
+                Text("ENTRENAMIENTO PERSONALIZADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text("Edita y guarda tu sesión", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            }
+            TextButton(onClick = { selectingExercise = true }, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)) {
+                Text("AÑADIR", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+            }
+            TextButton(
+                onClick = { onSave(workout.withEditableBlocks(blocks).copy(title = workout.title.trim(), estimatedMinutes = CustomWorkoutStore.estimateBlockMinutes(blocks))) },
+                enabled = workout.title.trim().isNotBlank() && blocks.any { it.exercises.isNotEmpty() },
+                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp),
+            ) {
+                Text("LISTO", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+            }
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             TextField(
@@ -154,14 +193,19 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
                 label = { Text("Título del entrenamiento") }, singleLine = true,
             )
             Text("ENFOQUE", Modifier.padding(top = 18.dp, bottom = 8.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                listOf("Full body", "Empuje", "Tirón", "Piernas").forEach { focus ->
-                    Text(
-                        focus, Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
-                            .background(if (workout.focus == focus) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary.copy(alpha = 0.08f))
-                            .clickable { workout = workout.copy(focus = focus) }.padding(vertical = 9.dp),
-                        color = if (workout.focus == focus) Color.White else WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center, style = MaterialTheme.typography.caption,
-                    )
+            Box {
+                Row(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.08f)).clickable { focusMenuExpanded = true }.padding(horizontal = 14.dp, vertical = 13.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("Enfoque", Modifier.weight(1f), color = WildforceThemeTokens.textSecondary)
+                    Text(workout.focus, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
+                    Text("⌄", Modifier.padding(start = 10.dp), color = WildforceThemeTokens.textSecondary)
+                }
+                DropdownMenu(expanded = focusMenuExpanded, onDismissRequest = { focusMenuExpanded = false }) {
+                    listOf("Full body", "Empuje", "Tirón", "Piernas").forEach { focus ->
+                        DropdownMenuItem(onClick = { workout = workout.copy(focus = focus); focusMenuExpanded = false }) { Text(focus) }
+                    }
                 }
             }
             Row(Modifier.fillMaxWidth().padding(top = 18.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -231,7 +275,7 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
             onClick = { onSave(workout.withEditableBlocks(blocks).copy(title = workout.title.trim(), estimatedMinutes = CustomWorkoutStore.estimateBlockMinutes(blocks))) },
             enabled = workout.title.trim().isNotBlank() && blocks.any { it.exercises.isNotEmpty() }, modifier = Modifier.fillMaxWidth().height(54.dp),
             shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary),
-        ) { Text("GUARDAR ENTRENAMIENTO", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+        ) { Text("MARCAR ENTRENAMIENTO COMO LISTO", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis) }
     }
 }
 
@@ -333,8 +377,9 @@ private fun StyleParameterControls(exercise: ExerciseSummary, onChange: (Exercis
 @Composable
 internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, equipmentPresets: List<Pair<String, String>> = emptyList(), onDismiss: () -> Unit, onGenerate: (CustomWorkoutRequest) -> Unit, initialFocus: String = "Full body", initialDuration: Int = 45, title: String = "CREAR CON IA") {
     var focus by remember(initialFocus) { mutableStateOf(initialFocus) }
-    var duration by remember(initialDuration) { mutableStateOf(initialDuration.toString()) }
+    var duration by remember(initialDuration) { mutableStateOf(initialDuration.coerceIn(15, 180)) }
     var equipment by remember(defaultEquipment) { mutableStateOf(defaultEquipment.ifBlank { "Peso corporal" }) }
+    var focusMenuExpanded by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title, fontFamily = AntonFontFamily) },
@@ -342,12 +387,23 @@ internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, equipmentPr
             Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                 Text("La IA adaptará la sesión a estos datos.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 Text("ENFOQUE", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    listOf("Full body", "Empuje", "Tirón", "Piernas").forEach { option ->
-                        Text(option, Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(if (focus == option) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary.copy(alpha = 0.08f)).clickable { focus = option }.padding(vertical = 8.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.overline, color = if (focus == option) Color.White else WildforceThemeTokens.textPrimary)
+                Box {
+                    Row(
+                        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.08f)).clickable { focusMenuExpanded = true }.padding(horizontal = 14.dp, vertical = 13.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("Objetivo", Modifier.weight(1f), color = WildforceThemeTokens.textSecondary)
+                        Text(focus, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
+                        Text("⌄", Modifier.padding(start = 10.dp), color = WildforceThemeTokens.textSecondary)
+                    }
+                    DropdownMenu(expanded = focusMenuExpanded, onDismissRequest = { focusMenuExpanded = false }) {
+                        listOf("Full body", "Empuje", "Tirón", "Piernas").forEach { option ->
+                            DropdownMenuItem(onClick = { focus = option; focusMenuExpanded = false }) { Text(option) }
+                        }
                     }
                 }
-                TextField(duration, { duration = it.filter(Char::isDigit).take(3) }, label = { Text("Duración (minutos)") }, singleLine = true)
+                Text("DURACIÓN ESTIMADA", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+                EditorStepper("MINUTOS", duration.toString(), { duration = (duration - 5).coerceAtLeast(15) }, { duration = (duration + 5).coerceAtMost(180) }, Modifier.fillMaxWidth())
                 if (equipmentPresets.isNotEmpty()) {
                     Text("UBICACIÓN DE ENTRENAMIENTO", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
                     equipmentPresets.forEach { (name, presetEquipment) ->
@@ -357,13 +413,13 @@ internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, equipmentPr
                 TextField(equipment, { equipment = it.take(120) }, label = { Text("Equipamiento disponible") }, maxLines = 2)
             }
         },
-        confirmButton = { TextButton(onClick = { onGenerate(CustomWorkoutRequest(focus.trim().ifBlank { "Full body" }, duration.toIntOrNull()?.coerceIn(15, 180) ?: 45, equipment.trim().ifBlank { defaultEquipment.ifBlank { "Peso corporal" } })) }) { Text("GENERAR", color = WildforceThemeTokens.accentGold) } },
+        confirmButton = { TextButton(onClick = { onGenerate(CustomWorkoutRequest(focus.trim().ifBlank { "Full body" }, duration, equipment.trim().ifBlank { defaultEquipment.ifBlank { "Peso corporal" } })) }) { Text("GENERAR", color = WildforceThemeTokens.accentGold) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
     )
 }
 
 @Composable
-private fun ExercisePickerScreen(gender: String, onBack: () -> Unit, onSelect: (ExerciseChoice) -> Unit) {
+internal fun ExercisePickerScreen(gender: String, onBack: () -> Unit, onSelect: (ExerciseChoice) -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val catalog = remember { CustomExerciseCatalog.load(context) }
     var search by remember { mutableStateOf("") }
@@ -393,13 +449,21 @@ private fun ExercisePickerScreen(gender: String, onBack: () -> Unit, onSelect: (
     }
 }
 
-@Composable private fun PrimaryAction(label: String, onClick: () -> Unit) = Button(onClick, Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(15.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text(label, fontWeight = FontWeight.Bold) }
+@Composable private fun PrimaryAction(label: String, modifier: Modifier = Modifier, onClick: () -> Unit) = Button(onClick, modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(15.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text(label, fontWeight = FontWeight.Bold) }
 @Composable private fun SmallAction(label: String, onClick: () -> Unit) = Text(label, Modifier.clickable(onClick = onClick).padding(horizontal = 8.dp, vertical = 6.dp), style = MaterialTheme.typography.caption, color = if (label == "BORRAR") Color(0xFFC62828) else WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
 
 @Composable private fun EditorStepper(title: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit, modifier: Modifier) {
     Column(modifier.background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(12.dp)).padding(7.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1)
-        Row(verticalAlignment = Alignment.CenterVertically) { Text("−", Modifier.semantics { contentDescription = "Reducir $title" }.clickable(onClick = onMinus).padding(5.dp)); Text(value, Modifier.weight(1f), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold, maxLines = 1); Text("+", Modifier.semantics { contentDescription = "Aumentar $title" }.clickable(onClick = onPlus).padding(5.dp)) }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(40.dp).clip(CircleShape).background(WildforceThemeTokens.textPrimary).semantics { contentDescription = "Reducir $title" }.clickable(onClick = onMinus), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.Remove, contentDescription = null, tint = WildforceThemeTokens.backgroundSecondary, modifier = Modifier.size(20.dp))
+            }
+            Text(value, Modifier.weight(1f), textAlign = TextAlign.Center, fontWeight = FontWeight.Bold, maxLines = 1)
+            Box(Modifier.size(40.dp).clip(CircleShape).background(WildforceThemeTokens.textPrimary).semantics { contentDescription = "Aumentar $title" }.clickable(onClick = onPlus), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.Add, contentDescription = null, tint = WildforceThemeTokens.backgroundSecondary, modifier = Modifier.size(20.dp))
+            }
+        }
     }
 }
 

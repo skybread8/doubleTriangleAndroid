@@ -16,12 +16,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -29,11 +33,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
+import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
@@ -42,7 +49,6 @@ import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import java.text.DateFormat
 import java.util.Date
-import java.util.Locale
 
 @Composable
 internal fun WorkoutPathScreen(
@@ -59,7 +65,7 @@ internal fun WorkoutPathScreen(
     val currentPathIndex = pathExercises.indexOfFirst { currentExerciseIndex in it.executionIndices }.coerceAtLeast(0)
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 18.dp, vertical = 12.dp)) {
         InsightHeader("RUTA DEL ENTRENAMIENTO", onBack)
-        Text(workout.title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+        Text(workout.title, fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
             Text(formatInsightClock(elapsedSeconds), style = MaterialTheme.typography.h3, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Spacer(Modifier.weight(1f))
@@ -116,6 +122,7 @@ internal fun WorkoutPathScreen(
 
 @Composable
 internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, history: List<ExerciseHistoryEntry>, useImperial: Boolean = false, onBack: () -> Unit) {
+    val locale = LocalLocale.current.platformLocale
     val best = history.maxByOrNull { it.maxWeightKg }
     val maxVolume = (history.maxOfOrNull { it.volumeKg } ?: 1.0).coerceAtLeast(1.0)
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 18.dp, vertical = 12.dp)) {
@@ -123,14 +130,14 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
         Row(verticalAlignment = Alignment.CenterVertically) {
             RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.size(72.dp).clip(RoundedCornerShape(16.dp)))
             Column(Modifier.padding(start = 14.dp)) {
-                Text(exercise.name.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(exercise.name, fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Text("Progreso y ejecuciones anteriores", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         if (history.isEmpty()) {
             Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Text("▥", style = MaterialTheme.typography.h2, color = WildforceThemeTokens.textSecondary)
-                Text("SIN EJECUCIONES ANTERIORES", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+                Text("SIN EJECUCIONES ANTERIORES", fontFamily = Exo2FontFamily, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 Text("Completa este ejercicio para desbloquear su historial.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
             return
@@ -148,7 +155,7 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
                 val targetHeight = (22 + 78 * entry.volumeKg / maxVolume).dp
                 val animatedHeight by animateDpAsState(targetHeight, animationSpec = tween(650), label = "history-volume")
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom) {
-                    Text(String.format(Locale.getDefault(), "%.0f", if (useImperial) entry.volumeKg * KG_TO_LB else entry.volumeKg), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    Text(String.format(locale, "%.0f", if (useImperial) entry.volumeKg * KG_TO_LB else entry.volumeKg), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                     Box(Modifier.width(24.dp).height(animatedHeight).background(WildforceThemeTokens.accentGold, RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp)))
                 }
             }
@@ -163,7 +170,9 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
 @Composable
 private fun InsightHeader(title: String, onBack: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text("‹ VOLVER", Modifier.clickable(onClick = onBack).padding(top = 8.dp, end = 12.dp, bottom = 8.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+        Box(Modifier.size(44.dp).clip(CircleShape).background(Color.White).clickable(onClick = onBack), contentAlignment = Alignment.Center) {
+            Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(22.dp))
+        }
         Spacer(Modifier.weight(1f))
         Text(title, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
@@ -180,6 +189,7 @@ private fun HistoryMetric(prefix: String, value: String, subtitle: String, modif
 
 @Composable
 private fun HistoryEntryRow(entry: ExerciseHistoryEntry, useImperial: Boolean) {
+    val locale = LocalLocale.current.platformLocale
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(14.dp)).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(entry.timestampMillis)), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -200,7 +210,7 @@ private fun HistoryEntryRow(entry: ExerciseHistoryEntry, useImperial: Boolean) {
         }
         Column(horizontalAlignment = Alignment.End) {
             Text(formatTrainingWeight(entry.maxWeightKg, useImperial), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-            Text(String.format(Locale.getDefault(), "%.0f %s vol.", if (useImperial) entry.volumeKg * KG_TO_LB else entry.volumeKg, if (useImperial) "lb" else "kg"), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(String.format(locale, "%.0f %s vol.", if (useImperial) entry.volumeKg * KG_TO_LB else entry.volumeKg, if (useImperial) "lb" else "kg"), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
     }
 }

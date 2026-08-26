@@ -27,7 +27,12 @@ internal object BodyMetricsStore {
         buildList {
             for (index in 0 until array.length()) {
                 val item = array.optJSONObject(index) ?: continue
-                add(BodyMetricEntry(item.optString("date"), item.optDouble("heightCm"), item.optDouble("weightKg")))
+                val height = item.optDouble("heightCm", Double.NaN)
+                val weight = item.optDouble("weightKg", Double.NaN)
+                val date = item.optString("date").takeIf(String::isNotBlank)
+                if (date != null && height.isFinite() && height in 80.0..260.0 && weight.isFinite() && weight in 20.0..400.0) {
+                    add(BodyMetricEntry(date, height, weight))
+                }
             }
         }
     }.getOrDefault(emptyList())

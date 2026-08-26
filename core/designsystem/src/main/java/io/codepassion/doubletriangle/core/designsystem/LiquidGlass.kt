@@ -21,14 +21,14 @@ fun Modifier.liquidGlass(
 ): Modifier = composed {
     val light = MaterialTheme.colors.isLight
     val top = when {
-        light && emphasized -> Color.White.copy(alpha = 0.88f)
-        light -> Color.White.copy(alpha = 0.62f)
+        light && emphasized -> Color(0xFFFFFFFF)
+        light -> Color(0xFFFFFEFF).copy(alpha = 0.94f)
         emphasized -> Color.White.copy(alpha = 0.11f)
         else -> Color.White.copy(alpha = 0.065f)
     }
     val bottom = when {
-        light && emphasized -> Color(0xFFE9EAED).copy(alpha = 0.72f)
-        light -> Color(0xFFE4E6E9).copy(alpha = 0.42f)
+        light && emphasized -> Color(0xFFFDFBFF)
+        light -> Color(0xFFF8F6FA).copy(alpha = 0.92f)
         emphasized -> Color(0xFF242428).copy(alpha = 0.70f)
         else -> Color(0xFF1D1D20).copy(alpha = 0.52f)
     }
@@ -38,7 +38,7 @@ fun Modifier.liquidGlass(
 
 fun Modifier.liquidGlassBackground(): Modifier = composed {
     val colors = if (MaterialTheme.colors.isLight) {
-        listOf(Color(0xFFF7F7F8), Color(0xFFF1F2F4), Color(0xFFF6F5F7))
+        listOf(Color(0xFFFAF8FF), Color(0xFFF7F5FC), Color(0xFFFAF8FF))
     } else {
         listOf(Color(0xFF111113), Color(0xFF0E0E10), Color(0xFF151317))
     }

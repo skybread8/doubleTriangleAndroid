@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,7 +27,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
@@ -39,8 +39,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -49,7 +51,6 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
-import java.util.Locale
 import kotlinx.coroutines.delay
 
 private enum class CompletionPhase { DurationWarning, Records, Summary, Score, Streak, Xp, LevelUp, PlanComplete }
@@ -127,6 +128,7 @@ private fun DurationWarning(onCancel: () -> Unit, onContinue: () -> Unit) {
 
 @Composable
 private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    val locale = LocalLocale.current.platformLocale
     var visibleRecords by remember { mutableStateOf(0) }
     LaunchedEffect(records) {
         visibleRecords = 0
@@ -146,8 +148,8 @@ private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: (
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).padding(16.dp)) {
                     Text(record.exerciseName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     Text(record.label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold)
-                    Text(String.format(Locale.getDefault(), "%.1f %s", record.newValue, record.unit), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-                Text(String.format(Locale.getDefault(), "Antes %.1f · +%.1f %s", record.previousValue, record.newValue - record.previousValue, record.unit), color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                    Text(String.format(locale, "%.1f %s", record.newValue, record.unit), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+                Text(String.format(locale, "Antes %.1f · +%.1f %s", record.previousValue, record.newValue - record.previousValue, record.unit), color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             }
         }
@@ -156,6 +158,7 @@ private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: (
 
 @Composable
 private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, stats: Map<Int, ExerciseSessionStats>, completedExercises: Int, useImperial: Boolean, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    val locale = LocalLocale.current.platformLocale
     var visibleRows by remember { mutableStateOf(0) }
     LaunchedEffect(Unit) {
         delay(180)
@@ -183,7 +186,7 @@ private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, 
         AnimatedVisibility(visibleRows >= 2, enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 }) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 CompletionStat("REPETICIONES", repetitions.toString(), Modifier.weight(1f))
-                CompletionStat("VOLUMEN", String.format(Locale.getDefault(), "%.0f %s", if (useImperial) volume * KG_TO_LB else volume, if (useImperial) "lb" else "kg"), Modifier.weight(1f))
+                CompletionStat("VOLUMEN", String.format(locale, "%.0f %s", if (useImperial) volume * KG_TO_LB else volume, if (useImperial) "lb" else "kg"), Modifier.weight(1f))
             }
         }
         AnimatedVisibility(visibleRows >= 3, enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 }) {
@@ -250,11 +253,7 @@ private fun XpCelebration(progress: CompletionProgress, onContinue: () -> Unit) 
     val xpBeforeProgress = ((progress.xpBefore - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f)
     val xpAfterProgress = ((progress.xpAfter - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f)
     val animatedXpProgress by animateFloatAsState(if (revealXp) xpAfterProgress else xpBeforeProgress, animationSpec = tween(950, delayMillis = 150))
-    LinearProgressIndicator(
-        progress = animatedXpProgress,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(14.dp), color = WildforceThemeTokens.accentGold,
-        backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.18f),
-    )
+    RoundedCompletionProgress(animatedXpProgress, Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(14.dp))
     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
         Text("${progress.xpBefore} XP", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Spacer(Modifier.weight(1f))
@@ -288,7 +287,7 @@ private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, t
     }
     val completionRatio = if (totalWorkouts > 0) (completedWorkouts.toFloat() / totalWorkouts).coerceIn(0f, 1f) else 1f
     val animatedRatio by animateFloatAsState(completionRatio, animationSpec = tween(800, delayMillis = 180))
-    LinearProgressIndicator(animatedRatio, Modifier.fillMaxWidth().padding(top = 18.dp).height(10.dp), color = WildforceThemeTokens.accentGold, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.16f))
+    RoundedCompletionProgress(animatedRatio, Modifier.fillMaxWidth().padding(top = 18.dp).height(10.dp))
     Text("Ya no quedan sesiones pendientes en este plan.", Modifier.padding(top = 18.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
@@ -331,6 +330,13 @@ private fun CompletionStat(title: String, value: String, modifier: Modifier) {
     Column(modifier.liquidGlass(RoundedCornerShape(15.dp)).padding(13.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(value, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
         Text(title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+    }
+}
+
+@Composable
+private fun RoundedCompletionProgress(progress: Float, modifier: Modifier) {
+    Box(modifier.clip(RoundedCornerShape(50)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.16f))) {
+        Box(Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).fillMaxHeight().clip(RoundedCornerShape(50)).background(WildforceThemeTokens.accentGold))
     }
 }
 

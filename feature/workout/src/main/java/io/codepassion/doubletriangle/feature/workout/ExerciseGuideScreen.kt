@@ -18,7 +18,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,6 +31,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
@@ -68,10 +72,12 @@ internal fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBa
         RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.fillMaxWidth().height(500.dp))
         Box(Modifier.fillMaxWidth().height(500.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.55f), Color.Transparent, WildforceThemeTokens.backgroundSecondary))))
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-            Text("‹  VOLVER", Modifier.clickable(onClick = onBack).padding(20.dp), color = Color.White, fontWeight = FontWeight.Bold)
+            Box(Modifier.padding(14.dp).size(48.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.84f)).clickable(onClick = onBack), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = Color.Black, modifier = Modifier.size(24.dp))
+            }
             Spacer(Modifier.height(255.dp))
             Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(topStart = 38.dp, topEnd = 38.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(20.dp)) {
-                Text(exercise.name.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+                Text(exercise.name.uppercase(), fontFamily = AntonFontFamily, fontSize = 34.sp, color = WildforceThemeTokens.textPrimary, maxLines = 2)
                 Text("${exercise.sets} series · ${exercise.reps} reps", color = WildforceThemeTokens.textSecondary)
                 Spacer(Modifier.height(22.dp))
                 Text("MÚSCULOS", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)

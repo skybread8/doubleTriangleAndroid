@@ -71,6 +71,15 @@ internal object ExerciseVisualCatalog {
     fun metadata(imageKey: String?): ExerciseVisualMetadata? = imageKey?.let { key ->
         definitions[key] ?: definitions.entries.firstOrNull { it.key.equals(key, ignoreCase = true) }?.value
     }
+
+    fun equipmentFor(imageKey: String?): List<String> = when (imageKey?.trim()) {
+        "benchPress", "inclineBenchPress", "chestDip" -> listOf("Banco ajustable")
+        "latPulldown", "seatedCableRow", "facePull", "tricepsPushdown" -> listOf("Máquina de poleas")
+        "barbellBackSquat", "deadlift", "romanianDeadlift", "bentOverRow" -> listOf("Barra y discos")
+        "gobletSquat", "overheadPress", "lateralRaise", "bicepsCurl", "hammerCurl" -> listOf("Mancuernas")
+        "pullUp" -> listOf("Barra de dominadas")
+        else -> listOf("Peso corporal")
+    }
 }
 
 @Composable

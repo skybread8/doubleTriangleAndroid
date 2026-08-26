@@ -14,7 +14,8 @@ import java.util.UUID
 import org.json.JSONArray
 import org.json.JSONObject
 
-internal object CustomWorkoutStore {
+/** Persistent collection used by the custom-workout list and detail editor. */
+object CustomWorkoutStore {
     private const val PREFERENCES = "wildforce_custom_workouts"
     private const val KEY = "workouts"
 
@@ -40,7 +41,8 @@ internal object CustomWorkoutStore {
     }.getOrDefault(emptyList())
 
     fun save(context: Context, workout: WorkoutDaySummary) {
-        val workouts = load(context).filterNot { it.id == workout.id } + workout
+        val workouts = (load(context).filterNot { it.id == workout.id } + workout)
+            .mapIndexed { index, item -> item.copy(order = index + 1) }
         write(context, workouts)
     }
 
@@ -83,7 +85,7 @@ internal object CustomWorkoutStore {
 
     private fun write(context: Context, workouts: List<WorkoutDaySummary>) {
         val array = JSONArray().apply {
-            workouts.forEach { workout ->
+            workouts.sortedBy { it.order }.forEach { workout ->
                 val exercises = JSONArray().apply {
                     workout.exercises.forEach { put(encodeExercise(it)) }
                 }

@@ -19,10 +19,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,7 +80,7 @@ fun NutritionScreen(contentPadding: androidx.compose.foundation.layout.PaddingVa
             item {
                 Text("NUTRICIÓN", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("‹", Modifier.semantics { contentDescription = "Día anterior" }.clickable { selectedDate = selectedDate.minusDays(1) }.padding(end = 14.dp), style = MaterialTheme.typography.h5, color = WildforceThemeTokens.accentGold)
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "Día anterior", modifier = Modifier.semantics { contentDescription = "Día anterior" }.clickable { selectedDate = selectedDate.minusDays(1) }.padding(end = 14.dp), tint = WildforceThemeTokens.accentGold)
                     Text("${selectedDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.forLanguageTag("es-ES")).uppercase()}${if (canEdit) " · HOY" else " · ${selectedDate.dayOfMonth}/${selectedDate.monthValue}"}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.weight(1f))
                     Text("›", Modifier.semantics { contentDescription = "Día siguiente" }.clickable(enabled = !canEdit) { selectedDate = selectedDate.plusDays(1) }.padding(horizontal = 10.dp), style = MaterialTheme.typography.h5, color = if (canEdit) WildforceThemeTokens.textSecondary.copy(alpha = .35f) else WildforceThemeTokens.accentGold)
