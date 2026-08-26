@@ -1388,7 +1388,9 @@ fun ActiveWorkoutScreen(
             Spacer(Modifier.height(8.dp))
             val timerMode = restRemaining != null || targetDurationSeconds(exercise?.reps) != null
             Column(
-                Modifier.fillMaxWidth().wrapContentHeight().animateContentSize(animationSpec = tween(280))
+                Modifier.fillMaxWidth()
+                    .then(if (!timerMode && effectiveSets > 3) Modifier.fillMaxHeight() else Modifier.wrapContentHeight())
+                    .animateContentSize(animationSpec = tween(280))
                     .clip(RoundedCornerShape(topStart = 42.dp, topEnd = 42.dp, bottomStart = 30.dp, bottomEnd = 30.dp))
                     .background(WildforceThemeTokens.backgroundSecondary)
                     .then(if (timerMode) Modifier else Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()))
