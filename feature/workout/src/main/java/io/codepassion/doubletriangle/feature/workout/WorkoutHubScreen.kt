@@ -76,6 +76,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
@@ -750,6 +755,30 @@ private fun PerformanceContextChip(label: String, value: String) {
 }
 
 @Composable
+private fun IosRouteIcon(modifier: Modifier = Modifier) {
+    val iconColor = WildforceThemeTokens.textPrimary
+    Canvas(modifier) {
+        val c = iconColor
+        val stroke = Stroke(width = 2.4.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+        val points = listOf(Offset(size.width * .18f, size.height * .78f), Offset(size.width * .48f, size.height * .22f), Offset(size.width * .82f, size.height * .58f))
+        drawPath(androidx.compose.ui.graphics.Path().apply { moveTo(points[0].x, points[0].y); quadraticBezierTo(size.width * .36f, size.height * .55f, points[1].x, points[1].y); quadraticBezierTo(size.width * .64f, size.height * .05f, points[2].x, points[2].y) }, c, style = stroke)
+        points.forEach { drawCircle(c, 3.2.dp.toPx(), it) }
+    }
+}
+
+@Composable
+private fun IosAnalyticsIcon(modifier: Modifier = Modifier) {
+    val iconColor = WildforceThemeTokens.textPrimary
+    Canvas(modifier) {
+        val c = iconColor
+        val stroke = Stroke(width = 2.4.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+        val points = listOf(Offset(size.width * .14f, size.height * .68f), Offset(size.width * .38f, size.height * .42f), Offset(size.width * .58f, size.height * .62f), Offset(size.width * .84f, size.height * .20f))
+        drawPath(androidx.compose.ui.graphics.Path().apply { moveTo(points.first().x, points.first().y); points.drop(1).forEach { lineTo(it.x, it.y) } }, c, style = stroke)
+        points.forEach { drawCircle(c, 3.1.dp.toPx(), it) }
+    }
+}
+
+@Composable
 private fun ActiveWorkoutMenuItem(glyph: String, label: String, destructive: Boolean = false, onClick: () -> Unit) {
     DropdownMenuItem(onClick = onClick) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -1308,18 +1337,8 @@ fun ActiveWorkoutScreen(
                     horizontalArrangement = Arrangement.spacedBy(2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.Timeline,
-                        contentDescription = "Ruta del entrenamiento",
-                        modifier = Modifier.size(44.dp).clickable { showsWorkoutPath = true }.padding(10.dp),
-                        tint = WildforceThemeTokens.textPrimary,
-                    )
-                    Icon(
-                        imageVector = Icons.Filled.Insights,
-                        contentDescription = "Datos del ejercicio",
-                        modifier = Modifier.size(44.dp).clickable { showsExerciseHistory = true }.padding(10.dp),
-                        tint = WildforceThemeTokens.textPrimary,
-                    )
+                    IosRouteIcon(Modifier.size(44.dp).clickable { showsWorkoutPath = true }.padding(10.dp))
+                    IosAnalyticsIcon(Modifier.size(44.dp).clickable { showsExerciseHistory = true }.padding(10.dp))
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Assignment,
                         contentDescription = "Guía del ejercicio",
