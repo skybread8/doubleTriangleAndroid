@@ -1278,7 +1278,7 @@ fun ActiveWorkoutScreen(
         return
     }
 
-    Box(Modifier.fillMaxSize().background(WildforceThemeTokens.backgroundSecondary)) {
+    Box(Modifier.fillMaxSize().background(WildforceThemeTokens.background)) {
         Crossfade(
             targetState = exerciseIndex,
             animationSpec = tween(durationMillis = 360),
@@ -1388,7 +1388,7 @@ fun ActiveWorkoutScreen(
                 MuscleStrip(exercise?.imageKey, onDarkBackground = true, modifier = Modifier.padding(top = 4.dp))
                 run {
                     val referenceWeight = exercise?.targetWeightKg ?: weightKg
-                    Row(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
+                    Column(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         PerformanceContextChip("PR", formatTrainingWeight(if (personalBestWeight > 0.0) personalBestWeight else referenceWeight, useImperial))
                         PerformanceContextChip("ÚLTIMO", formatTrainingWeight(if (lastRecordedWeight > 0.0) lastRecordedWeight else referenceWeight, useImperial))
                     }
