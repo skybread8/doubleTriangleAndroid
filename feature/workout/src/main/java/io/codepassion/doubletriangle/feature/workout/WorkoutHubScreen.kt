@@ -76,6 +76,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
@@ -1407,7 +1408,7 @@ fun ActiveWorkoutScreen(
                 MuscleStrip(exercise?.imageKey, onDarkBackground = true, modifier = Modifier.padding(top = 4.dp))
                 run {
                     val referenceWeight = exercise?.targetWeightKg ?: weightKg
-                    Column(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(Modifier.fillMaxWidth().offset(y = (-54).dp), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         PerformanceContextChip("PR", formatTrainingWeight(if (personalBestWeight > 0.0) personalBestWeight else referenceWeight, useImperial))
                         PerformanceContextChip("ÚLTIMO", formatTrainingWeight(if (lastRecordedWeight > 0.0) lastRecordedWeight else referenceWeight, useImperial))
                     }
@@ -1755,7 +1756,7 @@ private fun ActiveSetEditor(
             onPlus = { onRepsChanged(reps + 1) },
             onEdit = { editingWeight = false },
         )
-        Box(Modifier.fillMaxWidth().height(1.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.12f)))
+        Spacer(Modifier.height(2.dp))
         ActiveSetMetricRow(
             label = "Peso",
             target = "Objetivo ${formatTrainingWeight(targetWeightKg, useImperial)}",
