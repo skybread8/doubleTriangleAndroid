@@ -97,6 +97,7 @@ internal object WorkoutActiveNotification {
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
         val notificationArtwork = resolvedArtwork ?: exerciseArtwork(title)
         val systemArtwork = if (Build.VERSION.SDK_INT >= 36) centeredSquareArtwork(notificationArtwork) else notificationArtwork
+        val isSamsung = Build.MANUFACTURER.equals("samsung", ignoreCase = true) || Build.BRAND.equals("samsung", ignoreCase = true)
         val progressText = displayDetail
         val compactView = notificationView(context, R.layout.notification_workout_compact, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
         val expandedView = notificationView(context, R.layout.notification_workout_expanded, notificationArtwork, displayTitle, progressText, progress, progressMax, segmentedProgress, isResting)
@@ -123,8 +124,12 @@ internal object WorkoutActiveNotification {
             }
             val liveStyle = android.app.Notification.ProgressStyle()
                 .setStyledByProgress(true)
-                .setProgressStartIcon(Icon.createWithBitmap(systemArtwork))
                 .setProgressTrackerIcon(Icon.createWithResource(context, R.drawable.ic_workout_live))
+            if (!isSamsung) {
+                // Pixel y otros sistemas muestran este icono como imagen del
+                // ejercicio. One UI puede degradar la promoción si se incluye.
+                liveStyle.setProgressStartIcon(Icon.createWithBitmap(systemArtwork))
+            }
             if (progressMax > 0) {
                 if (segmentedProgress) {
                     repeat(progressMax.coerceAtLeast(1)) {

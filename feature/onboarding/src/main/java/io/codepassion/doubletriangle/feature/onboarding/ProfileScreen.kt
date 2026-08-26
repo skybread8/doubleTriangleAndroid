@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,7 +28,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.animation.AnimatedVisibility
@@ -46,17 +47,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccessibilityNew
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.time.Year
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.roundToInt
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
+import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
@@ -110,7 +124,17 @@ fun ProfileScreen(
     ) {
         if (selectedSection != null) {
             item {
-                Text("‹  PERFIL", Modifier.fillMaxWidth().clickable { selectedSection = null }.padding(vertical = 8.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(
+                        "‹",
+                        Modifier.size(44.dp).clip(CircleShape).background(Color.White).clickable { selectedSection = null }.padding(bottom = 4.dp),
+                        color = WildforceThemeTokens.textPrimary,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.h4,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                    Text("PERFIL", fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                }
             }
         }
         item {
@@ -120,6 +144,9 @@ fun ProfileScreen(
             if (selectedSection == null) ProfileEntrance(entered, 35) { ProfileExperience(experienceXp, experienceLevel, experienceProgress) }
         }
         if (selectedSection == null) item { ProfileCategoryTree { selectedSection = it } }
+        item {
+            if (selectedSection == null) ProfileEntrance(entered, 65) { ProfileAchievements() }
+        }
         item {
             if (selectedSection == ProfileSection.Body) ProfileEntrance(entered, 45) { ProfileBodyMetrics(initial, bodyMetrics) }
         }
@@ -199,14 +226,22 @@ fun ProfileScreen(
                 if (android.os.Build.VERSION.SDK_INT >= 36) {
                     val notificationManager = profileContext.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
                     val promotedEnabled = runCatching { notificationManager.canPostPromotedNotifications() }.getOrDefault(false)
-                    ChoiceButton("Live Update de entrenamiento", if (promotedEnabled) "Activada" else "Activar en Ajustes", "Muestra la sesión como tarjeta/chip cuando Android 16 lo permita.") {
+                    val isSamsung = android.os.Build.MANUFACTURER.equals("samsung", ignoreCase = true) || android.os.Build.BRAND.equals("samsung", ignoreCase = true)
+                    val liveUpdateDescription = if (isSamsung) {
+                        "En Samsung, activa también \"Live notifications para todas las apps\" en Opciones de desarrollador."
+                    } else {
+                        "Muestra la sesión como tarjeta/chip cuando Android 16 lo permita."
+                    }
+                    ChoiceButton("Live Update de entrenamiento", if (promotedEnabled) "Activada" else "Activar en Ajustes", liveUpdateDescription) {
                         val promotedIntent = android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_PROMOTION_SETTINGS).apply {
                             putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, profileContext.packageName)
                         }
+                        val developerIntent = android.content.Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
                         val fallbackIntent = android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
                             putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, profileContext.packageName)
                         }
-                        runCatching { profileContext.startActivity(promotedIntent) }.onFailure { runCatching { profileContext.startActivity(fallbackIntent) } }
+                        val targetIntent = if (isSamsung) developerIntent else promotedIntent
+                        runCatching { profileContext.startActivity(targetIntent) }.onFailure { runCatching { profileContext.startActivity(fallbackIntent) } }
                     }
                 }
                 TogglePreference("Notificaciones de entrenamiento", "Muestra la sesión activa en el panel y la pantalla bloqueada.", notificationsEnabled) {
@@ -285,31 +320,34 @@ private fun ProfileEntrance(visible: Boolean, delayMillis: Int, content: @Compos
     AnimatedVisibility(visible = visible, enter = fadeIn(tween(330, delayMillis = delayMillis)) + slideInVertically(tween(330, delayMillis = delayMillis)) { it / 16 }) { content() }
 }
 
-private enum class ProfileSection(val title: String, val subtitle: String) {
-    Personal("Datos personales", "Nombre, medidas, unidades y Health Connect"),
-    Body("Perfil corporal", "Historial de peso, altura y evolución"),
-    Goal("Objetivo y nivel", "Objetivo, nivel y fase corporal"),
-    Training("Entrenamiento", "Días, división, duración y preferencias"),
-    Environment("Entorno y seguridad", "Gimnasio, ubicaciones, equipamiento y restricciones"),
-    Achievements("Logros y rachas", "Experiencia, logros y progreso"),
-    Settings("Ajustes y notificaciones", "Avisos, descansos y recordatorios"),
+private enum class ProfileSection(val title: String, val subtitle: String, val icon: ImageVector) {
+    Personal("Datos personales", "Nombre, medidas, unidades y Health Connect", Icons.Filled.Person),
+    Body("Perfil corporal", "Historial de peso, altura y evolución", Icons.Filled.AccessibilityNew),
+    Goal("Objetivo y nivel", "Objetivo, nivel y fase corporal", Icons.Filled.Flag),
+    Training("Entrenamiento", "Días, división, duración y preferencias", Icons.Filled.FitnessCenter),
+    Environment("Entorno y seguridad", "Gimnasio, ubicaciones, equipamiento y restricciones", Icons.Filled.Home),
+    Achievements("Logros y rachas", "Experiencia, logros y progreso", Icons.Filled.EmojiEvents),
+    Settings("Ajustes y notificaciones", "Avisos, descansos y recordatorios", Icons.Filled.Settings),
 }
 
 @Composable
 private fun ProfileCategoryTree(onSelect: (ProfileSection) -> Unit) {
-    Column(Modifier.fillMaxWidth().padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("PERFIL", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
-        ProfileSection.entries.forEach { section ->
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(26.dp), emphasized = true).padding(vertical = 4.dp)) {
+        ProfileSection.entries.forEachIndexed { index, section ->
             Row(
-                Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).clickable { onSelect(section) }.padding(horizontal = 16.dp, vertical = 13.dp),
+                Modifier.fillMaxWidth().clickable { onSelect(section) }.padding(horizontal = 20.dp, vertical = 15.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(13.dp),
             ) {
+                Icon(section.icon, contentDescription = null, modifier = Modifier.size(28.dp), tint = WildforceThemeTokens.textPrimary)
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text(section.title, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
                     Text(section.subtitle, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-                Text("›", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.h5)
+                Text("›", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.h5)
+            }
+            if (index < ProfileSection.entries.lastIndex) {
+                Box(Modifier.fillMaxWidth().height(1.dp).padding(horizontal = 20.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.16f)))
             }
         }
     }
@@ -317,12 +355,23 @@ private fun ProfileCategoryTree(onSelect: (ProfileSection) -> Unit) {
 
 @Composable
 private fun ProfileBodyMetrics(profile: OnboardingProfile, history: List<BodyMetricEntry>) {
+    val age = (Year.now().value - profile.birthYear).coerceAtLeast(13)
+    val bmi = profile.weightKg / ((profile.heightCm / 100.0) * (profile.heightCm / 100.0))
+    val bmr = when (profile.gender.storedValue) {
+        "female" -> 10 * profile.weightKg + 6.25 * profile.heightCm - 5 * age - 161
+        else -> 10 * profile.weightKg + 6.25 * profile.heightCm - 5 * age + 5
+    }.roundToInt()
     Section("PERFIL CORPORAL") {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MetricTile("ALTURA", "${profile.heightCm.toInt()} cm", Modifier.weight(1f))
+            MetricTile("ALTURA", "%.0f cm".format(profile.heightCm), Modifier.weight(1f))
             MetricTile("PESO", "${"%.1f".format(profile.weightKg)} kg", Modifier.weight(1f))
             MetricTile("REGISTROS", history.size.toString(), Modifier.weight(1f))
         }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            MetricTile("IMC", "%.1f".format(bmi), Modifier.weight(1f))
+            MetricTile("METABOLISMO BASE", "$bmr kcal", Modifier.weight(1f))
+        }
+        Text("Estimación basada en tus medidas, edad y sexo. No sustituye una valoración clínica.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         if (history.isEmpty()) {
             Text("Guarda el perfil para comenzar el historial corporal.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         } else {
@@ -333,7 +382,10 @@ private fun ProfileBodyMetrics(profile: OnboardingProfile, history: List<BodyMet
             visible.forEach { entry ->
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(entry.date.takeLast(5), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.size(width = 44.dp, height = 24.dp))
-                    LinearProgressIndicator(((entry.weightKg - min) / (max - min)).toFloat().coerceIn(0f, 1f), Modifier.weight(1f), color = WildforceThemeTokens.accentGold)
+                    val fraction = ((entry.weightKg - min) / (max - min)).toFloat().coerceIn(0f, 1f)
+                    Box(Modifier.weight(1f).height(8.dp).clip(RoundedCornerShape(8.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.14f))) {
+                        Box(Modifier.fillMaxWidth(fraction).fillMaxHeight().clip(RoundedCornerShape(8.dp)).background(WildforceThemeTokens.accentGold))
+                    }
                     Text("${"%.1f".format(entry.weightKg)} kg", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
                 }
             }
@@ -356,11 +408,16 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
                 val bitmap = remember(avatarPath, avatarRevision) { avatarPath?.let { BitmapFactory.decodeFile(it) } }
                 if (bitmap != null) Image(bitmap.asImageBitmap(), profile.name, Modifier.fillMaxSize().clip(CircleShape), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
                 else Text(profile.name.take(1).uppercase().ifBlank { "W" }, Modifier.fillMaxSize().background(WildforceThemeTokens.accentGold, CircleShape).padding(30.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color.White)
-                Text("⌁", Modifier.align(Alignment.BottomEnd).size(30.dp).background(WildforceThemeTokens.accentGold, CircleShape).padding(5.dp), color = Color.White, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                Box(Modifier.align(Alignment.BottomEnd).size(38.dp).background(Color.White, CircleShape), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Filled.PhotoCamera, contentDescription = "Cambiar foto de perfil", modifier = Modifier.size(23.dp), tint = WildforceThemeTokens.textPrimary)
+                }
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text("${profile.goal.title} · ${profile.trainingLevel.title}", color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = Exo2FontFamily, fontSize = 32.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Icon(Icons.Filled.FitnessCenter, contentDescription = null, modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.textSecondary)
+                    Text("${profile.goal.title} · ${profile.trainingLevel.title}", color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                     ProfileStat("RACHA", currentStreak.toString(), Modifier.weight(1f))
                     ProfileStat("MÁS LARGA", longestStreak.toString(), Modifier.weight(1f))
@@ -373,24 +430,31 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
 @Composable
 private fun ProfileExperience(experienceXp: Int, experienceLevel: Int, experienceProgress: Float) {
     val animatedExperienceProgress by animateFloatAsState(experienceProgress.coerceIn(0f, 1f), animationSpec = tween(650), label = "profile-experience")
-    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
-            Text("NIVEL $experienceLevel", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+            Text("NIVEL $experienceLevel", fontFamily = Exo2FontFamily, fontSize = 34.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Text("$experienceXp XP", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
-        LinearProgressIndicator(animatedExperienceProgress, Modifier.fillMaxWidth().height(9.dp), color = WildforceThemeTokens.accentGold, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = .16f))
+        Box(Modifier.fillMaxWidth().height(12.dp).clip(RoundedCornerShape(8.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = .16f))) {
+            Box(Modifier.fillMaxWidth(animatedExperienceProgress).fillMaxHeight().clip(RoundedCornerShape(8.dp)).background(WildforceThemeTokens.accentGold))
+        }
     }
 }
 
 @Composable
 private fun ProfileAchievements() {
-    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(14.dp)) {
-        Text("LOGROS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
-        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            listOf("🔥", "★", "⚡", "◆", "♛", "◈", "✦").forEachIndexed { index, glyph ->
-                Column(Modifier.size(76.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(Modifier.size(54.dp).background(if (index < 2) WildforceThemeTokens.accentGold.copy(alpha = .22f) else WildforceThemeTokens.textSecondary.copy(alpha = .10f), CircleShape), contentAlignment = Alignment.Center) { Text(glyph, style = MaterialTheme.typography.h5, color = if (index < 2) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary) }
-                    Text(if (index < 2) "DESBLOQUEADO" else "PRÓXIMO", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Clip)
+    Column(Modifier.fillMaxWidth()) {
+        Text("LOGROS", fontFamily = Exo2FontFamily, fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(start = 8.dp, bottom = 8.dp))
+        Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(14.dp)) {
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                listOf("🔥", "★", "⚡", "◆", "♛", "◈", "✦").forEachIndexed { index, glyph ->
+                    Column(Modifier.size(76.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(Modifier.size(62.dp), contentAlignment = Alignment.Center) {
+                            Text("⬡", fontSize = 62.sp, color = if (index < 2) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary.copy(alpha = .25f), lineHeight = 62.sp)
+                            Text(glyph, style = MaterialTheme.typography.h6, color = if (index < 2) Color.White else WildforceThemeTokens.textSecondary)
+                        }
+                        Text(if (index < 2) "DESBLOQUEADO" else "PRÓXIMO", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Clip)
+                    }
                 }
             }
         }
@@ -399,7 +463,13 @@ private fun ProfileAchievements() {
 
 @Composable
 private fun ProfileStat(label: String, value: String, modifier: Modifier) {
-    Column(modifier.liquidGlass(RoundedCornerShape(13.dp)).padding(9.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    val icon = when (label) {
+        "SESIONES" -> Icons.Filled.EmojiEvents
+        "MÁS LARGA" -> Icons.Filled.LocalFireDepartment
+        else -> Icons.Filled.LocalFireDepartment
+    }
+    Column(modifier.padding(vertical = 2.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(icon, contentDescription = null, modifier = Modifier.size(25.dp), tint = if (label == "SESIONES") Color(0xFFF2C21A) else WildforceThemeTokens.accentGold)
         Text(value, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
         Text(label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
