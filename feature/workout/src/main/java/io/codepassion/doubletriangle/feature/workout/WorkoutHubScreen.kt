@@ -922,12 +922,11 @@ fun ActiveWorkoutScreen(
     // down only for those sessions so the complete editor and CTA remain
     // visible without leaving a blank tail or forcing an initial scroll.
     val screenHeightDp = LocalConfiguration.current.screenHeightDp
-    val heroFraction = when {
-        effectiveSets >= 5 -> 0.24f
-        effectiveSets >= 4 -> 0.29f
-        else -> 0.46f
-    }
-    val heroMinimum = if (effectiveSets >= 5) 210.dp else if (effectiveSets >= 4) 235.dp else 340.dp
+    // Keep the hero continuous with the sheet. Extra series expand the sheet
+    // first; only the scroll container yields space when the device truly
+    // cannot fit the complete editor.
+    val heroFraction = 0.46f
+    val heroMinimum = 340.dp
     val activeHeroHeight = (screenHeightDp * heroFraction).dp.coerceIn(heroMinimum, 430.dp)
     val effectiveExercise = exercise?.copy(sets = effectiveSets)
     val structuredPathBlocks = remember(workout) { workout.pathBlocks() }
@@ -1385,7 +1384,7 @@ fun ActiveWorkoutScreen(
                     }
                 }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(0.dp))
             val timerMode = restRemaining != null || targetDurationSeconds(exercise?.reps) != null
             Column(
                 Modifier.fillMaxWidth()
