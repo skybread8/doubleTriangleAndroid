@@ -1,7 +1,6 @@
 package io.codepassion.doubletriangle
 
 import android.os.Bundle
-import android.app.Activity
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
@@ -10,15 +9,22 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
@@ -36,14 +42,18 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,6 +66,9 @@ import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+import android.graphics.Color as AndroidColor
 import io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
@@ -84,6 +97,7 @@ import io.codepassion.doubletriangle.feature.onboarding.ProfileScreen
 import io.codepassion.doubletriangle.feature.workout.ActiveWorkoutScreen
 import io.codepassion.doubletriangle.feature.workout.CompletionProgressStore
 import io.codepassion.doubletriangle.feature.workout.WorkoutDetailScreen
+import io.codepassion.doubletriangle.feature.workout.CustomWorkoutStore
 import io.codepassion.doubletriangle.feature.workout.WorkoutHubScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutAnalyticsStore
 import io.codepassion.doubletriangle.nutrition.NutritionScreen
@@ -94,13 +108,23 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Opt into one consistent edge-to-edge policy. Without this, Android
+        // applies system-bar insets differently depending on the OEM and
+        // navigation mode (notably on Galaxy S23 vs Pixel). Composables below
+        // own the top and bottom insets explicitly.
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 7203)
         }
         setContent {
-            WildforceTheme {
-                Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-                    WildforceRoot()
+            val systemDarkTheme = isSystemInDarkTheme()
+            val savedTheme = remember { getSharedPreferences("wildforce_profile_details", 0).getString("theme", "Sistema") ?: "Sistema" }
+            WildforceTheme(darkTheme = when (savedTheme) { "Claro" -> false; "Oscuro" -> true; else -> systemDarkTheme }) {
+                // Apply only the top inset here. The bottom navigation owns the
+                // navigation-bar inset; applying safeDrawing at the root as
+                // well created an extra bottom gap on devices such as S23 Ultra.
+                Box(Modifier.fillMaxSize().statusBarsPadding()) {
+                    WildforceRoot(onThemeChanged = { recreate() })
                 }
             }
         }
@@ -113,13 +137,59 @@ private enum class RootDestination(val label: String, val icon: ImageVector) {
 }
 
 @Composable
-fun WildforceRoot() {
+private fun RootBottomNavigation(selected: RootDestination, onSelected: (RootDestination) -> Unit, modifier: Modifier = Modifier) {
+    BottomNavigation(
+        modifier = modifier.navigationBarsPadding()
+            .padding(horizontal = 24.dp, vertical = 6.dp)
+            .height(62.dp)
+            .shadow(10.dp, RoundedCornerShape(31.dp), clip = false)
+            .clip(RoundedCornerShape(31.dp))
+            .background(
+                if (androidx.compose.material.MaterialTheme.colors.isLight) Color.White.copy(alpha = 0.52f)
+                else Color.Black.copy(alpha = 0.40f),
+            )
+            .border(
+                1.dp,
+                if (androidx.compose.material.MaterialTheme.colors.isLight) Color.White.copy(alpha = 0.64f)
+                else Color.White.copy(alpha = 0.24f),
+                RoundedCornerShape(31.dp),
+            ),
+        backgroundColor = Color.Transparent,
+        elevation = 0.dp,
+    ) {
+        RootDestination.values().forEach { destination ->
+            BottomNavigationItem(
+                selected = selected == destination, onClick = { onSelected(destination) },
+                icon = {
+                    Box(
+                        Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(24.dp))
+                            .background(if (selected == destination) WildforceThemeTokens.textPrimary.copy(alpha = 0.10f) else Color.Transparent)
+                            .padding(horizontal = 8.dp, vertical = 8.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(destination.icon, contentDescription = destination.label, modifier = Modifier.size(28.dp), tint = if (androidx.compose.material.MaterialTheme.colors.isLight) Color(0xFF252525) else Color.White)
+                    }
+                },
+                label = null,
+                alwaysShowLabel = false,
+                selectedContentColor = WildforceThemeTokens.textPrimary,
+                unselectedContentColor = WildforceThemeTokens.textPrimary,
+            )
+        }
+    }
+}
+
+@Composable
+fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
     val context = LocalContext.current
     val preferences = remember { context.getSharedPreferences("wildforce_profile", 0) }
+    val workoutPlanStore = remember(preferences) { WorkoutPlanStateStore(preferences) }
     val healthPermissions = remember {
         setOf(
             HealthPermission.getReadPermission(HeightRecord::class),
             HealthPermission.getReadPermission(WeightRecord::class),
+            HealthPermission.getWritePermission(WeightRecord::class),
+            HealthPermission.getWritePermission(androidx.health.connect.client.records.ExerciseSessionRecord::class),
         )
     }
     val coroutineScope = rememberCoroutineScope()
@@ -242,7 +312,8 @@ fun WildforceRoot() {
                 coroutineScope.launch {
                     runCatching { WorkoutPlanGenerator.generate(completedProfile, context) }
                         .onSuccess { (json, state) ->
-                            preferences.edit().putString("workout_plan_json", json).apply()
+                            workoutPlanStore.saveCurrentPlan(json)
+                            WorkoutQuickAccessWidget.refresh(context)
                             generatedWorkoutState = state
                             profile = completedProfile
                         }
@@ -250,13 +321,13 @@ fun WildforceRoot() {
                     isGenerating = false
                 }
             } else {
-                preferences.edit().remove("workout_plan_json").apply()
+                workoutPlanStore.clearCurrentPlan()
                 generatedWorkoutState = PreviewWorkoutRepository.load(completedProfile.name, completedProfile.goal.title)
                 profile = completedProfile
             }
         }
     } else {
-        val baseState = generatedWorkoutState ?: preferences.getString("workout_plan_json", null)?.let { json ->
+        val baseState = generatedWorkoutState ?: workoutPlanStore.currentPlanJson()?.let { json ->
             runCatching { WorkoutPlanGenerator.parse(json, currentProfile.name, currentProfile.goal.title) }.getOrNull()
         } ?: PreviewWorkoutRepository.load(currentProfile.name, currentProfile.goal.title)
         val completedIds = preferences.getStringSet("completed_workouts", emptySet()).orEmpty()
@@ -282,7 +353,17 @@ fun WildforceRoot() {
                     .putInt("total_completed_workouts", totalCompleted)
                     .putInt("last_workout_duration", duration).putInt("last_workout_sets", sets)
                     .putLong("last_workout_volume", java.lang.Double.doubleToRawLongBits(volume)).apply()
-                TrainingSessionHistoryStore.record(preferences, duration, sets, volume)
+                // Finishing a workout must not crash if an optional side
+                // effect (history migration or widget provider) fails on any
+                // Android version, manufacturer or launcher.
+                runCatching { TrainingSessionHistoryStore.record(preferences, duration, sets, volume) }
+                runCatching { WorkoutQuickAccessWidget.refresh(context) }
+                if (currentProfile.isHealthConnectEnabled) {
+                    val workoutTitle = restoredState.workouts.firstOrNull { it.id == id }?.title ?: "Entrenamiento"
+                    coroutineScope.launch {
+                        runCatching { HealthConnectWeightSync.publishCompletedWorkout(context, workoutTitle, duration) }
+                    }
+                }
             },
             onResetOnboarding = {
                 preferences.edit().clear().apply()
@@ -312,8 +393,13 @@ fun WildforceRoot() {
                     .putBoolean("skips_rest_periods", updated.skipsRestPeriods)
                     .putString("planner_notes", updated.workoutPlannerNotes)
                     .putStringSet("training_locations", encodeTrainingLocations(updated.trainingLocations))
-                    .apply()
+                .apply()
                 profile = updated
+                if (updated.isHealthConnectEnabled) {
+                    coroutineScope.launch {
+                        runCatching { HealthConnectWeightSync.publishManualWeight(context, updated.weightKg) }
+                    }
+                }
             },
             onRegenerateProfile = { updated ->
                 generationError = null
@@ -336,11 +422,13 @@ fun WildforceRoot() {
             },
             onPlanWorkoutUpdated = { updatedState ->
                 generatedWorkoutState = updatedState
-                preferences.edit().putString("workout_plan_json", WorkoutPlanGenerator.serialize(updatedState)).apply()
+                workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(updatedState))
+                WorkoutQuickAccessWidget.refresh(context)
             },
             isGeneratingProfilePlan = isGenerating,
             profileGenerationError = generationError,
             onRequestHealthConnect = requestHealthConnect,
+            onThemeChanged = onThemeChanged,
         )
         pendingGeneratedPlan?.let { (json, state) ->
             AlertDialog(
@@ -359,10 +447,8 @@ fun WildforceRoot() {
                 },
                 confirmButton = {
                     Button(onClick = {
-                        preferences.getString("workout_plan_json", null)?.let { currentJson ->
-                            WorkoutPlanArchiveStore.archive(preferences, currentJson)
-                        }
-                        preferences.edit().putString("workout_plan_json", json).apply()
+                        workoutPlanStore.replaceCurrentPlan(json)
+                        WorkoutQuickAccessWidget.refresh(context)
                         preferences.edit().remove("completed_workouts").remove("skipped_workouts").apply()
                         generatedWorkoutState = state
                         pendingGeneratedPlan = null
@@ -386,9 +472,25 @@ private fun WildforceApp(
     isGeneratingProfilePlan: Boolean = false,
     profileGenerationError: String? = null,
     onRequestHealthConnect: (((Boolean, Int?, Double?) -> Unit) -> Unit) = { _ -> },
+    onThemeChanged: () -> Unit = {},
 ) {
+    val darkTheme = isSystemInDarkTheme()
+    val activity = LocalActivity.current
+    val view = LocalView.current
+    SideEffect {
+        activity?.let { host ->
+            host.window.statusBarColor = AndroidColor.TRANSPARENT
+            host.window.navigationBarColor = AndroidColor.TRANSPARENT
+            val controller = WindowCompat.getInsetsController(host.window, view)
+            controller.isAppearanceLightStatusBars = !darkTheme
+            controller.isAppearanceLightNavigationBars = !darkTheme
+        }
+    }
     val appContext = LocalContext.current.applicationContext
     val appPreferences = remember { appContext.getSharedPreferences("wildforce_profile", 0) }
+    val profileDetailPreferences = remember { appContext.getSharedPreferences("wildforce_profile_details", 0) }
+    var keepScreenOnDuringWorkout by remember { mutableStateOf(profileDetailPreferences.getBoolean("keep_screen_on", true)) }
+    val workoutPlanStore = remember(appPreferences) { WorkoutPlanStateStore(appPreferences) }
     var avatarPath by remember { mutableStateOf(appPreferences.getString("avatar_path", null)) }
     var avatarRevision by remember { mutableStateOf(0) }
     val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -411,6 +513,12 @@ private fun WildforceApp(
     var workoutDetail by remember { mutableStateOf<WorkoutDaySummary?>(null) }
     var activeWorkout by remember { mutableStateOf<WorkoutDaySummary?>(null) }
     var showExitAppDialog by remember { mutableStateOf(false) }
+    SideEffect {
+        activity?.window?.let { window ->
+            if (keepScreenOnDuringWorkout && activeWorkout != null) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            else window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
     BackHandler(enabled = activeWorkout == null) {
         when {
             workoutDetail != null -> workoutDetail = null
@@ -420,7 +528,7 @@ private fun WildforceApp(
     }
     activeWorkout?.let { workout ->
         ActiveWorkoutScreen(
-            workout = workout,
+            initialWorkout = workout,
             gender = profile.gender.storedValue,
             useImperial = profile.metricSystem == MetricSystem.Imperial,
             skipRestPeriods = profile.skipsRestPeriods,
@@ -435,6 +543,13 @@ private fun WildforceApp(
             onGenerateNextPlan = {
                 appPreferences.edit().putBoolean("generate_next_plan", true).apply()
                 onRegenerateProfile(profile)
+            },
+            onWorkoutChanged = { updated ->
+                if (updated.id.startsWith("custom-")) CustomWorkoutStore.save(appContext, updated)
+                displayedWorkoutState = displayedWorkoutState.copy(
+                    workouts = displayedWorkoutState.workouts.map { candidate -> if (candidate.id == updated.id) updated else candidate },
+                )
+                activeWorkout = updated
             },
             onExit = { activeWorkout = null },
             onFinish = { duration, sets, volume, streak ->
@@ -451,6 +566,7 @@ private fun WildforceApp(
         return
     }
     workoutDetail?.let { workout ->
+        Box(Modifier.fillMaxSize()) {
         WorkoutDetailScreen(workout, profile.gender.storedValue, useImperial = profile.metricSystem == MetricSystem.Imperial, onBack = { workoutDetail = null }, onStart = { activeWorkout = workout }, onSkip = {
             val skipped = appPreferences.getStringSet("skipped_workouts", emptySet()).orEmpty() + workout.id
             appPreferences.edit().putStringSet("skipped_workouts", skipped).apply()
@@ -465,6 +581,9 @@ private fun WildforceApp(
                 workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Planned) else it },
             )
         }, onWorkoutUpdated = { updated ->
+            if (updated.id.startsWith("custom-")) {
+                CustomWorkoutStore.save(appContext, updated)
+            }
             val updatedState = displayedWorkoutState.copy(
                 workouts = displayedWorkoutState.workouts.map { existing -> if (existing.id == updated.id) updated else existing },
             )
@@ -474,35 +593,31 @@ private fun WildforceApp(
         }, defaultAdaptEquipment = profile.effectiveTrainingLocations().firstOrNull { it.isDefault }?.equipment?.joinToString(", ") { it.title }.orEmpty().ifBlank { profile.availableEquipment.joinToString(", ") { it.title } }, adaptEquipmentPresets = profile.effectiveTrainingLocations().map { location -> location.name to location.equipment.joinToString(", ") { it.title } }, adaptAiGenerator = { request ->
             WorkoutPlanGenerator.adaptWorkout(profile, workout, request, appContext)
         })
+            RootBottomNavigation(selected = selected, onSelected = { selected = it }, modifier = Modifier.align(Alignment.BottomCenter))
+        }
         return
     }
     val archivedWorkoutStates = remember(displayedWorkoutState.mesocycleNumber, displayedWorkoutState.planName) {
-        WorkoutPlanArchiveStore.load(appPreferences).mapNotNull { archived ->
+        workoutPlanStore.archivedPlans().mapNotNull { archived ->
             runCatching { WorkoutPlanGenerator.parse(archived.rawJson, profile.name, profile.goal.title) }.getOrNull()
         }
     }
     Scaffold(
         modifier = Modifier.liquidGlassBackground(),
         backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
-        bottomBar = {
-            BottomNavigation(
-                modifier = Modifier.navigationBarsPadding().padding(horizontal = 10.dp, vertical = 6.dp).liquidGlass(RoundedCornerShape(18.dp), emphasized = true),
-                backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
-                elevation = 0.dp,
-            ) {
-                RootDestination.values().forEach { destination ->
-                    BottomNavigationItem(
-                        selected = selected == destination, onClick = { selected = destination },
-                        icon = { Icon(destination.icon, contentDescription = destination.label) }, label = { Text(destination.label) },
-                        selectedContentColor = WildforceThemeTokens.accentGold, unselectedContentColor = WildforceThemeTokens.textSecondary,
-                    )
-                }
-            }
-        },
+        bottomBar = { RootBottomNavigation(selected = selected, onSelected = { selected = it }) },
     ) { padding ->
+        // El contenido debe extenderse detrás de la cápsula inferior, como en iOS;
+        // la propia barra ya incluye el inset de navegación.
+        val overlayPadding = PaddingValues(
+            start = padding.calculateStartPadding(LayoutDirection.Ltr),
+            top = padding.calculateTopPadding(),
+            end = padding.calculateEndPadding(LayoutDirection.Ltr),
+            bottom = 0.dp,
+        )
         if (selected == RootDestination.Workout) {
             WorkoutHubScreen(
-                contentPadding = padding,
+                contentPadding = overlayPadding,
                 state = displayedWorkoutState,
                 planHistory = archivedWorkoutStates,
                 onWorkoutSelected = { workoutDetail = it },
@@ -514,14 +629,14 @@ private fun WildforceApp(
                 customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile, request, appContext) },
             )
         } else if (selected == RootDestination.Nutrition) {
-            NutritionScreen(padding, profile)
+            NutritionScreen(overlayPadding, profile)
         } else if (selected == RootDestination.Analytics) {
             val analyticsExercises = displayedWorkoutState.workouts.flatMap { it.exercises }
-            AnalyticsScreen(appContext, displayedWorkoutState, appPreferences, WorkoutAnalyticsStore.summaries(appContext, analyticsExercises), padding)
+            AnalyticsScreen(appContext, displayedWorkoutState, appPreferences, WorkoutAnalyticsStore.summaries(appContext, analyticsExercises), overlayPadding)
         } else if (selected == RootDestination.Profile) {
             ProfileScreen(
                 initial = profile,
-                contentPadding = padding,
+                contentPadding = overlayPadding,
                 isRegenerating = isGeneratingProfilePlan,
                 generationError = profileGenerationError,
                 currentStreak = trainingProgress.currentStreak.coerceAtLeast(displayedWorkoutState.user.currentStreak),
@@ -536,6 +651,8 @@ private fun WildforceApp(
                 onSave = onProfileUpdated,
                 onRegenerate = onRegenerateProfile,
                 onChangeAvatar = { avatarPicker.launch("image/*") },
+                onThemeChanged = onThemeChanged,
+                onKeepScreenOnChanged = { keepScreenOnDuringWorkout = it },
             )
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("${selected.label}\nPróxima vertical", color = WildforceThemeTokens.textSecondary)
@@ -550,7 +667,7 @@ private fun WildforceApp(
         }
     }
     if (showExitAppDialog) {
-        val hostActivity = LocalContext.current as? Activity
+        val hostActivity = LocalActivity.current
         AlertDialog(
             onDismissRequest = { showExitAppDialog = false },
             title = { Text("¿SALIR DE LA APLICACIÓN?", fontWeight = FontWeight.Bold) },
