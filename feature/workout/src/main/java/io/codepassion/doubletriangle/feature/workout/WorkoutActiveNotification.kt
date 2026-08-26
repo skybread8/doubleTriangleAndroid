@@ -42,7 +42,7 @@ internal object WorkoutActiveNotification {
         }
     }
 
-    fun showRestCompletedInPlace(context: Context, title: String) {
+    fun showRestCompletedInPlace(context: Context, title: String, completedExercises: Int, totalExercises: Int) {
         runCatching {
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             ensureChannel(manager)
@@ -50,11 +50,10 @@ internal object WorkoutActiveNotification {
                 context,
                 title,
                 "DESCANSO TERMINADO · Continúa con el siguiente ejercicio",
-                progress = 0,
-                progressMax = 0,
+                progress = completedExercises.coerceIn(0, totalExercises.coerceAtLeast(1)),
+                progressMax = totalExercises.coerceAtLeast(1),
                 isResting = false,
-                segmentedProgress = false,
-                alert = true,
+                segmentedProgress = true,
             )
             manager.notify(notificationId, notification)
             val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
