@@ -761,8 +761,8 @@ private fun IosRouteIcon(modifier: Modifier = Modifier) {
     Canvas(modifier) {
         val c = iconColor
         val stroke = Stroke(width = 2.4.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-        val points = listOf(Offset(size.width * .18f, size.height * .78f), Offset(size.width * .48f, size.height * .22f), Offset(size.width * .82f, size.height * .58f))
-        drawPath(androidx.compose.ui.graphics.Path().apply { moveTo(points[0].x, points[0].y); quadraticBezierTo(size.width * .36f, size.height * .55f, points[1].x, points[1].y); quadraticBezierTo(size.width * .64f, size.height * .05f, points[2].x, points[2].y) }, c, style = stroke)
+        val points = listOf(Offset(size.width * .18f, size.height * .72f), Offset(size.width * .50f, size.height * .28f), Offset(size.width * .82f, size.height * .70f))
+        drawPath(androidx.compose.ui.graphics.Path().apply { moveTo(points[0].x, points[0].y); cubicTo(size.width * .32f, size.height * .84f, size.width * .34f, size.height * .16f, points[1].x, points[1].y); cubicTo(size.width * .66f, size.height * .40f, size.width * .68f, size.height * .84f, points[2].x, points[2].y) }, c, style = stroke)
         points.forEach { drawCircle(c, 3.2.dp.toPx(), it) }
     }
 }
@@ -772,8 +772,14 @@ private fun IosAnalyticsIcon(modifier: Modifier = Modifier) {
     val iconColor = WildforceThemeTokens.textPrimary
     Canvas(modifier) {
         val c = iconColor
-        val stroke = Stroke(width = 2.4.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
-        val points = listOf(Offset(size.width * .14f, size.height * .68f), Offset(size.width * .38f, size.height * .42f), Offset(size.width * .58f, size.height * .62f), Offset(size.width * .84f, size.height * .20f))
+        val stroke = Stroke(width = 2.2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+        val base = size.height * .82f
+        val bars = listOf(.34f, .56f, .78f)
+        bars.forEachIndexed { index, height ->
+            val x = size.width * (.20f + index * .25f)
+            drawLine(c, Offset(x, base), Offset(x, base - size.height * height), strokeWidth = 3.2.dp.toPx(), cap = StrokeCap.Round)
+        }
+        val points = listOf(Offset(size.width * .14f, size.height * .62f), Offset(size.width * .38f, size.height * .42f), Offset(size.width * .61f, size.height * .56f), Offset(size.width * .86f, size.height * .20f))
         drawPath(androidx.compose.ui.graphics.Path().apply { moveTo(points.first().x, points.first().y); points.drop(1).forEach { lineTo(it.x, it.y) } }, c, style = stroke)
         points.forEach { drawCircle(c, 3.1.dp.toPx(), it) }
     }
