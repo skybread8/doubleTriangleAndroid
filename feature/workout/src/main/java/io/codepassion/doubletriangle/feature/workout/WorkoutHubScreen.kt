@@ -1673,8 +1673,8 @@ private fun SetTrackingRows(
             }
         }
         if (!current && editingSetNumber == setNumber && record != null) {
-            Column(Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 7.dp).padding(10.dp)) {
-                Text("CORREGIR SERIE $setNumber", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+            Column(Modifier.fillMaxWidth().padding(bottom = 7.dp)) {
+                Text("CORREGIR SERIE $setNumber", Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
                 ActiveSetEditor(
                     targetReps = exercise.reps,
                     targetWeightKg = exercise.targetWeightKg ?: editWeightKg,
