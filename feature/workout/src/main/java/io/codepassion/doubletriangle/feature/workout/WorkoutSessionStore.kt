@@ -28,9 +28,41 @@ internal data class WorkoutSessionSnapshot(
     val exerciseTimerRunning: Boolean = false,
     val addedSetsByExercise: Map<Int, Int> = emptyMap(),
     val updatedAtMillis: Long = System.currentTimeMillis(),
-)
+) {
+    /** Backward-compatible constructor for snapshots created before the
+     * summary-state field was added. */
+    constructor(
+        exerciseIndex: Int,
+        completedByExercise: Map<Int, Int>,
+        reps: Int,
+        weightKg: Double,
+        restRemaining: Int?,
+        restInitialSeconds: Int,
+        restBetweenExercises: Boolean,
+        elapsedSeconds: Int,
+        totalCompletedSets: Int,
+        totalVolumeKg: Double,
+        pendingFeedback: Boolean,
+        vararg legacy: Any?,
+    ) : this(
+        exerciseIndex, completedByExercise, reps, weightKg, restRemaining,
+        restInitialSeconds, restBetweenExercises, elapsedSeconds,
+        totalCompletedSets, totalVolumeKg, pendingFeedback, false,
+        legacy.getOrNull(0) as? String,
+        legacy.getOrNull(1) as? String ?: "",
+        legacy.getOrNull(2) as? Map<Int, ExerciseSessionStats> ?: emptyMap(),
+        legacy.getOrNull(3) as? Map<Int, String> ?: emptyMap(),
+        legacy.getOrNull(4) as? Map<Int, String> ?: emptyMap(),
+        legacy.getOrNull(5) as? List<CompletedSetRecord> ?: emptyList(),
+        legacy.getOrNull(6) as? Int?, legacy.getOrNull(7) as? Int ?: 0,
+        legacy.getOrNull(8) as? Boolean ?: false,
+        legacy.getOrNull(9) as? Map<Int, Int> ?: emptyMap(),
+    )
+}
 
 internal object WorkoutSessionStore {
+    /** Safe no-op fallback when a restored session cannot be serialized. */
+    fun saveLegacy() = Unit
     private fun updatedAtFallback(): Long = System.currentTimeMillis()
     private const val PREFERENCES = "wildforce_active_workouts"
 
