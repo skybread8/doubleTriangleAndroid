@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -83,15 +84,23 @@ internal object ExerciseVisualCatalog {
 }
 
 @Composable
-internal fun MuscleStrip(imageKey: String?, onDarkBackground: Boolean, modifier: Modifier = Modifier) {
+internal fun MuscleStrip(imageKey: String?, onDarkBackground: Boolean, modifier: Modifier = Modifier, wrapContent: Boolean = false) {
     val metadata = ExerciseVisualCatalog.metadata(imageKey) ?: run {
         androidx.compose.material.Text("Músculos no catalogados", modifier.padding(vertical = 8.dp), color = if (onDarkBackground) Color.White.copy(alpha = 0.7f) else Color.Gray, style = androidx.compose.material.MaterialTheme.typography.caption)
         return
     }
     val tint = if (onDarkBackground) Color.White else Color.Unspecified
-    Row(modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically) {
-        metadata.primary.forEach { muscle -> MuscleIcon(muscle, true) }
-        metadata.secondary.forEach { muscle -> MuscleIcon(muscle, false) }
+    val muscles = metadata.primary.map { it to true } + metadata.secondary.map { it to false }
+    if (wrapContent) {
+        Column(modifier) {
+            muscles.chunked(3).forEach { row ->
+                Row(verticalAlignment = Alignment.CenterVertically) { row.forEach { (muscle, primary) -> MuscleIcon(muscle, primary) } }
+            }
+        }
+    } else {
+        Row(modifier.horizontalScroll(rememberScrollState()), verticalAlignment = Alignment.CenterVertically) {
+            muscles.forEach { (muscle, primary) -> MuscleIcon(muscle, primary) }
+        }
     }
 }
 

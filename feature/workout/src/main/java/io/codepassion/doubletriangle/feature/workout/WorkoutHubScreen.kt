@@ -1375,11 +1375,16 @@ fun ActiveWorkoutScreen(
                     val contextLabel = exercise?.blockType?.takeIf { it != WorkoutBlockType.Standard }?.label?.uppercase() ?: "STANDARD"
                     Text(contextLabel, Modifier.clip(RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.48f)).padding(horizontal = 10.dp, vertical = 5.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
                 }
-                MuscleStrip(exercise?.imageKey, onDarkBackground = true, modifier = Modifier.padding(top = 4.dp))
+                val muscleCount = ExerciseVisualCatalog.metadata(exercise?.imageKey)?.let { it.primary.size + it.secondary.size } ?: 0
+                MuscleStrip(
+                    exercise?.imageKey,
+                    onDarkBackground = true,
+                    modifier = Modifier.padding(top = 4.dp),
+                    wrapContent = muscleCount > 3,
+                )
                 run {
                     val referenceWeight = exercise?.targetWeightKg ?: weightKg
-                    val muscleCount = ExerciseVisualCatalog.metadata(exercise?.imageKey)?.let { it.primary.size + it.secondary.size } ?: 0
-                    Column(Modifier.fillMaxWidth().offset(y = if (muscleCount > 3) 0.dp else (-54).dp), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Column(Modifier.fillMaxWidth().offset(y = (-54).dp), horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         PerformanceContextChip("PR", formatTrainingWeight(if (personalBestWeight > 0.0) personalBestWeight else referenceWeight, useImperial))
                         PerformanceContextChip("ÚLTIMO", formatTrainingWeight(if (lastRecordedWeight > 0.0) lastRecordedWeight else referenceWeight, useImperial))
                     }
