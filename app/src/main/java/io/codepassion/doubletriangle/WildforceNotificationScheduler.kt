@@ -23,6 +23,10 @@ internal object WildforceNotificationScheduler {
     const val CHANNEL_NUTRITION = "nutrition_reminders"
     private const val WORKOUT_ALARM = 7201
     private const val NUTRITION_ALARM = 7202
+    private const val SCHEDULED_WORKOUT_ALARMS = "scheduled_workout_alarm_codes"
+    private const val PROFILE_PREFERENCES = "wildforce_profile"
+    private const val LAST_WORKOUT_STARTED_AT = "last_workout_started_at"
+    private const val LAST_WORKOUT_COMPLETED_AT = "last_workout_completed_at"
 
     fun ensureChannels(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -33,10 +37,35 @@ internal object WildforceNotificationScheduler {
     }
 
     fun scheduleNextWorkout(context: Context, state: WorkoutHubState) {
+        cancelWorkoutReminders(context)
         if (!WorkoutNotificationPreferences.remindersEnabled(context)) return
-        val next = state.workouts.filter { it.status == WorkoutStatus.Planned }.minByOrNull { daysUntil(it.scheduledDay) } ?: return
-        val date = LocalDate.now().plusDays(daysUntil(next.scheduledDay).toLong())
-        schedule(context, WORKOUT_ALARM, date.atTime(LocalTime.of(9, 0)), CHANNEL_WORKOUT, "Entrenamiento pendiente", "Hoy: ${next.title}")
+
+        val reminderTime = preferredWorkoutTime(context)
+        val scheduledAlarmCodes = mutableSetOf<Int>()
+        state.workouts
+            .asSequence()
+            .filter { it.status == WorkoutStatus.Planned }
+            .sortedBy { it.order }
+            .take(7)
+            .forEach { workout ->
+                val date = LocalDate.now().plusDays(daysUntil(workout.scheduledDay).toLong())
+                // Keep the same lead time as iOS: the reminder arrives 30 minutes
+                // before the user's usual workout start time.
+                val reminderAt = date.atTime(reminderTime).minusMinutes(30)
+                if (reminderAt.isAfter(LocalDateTime.now())) {
+                    val requestCode = workoutAlarmCode(workout.id)
+                    schedule(
+                        context = context,
+                        requestCode = requestCode,
+                        dateTime = reminderAt,
+                        channel = CHANNEL_WORKOUT,
+                        title = workoutReminderTitle(context),
+                        body = context.getString(R.string.workout_reminder_body, workout.title),
+                    )
+                    scheduledAlarmCodes.add(requestCode)
+                }
+            }
+        persistScheduledWorkoutAlarmCodes(context, scheduledAlarmCodes)
     }
 
     fun scheduleNutritionReminder(context: Context) {
@@ -46,23 +75,85 @@ internal object WildforceNotificationScheduler {
 
     fun cancelAll(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        listOf(WORKOUT_ALARM, NUTRITION_ALARM).forEach { alarmManager.cancel(pendingIntent(context, it)) }
+        cancelWorkoutReminders(context)
+        alarmManager.cancel(pendingIntent(context, NUTRITION_ALARM))
+    }
+
+    /** Store the start time so future reminders follow the user's actual routine. */
+    fun recordWorkoutStarted(context: Context, startedAtMillis: Long = System.currentTimeMillis()) {
+        context.getSharedPreferences(PROFILE_PREFERENCES, Context.MODE_PRIVATE)
+            .edit()
+            .putLong(LAST_WORKOUT_STARTED_AT, startedAtMillis)
+            .apply()
+    }
+
+    fun recordWorkoutCompleted(context: Context, completedAtMillis: Long = System.currentTimeMillis()) {
+        context.getSharedPreferences(PROFILE_PREFERENCES, Context.MODE_PRIVATE)
+            .edit()
+            .putLong(LAST_WORKOUT_COMPLETED_AT, completedAtMillis)
+            .apply()
     }
 
     private fun schedule(context: Context, requestCode: Int, dateTime: LocalDateTime, channel: String, title: String, body: String) {
         ensureChannels(context)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val triggerAt = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli().coerceAtLeast(System.currentTimeMillis() + 5_000)
-        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent(context, requestCode, channel, title, body))
+        val triggerAt = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val alarmIntent = pendingIntent(context, requestCode, channel, title, body)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, alarmIntent)
+        } else {
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, alarmIntent)
+        }
     }
 
     private fun pendingIntent(context: Context, requestCode: Int, channel: String? = null, title: String? = null, body: String? = null): PendingIntent {
         val intent = Intent(context, WildforceNotificationReceiver::class.java).setAction(ACTION_REMINDER)
             .putExtra("channel", channel).putExtra("title", title).putExtra("body", body)
+            .putExtra("notification_id", requestCode)
         return PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
     private fun daysUntil(day: DayOfWeek): Int = ((day.value - LocalDate.now().dayOfWeek.value) + 7) % 7
+
+    private fun preferredWorkoutTime(context: Context): LocalTime {
+        val preferences = context.getSharedPreferences(PROFILE_PREFERENCES, Context.MODE_PRIVATE)
+        val lastStartedAt = preferences.getLong(LAST_WORKOUT_STARTED_AT, 0L)
+        val lastCompletedAt = preferences.getLong(LAST_WORKOUT_COMPLETED_AT, 0L)
+        val reference = when {
+            lastStartedAt > 0L -> lastStartedAt
+            lastCompletedAt > 0L -> lastCompletedAt - 45 * 60 * 1_000L
+            else -> return LocalTime.of(9, 0)
+        }
+        return java.time.Instant.ofEpochMilli(reference).atZone(ZoneId.systemDefault()).toLocalTime()
+    }
+
+    private fun workoutAlarmCode(workoutId: String): Int = WORKOUT_ALARM + (workoutId.hashCode() and 0x3fffffff)
+
+    private fun scheduledWorkoutAlarmCodes(context: Context): MutableSet<Int> = context
+        .getSharedPreferences(PROFILE_PREFERENCES, Context.MODE_PRIVATE)
+        .getStringSet(SCHEDULED_WORKOUT_ALARMS, emptySet())
+        .orEmpty()
+        .mapNotNull { it.toIntOrNull() }
+        .toMutableSet()
+
+    private fun persistScheduledWorkoutAlarmCodes(context: Context, codes: Set<Int> = scheduledWorkoutAlarmCodes(context)) {
+        context.getSharedPreferences(PROFILE_PREFERENCES, Context.MODE_PRIVATE)
+            .edit()
+            .putStringSet(SCHEDULED_WORKOUT_ALARMS, codes.mapTo(mutableSetOf()) { it.toString() })
+            .apply()
+    }
+
+    private fun cancelWorkoutReminders(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        scheduledWorkoutAlarmCodes(context).forEach { alarmManager.cancel(pendingIntent(context, it)) }
+        // Cancel the legacy single-workout alarm too, so updating the app never
+        // leaves an old 09:00 reminder behind.
+        alarmManager.cancel(pendingIntent(context, WORKOUT_ALARM))
+        persistScheduledWorkoutAlarmCodes(context, emptySet())
+    }
+
+    private fun workoutReminderTitle(context: Context): String =
+        context.resources.getStringArray(R.array.workout_reminder_titles).random()
 }
 
 internal class WildforceNotificationReceiver : BroadcastReceiver() {
@@ -84,8 +175,9 @@ internal class WildforceNotificationReceiver : BroadcastReceiver() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
-        val built = notification.setSmallIcon(android.R.drawable.ic_popup_reminder).setContentTitle(title).setContentText(body)
+        val built = notification.setSmallIcon(R.drawable.ic_wildforce_notification).setContentTitle(title).setContentText(body)
             .setAutoCancel(true).apply { contentIntent?.let(::setContentIntent) }.build()
-        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(channel.hashCode(), built)
+        val notificationId = intent.getIntExtra("notification_id", channel.hashCode())
+        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(notificationId, built)
     }
 }

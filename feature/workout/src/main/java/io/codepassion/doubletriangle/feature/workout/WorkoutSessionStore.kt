@@ -27,6 +27,9 @@ internal data class WorkoutSessionSnapshot(
     val exerciseTimeInitial: Int = 0,
     val exerciseTimerRunning: Boolean = false,
     val addedSetsByExercise: Map<Int, Int> = emptyMap(),
+    val completedDistanceKm: Double = 0.0,
+    val restContext: WorkoutRestContext? = null,
+    val exerciseTimerFinishedWhileAway: Boolean = false,
     val updatedAtMillis: Long = System.currentTimeMillis(),
 ) {
     /** Backward-compatible constructor for snapshots created before the
@@ -60,13 +63,13 @@ internal data class WorkoutSessionSnapshot(
     )
 }
 
-internal object WorkoutSessionStore {
+object WorkoutSessionStore {
     /** Safe no-op fallback when a restored session cannot be serialized. */
     fun saveLegacy() = Unit
     private fun updatedAtFallback(): Long = System.currentTimeMillis()
     private const val PREFERENCES = "wildforce_active_workouts"
 
-    fun load(context: Context, workoutId: String): WorkoutSessionSnapshot? = runCatching {
+    internal fun load(context: Context, workoutId: String): WorkoutSessionSnapshot? = runCatching {
         val raw = context.getSharedPreferences(PREFERENCES, 0).getString(workoutId, null) ?: return null
         val json = JSONObject(raw)
         val completedJson = json.optJSONObject("completed") ?: JSONObject()
@@ -77,7 +80,7 @@ internal object WorkoutSessionStore {
         val stats = buildMap {
             statsJson.keys().forEach { key ->
                 val item = statsJson.getJSONObject(key)
-                put(key.toInt(), ExerciseSessionStats(item.optInt("sets"), item.optInt("reps"), item.optDouble("maxWeightKg"), item.optDouble("volumeKg")))
+                put(key.toInt(), ExerciseSessionStats(item.optInt("sets"), item.optInt("reps"), item.optDouble("maxWeightKg"), item.optDouble("volumeKg"), item.optInt("durationSeconds"), item.optDouble("distanceKm"), item.optDouble("averageWeightKg")))
             }
         }
         val feedbackJson = json.optJSONObject("feedbackByExercise") ?: JSONObject()
@@ -95,6 +98,7 @@ internal object WorkoutSessionStore {
                         item.getInt("exerciseIndex"), item.getInt("setNumber"), item.getInt("reps"),
                         item.getDouble("weightKg"), item.optLong("completedAt", updatedAtFallback()),
                         runCatching { ExerciseSetStyle.valueOf(item.optString("setStyle")) }.getOrDefault(ExerciseSetStyle.Straight),
+                        item.optInt("durationSeconds"), item.optDouble("distanceKm"),
                     ),
                 )
             }
@@ -122,15 +126,29 @@ internal object WorkoutSessionStore {
             exerciseTimeInitial = json.optInt("exerciseTimeInitial"),
             exerciseTimerRunning = exerciseTimerWasRunning && (savedExerciseTime ?: 0) > elapsedWhileAway,
             addedSetsByExercise = addedSets,
+            completedDistanceKm = json.optDouble("completedDistanceKm"),
+            restContext = runCatching { WorkoutRestContext.valueOf(json.optString("restContext")) }.getOrNull()
+                ?: if (json.optBoolean("restBetweenExercises")) WorkoutRestContext.BeforeNextBlock else savedRestRemaining?.let { WorkoutRestContext.BetweenSets },
+            exerciseTimerFinishedWhileAway = exerciseTimerWasRunning && savedExerciseTime != null && savedExerciseTime <= elapsedWhileAway,
             updatedAtMillis = System.currentTimeMillis(),
         )
     }.getOrNull()
 
-    fun save(context: Context, workoutId: String, snapshot: WorkoutSessionSnapshot) {
+    /**
+     * The root navigation owns the compact active-workout accessory. Keep its
+     * contract small so callers outside this feature never need session data.
+     */
+    fun hasActiveSession(context: Context, workoutId: String): Boolean =
+        load(context, workoutId) != null
+
+    fun activeExerciseIndex(context: Context, workoutId: String): Int? =
+        load(context, workoutId)?.exerciseIndex
+
+    internal fun save(context: Context, workoutId: String, snapshot: WorkoutSessionSnapshot) {
         val completed = JSONObject().apply { snapshot.completedByExercise.forEach { (index, sets) -> put(index.toString(), sets) } }
         val stats = JSONObject().apply {
             snapshot.exerciseStats.forEach { (index, value) ->
-                put(index.toString(), JSONObject().put("sets", value.sets).put("reps", value.totalReps).put("maxWeightKg", value.maxWeightKg).put("volumeKg", value.volumeKg))
+                put(index.toString(), JSONObject().put("sets", value.sets).put("reps", value.totalReps).put("maxWeightKg", value.maxWeightKg).put("volumeKg", value.volumeKg).put("durationSeconds", value.durationSeconds).put("distanceKm", value.distanceKm).put("averageWeightKg", value.averageWeightKg))
             }
         }
         val feedback = JSONObject().apply { snapshot.feedbackByExercise.forEach { (index, value) -> put(index.toString(), value) } }
@@ -140,7 +158,7 @@ internal object WorkoutSessionStore {
             snapshot.completedSetRecords.forEach { record ->
                 put(JSONObject().put("exerciseIndex", record.exerciseIndex).put("setNumber", record.setNumber)
                     .put("reps", record.reps).put("weightKg", record.weightKg).put("completedAt", record.completedAtMillis)
-                    .put("setStyle", record.setStyle.name))
+                    .put("setStyle", record.setStyle.name).put("durationSeconds", record.durationSeconds).put("distanceKm", record.distanceKm))
             }
         }
         val json = JSONObject()
@@ -157,6 +175,8 @@ internal object WorkoutSessionStore {
             .put("exerciseTimeInitial", snapshot.exerciseTimeInitial)
             .put("exerciseTimerRunning", snapshot.exerciseTimerRunning)
             .put("addedSetsByExercise", addedSets)
+            .put("completedDistanceKm", snapshot.completedDistanceKm)
+            .put("restContext", snapshot.restContext?.name ?: JSONObject.NULL)
         context.getSharedPreferences(PREFERENCES, 0).edit().putString(workoutId, json.toString()).apply()
     }
 

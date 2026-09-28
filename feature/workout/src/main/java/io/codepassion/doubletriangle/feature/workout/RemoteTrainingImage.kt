@@ -34,7 +34,7 @@ private val memoryCache = object : LruCache<String, Bitmap>(32 * 1024 * 1024) {
 }
 
 @Composable
-internal fun RemoteTrainingImage(
+fun RemoteTrainingImage(
     url: String?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
@@ -55,7 +55,7 @@ internal fun RemoteTrainingImage(
     }
 }
 
-internal fun exerciseImageUrl(imageKey: String?, gender: String): String? =
+fun exerciseImageUrl(imageKey: String?, gender: String): String? =
     imageKey?.takeIf(String::isNotBlank)?.let { "$IMAGE_BASE/vertical/${it}_${gender}.jpeg" }
 
 internal fun exerciseTutorialImageUrl(imageKey: String?): String? =

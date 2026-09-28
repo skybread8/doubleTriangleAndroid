@@ -7,8 +7,12 @@ import java.time.LocalDate
 
 internal data class CompletionProgress(
     val xpBefore: Int,
+    val xpAfterWorkout: Int,
+    val xpAfterPlan: Int,
     val xpAfter: Int,
     val levelBefore: Int,
+    val levelAfterWorkout: Int,
+    val levelAfterPlan: Int,
     val levelAfter: Int,
     val streakAfter: Int,
     val streakIncreased: Boolean,
@@ -32,6 +36,8 @@ internal data class ExerciseRecordEvent(
 
 internal object WorkoutCompletionCalculator {
     const val WORKOUT_XP = 25
+    const val PLAN_XP = 50
+    const val MESOCYCLE_XP = 100
 
     fun score(workout: WorkoutDaySummary, stats: Map<Int, ExerciseSessionStats>, feedback: Map<Int, String>): Double {
         val scoredExercises = workout.exercises.withIndex().filter { it.value.blockType !in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown) }
@@ -40,17 +46,30 @@ internal object WorkoutCompletionCalculator {
         val adherence = scoredExercises.map { (index, exercise) ->
             val result = stats[index] ?: return@map 0.0
             val setScore = ratio(result.sets.toDouble(), exercise.sets.coerceAtLeast(1).toDouble())
-            val targetReps = targetReps(exercise.reps) * exercise.sets.coerceAtLeast(1)
-            val repScore = ratio(result.totalReps.toDouble(), targetReps.toDouble())
-            (setScore + repScore) / 2.0
+            val metricScores = mutableListOf(setScore)
+            val targetDuration = exercise.resolvedTargetDurationSeconds()
+            if (targetDuration != null) {
+                metricScores += ratio(result.durationSeconds.toDouble(), (targetDuration * exercise.sets.coerceAtLeast(1)).toDouble())
+            } else {
+                val prescribedRepetitions = exercise.targetRepsPerSet?.sum()
+                    ?: targetReps(exercise.reps) * exercise.sets.coerceAtLeast(1)
+                metricScores += ratio(result.totalReps.toDouble(), prescribedRepetitions.toDouble())
+            }
+            exercise.targetDistanceKm?.takeIf { it > 0 }?.let { metricScores += ratio(result.distanceKm, it) }
+            val plannedAverageWeight = exercise.targetWeightsKg?.filter { it > 0 }?.takeIf { it.isNotEmpty() }?.average()
+                ?: exercise.targetWeightKg?.takeIf { it > 0 }
+            if (plannedAverageWeight != null && result.averageWeightKg > 0) {
+                metricScores += ratio(result.averageWeightKg, plannedAverageWeight)
+            }
+            metricScores.average()
         }.average()
         val effortValues = feedback.values.map {
             when (it) {
                 "MUY FÁCIL" -> 0.55
                 "FÁCIL" -> 0.70
-                "JUSTO" -> 0.85
+                "JUSTO" -> 1.0
                 "DIFÍCIL" -> 0.94
-                "MUY DIFÍCIL" -> 1.0
+                "MUY DIFÍCIL" -> 0.76
                 "CORRECTO" -> 1.0
                 else -> 0.85
             }
@@ -110,20 +129,49 @@ internal object WorkoutCompletionCalculator {
 object CompletionProgressStore {
     private const val PREFERENCES = "wildforce_completion_progress"
 
-    internal fun preview(context: Context, fallbackStreak: Int): CompletionProgress {
+    internal fun preview(
+        context: Context,
+        fallbackStreak: Int,
+        completesPlan: Boolean = false,
+        completesMesocycle: Boolean = false,
+    ): CompletionProgress {
         val preferences = context.getSharedPreferences(PREFERENCES, 0)
         val xpBefore = preferences.getInt("xp", 0)
         val today = LocalDate.now().toEpochDay()
         val previousDay = preferences.getLong("lastWorkoutDay", Long.MIN_VALUE)
         val storedStreak = preferences.getInt("streak", fallbackStreak)
+        return calculate(xpBefore, storedStreak, previousDay, today, completesPlan, completesMesocycle)
+    }
+
+    internal fun calculate(
+        xpBefore: Int,
+        storedStreak: Int,
+        previousDay: Long,
+        today: Long,
+        completesPlan: Boolean,
+        completesMesocycle: Boolean,
+    ): CompletionProgress {
         val increased = previousDay != today
         val streak = when {
             !increased -> storedStreak
             previousDay == today - 1 -> storedStreak + 1
             else -> 1
         }
-        val xpAfter = xpBefore + WorkoutCompletionCalculator.WORKOUT_XP
-        return CompletionProgress(xpBefore, xpAfter, WorkoutCompletionCalculator.level(xpBefore), WorkoutCompletionCalculator.level(xpAfter), streak, increased)
+        val xpAfterWorkout = xpBefore + WorkoutCompletionCalculator.WORKOUT_XP
+        val xpAfterPlan = xpAfterWorkout + if (completesPlan) WorkoutCompletionCalculator.PLAN_XP else 0
+        val xpAfter = xpAfterPlan + if (completesMesocycle) WorkoutCompletionCalculator.MESOCYCLE_XP else 0
+        return CompletionProgress(
+            xpBefore = xpBefore,
+            xpAfterWorkout = xpAfterWorkout,
+            xpAfterPlan = xpAfterPlan,
+            xpAfter = xpAfter,
+            levelBefore = WorkoutCompletionCalculator.level(xpBefore),
+            levelAfterWorkout = WorkoutCompletionCalculator.level(xpAfterWorkout),
+            levelAfterPlan = WorkoutCompletionCalculator.level(xpAfterPlan),
+            levelAfter = WorkoutCompletionCalculator.level(xpAfter),
+            streakAfter = streak,
+            streakIncreased = increased,
+        )
     }
 
     internal fun commit(context: Context, progress: CompletionProgress) {

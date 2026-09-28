@@ -1,3 +1,30 @@
 <resources>
     <string name="app_name">Wildforce</string>
+    <string name="destination_workout">Entrenamiento</string>
+    <string name="destination_nutrition">Nutrición</string>
+    <string name="destination_analytics">Analíticas</string>
+    <string name="destination_profile">Perfil</string>
+    <string name="preview_new_plan">PREVISUALIZAR NUEVO PLAN</string>
+    <string name="plan_progress">Plan %1$d · Mesociclo %2$d · Semana %3$d/%4$d</string>
+    <string name="plan_preview_workout">• %1$s: %2$s · %3$d ejercicios · %4$d min</string>
+    <string name="use_this_plan">USAR ESTE PLAN</string>
+    <string name="cancel">CANCELAR</string>
+    <string name="coming_soon">%1$s\nPróximamente</string>
+    <string name="creating_next_plan">CREANDO TU SIGUIENTE PLAN</string>
+    <string name="exit_app_title">¿SALIR DE LA APLICACIÓN?</string>
+    <string name="exit_app_message">¿Seguro que quieres salir de Wildforce?</string>
+    <string name="exit">SALIR</string>
+    <string name="workout_reminder_body">Tu entrenamiento «%1$s» empieza en 30 minutos.</string>
+    <string-array name="workout_reminder_titles">
+        <item>¡Hora de darlo todo!</item>
+        <item>¡Suda ahora, brilla después!</item>
+        <item>Tu yo del futuro te lo agradecerá.</item>
+        <item>¡La constancia es la clave!</item>
+        <item>¿Listo para entrenar?</item>
+        <item>¡Vamos a movernos!</item>
+        <item>Haz que hoy cuente.</item>
+        <item>No pares hasta sentirte orgulloso.</item>
+        <item>¡Supera tus límites!</item>
+        <item>Cree en ti.</item>
+    </string-array>
 </resources>

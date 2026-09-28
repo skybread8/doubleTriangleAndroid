@@ -18,9 +18,10 @@ class WorkoutModelsTest {
     }
 
     @Test fun intensiveStylesApplyOnlyToFinalSet() {
-        assertEquals(false, ExerciseSetStyle.DropSet.appliesToSet(2, 3))
-        assertEquals(true, ExerciseSetStyle.DropSet.appliesToSet(3, 3))
-        assertEquals(false, ExerciseSetStyle.RestPause.appliesToSet(1, 4))
+        assertEquals(false, ExerciseSetStyle.DropSet.appliesToSet(2, 3, appliesToFinalSetOnly = true))
+        assertEquals(true, ExerciseSetStyle.DropSet.appliesToSet(3, 3, appliesToFinalSetOnly = true))
+        assertEquals(true, ExerciseSetStyle.RestPause.appliesToSet(1, 4))
+        assertEquals(false, ExerciseSetStyle.RestPause.appliesToSet(1, 4, appliesToFinalSetOnly = true))
         assertEquals(true, ExerciseSetStyle.Tempo.appliesToSet(1, 4))
     }
 
@@ -28,6 +29,17 @@ class WorkoutModelsTest {
         val exercise = ExerciseSummary("Press", sets = 3, reps = "8", restSeconds = 90)
         assertEquals(ExerciseSetStyle.Straight, exercise.setStyle)
         assertEquals(SetStyleParameters(), exercise.setStyleParameters)
+    }
+
+    @Test fun prescriptionsCarryAnExplicitTrackingModeAndRepRange() {
+        val repetitions = ExerciseSummary("Press", sets = 3, reps = "8-10", restSeconds = 90, repRange = RepRange(8, 10))
+        val timed = ExerciseSummary("Plancha", sets = 1, reps = "45 s", restSeconds = 0, targetDurationSeconds = 45)
+        val distance = ExerciseSummary("Carrera", sets = 1, reps = "", restSeconds = 0, targetDurationMinutes = 20, targetDistanceKm = 3.0)
+
+        assertEquals(ExerciseTrackingMode.Repetitions, repetitions.trackingMode)
+        assertEquals("8-10", repetitions.repRange?.displayText)
+        assertEquals(ExerciseTrackingMode.Duration, timed.trackingMode)
+        assertEquals(ExerciseTrackingMode.DurationAndDistance, distance.trackingMode)
     }
 
     @Test fun legacyWorkoutsBecomeAStandardDisplayBlock() {

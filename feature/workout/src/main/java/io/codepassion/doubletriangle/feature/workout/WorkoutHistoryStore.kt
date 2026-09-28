@@ -12,6 +12,9 @@ internal data class ExerciseSessionStats(
     val totalReps: Int = 0,
     val maxWeightKg: Double = 0.0,
     val volumeKg: Double = 0.0,
+    val durationSeconds: Int = 0,
+    val distanceKm: Double = 0.0,
+    val averageWeightKg: Double = 0.0,
 )
 
 internal data class CompletedSetRecord(
@@ -21,6 +24,8 @@ internal data class CompletedSetRecord(
     val weightKg: Double,
     val completedAtMillis: Long = System.currentTimeMillis(),
     val setStyle: ExerciseSetStyle = ExerciseSetStyle.Straight,
+    val durationSeconds: Int = 0,
+    val distanceKm: Double = 0.0,
 )
 
 internal data class SetPerformance(
@@ -28,6 +33,8 @@ internal data class SetPerformance(
     val reps: Int,
     val weightKg: Double,
     val setStyle: ExerciseSetStyle,
+    val durationSeconds: Int = 0,
+    val distanceKm: Double = 0.0,
 )
 
 internal data class ExerciseHistoryEntry(
@@ -39,6 +46,8 @@ internal data class ExerciseHistoryEntry(
     val setDetails: List<SetPerformance> = emptyList(),
     val feedback: String? = null,
     val note: String? = null,
+    val durationSeconds: Int = 0,
+    val distanceKm: Double = 0.0,
 )
 
 data class ExerciseAnalyticsSummary(
@@ -56,6 +65,8 @@ data class ExerciseAnalyticsPoint(
     val maxWeightKg: Double,
     val volumeKg: Double,
     val feedback: String?,
+    val durationSeconds: Int = 0,
+    val distanceKm: Double = 0.0,
 )
 
 internal fun ExerciseSummary.historyKey(): String = imageKey?.takeIf(String::isNotBlank)?.lowercase() ?: name.lowercase()
@@ -82,6 +93,7 @@ object WorkoutHistoryStore {
                                 SetPerformance(
                                     set.getInt("setNumber"), set.getInt("reps"), set.getDouble("weightKg"),
                                     runCatching { ExerciseSetStyle.valueOf(set.optString("setStyle")) }.getOrDefault(ExerciseSetStyle.Straight),
+                                    set.optInt("durationSeconds"), set.optDouble("distanceKm"),
                                 ),
                             )
                         }
@@ -97,6 +109,8 @@ object WorkoutHistoryStore {
                         setDetails = details,
                         feedback = item.optString("feedback").takeIf(String::isNotBlank),
                         note = item.optString("note").takeIf(String::isNotBlank),
+                        durationSeconds = item.optInt("durationSeconds"),
+                        distanceKm = item.optDouble("distanceKm"),
                     ),
                 )
             }
@@ -124,15 +138,18 @@ object WorkoutHistoryStore {
                 totalReps = results.sumOf { it.totalReps },
                 maxWeightKg = results.maxOfOrNull { it.maxWeightKg } ?: 0.0,
                 volumeKg = results.sumOf { it.volumeKg },
+                durationSeconds = results.sumOf { it.durationSeconds },
+                distanceKm = results.sumOf { it.distanceKm },
+                averageWeightKg = results.map { it.averageWeightKg }.filter { it > 0 }.average().takeUnless(Double::isNaN) ?: 0.0,
             )
             val details = completedSets
                 .filter { it.exerciseIndex in exerciseIndices }
                 .sortedWith(compareBy(CompletedSetRecord::exerciseIndex, CompletedSetRecord::setNumber))
-                .mapIndexed { index, set -> SetPerformance(index + 1, set.reps, set.weightKg, set.setStyle) }
+                .mapIndexed { index, set -> SetPerformance(index + 1, set.reps, set.weightKg, set.setStyle, set.durationSeconds, set.distanceKm) }
             val feedback = exerciseIndices.mapNotNull(feedbackByExercise::get).lastOrNull()?.trim()?.uppercase()?.takeIf(String::isNotBlank)
             val note = exerciseIndices.mapNotNull(notesByExercise::get).lastOrNull()?.trim()?.take(500)?.takeIf(String::isNotBlank)
             val entries = listOf(
-                ExerciseHistoryEntry(timestamp, result.sets, result.totalReps, result.maxWeightKg, result.volumeKg, details, feedback, note),
+                ExerciseHistoryEntry(timestamp, result.sets, result.totalReps, result.maxWeightKg, result.volumeKg, details, feedback, note, result.durationSeconds, result.distanceKm),
             ) + history(context, exercise)
             val json = JSONArray().apply {
                 entries.take(MAX_ENTRIES).forEach { entry ->
@@ -140,7 +157,8 @@ object WorkoutHistoryStore {
                         entry.setDetails.forEach { set ->
                             put(
                                 JSONObject().put("setNumber", set.setNumber).put("reps", set.reps)
-                                    .put("weightKg", set.weightKg).put("setStyle", set.setStyle.name),
+                                    .put("weightKg", set.weightKg).put("setStyle", set.setStyle.name)
+                                    .put("durationSeconds", set.durationSeconds).put("distanceKm", set.distanceKm),
                             )
                         }
                     }
@@ -149,7 +167,8 @@ object WorkoutHistoryStore {
                             .put("reps", entry.totalReps).put("maxWeightKg", entry.maxWeightKg).put("volumeKg", entry.volumeKg)
                             .put("setDetails", detailsJson)
                             .put("feedback", entry.feedback ?: JSONObject.NULL)
-                            .put("note", entry.note ?: JSONObject.NULL),
+                            .put("note", entry.note ?: JSONObject.NULL)
+                            .put("durationSeconds", entry.durationSeconds).put("distanceKm", entry.distanceKm),
                     )
                 }
             }
@@ -212,6 +231,15 @@ object WorkoutAnalyticsStore {
 
     fun history(context: Context, exercise: ExerciseSummary): List<ExerciseAnalyticsPoint> =
         WorkoutHistoryStore.history(context, exercise).map {
-            ExerciseAnalyticsPoint(it.timestampMillis, it.sets, it.totalReps, it.maxWeightKg, it.volumeKg, it.feedback)
+            ExerciseAnalyticsPoint(
+                timestampMillis = it.timestampMillis,
+                sets = it.sets,
+                reps = it.totalReps,
+                maxWeightKg = it.maxWeightKg,
+                volumeKg = it.volumeKg,
+                feedback = it.feedback,
+                durationSeconds = it.durationSeconds,
+                distanceKm = it.distanceKm,
+            )
         }
 }

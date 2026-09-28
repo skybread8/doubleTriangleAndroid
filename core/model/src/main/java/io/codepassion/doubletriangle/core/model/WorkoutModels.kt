@@ -6,7 +6,7 @@ data class UserSummary(val name: String, val goal: String, val currentStreak: In
 
 enum class WorkoutMode(val label: String) {
     Plan("Tu plan"),
-    Custom("Entrenamientos personalizados"),
+    Custom("Entrenamiento personalizado"),
 }
 
 enum class WorkoutStatus { Planned, Completed, Skipped }
@@ -55,6 +55,7 @@ data class SetStyleParameters(
     val intraSetRestSeconds: Int = 15,
     val tempo: String = "3-1-1-0",
     val targetRir: Int = 2,
+    val appliesToFinalSetOnly: Boolean = false,
 )
 
 enum class WorkoutBlockType(val label: String) {
@@ -62,6 +63,18 @@ enum class WorkoutBlockType(val label: String) {
     Standard("Bloque principal"),
     Superset("Superserie"),
     Cooldown("Vuelta a la calma"),
+}
+
+/** The unit of work is part of the prescription, never a UI string. */
+enum class ExerciseTrackingMode { Repetitions, Duration, DurationAndDistance }
+
+data class RepRange(val minimum: Int, val maximum: Int) {
+    init {
+        require(minimum > 0)
+        require(maximum >= minimum)
+    }
+
+    val displayText: String get() = if (minimum == maximum) minimum.toString() else "$minimum-$maximum"
 }
 
 data class ExerciseSummary(
@@ -79,10 +92,25 @@ data class ExerciseSummary(
     val isLastInBlock: Boolean = true,
     val restAfterBlockSeconds: Int? = null,
     val targetWeightKg: Double? = null,
+    val targetRepsPerSet: List<Int>? = null,
+    val targetWeightsKg: List<Double>? = null,
+    val targetDurationSeconds: Int? = null,
+    val targetDurationMinutes: Int? = null,
+    val targetDistanceKm: Double? = null,
+    val isPerSideLoad: Boolean = false,
+    val trackingMode: ExerciseTrackingMode = when {
+        targetDistanceKm != null -> ExerciseTrackingMode.DurationAndDistance
+        targetDurationSeconds != null || targetDurationMinutes != null -> ExerciseTrackingMode.Duration
+        else -> ExerciseTrackingMode.Repetitions
+    },
+    val repRange: RepRange? = null,
 )
 
-fun ExerciseSetStyle.appliesToSet(setNumber: Int, totalSets: Int): Boolean =
-    this !in setOf(ExerciseSetStyle.DropSet, ExerciseSetStyle.RestPause) || setNumber == totalSets
+fun ExerciseSetStyle.appliesToSet(setNumber: Int, totalSets: Int, appliesToFinalSetOnly: Boolean = false): Boolean =
+    !appliesToFinalSetOnly || setNumber >= totalSets
+
+fun ExerciseSummary.appliesSetStyle(setNumber: Int): Boolean =
+    setStyle.appliesToSet(setNumber, sets.coerceAtLeast(1), setStyleParameters.appliesToFinalSetOnly)
 
 data class WorkoutBlockSummary(
     val type: WorkoutBlockType,

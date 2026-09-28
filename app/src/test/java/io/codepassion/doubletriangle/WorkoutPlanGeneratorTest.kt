@@ -2,6 +2,7 @@ package io.codepassion.doubletriangle
 
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
 import io.codepassion.doubletriangle.core.model.WorkoutBlockType
+import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -34,5 +35,13 @@ class WorkoutPlanGeneratorTest {
         assertEquals(WorkoutBlockType.Superset, WorkoutPlanGenerator.parseBlockType("SUPERSET"))
         assertEquals(WorkoutBlockType.Cooldown, WorkoutPlanGenerator.parseBlockType("cooldown"))
         assertEquals(WorkoutBlockType.Standard, WorkoutPlanGenerator.parseBlockType("unknown"))
+    }
+
+    @Test
+    fun `parses persisted workout statuses and defaults legacy plans to planned`() {
+        assertEquals(WorkoutStatus.Completed, WorkoutPlanGenerator.parseWorkoutStatus("Completed"))
+        assertEquals(WorkoutStatus.Skipped, WorkoutPlanGenerator.parseWorkoutStatus("Skipped"))
+        assertEquals(WorkoutStatus.Planned, WorkoutPlanGenerator.parseWorkoutStatus("unknown"))
+        assertEquals(WorkoutStatus.Planned, WorkoutPlanGenerator.parseWorkoutStatus(""))
     }
 }

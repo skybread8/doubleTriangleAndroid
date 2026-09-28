@@ -19,20 +19,20 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
-internal enum class MuscleVisual(val label: String, @param:DrawableRes val drawable: Int) {
-    Abs("Abdominales", R.drawable.muscle_group_abs),
-    Back("Espalda", R.drawable.muscle_group_back),
-    Biceps("Bíceps", R.drawable.muscle_group_biceps),
-    Calves("Gemelos", R.drawable.muscle_group_calves),
-    Cardio("Cardio", R.drawable.muscle_group_cardio),
-    Chest("Pecho", R.drawable.muscle_group_chest),
-    Glutes("Glúteos", R.drawable.muscle_group_glutes),
-    Hamstrings("Isquiotibiales", R.drawable.muscle_group_hamstrings),
-    LowerBack("Lumbar", R.drawable.muscle_group_lower_back),
-    Obliques("Oblicuos", R.drawable.muscle_group_obliques),
-    Quads("Cuádriceps", R.drawable.muscle_group_quads),
-    Shoulders("Hombros", R.drawable.muscle_group_shoulders),
-    Triceps("Tríceps", R.drawable.muscle_group_triceps),
+internal enum class MuscleVisual(val iosIdentifier: String, val label: String, @param:DrawableRes val drawable: Int) {
+    Abs("abs", "Abdominales", R.drawable.muscle_group_abs),
+    Back("back", "Espalda", R.drawable.muscle_group_back),
+    Biceps("biceps", "Bíceps", R.drawable.muscle_group_biceps),
+    Calves("calves", "Gemelos", R.drawable.muscle_group_calves),
+    Cardio("cardio", "Cardio", R.drawable.muscle_group_cardio),
+    Chest("chest", "Pecho", R.drawable.muscle_group_chest),
+    Glutes("glutes", "Glúteos", R.drawable.muscle_group_glutes),
+    Hamstrings("hamstrings", "Isquiotibiales", R.drawable.muscle_group_hamstrings),
+    LowerBack("lowerBack", "Lumbar", R.drawable.muscle_group_lower_back),
+    Obliques("obliques", "Oblicuos", R.drawable.muscle_group_obliques),
+    Quads("quads", "Cuádriceps", R.drawable.muscle_group_quads),
+    Shoulders("shoulders", "Hombros", R.drawable.muscle_group_shoulders),
+    Triceps("triceps", "Tríceps", R.drawable.muscle_group_triceps),
 }
 
 internal data class ExerciseVisualMetadata(
@@ -40,7 +40,17 @@ internal data class ExerciseVisualMetadata(
     val secondary: List<MuscleVisual> = emptyList(),
 )
 
-internal object ExerciseVisualCatalog {
+internal enum class EquipmentVisual(val label: String, @param:DrawableRes val drawable: Int) {
+    Bodyweight("Peso corporal", R.drawable.equipment_bodyweight),
+    Dumbbells("Mancuernas", R.drawable.equipment_dumbbells),
+    AdjustableBench("Banco ajustable", R.drawable.equipment_adjustable_bench),
+    CableMachine("Máquina de poleas", R.drawable.equipment_cable_machine),
+    OlympicBarbell("Barra y discos", R.drawable.equipment_olympic_barbell),
+    PullUpBar("Barra de dominadas", R.drawable.equipment_pull_up_bar),
+    LegPressMachine("Prensa de piernas", R.drawable.equipment_leg_press_machine),
+}
+
+object ExerciseVisualCatalog {
     private val definitions = mapOf(
         "airSquat" to ExerciseVisualMetadata(listOf(MuscleVisual.Quads), listOf(MuscleVisual.Hamstrings, MuscleVisual.Glutes)),
         "gobletSquat" to ExerciseVisualMetadata(listOf(MuscleVisual.Quads), listOf(MuscleVisual.Glutes, MuscleVisual.Abs)),
@@ -69,9 +79,17 @@ internal object ExerciseVisualCatalog {
         "mountainClimber" to ExerciseVisualMetadata(listOf(MuscleVisual.Cardio), listOf(MuscleVisual.Abs, MuscleVisual.Shoulders)),
     )
 
-    fun metadata(imageKey: String?): ExerciseVisualMetadata? = imageKey?.let { key ->
+    internal fun metadata(imageKey: String?): ExerciseVisualMetadata? = imageKey?.let { key ->
         definitions[key] ?: definitions.entries.firstOrNull { it.key.equals(key, ignoreCase = true) }?.value
     }
+
+    fun primaryMuscleLabels(imageKey: String?): List<String> = metadata(imageKey)?.primary?.map(MuscleVisual::label).orEmpty()
+
+    /** Matches iOS: choose the alphabetically first primary `MuscleGroup.rawValue`. */
+    fun primaryMuscleDrawable(imageKey: String?): Int? = metadata(imageKey)
+        ?.primary
+        ?.minByOrNull(MuscleVisual::iosIdentifier)
+        ?.drawable
 
     fun equipmentFor(imageKey: String?): List<String> = when (imageKey?.trim()) {
         "benchPress", "inclineBenchPress", "chestDip" -> listOf("Banco ajustable")
@@ -79,7 +97,19 @@ internal object ExerciseVisualCatalog {
         "barbellBackSquat", "deadlift", "romanianDeadlift", "bentOverRow" -> listOf("Barra y discos")
         "gobletSquat", "overheadPress", "lateralRaise", "bicepsCurl", "hammerCurl" -> listOf("Mancuernas")
         "pullUp" -> listOf("Barra de dominadas")
+        "legPress" -> listOf("Prensa de piernas")
         else -> listOf("Peso corporal")
+    }
+
+    /** Uses the same equipment illustrations as iOS's WorkoutEquipmentScroll. */
+    internal fun equipmentVisualsFor(imageKey: String?): List<EquipmentVisual> = when (imageKey?.trim()) {
+        "benchPress", "inclineBenchPress", "chestDip" -> listOf(EquipmentVisual.AdjustableBench)
+        "latPulldown", "seatedCableRow", "facePull", "tricepsPushdown" -> listOf(EquipmentVisual.CableMachine)
+        "barbellBackSquat", "deadlift", "romanianDeadlift", "bentOverRow" -> listOf(EquipmentVisual.OlympicBarbell)
+        "gobletSquat", "overheadPress", "lateralRaise", "bicepsCurl", "hammerCurl" -> listOf(EquipmentVisual.Dumbbells)
+        "pullUp" -> listOf(EquipmentVisual.PullUpBar)
+        "legPress" -> listOf(EquipmentVisual.LegPressMachine)
+        else -> listOf(EquipmentVisual.Bodyweight)
     }
 }
 

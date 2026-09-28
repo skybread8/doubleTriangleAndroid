@@ -18,8 +18,22 @@ internal class WorkoutPlanStateStore(
         preferences.edit().putString(CURRENT_PLAN_KEY, rawJson).apply()
     }
 
+    /**
+     * Stores the training-profile snapshot used to create the current plan.  It is
+     * deliberately kept outside the AI response so plans saved before this field
+     * existed remain valid rather than suddenly asking users to recreate them.
+     */
+    fun saveProfileSignature(signature: String) {
+        preferences.edit().putString(PROFILE_SIGNATURE_KEY, signature).apply()
+    }
+
+    fun requiresRegeneration(currentProfileSignature: String): Boolean {
+        val savedSignature = preferences.getString(PROFILE_SIGNATURE_KEY, null)
+        return currentPlanJson() != null && savedSignature != null && savedSignature != currentProfileSignature
+    }
+
     fun clearCurrentPlan() {
-        preferences.edit().remove(CURRENT_PLAN_KEY).apply()
+        preferences.edit().remove(CURRENT_PLAN_KEY).remove(PROFILE_SIGNATURE_KEY).apply()
     }
 
     fun replaceCurrentPlan(rawJson: String) {
@@ -31,5 +45,6 @@ internal class WorkoutPlanStateStore(
 
     private companion object {
         const val CURRENT_PLAN_KEY = "workout_plan_json"
+        const val PROFILE_SIGNATURE_KEY = "workout_plan_profile_signature"
     }
 }

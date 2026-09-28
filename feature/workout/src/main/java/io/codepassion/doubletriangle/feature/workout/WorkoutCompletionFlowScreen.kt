@@ -1,5 +1,13 @@
 package io.codepassion.doubletriangle.feature.workout
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -43,6 +51,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -53,7 +64,24 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import kotlinx.coroutines.delay
 
-private enum class CompletionPhase { DurationWarning, Records, Summary, Score, Streak, Xp, LevelUp, PlanComplete }
+private enum class CompletionPhase {
+    DurationWarning,
+    Records,
+    Summary,
+    Score,
+    Streak,
+    WorkoutXp,
+    WorkoutLevelUp,
+    PlanComplete,
+    MesocycleComplete,
+    PlanXp,
+    PlanLevelUp,
+    MesocycleXp,
+    MesocycleLevelUp,
+    NotificationRequest,
+    RateApp,
+    PlanGenerator,
+}
 
 @Composable
 internal fun WorkoutCompletionFlowScreen(
@@ -64,6 +92,7 @@ internal fun WorkoutCompletionFlowScreen(
     records: List<ExerciseRecordEvent>,
     progress: CompletionProgress,
     isPlanCompleted: Boolean = false,
+    isMesocycleCompleted: Boolean = false,
     planName: String = "",
     completedPlanWorkouts: Int = 0,
     totalPlanWorkouts: Int = 0,
@@ -73,22 +102,53 @@ internal fun WorkoutCompletionFlowScreen(
     onDone: () -> Unit,
     onGenerateNextPlan: () -> Unit = {},
 ) {
+    val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
     val firstRegularPhase = if (records.isEmpty()) CompletionPhase.Summary else CompletionPhase.Records
     var phase by remember(workout.id) {
         mutableStateOf(
             if (durationSeconds < workout.estimatedMinutes * 60 / 4) CompletionPhase.DurationWarning else firstRegularPhase,
         )
     }
+    LaunchedEffect(phase) {
+        if (phase in setOf(CompletionPhase.WorkoutLevelUp, CompletionPhase.PlanComplete, CompletionPhase.MesocycleComplete, CompletionPhase.PlanLevelUp, CompletionPhase.MesocycleLevelUp)) {
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        }
+    }
     val score = remember(workout.id, stats, feedback) { WorkoutCompletionCalculator.score(workout, stats, feedback) }
     val mainExercises = remember(workout) { workout.pathBlocks().mainExercises() }
     val completedSets = stats.mapValues { it.value.sets }
     val completedMainExercises = mainExercises.count { it.isCompleted(workout, completedSets) }
-    fun continueAfterXp() {
+    fun finishOrGenerate() {
         when {
-            progress.levelAfter > progress.levelBefore -> phase = CompletionPhase.LevelUp
-            isPlanCompleted -> phase = CompletionPhase.PlanComplete
+            shouldShowNotificationEducation(context) -> phase = CompletionPhase.NotificationRequest
+            progress.streakAfter > 0 && progress.streakAfter % 2 == 0 && !hasRatedApp(context) -> phase = CompletionPhase.RateApp
+            isPlanCompleted -> phase = CompletionPhase.PlanGenerator
             else -> onDone()
         }
+    }
+    fun continueAfterNotificationEducation() {
+        phase = if (progress.streakAfter > 0 && progress.streakAfter % 2 == 0 && !hasRatedApp(context)) {
+            CompletionPhase.RateApp
+        } else if (isPlanCompleted) {
+            CompletionPhase.PlanGenerator
+        } else {
+            onDone()
+            return
+        }
+    }
+    fun continueAfterWorkout() {
+        if (isPlanCompleted) phase = CompletionPhase.PlanComplete else onDone()
+    }
+    fun continueAfterPlanXp() {
+        when {
+            progress.levelAfterPlan > progress.levelAfterWorkout -> phase = CompletionPhase.PlanLevelUp
+            isMesocycleCompleted -> phase = CompletionPhase.MesocycleXp
+            else -> finishOrGenerate()
+        }
+    }
+    fun continueAfterMesocycleXp() {
+        if (progress.levelAfter > progress.levelAfterPlan) phase = CompletionPhase.MesocycleLevelUp else finishOrGenerate()
     }
     // iOS presents the finish flow as a sequence of soft, progressive transitions.
     // Keep the phase state machine intact, but animate each screen change so the
@@ -98,11 +158,27 @@ internal fun WorkoutCompletionFlowScreen(
             CompletionPhase.DurationWarning -> DurationWarning(onCancelWorkout) { phase = firstRegularPhase }
             CompletionPhase.Records -> RecordsCelebration(records) { phase = CompletionPhase.Summary }
             CompletionPhase.Summary -> CompletionSummary(workout, durationSeconds, stats, completedMainExercises, useImperial) { phase = CompletionPhase.Score }
-            CompletionPhase.Score -> ScoreCelebration(score, completedMainExercises, mainExercises.size, dominantFeedback(feedback)) { phase = if (progress.streakIncreased) CompletionPhase.Streak else CompletionPhase.Xp }
-            CompletionPhase.Streak -> StreakCelebration(progress.streakAfter) { phase = CompletionPhase.Xp }
-            CompletionPhase.Xp -> XpCelebration(progress) { continueAfterXp() }
-            CompletionPhase.LevelUp -> LevelUpCelebration(progress.levelAfter) { if (isPlanCompleted) phase = CompletionPhase.PlanComplete else onDone() }
-            CompletionPhase.PlanComplete -> PlanCompletedCelebration(planName.ifBlank { workout.title }, completedPlanWorkouts, totalPlanWorkouts, totalPlanExercises, onDone, onGenerateNextPlan)
+            CompletionPhase.Score -> ScoreCelebration(score, completedMainExercises, mainExercises.size, dominantFeedback(feedback)) { phase = if (progress.streakIncreased) CompletionPhase.Streak else CompletionPhase.WorkoutXp }
+            CompletionPhase.Streak -> StreakCelebration(progress.streakAfter) { phase = CompletionPhase.WorkoutXp }
+            CompletionPhase.WorkoutXp -> XpCelebration(progress.xpBefore, progress.xpAfterWorkout, progress.levelBefore, "ENTRENAMIENTO COMPLETADO") {
+                if (progress.levelAfterWorkout > progress.levelBefore) phase = CompletionPhase.WorkoutLevelUp else continueAfterWorkout()
+            }
+            CompletionPhase.WorkoutLevelUp -> LevelUpCelebration(progress.levelAfterWorkout) { continueAfterWorkout() }
+            CompletionPhase.PlanComplete -> PlanCompletedCelebration(planName.ifBlank { workout.title }, completedPlanWorkouts, totalPlanWorkouts, totalPlanExercises) {
+                phase = if (isMesocycleCompleted) CompletionPhase.MesocycleComplete else CompletionPhase.PlanXp
+            }
+            CompletionPhase.MesocycleComplete -> MesocycleCompletedCelebration { phase = CompletionPhase.PlanXp }
+            CompletionPhase.PlanXp -> XpCelebration(progress.xpAfterWorkout, progress.xpAfterPlan, progress.levelAfterWorkout, "PLAN COMPLETADO") { continueAfterPlanXp() }
+            CompletionPhase.PlanLevelUp -> LevelUpCelebration(progress.levelAfterPlan) {
+                if (isMesocycleCompleted) phase = CompletionPhase.MesocycleXp else finishOrGenerate()
+            }
+            CompletionPhase.MesocycleXp -> XpCelebration(progress.xpAfterPlan, progress.xpAfter, progress.levelAfterPlan, "MESOCICLO COMPLETADO") { continueAfterMesocycleXp() }
+            CompletionPhase.MesocycleLevelUp -> LevelUpCelebration(progress.levelAfter) { finishOrGenerate() }
+            CompletionPhase.NotificationRequest -> NotificationEducationCelebration(context) { continueAfterNotificationEducation() }
+            CompletionPhase.RateApp -> RateAppCelebration(context) {
+                if (isPlanCompleted) phase = CompletionPhase.PlanGenerator else onDone()
+            }
+            CompletionPhase.PlanGenerator -> PlanGeneratorCelebration(onDone, onGenerateNextPlan)
         }
     }
 }
@@ -239,25 +315,26 @@ private fun StreakCelebration(streak: Int, onContinue: () -> Unit) = Celebration
 }
 
 @Composable
-private fun XpCelebration(progress: CompletionProgress, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+private fun XpCelebration(xpBefore: Int, xpAfter: Int, levelBefore: Int, gainedLabel: String, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
     var revealXp by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { revealXp = true }
     Spacer(Modifier.weight(1f))
     Text("⚡", style = MaterialTheme.typography.h1)
     Text("XP TOTAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
-    val displayedXp by animateIntAsState(if (revealXp) progress.xpAfter else progress.xpBefore, animationSpec = tween(850, delayMillis = 140))
+    Text(gainedLabel, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+    val displayedXp by animateIntAsState(if (revealXp) xpAfter else xpBefore, animationSpec = tween(850, delayMillis = 140))
     Text(displayedXp.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
-    Text("Nivel ${progress.levelBefore}", color = WildforceThemeTokens.textSecondary)
-    val levelStart = WorkoutCompletionCalculator.minimumXp(progress.levelBefore)
-    val levelEnd = WorkoutCompletionCalculator.minimumXp(progress.levelBefore + 1)
-    val xpBeforeProgress = ((progress.xpBefore - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f)
-    val xpAfterProgress = ((progress.xpAfter - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f)
+    Text("Nivel $levelBefore", color = WildforceThemeTokens.textSecondary)
+    val levelStart = WorkoutCompletionCalculator.minimumXp(levelBefore)
+    val levelEnd = WorkoutCompletionCalculator.minimumXp(levelBefore + 1)
+    val xpBeforeProgress = ((xpBefore - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f)
+    val xpAfterProgress = ((xpAfter - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f)
     val animatedXpProgress by animateFloatAsState(if (revealXp) xpAfterProgress else xpBeforeProgress, animationSpec = tween(950, delayMillis = 150))
     RoundedCompletionProgress(animatedXpProgress, Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(14.dp))
     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-        Text("${progress.xpBefore} XP", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Text("$xpBefore XP", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Spacer(Modifier.weight(1f))
-        Text("+${progress.xpAfter - progress.xpBefore} XP", color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+        Text("+${xpAfter - xpBefore} XP", color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
     }
     Spacer(Modifier.weight(1f))
 }
@@ -276,7 +353,7 @@ private fun LevelUpCelebration(level: Int, onContinue: () -> Unit) = Celebration
 }
 
 @Composable
-private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, totalWorkouts: Int, totalExercises: Int, onContinue: () -> Unit, onGenerateNextPlan: () -> Unit) = CelebrationFrame("TERMINAR", onContinue, secondaryLabel = "GENERAR SIGUIENTE PLAN", onSecondary = onGenerateNextPlan) {
+private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, totalWorkouts: Int, totalExercises: Int, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
     Spacer(Modifier.weight(1f))
     Text("🏆", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
     Text("PLAN COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
@@ -289,6 +366,73 @@ private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, t
     val animatedRatio by animateFloatAsState(completionRatio, animationSpec = tween(800, delayMillis = 180))
     RoundedCompletionProgress(animatedRatio, Modifier.fillMaxWidth().padding(top = 18.dp).height(10.dp))
     Text("Ya no quedan sesiones pendientes en este plan.", Modifier.padding(top = 18.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Spacer(Modifier.weight(1f))
+}
+
+@Composable
+private fun MesocycleCompletedCelebration(onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    Spacer(Modifier.weight(1f))
+    Text("◆", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
+    Text("MESOCICLO COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text("Has completado todas las semanas del ciclo. Tu progresión está lista para el siguiente bloque.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Spacer(Modifier.weight(1f))
+}
+
+@Composable
+private fun PlanGeneratorCelebration(onDone: () -> Unit, onGenerateNextPlan: () -> Unit) = CelebrationFrame(
+    buttonLabel = "GENERAR SIGUIENTE PLAN",
+    onContinue = onGenerateNextPlan,
+    secondaryLabel = "TERMINAR",
+    onSecondary = onDone,
+) {
+    Spacer(Modifier.weight(1f))
+    Text("＋", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
+    Text("SIGUIENTE PLAN", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text("Genera la siguiente semana manteniendo tu progresión, historial y feedback.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Spacer(Modifier.weight(1f))
+}
+
+@Composable
+private fun NotificationEducationCelebration(context: Context, onContinue: () -> Unit) = CelebrationFrame(
+    buttonLabel = "ACTIVAR RECORDATORIOS",
+    onContinue = {
+        WorkoutNotificationPreferences.markCompletionEducationSeen(context)
+        if (Build.VERSION.SDK_INT >= 33 && context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            context.findActivity()?.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 7204)
+        }
+        onContinue()
+    },
+    secondaryLabel = "QUIZÁ MÁS TARDE",
+    onSecondary = {
+        WorkoutNotificationPreferences.markCompletionEducationSeen(context)
+        onContinue()
+    },
+) {
+    Spacer(Modifier.weight(1f))
+    Text("🔔", style = MaterialTheme.typography.h1)
+    Text("MANTÉN LA CONSTANCIA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text("Activa recordatorios antes de tus entrenamientos y avisos cuando termine un descanso.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Spacer(Modifier.weight(1f))
+}
+
+@Composable
+private fun RateAppCelebration(context: Context, onContinue: () -> Unit) = CelebrationFrame(
+    buttonLabel = "VALORAR LA APP",
+    onContinue = {
+        markAppRated(context)
+        val packageName = context.packageName
+        val marketIntent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName"))
+        val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$packageName"))
+        runCatching { context.startActivity(marketIntent) }.recoverCatching { context.startActivity(webIntent) }
+        onContinue()
+    },
+    secondaryLabel = "QUIZÁ MÁS TARDE",
+    onSecondary = onContinue,
+) {
+    Spacer(Modifier.weight(1f))
+    Text("♥", style = MaterialTheme.typography.h1, color = Color(0xFFE53935))
+    Text("¿TE GUSTA TU PROGRESO?", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text("Si disfrutas Double Triangle, dedica un momento a valorarla en Google Play.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
 
@@ -342,3 +486,21 @@ private fun RoundedCompletionProgress(progress: Float, modifier: Modifier) {
 
 private fun dominantFeedback(feedback: Map<Int, String>): String = feedback.values.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: "SIN DATOS"
 private fun formatCompletionClock(seconds: Int): String = if (seconds >= 3600) "%d:%02d:%02d".format(seconds / 3600, seconds / 60 % 60, seconds % 60) else "%d:%02d".format(seconds / 60, seconds % 60)
+
+private fun shouldShowNotificationEducation(context: Context): Boolean =
+    !WorkoutNotificationPreferences.completionEducationSeen(context) &&
+        Build.VERSION.SDK_INT >= 33 &&
+        context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+
+private fun hasRatedApp(context: Context): Boolean =
+    context.getSharedPreferences("wildforce_completion_prompts", 0).getBoolean("has_rated_app", false)
+
+private fun markAppRated(context: Context) {
+    context.getSharedPreferences("wildforce_completion_prompts", 0).edit().putBoolean("has_rated_app", true).apply()
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}

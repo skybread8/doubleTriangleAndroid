@@ -17,8 +17,19 @@ internal object WorkoutNotificationActionStore {
         return preferences.getString("action", null)?.let { it to preferences.getLong("timestamp", 0L) }
     }
     fun clear(context: Context) {
-        context.getSharedPreferences(PREFS, 0).edit().remove("action").remove("timestamp").apply()
+        context.getSharedPreferences(PREFS, 0).edit()
+            .remove("action")
+            .remove("timestamp")
+            .remove("handledTimestamp")
+            .apply()
     }
+
+    fun markHandled(context: Context, timestamp: Long) {
+        context.getSharedPreferences(PREFS, 0).edit().putLong("handledTimestamp", timestamp).apply()
+    }
+
+    fun wasHandled(context: Context, timestamp: Long): Boolean =
+        context.getSharedPreferences(PREFS, 0).getLong("handledTimestamp", -1L) == timestamp
 }
 
 internal class WorkoutNotificationActionReceiver : BroadcastReceiver() {

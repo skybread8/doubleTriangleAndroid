@@ -3,6 +3,8 @@ package io.codepassion.doubletriangle.feature.workout
 import android.content.Context
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
+import io.codepassion.doubletriangle.core.model.ExerciseTrackingMode
+import io.codepassion.doubletriangle.core.model.RepRange
 import io.codepassion.doubletriangle.core.model.SetStyleParameters
 import io.codepassion.doubletriangle.core.model.WorkoutBlockSummary
 import io.codepassion.doubletriangle.core.model.WorkoutBlockType
@@ -59,16 +61,24 @@ object CustomWorkoutStore {
         scheduledDay = day, estimatedMinutes = 0, status = WorkoutStatus.Planned,
     )
 
-    fun automatic(day: DayOfWeek): WorkoutDaySummary = empty(day).copy(
-        title = "Full body personalizado", estimatedMinutes = 45,
-        exercises = listOf(
+    fun automatic(day: DayOfWeek, request: CustomWorkoutRequest = CustomWorkoutRequest("Full body", 45, "Peso corporal")): WorkoutDaySummary {
+        val main = listOf(
             ExerciseSummary("Sentadilla goblet", "gobletSquat", 3, "10-12", 90),
             ExerciseSummary("Press de banca", "benchPress", 3, "8-10", 90),
             ExerciseSummary("Remo con barra", "bentOverRow", 3, "10", 75),
             ExerciseSummary("Peso muerto rumano", "romanianDeadlift", 3, "8-10", 90),
-            ExerciseSummary("Plancha", "plank", 3, "45 s", 60),
-        ),
-    )
+            ExerciseSummary("Plancha", "plank", 3, "45 s", 60, targetDurationSeconds = 45),
+        )
+        val blocks = buildList {
+            if (request.includeWarmup) add(WorkoutBlockSummary(WorkoutBlockType.Warmup, exercises = listOf(ExerciseSummary("Movilidad articular", "catCow", 1, "5 min", 0, ExerciseSetStyle.Warmup, targetDurationMinutes = 5))))
+            addAll(main.map { WorkoutBlockSummary(WorkoutBlockType.Standard, exercises = listOf(it)) })
+            if (request.includeCooldown) add(WorkoutBlockSummary(WorkoutBlockType.Cooldown, exercises = listOf(ExerciseSummary("Vuelta a la calma", "thoracicRotation", 1, "5 min", 0, ExerciseSetStyle.Warmup, targetDurationMinutes = 5))))
+        }
+        return empty(day).copy(
+            title = "${request.focus} personalizado", focus = request.focus, estimatedMinutes = request.durationMinutes,
+            blocks = blocks, exercises = blocks.executionExercises(),
+        )
+    }
 
     fun estimateMinutes(exercises: List<ExerciseSummary>): Int = exercises.sumOf { exercise ->
         exercise.sets.coerceAtLeast(1) * (45 + exercise.restSeconds.coerceAtLeast(0))
@@ -139,7 +149,23 @@ object CustomWorkoutStore {
                         backoffSetCount = parameters.optInt("backoffSetCount", 3), backoffWeightPercent = parameters.optInt("backoffWeightPercent", 15),
                         intraSetRestSeconds = parameters.optInt("intraSetRestSeconds", 15), tempo = parameters.optString("tempo", "3-1-1-0"),
                         targetRir = parameters.optInt("targetRir", 2),
+                        appliesToFinalSetOnly = parameters.optBoolean("appliesToFinalSetOnly", false),
                     ),
+                    targetWeightKg = exercise.optDoubleOrNull("targetWeightKg"),
+                    targetRepsPerSet = exercise.optIntList("targetRepsPerSet"),
+                    targetWeightsKg = exercise.optDoubleList("targetWeightsKg"),
+                    targetDurationSeconds = exercise.optIntOrNull("targetDurationSeconds"),
+                    targetDurationMinutes = exercise.optIntOrNull("targetDurationMinutes"),
+                    targetDistanceKm = exercise.optDoubleOrNull("targetDistanceKm"),
+                    isPerSideLoad = exercise.optBoolean("isPerSideLoad", false),
+                    trackingMode = runCatching { ExerciseTrackingMode.valueOf(exercise.optString("trackingMode")) }.getOrElse {
+                        when {
+                            exercise.optDoubleOrNull("targetDistanceKm") != null -> ExerciseTrackingMode.DurationAndDistance
+                            exercise.optIntOrNull("targetDurationSeconds") != null || exercise.optIntOrNull("targetDurationMinutes") != null -> ExerciseTrackingMode.Duration
+                            else -> ExerciseTrackingMode.Repetitions
+                        }
+                    },
+                    repRange = exercise.optIntOrNull("repsMin")?.let { minimum -> RepRange(minimum, (exercise.optIntOrNull("repsMax") ?: minimum).coerceAtLeast(minimum)) },
                 ),
             )
         }
@@ -150,14 +176,87 @@ object CustomWorkoutStore {
             .put("dropCount", exercise.setStyleParameters.dropCount).put("dropWeightPercent", exercise.setStyleParameters.dropWeightPercent)
             .put("backoffSetCount", exercise.setStyleParameters.backoffSetCount).put("backoffWeightPercent", exercise.setStyleParameters.backoffWeightPercent)
             .put("intraSetRestSeconds", exercise.setStyleParameters.intraSetRestSeconds).put("tempo", exercise.setStyleParameters.tempo)
-            .put("targetRir", exercise.setStyleParameters.targetRir)
+            .put("targetRir", exercise.setStyleParameters.targetRir).put("appliesToFinalSetOnly", exercise.setStyleParameters.appliesToFinalSetOnly)
         return JSONObject().put("name", exercise.name).put("imageKey", exercise.imageKey ?: "").put("sets", exercise.sets)
             .put("reps", exercise.reps).put("restSeconds", exercise.restSeconds).put("setStyle", exercise.setStyle.name)
             .put("setStyleParameters", parameters)
+            .put("targetWeightKg", exercise.targetWeightKg)
+            .put("targetRepsPerSet", JSONArray(exercise.targetRepsPerSet.orEmpty()))
+            .put("targetWeightsKg", JSONArray(exercise.targetWeightsKg.orEmpty()))
+            .put("targetDurationSeconds", exercise.targetDurationSeconds)
+            .put("targetDurationMinutes", exercise.targetDurationMinutes)
+            .put("targetDistanceKm", exercise.targetDistanceKm)
+            .put("isPerSideLoad", exercise.isPerSideLoad)
+            .put("trackingMode", exercise.trackingMode.name)
+            .put("repsMin", exercise.repRange?.minimum)
+            .put("repsMax", exercise.repRange?.maximum)
     }
 }
 
+private fun JSONObject.optIntOrNull(name: String): Int? = takeIf { has(name) && !isNull(name) }?.optInt(name)
+private fun JSONObject.optDoubleOrNull(name: String): Double? = takeIf { has(name) && !isNull(name) }?.optDouble(name)
+private fun JSONObject.optIntList(name: String): List<Int>? = optJSONArray(name)?.let { array -> List(array.length()) { array.optInt(it) } }
+private fun JSONObject.optDoubleList(name: String): List<Double>? = optJSONArray(name)?.let { array -> List(array.length()) { array.optDouble(it) } }
+
 internal data class ExerciseChoice(val name: String, val imageKey: String)
+
+/**
+ * Keeps the replacement picker useful when the plan was generated with a
+ * different variation of the same movement.  The catalog does not carry a
+ * full exercise taxonomy, so these are deliberately broad movement families
+ * rather than equipment-specific labels.
+ */
+internal fun rankExerciseReplacements(
+    catalog: List<ExerciseChoice>,
+    replacing: ExerciseSummary,
+): List<ExerciseChoice> {
+    val replacingKey = replacing.imageKey?.trim()?.lowercase()
+    val replacingName = replacementTokens(replacing.name)
+    val replacingPattern = exercisePattern(replacing.imageKey, replacing.name)
+
+    return catalog
+        .asSequence()
+        // Re-selecting the plan exercise is not a substitution.
+        .filterNot { choice ->
+            choice.imageKey.lowercase() == replacingKey ||
+                replacementTokens(choice.name) == replacingName
+        }
+        .sortedWith(
+            compareByDescending<ExerciseChoice> { choice ->
+                val patternScore = if (exercisePattern(choice.imageKey, choice.name) == replacingPattern) 1_000 else 0
+                val keyScore = sharedReplacementTokens(choice.imageKey, replacing.imageKey) * 40
+                val nameScore = sharedReplacementTokens(choice.name, replacing.name) * 10
+                patternScore + keyScore + nameScore
+            }.thenBy { it.name },
+        )
+        .toList()
+}
+
+private fun exercisePattern(imageKey: String?, name: String): String? {
+    val text = "${imageKey.orEmpty()} $name".lowercase()
+    return when {
+        text.containsAny("squat", "sentadilla", "legpress", "leg press", "lunge", "zancada") -> "squat"
+        text.containsAny("deadlift", "peso muerto") -> "hinge"
+        text.containsAny("benchpress", "bench press", "inclinebench", "press de banca", "flexion", "pushup") -> "horizontal-push"
+        text.containsAny("overheadpress", "overhead press", "press militar", "lateralraise", "lateral raise") -> "vertical-push"
+        text.containsAny("chestdip", "chest dip", "fondos", "triceps", "tríceps") -> "triceps"
+        text.containsAny("pullup", "pull up", "dominada", "latpulldown", "lat pulldown", "jalon", "jalón") -> "vertical-pull"
+        text.containsAny("row", "remo", "facepull", "face pull") -> "horizontal-pull"
+        text.containsAny("curl", "bíceps", "biceps") -> "biceps"
+        text.containsAny("plank", "plancha", "deadbug", "dead bug", "mountainclimber", "mountain climber") -> "core"
+        else -> null
+    }
+}
+
+private fun String.containsAny(vararg values: String): Boolean = values.any(::contains)
+
+private fun replacementTokens(value: String): Set<String> =
+    value.lowercase().split(Regex("[^a-záéíóúüñ0-9]+"))
+        .filter { it.length > 2 }
+        .toSet()
+
+private fun sharedReplacementTokens(first: String?, second: String?): Int =
+    replacementTokens(first.orEmpty()).intersect(replacementTokens(second.orEmpty())).size
 
 internal object CustomExerciseCatalog {
     private val spanishNames = mapOf(

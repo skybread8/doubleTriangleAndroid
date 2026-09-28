@@ -85,8 +85,8 @@ internal fun WorkoutPathScreen(
                         style = MaterialTheme.typography.caption,
                         fontWeight = FontWeight.Bold,
                         color = when (block.type) {
-                            WorkoutBlockType.Warmup -> Color(0xFFF08A24)
-                            WorkoutBlockType.Cooldown -> Color(0xFF4A8FE7)
+                            WorkoutBlockType.Warmup -> WildforceThemeTokens.warmupAccent
+                            WorkoutBlockType.Cooldown -> WildforceThemeTokens.cooldownAccent
                             WorkoutBlockType.Superset -> WildforceThemeTokens.accentGold
                             WorkoutBlockType.Standard -> WildforceThemeTokens.textSecondary
                         },
@@ -144,7 +144,7 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
         }
         Row(Modifier.fillMaxWidth().padding(vertical = 14.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             HistoryMetric("PR", formatTrainingWeight(best?.maxWeightKg ?: 0.0, useImperial), "MEJOR PESO", Modifier.weight(1f))
-            HistoryMetric("ÚLTIMO", formatTrainingWeight(history.first().maxWeightKg, useImperial), "MEJOR PESO", Modifier.weight(1f))
+            HistoryMetric("Último", formatTrainingWeight(history.first().maxWeightKg, useImperial), "MEJOR PESO", Modifier.weight(1f))
         }
         Text("VOLUMEN POR SESIÓN", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
         Row(
@@ -170,7 +170,7 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
 @Composable
 private fun InsightHeader(title: String, onBack: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.size(44.dp).clip(CircleShape).background(Color.White).clickable(onClick = onBack), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(44.dp).clip(CircleShape).background(WildforceThemeTokens.surfaceElevated).clickable(onClick = onBack), contentAlignment = Alignment.Center) {
             Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(22.dp))
         }
         Spacer(Modifier.weight(1f))

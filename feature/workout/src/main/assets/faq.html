@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Preguntas frecuentes sobre WildForce: entrenamiento, nutrición, Apple Watch y tus datos."
+    />
+    <title>FAQs · WildForce</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto+Condensed:wght@400;500;600;700&display=swap");
+
+      :root {
+        --bg: #151616;
+        --surface: #232227;
+        --card: #1b1a1e;
+        --border: #39383e;
+        --accent: #feffff;
+        --accent-bright: #ffffff;
+        --accent-muted: rgba(254, 255, 255, 0.10);
+        --white: #feffff;
+        --secondary: #a7a6ae;
+        --muted: #77767d;
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        min-width: 320px;
+        margin: 0;
+        color: var(--white);
+        background:
+          radial-gradient(circle at 82% -12%, rgba(254, 255, 255, 0.06), transparent 24rem),
+          var(--bg);
+        font-family: "Roboto Condensed", "Arial Narrow", Arial, sans-serif;
+      }
+
+      .page { width: min(100% - 32px, 760px); margin: 0 auto; padding: 30px 0 54px; }
+      .brand { display: inline-flex; align-items: center; min-height: 38px; }
+      .brand img { display: block; width: 154px; height: auto; object-fit: contain; }
+      .brand span { color: var(--white); font-family: "Bebas Neue", Impact, sans-serif; font-size: 31px; letter-spacing: .05em; }
+
+      .hero { padding: 48px 0 32px; }
+      .eyebrow {
+        display: flex; align-items: center; gap: 8px; margin: 0 0 14px;
+        color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+      }
+      .eyebrow::before { width: 24px; height: 2px; content: ""; background: currentColor; }
+      h1, h2 { margin: 0; font-family: "Bebas Neue", Impact, sans-serif; font-weight: 400; letter-spacing: .025em; }
+      h1 { max-width: 610px; font-size: clamp(40px, 9vw, 64px); line-height: 1; text-decoration: none; }
+      .hero p { max-width: 550px; margin: 18px 0 0; color: var(--secondary); font-size: 17px; line-height: 1.5; }
+
+      .faq-section { padding-top: 24px; }
+      .section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+      h2 { font-size: 31px; }
+      .count { color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+      .faq-list { display: grid; gap: 10px; }
+      .category {
+        margin: 22px 0 4px; color: var(--accent); font-size: 12px; font-weight: 700;
+        letter-spacing: .13em; text-transform: uppercase;
+      }
+      .category:first-child { margin-top: 0; }
+      details {
+        overflow: hidden; background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+        transition: border-color 160ms ease, background 160ms ease;
+      }
+      details[open] { border-color: rgba(254, 255, 255, .52); background: var(--surface); }
+      summary {
+        position: relative; display: flex; align-items: center; min-height: 68px; padding: 18px 58px 18px 19px;
+        cursor: pointer; list-style: none; font-size: 18px; font-weight: 700; line-height: 1.15;
+      }
+      summary::-webkit-details-marker { display: none; }
+      summary::after {
+        position: absolute; right: 20px; width: 12px; height: 12px; content: "";
+        border-right: 2px solid var(--accent); border-bottom: 2px solid var(--accent); transform: rotate(45deg) translateY(-3px);
+        transition: transform 160ms ease;
+      }
+      details[open] summary::after { transform: rotate(225deg) translate(-3px, -1px); }
+      .answer { padding: 0 20px 19px; color: var(--secondary); font-size: 16px; line-height: 1.48; }
+      .answer p { margin: 0; }
+      .answer strong { color: var(--white); }
+      .availability {
+        display: inline-block; margin: 0 0 9px; padding: 4px 8px; color: var(--white);
+        background: var(--accent-muted); border: 1px solid rgba(254, 255, 255, .30); border-radius: 999px;
+        font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      }
+
+      .support {
+        display: grid; grid-template-columns: 1fr auto; gap: 22px; align-items: center; margin-top: 38px; padding: 24px;
+        background: linear-gradient(135deg, var(--accent-muted), transparent 72%), var(--surface);
+        border: 1px solid rgba(254, 255, 255, .32); border-radius: 14px;
+      }
+      .support h2 { font-size: 29px; }
+      .support p { max-width: 410px; margin: 7px 0 0; color: var(--secondary); font-size: 16px; line-height: 1.4; }
+      .button {
+        display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 19px; color: var(--white);
+        background: var(--accent); border-radius: 10px; font-size: 14px; font-weight: 700; letter-spacing: .07em;
+        color: #151616;
+        text-decoration: none; text-transform: uppercase; transition: background 160ms ease, transform 160ms ease;
+      }
+      .button:hover, .button:focus-visible { background: var(--accent-bright); transform: translateY(-1px); }
+      .button:focus-visible, summary:focus-visible { outline: 2px solid var(--white); outline-offset: 3px; }
+      footer { padding-top: 28px; color: var(--muted); font-size: 13px; text-align: center; }
+
+      @media (max-width: 540px) {
+        .page { width: min(100% - 28px, 760px); padding-top: 22px; }
+        .brand img { width: 132px; }
+        .hero { padding: 48px 0 32px; }
+        .hero p { font-size: 17px; }
+        summary { min-height: 64px; font-size: 17px; }
+        .support { grid-template-columns: 1fr; gap: 17px; padding: 20px; }
+        .support .button { width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <a class="brand" href="#inicio" aria-label="WildForce, inicio">
+        <span aria-label="WildForce">WILDFORCE</span>
+      </a>
+
+      <header class="hero" id="inicio">
+        <p class="eyebrow">Centro de ayuda</p>
+        <h1>Las dudas se resuelven. El progreso continúa.</h1>
+        <p>Todo lo que necesitas saber para entrenar, comer mejor y seguir avanzando con WildForce.</p>
+      </header>
+
+      <section class="faq-section" aria-labelledby="faq-title">
+        <div class="section-heading">
+          <h2 id="faq-title">Preguntas frecuentes</h2>
+          <span class="count">24 respuestas</span>
+        </div>
+
+        <div class="faq-list">
+          <p class="category">Primeros pasos</p>
+          <details open>
+            <summary>¿Qué es WildForce?</summary>
+            <div class="answer"><p>WildForce es tu plataforma de entrenamiento y nutrición para iPhone y Android. Crea planes adaptados a tu objetivo, registra cada sesión, controla tus macros y convierte la constancia en progreso real.</p></div>
+          </details>
+          <details>
+            <summary>¿Cómo se crea mi plan de entrenamiento?</summary>
+            <div class="answer"><p>Durante el inicio eliges tu objetivo, experiencia, disponibilidad, equipo, preferencias y posibles limitaciones. Con esa información, WildForce genera un plan progresivo que puedes seguir y ajustar desde la app.</p></div>
+          </details>
+          <details>
+            <summary>¿Qué necesito para usar WildForce en Android?</summary>
+            <div class="answer"><span class="availability">Android</span><p>Necesitas un dispositivo con <strong>Android 9 o posterior</strong>. Descarga la versión más reciente de WildForce desde Google Play cuando esté disponible para tu región.</p></div>
+          </details>
+          <details>
+            <summary>¿Puedo entrenar sin conexión?</summary>
+            <div class="answer"><p>Puedes consultar y registrar el contenido disponible localmente en la app. Algunas funciones, como generar planes o analizar información con IA, necesitan conexión. Cuando la sincronización en la nube esté activada, los cambios pendientes se enviarán al recuperar internet.</p></div>
+          </details>
+
+          <p class="category">Entrenamiento y progreso</p>
+          <details>
+            <summary>¿Puedo cambiar un ejercicio durante un entreno?</summary>
+            <div class="answer"><p>Sí. Puedes buscar una alternativa, sustituir el ejercicio o retirarlo de la sesión activa. Así tu entreno se adapta a lo que tienes disponible sin perder el ritmo.</p></div>
+          </details>
+          <details>
+            <summary>¿Puedo crear mis propios entrenamientos?</summary>
+            <div class="answer"><p>Sí. Puedes crear, editar, ejecutar y eliminar entrenamientos personalizados. Úsalos cuando quieras salir de tu plan o necesites una sesión a medida.</p></div>
+          </details>
+          <details>
+            <summary>¿Cómo funcionan los descansos durante una sesión?</summary>
+            <div class="answer"><p>Al completar una serie, WildForce controla el descanso para que puedas mantener el ritmo. En Android, el entreno activo puede seguir accesible mediante una notificación; revisa que las notificaciones estén permitidas.</p></div>
+          </details>
+          <details>
+            <summary>¿Dónde veo mis marcas, volumen y rachas?</summary>
+            <div class="answer"><p>En <strong>Progreso</strong> encontrarás el historial por ejercicio, volumen, estadísticas de entrenamiento, rachas y evolución corporal. Úsalo para comprobar qué funciona y mantener el foco.</p></div>
+          </details>
+          <details>
+            <summary>¿Qué ocurre al terminar un entreno?</summary>
+            <div class="answer"><p>La sesión queda registrada en tu historial y actualiza tus estadísticas, progreso y racha. Cuando haya datos suficientes, podrás compararte con tus sesiones anteriores y detectar tu evolución.</p></div>
+          </details>
+
+          <p class="category">Nutrición</p>
+          <details>
+            <summary>¿Cómo registro lo que como?</summary>
+            <div class="answer"><p>WildForce ofrece registro por foto, código de barras, etiqueta nutricional, texto, búsqueda de alimentos, recientes o manual. Elige la forma que mejor encaje con tu día y mantén tus macros al día.</p></div>
+          </details>
+          <details>
+            <summary>¿La app puede proponer comidas con lo que tengo en casa?</summary>
+            <div class="answer"><p>Sí. Indica los ingredientes disponibles y usa la función de ideas de comida para recibir propuestas alineadas con tus objetivos nutricionales.</p></div>
+          </details>
+          <details>
+            <summary>¿Qué pasa si no llego a mis macros?</summary>
+            <div class="answer"><p>WildForce puede sugerirte alimentos o comidas para cubrir los macros que te quedan en el día. No se trata de perseguir la perfección: se trata de tomar mejores decisiones de forma constante.</p></div>
+          </details>
+          <details>
+            <summary>¿Puedo ver mi planificación nutricional por días?</summary>
+            <div class="answer"><p>Sí. La planificación incluye un calendario semanal, objetivos de energía y macros, y te permite distinguir días de déficit, mantenimiento o superávit según tu meta.</p></div>
+          </details>
+
+          <p class="category">iPhone, Android y dispositivos</p>
+          <details>
+            <summary>¿WildForce está disponible en iPhone y Android?</summary>
+            <div class="answer"><p>Sí. WildForce se está desarrollando para ambas plataformas. La experiencia principal de entrenamiento, planes, sesiones activas, entrenamientos personalizados y seguimiento de progreso se adapta de forma nativa a cada sistema operativo.</p></div>
+          </details>
+          <details>
+            <summary>¿Qué integración de salud usa cada plataforma?</summary>
+            <div class="answer"><p>En iPhone, WildForce se conecta con <strong>Apple Health</strong>. En Android, se conecta con <strong>Health Connect</strong>. En ambos casos eliges los permisos: por ejemplo, altura, peso, calorías, nutrición y entrenamientos. Puedes revocarlos cuando quieras desde los ajustes del sistema.</p></div>
+          </details>
+          <details>
+            <summary>¿Puedo usar Apple Watch con WildForce?</summary>
+            <div class="answer"><span class="availability">iPhone + Apple Watch</span><p>Sí. La app de Apple Watch acompaña la sesión con el entreno activo, descansos e información de repeticiones en ejercicios compatibles. Los datos se sincronizan con el iPhone.</p></div>
+          </details>
+          <details>
+            <summary>¿Funciona con Wear OS?</summary>
+            <div class="answer"><span class="availability">Android</span><p>La integración con Wear OS está planificada, pero todavía no está disponible. Mientras tanto, puedes registrar y seguir tus entrenos desde el móvil Android.</p></div>
+          </details>
+          <details>
+            <summary>¿Para qué sirven las notificaciones en Android?</summary>
+            <div class="answer"><span class="availability">Android</span><p>Permiten mantener visible el estado del entreno y del descanso, además de recibir recordatorios si los activas. Si no ves el entreno activo en la barra de notificaciones, comprueba que WildForce tenga permiso para enviar notificaciones.</p></div>
+          </details>
+          <details>
+            <summary>¿Hay widget de WildForce para Android?</summary>
+            <div class="answer"><span class="availability">Android</span><p>Hay un acceso rápido para llevarte al entreno desde la pantalla de inicio. Mantén pulsado un espacio vacío, abre el selector de widgets y busca WildForce cuando la función esté habilitada en tu versión.</p></div>
+          </details>
+
+          <p class="category">Cuenta, datos y ajustes</p>
+          <details>
+            <summary>¿Puedo usar unidades imperiales?</summary>
+            <div class="answer"><p>Sí. Puedes elegir entre sistema métrico e imperial desde los ajustes de la app. Las métricas de peso y medidas se mostrarán en el formato que prefieras.</p></div>
+          </details>
+          <details>
+            <summary>¿Mis datos se guardan si cambio de dispositivo?</summary>
+            <div class="answer"><p>Tu información se guarda localmente y puede sincronizarse con tu cuenta en la nube cuando esa opción esté activa. Inicia sesión con la misma cuenta en tu nuevo dispositivo para recuperar tus datos sincronizados.</p></div>
+          </details>
+          <details>
+            <summary>¿Puedo cambiar idioma, tema o preferencias?</summary>
+            <div class="answer"><p>Sí. Desde Perfil y Ajustes puedes configurar el idioma, unidades, preferencias del plan, recordatorios y el tema visual disponible en tu dispositivo.</p></div>
+          </details>
+          <details>
+            <summary>¿Qué hago si no se sincronizan Apple Health o Health Connect?</summary>
+            <div class="answer"><p>Comprueba que hayas concedido los permisos adecuados en Apple Health o Health Connect, que la app esté actualizada y que el dispositivo tenga conexión. Después, vuelve a abrir WildForce. Si continúa el problema, contacta con soporte desde Ayuda e indica tu plataforma y versión de la app.</p></div>
+          </details>
+          <details>
+            <summary>¿Qué hago si algo no funciona como debería?</summary>
+            <div class="answer"><p>Actualiza WildForce a la última versión, reinicia la app y revisa que los permisos necesarios estén activos. Si el problema continúa, contacta con soporte desde Ayuda e incluye tu modelo de móvil, sistema operativo, versión de WildForce y una breve descripción.</p></div>
+          </details>
+        </div>
+      </section>
+
+      <section class="support" id="contacto" aria-labelledby="support-title">
+        <div>
+          <h2 id="support-title">¿Aún tienes dudas?</h2>
+          <p>Entra en Ayuda desde tu perfil y cuéntanos qué necesitas. Estamos aquí para que no pares.</p>
+        </div>
+        <a class="button" href="#inicio">Volver arriba</a>
+      </section>
+
+      <footer>WILDFORCE · ENTRENA EL CUERPO. DOMINA LA MENTE.</footer>
+    </main>
+  </body>
+</html>

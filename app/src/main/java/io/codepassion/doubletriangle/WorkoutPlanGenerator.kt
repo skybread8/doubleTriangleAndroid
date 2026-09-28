@@ -3,6 +3,8 @@ package io.codepassion.doubletriangle
 import android.content.Context
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
+import io.codepassion.doubletriangle.core.model.ExerciseTrackingMode
+import io.codepassion.doubletriangle.core.model.RepRange
 import io.codepassion.doubletriangle.core.model.SetStyleParameters
 import io.codepassion.doubletriangle.core.model.UserSummary
 import io.codepassion.doubletriangle.core.model.WorkoutBlockSummary
@@ -63,7 +65,7 @@ object WorkoutPlanGenerator {
     suspend fun generateCustom(profile: OnboardingProfile, request: CustomWorkoutRequest, context: Context? = null): WorkoutDaySummary = withContext(Dispatchers.IO) {
         val (_, state) = generateWithInstruction(
             profile.copy(workoutDays = setOf(WorkoutWeekday.Monday)),
-            "Genera UNA ÚNICA sesión personalizada para MONDAY. Enfoque: ${request.focus}. Duración objetivo: ${request.durationMinutes} minutos. El equipamiento temporal de esta sesión es exactamente: ${request.equipment.ifBlank { "peso corporal" }}. Sustituye con él el equipamiento habitual del perfil: no añadas ni presupongas máquinas, barras o accesorios que no figuren en esta lista. Devuelve un único objeto dentro de `workouts` y aplica las mismas reglas de bloques, prescripciones y seguridad que el plan semanal.",
+            "Genera UNA ÚNICA sesión personalizada para MONDAY. Objetivo: ${request.goal ?: "el objetivo habitual (${profile.goal.title})"}. Enfoques elegidos: ${request.focuses.joinToString().ifBlank { request.focus }}. Grupos musculares elegidos: ${request.muscleGroups.joinToString().ifBlank { "cualquiera" }}. Duración objetivo: ${request.durationMinutes} minutos. Incluye calentamiento: ${request.includeWarmup}. Incluye vuelta a la calma: ${request.includeCooldown}. El equipamiento temporal de esta sesión es exactamente: ${request.equipment.ifBlank { "peso corporal" }}. Sustituye con él el equipamiento habitual del perfil: no añadas ni presupongas máquinas, barras o accesorios que no figuren en esta lista. Devuelve un único objeto dentro de `workouts` y aplica las mismas reglas de bloques, prescripciones y seguridad que el plan semanal.",
             context,
         )
         state.workouts.first().copy(id = "custom-ai-${UUID.randomUUID()}", order = 1, estimatedMinutes = request.durationMinutes, status = WorkoutStatus.Planned)
@@ -134,7 +136,7 @@ object WorkoutPlanGenerator {
                 val weekday = day.optString("weekday", day.optString("intendedWeekday", "MONDAY"))
                     .uppercase().let { value -> runCatching { DayOfWeek.valueOf(value) }.getOrDefault(DayOfWeek.MONDAY) }
                 val estimatedMinutes = day.optInt("estimatedMinutes", day.optInt("estimatedDurationMinutes", 50))
-                add(WorkoutDaySummary("ai-${index + 1}", index + 1, day.optString("title").trim().ifBlank { "Sesión ${index + 1}" }, day.optString("focus").trim().ifBlank { "Fitness general" }, day.optString("dayType").trim().lowercase().ifBlank { "strength" }, weekday, estimatedMinutes.coerceIn(15, 180), WorkoutStatus.Planned, exercises, blocks))
+                add(WorkoutDaySummary("ai-${index + 1}", index + 1, day.optString("title").trim().ifBlank { "Sesión ${index + 1}" }, day.optString("focus").trim().ifBlank { "Fitness general" }, day.optString("dayType").trim().lowercase().ifBlank { "strength" }, weekday, estimatedMinutes.coerceIn(15, 180), parseWorkoutStatus(day.optString("status")), exercises, blocks))
             }
         }
         check(workouts.isNotEmpty()) { "La IA devolvió un plan vacío" }
@@ -222,6 +224,7 @@ object WorkoutPlanGenerator {
                         .put("intraSetRestSeconds", exercise.setStyleParameters.intraSetRestSeconds)
                         .put("tempo", exercise.setStyleParameters.tempo)
                         .put("targetRir", exercise.setStyleParameters.targetRir)
+                        .put("appliesToFinalSetOnly", exercise.setStyleParameters.appliesToFinalSetOnly)
                     exercises.put(JSONObject()
                         .put("name", exercise.name)
                         .put("imageKey", exercise.imageKey)
@@ -230,6 +233,15 @@ object WorkoutPlanGenerator {
                         .put("restSeconds", exercise.restSeconds)
                         .put("setStyle", exercise.setStyle.name)
                         .put("targetWeightKg", exercise.targetWeightKg)
+                        .put("targetReps", exercise.targetRepsPerSet?.let { values -> JSONArray().apply { values.forEach(::put) } })
+                        .put("targetWeightsKg", exercise.targetWeightsKg?.let { values -> JSONArray().apply { values.forEach(::put) } })
+                        .put("targetDurationSeconds", exercise.targetDurationSeconds)
+                        .put("targetDurationMinutes", exercise.targetDurationMinutes)
+                        .put("targetDistanceKm", exercise.targetDistanceKm)
+                        .put("isPerSideLoad", exercise.isPerSideLoad)
+                        .put("trackingMode", exercise.trackingMode.name)
+                        .put("repsMin", exercise.repRange?.minimum)
+                        .put("repsMax", exercise.repRange?.maximum)
                         .put("setStyleParameters", parameters))
                 }
                 blocks.put(JSONObject()
@@ -243,6 +255,7 @@ object WorkoutPlanGenerator {
                 .put("title", workout.title)
                 .put("focus", workout.focus)
                 .put("dayType", workout.dayType)
+                .put("status", workout.status.name)
                 .put("weekday", workout.scheduledDay.name)
                 .put("estimatedDurationMinutes", workout.estimatedMinutes)
                 .put("blocks", blocks))
@@ -275,12 +288,12 @@ object WorkoutPlanGenerator {
 
 Perfil obligatorio del usuario:
 - Nombre: ${profile.name}; objetivo: ${profile.goal.title}; nivel: ${profile.trainingLevel.title}; estilo de vida: ${profile.lifestyle.title}
-- Sexo: ${profile.gender.title}; idioma de salida: español; todas las cadenas visibles, títulos, notas y explicaciones deben estar en español.
+- Sexo: ${profile.gender.title}; idioma de salida: ${profile.appLanguage}; todas las cadenas visibles, títulos, notas y explicaciones deben estar en ese idioma.
 - Días disponibles: ${profile.workoutDays.joinToString { it.storedValue }}; duración preferida: ${profile.preferredWorkoutDurationMinutes} minutos
 - Estructura: ${profile.trainingSplitPreference.title}; focos personalizados: ${profile.customWorkoutFocuses.entries.joinToString { "${it.key.storedValue}=${it.value.storedValue}" }.ifBlank { "ninguno" }}
 - Equipamiento: ${profile.availableEquipment.joinToString { it.title }.ifBlank { "peso corporal" }}; restricciones: ${profile.movementRestrictions.joinToString { it.title }.ifBlank { "ninguna" }}
 - Ubicaciones: ${profile.effectiveTrainingLocations().joinToString { location -> "${location.name} [${location.equipment.joinToString { it.title }}]" }.ifBlank { "sin ubicación adicional" }}
-- Composición corporal: ${profile.bodyCompositionPhase?.storedValue ?: "no especificada"}; edad aproximada: ${(java.time.Year.now().value - profile.birthYear).coerceAtLeast(13)}; altura: ${profile.heightCm} cm; peso: ${profile.weightKg} kg
+- Composición corporal: ${profile.bodyCompositionPhase?.storedValue ?: "no especificada"}; edad aproximada: ${(java.time.Year.now().value - profile.birthYear).coerceAtLeast(0)}; altura: ${profile.heightCm} cm; peso: ${profile.weightKg} kg
 - Omitir calentamiento: ${if (profile.skipsWarmups) "sí" else "no"}; omitir vuelta a la calma: ${if (profile.skipsCooldowns) "sí" else "no"}; omitir descansos: ${if (profile.skipsRestPeriods) "sí" else "no"}; notas del planificador: ${profile.workoutPlannerNotes.ifBlank { "ninguna" }}
 ${historyContext ?: "Historial de entrenamientos recientes: todavía no hay sesiones completadas."}
 Reglas estrictas: crea exactamente un workout por cada día disponible y no inventes días. Cada sesión debe respetar el presupuesto total de duración incluyendo calentamiento, trabajo principal y vuelta a la calma. Si se omite calentamiento o vuelta a la calma, devuelve cero ejercicios y cero bloques de ese tipo: nunca uses bloques vacíos, ocultos o de relleno. No uses ejercicios incompatibles con el equipamiento, las ubicaciones o las restricciones; prioriza sustituciones seguras y cercanas. Usa siempre bloques y prescripciones concretas, conserva el foco personalizado de cada día y distribuye el volumen de forma recuperable. Las molestias y restricciones tienen prioridad sobre el objetivo de volumen.
@@ -319,6 +332,9 @@ Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación
         else -> WorkoutBlockType.Standard
     }
 
+    internal fun parseWorkoutStatus(value: String): WorkoutStatus =
+        runCatching { WorkoutStatus.valueOf(value) }.getOrDefault(WorkoutStatus.Planned)
+
     private fun parseBlocks(json: JSONArray): List<WorkoutBlockSummary> = buildList {
         for (index in 0 until json.length()) {
             val block = json.getJSONObject(index)
@@ -353,7 +369,19 @@ Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación
             intraSetRestSeconds = details.optInt("intraSetRestSeconds", 15).coerceIn(5, 120),
             tempo = details.optString("tempo", "3-1-1-0").trim().take(9),
             targetRir = details.optInt("targetRir", 2).coerceIn(0, 5),
+            appliesToFinalSetOnly = details.optBoolean("appliesToFinalSetOnly", false),
         )
+        val durationSeconds = exercise.optInt("targetDurationSeconds", 0).takeIf { it > 0 }
+        val durationMinutes = exercise.optInt("targetDurationMinutes", 0).takeIf { it > 0 }
+        val distanceKm = exercise.optDouble("targetDistanceKm", Double.NaN).takeUnless(Double::isNaN)
+        val repsMin = exercise.optInt("repsMin", 0).takeIf { it > 0 }
+        val repsMax = exercise.optInt("repsMax", repsMin ?: 0).takeIf { it > 0 }
+        val trackingMode = runCatching { ExerciseTrackingMode.valueOf(exercise.optString("trackingMode")) }.getOrNull()
+            ?: when {
+                distanceKm != null -> ExerciseTrackingMode.DurationAndDistance
+                durationSeconds != null || durationMinutes != null -> ExerciseTrackingMode.Duration
+                else -> ExerciseTrackingMode.Repetitions
+            }
         return ExerciseSummary(
             name = name,
             imageKey = imageKey,
@@ -373,6 +401,20 @@ Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación
             setStyleParameters = parameters,
             targetWeightKg = exercise.optDouble("targetWeightKg", Double.NaN).takeUnless { it.isNaN() }
                 ?: exercise.optJSONArray("targetWeightsKg")?.optDouble(0, Double.NaN)?.takeUnless { it.isNaN() },
+            targetRepsPerSet = exercise.optJSONArray("targetReps")?.let { values ->
+                List(values.length()) { index -> values.optInt(index) }.filter { it > 0 }.takeIf { it.isNotEmpty() }
+            },
+            targetWeightsKg = exercise.optJSONArray("targetWeightsKg")?.let { values ->
+                List(values.length()) { index -> values.optDouble(index, Double.NaN) }
+                    .filterNot(Double::isNaN)
+                    .takeIf { it.isNotEmpty() }
+            },
+            targetDurationSeconds = durationSeconds,
+            targetDurationMinutes = durationMinutes,
+            targetDistanceKm = distanceKm,
+            isPerSideLoad = exercise.optBoolean("isPerSideLoad"),
+            trackingMode = trackingMode,
+            repRange = repsMin?.let { minimum -> RepRange(minimum, (repsMax ?: minimum).coerceAtLeast(minimum)) },
         )
     }
 
@@ -403,5 +445,5 @@ Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación
             appendLine("- ${block.type.label}: ${block.exercises.joinToString { exercise -> "${exercise.name} (${exercise.sets}×${exercise.reps}, descanso ${exercise.restSeconds}s)" }}")
         }
     }
-    private const val SYSTEM_PROMPT = """Eres un entrenador profesional y el planificador de Wildforce. Responde exclusivamente con JSON válido, sin markdown. Usa esta forma: {"planName":"...","phase":"...","workouts":[{"title":"...","focus":"...","dayType":"strength|hypertrophy|technique|volume|deload|recovery|conditioning","weekday":"MONDAY","estimatedDurationMinutes":50,"blocks":[{"type":"warmup|standard|superset|cooldown","orderIndex":0,"rounds":1,"restAfterBlockSeconds":90,"notes":"...","exercises":[{"name":"...","imageKey":"benchPress","sets":3,"reps":"8-12","repsMin":8,"repsMax":12,"targetWeightKg":20,"restSeconds":90,"setStyle":"straight","setStyleParameters":{"targetRir":2}}]}]}]}. Usa los días indicados en el perfil, no una lista fija. Cada día debe tener calentamiento, trabajo principal y vuelta a la calma salvo que el perfil indique lo contrario. Usa bloques standard para ejercicios individuales y superset solo para parejas seguras; en superserie cada ejercicio tiene sets=1 y rounds contiene repeticiones del bloque. Incluye entre 4 y 7 ejercicios seguros por sesión, mantén la duración solicitada, usa metric kg y segundos en reps para ejercicios temporizados. Respeta equipamiento, nivel, objetivo y restricciones. imageKey debe ser uno de: airSquat,gobletSquat,barbellBackSquat,walkingLunge,legPress,deadlift,romanianDeadlift,pushUp,benchPress,inclineBenchPress,overheadPress,lateralRaise,chestDip,tricepsPushdown,pullUp,latPulldown,seatedCableRow,bentOverRow,facePull,bicepsCurl,hammerCurl,plank,sidePlank,deadBug,mountainClimber."""
+    private const val SYSTEM_PROMPT = """Eres un entrenador profesional y el planificador de Wildforce. Responde exclusivamente con JSON válido, sin markdown. Usa esta forma: {"planName":"...","phase":"...","workouts":[{"title":"...","focus":"...","dayType":"strength|hypertrophy|technique|volume|deload|recovery|conditioning","weekday":"MONDAY","estimatedDurationMinutes":50,"blocks":[{"type":"warmup|standard|superset|cooldown","orderIndex":0,"rounds":1,"restAfterBlockSeconds":90,"notes":"...","exercises":[{"name":"...","imageKey":"benchPress","sets":3,"trackingMode":"Repetitions|Duration|DurationAndDistance","reps":"8-12","repsMin":8,"repsMax":12,"targetReps":[8,8,8],"targetWeightKg":20,"targetWeightsKg":[20,20,20],"targetDurationSeconds":null,"targetDurationMinutes":null,"targetDistanceKm":null,"isPerSideLoad":false,"restSeconds":90,"setStyle":"straight","setStyleParameters":{"targetRir":2,"appliesToFinalSetOnly":false}}]}]}]}. Usa campos tipados: trackingMode es obligatorio; repsMin/repsMax y targetReps solo se usan para Repetitions; targetReps y targetWeightsKg contienen un valor por serie; para Duration usa targetDurationSeconds o targetDurationMinutes y no conviertas el tiempo en repeticiones; para DurationAndDistance usa además targetDistanceKm. Indica appliesToFinalSetOnly dentro de setStyleParameters cuando el estilo se aplique solamente a la última serie. Usa los días indicados en el perfil, no una lista fija. Cada día debe tener calentamiento, trabajo principal y vuelta a la calma salvo que el perfil indique lo contrario. Usa bloques standard para ejercicios individuales y superset solo para parejas seguras; en superserie cada ejercicio tiene sets=1 y rounds contiene repeticiones del bloque. Incluye entre 4 y 7 ejercicios seguros por sesión, mantén la duración solicitada y usa unidades métricas canónicas. Respeta equipamiento, nivel, objetivo y restricciones. imageKey debe ser uno de: airSquat,gobletSquat,barbellBackSquat,walkingLunge,legPress,deadlift,romanianDeadlift,pushUp,benchPress,inclineBenchPress,overheadPress,lateralRaise,chestDip,tricepsPushdown,pullUp,latPulldown,seatedCableRow,bentOverRow,facePull,bicepsCurl,hammerCurl,plank,sidePlank,deadBug,mountainClimber."""
 }
