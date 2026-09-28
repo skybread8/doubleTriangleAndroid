@@ -200,63 +200,77 @@ private fun JSONObject.optDoubleList(name: String): List<Double>? = optJSONArray
 
 internal data class ExerciseChoice(val name: String, val imageKey: String)
 
+/** Mirrors `SwapExerciseView` on iOS: candidates first, then exercises with a
+ * shared primary muscle, followed by every remaining exercise. */
+internal data class ExerciseReplacementSections(
+    val recommendedSubstitutes: List<ExerciseChoice>,
+    val sameMuscleGroup: List<ExerciseChoice>,
+    val allOtherExercises: List<ExerciseChoice>,
+) {
+    val all: List<ExerciseChoice>
+        get() = recommendedSubstitutes + sameMuscleGroup + allOtherExercises
+}
+
 /**
- * Keeps the replacement picker useful when the plan was generated with a
- * different variation of the same movement.  The catalog does not carry a
- * full exercise taxonomy, so these are deliberately broad movement families
- * rather than equipment-specific labels.
+ * Android's picker catalogue is a subset of the canonical iOS exercise
+ * catalogue. Keep the exact iOS substitution order for every exercise it
+ * contains; candidates absent from Android's local catalogue are omitted.
  */
+private val iosSubstitutionCandidates = mapOf(
+    "airSquat" to listOf("gobletSquat", "legPress", "walkingLunge"),
+    "gobletSquat" to listOf("airSquat", "barbellBackSquat", "legPress"),
+    "barbellBackSquat" to listOf("barbellFrontSquat", "legPress", "gobletSquat"),
+    "legPress" to listOf("barbellBackSquat", "gobletSquat", "airSquat"),
+    "walkingLunge" to listOf("reverseLunge", "stepUp", "bulgarianSplitSquat"),
+    "deadlift" to listOf("romanianDeadlift", "gluteBridge", "seatedLegCurl"),
+    "romanianDeadlift" to listOf("hamstringCurl", "deadlift"),
+    "pushUp" to listOf("declinePushUp", "benchPress", "chestPressMachine", "chestFly"),
+    "benchPress" to listOf("inclineBenchPress", "chestPressMachine", "pushUp", "dumbbellBenchPress", "smithMachineBenchPress"),
+    "inclineBenchPress" to listOf("benchPress", "chestPressMachine", "pushUp"),
+    "overheadPress" to listOf("dumbbellOverheadPress", "arnoldPress", "lateralRaise"),
+    "lateralRaise" to listOf("overheadPress", "arnoldPress", "frontRaise"),
+    "chestDip" to listOf("tricepsDip", "tricepsPushdown", "overheadTricepsExtension", "ringDip"),
+    "tricepsPushdown" to listOf("chestDip", "overheadTricepsExtension", "tricepsDip"),
+    "pullUp" to listOf("chinUp", "latPulldown", "seatedCableRow"),
+    "latPulldown" to listOf("pullUp", "chinUp", "seatedCableRow"),
+    "seatedCableRow" to listOf("bentOverRow", "singleArmDumbbellRow", "latPulldown", "seatedMachineRow"),
+    "bentOverRow" to listOf("seatedCableRow", "dumbbellBentOverRow", "deadlift", "dumbbellBentOverRow", "smithMachineBentOverRow"),
+    "facePull" to listOf("rearDeltFly", "thoracicRotation", "machineRearDeltFly"),
+    "bicepsCurl" to listOf("hammerCurl", "chinUp"),
+    "hammerCurl" to listOf("bicepsCurl", "cableCurl", "bayesianCableCurl"),
+    "plank" to listOf("sidePlank", "deadBug", "birdDog"),
+    "sidePlank" to listOf("plank", "russianTwist"),
+    "deadBug" to listOf("birdDog", "plank", "bicycleCrunch"),
+    "mountainClimber" to listOf("burpee", "jumpRope", "bicycleCrunch"),
+)
+
+internal fun exerciseReplacementSections(
+    catalog: List<ExerciseChoice>,
+    replacing: ExerciseSummary,
+): ExerciseReplacementSections {
+    val currentKey = replacing.imageKey?.trim()
+    val current = catalog.firstOrNull { it.imageKey.equals(currentKey, ignoreCase = true) }
+    val candidates = iosSubstitutionCandidates[current?.imageKey ?: currentKey]
+        .orEmpty()
+        .mapNotNull { key -> catalog.firstOrNull { it.imageKey.equals(key, ignoreCase = true) } }
+    val candidateKeys = candidates.map { it.imageKey.lowercase() }.toSet()
+    val currentPrimaryMuscles = ExerciseVisualCatalog.metadata(current?.imageKey ?: currentKey)?.primary.orEmpty().toSet()
+    val remaining = catalog.filterNot { choice ->
+        choice.imageKey.equals(currentKey, ignoreCase = true) || choice.imageKey.lowercase() in candidateKeys
+    }
+    val sameMuscleGroup = remaining.filter { choice ->
+        !ExerciseVisualCatalog.metadata(choice.imageKey)?.primary.orEmpty().toSet().intersect(currentPrimaryMuscles).isEmpty()
+    }.sortedBy { it.name }
+    val sameKeys = sameMuscleGroup.map { it.imageKey.lowercase() }.toSet()
+    val allOtherExercises = remaining.filterNot { it.imageKey.lowercase() in sameKeys }.sortedBy { it.name }
+    return ExerciseReplacementSections(candidates, sameMuscleGroup, allOtherExercises)
+}
+
+/** Retained for callers outside the picker; its order is iOS section order. */
 internal fun rankExerciseReplacements(
     catalog: List<ExerciseChoice>,
     replacing: ExerciseSummary,
-): List<ExerciseChoice> {
-    val replacingKey = replacing.imageKey?.trim()?.lowercase()
-    val replacingName = replacementTokens(replacing.name)
-    val replacingPattern = exercisePattern(replacing.imageKey, replacing.name)
-
-    return catalog
-        .asSequence()
-        // Re-selecting the plan exercise is not a substitution.
-        .filterNot { choice ->
-            choice.imageKey.lowercase() == replacingKey ||
-                replacementTokens(choice.name) == replacingName
-        }
-        .sortedWith(
-            compareByDescending<ExerciseChoice> { choice ->
-                val patternScore = if (exercisePattern(choice.imageKey, choice.name) == replacingPattern) 1_000 else 0
-                val keyScore = sharedReplacementTokens(choice.imageKey, replacing.imageKey) * 40
-                val nameScore = sharedReplacementTokens(choice.name, replacing.name) * 10
-                patternScore + keyScore + nameScore
-            }.thenBy { it.name },
-        )
-        .toList()
-}
-
-private fun exercisePattern(imageKey: String?, name: String): String? {
-    val text = "${imageKey.orEmpty()} $name".lowercase()
-    return when {
-        text.containsAny("squat", "sentadilla", "legpress", "leg press", "lunge", "zancada") -> "squat"
-        text.containsAny("deadlift", "peso muerto") -> "hinge"
-        text.containsAny("benchpress", "bench press", "inclinebench", "press de banca", "flexion", "pushup") -> "horizontal-push"
-        text.containsAny("overheadpress", "overhead press", "press militar", "lateralraise", "lateral raise") -> "vertical-push"
-        text.containsAny("chestdip", "chest dip", "fondos", "triceps", "tríceps") -> "triceps"
-        text.containsAny("pullup", "pull up", "dominada", "latpulldown", "lat pulldown", "jalon", "jalón") -> "vertical-pull"
-        text.containsAny("row", "remo", "facepull", "face pull") -> "horizontal-pull"
-        text.containsAny("curl", "bíceps", "biceps") -> "biceps"
-        text.containsAny("plank", "plancha", "deadbug", "dead bug", "mountainclimber", "mountain climber") -> "core"
-        else -> null
-    }
-}
-
-private fun String.containsAny(vararg values: String): Boolean = values.any(::contains)
-
-private fun replacementTokens(value: String): Set<String> =
-    value.lowercase().split(Regex("[^a-záéíóúüñ0-9]+"))
-        .filter { it.length > 2 }
-        .toSet()
-
-private fun sharedReplacementTokens(first: String?, second: String?): Int =
-    replacementTokens(first.orEmpty()).intersect(replacementTokens(second.orEmpty())).size
+): List<ExerciseChoice> = exerciseReplacementSections(catalog, replacing).all
 
 internal object CustomExerciseCatalog {
     private val spanishNames = mapOf(

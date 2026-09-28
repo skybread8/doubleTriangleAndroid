@@ -1,9 +1,6 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import android.Manifest
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGatt
@@ -24,8 +21,6 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.ParcelUuid
 import android.util.Log
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import org.json.JSONObject
 import java.nio.charset.StandardCharsets
 import java.util.UUID
@@ -78,7 +73,7 @@ internal object WildforceWatchBridge {
 
     fun start(context: Context) {
         if (!hasBluetoothPermissions(context)) return
-        ContextCompat.startForegroundService(context, Intent(context, WildforceWatchBleService::class.java).setAction(ACTION_START))
+        context.startService(Intent(context, WildforceWatchBleService::class.java).setAction(ACTION_START))
     }
 
     fun stop(context: Context) {
@@ -89,7 +84,7 @@ internal object WildforceWatchBridge {
     fun publish(context: Context, value: State) {
         state = value
         if (hasBluetoothPermissions(context)) {
-            ContextCompat.startForegroundService(context, Intent(context, WildforceWatchBleService::class.java).setAction(ACTION_PUBLISH))
+            context.startService(Intent(context, WildforceWatchBleService::class.java).setAction(ACTION_PUBLISH))
         }
     }
 
@@ -174,7 +169,6 @@ internal class WildforceWatchBleService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-        startForeground(NOTIFICATION_ID, notification())
         startGattServer()
         return START_STICKY
     }
@@ -216,20 +210,6 @@ internal class WildforceWatchBleService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private fun notification(): android.app.Notification {
-        val manager = getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(NotificationChannel(CHANNEL_ID, "Wildforce Watch", NotificationManager.IMPORTANCE_LOW))
-        val launchIntent = packageManager.getLaunchIntentForPackage(packageName) ?: Intent()
-        val openApp = PendingIntent.getActivity(this, 0, launchIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(io.codepassion.doubletriangle.feature.workout.R.drawable.ic_wildforce_notification)
-            .setContentTitle("Wildforce conectado al reloj")
-            .setContentText("Sincronización local por Bluetooth activa")
-            .setContentIntent(openApp)
-            .setOngoing(true)
-            .build()
-    }
-
     private fun parseCommand(bytes: ByteArray): WildforceWatchBridge.Command? = runCatching {
         val wire = String(bytes, StandardCharsets.UTF_8)
         when {
@@ -245,7 +225,5 @@ internal class WildforceWatchBleService : Service() {
         val SERVICE_UUID: UUID = UUID.fromString("25e3a160-6c4d-4d73-9b4c-7b5bfeacf001")
         val STATE_UUID: UUID = UUID.fromString("25e3a161-6c4d-4d73-9b4c-7b5bfeacf001")
         val COMMAND_UUID: UUID = UUID.fromString("25e3a162-6c4d-4d73-9b4c-7b5bfeacf001")
-        const val CHANNEL_ID = "wildforce_watch_bridge"
-        const val NOTIFICATION_ID = 4102
     }
 }

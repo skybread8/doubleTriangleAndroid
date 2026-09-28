@@ -261,6 +261,18 @@ The remaining unchecked items are intentionally not implied to be complete. In p
 - Standard exercise blocks no longer render the Android-only `BLOQUE PRINCIPAL` heading. Warmup, cooldown and superset headers retain their iOS-specific hierarchy; standard-block notes remain visible without creating a synthetic block heading.
 - Verified with `:feature:workout:compileDebugKotlin :feature:workout:testDebugUnitTest`.
 
+### 2026-09-28 — skipped-workout plan completion pass
+
+- Matched `SkipWorkoutDay.perform`: skipped workouts remain visibly omitted and do not count toward completed-workout history, but do finalize their plan slot.
+- When omitting the final pending workout, Android now starts the same next-plan generation flow as iOS. Plan progress also counts completed and skipped sessions as finalized, while preserving the omitted-session count separately.
+- Added model coverage for the finalized-plan status rule and verified with `:core:model:test :feature:workout:compileDebugKotlin :app:compileDebugKotlin`.
+
+### 2026-09-28 — replacement-plan session isolation pass
+
+- Generated sessions now receive unique IDs which are persisted in the plan JSON; old paused-session snapshots can no longer match an identically positioned workout in a new week.
+- Confirming a replacement plan clears every prior plan-session snapshot plus its foreground timer, notification actions, notification and watch bridge, matching iOS's completed-plan transition rather than offering a stale session to resume.
+- Added identity-contract coverage and verified with `:app:testDebugUnitTest :feature:workout:compileDebugKotlin :app:compileDebugKotlin`.
+
 ## Visual evidence log
 
 ### 2026-08-27 — source-level comparison, active workout
@@ -301,6 +313,12 @@ The source comparison is not a replacement for image comparison. On 2026-08-27 a
 - Not yet captured on this device: work timer, supersets and the later XP/streak celebration phases. The available disposable workout had no time-based exercise; these remain source/test verified until a safe fixture exposes them.
 
 ## Verification protocol
+
+### 2026-09-28 — rest-sheet next-exercise prescription pass
+
+- Replaced Android's fixed `series · reps` next-exercise summary with the compact typed prescription hierarchy used by iOS `PlannedExercicePrescriptionView`: series, repetitions, target load, duration and distance now appear whenever configured.
+- Applied the same compact prescription to each exercise in the next superset round, so timed and distance work is not misrepresented as repetitions.
+- Added unit coverage for weighted repetitions and duration-with-distance prescriptions. Pending device screenshot comparison remains required for visual checklist closure.
 
 For each parity milestone:
 

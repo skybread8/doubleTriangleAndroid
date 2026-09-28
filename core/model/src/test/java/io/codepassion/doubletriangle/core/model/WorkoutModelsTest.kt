@@ -17,6 +17,12 @@ class WorkoutModelsTest {
         assertEquals(emptyList<WorkoutDaySummary>(), state.workoutsFor(DayOfWeek.TUESDAY))
     }
 
+    @Test fun skippedWorkoutFinalizesItsPlanSlotWithoutBeingCompleted() {
+        assertEquals(false, WorkoutStatus.Planned.isPlanFinalized)
+        assertEquals(true, WorkoutStatus.Completed.isPlanFinalized)
+        assertEquals(true, WorkoutStatus.Skipped.isPlanFinalized)
+    }
+
     @Test fun intensiveStylesApplyOnlyToFinalSet() {
         assertEquals(false, ExerciseSetStyle.DropSet.appliesToSet(2, 3, appliesToFinalSetOnly = true))
         assertEquals(true, ExerciseSetStyle.DropSet.appliesToSet(3, 3, appliesToFinalSetOnly = true))

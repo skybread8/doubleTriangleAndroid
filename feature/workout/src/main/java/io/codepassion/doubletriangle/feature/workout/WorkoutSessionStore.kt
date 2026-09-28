@@ -183,4 +183,21 @@ object WorkoutSessionStore {
     fun clear(context: Context, workoutId: String) {
         context.getSharedPreferences(PREFERENCES, 0).edit().remove(workoutId).apply()
     }
+
+    /**
+     * A replacement plan must never inherit an unfinished session, its timer,
+     * or its notification. This is deliberately separate from `clear`: callers
+     * use it only after the user confirms replacing the whole plan.
+     */
+    fun discardPlanSessions(context: Context, workoutIds: Collection<String>) {
+        val preferences = context.getSharedPreferences(PREFERENCES, 0)
+        preferences.edit().apply {
+            workoutIds.forEach(::remove)
+        }.apply()
+        WorkoutNotificationActionStore.clear(context)
+        WorkoutActiveNotification.cancelRestFinished(context)
+        WorkoutActiveNotification.cancel(context)
+        context.stopService(android.content.Intent(context, WorkoutForegroundService::class.java))
+        WildforceWatchLocalBridge.stop(context)
+    }
 }

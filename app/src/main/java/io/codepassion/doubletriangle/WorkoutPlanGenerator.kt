@@ -136,7 +136,11 @@ object WorkoutPlanGenerator {
                 val weekday = day.optString("weekday", day.optString("intendedWeekday", "MONDAY"))
                     .uppercase().let { value -> runCatching { DayOfWeek.valueOf(value) }.getOrDefault(DayOfWeek.MONDAY) }
                 val estimatedMinutes = day.optInt("estimatedMinutes", day.optInt("estimatedDurationMinutes", 50))
-                add(WorkoutDaySummary("ai-${index + 1}", index + 1, day.optString("title").trim().ifBlank { "Sesión ${index + 1}" }, day.optString("focus").trim().ifBlank { "Fitness general" }, day.optString("dayType").trim().lowercase().ifBlank { "strength" }, weekday, estimatedMinutes.coerceIn(15, 180), parseWorkoutStatus(day.optString("status")), exercises, blocks))
+                // A session snapshot is keyed by workout ID.  Never reuse the
+                // former `ai-1`, `ai-2` IDs for a newly generated week, or a
+                // paused workout from the old plan can be restored into it.
+                val id = resolveWorkoutId(day.optString("id"))
+                add(WorkoutDaySummary(id, index + 1, day.optString("title").trim().ifBlank { "Sesión ${index + 1}" }, day.optString("focus").trim().ifBlank { "Fitness general" }, day.optString("dayType").trim().lowercase().ifBlank { "strength" }, weekday, estimatedMinutes.coerceIn(15, 180), parseWorkoutStatus(day.optString("status")), exercises, blocks))
             }
         }
         check(workouts.isNotEmpty()) { "La IA devolvió un plan vacío" }
@@ -252,6 +256,7 @@ object WorkoutPlanGenerator {
                     .put("exercises", exercises))
             }
             days.put(JSONObject()
+                .put("id", workout.id)
                 .put("title", workout.title)
                 .put("focus", workout.focus)
                 .put("dayType", workout.dayType)
@@ -283,6 +288,10 @@ object WorkoutPlanGenerator {
         "tempo" -> ExerciseSetStyle.Tempo
         else -> ExerciseSetStyle.Straight
     }
+
+    /** Restored plans keep their saved identity; incoming AI plans receive a fresh one. */
+    internal fun resolveWorkoutId(value: String): String =
+        value.trim().takeIf(String::isNotBlank) ?: "ai-${UUID.randomUUID()}"
 
     private fun systemPrompt(profile: OnboardingProfile, historyContext: String?): String = SYSTEM_PROMPT + """
 

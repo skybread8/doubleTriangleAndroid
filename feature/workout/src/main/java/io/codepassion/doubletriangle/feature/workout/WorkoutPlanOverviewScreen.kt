@@ -36,14 +36,15 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
+import io.codepassion.doubletriangle.core.model.isPlanFinalized
 import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
 internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, planHistory: List<WorkoutHubState> = emptyList(), contentPadding: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues(), onBack: () -> Unit, onWorkoutSelected: (WorkoutDaySummary) -> Unit) {
-    val completed = state.workouts.count { it.status == WorkoutStatus.Completed }
     val skipped = state.workouts.count { it.status == WorkoutStatus.Skipped }
-    val progress = if (state.workouts.isEmpty()) 0f else completed.toFloat() / state.workouts.size
+    val finalized = state.workouts.count { it.status.isPlanFinalized }
+    val progress = if (state.workouts.isEmpty()) 0f else finalized.toFloat() / state.workouts.size
     val animatedProgress by animateFloatAsState(progress, animationSpec = tween(650))
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(contentPadding).padding(horizontal = 18.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth().padding(bottom = 16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -65,7 +66,7 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, planHistory: List
                         }
                         Column(Modifier.padding(start = 14.dp)) {
                             Text("PROGRESO DEL MESOCICLO", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
-                            Text("$completed de ${state.workouts.size} sesiones completadas", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                            Text("$finalized de ${state.workouts.size} sesiones finalizadas", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                             if (skipped > 0) Text("$skipped sesión(es) omitida(s)", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                         }
                     }
@@ -77,7 +78,7 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, planHistory: List
             item {
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp)) {
                     Text("SIGUIENTE PASO", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
-                    Text(if (completed == state.workouts.size && state.workouts.isNotEmpty()) "Mesociclo completado. Ya puedes preparar la siguiente fase." else "Completa las sesiones previstas para avanzar en tu fase actual.", Modifier.padding(top = 5.dp), color = WildforceThemeTokens.textSecondary, maxLines = 3, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                    Text(if (finalized == state.workouts.size && state.workouts.isNotEmpty()) "Mesociclo completado. Ya puedes preparar la siguiente fase." else "Completa u omite las sesiones previstas para avanzar en tu fase actual.", Modifier.padding(top = 5.dp), color = WildforceThemeTokens.textSecondary, maxLines = 3, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             }
             if (planHistory.isNotEmpty()) {

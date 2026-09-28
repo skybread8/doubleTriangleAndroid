@@ -12,6 +12,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -22,18 +23,24 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.TextButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.Icon
@@ -43,6 +50,11 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -78,6 +90,7 @@ import io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
+import io.codepassion.doubletriangle.core.model.isPlanFinalized
 import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
@@ -107,7 +120,8 @@ import io.codepassion.doubletriangle.feature.workout.CustomWorkoutStore
 import io.codepassion.doubletriangle.feature.workout.WorkoutHubScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutAnalyticsStore
 import io.codepassion.doubletriangle.feature.workout.WorkoutSessionStore
-import io.codepassion.doubletriangle.feature.workout.ExerciseVisualCatalog
+import io.codepassion.doubletriangle.feature.workout.RemoteTrainingImage
+import io.codepassion.doubletriangle.feature.workout.exerciseImageUrl
 import io.codepassion.doubletriangle.nutrition.NutritionScreen
 import java.time.Instant
 import java.io.File
@@ -162,8 +176,10 @@ private fun RootBottomNavigation(selected: RootDestination, onSelected: (RootDes
             .shadow(10.dp, RoundedCornerShape(31.dp), clip = false)
             .clip(RoundedCornerShape(31.dp))
             .background(
-                if (androidx.compose.material.MaterialTheme.colors.isLight) Color.White.copy(alpha = 0.52f)
-                else Color.Black.copy(alpha = 0.40f),
+                // Use the same translucent system material as the "Resume"
+                // accessory so the root navigation stays visually consistent.
+                if (androidx.compose.material.MaterialTheme.colors.isLight) Color.White.copy(alpha = 0.88f)
+                else Color.Black.copy(alpha = 0.68f),
             )
             .border(
                 1.dp,
@@ -487,32 +503,129 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             onThemeChanged = onThemeChanged,
         )
         pendingGeneratedPlan?.let { (json, state) ->
-            AlertDialog(
-                onDismissRequest = { pendingGeneratedPlan = null },
-                title = { Text(androidx.compose.ui.res.stringResource(R.string.preview_new_plan), fontWeight = FontWeight.Bold, maxLines = 2) },
-                text = {
-                    Column {
-                        Text(state.planName, fontWeight = FontWeight.Bold, maxLines = 2)
-                        Text(state.phase, color = WildforceThemeTokens.textSecondary, maxLines = 2)
-                        Text(androidx.compose.ui.res.stringResource(R.string.plan_progress, state.mesocycleNumber, state.mesocycleIndex, state.weekIndex, state.cycleLength), color = WildforceThemeTokens.accentGold, maxLines = 1)
-                        state.mesocyclePhase?.let { phase -> Text("${phase.label} · Semana de fase ${state.phaseWeek}", color = WildforceThemeTokens.textSecondary) }
-                        state.workouts.take(6).forEach { workout ->
-                            Text(androidx.compose.ui.res.stringResource(R.string.plan_preview_workout, workout.scheduledDay, workout.title, workout.exercises.size, workout.estimatedMinutes), modifier = Modifier.padding(top = 6.dp), maxLines = 1)
-                        }
-                    }
+            WorkoutPlanPreviewSheet(
+                state = state,
+                gender = currentProfile.gender.storedValue,
+                onDismiss = { pendingGeneratedPlan = null },
+                onCommit = {
+                    // New plans have a distinct workout identity. Discard any
+                    // paused state from the plan being replaced before its IDs
+                    // can be mistaken for the new week's sessions.
+                    WorkoutSessionStore.discardPlanSessions(context, baseState.workouts.map(WorkoutDaySummary::id))
+                    workoutPlanStore.replaceCurrentPlan(json)
+                    workoutPlanStore.saveProfileSignature(currentProfile.workoutPlanProfileSignature())
+                    WorkoutQuickAccessWidget.refresh(context)
+                    preferences.edit().remove("completed_workouts").remove("skipped_workouts").apply()
+                    generatedWorkoutState = state
+                    pendingGeneratedPlan = null
                 },
-                confirmButton = {
-                    Button(onClick = {
-                        workoutPlanStore.replaceCurrentPlan(json)
-                        workoutPlanStore.saveProfileSignature(currentProfile.workoutPlanProfileSignature())
-                        WorkoutQuickAccessWidget.refresh(context)
-                        preferences.edit().remove("completed_workouts").remove("skipped_workouts").apply()
-                        generatedWorkoutState = state
-                        pendingGeneratedPlan = null
-                    }) { Text(androidx.compose.ui.res.stringResource(R.string.use_this_plan)) }
-                },
-                dismissButton = { Button(onClick = { pendingGeneratedPlan = null }) { Text(androidx.compose.ui.res.stringResource(R.string.cancel)) } },
             )
+        }
+    }
+}
+
+/** The generated-plan confirmation mirrors iOS's expandable preview sheet. */
+@Composable
+private fun WorkoutPlanPreviewSheet(
+    state: WorkoutHubState,
+    gender: String,
+    onDismiss: () -> Unit,
+    onCommit: () -> Unit,
+) {
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        androidx.compose.material.Surface(
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(.92f),
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            color = WildforceThemeTokens.background,
+        ) {
+            Column {
+                Row(
+                    Modifier.fillMaxWidth().padding(start = 24.dp, top = 18.dp, end = 12.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("TU NUEVO PLAN", Modifier.weight(1f), style = androidx.compose.material.MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
+                    TextButton(onClick = onDismiss) {
+                        Icon(Icons.Filled.Close, contentDescription = androidx.compose.ui.res.stringResource(R.string.cancel), tint = WildforceThemeTokens.textSecondary)
+                    }
+                }
+                Column(
+                    Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    PlanPreviewSummary(state)
+                    state.workouts.sortedBy(WorkoutDaySummary::order).forEach { workout ->
+                        PlanPreviewWorkoutCard(workout, gender)
+                    }
+                    Spacer(Modifier.height(4.dp))
+                }
+                Button(
+                    onClick = onCommit,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = WildforceThemeTokens.textPrimary,
+                        contentColor = WildforceThemeTokens.background,
+                    ),
+                ) {
+                    Text("¡ME COMPROMETO!", modifier = Modifier.padding(vertical = 4.dp), fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PlanPreviewSummary(state: WorkoutHubState) {
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text("ESTA SEMANA", style = androidx.compose.material.MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
+        Text(state.planName, style = androidx.compose.material.MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, maxLines = 2)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            PlanPreviewPill(state.phase)
+            PlanPreviewPill("${state.workouts.size} sesiones")
+        }
+        Text(
+            androidx.compose.ui.res.stringResource(R.string.plan_progress, state.mesocycleNumber, state.mesocycleIndex, state.weekIndex, state.cycleLength),
+            style = androidx.compose.material.MaterialTheme.typography.caption,
+            color = WildforceThemeTokens.textSecondary,
+        )
+    }
+}
+
+@Composable
+private fun PlanPreviewPill(text: String) {
+    Text(
+        text,
+        Modifier.background(WildforceThemeTokens.surfaceSubtle, RoundedCornerShape(100.dp)).padding(horizontal = 10.dp, vertical = 6.dp),
+        style = androidx.compose.material.MaterialTheme.typography.caption,
+        color = WildforceThemeTokens.textSecondary,
+        maxLines = 1,
+    )
+}
+
+@Composable
+private fun PlanPreviewWorkoutCard(workout: WorkoutDaySummary, gender: String) {
+    Box(Modifier.fillMaxWidth().height(160.dp).clip(RoundedCornerShape(10.dp))) {
+        RemoteTrainingImage(
+            url = exerciseImageUrl(workout.exercises.firstOrNull()?.imageKey, gender),
+            contentDescription = workout.title,
+            modifier = Modifier.fillMaxSize(),
+        )
+        Box(Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = .84f)))))
+        Column(
+            Modifier.align(Alignment.BottomStart).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(workout.scheduledDay.name.lowercase().replaceFirstChar(Char::titlecase), style = androidx.compose.material.MaterialTheme.typography.caption, color = Color.White.copy(alpha = .78f))
+            Text(workout.title, style = androidx.compose.material.MaterialTheme.typography.h6, color = Color.White, maxLines = 1)
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.Timer, null, modifier = Modifier.size(14.dp), tint = Color.White.copy(alpha = .84f))
+                Text("${workout.estimatedMinutes} min", style = androidx.compose.material.MaterialTheme.typography.caption, color = Color.White.copy(alpha = .84f))
+                Icon(Icons.Filled.FitnessCenter, null, modifier = Modifier.size(14.dp), tint = Color.White.copy(alpha = .84f))
+                Text(workout.focus, style = androidx.compose.material.MaterialTheme.typography.caption, color = Color.White.copy(alpha = .84f), maxLines = 1)
+            }
         }
     }
 }
@@ -594,12 +707,12 @@ private fun WildforceApp(
             skipRestPeriods = profile.skipsRestPeriods,
             currentStreak = displayedWorkoutState.user.currentStreak,
             isPlanCompletedAfterWorkout = displayedWorkoutState.workouts.none { candidate ->
-                candidate.id != workout.id && candidate.status == WorkoutStatus.Planned
+                candidate.id != workout.id && !candidate.status.isPlanFinalized
             },
             isMesocycleCompletedAfterWorkout = displayedWorkoutState.cycleLength > 1 &&
                 displayedWorkoutState.positionInCycle >= displayedWorkoutState.cycleLength &&
                 displayedWorkoutState.workouts.none { candidate ->
-                    candidate.id != workout.id && candidate.status == WorkoutStatus.Planned
+                    candidate.id != workout.id && !candidate.status.isPlanFinalized
                 },
             planName = displayedWorkoutState.planName,
             completedPlanWorkouts = displayedWorkoutState.workouts.count { it.status == WorkoutStatus.Completed } + 1,
@@ -650,6 +763,12 @@ private fun WildforceApp(
             if (!workout.id.startsWith("custom-")) workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(skippedState))
             WildforceNotificationScheduler.scheduleNextWorkout(appContext, skippedState)
             workoutDetail = null
+            // iOS treats skipped days as finished plan slots.  If this was the
+            // final pending session, continue straight to the next-plan flow.
+            if (skippedState.workouts.isNotEmpty() && skippedState.workouts.all { it.status.isPlanFinalized }) {
+                appPreferences.edit().putBoolean("generate_next_plan", true).apply()
+                onRegenerateProfile(profile)
+            }
         }, onUnskip = {
             val skipped = appPreferences.getStringSet("skipped_workouts", emptySet()).orEmpty() - workout.id
             appPreferences.edit().putStringSet("skipped_workouts", skipped).apply()
@@ -704,6 +823,7 @@ private fun WildforceApp(
                     ActiveWorkoutAccessory(
                         workout = workout,
                         exerciseIndex = WorkoutSessionStore.activeExerciseIndex(appContext, workout.id),
+                        gender = profile.gender.storedValue,
                         onResume = { activeWorkout = workout },
                     )
                 }
@@ -815,10 +935,10 @@ private fun workoutBmr(profile: OnboardingProfile): Double {
 private fun ActiveWorkoutAccessory(
     workout: WorkoutDaySummary,
     exerciseIndex: Int?,
+    gender: String,
     onResume: () -> Unit,
 ) {
     val currentExercise = workout.exercises.getOrNull(exerciseIndex ?: 0)
-    val primaryMuscleDrawable = ExerciseVisualCatalog.primaryMuscleDrawable(currentExercise?.imageKey)
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -841,11 +961,13 @@ private fun ActiveWorkoutAccessory(
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (primaryMuscleDrawable != null) {
-                Image(
-                    painter = painterResource(primaryMuscleDrawable),
-                    contentDescription = null,
-                    modifier = Modifier.size(28.dp),
+            if (currentExercise?.imageKey != null) {
+                // The resume accessory identifies a specific exercise, so use its
+                // own thumbnail instead of an abstract muscle-group symbol.
+                RemoteTrainingImage(
+                    url = exerciseImageUrl(currentExercise.imageKey, gender),
+                    contentDescription = currentExercise.name,
+                    modifier = Modifier.size(28.dp).clip(RoundedCornerShape(7.dp)),
                 )
             } else {
                 Icon(

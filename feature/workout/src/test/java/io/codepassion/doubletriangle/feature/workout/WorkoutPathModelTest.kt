@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
+import io.codepassion.doubletriangle.core.model.ExerciseTrackingMode
 import io.codepassion.doubletriangle.core.model.WorkoutBlockSummary
 import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
@@ -8,9 +9,41 @@ import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import io.codepassion.doubletriangle.core.model.executionExercises
 import java.time.DayOfWeek
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WorkoutPathModelTest {
+    @Test
+    fun `rest timer next exercise keeps the typed series reps and weight prescription`() {
+        val exercise = ExerciseSummary(
+            name = "Press de banca",
+            sets = 4,
+            reps = "8-10",
+            restSeconds = 90,
+            targetWeightsKg = listOf(50.0, 55.0),
+            trackingMode = ExerciseTrackingMode.Repetitions,
+        )
+
+        val prescription = restTimerExercisePrescription(exercise, useImperial = false)
+        assertEquals(listOf("4 series", "8-10 reps"), prescription.take(2))
+        assertTrue(prescription.last().endsWith(" kg"))
+    }
+
+    @Test
+    fun `rest timer next exercise shows duration and distance instead of repetitions`() {
+        val exercise = ExerciseSummary(
+            name = "Correr",
+            sets = 1,
+            reps = "—",
+            restSeconds = 60,
+            targetDurationMinutes = 20,
+            targetDistanceKm = 3.5,
+            trackingMode = ExerciseTrackingMode.DurationAndDistance,
+        )
+
+        assertEquals(listOf("1 serie", "20 min", "3.5 km"), restTimerExercisePrescription(exercise, useImperial = false))
+    }
+
     @Test
     fun `superset rounds share one visual row per exercise`() {
         val blocks = listOf(

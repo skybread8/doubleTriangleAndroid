@@ -15,11 +15,13 @@ class ExerciseReplacementRankingTest {
     )
 
     @Test
-    fun `puts the closest movement first and removes the original exercise`() {
+    fun `uses iOS candidate order and removes the original exercise`() {
         val replacing = ExerciseSummary("Sentadilla con barra", "barbellBackSquat", 3, "8", 90)
 
         val replacements = rankExerciseReplacements(catalog, replacing)
 
+        // iOS puts barbellFrontSquat and legPress first, but neither is in
+        // this local test catalogue. Goblet squat is the next available one.
         assertEquals("gobletSquat", replacements.first().imageKey)
         assertFalse(replacements.any { it.imageKey == "barbellBackSquat" })
     }
@@ -33,5 +35,16 @@ class ExerciseReplacementRankingTest {
         )
 
         assertEquals("latPulldown", rankExerciseReplacements(choices, replacing).first().imageKey)
+    }
+
+    @Test
+    fun `separates same primary muscle exercises from all other exercises`() {
+        val replacing = ExerciseSummary("Press de banca", "benchPress", 3, "8", 90)
+
+        val sections = exerciseReplacementSections(catalog, replacing)
+
+        assertEquals(listOf("deadlift", "barbellBackSquat", "gobletSquat", "airSquat"), sections.all.map { it.imageKey })
+        assertEquals(emptyList<String>(), sections.recommendedSubstitutes.map { it.imageKey })
+        assertEquals(emptyList<String>(), sections.sameMuscleGroup.map { it.imageKey })
     }
 }

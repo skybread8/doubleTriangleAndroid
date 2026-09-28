@@ -4,9 +4,15 @@ import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
 import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class WorkoutPlanGeneratorTest {
+
+    @Test fun generatedWorkoutIdsAreUniqueAndPersistedIdsAreKept() {
+        assertEquals("saved-workout-id", WorkoutPlanGenerator.resolveWorkoutId("saved-workout-id"))
+        assertNotEquals("ai-1", WorkoutPlanGenerator.resolveWorkoutId(""))
+    }
     @Test
     fun `maps every AI set style and keeps legacy plans compatible`() {
         val styles = mapOf(

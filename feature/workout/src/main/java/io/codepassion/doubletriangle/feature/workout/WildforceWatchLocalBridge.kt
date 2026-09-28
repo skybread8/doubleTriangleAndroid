@@ -1,16 +1,11 @@
 package io.codepassion.doubletriangle.feature.workout
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.ServerSocket
@@ -54,7 +49,7 @@ object WildforceWatchLocalBridge {
         if (!value) stop(context) else if (state != null) start(context)
     }
     fun start(context: Context) {
-        if (enabled(context)) ContextCompat.startForegroundService(context, Intent(context, WildforceWatchLocalBridgeService::class.java).setAction(ACTION_START))
+        if (enabled(context)) context.startService(Intent(context, WildforceWatchLocalBridgeService::class.java).setAction(ACTION_START))
     }
     fun stop(context: Context) {
         context.stopService(Intent(context, WildforceWatchLocalBridgeService::class.java))
@@ -66,7 +61,47 @@ object WildforceWatchLocalBridge {
         state = value.copy(heartRateZoneAge = age)
         start(context)
     }
-    internal fun dispatch(command: Command) = Handler(Looper.getMainLooper()).post { commandListener?.invoke(command) }
+    /**
+     * A workout screen is not guaranteed to be composed while Android has the
+     * app in the background. Keep a command received in that window instead of
+     * silently dropping it; it is consumed as soon as its workout is restored.
+     */
+    internal fun dispatch(context: Context, command: Command) = Handler(Looper.getMainLooper()).post {
+        val listener = commandListener
+        if (listener != null) listener(command) else WatchCommandStore.enqueue(context, command)
+    }
+}
+
+/** Small FIFO persisted alongside the active workout, used only as a fallback
+ * when the watch sends a command while the Compose workout is not alive. */
+internal object WatchCommandStore {
+    private const val PREFS = "wildforce_watch_commands"
+    private const val QUEUE = "queue"
+
+    fun enqueue(context: Context, command: WildforceWatchLocalBridge.Command) {
+        synchronized(this) {
+            val prefs = context.getSharedPreferences(PREFS, 0)
+            val queue = runCatching { JSONArray(prefs.getString(QUEUE, "[]")) }.getOrDefault(JSONArray())
+            queue.put(JSONObject().put("op", command.operation).put("reps", command.reps).put("weightKg", command.weightKg))
+            prefs.edit().putString(QUEUE, queue.toString()).apply()
+        }
+    }
+
+    fun drain(context: Context): List<WildforceWatchLocalBridge.Command> = synchronized(this) {
+        val prefs = context.getSharedPreferences(PREFS, 0)
+        val queue = runCatching { JSONArray(prefs.getString(QUEUE, "[]")) }.getOrDefault(JSONArray())
+        prefs.edit().remove(QUEUE).apply()
+        buildList {
+            for (index in 0 until queue.length()) {
+                val item = queue.optJSONObject(index) ?: continue
+                when (item.optString("op")) {
+                    "set_reps" -> add(WildforceWatchLocalBridge.Command("set_reps", reps = item.optInt("reps")))
+                    "set_weight" -> add(WildforceWatchLocalBridge.Command("set_weight", weightKg = item.optDouble("weightKg")))
+                    "complete_set", "skip_rest", "add_rest" -> add(WildforceWatchLocalBridge.Command(item.getString("op")))
+                }
+            }
+        }
+    }
 }
 
 class WildforceWatchLocalBridgeService : Service() {
@@ -74,7 +109,6 @@ class WildforceWatchLocalBridgeService : Service() {
     @Volatile private var socket: ServerSocket? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground(4103, notification())
         if (socket == null) executor.execute(::serve)
         return START_NOT_STICKY
     }
@@ -100,7 +134,7 @@ class WildforceWatchLocalBridgeService : Service() {
         val body = if (contentLength > 0) CharArray(contentLength).also { reader.read(it) }.concatToString() else ""
         val response = when {
             request.startsWith("GET /v1/state") -> WildforceWatchLocalBridge.state?.toJson() ?: "{\"active\":false}"
-            request.startsWith("POST /v1/command") -> { parseCommand(body)?.let(WildforceWatchLocalBridge::dispatch); "{\"ok\":true}" }
+            request.startsWith("POST /v1/command") -> { parseCommand(body)?.let { WildforceWatchLocalBridge.dispatch(applicationContext, it) }; "{\"ok\":true}" }
             else -> "{\"error\":\"not_found\"}"
         }
         val bytes = response.toByteArray(StandardCharsets.UTF_8)
@@ -124,13 +158,4 @@ class WildforceWatchLocalBridgeService : Service() {
 
     override fun onDestroy() { runCatching { socket?.close() }; socket = null; executor.shutdownNow(); super.onDestroy() }
     override fun onBind(intent: Intent?): IBinder? = null
-    private fun notification() : android.app.Notification {
-        val manager = getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(NotificationChannel("wildforce_watch_local", "Wildforce Watch", NotificationManager.IMPORTANCE_LOW))
-        val launch = packageManager.getLaunchIntentForPackage(packageName) ?: Intent()
-        return NotificationCompat.Builder(this, "wildforce_watch_local")
-            .setSmallIcon(R.drawable.ic_wildforce_notification).setContentTitle("Wildforce Watch activo")
-            .setContentText("Sincronización local durante el entrenamiento")
-            .setContentIntent(PendingIntent.getActivity(this, 0, launch, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)).setOngoing(true).build()
-    }
 }

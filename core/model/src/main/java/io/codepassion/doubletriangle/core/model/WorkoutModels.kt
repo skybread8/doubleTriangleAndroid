@@ -11,6 +11,10 @@ enum class WorkoutMode(val label: String) {
 
 enum class WorkoutStatus { Planned, Completed, Skipped }
 
+/** A skipped session is not performed, but it does finish its slot in the plan. */
+val WorkoutStatus.isPlanFinalized: Boolean
+    get() = this == WorkoutStatus.Completed || this == WorkoutStatus.Skipped
+
 enum class MesocyclePhase(val label: String) {
     Accumulation("Acumulación"),
     Intensification("Intensificación"),

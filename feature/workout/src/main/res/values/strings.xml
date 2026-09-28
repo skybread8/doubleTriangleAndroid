@@ -38,7 +38,11 @@
     <string name="workout_close">Cerrar</string>
     <string name="workout_back">‹ VOLVER</string>
     <string name="workout_add_exercise_title">AÑADIR EJERCICIO</string>
+    <string name="workout_swap_exercise_title">SUSTITUIR EJERCICIO</string>
     <string name="workout_search_exercise">Buscar ejercicio</string>
+    <string name="workout_recommended_substitutes">Sustitutos recomendados</string>
+    <string name="workout_same_muscle_group">Mismo grupo muscular</string>
+    <string name="workout_all_exercises">Todos los ejercicios</string>
     <string name="workout_work_timer_description">Temporizador de ejercicio, %1$s restante</string>
     <string name="workout_remaining">RESTANTE</string>
     <string name="workout_section">SECCIÓN · %1$s  ›</string>

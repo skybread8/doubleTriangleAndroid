@@ -589,28 +589,53 @@ internal fun ExercisePickerScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     val catalog = remember { CustomExerciseCatalog.load(context) }
     var search by remember { mutableStateOf("") }
-    val rankedCatalog = remember(catalog, replacing) {
-        replacing?.let { rankExerciseReplacements(catalog, it) } ?: catalog
+    val replacementSections = remember(catalog, replacing) {
+        replacing?.let { exerciseReplacementSections(catalog, it) }
     }
-    val filtered = remember(search, rankedCatalog) {
-        rankedCatalog.filter { it.name.contains(search, ignoreCase = true) || it.imageKey.contains(search, ignoreCase = true) }
+    val visibleSections = remember(search, catalog, replacementSections) {
+        val source = replacementSections ?: ExerciseReplacementSections(emptyList(), emptyList(), catalog)
+        fun filtered(choices: List<ExerciseChoice>) = choices.filter {
+            it.name.contains(search, ignoreCase = true) || it.imageKey.contains(search, ignoreCase = true)
+        }
+        ExerciseReplacementSections(filtered(source.recommendedSubstitutes), filtered(source.sameMuscleGroup), filtered(source.allOtherExercises))
     }
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.workout_back), Modifier.clickable(onClick = onBack).padding(10.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
-            Text(stringResource(R.string.workout_add_exercise_title), Modifier.weight(1f), textAlign = TextAlign.Center, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5)
+            Text(stringResource(if (replacing == null) R.string.workout_add_exercise_title else R.string.workout_swap_exercise_title), Modifier.weight(1f), textAlign = TextAlign.Center, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5)
         }
         TextField(search, { search = it }, Modifier.fillMaxWidth().padding(vertical = 10.dp), label = { Text(stringResource(R.string.workout_search_exercise)) }, singleLine = true)
         LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            items(filtered, key = { it.imageKey }) { choice ->
-                Row(Modifier.fillMaxWidth().clickable { onSelect(choice) }.padding(7.dp), verticalAlignment = Alignment.CenterVertically) {
-                    RemoteTrainingImage(exerciseImageUrl(choice.imageKey, gender), choice.name, Modifier.size(54.dp).clip(RoundedCornerShape(12.dp)))
-                    Text(choice.name, Modifier.weight(1f).padding(horizontal = 12.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
-                    Text("＋", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.h5)
+            fun androidx.compose.foundation.lazy.LazyListScope.exerciseRows(choices: List<ExerciseChoice>) {
+                items(choices, key = { it.imageKey }) { choice ->
+                    Row(Modifier.fillMaxWidth().clickable { onSelect(choice) }.padding(7.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RemoteTrainingImage(exerciseImageUrl(choice.imageKey, gender), choice.name, Modifier.size(54.dp).clip(RoundedCornerShape(12.dp)))
+                        Text(choice.name, Modifier.weight(1f).padding(horizontal = 12.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
+                        Text("＋", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.h5)
+                    }
                 }
+            }
+            if (replacing != null && search.isBlank()) {
+                if (visibleSections.recommendedSubstitutes.isNotEmpty()) {
+                    item { ExercisePickerSectionTitle(stringResource(R.string.workout_recommended_substitutes)) }
+                    exerciseRows(visibleSections.recommendedSubstitutes)
+                }
+                if (visibleSections.sameMuscleGroup.isNotEmpty()) {
+                    item { ExercisePickerSectionTitle(stringResource(R.string.workout_same_muscle_group)) }
+                    exerciseRows(visibleSections.sameMuscleGroup)
+                }
+                item { ExercisePickerSectionTitle(stringResource(R.string.workout_all_exercises)) }
+                exerciseRows(visibleSections.allOtherExercises)
+            } else {
+                exerciseRows(visibleSections.all)
             }
         }
     }
+}
+
+@Composable
+private fun ExercisePickerSectionTitle(title: String) {
+    Text(title, Modifier.padding(top = 12.dp, bottom = 4.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
 }
 
 @Composable private fun CreationOption(glyph: String, title: String, description: String, onClick: () -> Unit) {

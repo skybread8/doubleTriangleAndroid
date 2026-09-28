@@ -12,16 +12,16 @@
       @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto+Condensed:wght@400;500;600;700&display=swap");
 
       :root {
-        --bg: #151616;
-        --surface: #232227;
-        --card: #1b1a1e;
-        --border: #39383e;
-        --accent: #feffff;
-        --accent-bright: #ffffff;
-        --accent-muted: rgba(254, 255, 255, 0.10);
-        --white: #feffff;
-        --secondary: #a7a6ae;
-        --muted: #77767d;
+        --bg: #ffffff;
+        --surface: #f4f4f5;
+        --card: #ffffff;
+        --border: #dedee1;
+        --accent: #161616;
+        --accent-bright: #000000;
+        --accent-muted: rgba(22, 22, 22, 0.07);
+        --white: #161616;
+        --secondary: #5e5e63;
+        --muted: #85858b;
       }
 
       * { box-sizing: border-box; }
@@ -30,18 +30,13 @@
         min-width: 320px;
         margin: 0;
         color: var(--white);
-        background:
-          radial-gradient(circle at 82% -12%, rgba(254, 255, 255, 0.06), transparent 24rem),
-          var(--bg);
+        background: var(--bg);
         font-family: "Roboto Condensed", "Arial Narrow", Arial, sans-serif;
       }
 
-      .page { width: min(100% - 32px, 760px); margin: 0 auto; padding: 30px 0 54px; }
-      .brand { display: inline-flex; align-items: center; min-height: 38px; }
-      .brand img { display: block; width: 154px; height: auto; object-fit: contain; }
-      .brand span { color: var(--white); font-family: "Bebas Neue", Impact, sans-serif; font-size: 31px; letter-spacing: .05em; }
+      .page { width: min(100% - 32px, 760px); margin: 0 auto; padding: 36px 0 54px; }
 
-      .hero { padding: 48px 0 32px; }
+      .hero { padding: 8px 0 32px; }
       .eyebrow {
         display: flex; align-items: center; gap: 8px; margin: 0 0 14px;
         color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
@@ -65,7 +60,7 @@
         overflow: hidden; background: var(--card); border: 1px solid var(--border); border-radius: 14px;
         transition: border-color 160ms ease, background 160ms ease;
       }
-      details[open] { border-color: rgba(254, 255, 255, .52); background: var(--surface); }
+      details[open] { border-color: #161616; background: var(--surface); }
       summary {
         position: relative; display: flex; align-items: center; min-height: 68px; padding: 18px 58px 18px 19px;
         cursor: pointer; list-style: none; font-size: 18px; font-weight: 700; line-height: 1.15;
@@ -82,21 +77,21 @@
       .answer strong { color: var(--white); }
       .availability {
         display: inline-block; margin: 0 0 9px; padding: 4px 8px; color: var(--white);
-        background: var(--accent-muted); border: 1px solid rgba(254, 255, 255, .30); border-radius: 999px;
+        background: var(--accent-muted); border: 1px solid rgba(22, 22, 22, .25); border-radius: 999px;
         font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
       }
 
       .support {
         display: grid; grid-template-columns: 1fr auto; gap: 22px; align-items: center; margin-top: 38px; padding: 24px;
         background: linear-gradient(135deg, var(--accent-muted), transparent 72%), var(--surface);
-        border: 1px solid rgba(254, 255, 255, .32); border-radius: 14px;
+        border: 1px solid rgba(22, 22, 22, .28); border-radius: 14px;
       }
       .support h2 { font-size: 29px; }
       .support p { max-width: 410px; margin: 7px 0 0; color: var(--secondary); font-size: 16px; line-height: 1.4; }
       .button {
         display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 19px; color: var(--white);
         background: var(--accent); border-radius: 10px; font-size: 14px; font-weight: 700; letter-spacing: .07em;
-        color: #151616;
+        color: #ffffff;
         text-decoration: none; text-transform: uppercase; transition: background 160ms ease, transform 160ms ease;
       }
       .button:hover, .button:focus-visible { background: var(--accent-bright); transform: translateY(-1px); }
@@ -105,8 +100,7 @@
 
       @media (max-width: 540px) {
         .page { width: min(100% - 28px, 760px); padding-top: 22px; }
-        .brand img { width: 132px; }
-        .hero { padding: 48px 0 32px; }
+        .hero { padding: 12px 0 32px; }
         .hero p { font-size: 17px; }
         summary { min-height: 64px; font-size: 17px; }
         .support { grid-template-columns: 1fr; gap: 17px; padding: 20px; }
@@ -116,10 +110,6 @@
   </head>
   <body>
     <main class="page">
-      <a class="brand" href="#inicio" aria-label="WildForce, inicio">
-        <span aria-label="WildForce">WILDFORCE</span>
-      </a>
-
       <header class="hero" id="inicio">
         <p class="eyebrow">Centro de ayuda</p>
         <h1>Las dudas se resuelven. El progreso continúa.</h1>
