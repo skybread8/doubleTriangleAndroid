@@ -410,6 +410,21 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 }
             },
         )
+        LaunchedEffect(currentProfile.name, workoutPlanStore.currentPlanJson()) {
+            val hasRemoteSession = context.getSharedPreferences("wildforce_account", 0).getString("token", null) != null
+            if (preferences.getBoolean("remote_sync_pending", false) || hasRemoteSession) {
+                if (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
+                    preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                    if (preferences.getBoolean("remote_plan_imported", false)) {
+                        preferences.edit().remove("remote_plan_imported").apply()
+                        workoutPlanStore.currentPlanJson()?.let { remotePlan ->
+                            runCatching { WorkoutPlanGenerator.parse(remotePlan, currentProfile.name, currentProfile.goal.title) }
+                                .onSuccess { generatedWorkoutState = it }
+                        }
+                    }
+                }
+            }
+        }
         WildforceApp(
             profile = currentProfile,
             workoutState = restoredState,
@@ -428,6 +443,12 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 val completedWorkout = restoredState.workouts.firstOrNull { it.id == id }
                 runCatching { TrainingSessionHistoryStore.record(preferences, duration, sets, volume, completedWorkout?.focus) }
                 runCatching { WorkoutQuickAccessWidget.refresh(context) }
+                preferences.edit().putBoolean("remote_sync_pending", true).apply()
+                coroutineScope.launch {
+                    if (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
+                        preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                    }
+                }
                 if (currentProfile.isHealthConnectEnabled) {
                     val workoutTitle = completedWorkout?.title ?: "Entrenamiento"
                     coroutineScope.launch {
@@ -465,6 +486,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     .putString("planner_notes", updated.workoutPlannerNotes)
                     .putStringSet("training_locations", encodeTrainingLocations(updated.trainingLocations))
                     .putString("app_language", updated.appLanguage)
+                    .putBoolean("remote_sync_pending", true)
                 .apply()
                 profile = updated
                 if (updated.isHealthConnectEnabled) {
@@ -495,6 +517,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             onPlanWorkoutUpdated = { updatedState ->
                 generatedWorkoutState = updatedState
                 workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(updatedState))
+                preferences.edit().putBoolean("remote_sync_pending", true).apply()
                 WorkoutQuickAccessWidget.refresh(context)
             },
             isGeneratingProfilePlan = isGenerating,
@@ -515,7 +538,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     workoutPlanStore.replaceCurrentPlan(json)
                     workoutPlanStore.saveProfileSignature(currentProfile.workoutPlanProfileSignature())
                     WorkoutQuickAccessWidget.refresh(context)
-                    preferences.edit().remove("completed_workouts").remove("skipped_workouts").apply()
+                    preferences.edit().remove("completed_workouts").remove("skipped_workouts").putBoolean("remote_sync_pending", true).apply()
                     generatedWorkoutState = state
                     pendingGeneratedPlan = null
                 },
@@ -749,7 +772,20 @@ private fun WildforceApp(
         return
     }
     workoutDetail?.let { workout ->
-        Box(Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier.liquidGlassBackground(),
+            backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
+            bottomBar = {
+                RootBottomNavigation(
+                    selected = selected,
+                    onSelected = {
+                        workoutDetail = null
+                        selected = it
+                    },
+                )
+            },
+        ) { padding ->
+        Box(Modifier.fillMaxSize().padding(padding)) {
         WorkoutDetailScreen(workout, profile.gender.storedValue, useImperial = profile.metricSystem == MetricSystem.Imperial, onBack = { workoutDetail = null }, onStart = {
             WildforceNotificationScheduler.recordWorkoutStarted(appContext)
             activeWorkout = workout
@@ -792,14 +828,7 @@ private fun WildforceApp(
         }, defaultAdaptEquipment = profile.effectiveTrainingLocations().firstOrNull { it.isDefault }?.equipment?.joinToString(", ") { it.title }.orEmpty().ifBlank { profile.availableEquipment.joinToString(", ") { it.title } }, adaptEquipmentPresets = profile.effectiveTrainingLocations().map { location -> location.name to location.equipment.joinToString(", ") { it.title } }, adaptAiGenerator = { request ->
             WorkoutPlanGenerator.adaptWorkout(profile, workout, request, appContext)
         })
-            RootBottomNavigation(
-                selected = selected,
-                onSelected = {
-                    workoutDetail = null
-                    selected = it
-                },
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
+        }
         }
         return
     }
@@ -831,13 +860,14 @@ private fun WildforceApp(
             }
         },
     ) { padding ->
-        // El contenido debe extenderse detrás de la cápsula inferior, como en iOS;
-        // la propia barra ya incluye el inset de navegación.
+        // Reserve the complete bottom-bar footprint.  The resume accessory can be
+        // taller than the navigation bar, so drawing content behind it would make
+        // the final item of any scrollable screen unreachable.
         val overlayPadding = PaddingValues(
             start = padding.calculateStartPadding(LayoutDirection.Ltr),
             top = padding.calculateTopPadding(),
             end = padding.calculateEndPadding(LayoutDirection.Ltr),
-            bottom = 0.dp,
+            bottom = padding.calculateBottomPadding(),
         )
         if (selected == RootDestination.Workout) {
             WorkoutHubScreen(

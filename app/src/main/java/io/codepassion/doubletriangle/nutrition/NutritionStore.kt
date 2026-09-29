@@ -170,6 +170,9 @@ internal object NutritionStore {
     fun recent(context: Context, limit: Int = 12): List<MealLog> = all(context).sortedByDescending { it.id }
         .distinctBy { listOf(it.name.lowercase(), it.calories, it.protein, it.carbs, it.fat) }.take(limit)
 
+    /** Returns every local entry so the account synchronizer can upload its complete history. */
+    fun allForSync(context: Context): List<MealLog> = all(context)
+
     fun save(context: Context, date: LocalDate, meals: List<MealLog>) {
         write(context, all(context).filterNot { it.loggedDate == date } + meals.map { it.copy(loggedDate = date) })
     }

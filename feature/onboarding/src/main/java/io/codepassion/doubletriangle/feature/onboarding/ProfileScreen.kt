@@ -201,6 +201,7 @@ fun ProfileScreen(
         if (selectedSection == null) { item { ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, avatarPath, avatarRevision, onChangeAvatar) } } }
         if (selectedSection == null) { item { ProfileEntrance(entered, 35) { ProfileExperience(experienceXp, experienceLevel, experienceProgress) } } }
         if (selectedSection == null) { item { ProfileCategoryTree(draft, nutritionProfile, appLanguage) { selectedSection = it } } }
+        if (selectedSection == null) { item { ProfileEntrance(entered, 50) { AccountSection(draft) { remoteProfile -> draft = remoteProfile; saveProfile(remoteProfile) } } } }
         // `achievementsSection` is intentionally disabled in the canonical iOS
         // profile view.  Do not render a placeholder rail here: it changes the
         // hierarchy and pushes the four profile destinations below the fold.

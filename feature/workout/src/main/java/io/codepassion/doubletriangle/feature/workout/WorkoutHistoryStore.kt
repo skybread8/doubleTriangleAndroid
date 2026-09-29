@@ -69,6 +69,21 @@ data class ExerciseAnalyticsPoint(
     val distanceKm: Double = 0.0,
 )
 
+/** Stable, UI-independent history snapshot exposed to the account synchronizer. */
+data class RemoteExerciseHistoryEntry(
+    val exerciseKey: String,
+    val timestampMillis: Long,
+    val sets: Int,
+    val totalReps: Int,
+    val maxWeightKg: Double,
+    val setReps: List<Int>,
+    val setWeightsKg: List<Double>,
+    val feedback: String?,
+    val note: String?,
+    val durationSeconds: Int,
+    val distanceKm: Double,
+)
+
 internal fun ExerciseSummary.historyKey(): String = imageKey?.takeIf(String::isNotBlank)?.lowercase() ?: name.lowercase()
 
 object WorkoutHistoryStore {
@@ -77,6 +92,26 @@ object WorkoutHistoryStore {
     private const val MAX_ENTRIES = 24
 
     internal fun history(context: Context, exercise: ExerciseSummary): List<ExerciseHistoryEntry> = historyForKey(context, exercise.historyKey())
+
+    fun remoteEntries(context: Context): List<RemoteExerciseHistoryEntry> {
+        val preferences = context.getSharedPreferences(PREFERENCES, 0)
+        val keys = preferences.getStringSet(HISTORY_KEYS, emptySet()).orEmpty()
+        return keys.flatMap { key -> historyForKey(context, key).map { entry ->
+            RemoteExerciseHistoryEntry(
+                exerciseKey = key,
+                timestampMillis = entry.timestampMillis,
+                sets = entry.sets,
+                totalReps = entry.totalReps,
+                maxWeightKg = entry.maxWeightKg,
+                setReps = entry.setDetails.map(SetPerformance::reps),
+                setWeightsKg = entry.setDetails.map(SetPerformance::weightKg),
+                feedback = entry.feedback,
+                note = entry.note,
+                durationSeconds = entry.durationSeconds,
+                distanceKm = entry.distanceKm,
+            )
+        } }
+    }
 
     private fun historyForKey(context: Context, key: String): List<ExerciseHistoryEntry> = runCatching {
         val raw = context.getSharedPreferences(PREFERENCES, 0).getString(key, null) ?: return emptyList()
