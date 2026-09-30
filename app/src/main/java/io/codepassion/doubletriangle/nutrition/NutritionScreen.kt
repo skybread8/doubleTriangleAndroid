@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -80,6 +81,7 @@ fun NutritionScreen(
     var showTargets by remember { mutableStateOf(false) }
     var showPreferences by remember { mutableStateOf(false) }
     var showIdeas by remember { mutableStateOf(false) }
+    var fridgeTarget by remember { mutableStateOf<NutritionTargets?>(null) }
     var showMoreActions by remember { mutableStateOf(false) }
     var showGrocery by remember { mutableStateOf(false) }
     var showFulfill by remember { mutableStateOf(false) }
@@ -122,7 +124,17 @@ fun NutritionScreen(
             entries = NutritionStore.load(context, detailDay!!.date),
             onBack = { detailDay = null },
             onLog = { selectedDate = detailDay!!.date; showLogFlow = true },
-            onPlannedMealAction = { meal, method -> selectedDate = detailDay!!.date; plannedMethod = method; plannedTitle = meal.title; showLogFlow = true },
+            onPlannedMealAction = { meal, method ->
+                selectedDate = detailDay!!.date
+                if (method == LogMethod.Describe) {
+                    fridgeTarget = meal.targets
+                    showIdeas = true
+                } else {
+                    plannedMethod = method
+                    plannedTitle = meal.title
+                    showLogFlow = true
+                }
+            },
             modifier = Modifier.padding(contentPadding),
         )
     } else if (showEntries) {
@@ -148,11 +160,13 @@ fun NutritionScreen(
             onSelectDate = { selectedDate = it },
             onToday = { selectedDate = today },
             onLog = { showLogFlow = true },
-            onIdeas = { showMoreActions = true },
+            onIdeas = { fridgeTarget = null; showMoreActions = true },
             onProgress = { showEntries = true },
             onDay = { detailDay = it },
             onEditPlan = { showTargets = true },
             onEditPreferences = { showPreferences = true },
+            onPlanGrocery = { showGrocery = true },
+            onPlanRegenerate = ::requestPlanGeneration,
             onGeneratePlan = ::requestPlanGeneration,
             modifier = Modifier.padding(contentPadding),
         )
@@ -183,14 +197,14 @@ fun NutritionScreen(
     if (showPreferences) NutritionPreferencesDialog(preferences, { showPreferences = false }) { value ->
         preferences = value; NutritionStore.savePreferences(context, value); NutritionStore.clearGeneratedPlan(context); generatedPlan = null; showPreferences = false
     }
-    if (showIdeas) MealIdeasDialog(plan.firstOrNull { it.date == selectedDate }, { showIdeas = false }) { planned ->
+    if (showIdeas) MealIdeasDialog(plan.firstOrNull { it.date == selectedDate }, fridgeTarget, { showIdeas = false; fridgeTarget = null }) { planned ->
         val entry = MealLog(System.currentTimeMillis(), planned.title, planned.targets.calories, planned.targets.protein, planned.targets.carbs, planned.targets.fat, planned.type, selectedDate, planned.guidance, "meal_idea")
         val updated = NutritionStore.load(context, selectedDate) + entry
-        NutritionStore.save(context, selectedDate, updated); reload(); showIdeas = false
+        NutritionStore.save(context, selectedDate, updated); reload(); showIdeas = false; fridgeTarget = null
     }
     if (showMoreActions) NutritionMoreActionsDialog(
         onDismiss = { showMoreActions = false },
-        onIdeas = { showMoreActions = false; showIdeas = true },
+        onIdeas = { showMoreActions = false; fridgeTarget = null; showIdeas = true },
         onFulfill = { showMoreActions = false; showFulfill = true },
         onGrocery = { showMoreActions = false; showGrocery = true },
         onRegenerate = {
@@ -229,6 +243,8 @@ private fun NutritionHub(
     onDay: (NutritionDayPlan) -> Unit,
     onEditPlan: () -> Unit,
     onEditPreferences: () -> Unit,
+    onPlanGrocery: () -> Unit,
+    onPlanRegenerate: () -> Unit,
     onGeneratePlan: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -245,7 +261,7 @@ private fun NutritionHub(
         )
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 120.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 160.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             if (!hasGeneratedPlan) item { NutritionPlanHero(onGeneratePlan) }
@@ -259,7 +275,7 @@ private fun NutritionHub(
                 )
             }
             item { WeeklyBalanceCard(plan, selectedDate, energyHistory) }
-            item { PlanHeader(plan, preferences, onEditPlan, onEditPreferences) }
+            item { PlanHeader(plan, preferences, onEditPlan, onEditPreferences, onPlanGrocery, onPlanRegenerate) }
             items(plan.filter { !it.date.isBefore(today) }.take(7), key = { it.date }) { day ->
                 NutritionDayHeader(day, NutritionStore.load(context, day.date).total(), day.date == today) { onDay(day) }
             }
@@ -385,9 +401,9 @@ private fun DailyProgressCard(date: LocalDate, current: NutritionTargets, target
             ProgressRing(animatedProgress)
         }
         Row(Modifier.padding(top = 22.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MacroProgress("Proteína", current.protein, target.protein, ProteinColor, Modifier.weight(1f))
-            MacroProgress("Carbos", current.carbs, target.carbs, CarbsColor, Modifier.weight(1f))
-            MacroProgress("Grasa", current.fat, target.fat, FatColor, Modifier.weight(1f))
+            MacroProgress("Proteína", current.protein, target.protein, ProteinColor, Icons.Filled.SetMeal, Modifier.weight(1f))
+            MacroProgress("Carbos", current.carbs, target.carbs, CarbsColor, Icons.Filled.Eco, Modifier.weight(1f))
+            MacroProgress("Grasa", current.fat, target.fat, FatColor, Icons.Filled.Opacity, Modifier.weight(1f))
         }
     }
 }
@@ -406,11 +422,14 @@ private fun ProgressRing(progress: Float) {
 }
 
 @Composable
-private fun MacroProgress(title: String, current: Int, target: Int, color: Color, modifier: Modifier) {
+private fun MacroProgress(title: String, current: Int, target: Int, color: Color, icon: ImageVector, modifier: Modifier) {
     val fraction = if (target > 0) current.toFloat() / target else 0f
     val animatedFraction by animateFloatAsState(fraction, label = "$title progress")
     Column(modifier, verticalArrangement = Arrangement.spacedBy(7.dp)) {
-        Text(title, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(15.dp))
+            Text(title, Modifier.padding(start = 5.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+        }
         Text("$current / $target g", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Box(Modifier.fillMaxWidth().height(10.dp).clip(CircleShape).background(WildforceThemeTokens.textSecondary.copy(alpha = .12f))) {
             Box(Modifier.fillMaxWidth(animatedFraction.coerceIn(0f, 1f)).fillMaxHeight().background(color))
@@ -421,39 +440,46 @@ private fun MacroProgress(title: String, current: Int, target: Int, color: Color
 @Composable
 private fun WeeklyBalanceCard(plan: List<NutritionDayPlan>, selected: LocalDate, energyHistory: Map<LocalDate, NutritionEnergyPoint>) {
     val context = LocalContext.current.applicationContext
-    val dates = remember(selected) { (0L..6L).map { selected.minusDays(it) }.reversed() }
+    // iOS exposes the previous 15 days, including both intake and the Health data.
+    val dates = remember(selected) { (0L..14L).map { selected.minusDays(it) }.reversed() }
     val history = remember(selected) { dates.map { date -> NutritionStore.load(context, date).sumOf { it.calories } } }
     var inspectedDate by remember(selected) { mutableStateOf<LocalDate?>(null) }
-    val logged = history.count { it > 0 }
-    if (logged == 0 && energyHistory.isEmpty()) return
+    if (energyHistory.isEmpty()) return
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text("BALANCE ENERGÉTICO", fontFamily = AntonFontFamily, color = NutritionCoral); Text(inspectedDate?.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale("es")))?.uppercase() ?: "ÚLTIMOS 7 DÍAS", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
-        val averageEaten = history.filter { it > 0 }.average().takeIf { !it.isNaN() }?.toInt() ?: 0
-        val burnedValues = dates.mapNotNull { energyHistory[it]?.totalCalories ?: energyHistory[it]?.activeCalories }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text("BALANCE ENERGÉTICO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary); Text(inspectedDate?.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale("es")))?.uppercase() ?: "ÚLTIMOS 15 DÍAS", style = MaterialTheme.typography.caption, color = NutritionCoral) }
+        val historicalIndexes = dates.indices.filter { dates[it] != LocalDate.now() }
+        val averageEaten = historicalIndexes.map { history[it] }.filter { it > 0 }.average().takeIf { !it.isNaN() }?.toInt() ?: 0
+        val burnedValues = historicalIndexes.mapNotNull { energyHistory[dates[it]]?.totalCalories }
         val averageBurned = burnedValues.average().takeIf { !it.isNaN() }?.toInt()
         val inspectedIndex = inspectedDate?.let(dates::indexOf)?.takeIf { it >= 0 }
         val displayedEaten = inspectedIndex?.let { history[it] } ?: averageEaten
-        val displayedBurned = inspectedIndex?.let { index -> (energyHistory[dates[index]]?.totalCalories ?: energyHistory[dates[index]]?.activeCalories)?.toInt() } ?: averageBurned
+        val displayedBurned = inspectedIndex?.let { index -> energyHistory[dates[index]]?.totalCalories?.toInt() } ?: averageBurned
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             BalanceMetric(if (inspectedIndex == null) "MEDIA INGESTA" else "INGERIDA", if (displayedEaten > 0) "$displayedEaten kcal" else "—", NutritionCoral)
             BalanceMetric(if (inspectedIndex == null) "MEDIA QUEMADA" else "QUEMADA", displayedBurned?.let { "$it kcal" } ?: "—", NutritionRed)
             BalanceMetric("BALANCE", displayedBurned?.let { "${if (displayedEaten - it > 0) "+" else ""}${displayedEaten - it} kcal" } ?: "—", if ((displayedBurned ?: displayedEaten) > displayedEaten) NutritionGreen else NutritionOrange)
         }
-        val maximum = (history + burnedValues.map { it.toInt() }).maxOrNull()?.coerceAtLeast(1) ?: 1
-        Row(Modifier.fillMaxWidth().height(86.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
+        val chartBurnedValues = dates.mapNotNull { energyHistory[it]?.totalCalories ?: energyHistory[it]?.activeCalories }.map { it.toInt() }
+        val maximum = (history + chartBurnedValues).maxOrNull()?.coerceAtLeast(1) ?: 1
+        Row(Modifier.fillMaxWidth().height(130.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom) {
             dates.forEachIndexed { index, date ->
                 val eaten = history[index]
                 val point = energyHistory[date]
                 val burned = (point?.totalCalories ?: point?.activeCalories ?: 0.0).toInt()
                 val active = point?.activeCalories?.toInt()?.coerceAtMost(burned) ?: 0
                 Box(Modifier.weight(1f).fillMaxHeight().clickable { inspectedDate = if (inspectedDate == date) null else date }, contentAlignment = Alignment.BottomCenter) {
-                    if (burned > 0) Column(Modifier.fillMaxWidth(.62f).height((80 * burned / maximum).dp), verticalArrangement = Arrangement.Bottom) {
+                    if (burned > 0) Column(Modifier.fillMaxWidth(.62f).height((118 * burned / maximum).dp), verticalArrangement = Arrangement.Bottom) {
                         Box(Modifier.fillMaxWidth().weight((burned - active).coerceAtLeast(1).toFloat()).background(NutritionRed.copy(alpha = .5f), RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)))
                         if (active > 0) Box(Modifier.fillMaxWidth().weight(active.toFloat()).background(NutritionRed, RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)))
                     }
-                    if (eaten > 0) Box(Modifier.fillMaxWidth(.86f).height(3.dp).offset(y = -((80 * eaten / maximum).dp)).background(WildforceThemeTokens.textPrimary, CircleShape))
+                    if (eaten > 0) Box(Modifier.fillMaxWidth(.9f).height(3.dp).offset(y = -((118 * eaten / maximum).dp)).background(WildforceThemeTokens.textPrimary, CircleShape))
                     if (inspectedDate == date) Box(Modifier.fillMaxWidth().fillMaxHeight().border(1.dp, NutritionCoral, RoundedCornerShape(6.dp)))
                 }
+            }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            dates.filterIndexed { index, _ -> index % 4 == 0 || index == dates.lastIndex }.forEach { date ->
+                Text(date.format(DateTimeFormatter.ofPattern("d MMM", Locale("es"))), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) { BalanceLegend(NutritionRed.copy(alpha = .5f), "Base"); BalanceLegend(NutritionRed, "Activa"); BalanceLegend(WildforceThemeTokens.textPrimary, "Ingerida") }
@@ -464,27 +490,59 @@ private fun WeeklyBalanceCard(plan: List<NutritionDayPlan>, selected: LocalDate,
 @Composable private fun BalanceLegend(color: Color, label: String) { Row(verticalAlignment = Alignment.CenterVertically) { Box(Modifier.size(7.dp).background(color, CircleShape)); Text(label, Modifier.padding(start = 5.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }
 
 @Composable
-private fun PlanHeader(plan: List<NutritionDayPlan>, preferences: NutritionPreferences, onEditPlan: () -> Unit, onEditPreferences: () -> Unit) {
+private fun PlanHeader(
+    plan: List<NutritionDayPlan>,
+    preferences: NutritionPreferences,
+    onEditPlan: () -> Unit,
+    onEditPreferences: () -> Unit,
+    onGrocery: () -> Unit,
+    onRegenerate: () -> Unit,
+) {
     val average = plan.take(7).map { it.targets.calories }.average().toInt()
+    val notes = plan.mapNotNull { it.notes.takeIf(String::isNotBlank) }.firstOrNull()
+    var menuOpen by remember { mutableStateOf(false) }
+    var showNotes by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(20.dp), verticalArrangement = Arrangement.spacedBy(15.dp)) {
         Row(verticalAlignment = Alignment.Top) {
             Column(Modifier.weight(1f)) { Text("PLAN ACTUAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); Text("Plan nutricional semanal", fontSize = 25.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 2) }
             Column(Modifier.width(76.dp), horizontalAlignment = Alignment.End) { Text(average.toString(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1); Text("kcal/día", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1) }
-            IconButton(onClick = onEditPlan) { Icon(Icons.Filled.MoreHoriz, "Opciones del plan", tint = WildforceThemeTokens.textSecondary) }
+            Box {
+                IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreHoriz, "Opciones del plan", tint = WildforceThemeTokens.textSecondary) }
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    if (notes != null) DropdownMenuItem(onClick = { menuOpen = false; showNotes = true }) { Icon(Icons.Filled.Notes, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text("Ver notas", Modifier.padding(start = 12.dp)) }
+                    DropdownMenuItem(onClick = { menuOpen = false; onEditPlan() }) { Icon(Icons.Filled.Tune, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text("Editar objetivos", Modifier.padding(start = 12.dp)) }
+                    DropdownMenuItem(onClick = { menuOpen = false; onGrocery() }) { Icon(Icons.Filled.ShoppingBasket, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text("Lista de la compra", Modifier.padding(start = 12.dp)) }
+                    DropdownMenuItem(onClick = { menuOpen = false; onRegenerate() }) { Icon(Icons.Filled.Refresh, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text("Regenerar plan", Modifier.padding(start = 12.dp)) }
+                }
+            }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            PlanTag(Icons.Filled.CalendarToday, "7 días")
+            PlanTag(Icons.Filled.LocalFireDepartment, "Objetivo diario")
+            PlanTag(Icons.Filled.FitnessCenter, "Adaptado al entreno")
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-            PlanMetric("◉", "Estilo", preferences.dietaryStyle, onEditPreferences)
-            PlanMetric("🍴", "Comidas al día", "${preferences.mealsPerDay} comidas", onEditPreferences)
-            PlanMetric("✦", "Sugerencias", if (preferences.wantsSuggestions) "Activadas" else "Desactivadas", onEditPreferences)
+            PlanMetric(Icons.Filled.Restaurant, "Estilo", preferences.dietaryStyle, onEditPreferences)
+            PlanMetric(Icons.Filled.RestaurantMenu, "Comidas al día", "${preferences.mealsPerDay} comidas", onEditPreferences)
+            PlanMetric(Icons.Filled.Lightbulb, "Sugerencias", if (preferences.wantsSuggestions) "Activadas" else "Desactivadas", onEditPreferences)
         }
         Divider(color = WildforceThemeTokens.textSecondary.copy(alpha = .12f))
         Text("Las calorías y macros cambian según la demanda de cada entrenamiento.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
+    if (showNotes && notes != null) AlertDialog(onDismissRequest = { showNotes = false }, title = { Text("NOTAS DEL PLAN", fontFamily = AntonFontFamily) }, text = { Text(notes, color = WildforceThemeTokens.textSecondary) }, confirmButton = { TextButton(onClick = { showNotes = false }) { Text("CERRAR", color = NutritionCoral) } })
 }
 
 @Composable
-private fun PlanMetric(icon: String, title: String, value: String, onClick: () -> Unit) {
-    Column(Modifier.clickable(onClick = onClick).padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally) { Text(icon); Text(title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); Text(value, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary) }
+private fun PlanTag(icon: ImageVector, text: String) {
+    Row(Modifier.background(WildforceThemeTokens.textSecondary.copy(alpha = .08f), CircleShape).padding(horizontal = 9.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, tint = NutritionCoral, modifier = Modifier.size(13.dp))
+        Text(text, Modifier.padding(start = 5.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
+    }
+}
+
+@Composable
+private fun PlanMetric(icon: ImageVector, title: String, value: String, onClick: () -> Unit) {
+    Column(Modifier.clickable(onClick = onClick).padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally) { Icon(icon, null, tint = NutritionCoral, modifier = Modifier.size(19.dp)); Text(title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); Text(value, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary) }
 }
 
 @Composable
@@ -496,15 +554,15 @@ internal fun NutritionDayHeader(day: NutritionDayPlan, logged: NutritionTargets,
     ) {
         Row {
             Column { Text(day.date.format(DateTimeFormatter.ofPattern("d MMMM", Locale("es"))), style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = .82f)); Text(if (isToday) "HOY" else day.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es")).uppercase(), fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = Color.White) }
-            Spacer(Modifier.weight(1f)); Column(horizontalAlignment = Alignment.End) { Text(day.type.title.uppercase(), style = MaterialTheme.typography.caption, color = Color.White, modifier = Modifier.background(Color.White.copy(alpha = .14f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp)); Text("◉ ${day.targets.calories} kcal", fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.padding(top = 6.dp)) }
+            Spacer(Modifier.weight(1f)); Column(horizontalAlignment = Alignment.End) { Text(day.type.title.uppercase(), style = MaterialTheme.typography.caption, color = Color.White, modifier = Modifier.background(Color.White.copy(alpha = .14f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp)); Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.LocalFireDepartment, null, tint = Color.White, modifier = Modifier.size(15.dp)); Text("${day.targets.calories} kcal", Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold, color = Color.White) } }
         }
-        Text("▰ ${day.workoutTitle.uppercase()}", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.background(Color.White.copy(alpha = .12f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp))
+        Row(Modifier.background(Color.White.copy(alpha = .12f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.FitnessCenter, null, tint = Color.White, modifier = Modifier.size(14.dp)); Text(day.workoutTitle.uppercase(), Modifier.padding(start = 5.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White) }
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-            HeaderPill("P ${logged.protein}/${day.targets.protein} g"); HeaderPill("C ${logged.carbs}/${day.targets.carbs} g"); HeaderPill("G ${logged.fat}/${day.targets.fat} g"); HeaderPill("⚡ ${day.energyDemand.title}")
+            HeaderPill(Icons.Filled.SetMeal, "${logged.protein}/${day.targets.protein} g"); HeaderPill(Icons.Filled.Eco, "${logged.carbs}/${day.targets.carbs} g"); HeaderPill(Icons.Filled.Opacity, "${logged.fat}/${day.targets.fat} g"); HeaderPill(Icons.Filled.Bolt, day.energyDemand.title)
         }
     }
 }
 
-@Composable private fun HeaderPill(text: String) { Text(text, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.background(Color.White.copy(alpha = .10f), CircleShape).padding(horizontal = 8.dp, vertical = 4.dp)) }
+@Composable private fun HeaderPill(icon: ImageVector, text: String) { Row(Modifier.background(Color.White.copy(alpha = .10f), CircleShape).padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) { Icon(icon, null, tint = Color.White, modifier = Modifier.size(13.dp)); Text(text, Modifier.padding(start = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White) } }
 private fun demandColor(demand: EnergyDemand) = when (demand) { EnergyDemand.High -> NutritionRed; EnergyDemand.Medium -> NutritionOrange; EnergyDemand.Low -> NutritionGreen }
 internal fun List<MealLog>.total() = NutritionTargets(sumOf { it.calories }, sumOf { it.protein }, sumOf { it.carbs }, sumOf { it.fat })

@@ -151,7 +151,11 @@ internal fun CustomWorkoutsScreen(
             ) { showsCreationMode = true }
         }
     } else {
-        LazyColumn(modifier, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        LazyColumn(
+            modifier,
+            contentPadding = PaddingValues(start = 16.dp, top = 10.dp, end = 16.dp, bottom = 160.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
             item {
                 TextButton(
                     onClick = { showsCreationMode = true },

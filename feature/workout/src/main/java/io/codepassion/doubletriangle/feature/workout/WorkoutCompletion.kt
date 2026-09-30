@@ -134,10 +134,11 @@ object CompletionProgressStore {
         fallbackStreak: Int,
         completesPlan: Boolean = false,
         completesMesocycle: Boolean = false,
+        completedOn: LocalDate = LocalDate.now(),
     ): CompletionProgress {
         val preferences = context.getSharedPreferences(PREFERENCES, 0)
         val xpBefore = preferences.getInt("xp", 0)
-        val today = LocalDate.now().toEpochDay()
+        val today = completedOn.toEpochDay()
         val previousDay = preferences.getLong("lastWorkoutDay", Long.MIN_VALUE)
         val storedStreak = preferences.getInt("streak", fallbackStreak)
         return calculate(xpBefore, storedStreak, previousDay, today, completesPlan, completesMesocycle)
@@ -174,13 +175,13 @@ object CompletionProgressStore {
         )
     }
 
-    internal fun commit(context: Context, progress: CompletionProgress) {
+    internal fun commit(context: Context, progress: CompletionProgress, completedOn: LocalDate) {
         val preferences = context.getSharedPreferences(PREFERENCES, 0)
         preferences.edit()
             .putInt("xp", progress.xpAfter)
             .putInt("streak", progress.streakAfter)
             .putInt("longestStreak", maxOf(preferences.getInt("longestStreak", 0), progress.streakAfter))
-            .putLong("lastWorkoutDay", LocalDate.now().toEpochDay()).apply()
+            .putLong("lastWorkoutDay", completedOn.toEpochDay()).apply()
     }
 
     fun progress(context: Context): TrainingProgress {

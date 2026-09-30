@@ -110,6 +110,62 @@ internal object NutritionStore {
         context.getSharedPreferences(PREFS, 0).edit().putString(GENERATED_PLAN_KEY, days.toString()).apply()
     }
 
+    /** Converts the graph returned by iOS's `/sync/nutrition-plans` endpoint to Android's local plan. */
+    fun importRemotePlan(context: Context, remote: JSONObject) {
+        val days = remote.optJSONArray("days") ?: return
+        val plan = buildList {
+            for (index in 0 until days.length()) {
+                val day = days.optJSONObject(index) ?: continue
+                if (!day.isNull("deleted_at")) continue
+                val date = runCatching { LocalDate.parse(day.optString("date").take(10)) }.getOrNull() ?: continue
+                val meals = day.optJSONArray("meals")?.let { entries -> buildList {
+                    for (mealIndex in 0 until entries.length()) {
+                        val meal = entries.optJSONObject(mealIndex) ?: continue
+                        if (!meal.isNull("deleted_at")) continue
+                        val foods = meal.optJSONArray("example_foods")?.let { foodsJson -> buildList {
+                            for (foodIndex in 0 until foodsJson.length()) {
+                                val food = foodsJson.optJSONObject(foodIndex) ?: continue
+                                food.optString("name").trim().takeIf(String::isNotBlank)?.let { add(it to food.optInt("grams").coerceAtLeast(0)) }
+                            }
+                        } }.orEmpty()
+                        add(PlannedMeal(
+                            title = meal.optString("title", "Comida"),
+                            type = mealTypeFromRemote(meal.optString("meal_type")),
+                            targets = NutritionTargets(meal.optDouble("target_calories").toInt(), meal.optDouble("target_protein_grams").toInt(), meal.optDouble("target_carbs_grams").toInt(), meal.optDouble("target_fat_grams").toInt()),
+                            guidance = meal.optString("guidance"), foods = foods,
+                        ))
+                    }
+                } }.orEmpty()
+                add(NutritionDayPlan(
+                    date = date,
+                    type = nutritionDayTypeFromRemote(day.optString("day_type")),
+                    energyDemand = energyDemandFromRemote(day.optString("energy_demand")),
+                    targets = NutritionTargets(day.optDouble("target_calories").toInt(), day.optDouble("target_protein_grams").toInt(), day.optDouble("target_carbs_grams").toInt(), day.optDouble("target_fat_grams").toInt()),
+                    workoutTitle = day.optString("planned_workout_title"), notes = day.optString("notes"),
+                    preWorkoutGuidance = day.optString("pre_workout_guidance").takeIf(String::isNotBlank),
+                    postWorkoutGuidance = day.optString("post_workout_guidance").takeIf(String::isNotBlank), meals = meals,
+                ))
+            }
+        }
+        if (plan.isNotEmpty()) saveGeneratedPlan(context, plan)
+    }
+
+    /** Restores dietary preferences before Android's next push, matching iOS's initial snapshot. */
+    fun importRemotePreferences(context: Context, remote: JSONObject) {
+        savePreferences(context, NutritionPreferences(
+            dietaryStyle = remote.optString("dietary_style", "Omnívora"),
+            mealsPerDay = remote.optInt("meals_per_day_preference", 4).coerceIn(1, 8),
+            wantsSuggestions = remote.optBoolean("wants_meal_suggestions", true),
+            eatingWindowStartHour = remote.optionalHour("preferred_eating_window_start_hour"),
+            eatingWindowEndHour = remote.optionalHour("preferred_eating_window_end_hour"),
+            cookingEffort = remote.optString("cooking_effort", "Medio"),
+            budgetSensitivity = remote.optString("budget_sensitivity", "Media"),
+            preferredProteinSources = remote.stringList("preferred_protein_sources"), dislikes = remote.stringList("dislikes"),
+            excludedFoods = remote.stringList("excluded_foods"), allergiesAndIntolerances = remote.stringList("allergies_and_intolerances"),
+            notes = remote.optString("notes"),
+        ))
+    }
+
     fun clearGeneratedPlan(context: Context) {
         context.getSharedPreferences(PREFS, 0).edit().remove(GENERATED_PLAN_KEY).apply()
     }
@@ -262,6 +318,16 @@ internal object NutritionStore {
         }
         PlannedMeal(title, type, macros, if (workoutDay && type == MealType.Lunch) "Aumenta aquí los carbohidratos para rendir en la sesión." else "Ajusta las cantidades manteniendo los objetivos.", filteredFoods)
     }
+}
+
+private fun mealTypeFromRemote(value: String) = when (value.lowercase()) {
+    "breakfast" -> MealType.Breakfast; "lunch" -> MealType.Lunch; "dinner" -> MealType.Dinner; else -> MealType.Snack
+}
+private fun nutritionDayTypeFromRemote(value: String) = when (value.lowercase()) {
+    "training" -> NutritionDayType.Training; "recovery" -> NutritionDayType.Recovery; else -> NutritionDayType.Rest
+}
+private fun energyDemandFromRemote(value: String) = when (value.lowercase()) {
+    "high" -> EnergyDemand.High; "low" -> EnergyDemand.Low; else -> EnergyDemand.Medium
 }
 
 private fun JSONObject.toTargets(fallback: NutritionTargets) = NutritionTargets(optInt("calories", fallback.calories).coerceIn(500, 8000), optInt("protein", fallback.protein).coerceIn(0, 500), optInt("carbs", fallback.carbs).coerceIn(0, 1000), optInt("fat", fallback.fat).coerceIn(0, 500))

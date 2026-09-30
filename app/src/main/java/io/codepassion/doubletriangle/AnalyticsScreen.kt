@@ -159,7 +159,7 @@ fun AnalyticsScreen(
 
     Column(
         Modifier.fillMaxSize().liquidGlassBackground().padding(contentPadding).verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+            .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 160.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         AnalyticsHeader(timeframe, { timeframe = it }, allSessions.maxByOrNull { it.timestampMillis })
@@ -432,7 +432,7 @@ private fun AnalyticsMiniCharts(
 
 @Composable private fun ExerciseAnalyticsDetail(summary: ExerciseAnalyticsSummary, history: List<ExerciseAnalyticsPoint>, padding: PaddingValues, gender: String, useImperial: Boolean, back: () -> Unit) {
     val colors = analyticsColors()
-    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(padding).verticalScroll(rememberScrollState()).padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 160.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Box(Modifier.size(44.dp).background(colors.elevated, CircleShape).border(1.dp, colors.border, CircleShape).clickable(onClick = back), contentAlignment = Alignment.Center) { Icon(Icons.Filled.ArrowBack, "Volver", tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(22.dp)) }
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
             RemoteTrainingImage(

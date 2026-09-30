@@ -7,6 +7,7 @@ import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import java.time.DayOfWeek
+import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -28,6 +29,21 @@ class WorkoutCompletionCalculatorTest {
         assertEquals(185, progress.xpAfter)
         assertEquals(3, progress.streakAfter)
         assertTrue(progress.streakIncreased)
+    }
+
+    @Test
+    fun `completion progress uses the captured device date`() {
+        val progress = CompletionProgressStore.calculate(
+            xpBefore = 0,
+            storedStreak = 4,
+            previousDay = LocalDate.of(2026, 9, 28).toEpochDay(),
+            today = LocalDate.of(2026, 9, 28).toEpochDay(),
+            completesPlan = false,
+            completesMesocycle = false,
+        )
+
+        assertEquals(4, progress.streakAfter)
+        assertEquals(false, progress.streakIncreased)
     }
 
     private val workout = WorkoutDaySummary(

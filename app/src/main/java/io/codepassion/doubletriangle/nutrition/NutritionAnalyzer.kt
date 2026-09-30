@@ -28,6 +28,21 @@ internal object NutritionAnalyzer {
         listOf(JSONObject().put("type", "text").put("text", "Analiza esta comida y estima sus macros totales: $text"))
     )
 
+    fun fridgeIdea(ingredients: String, target: NutritionTargets): NutritionAnalysis = request(
+        listOf(
+            JSONObject().put(
+                "type",
+                "text"
+            ).put(
+                "text",
+                "Crea una idea de comida sencilla usando estos ingredientes: $ingredients. " +
+                    "Intenta aproximarte a ${target.calories} kcal, ${target.protein} g de proteína, " +
+                    "${target.carbs} g de carbohidratos y ${target.fat} g de grasa. " +
+                    "En notes incluye una preparación breve y las sustituciones o ajustes necesarios."
+            )
+        )
+    )
+
     fun image(context: Context, uri: Uri, isLabel: Boolean): NutritionAnalysis {
         val resolver = context.contentResolver
         val mime = resolver.getType(uri)?.takeIf { it.startsWith("image/") } ?: "image/jpeg"

@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -31,6 +32,9 @@ import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 internal fun NutritionDayDetail(
@@ -43,14 +47,23 @@ internal fun NutritionDayDetail(
 ) {
     Column(modifier.fillMaxSize().liquidGlassBackground()) {
         TopBar(day.date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, Locale("es")).replaceFirstChar { it.uppercase() }, onBack, onLog)
-        LazyColumn(contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 100.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        LazyColumn(contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 160.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
             item { NutritionDayHeader(day, entries.total(), day.date == LocalDate.now()) {} }
             item { MacroSummary(day.targets) }
-            if (day.preWorkoutGuidance != null || day.postWorkoutGuidance != null) {
+            if (day.notes.isNotBlank() || day.workoutTitle.isNotBlank() || day.preWorkoutGuidance != null || day.postWorkoutGuidance != null) {
                 item {
                     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text("COMBUSTIBLE PARA EL ENTRENAMIENTO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
-                        Text("▰ ${day.workoutTitle}", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                        if (day.notes.isNotBlank()) {
+                            Text("NOTAS", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+                            Text(day.notes, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                        }
+                        if (day.workoutTitle.isNotBlank()) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Filled.FitnessCenter, null, tint = NutritionCoral, modifier = Modifier.size(18.dp))
+                                Text(day.workoutTitle, Modifier.padding(start = 8.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                            }
+                        }
                         day.preWorkoutGuidance?.let { Guidance("Antes de entrenar", it, NutritionOrange) }
                         day.postWorkoutGuidance?.let { Guidance("Después de entrenar", it, NutritionGreen) }
                     }
@@ -67,12 +80,12 @@ internal fun NutritionDayDetail(
 
 @Composable private fun MacroSummary(target: NutritionTargets) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        MacroBadge("Calorías", target.calories, "kcal", NutritionCoral, Modifier.fillMaxWidth())
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { MacroBadge("Proteína", target.protein, "g", ProteinColor, Modifier.weight(1f)); MacroBadge("Carbos", target.carbs, "g", CarbsColor, Modifier.weight(1f)); MacroBadge("Grasa", target.fat, "g", FatColor, Modifier.weight(1f)) }
+        MacroBadge("Calorías", target.calories, "kcal", NutritionCoral, Icons.Filled.LocalFireDepartment, Modifier.fillMaxWidth())
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { MacroBadge("Proteína", target.protein, "g", ProteinColor, Icons.Filled.SetMeal, Modifier.weight(1f)); MacroBadge("Carbos", target.carbs, "g", CarbsColor, Icons.Filled.Eco, Modifier.weight(1f)); MacroBadge("Grasa", target.fat, "g", FatColor, Icons.Filled.Opacity, Modifier.weight(1f)) }
     }
 }
 
-@Composable private fun MacroBadge(label: String, value: Int, unit: String, color: Color, modifier: Modifier) { Row(modifier.background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(16.dp)).padding(8.dp), verticalAlignment = Alignment.CenterVertically) { Box(Modifier.size(36.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = .06f), RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) { Text("●", color = color) }; Column(Modifier.padding(start = 7.dp)) { Text(label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1); Text("$value $unit", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1) } } }
+@Composable private fun MacroBadge(label: String, value: Int, unit: String, color: Color, icon: ImageVector, modifier: Modifier) { Row(modifier.background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(16.dp)).padding(8.dp), verticalAlignment = Alignment.CenterVertically) { Box(Modifier.size(36.dp).background(color.copy(alpha = .12f), RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) { Icon(icon, null, tint = color, modifier = Modifier.size(20.dp)) }; Column(Modifier.padding(start = 7.dp)) { Text(label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1); Text("$value $unit", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1) } } }
 
 @Composable private fun Guidance(title: String, body: String, color: Color) { Column(Modifier.fillMaxWidth().background(color.copy(alpha = .08f), RoundedCornerShape(16.dp)).padding(14.dp)) { Text(title, fontWeight = FontWeight.SemiBold, color = color); Text(body, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(top = 5.dp)) } }
 
@@ -85,18 +98,21 @@ internal fun NutritionDayDetail(
             Box {
                 IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, "Más opciones", tint = WildforceThemeTokens.textSecondary) }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    DropdownMenuItem(onClick = { menuOpen = false; onAction(meal, LogMethod.Manual) }) { Text("Registrar esta comida") }
-                    DropdownMenuItem(onClick = { menuOpen = false; onAction(meal, LogMethod.Describe) }) { Text("Obtener ideas de comida") }
-                    DropdownMenuItem(onClick = { menuOpen = false; onAction(meal, LogMethod.Photo) }) { Text("Analizar foto") }
-                    DropdownMenuItem(onClick = { menuOpen = false; onAction(meal, LogMethod.Barcode) }) { Text("Escanear código de barras") }
+                    MealMenuItem(Icons.Filled.CheckCircle, "Registrar esta comida") { menuOpen = false; onAction(meal, LogMethod.Manual) }
+                    MealMenuItem(Icons.Filled.Kitchen, "Obtener ideas de comida") { menuOpen = false; onAction(meal, LogMethod.Describe) }
+                    MealMenuItem(Icons.Filled.CameraAlt, "Analizar foto") { menuOpen = false; onAction(meal, LogMethod.Photo) }
+                    MealMenuItem(Icons.Filled.QrCodeScanner, "Escanear código de barras") { menuOpen = false; onAction(meal, LogMethod.Barcode) }
                 }
             }
         }
-        Text("P ${meal.targets.protein}g   C ${meal.targets.carbs}g   G ${meal.targets.fat}g", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { MealMacro(Icons.Filled.SetMeal, "${meal.targets.protein}g", ProteinColor); MealMacro(Icons.Filled.Eco, "${meal.targets.carbs}g", CarbsColor); MealMacro(Icons.Filled.Opacity, "${meal.targets.fat}g", FatColor) }
         Text(meal.guidance, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(7.dp)) { meal.foods.forEach { (food, grams) -> Text("$food (${grams}g)", Modifier.background(WildforceThemeTokens.textSecondary.copy(alpha = .1f), CircleShape).padding(horizontal = 9.dp, vertical = 5.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary) } }
     }
 }
+
+@Composable private fun MealMenuItem(icon: ImageVector, text: String, onClick: () -> Unit) { DropdownMenuItem(onClick = onClick) { Icon(icon, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text(text, Modifier.padding(start = 12.dp)) } }
+@Composable private fun MealMacro(icon: ImageVector, value: String, color: Color) { Row(verticalAlignment = Alignment.CenterVertically) { Icon(icon, null, tint = color, modifier = Modifier.size(14.dp)); Text(value, Modifier.padding(start = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary) } }
 
 @Composable
 internal fun NutritionEntriesScreen(
@@ -112,7 +128,7 @@ internal fun NutritionEntriesScreen(
     var deleting by remember { mutableStateOf<MealLog?>(null) }
     Column(modifier.fillMaxSize().liquidGlassBackground()) {
         TopBar("Ingesta", onBack, onAdd)
-        LazyColumn(contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 110.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        LazyColumn(contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 160.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item { Text(date.format(DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale("es"))).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary) }
             item { EntrySummary(entries.total(), target) }
             if (entries.isEmpty()) item { EmptyState("Aún no hay registros", "Usa el botón + para añadir tu primera comida del día.") }
@@ -130,9 +146,9 @@ internal fun NutritionEntriesScreen(
     deleting?.let { entry -> AlertDialog(onDismissRequest = { deleting = null }, title = { Text("¿Eliminar registro?") }, text = { Text("Se eliminará «${entry.name}» de este día.") }, confirmButton = { TextButton(onClick = { onChanged(entries.filterNot { it.id == entry.id }); deleting = null }) { Text("ELIMINAR", color = NutritionRed) } }, dismissButton = { TextButton(onClick = { deleting = null }) { Text("CANCELAR") } }) }
 }
 
-@Composable private fun EntrySummary(current: NutritionTargets, target: NutritionTargets) { Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp), emphasized = true).padding(16.dp)) { Row(verticalAlignment = Alignment.Bottom) { Text(current.calories.toString(), style = MaterialTheme.typography.h4, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary); Text(" / ${target.calories} kcal", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(bottom = 5.dp)) }; Text("P ${current.protein}/${target.protein}g   ·   C ${current.carbs}/${target.carbs}g   ·   G ${current.fat}/${target.fat}g", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }
+@Composable private fun EntrySummary(current: NutritionTargets, target: NutritionTargets) { Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp), emphasized = true).padding(16.dp)) { Row(verticalAlignment = Alignment.Bottom) { Icon(Icons.Filled.LocalFireDepartment, null, tint = NutritionCoral, modifier = Modifier.size(20.dp)); Text(current.calories.toString(), Modifier.padding(start = 6.dp), style = MaterialTheme.typography.h4, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary); Text(" / ${target.calories} kcal", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(bottom = 5.dp)) }; Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) { MealMacro(Icons.Filled.SetMeal, "${current.protein}/${target.protein}g", ProteinColor); MealMacro(Icons.Filled.Eco, "${current.carbs}/${target.carbs}g", CarbsColor); MealMacro(Icons.Filled.Opacity, "${current.fat}/${target.fat}g", FatColor) } } }
 
-@Composable private fun EntryCard(entry: MealLog, onBookmark: () -> Unit, onDelete: () -> Unit, onEdit: () -> Unit) { Column(Modifier.fillMaxWidth().background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(18.dp)).clickable(onClick = onEdit).padding(14.dp)) { Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.Restaurant, null, tint = NutritionCoral); Column(Modifier.weight(1f).padding(start = 10.dp)) { Text(entry.name, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary); Text("${entry.calories} kcal · P ${entry.protein}g · C ${entry.carbs}g · G ${entry.fat}g", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }; IconButton(onClick = onBookmark) { Icon(if (entry.isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, "Favorito", tint = if (entry.isBookmarked) NutritionCoral else WildforceThemeTokens.textSecondary) }; IconButton(onClick = onDelete) { Icon(Icons.Filled.DeleteOutline, "Eliminar", tint = WildforceThemeTokens.textSecondary) } }; if (entry.items.size > 1) { Text("${entry.items.size} alimentos", style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = NutritionCoral, modifier = Modifier.padding(top = 7.dp)); entry.items.forEach { food -> Text("• ${food.name} · ${food.calories} kcal", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }; if (entry.notes.isNotBlank()) Text(entry.notes, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(top = 7.dp)) } }
+@Composable private fun EntryCard(entry: MealLog, onBookmark: () -> Unit, onDelete: () -> Unit, onEdit: () -> Unit) { Column(Modifier.fillMaxWidth().background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(18.dp)).clickable(onClick = onEdit).padding(14.dp)) { Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.Restaurant, null, tint = NutritionCoral); Column(Modifier.weight(1f).padding(start = 10.dp)) { Text(entry.name, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary); Row(Modifier.padding(top = 3.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) { Text("${entry.calories} kcal", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); MealMacro(Icons.Filled.SetMeal, "${entry.protein}g", ProteinColor); MealMacro(Icons.Filled.Eco, "${entry.carbs}g", CarbsColor); MealMacro(Icons.Filled.Opacity, "${entry.fat}g", FatColor) } }; IconButton(onClick = onBookmark) { Icon(if (entry.isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, "Favorito", tint = if (entry.isBookmarked) NutritionCoral else WildforceThemeTokens.textSecondary) }; IconButton(onClick = onDelete) { Icon(Icons.Filled.DeleteOutline, "Eliminar", tint = WildforceThemeTokens.textSecondary) } }; if (entry.items.size > 1) { Text("${entry.items.size} alimentos", style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = NutritionCoral, modifier = Modifier.padding(top = 7.dp)); entry.items.forEach { food -> Text("• ${food.name} · ${food.calories} kcal", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }; if (entry.notes.isNotBlank()) Text(entry.notes, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(top = 7.dp)) } }
 
 @Composable
 internal fun NutritionTargetsDialog(initial: NutritionTargets, onDismiss: () -> Unit, onSave: (NutritionTargets) -> Unit) {
@@ -148,8 +164,43 @@ internal fun NutritionPreferencesDialog(initial: NutritionPreferences, onDismiss
 }
 
 @Composable
-internal fun MealIdeasDialog(day: NutritionDayPlan?, onDismiss: () -> Unit, onSelect: (PlannedMeal) -> Unit) {
-    AlertDialog(onDismissRequest = onDismiss, title = { Text("IDEAS DE COMIDAS", fontFamily = AntonFontFamily) }, text = { if (day == null) Text("Selecciona un día del plan para ver ideas.") else Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { Text("Opciones ajustadas a los macros del día.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); day.meals.forEach { meal -> Row(Modifier.fillMaxWidth().background(WildforceThemeTokens.textSecondary.copy(alpha = .08f), RoundedCornerShape(14.dp)).clickable { onSelect(meal) }.padding(12.dp), verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text(meal.title, fontWeight = FontWeight.SemiBold); Text("${meal.targets.calories} kcal · ${meal.type.title}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }; Icon(Icons.Filled.AddCircle, "Añadir", tint = NutritionCoral) } } } }, confirmButton = {}, dismissButton = { TextButton(onClick = onDismiss) { Text("CERRAR") } })
+internal fun MealIdeasDialog(day: NutritionDayPlan?, targetOverride: NutritionTargets? = null, onDismiss: () -> Unit, onSelect: (PlannedMeal) -> Unit) {
+    if (day == null) {
+        AlertDialog(onDismissRequest = onDismiss, title = { Text("IDEAS DE COMIDAS", fontFamily = AntonFontFamily) }, text = { Text("Selecciona un día del plan para crear una idea de comida.") }, confirmButton = { TextButton(onClick = onDismiss) { Text("CERRAR") } })
+        return
+    }
+    val scope = rememberCoroutineScope()
+    var ingredients by remember { mutableStateOf("") }
+    var creating by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val target = targetOverride ?: day.meals.firstOrNull()?.targets ?: day.targets
+    AlertDialog(
+        onDismissRequest = { if (!creating) onDismiss() },
+        title = { Text("IDEAS DESDE TU NEVERA", fontFamily = AntonFontFamily) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("Escribe los ingredientes que tienes y crearé una comida ajustada a los macros del día.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { MealMacro(Icons.Filled.LocalFireDepartment, "${target.calories} kcal", NutritionCoral); MealMacro(Icons.Filled.SetMeal, "${target.protein}g", ProteinColor); MealMacro(Icons.Filled.Eco, "${target.carbs}g", CarbsColor); MealMacro(Icons.Filled.Opacity, "${target.fat}g", FatColor) }
+                OutlinedTextField(ingredients, { ingredients = it.take(500) }, Modifier.fillMaxWidth(), label = { Text("Ingredientes disponibles") }, placeholder = { Text("Ej.: arroz, pollo, tomate y yogur") }, minLines = 3, enabled = !creating)
+                if (creating) Row(verticalAlignment = Alignment.CenterVertically) { CircularProgressIndicator(Modifier.size(18.dp), color = NutritionCoral, strokeWidth = 2.dp); Text("Creando idea…", Modifier.padding(start = 9.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                error?.let { Text(it, style = MaterialTheme.typography.caption, color = MaterialTheme.colors.error) }
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                creating = true; error = null
+                scope.launch {
+                    runCatching { withContext(Dispatchers.IO) { NutritionAnalyzer.fridgeIdea(ingredients, target) } }
+                        .onSuccess { idea ->
+                            onSelect(PlannedMeal(idea.name, MealType.Snack, NutritionTargets(idea.calories, idea.protein, idea.carbs, idea.fat), idea.notes, ingredients.split(",").mapNotNull { ingredient -> ingredient.trim().takeIf(String::isNotBlank)?.let { it to 0 } }))
+                        }
+                        .onFailure { error = it.message ?: "No se pudo crear la idea" }
+                    creating = false
+                }
+            }, enabled = ingredients.isNotBlank() && !creating, colors = ButtonDefaults.buttonColors(backgroundColor = NutritionCoral)) { Icon(Icons.Filled.Kitchen, null, modifier = Modifier.size(17.dp)); Text("CREAR IDEA", Modifier.padding(start = 7.dp), color = Color.White) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss, enabled = !creating) { Text("CANCELAR") } },
+    )
 }
 
 @Composable
@@ -209,5 +260,5 @@ internal fun NutritionFulfillDialog(current: NutritionTargets, target: Nutrition
         MealLog(0, "Arroz con pollo", (missing.calories * .9).toInt(), (missing.protein * .85).toInt(), (missing.carbs * .9).toInt(), (missing.fat * .45).toInt(), MealType.Lunch),
         MealLog(0, "Tostada con huevo y aguacate", (missing.calories * .8).toInt(), (missing.protein * .55).toInt(), (missing.carbs * .65).toInt(), (missing.fat * .85).toInt(), MealType.Snack),
     )
-    AlertDialog(onDismissRequest = onDismiss, title = { Text("MACROS QUE FALTAN", fontFamily = AntonFontFamily) }, text = { if (met) EmptyState("¡Objetivos cumplidos!", "Ya has cubierto los macros del día.") else Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { Text("Faltan aproximadamente ${missing.calories} kcal · P ${missing.protein}g · C ${missing.carbs}g · G ${missing.fat}g", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); suggestions.forEach { suggestion -> Row(Modifier.fillMaxWidth().background(WildforceThemeTokens.textSecondary.copy(alpha = .08f), RoundedCornerShape(14.dp)).clickable { onSelect(suggestion) }.padding(12.dp), verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text(suggestion.name, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary); Text("${suggestion.calories} kcal · P ${suggestion.protein}g · C ${suggestion.carbs}g · G ${suggestion.fat}g", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }; Icon(Icons.Filled.AddCircle, "Registrar", tint = NutritionCoral) } } } }, confirmButton = { TextButton(onClick = onDismiss) { Text("CERRAR") } })
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("MACROS QUE FALTAN", fontFamily = AntonFontFamily) }, text = { if (met) EmptyState("¡Objetivos cumplidos!", "Ya has cubierto los macros del día.") else Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { MealMacro(Icons.Filled.LocalFireDepartment, "${missing.calories} kcal", NutritionCoral); MealMacro(Icons.Filled.SetMeal, "${missing.protein}g", ProteinColor); MealMacro(Icons.Filled.Eco, "${missing.carbs}g", CarbsColor); MealMacro(Icons.Filled.Opacity, "${missing.fat}g", FatColor) }; suggestions.forEach { suggestion -> Row(Modifier.fillMaxWidth().background(WildforceThemeTokens.textSecondary.copy(alpha = .08f), RoundedCornerShape(14.dp)).clickable { onSelect(suggestion) }.padding(12.dp), verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text(suggestion.name, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary); Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) { Text("${suggestion.calories} kcal", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); MealMacro(Icons.Filled.SetMeal, "${suggestion.protein}g", ProteinColor); MealMacro(Icons.Filled.Eco, "${suggestion.carbs}g", CarbsColor); MealMacro(Icons.Filled.Opacity, "${suggestion.fat}g", FatColor) } }; Icon(Icons.Filled.AddCircle, "Registrar", tint = NutritionCoral) } } } }, confirmButton = { TextButton(onClick = onDismiss) { Text("CERRAR") } })
 }

@@ -118,13 +118,13 @@ internal fun NutritionLogFlow(
                     }
                     item {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            PrimaryMethod(LogMethod.Barcode, "▥", Modifier.weight(1f)) {
+                            PrimaryMethod(LogMethod.Barcode, Icons.Filled.QrCodeScanner, Modifier.weight(1f)) {
                                 barcodeScanner.startScan()
                                     .addOnSuccessListener { barcode -> scannedBarcode = barcode.rawValue.orEmpty(); method = LogMethod.Barcode }
                                     .addOnFailureListener { method = LogMethod.Barcode }
                             }
-                            PrimaryMethod(LogMethod.Describe, "✎", Modifier.weight(1f)) { method = LogMethod.Describe }
-                            PrimaryMethod(LogMethod.Photo, "▣", Modifier.weight(1f)) { pendingPhotoMethod = LogMethod.Photo; cameraPicker.launch(null) }
+                            PrimaryMethod(LogMethod.Describe, Icons.Filled.EditNote, Modifier.weight(1f)) { method = LogMethod.Describe }
+                            PrimaryMethod(LogMethod.Photo, Icons.Filled.CameraAlt, Modifier.weight(1f)) { pendingPhotoMethod = LogMethod.Photo; cameraPicker.launch(null) }
                         }
                     }
                     items(listOf(LogMethod.Recent, LogMethod.Label, LogMethod.Search, LogMethod.Manual)) { item ->
@@ -159,9 +159,9 @@ internal fun NutritionLogFlow(
 }
 
 @Composable
-private fun PrimaryMethod(method: LogMethod, glyph: String, modifier: Modifier, onClick: () -> Unit) {
+private fun PrimaryMethod(method: LogMethod, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier, onClick: () -> Unit) {
     Column(modifier.height(108.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = .08f), RoundedCornerShape(14.dp)).clickable(onClick = onClick).padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Text(glyph, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+        Icon(icon, null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(28.dp))
         Text(method.title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
     }
 }

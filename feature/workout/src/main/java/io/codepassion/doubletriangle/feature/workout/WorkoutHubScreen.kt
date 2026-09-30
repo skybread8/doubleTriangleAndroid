@@ -82,6 +82,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Hotel
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.MoreHoriz
@@ -166,7 +167,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.time.temporal.TemporalAdjusters
-import java.text.DecimalFormatSymbols
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
@@ -683,7 +683,9 @@ private fun WorkoutPlan(
     LaunchedEffect(selectedDay, state.planName) { cardsEntered = true }
     LazyColumn(
         modifier,
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
+        // Keep the final card scrollable above both the tab bar and the optional
+        // resume accessory, without shrinking the screen behind those controls.
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 160.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
@@ -790,9 +792,9 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> U
 }
 
 @Composable
-internal fun ContextPill(text: String, glyph: String) {
+internal fun ContextPill(text: String, glyph: String, modifier: Modifier = Modifier) {
     Row(
-        Modifier.clip(RoundedCornerShape(50)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.10f)).padding(horizontal = 8.dp, vertical = 5.dp),
+        modifier.clip(RoundedCornerShape(50)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.10f)).padding(horizontal = 8.dp, vertical = 5.dp),
         horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(glyph, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
@@ -801,9 +803,9 @@ internal fun ContextPill(text: String, glyph: String) {
 }
 
 @Composable
-internal fun ContextPill(text: String, icon: ImageVector) {
+internal fun ContextPill(text: String, icon: ImageVector, modifier: Modifier = Modifier) {
     Row(
-        Modifier.clip(RoundedCornerShape(50)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.10f)).padding(horizontal = 8.dp, vertical = 5.dp),
+        modifier.clip(RoundedCornerShape(50)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.10f)).padding(horizontal = 8.dp, vertical = 5.dp),
         horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp), tint = WildforceThemeTokens.textSecondary)
@@ -1108,7 +1110,11 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
             modifier = Modifier.fillMaxWidth().height(detailHeroHeight),
         )
         Box(Modifier.fillMaxWidth().height(detailHeroHeight).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.48f), Color.Transparent, WildforceThemeTokens.backgroundSecondary))))
-        Column(Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState())) {
+        Column(
+            Modifier.fillMaxSize()
+                .verticalScroll(androidx.compose.foundation.rememberScrollState())
+                .padding(bottom = 112.dp),
+        ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 CenteredBackButton(onBack, 40.dp, 14.dp)
                 Spacer(Modifier.weight(1f))
@@ -1598,7 +1604,7 @@ fun ActiveWorkoutScreen(
     onGenerateNextPlan: () -> Unit = {},
     onWorkoutChanged: (WorkoutDaySummary) -> Unit = {},
     onExit: () -> Unit,
-    onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double, streak: Int) -> Unit,
+    onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double, streak: Int, completedOn: LocalDate) -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current.applicationContext
     val haptics = LocalHapticFeedback.current
@@ -1656,6 +1662,7 @@ fun ActiveWorkoutScreen(
     var totalCompletedSets by remember(workout.id) { mutableStateOf(restored?.totalCompletedSets ?: 0) }
     var totalVolumeKg by remember(workout.id) { mutableStateOf(restored?.totalVolumeKg ?: 0.0) }
     var showsSummary by remember(workout.id) { mutableStateOf(restored?.showsSummary ?: false) }
+    var completedOn by remember(workout.id) { mutableStateOf<LocalDate?>(null) }
     var completionCommitted by remember(workout.id) { mutableStateOf(false) }
     var pendingFeedback by remember(workout.id) { mutableStateOf(restored?.pendingFeedback ?: false) }
     var selectedFeedback by remember(workout.id) { mutableStateOf(restored?.selectedFeedback ?: "JUSTO") }
@@ -1891,6 +1898,7 @@ fun ActiveWorkoutScreen(
                 restContext = null
             }
         } else {
+            completedOn = completedOn ?: LocalDate.now()
             showsSummary = true
         }
     }
@@ -1934,8 +1942,24 @@ fun ActiveWorkoutScreen(
                 } else previousStats.averageWeightKg,
             ))
             if (newCompleted < effectiveSets) {
-                reps = activeExercise.targetRepsPerSet?.getOrNull(newCompleted) ?: targetReps(activeExercise.reps)
-                weightKg = activeExercise.targetWeightsKg?.getOrNull(newCompleted) ?: activeExercise.targetWeightKg ?: weightKg
+                val completedSetIndex = newCompleted - 1
+                val completedSetTargetReps = activeExercise.targetRepsPerSet?.getOrNull(completedSetIndex)
+                    ?: targetReps(activeExercise.reps)
+                val completedSetTargetWeightKg = activeExercise.targetWeightsKg?.getOrNull(completedSetIndex)
+                    ?: activeExercise.targetWeightKg
+                // When the athlete deviates from the AI target, continue with
+                // that actual result in the next set. The planned target stays
+                // intact and is still displayed as the reference value.
+                reps = if (loggedReps != completedSetTargetReps) {
+                    loggedReps
+                } else {
+                    activeExercise.targetRepsPerSet?.getOrNull(newCompleted) ?: targetReps(activeExercise.reps)
+                }
+                weightKg = if (completedSetTargetWeightKg != null && loggedWeight != completedSetTargetWeightKg) {
+                    loggedWeight
+                } else {
+                    activeExercise.targetWeightsKg?.getOrNull(newCompleted) ?: activeExercise.targetWeightKg ?: weightKg
+                }
                 exerciseTimerRunning = false
                 if (timedDuration != null) {
                     exerciseTimeRemaining = timedDuration
@@ -2321,7 +2345,12 @@ fun ActiveWorkoutScreen(
                 showsSkipExerciseConfirmation = false
                 val nextIndex = if (skipsWholeBlock) currentPathBlock?.exercises?.flatMap { it.executionIndices }?.maxOrNull()?.plus(1) else exerciseIndex + 1
                 restRemaining = null
-                if (nextIndex == null || nextIndex > workout.exercises.lastIndex) showsSummary = true else exerciseIndex = nextIndex
+                if (nextIndex == null || nextIndex > workout.exercises.lastIndex) {
+                    completedOn = completedOn ?: LocalDate.now()
+                    showsSummary = true
+                } else {
+                    exerciseIndex = nextIndex
+                }
             }) { Text("SALTAR", color = WildforceThemeTokens.accentGold) } },
             dismissButton = { TextButton(onClick = { showsSkipExerciseConfirmation = false }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
         )
@@ -2384,10 +2413,10 @@ fun ActiveWorkoutScreen(
                     totalVolumeKg = totalVolumeKg,
                 ),
             )
-            CompletionProgressStore.commit(context, progress)
+            CompletionProgressStore.commit(context, progress, completedOn ?: LocalDate.now())
             WorkoutSessionStore.clear(context, workout.id)
         }
-        runCatching { onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg, progress.streakAfter) }
+        runCatching { onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg, progress.streakAfter, completedOn ?: LocalDate.now()) }
     }
 
     if (showsSummary) {
@@ -2397,6 +2426,7 @@ fun ActiveWorkoutScreen(
                 currentStreak,
                 completesPlan = isPlanCompletedAfterWorkout,
                 completesMesocycle = isMesocycleCompletedAfterWorkout,
+                completedOn = completedOn ?: LocalDate.now(),
             )
         }
         val recordEvents = remember(workout.id, exerciseStats) { WorkoutCompletionCalculator.records(context, workout, exerciseStats) }
@@ -3002,9 +3032,8 @@ private fun ActiveSetEditor(
 }
 
 /**
- * Numeric sheet equivalent to iOS's NumericInputSheet.  It deliberately does
- * not summon the system keyboard: reps receive an integer keypad, while load
- * gets a decimal separator and its own configured increment.
+ * Compact value editor for the active set. It uses the system numeric keyboard
+ * for direct entry and exposes the usual training increment as +/- controls.
  */
 @Composable
 private fun WorkoutNumericInputDialog(
@@ -3015,17 +3044,8 @@ private fun WorkoutNumericInputDialog(
     onDismissRequest: () -> Unit,
     onSave: (Double) -> Unit,
 ) {
-    val decimalPlaces = if (allowsDecimal) 1 else 0
     var draft by remember(title, initialValue, allowsDecimal) {
         mutableStateOf(if (allowsDecimal) String.format(Locale.US, "%.1f", initialValue) else initialValue.toInt().toString())
-    }
-    fun appendDigit(digit: Char) {
-        val fractionLength = draft.substringAfter('.', "").length
-        if (allowsDecimal && draft.contains('.') && fractionLength >= decimalPlaces) return
-        draft = when (draft) {
-            "0" -> digit.toString()
-            else -> (draft + digit).take(8)
-        }
     }
     fun parsedDraft(): Double? = draft.replace(',', '.').toDoubleOrNull()
     fun applyStep(direction: Double) {
@@ -3037,43 +3057,44 @@ private fun WorkoutNumericInputDialog(
         onDismissRequest = onDismissRequest,
         title = { Text(title, fontFamily = AntonFontFamily) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(
-                    Modifier.fillMaxWidth()
-                        .background(WildforceThemeTokens.textSecondary.copy(alpha = 0.10f), RoundedCornerShape(12.dp))
-                        .padding(start = 12.dp, end = 6.dp, top = 10.dp, bottom = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        draft.ifBlank { "0" },
-                        Modifier.weight(1f),
+            Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                TextField(
+                    value = draft,
+                    onValueChange = { draft = sanitizeNumericInput(it, allowsDecimal) },
+                    modifier = Modifier.fillMaxWidth()
+                        .background(WildforceThemeTokens.textSecondary.copy(alpha = 0.10f), RoundedCornerShape(12.dp)),
+                    singleLine = true,
+                    textStyle = androidx.compose.ui.text.TextStyle(
                         fontFamily = Exo2FontFamily,
                         fontSize = 32.sp,
-                        color = if (draft.isBlank()) WildforceThemeTokens.textSecondary else WildforceThemeTokens.textPrimary,
-                        textAlign = TextAlign.End,
+                        textAlign = TextAlign.Center,
+                        color = WildforceThemeTokens.textPrimary,
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = if (allowsDecimal) KeyboardType.Decimal else KeyboardType.Number,
+                    ),
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                    ),
+                )
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    CenteredRoundControl("−", 56.dp, { applyStep(-1.0) }, "Reducir ${numberForInput(step, allowsDecimal)}")
+                    Text(
+                        numberForInput(step, allowsDecimal),
+                        Modifier.width(88.dp),
+                        fontFamily = Exo2FontFamily,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center,
+                        color = WildforceThemeTokens.textSecondary,
                     )
-                    Text("×", Modifier.clickable { draft = "" }.padding(10.dp), fontSize = 20.sp, color = WildforceThemeTokens.textSecondary)
-                }
-                listOf(listOf('1', '2', '3'), listOf('4', '5', '6'), listOf('7', '8', '9')).forEach { row ->
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        row.forEach { digit -> NumericKey(digit.toString(), Modifier.weight(1f)) { appendDigit(digit) } }
-                    }
-                }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (allowsDecimal) {
-                        NumericKey(DecimalFormatSymbols.getInstance().decimalSeparator.toString(), Modifier.weight(1f)) {
-                            if (!draft.contains('.')) draft = if (draft.isBlank()) "0." else "$draft."
-                        }
-                    } else {
-                        Spacer(Modifier.weight(1f))
-                    }
-                    NumericKey("0", Modifier.weight(1f)) { appendDigit('0') }
-                    NumericKey("⌫", Modifier.weight(1f)) { if (draft.isNotEmpty()) draft = draft.dropLast(1) }
-                }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NumericKey("BORRAR", Modifier.weight(1f)) { draft = "" }
-                    NumericKey("−${numberForInput(step, allowsDecimal)}", Modifier.weight(1f)) { applyStep(-1.0) }
-                    NumericKey("+${numberForInput(step, allowsDecimal)}", Modifier.weight(1f)) { applyStep(1.0) }
+                    CenteredRoundControl("+", 56.dp, { applyStep(1.0) }, "Aumentar ${numberForInput(step, allowsDecimal)}")
                 }
             }
         },
@@ -3083,23 +3104,6 @@ private fun WorkoutNumericInputDialog(
             }
         },
         dismissButton = { TextButton(onClick = onDismissRequest) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
-    )
-}
-
-@Composable
-private fun NumericKey(label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Text(
-        label,
-        modifier.height(48.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(WildforceThemeTokens.textSecondary.copy(alpha = 0.08f))
-            .clickable(onClick = onClick)
-            .padding(horizontal = 4.dp),
-        fontFamily = Exo2FontFamily,
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Medium,
-        color = WildforceThemeTokens.textPrimary,
-        textAlign = TextAlign.Center,
     )
 }
 
@@ -3350,14 +3354,56 @@ private fun RestTimerContent(
 private fun RestTimerExercisePrescription(exercise: ExerciseSummary, useImperial: Boolean) {
     val prescription = restTimerExercisePrescription(exercise, useImperial)
     if (prescription.isNotEmpty()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            prescription.zip(restTimerPrescriptionIcons(exercise)).forEach { (value, icon) ->
+                RestTimerPrescriptionMetric(
+                    icon = icon,
+                    text = value,
+                )
+            }
+        }
+    }
+}
+
+/** Mirrors the symbols that accompany the compact prescription on iOS. */
+@Composable
+private fun RestTimerPrescriptionMetric(icon: ImageVector, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(13.dp),
+            tint = WildforceThemeTokens.textSecondary,
+        )
         Text(
-            prescription.joinToString(" · "),
+            text = text,
+            modifier = Modifier.padding(start = 2.dp),
             style = MaterialTheme.typography.caption,
             color = WildforceThemeTokens.textSecondary,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
         )
     }
+}
+
+private fun restTimerPrescriptionIcons(exercise: ExerciseSummary): List<ImageVector> = buildList {
+    if (exercise.sets > 0) add(Icons.Filled.Layers)
+    when (exercise.trackingMode) {
+        io.codepassion.doubletriangle.core.model.ExerciseTrackingMode.Repetitions -> {
+            val hasReps = exercise.repRange != null || !exercise.targetRepsPerSet.isNullOrEmpty() || exercise.reps.isNotBlank()
+            if (hasReps) add(Icons.Filled.FormatListNumbered)
+        }
+        io.codepassion.doubletriangle.core.model.ExerciseTrackingMode.Duration,
+        io.codepassion.doubletriangle.core.model.ExerciseTrackingMode.DurationAndDistance -> {
+            exercise.targetDurationMinutes?.takeIf { it > 0 }?.let { add(Icons.Filled.AccessTime) }
+            exercise.targetDurationSeconds?.takeIf { it > 0 }?.let { add(Icons.Filled.AccessTime) }
+        }
+    }
+    if ((exercise.targetWeightKg ?: exercise.targetWeightsKg?.maxOrNull() ?: 0.0) > 0.0) add(Icons.Filled.Scale)
+    if ((exercise.targetDistanceKm ?: 0.0) > 0.0) add(Icons.Filled.MyLocation)
 }
 
 /** Typed compact prescription shared by the next-exercise and next-round cards. */

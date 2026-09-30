@@ -32,6 +32,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.animateFloatAsState
@@ -200,8 +201,8 @@ fun ProfileScreen(
         }
         if (selectedSection == null) { item { ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, avatarPath, avatarRevision, onChangeAvatar) } } }
         if (selectedSection == null) { item { ProfileEntrance(entered, 35) { ProfileExperience(experienceXp, experienceLevel, experienceProgress) } } }
-        if (selectedSection == null) { item { ProfileCategoryTree(draft, nutritionProfile, appLanguage) { selectedSection = it } } }
         if (selectedSection == null) { item { ProfileEntrance(entered, 50) { AccountSection(draft) { remoteProfile -> draft = remoteProfile; saveProfile(remoteProfile) } } } }
+        if (selectedSection == null) { item { ProfileCategoryTree(draft, nutritionProfile, appLanguage) { selectedSection = it } } }
         // `achievementsSection` is intentionally disabled in the canonical iOS
         // profile view.  Do not render a placeholder rail here: it changes the
         // hierarchy and pushes the four profile destinations below the fold.
@@ -1086,7 +1087,32 @@ private fun TogglePickerRow(label: String, selected: Boolean, onToggle: () -> Un
 
 @Composable private fun Section(title: String, content: @Composable () -> Unit) { Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) { Text(title, fontFamily = Exo2FontFamily, fontSize = 18.sp, color = WildforceThemeTokens.textPrimary); Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(horizontal = 14.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) { content() } } }
 @Composable private fun ChoiceButton(label: String, value: String, description: String? = null, icon: ImageVector? = null, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 10.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { icon?.let { Icon(it, contentDescription = null, modifier = Modifier.padding(end = 12.dp).size(20.dp), tint = WildforceThemeTokens.textSecondary) }; Column(Modifier.weight(1f)) { Text(label, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis); description?.let { Text(it, Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 3, overflow = TextOverflow.Ellipsis) } }; Text(value, Modifier.padding(start = 10.dp).weight(.85f), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.End, maxLines = 2, overflow = TextOverflow.Ellipsis); Text("›", Modifier.padding(start = 8.dp), color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold) } }
-@Composable private fun NumberField(label: String, value: String, onValueChange: (String) -> Unit, modifier: Modifier, decimal: Boolean = false) { OutlinedTextField(value, onValueChange, modifier, label = { Text(label) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number)) }
+@Composable
+private fun NumberField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier,
+    decimal: Boolean = false,
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier,
+        label = { Text(label) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            textColor = WildforceThemeTokens.textPrimary,
+            cursorColor = WildforceThemeTokens.accent,
+            focusedBorderColor = WildforceThemeTokens.accent,
+            unfocusedBorderColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.55f),
+            focusedLabelColor = WildforceThemeTokens.accent,
+            unfocusedLabelColor = WildforceThemeTokens.textSecondary,
+            backgroundColor = Color.Transparent,
+        ),
+    )
+}
 @Composable private fun TogglePreference(label: String, description: String, selected: Boolean, icon: ImageVector? = null, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 10.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { icon?.let { Icon(it, contentDescription = null, modifier = Modifier.padding(end = 12.dp).size(20.dp), tint = WildforceThemeTokens.textSecondary) }; Column(Modifier.weight(1f)) { Text(label, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis); Text(description, Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 3, overflow = TextOverflow.Ellipsis) }; androidx.compose.material.Switch(checked = selected, onCheckedChange = { onClick() }, modifier = Modifier.padding(start = 10.dp), colors = androidx.compose.material.SwitchDefaults.colors(checkedThumbColor = WildforceThemeTokens.accent, checkedTrackColor = WildforceThemeTokens.accent.copy(alpha = .32f))) } }
 
 private const val PoundsPerKilogram = 2.2046226218

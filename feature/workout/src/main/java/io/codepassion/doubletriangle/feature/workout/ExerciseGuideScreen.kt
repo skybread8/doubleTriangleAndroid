@@ -75,7 +75,7 @@ internal fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBa
     Box(Modifier.fillMaxSize().background(WildforceThemeTokens.backgroundSecondary)) {
         RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.fillMaxWidth().height(500.dp))
         Box(Modifier.fillMaxWidth().height(500.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.55f), Color.Transparent, WildforceThemeTokens.backgroundSecondary))))
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 112.dp)) {
             Box(Modifier.padding(14.dp).size(48.dp).clip(CircleShape).background(WildforceThemeTokens.imageControlBackground).clickable(onClick = onBack), contentAlignment = Alignment.Center) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = WildforceThemeTokens.imageControlContent, modifier = Modifier.size(22.dp))
             }

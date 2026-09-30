@@ -56,6 +56,7 @@ import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -83,6 +84,9 @@ import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.core.view.WindowCompat
 import android.graphics.Color as AndroidColor
@@ -113,8 +117,11 @@ import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingPlanPreview
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
 import io.codepassion.doubletriangle.feature.onboarding.ProfileScreen
+import io.codepassion.doubletriangle.feature.onboarding.SubscriptionPaywall
+import io.codepassion.doubletriangle.feature.onboarding.subscriptionAccess
 import io.codepassion.doubletriangle.feature.workout.ActiveWorkoutScreen
 import io.codepassion.doubletriangle.feature.workout.CompletionProgressStore
+import io.codepassion.doubletriangle.feature.workout.ExerciseVisualCatalog
 import io.codepassion.doubletriangle.feature.workout.WorkoutDetailScreen
 import io.codepassion.doubletriangle.feature.workout.CustomWorkoutStore
 import io.codepassion.doubletriangle.feature.workout.WorkoutHubScreen
@@ -399,9 +406,21 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             runCatching { WorkoutPlanGenerator.parse(json, currentProfile.name, currentProfile.goal.title) }.getOrNull()
         } ?: PreviewWorkoutRepository.load(currentProfile.name, currentProfile.goal.title)
         val completedIds = preferences.getStringSet("completed_workouts", emptySet()).orEmpty()
+        val completedDatesByWorkout = preferences.getStringSet("completed_workout_local_dates", emptySet())
+            .orEmpty()
+            .mapNotNull { entry ->
+                val separator = entry.lastIndexOf('|')
+                if (separator <= 0) return@mapNotNull null
+                val date = runCatching { java.time.LocalDate.parse(entry.substring(separator + 1)) }.getOrNull()
+                    ?: return@mapNotNull null
+                entry.substring(0, separator) to date
+            }
+            .toMap()
         val skippedIds = preferences.getStringSet("skipped_workouts", emptySet()).orEmpty()
         val restoredState = baseState.copy(
-            completedDays = baseState.workouts.filter { it.id in completedIds }.mapTo(mutableSetOf()) { it.scheduledDay },
+            completedDays = baseState.workouts.filter { it.id in completedIds }.mapTo(mutableSetOf()) {
+                completedDatesByWorkout[it.id]?.dayOfWeek ?: it.scheduledDay
+            },
             workouts = baseState.workouts.map {
                 when {
                     it.id in completedIds -> it.copy(status = WorkoutStatus.Completed)
@@ -410,24 +429,65 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 }
             },
         )
+        var subscriptionRequired by remember { mutableStateOf(false) }
         LaunchedEffect(currentProfile.name, workoutPlanStore.currentPlanJson()) {
             val hasRemoteSession = context.getSharedPreferences("wildforce_account", 0).getString("token", null) != null
             if (preferences.getBoolean("remote_sync_pending", false) || hasRemoteSession) {
-                if (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
-                    preferences.edit().putBoolean("remote_sync_pending", false).apply()
-                    if (preferences.getBoolean("remote_plan_imported", false)) {
-                        preferences.edit().remove("remote_plan_imported").apply()
-                        workoutPlanStore.currentPlanJson()?.let { remotePlan ->
-                            runCatching { WorkoutPlanGenerator.parse(remotePlan, currentProfile.name, currentProfile.goal.title) }
-                                .onSuccess { generatedWorkoutState = it }
+                when (val result = WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
+                    is WorkoutRemoteSync.Outcome.Synchronized -> {
+                        preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                        if (preferences.getBoolean("remote_plan_imported", false)) {
+                            preferences.edit().remove("remote_plan_imported").apply()
+                            workoutPlanStore.currentPlanJson()?.let { remotePlan ->
+                                runCatching { WorkoutPlanGenerator.parse(remotePlan, currentProfile.name, currentProfile.goal.title) }
+                                    .onSuccess { generatedWorkoutState = it }
+                            }
+                        }
+                        result.importedProfile?.let { imported ->
+                            persistOnboardingProfile(imported)
+                            profile = imported
+                        }
+                    }
+                    WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = hasExpiredSubscription(context)
+                    else -> Unit
+                }
+            }
+        }
+        // Same policy as iOS's scenePhase(.active): check server access again
+        // whenever the app returns to foreground.  The paywall itself is only
+        // forced for the explicit `expired` status, never for a network error.
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner, currentProfile.name) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME && context.getSharedPreferences("wildforce_account", 0).getString("token", null) != null) {
+                    coroutineScope.launch {
+                        when (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
+                            WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = hasExpiredSubscription(context)
+                            is WorkoutRemoteSync.Outcome.Synchronized -> preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                            else -> Unit
                         }
                     }
                 }
             }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
         }
         WildforceApp(
             profile = currentProfile,
             workoutState = restoredState,
+            subscriptionRequired = subscriptionRequired,
+            onSubscriptionPurchaseCompleted = {
+                coroutineScope.launch {
+                    when (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
+                        is WorkoutRemoteSync.Outcome.Synchronized -> {
+                            preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                            subscriptionRequired = false
+                        }
+                        WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = hasExpiredSubscription(context)
+                        else -> Unit
+                    }
+                }
+            },
             onWorkoutCompleted = { id, duration, sets, volume ->
                 val previouslyCompleted = preferences.getStringSet("completed_workouts", emptySet()).orEmpty()
                 val completed = previouslyCompleted + id
@@ -445,8 +505,10 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 runCatching { WorkoutQuickAccessWidget.refresh(context) }
                 preferences.edit().putBoolean("remote_sync_pending", true).apply()
                 coroutineScope.launch {
-                    if (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
-                        preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                    when (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
+                        is WorkoutRemoteSync.Outcome.Synchronized -> preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                        WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = hasExpiredSubscription(context)
+                        else -> Unit
                     }
                 }
                 if (currentProfile.isHealthConnectEnabled) {
@@ -653,11 +715,19 @@ private fun PlanPreviewWorkoutCard(workout: WorkoutDaySummary, gender: String) {
     }
 }
 
+/** Mirrors iOS: a failed sync only forces the paywall when access is expired. */
+private suspend fun hasExpiredSubscription(context: android.content.Context): Boolean {
+    val token = context.getSharedPreferences("wildforce_account", 0).getString("token", null) ?: return false
+    return subscriptionAccess(token).getOrNull()?.status == "expired"
+}
+
 @Composable
 private fun WildforceApp(
     profile: OnboardingProfile,
     workoutState: WorkoutHubState,
     onWorkoutCompleted: (String, Int, Int, Double) -> Unit,
+    subscriptionRequired: Boolean = false,
+    onSubscriptionPurchaseCompleted: () -> Unit = {},
     onResetOnboarding: () -> Unit = {},
     onProfileUpdated: (OnboardingProfile) -> Unit = {},
     onRegenerateProfile: (OnboardingProfile) -> Unit = {},
@@ -708,6 +778,14 @@ private fun WildforceApp(
     var workoutDetail by remember { mutableStateOf<WorkoutDaySummary?>(null) }
     var activeWorkout by remember { mutableStateOf<WorkoutDaySummary?>(null) }
     var showExitAppDialog by remember { mutableStateOf(false) }
+    if (subscriptionRequired) {
+        val accountPreferences = remember(appContext) { appContext.getSharedPreferences("wildforce_account", 0) }
+        SubscriptionPaywall(
+            accountId = accountPreferences.getString("id", null),
+            mandatory = true,
+            onPurchaseCompleted = onSubscriptionPurchaseCompleted,
+        )
+    }
     SideEffect {
         activity?.window?.let { window ->
             if (keepScreenOnDuringWorkout && activeWorkout != null) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -755,10 +833,17 @@ private fun WildforceApp(
                 activeWorkout = updated
             },
             onExit = { activeWorkout = null },
-            onFinish = { duration, sets, volume, streak ->
+            onFinish = { duration, sets, volume, streak, completedOn ->
+                val completedDates = appPreferences
+                    .getStringSet("completed_workout_local_dates", emptySet())
+                    .orEmpty()
+                    .filterNot { it.substringBeforeLast('|', missingDelimiterValue = "") == workout.id }
+                    .toMutableSet()
+                    .apply { add("${workout.id}|$completedOn") }
+                appPreferences.edit().putStringSet("completed_workout_local_dates", completedDates).apply()
                 val completedState = displayedWorkoutState.copy(
                     user = displayedWorkoutState.user.copy(currentStreak = streak),
-                    completedDays = if (displayedWorkoutState.workouts.any { it.id == workout.id }) displayedWorkoutState.completedDays + workout.scheduledDay else displayedWorkoutState.completedDays,
+                    completedDays = if (displayedWorkoutState.workouts.any { it.id == workout.id }) displayedWorkoutState.completedDays + completedOn.dayOfWeek else displayedWorkoutState.completedDays,
                     workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Completed) else it },
                 )
                 displayedWorkoutState = completedState
@@ -772,20 +857,7 @@ private fun WildforceApp(
         return
     }
     workoutDetail?.let { workout ->
-        Scaffold(
-            modifier = Modifier.liquidGlassBackground(),
-            backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
-            bottomBar = {
-                RootBottomNavigation(
-                    selected = selected,
-                    onSelected = {
-                        workoutDetail = null
-                        selected = it
-                    },
-                )
-            },
-        ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding)) {
+        Box(Modifier.fillMaxSize()) {
         WorkoutDetailScreen(workout, profile.gender.storedValue, useImperial = profile.metricSystem == MetricSystem.Imperial, onBack = { workoutDetail = null }, onStart = {
             WildforceNotificationScheduler.recordWorkoutStarted(appContext)
             activeWorkout = workout
@@ -828,7 +900,14 @@ private fun WildforceApp(
         }, defaultAdaptEquipment = profile.effectiveTrainingLocations().firstOrNull { it.isDefault }?.equipment?.joinToString(", ") { it.title }.orEmpty().ifBlank { profile.availableEquipment.joinToString(", ") { it.title } }, adaptEquipmentPresets = profile.effectiveTrainingLocations().map { location -> location.name to location.equipment.joinToString(", ") { it.title } }, adaptAiGenerator = { request ->
             WorkoutPlanGenerator.adaptWorkout(profile, workout, request, appContext)
         })
-        }
+            RootBottomNavigation(
+                selected = selected,
+                onSelected = {
+                    workoutDetail = null
+                    selected = it
+                },
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
         }
         return
     }
@@ -852,7 +931,6 @@ private fun WildforceApp(
                     ActiveWorkoutAccessory(
                         workout = workout,
                         exerciseIndex = WorkoutSessionStore.activeExerciseIndex(appContext, workout.id),
-                        gender = profile.gender.storedValue,
                         onResume = { activeWorkout = workout },
                     )
                 }
@@ -860,14 +938,13 @@ private fun WildforceApp(
             }
         },
     ) { padding ->
-        // Reserve the complete bottom-bar footprint.  The resume accessory can be
-        // taller than the navigation bar, so drawing content behind it would make
-        // the final item of any scrollable screen unreachable.
+        // Keep the screen canvas behind the bottom controls. Scrollable screens
+        // provide their own final content inset, as ProfileScreen does.
         val overlayPadding = PaddingValues(
             start = padding.calculateStartPadding(LayoutDirection.Ltr),
             top = padding.calculateTopPadding(),
             end = padding.calculateEndPadding(LayoutDirection.Ltr),
-            bottom = padding.calculateBottomPadding(),
+            bottom = 0.dp,
         )
         if (selected == RootDestination.Workout) {
             WorkoutHubScreen(
@@ -965,7 +1042,6 @@ private fun workoutBmr(profile: OnboardingProfile): Double {
 private fun ActiveWorkoutAccessory(
     workout: WorkoutDaySummary,
     exerciseIndex: Int?,
-    gender: String,
     onResume: () -> Unit,
 ) {
     val currentExercise = workout.exercises.getOrNull(exerciseIndex ?: 0)
@@ -991,13 +1067,14 @@ private fun ActiveWorkoutAccessory(
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (currentExercise?.imageKey != null) {
-                // The resume accessory identifies a specific exercise, so use its
-                // own thumbnail instead of an abstract muscle-group symbol.
-                RemoteTrainingImage(
-                    url = exerciseImageUrl(currentExercise.imageKey, gender),
-                    contentDescription = currentExercise.name,
-                    modifier = Modifier.size(28.dp).clip(RoundedCornerShape(7.dp)),
+            val primaryMuscleDrawable = ExerciseVisualCatalog.primaryMuscleDrawable(currentExercise?.imageKey)
+            if (primaryMuscleDrawable != null) {
+                // Match iOS: the accessory uses the alphabetically first primary
+                // target muscle, rather than the exercise's training photo.
+                Image(
+                    painter = painterResource(primaryMuscleDrawable),
+                    contentDescription = currentExercise?.name,
+                    modifier = Modifier.size(28.dp),
                 )
             } else {
                 Icon(

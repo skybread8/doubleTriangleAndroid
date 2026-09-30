@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -67,7 +68,7 @@ internal fun WorkoutMesocycleDetailScreen(state: WorkoutHubState, planHistory: L
             Spacer(Modifier.weight(1f))
             Text("HECHO", Modifier.clickable(onClick = onBack).padding(8.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
         }
-        LazyColumn(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        LazyColumn(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 160.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             item { MesocycleSummaryCard(state, currentGroup, currentEntry) }
             item { DetailSectionHeader("Mesociclo actual", "Tu posición actual dentro del ciclo activo.") }
             item { MesocycleGroupCard(currentGroup, currentGroup.entries.any { it.isProjected }) }
@@ -126,9 +127,9 @@ private fun MesocyclePillProgress(currentWeek: Int, totalWeeks: Int) {
 @Composable
 private fun DetailMetric(title: String, value: String, icon: ImageVector? = null) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(title, Modifier.weight(1f), style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.Medium, color = WildforceThemeTokens.textPrimary)
+        Text(title, Modifier.weight(1f), style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.Medium, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         icon?.let { Icon(it, null, Modifier.padding(end = 6.dp).size(16.dp), WildforceThemeTokens.textSecondary) }
-        Text(value, style = MaterialTheme.typography.subtitle2, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(value, Modifier.widthIn(max = 160.dp), style = MaterialTheme.typography.subtitle2, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -193,7 +194,10 @@ private fun MesocycleEntryRow(entry: MesocycleTimelineEntry) {
                 }
             }
         }
-        ContextPill(entry.phase.label, phaseIcon(entry.phase))
+        // Keep the phase badge bounded. Without this, Compose measures this
+        // unweighted child first and can leave the plan title only a few pixels
+        // wide, which makes it wrap one character per line on narrow layouts.
+        ContextPill(entry.phase.label, phaseIcon(entry.phase), Modifier.widthIn(max = 124.dp))
     }
 }
 

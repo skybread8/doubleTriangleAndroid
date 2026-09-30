@@ -14,7 +14,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "io.codepassion.doubletriangle"
+        applicationId = "io.codepassion.wildforce.android"
         minSdk = 28
         targetSdk = 37
         versionCode = 1
