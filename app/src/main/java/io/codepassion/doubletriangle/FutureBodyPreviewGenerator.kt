@@ -1,5 +1,7 @@
 package io.codepassion.doubletriangle
 
+import io.codepassion.wildforce.android.BuildConfig
+
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64

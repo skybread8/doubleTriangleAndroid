@@ -52,7 +52,10 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, planHistory: List
             Spacer(Modifier.weight(1f))
             Text("PLAN DE ENTRENAMIENTO", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
         }
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        LazyColumn(
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 160.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
             item {
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(22.dp), emphasized = true).padding(20.dp)) {
                     Text(state.planName.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)

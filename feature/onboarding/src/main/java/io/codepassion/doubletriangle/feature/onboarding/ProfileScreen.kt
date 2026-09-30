@@ -186,7 +186,9 @@ fun ProfileScreen(
     }
     LazyColumn(
         modifier = Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 16.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 16.dp, bottom = contentPadding.calculateBottomPadding() + 96.dp),
+        // The menu stays over the canvas; reserve room inside the scroll so the
+        // final profile setting can be brought above it (and the resume bar).
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 16.dp, bottom = contentPadding.calculateBottomPadding() + 160.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (selectedSection != null) {
@@ -531,7 +533,7 @@ private fun BodyMetricsScreen(
     val latest = entries.lastOrNull()?.valueFor(selected)
     LazyColumn(
         modifier = Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 16.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 16.dp, bottom = 112.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 16.dp, bottom = 160.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {

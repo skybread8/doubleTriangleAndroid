@@ -1,7 +1,7 @@
 package io.codepassion.doubletriangle.nutrition
 
 import android.content.Context
-import io.codepassion.doubletriangle.BuildConfig
+import io.codepassion.wildforce.android.BuildConfig
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

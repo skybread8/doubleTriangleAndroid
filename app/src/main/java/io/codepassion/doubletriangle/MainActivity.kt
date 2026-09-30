@@ -1,5 +1,7 @@
 package io.codepassion.doubletriangle
 
+import io.codepassion.wildforce.android.R
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts

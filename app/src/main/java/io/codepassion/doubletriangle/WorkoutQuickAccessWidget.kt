@@ -1,5 +1,7 @@
 package io.codepassion.doubletriangle
 
+import io.codepassion.wildforce.android.R
+
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider

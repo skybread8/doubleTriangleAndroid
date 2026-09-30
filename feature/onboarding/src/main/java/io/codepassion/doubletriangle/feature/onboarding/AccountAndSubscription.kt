@@ -54,8 +54,8 @@ import java.net.URL
 import java.security.MessageDigest
 
 private const val AccountPreferences = "wildforce_account"
-private const val MonthlyProductId = "io.codepassion.wildforce.subscription.standard"
-private const val YearlyProductId = "io.codepassion.wildforce.subscription.year"
+private const val MonthlyProductId = "io.codepassion.wildforce.premium"
+private const val YearlyProductId = "io.codepassion.wildforce.premium.year"
 
 data class WildforceAccount(val id: String, val name: String, val email: String)
 

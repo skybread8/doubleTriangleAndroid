@@ -16,6 +16,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -385,7 +386,9 @@ private fun IntakeActions(date: LocalDate, today: LocalDate, onToday: () -> Unit
 @Composable
 private fun DailyProgressCard(date: LocalDate, current: NutritionTargets, target: NutritionTargets, onClick: () -> Unit) {
     val progress = if (target.calories > 0) current.calories.toFloat() / target.calories else 0f
-    val animatedProgress by animateFloatAsState(progress, label = "calorie progress")
+    // iOS animates the nutrition ring when its totals change; use the same
+    // 650 ms cadence here instead of Compose's default spring.
+    val animatedProgress by animateFloatAsState(progress, animationSpec = tween(650), label = "calorie progress")
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).clickable(onClick = onClick).padding(20.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -401,9 +404,9 @@ private fun DailyProgressCard(date: LocalDate, current: NutritionTargets, target
             ProgressRing(animatedProgress)
         }
         Row(Modifier.padding(top = 22.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MacroProgress("Proteína", current.protein, target.protein, ProteinColor, Icons.Filled.SetMeal, Modifier.weight(1f))
-            MacroProgress("Carbos", current.carbs, target.carbs, CarbsColor, Icons.Filled.Eco, Modifier.weight(1f))
-            MacroProgress("Grasa", current.fat, target.fat, FatColor, Icons.Filled.Opacity, Modifier.weight(1f))
+            MacroProgress("Proteína", current.protein, target.protein, ProteinColor, NutritionMacroIcon.Protein, Modifier.weight(1f))
+            MacroProgress("Carbos", current.carbs, target.carbs, CarbsColor, NutritionMacroIcon.Carbs, Modifier.weight(1f))
+            MacroProgress("Grasa", current.fat, target.fat, FatColor, NutritionMacroIcon.Fat, Modifier.weight(1f))
         }
     }
 }
@@ -422,12 +425,12 @@ private fun ProgressRing(progress: Float) {
 }
 
 @Composable
-private fun MacroProgress(title: String, current: Int, target: Int, color: Color, icon: ImageVector, modifier: Modifier) {
+private fun MacroProgress(title: String, current: Int, target: Int, color: Color, icon: NutritionMacroIcon, modifier: Modifier) {
     val fraction = if (target > 0) current.toFloat() / target else 0f
-    val animatedFraction by animateFloatAsState(fraction, label = "$title progress")
+    val animatedFraction by animateFloatAsState(fraction, animationSpec = tween(650), label = "$title progress")
     Column(modifier, verticalArrangement = Arrangement.spacedBy(7.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(15.dp))
+            NutritionMacroSymbol(icon, tint = color, modifier = Modifier.size(15.dp))
             Text(title, Modifier.padding(start = 5.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
         }
         Text("$current / $target g", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
@@ -554,15 +557,16 @@ internal fun NutritionDayHeader(day: NutritionDayPlan, logged: NutritionTargets,
     ) {
         Row {
             Column { Text(day.date.format(DateTimeFormatter.ofPattern("d MMMM", Locale("es"))), style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = .82f)); Text(if (isToday) "HOY" else day.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es")).uppercase(), fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = Color.White) }
-            Spacer(Modifier.weight(1f)); Column(horizontalAlignment = Alignment.End) { Text(day.type.title.uppercase(), style = MaterialTheme.typography.caption, color = Color.White, modifier = Modifier.background(Color.White.copy(alpha = .14f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp)); Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.LocalFireDepartment, null, tint = Color.White, modifier = Modifier.size(15.dp)); Text("${day.targets.calories} kcal", Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold, color = Color.White) } }
+            Spacer(Modifier.weight(1f)); Column(horizontalAlignment = Alignment.End) { Text(day.type.title.uppercase(), style = MaterialTheme.typography.caption, color = Color.White, modifier = Modifier.background(Color.White.copy(alpha = .14f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp)); Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) { NutritionMacroSymbol(NutritionMacroIcon.Calories, Color.White, Modifier.size(15.dp)); Text("${day.targets.calories} kcal", Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold, color = Color.White) } }
         }
         Row(Modifier.background(Color.White.copy(alpha = .12f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.FitnessCenter, null, tint = Color.White, modifier = Modifier.size(14.dp)); Text(day.workoutTitle.uppercase(), Modifier.padding(start = 5.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White) }
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-            HeaderPill(Icons.Filled.SetMeal, "${logged.protein}/${day.targets.protein} g"); HeaderPill(Icons.Filled.Eco, "${logged.carbs}/${day.targets.carbs} g"); HeaderPill(Icons.Filled.Opacity, "${logged.fat}/${day.targets.fat} g"); HeaderPill(Icons.Filled.Bolt, day.energyDemand.title)
+            HeaderMacroPill(NutritionMacroIcon.Protein, "${logged.protein}/${day.targets.protein} g"); HeaderMacroPill(NutritionMacroIcon.Carbs, "${logged.carbs}/${day.targets.carbs} g"); HeaderMacroPill(NutritionMacroIcon.Fat, "${logged.fat}/${day.targets.fat} g"); HeaderPill(Icons.Filled.Bolt, day.energyDemand.title)
         }
     }
 }
 
 @Composable private fun HeaderPill(icon: ImageVector, text: String) { Row(Modifier.background(Color.White.copy(alpha = .10f), CircleShape).padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) { Icon(icon, null, tint = Color.White, modifier = Modifier.size(13.dp)); Text(text, Modifier.padding(start = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White) } }
+@Composable private fun HeaderMacroPill(icon: NutritionMacroIcon, text: String) { Row(Modifier.background(Color.White.copy(alpha = .10f), CircleShape).padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) { NutritionMacroSymbol(icon, Color.White, Modifier.size(13.dp)); Text(text, Modifier.padding(start = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White) } }
 private fun demandColor(demand: EnergyDemand) = when (demand) { EnergyDemand.High -> NutritionRed; EnergyDemand.Medium -> NutritionOrange; EnergyDemand.Low -> NutritionGreen }
 internal fun List<MealLog>.total() = NutritionTargets(sumOf { it.calories }, sumOf { it.protein }, sumOf { it.carbs }, sumOf { it.fat })

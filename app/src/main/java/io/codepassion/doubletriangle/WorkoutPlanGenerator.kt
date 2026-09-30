@@ -1,5 +1,7 @@
 package io.codepassion.doubletriangle
 
+import io.codepassion.wildforce.android.BuildConfig
+
 import android.content.Context
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle

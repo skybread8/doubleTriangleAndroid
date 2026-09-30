@@ -6,6 +6,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -64,12 +71,23 @@ internal fun BodyProgressScreen(profile: OnboardingProfile, generateFuturePrevie
         )
         return
     }
-    when (val destination = screen) {
-        Screen.Gallery -> Gallery(sessions, onClose, { screen = Screen.Capture }, { screen = Screen.Compare(it.id) }) { session ->
-            BodyProgressStore.delete(context, session); sessions = BodyProgressStore.load(context)
+    // The iOS capture flow uses a directional slide with a short fade between
+    // gallery, capture and comparison. Keep the same continuity on Android.
+    AnimatedContent(
+        targetState = screen,
+        transitionSpec = {
+            (slideInHorizontally(tween(320)) { it / 4 } + fadeIn(tween(240))) togetherWith
+                (slideOutHorizontally(tween(260)) { -it / 6 } + fadeOut(tween(180)))
+        },
+        label = "body-progress-screen",
+    ) { destination ->
+        when (destination) {
+            Screen.Gallery -> Gallery(sessions, onClose, { screen = Screen.Capture }, { screen = Screen.Compare(it.id) }) { session ->
+                BodyProgressStore.delete(context, session); sessions = BodyProgressStore.load(context)
+            }
+            Screen.Capture -> Capture(sessions, { screen = Screen.Gallery }) { sessions = BodyProgressStore.load(context); screen = Screen.Gallery }
+            is Screen.Compare -> Compare(sessions, destination.id, profile, { screen = Screen.Gallery }, generateFuturePreview)
         }
-        Screen.Capture -> Capture(sessions, { screen = Screen.Gallery }) { sessions = BodyProgressStore.load(context); screen = Screen.Gallery }
-        is Screen.Compare -> Compare(sessions, destination.id, profile, { screen = Screen.Gallery }, generateFuturePreview)
     }
 }
 

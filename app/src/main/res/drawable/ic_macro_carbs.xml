@@ -1,0 +1,8 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Matches iOS's filled leaf symbol for carbohydrates. -->
+    <path android:fillColor="#000000" android:pathData="M20.9,3.1C13.6,3.3 7.1,5.4 4.5,10.6C2.8,14.1 4.2,18.5 7.7,20.2C11.4,22 15.9,20.4 17.4,16.7C19.2,12.2 19.5,7.4 20.9,3.1ZM7.2,16.7C9.4,13.5 12.2,11.2 16.1,9.4C12.7,12.1 10.5,14.7 9.2,18.4L7.2,16.7Z" />
+</vector>

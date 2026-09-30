@@ -5,7 +5,7 @@ import android.net.Uri
 import android.graphics.Bitmap
 import java.io.ByteArrayOutputStream
 import android.util.Base64
-import io.codepassion.doubletriangle.BuildConfig
+import io.codepassion.wildforce.android.BuildConfig
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection

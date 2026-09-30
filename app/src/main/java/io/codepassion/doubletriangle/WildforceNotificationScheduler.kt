@@ -1,5 +1,7 @@
 package io.codepassion.doubletriangle
 
+import io.codepassion.wildforce.android.R
+
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager

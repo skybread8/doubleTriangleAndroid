@@ -1,6 +1,12 @@
 package io.codepassion.doubletriangle.feature.onboarding
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -314,7 +320,21 @@ fun OnboardingScreen(
     }
 
     Box(Modifier.fillMaxSize()) {
-    AnimatedContent(targetState = step, label = "onboarding-step") { currentStep ->
+    // Mirrors the iOS progressive transition: forward steps enter from the
+    // trailing edge, while going back reverses that direction.
+    AnimatedContent(
+        targetState = step,
+        transitionSpec = {
+            if (targetState > initialState) {
+                (slideInHorizontally(tween(350)) { it / 3 } + fadeIn(tween(250))) togetherWith
+                    (slideOutHorizontally(tween(280)) { -it / 5 } + fadeOut(tween(180)))
+            } else {
+                (slideInHorizontally(tween(350)) { -it / 3 } + fadeIn(tween(250))) togetherWith
+                    (slideOutHorizontally(tween(280)) { it / 5 } + fadeOut(tween(180)))
+            }
+        },
+        label = "onboarding-step",
+    ) { currentStep ->
         when (currentStep) {
             0 -> CoverStep { step = 1 }
             1 -> FormStep(
