@@ -118,6 +118,8 @@ import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingPlanPreview
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
+import io.codepassion.doubletriangle.feature.onboarding.saveAuthenticatedAccount
+import io.codepassion.doubletriangle.feature.onboarding.synchronizeAccountProfile
 import io.codepassion.doubletriangle.feature.onboarding.ProfileScreen
 import io.codepassion.doubletriangle.feature.onboarding.SubscriptionPaywall
 import io.codepassion.doubletriangle.feature.onboarding.subscriptionAccess
@@ -384,6 +386,35 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 context.getSharedPreferences("wildforce_profile_details", 0).edit().putString("language", language).apply()
                 AppLocale.apply(language)
             },
+            onLoggedIn = { response ->
+                saveAuthenticatedAccount(context, response)
+                preferences.edit()
+                    .putBoolean("remote_sync_pending", true)
+                    .putBoolean("remote_sync_import_required", !response.isNewAccount)
+                    .apply()
+                // A login from the cover must enter the same remote-first path as
+                // iOS.  Keep a valid local fallback so an intermittent network
+                // failure never strands a user on the welcome screen.
+                val fallback = OnboardingProfile(name = response.name.ifBlank { "Wildforce" }, goal = FitnessGoal.BuildMuscle)
+                coroutineScope.launch {
+                    synchronizeAccountProfile(response, fallback)
+                        .onSuccess { remote ->
+                            persistOnboardingProfile(remote)
+                            profile = remote
+                        }
+                        .onFailure {
+                            persistOnboardingProfile(fallback)
+                            profile = fallback
+                        }
+                }
+            },
+            onRegistered = { response ->
+                // The plan is generated immediately after registration. Mark the
+                // first sync as pending so it is uploaded once the local profile
+                // and plan exist, rather than creating an incomplete remote user.
+                saveAuthenticatedAccount(context, response)
+                preferences.edit().putBoolean("remote_sync_pending", true).apply()
+            },
         ) { completedProfile, useAi ->
             generationError = null
             if (useAi) {
@@ -505,6 +536,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 val completedWorkout = restoredState.workouts.firstOrNull { it.id == id }
                 runCatching { TrainingSessionHistoryStore.record(preferences, duration, sets, volume, completedWorkout?.focus) }
                 runCatching { WorkoutQuickAccessWidget.refresh(context) }
+                WorkoutRemoteSync.recordWorkoutCompletion(context)
                 preferences.edit().putBoolean("remote_sync_pending", true).apply()
                 coroutineScope.launch {
                     when (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {

@@ -166,6 +166,53 @@ internal object NutritionStore {
         ))
     }
 
+    /**
+     * Restores the food log graph returned by iOS's batch sync.  Android stores
+     * a compact local representation, so entries and their items are folded
+     * into one MealLog while retaining a deterministic local id for later syncs.
+     */
+    fun importRemoteLogs(context: Context, remoteEntries: JSONArray, remoteItems: JSONArray) {
+        val itemsByEntry = mutableMapOf<String, MutableList<MealItem>>()
+        for (index in 0 until remoteItems.length()) {
+            val item = remoteItems.optJSONObject(index) ?: continue
+            if (!item.isNull("deleted_at")) continue
+            val entryId = item.optString("nutrition_log_entry_id")
+            if (entryId.isBlank()) continue
+            itemsByEntry.getOrPut(entryId) { mutableListOf() } += MealItem(
+                name = item.optString("name").trim().ifBlank { "Alimento" },
+                calories = item.optDouble("calories").toInt().coerceIn(0, 8000),
+                protein = item.optDouble("protein_grams").toInt().coerceIn(0, 500),
+                carbs = item.optDouble("carbs_grams").toInt().coerceIn(0, 1000),
+                fat = item.optDouble("fat_grams").toInt().coerceIn(0, 500),
+            )
+        }
+
+        val restored = buildList {
+            for (index in 0 until remoteEntries.length()) {
+                val entry = remoteEntries.optJSONObject(index) ?: continue
+                if (!entry.isNull("deleted_at")) continue
+                val remoteId = entry.optString("id")
+                val loggedDate = runCatching { LocalDate.parse(entry.optString("logged_at").take(10)) }.getOrNull() ?: continue
+                val items = itemsByEntry[remoteId].orEmpty()
+                add(MealLog(
+                    id = stableRemoteLogId(remoteId, index),
+                    name = entry.optString("title").trim().ifBlank { "Comida" },
+                    calories = items.sumOf { it.calories }.coerceIn(0, 8000),
+                    protein = items.sumOf { it.protein }.coerceIn(0, 500),
+                    carbs = items.sumOf { it.carbs }.coerceIn(0, 1000),
+                    fat = items.sumOf { it.fat }.coerceIn(0, 500),
+                    type = mealTypeFromRemote(entry.optString("meal_type")),
+                    loggedDate = loggedDate,
+                    notes = entry.optString("notes"),
+                    source = "sync",
+                    isBookmarked = entry.optBoolean("is_favorite", false),
+                    items = items,
+                ))
+            }
+        }
+        if (restored.isNotEmpty()) write(context, restored)
+    }
+
     fun clearGeneratedPlan(context: Context) {
         context.getSharedPreferences(PREFS, 0).edit().remove(GENERATED_PLAN_KEY).apply()
     }
@@ -319,6 +366,9 @@ internal object NutritionStore {
         PlannedMeal(title, type, macros, if (workoutDay && type == MealType.Lunch) "Aumenta aquí los carbohidratos para rendir en la sesión." else "Ajusta las cantidades manteniendo los objetivos.", filteredFoods)
     }
 }
+
+private fun stableRemoteLogId(value: String, fallback: Int): Long =
+    value.hashCode().toLong().and(Long.MAX_VALUE).takeIf { it != 0L } ?: fallback.toLong() + 1
 
 private fun mealTypeFromRemote(value: String) = when (value.lowercase()) {
     "breakfast" -> MealType.Breakfast; "lunch" -> MealType.Lunch; "dinner" -> MealType.Dinner; else -> MealType.Snack

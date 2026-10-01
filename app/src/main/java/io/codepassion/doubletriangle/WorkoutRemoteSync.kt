@@ -34,6 +34,11 @@ import java.util.UUID
 internal object WorkoutRemoteSync {
     private const val accountPrefs = "wildforce_account"
     private const val planKey = "remote_workout_plan_id"
+    private const val syncPrefs = "wildforce_remote_sync"
+    private const val nutritionEntryIDsKey = "nutrition_entry_ids"
+    private const val nutritionItemIDsKey = "nutrition_item_ids"
+    private const val accountProgressPrefs = "wildforce_account_progress"
+    private const val exerciseProfilesKey = "exercise_profiles"
 
     sealed interface Outcome {
         /** A first-device import can replace the in-memory profile before the UI is shown. */
@@ -56,23 +61,34 @@ internal object WorkoutRemoteSync {
             val shouldPullRemote = shouldImportRemoteSnapshot || !hasPendingLocalChanges
             val importedProfile = if (shouldPullRemote) {
                 val remoteProfile = pullRemoteProfile(context, token, profile)
+                pullRemoteAccountProgress(context, token)
+                pullRemoteExerciseProfiles(context, token)
                 pullWorkoutPlan(token, preferences)
                 pullRemoteNutrition(context, token)
+                pullRemoteBodyMetrics(context, token, (remoteProfile ?: profile).heightCm)
+                pullRemoteAppSettings(context, token)
+                // iOS pulls media on every synchronization. The local store
+                // de-duplicates sessions, so this also restores progress photos
+                // added from another device after the first Android sign-in.
+                pullRemoteMedia(context, token)
                 if (shouldImportRemoteSnapshot) {
-                    pullRemoteMedia(context, token)
                     preferences.edit().remove("remote_sync_import_required").apply()
                 }
                 remoteProfile
             } else null
             val profileToSync = importedProfile ?: profile
             val now = java.time.Instant.now().toString()
+            val progress = accountProgress(context)
             // User is a first-class iOS sync resource. Keeping it here ensures
             // profile edits made on Android are visible to the other platform.
             push(token, "users", JSONArray().put(record(userId, now)
                 .put("name", profileToSync.name).put("height_cm", profileToSync.heightCm).put("weight_kg", profileToSync.weightKg)
                 .put("birth_date", "%04d-%02d-01".format(profileToSync.birthYear, profileToSync.birthMonth))
                 .put("gender", profileToSync.gender.storedValue).put("language", profileToSync.appLanguage)
-                .put("metric_system", profileToSync.metricSystem.storedValue)))
+                .put("metric_system", profileToSync.metricSystem.storedValue)
+                .put("current_streak", progress.currentStreak).put("longest_streak", progress.longestStreak)
+                .put("last_completed_workout_at", progress.lastCompletedWorkoutAt ?: JSONObject.NULL)
+                .put("xp", progress.xp).put("xp_level", progress.xpLevel)))
             push(token, "training-preferences", JSONArray().put(record(stableId("$userId:training-preferences"), now)
                 .put("goal", profileToSync.goal.storedValue).put("lifestyle", profileToSync.lifestyle.storedValue)
                 .put("gym_type", profileToSync.gymType.storedValue).put("general_training_level", profileToSync.trainingLevel.storedValue)
@@ -182,12 +198,139 @@ internal object WorkoutRemoteSync {
         )
     }
 
+    /** Stores the account-wide progression fields iOS keeps on User. */
+    private fun pullRemoteAccountProgress(context: Context, token: String) {
+        val user = get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=users"))
+            .optJSONArray("data")?.firstLiveRecord() ?: return
+        context.getSharedPreferences(accountProgressPrefs, Context.MODE_PRIVATE).edit()
+            .putInt("current_streak", user.optInt("current_streak", 0).coerceAtLeast(0))
+            .putInt("longest_streak", user.optInt("longest_streak", 0).coerceAtLeast(0))
+            .putString("last_completed_workout_at", user.optString("last_completed_workout_at").takeIf(String::isNotBlank))
+            .putInt("xp", user.optInt("xp", 0).coerceAtLeast(0))
+            .putInt("xp_level", user.optInt("xp_level", 1).coerceAtLeast(1))
+            .apply()
+    }
+
+    /**
+     * Exercise profiles are not exposed by Android's current editor yet, but
+     * retaining the iOS payload locally makes them available to the Android
+     * planner when that editor is added and, crucially, never discards them.
+     */
+    private fun pullRemoteExerciseProfiles(context: Context, token: String) {
+        val profiles = get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=exercise-profiles"))
+            .optJSONArray("data") ?: return
+        context.getSharedPreferences(syncPrefs, Context.MODE_PRIVATE).edit()
+            .putString(exerciseProfilesKey, profiles.toString()).apply()
+    }
+
+    private fun accountProgress(context: Context): AccountProgress {
+        val preferences = context.getSharedPreferences(accountProgressPrefs, Context.MODE_PRIVATE)
+        return AccountProgress(
+            currentStreak = preferences.getInt("current_streak", 0).coerceAtLeast(0),
+            longestStreak = preferences.getInt("longest_streak", 0).coerceAtLeast(0),
+            lastCompletedWorkoutAt = preferences.getString("last_completed_workout_at", null),
+            xp = preferences.getInt("xp", 0).coerceAtLeast(0),
+            xpLevel = preferences.getInt("xp_level", 1).coerceAtLeast(1),
+        )
+    }
+
+    /** Mirrors iOS's per-session streak and base workout XP award. */
+    fun recordWorkoutCompletion(context: Context, completedAt: java.time.Instant = java.time.Instant.now()) {
+        val preferences = context.getSharedPreferences(accountProgressPrefs, Context.MODE_PRIVATE)
+        val previous = preferences.getString("last_completed_workout_at", null)
+            ?.let { runCatching { java.time.Instant.parse(it) }.getOrNull() }
+        val zone = java.time.ZoneId.systemDefault()
+        if (previous?.atZone(zone)?.toLocalDate() == completedAt.atZone(zone).toLocalDate()) return
+
+        val currentStreak = preferences.getInt("current_streak", 0).coerceAtLeast(0) + 1
+        val longestStreak = maxOf(preferences.getInt("longest_streak", 0).coerceAtLeast(0), currentStreak)
+        val xp = preferences.getInt("xp", 0).coerceAtLeast(0) + 25
+        preferences.edit()
+            .putInt("current_streak", currentStreak)
+            .putInt("longest_streak", longestStreak)
+            .putString("last_completed_workout_at", completedAt.toString())
+            .putInt("xp", xp)
+            .putInt("xp_level", experienceLevelFor(xp))
+            .apply()
+    }
+
+    private fun experienceLevelFor(totalXP: Int): Int {
+        var level = 1
+        var required = 0
+        while (totalXP >= required + 60 + (level - 1) * 35) {
+            required += 60 + (level - 1) * 35
+            level += 1
+        }
+        return level
+    }
+
     /** Imports the iOS nutrition graph so a new Android device does not upload an empty plan over it. */
     private fun pullRemoteNutrition(context: Context, token: String) {
-        val plans = get(token, WildforceApiEnvironment.apiUrl("sync/nutrition-plans")).optJSONArray("data") ?: return
-        NutritionStore.importRemotePlan(context, plans.firstLiveRecord() ?: return)
+        get(token, WildforceApiEnvironment.apiUrl("sync/nutrition-plans")).optJSONArray("data")
+            ?.firstLiveRecord()?.let { NutritionStore.importRemotePlan(context, it) }
         get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=nutrition-profiles")).optJSONArray("data")
             ?.firstLiveRecord()?.let { NutritionStore.importRemotePreferences(context, it) }
+        val entries = get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=nutrition-log-entries")).optJSONArray("data")
+        val items = get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=nutrition-log-items")).optJSONArray("data")
+        if (entries != null && items != null) {
+            NutritionStore.importRemoteLogs(context, entries, items)
+            rememberRemoteNutritionIDs(context, entries, items)
+        }
+    }
+
+    /** Keeps iOS UUIDs when Android re-uploads an imported food log. */
+    private fun rememberRemoteNutritionIDs(context: Context, entries: JSONArray, items: JSONArray) {
+        val entryIDs = JSONObject()
+        val itemIDs = JSONObject()
+        val localEntryIDs = entries.liveRecords().associate { entry ->
+            stableRemoteNutritionLogId(entry.optString("id")) to entry.optString("id")
+        }
+        localEntryIDs.forEach { (localID, remoteID) -> entryIDs.put(localID.toString(), remoteID) }
+        items.liveRecords().forEach { item ->
+            val localEntryID = stableRemoteNutritionLogId(item.optString("nutrition_log_entry_id"))
+            itemIDs.put("$localEntryID:${item.optInt("order_index", 0)}", item.optString("id"))
+        }
+        context.getSharedPreferences(syncPrefs, Context.MODE_PRIVATE).edit()
+            .putString(nutritionEntryIDsKey, entryIDs.toString())
+            .putString(nutritionItemIDsKey, itemIDs.toString())
+            .apply()
+    }
+
+    /** Restores the weight-history portion Android can represent from iOS's body metric log. */
+    private fun pullRemoteBodyMetrics(context: Context, token: String, fallbackHeightCm: Int) {
+        val remote = get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=body-metric-entries")).optJSONArray("data") ?: return
+        val history = JSONArray()
+        for (index in 0 until remote.length()) {
+            val entry = remote.optJSONObject(index) ?: continue
+            if (!entry.isNull("deleted_at") || entry.optString("type") != "weight") continue
+            val date = entry.optString("recorded_at").take(10)
+            val weight = entry.optDouble("value", Double.NaN)
+            if (date.isBlank() || !weight.isFinite() || weight !in 20.0..400.0) continue
+            history.put(JSONObject().put("date", date).put("heightCm", fallbackHeightCm.toDouble()).put("weightKg", weight))
+        }
+        if (history.length() > 0) context.getSharedPreferences("wildforce_body_metrics", Context.MODE_PRIVATE)
+            .edit().putString("history", history.toString()).apply()
+    }
+
+    /** Applies user settings before the next push so a fresh Android install never resets iOS choices. */
+    private fun pullRemoteAppSettings(context: Context, token: String) {
+        val remote = get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=user-app-settings"))
+            .optJSONArray("data")?.firstLiveRecord() ?: return
+        val profile = context.getSharedPreferences("wildforce_profile_details", Context.MODE_PRIVATE)
+        profile.edit()
+            .putBoolean("keep_screen_on", remote.optBoolean("is_screen_on_during_workout_enabled", profile.getBoolean("keep_screen_on", true)))
+            .putBoolean("full_focus", remote.optBoolean("is_full_focus_mode_enabled", profile.getBoolean("full_focus", false)))
+            .putBoolean("has_seen_notification_request", remote.optBoolean("has_seen_notification_request", profile.getBoolean("has_seen_notification_request", false)))
+            .putBoolean("has_seen_body_progress_tutorial", remote.optBoolean("has_seen_body_progress_tutorial", profile.getBoolean("has_seen_body_progress_tutorial", false)))
+            .putBoolean("has_rated_app", remote.optBoolean("has_rated_app", profile.getBoolean("has_rated_app", false)))
+            .apply()
+        // HealthKit and Health Connect have the same account-level meaning.
+        // Permission is still requested locally by Android before any data access.
+        context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE).edit()
+            .putBoolean("health_connect", remote.optBoolean("is_health_kit_enabled", false))
+            .apply()
+        context.getSharedPreferences("wildforce_notification_settings", Context.MODE_PRIVATE).edit()
+            .putBoolean("enabled", remote.optBoolean("is_notifications_enabled", true)).apply()
     }
 
     private fun synchronizeNutrition(token: String, userId: String, profile: OnboardingProfile, now: String, context: Context) {
@@ -201,18 +344,29 @@ internal object WorkoutRemoteSync {
             .put("preferred_protein_sources", JSONArray(prefs.preferredProteinSources)).put("dislikes", JSONArray(prefs.dislikes))
             .put("wants_meal_suggestions", prefs.wantsSuggestions).put("notes", prefs.notes)))
 
+        val ids = context.getSharedPreferences(syncPrefs, Context.MODE_PRIVATE)
+        val entryIDs = ids.getString(nutritionEntryIDsKey, "{}")?.let(::JSONObject) ?: JSONObject()
+        val itemIDs = ids.getString(nutritionItemIDsKey, "{}")?.let(::JSONObject) ?: JSONObject()
         val entries = JSONArray(); val items = JSONArray()
         NutritionStore.allForSync(context).forEach { meal ->
-            val entryId = stableId("$userId:nutrition-entry:${meal.id}")
+            val entryKey = meal.id.toString()
+            val entryId = entryIDs.optString(entryKey).takeIf(::isUuid) ?: stableId("$userId:nutrition-entry:${meal.id}")
+            entryIDs.put(entryKey, entryId)
             entries.put(record(entryId, now).put("title", meal.name)
                 .put("logged_at", meal.loggedDate.toString() + "T12:00:00Z").put("meal_type", meal.type.name.lowercase())
                 .put("notes", meal.notes).put("is_favorite", meal.isBookmarked))
             val foods = meal.items.ifEmpty { listOf(io.codepassion.doubletriangle.nutrition.MealItem(meal.name, meal.calories, meal.protein, meal.carbs, meal.fat)) }
-            foods.forEachIndexed { index, food -> items.put(record(stableId("$entryId:$index"), now)
+            foods.forEachIndexed { index, food ->
+                val itemKey = "${meal.id}:$index"
+                val itemId = itemIDs.optString(itemKey).takeIf(::isUuid) ?: stableId("$entryId:$index")
+                itemIDs.put(itemKey, itemId)
+                items.put(record(itemId, now)
                 .put("nutrition_log_entry_id", entryId).put("name", food.name).put("quantity", 1)
                 .put("calories", food.calories).put("protein_grams", food.protein).put("carbs_grams", food.carbs)
-                .put("fat_grams", food.fat).put("order_index", index)) }
+                .put("fat_grams", food.fat).put("order_index", index))
+            }
         }
+        ids.edit().putString(nutritionEntryIDsKey, entryIDs.toString()).putString(nutritionItemIDsKey, itemIDs.toString()).apply()
         push(token, "nutrition-log-entries", entries)
         push(token, "nutrition-log-items", items)
 
@@ -486,6 +640,17 @@ internal object WorkoutRemoteSync {
     private data object SubscriptionRequiredException : Exception()
 
     private fun isUuid(value: String): Boolean = runCatching { UUID.fromString(value) }.isSuccess
+
+    private fun stableRemoteNutritionLogId(value: String): Long =
+        value.hashCode().toLong().and(Long.MAX_VALUE).takeIf { it != 0L } ?: 1L
+
+    private data class AccountProgress(
+        val currentStreak: Int,
+        val longestStreak: Int,
+        val lastCompletedWorkoutAt: String?,
+        val xp: Int,
+        val xpLevel: Int,
+    )
 
     private fun JSONArray?.liveRecords(): List<JSONObject> = buildList {
         this@liveRecords ?: return@buildList

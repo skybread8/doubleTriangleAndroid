@@ -1,12 +1,19 @@
 package io.codepassion.doubletriangle.feature.onboarding
 
+import android.widget.NumberPicker
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,7 +28,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
@@ -31,6 +40,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Icon
@@ -38,14 +48,40 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AccessibilityNew
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.ChangeHistory
+import androidx.compose.material.icons.filled.ChangeCircle
+import androidx.compose.material.icons.filled.Chair
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Female
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.HorizontalRule
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Male
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.UnfoldMore
+import androidx.compose.material.icons.filled.ViewWeek
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +89,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
@@ -60,11 +98,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
-import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
+import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
-import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
+import kotlinx.coroutines.delay
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
@@ -260,6 +298,8 @@ fun OnboardingScreen(
     generatedPlanPreview: OnboardingPlanPreview? = null,
     onStartTraining: () -> Unit = {},
     onLanguageSelected: (String) -> Unit = {},
+    onLoggedIn: (AuthResponse) -> Unit = {},
+    onRegistered: (AuthResponse) -> Unit = {},
     onCompleted: (OnboardingProfile, Boolean) -> Unit,
 ) {
     var step by remember { mutableStateOf(0) }
@@ -283,6 +323,9 @@ fun OnboardingScreen(
     var generationAttempt by remember { mutableStateOf(0) }
     var appLanguage by remember { mutableStateOf("Español") }
     var isLanguagePickerVisible by remember { mutableStateOf(false) }
+    var isLoginVisible by remember { mutableStateOf(false) }
+    var authenticationRegisters by remember { mutableStateOf(false) }
+    var registrationCompletesOnboarding by remember { mutableStateOf(false) }
     val currentYear=java.time.Year.now().value
     val onboardingLocale = when (appLanguage) {
         "English" -> Locale.ENGLISH
@@ -336,7 +379,11 @@ fun OnboardingScreen(
         label = "onboarding-step",
     ) { currentStep ->
         when (currentStep) {
-            0 -> CoverStep { step = 1 }
+            0 -> CoverStep(onStart = { step = 1 }, onLogin = {
+                authenticationRegisters = false
+                registrationCompletesOnboarding = false
+                isLoginVisible = true
+            })
             1 -> FormStep(
                 progress = progressFor(1),
                 title = "Bienvenido",
@@ -458,7 +505,7 @@ fun OnboardingScreen(
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){
                         items.forEach { item ->
                             Box(Modifier.weight(1f)) {
-                                EquipmentOption(item.title, item in equipment) {
+                                EquipmentOption(item, item in equipment) {
                                     equipment = if (item in equipment) equipment - item else equipment + item
                                 }
                             }
@@ -494,19 +541,27 @@ fun OnboardingScreen(
                 )
             }
             13 -> FormStep(progress=progressFor(13),title="Fecha de nacimiento",subtitle="Esto nos ayuda a adaptar volumen, intensidad y recuperación.",canContinue=true,onBack={step=12},onContinue={step=14}){
-                ValueStepper("Mes",monthNames[birthMonth-1],{birthMonth=if(birthMonth==1)12 else birthMonth-1},{birthMonth=if(birthMonth==12)1 else birthMonth+1});Spacer(Modifier.height(12.dp))
-                ValueStepper("Año",birthYear.toString(),{birthYear=(birthYear-1).coerceAtLeast(1920)},{birthYear=(birthYear+1).coerceAtMost(currentYear)})
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    WheelPicker("Mes", (1..12).toList(), birthMonth, { monthNames[it - 1] }, Modifier.weight(1f)) { birthMonth = it }
+                    WheelPicker("Año", (1920..currentYear).toList().reversed(), birthYear, { it.toString() }, Modifier.weight(1f)) { birthYear = it }
+                }
             }
             14 -> FormStep(progress=progressFor(14),title="¿Cuál es tu sexo?",subtitle="Se utiliza para ajustar los cálculos físicos del plan.",canContinue=gender!=null,onBack={step=13},onContinue={step=nextVisibleStep(14)}){Gender.entries.forEach{item->ChoiceOption(item.title,null,item.glyph,gender==item){gender=item};Spacer(Modifier.height(10.dp))}}
             15 -> FormStep(progress=progressFor(15),title="Altura",subtitle="Esto nos ayuda a calcular tus necesidades con precisión.",canContinue=true,onBack={step=previousVisibleStep(15)},onContinue={step=nextVisibleStep(15)}){
-                Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){MetricSystem.entries.forEach{system->Box(Modifier.weight(1f)){CompactOption(system.title,metricSystem==system){metricSystem=system}}}}
+                MetricSystemSegmentedControl(metricSystem) { metricSystem = it }
                 Spacer(Modifier.height(20.dp))
-                val heightLabel=if(metricSystem==MetricSystem.Metric)"$heightCm cm" else {val inches=(heightCm/2.54).toInt();"${inches/12} ft ${inches%12} in"}
-                ValueStepper("Altura",heightLabel,{heightCm=(heightCm-1).coerceAtLeast(120)},{heightCm=(heightCm+1).coerceAtMost(230)})
+                val displayedHeight = if (metricSystem == MetricSystem.Metric) heightCm else (heightCm / 2.54).toInt()
+                WheelPicker("Altura", if (metricSystem == MetricSystem.Metric) (120..230).toList() else (48..91).toList(), displayedHeight, {
+                    if (metricSystem == MetricSystem.Metric) "$it cm" else "${it / 12} ft ${it % 12} in"
+                }, Modifier.fillMaxWidth()) { selected -> heightCm = if (metricSystem == MetricSystem.Metric) selected else (selected * 2.54).toInt() }
             }
-            16 -> FormStep(progress=progressFor(16),title="Peso",subtitle="Esto nos ayuda a calcular tus necesidades con precisión.",canContinue=true,onBack={step=previousVisibleStep(16)},onContinue={step=18}){
-                val weightLabel=if(metricSystem==MetricSystem.Metric)String.format("%.1f kg",weightKg) else String.format("%.1f lb",weightKg*2.20462)
-                ValueStepper("Peso",weightLabel,{weightKg=(weightKg-.5).coerceAtLeast(35.0)},{weightKg=(weightKg+.5).coerceAtMost(250.0)})
+            16 -> FormStep(progress=progressFor(16),title="Peso",subtitle="Esto nos ayuda a calcular tus necesidades con precisión.",canContinue=true,onBack={step=previousVisibleStep(16)},onContinue={
+                authenticationRegisters = true
+                registrationCompletesOnboarding = true
+                isLoginVisible = true
+            }){
+                val displayedWeight = if (metricSystem == MetricSystem.Metric) weightKg else weightKg * 2.20462
+                WeightWheelPicker(displayedWeight, metricSystem) { selected -> weightKg = if (metricSystem == MetricSystem.Metric) selected else selected / 2.20462 }
             }
             else -> PlanGenerationStep(
                 preview = generatedPlanPreview,
@@ -536,11 +591,37 @@ fun OnboardingScreen(
             confirmButton = {},
         )
     }
+    if (isLoginVisible) {
+        AuthenticationSheet(
+            register = authenticationRegisters,
+            profileName = name,
+            onDismiss = { isLoginVisible = false },
+            onSwitch = { authenticationRegisters = !authenticationRegisters },
+            onAuthenticated = { response ->
+                isLoginVisible = false
+                if (authenticationRegisters && registrationCompletesOnboarding) {
+                    onRegistered(response)
+                    step = 18
+                } else {
+                    onLoggedIn(response)
+                }
+            },
+        )
+    }
     }
 }
 
 @Composable
-private fun CoverStep(onStart: () -> Unit) {
+private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit) {
+    var appeared by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { delay(100); appeared = true }
+    val dust = rememberInfiniteTransition(label = "cover-dust")
+    val dustDrift by dust.animateFloat(
+        initialValue = -10f,
+        targetValue = 10f,
+        animationSpec = infiniteRepeatable(tween(4200, easing = LinearEasing), RepeatMode.Reverse),
+        label = "cover-dust-drift",
+    )
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         Image(
             painter = painterResource(R.drawable.onboarding_cover),
@@ -553,6 +634,11 @@ private fun CoverStep(onStart: () -> Unit) {
                 Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.35f), Color.Black)),
             ),
         )
+        // iOS uses a subtle moving dust layer over the photo. These low-contrast
+        // particles preserve that depth without compromising text readability.
+        listOf(24 to 90, 310 to 170, 85 to 360, 280 to 510, 180 to 250).forEachIndexed { index, (x, y) ->
+            Box(Modifier.offset(x = (x + dustDrift * (index + 1) / 4).dp, y = (y + dustDrift * (if (index % 2 == 0) 1 else -1)).dp).size((2 + index % 3).dp).background(Color.White.copy(alpha = .22f), CircleShape))
+        }
         Column(
             modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 50.dp, vertical = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -560,17 +646,26 @@ private fun CoverStep(onStart: () -> Unit) {
             Image(
                 painter = painterResource(R.drawable.logo_white),
                 contentDescription = "Wildforce",
-                modifier = Modifier.fillMaxWidth().height(82.dp),
+                modifier = Modifier.fillMaxWidth().height(82.dp).alpha(if (appeared) 1f else 0f).graphicsLayer { translationY = if (appeared) 0f else 30f },
                 contentScale = ContentScale.Fit,
             )
             Text(
                 "Tu camino hacia una versión más fuerte y saludable empieza aquí.",
-                color = Color.White.copy(alpha = 0.72f),
+                // The cover is always dark in iOS, independent of the app theme.
+                color = Color(0xFFA7A6AE),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.body1.copy(fontSize = 18.sp, letterSpacing = 4.sp),
+                modifier = Modifier.alpha(if (appeared) 1f else 0f),
             )
             Spacer(Modifier.height(40.dp))
-            PrimaryAction("EMPEZAR", true, onStart)
+            Box(Modifier.alpha(if (appeared) 1f else 0f)) { PrimaryAction("Empezar", true, onStart) }
+            Text(
+                "Ya tengo una cuenta",
+                modifier = Modifier.padding(top = 18.dp).clickable(onClick = onLogin).padding(8.dp),
+                color = Color.White.copy(alpha = 0.80f),
+                style = MaterialTheme.typography.caption,
+                fontWeight = FontWeight.SemiBold,
+            )
         }
     }
 }
@@ -596,15 +691,15 @@ private fun PlanGenerationStep(
                 Spacer(Modifier.height(96.dp))
                 Text("!", modifier = Modifier.fillMaxWidth(), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.h2, textAlign = TextAlign.Center)
                 Text("No hemos podido crear tu plan", modifier = Modifier.fillMaxWidth(), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
-                Text(generationError, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color.White.copy(alpha = .10f)).padding(16.dp), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                Text(generationError, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = .10f)).padding(16.dp), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
                 Spacer(Modifier.height(20.dp))
-                PrimaryAction("REINTENTAR", !isGenerating, onGenerate)
+                PrimaryAction("Reintentar", !isGenerating, onGenerate)
             }
             preview != null -> {
                 PlanWeekSummary(preview)
                 preview.workouts.forEach { workout -> PlanWorkoutPreviewCard(workout) }
                 Spacer(Modifier.height(12.dp))
-                PrimaryAction("EMPEZAR A ENTRENAR", true, onStartTraining)
+                PrimaryAction("Empezar a entrenar", true, onStartTraining)
             }
             else -> {
                 Spacer(Modifier.height(156.dp))
@@ -623,7 +718,7 @@ private fun PlanWeekSummary(preview: OnboardingPlanPreview) {
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text("ESTA SEMANA", style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
-        Text(preview.name, style = MaterialTheme.typography.h4, fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
+        Text(preview.name, style = MaterialTheme.typography.h4, fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
         Text(preview.phase, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
         Text("${preview.workouts.size} sesiones", style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
     }
@@ -646,17 +741,21 @@ private fun FormStep(
     canContinue: Boolean,
     onBack: () -> Unit,
     onContinue: () -> Unit,
-    buttonTitle: String = "CONTINUAR",
+    buttonTitle: String = "Continuar",
     showBottomAction: Boolean = true,
     showTopBar: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Column(Modifier.fillMaxSize().liquidGlassBackground()) {
+    // iOS uses the plain semantic background here; frosted treatment is
+    // reserved for modal surfaces, not the onboarding canvas.
+    Column(Modifier.fillMaxSize().background(WildforceThemeTokens.background)) {
         if (showTopBar) {
             LinearProgressIndicator(
                 progress = progress,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-                color = WildforceThemeTokens.accentGold,
+                // SwiftUI's linear ProgressView follows the app accent, not the
+                // warm workout-only emphasis color.
+                color = WildforceThemeTokens.accent,
             )
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(44.dp).clickable(onClick = onBack), contentAlignment = Alignment.CenterStart) {
@@ -665,17 +764,20 @@ private fun FormStep(
             }
         }
         Column(
-            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
+            Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 16.dp),
         ) {
             if (title.isNotBlank()) {
-                Text(title, style = MaterialTheme.typography.h4, fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
+                Text(title, style = MaterialTheme.typography.h4.copy(fontSize = 40.sp), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                 if (subtitle.isNotBlank()) Text(subtitle, color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.body1)
                 Spacer(Modifier.height(34.dp))
             }
             content()
         }
-        if (showBottomAction) Box(Modifier.fillMaxWidth().padding(12.dp).liquidGlass(RoundedCornerShape(18.dp), emphasized = true).padding(16.dp)) {
-            PrimaryAction(buttonTitle, canContinue, onContinue)
+        if (showBottomAction) {
+            Divider(color = WildforceThemeTokens.textSecondary.copy(alpha = 0.16f))
+            Box(Modifier.fillMaxWidth().padding(24.dp)) {
+                PrimaryAction(buttonTitle, canContinue, onContinue)
+            }
         }
     }
 }
@@ -683,6 +785,13 @@ private fun FormStep(
 /** Mirrors the dedicated Apple Health screen instead of presenting Health Connect as a form row. */
 @Composable
 private fun HealthConnectStep(onConnect: () -> Unit, onNotNow: () -> Unit) {
+    var appeared by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { delay(180); appeared = true }
+    val appOffset by animateFloatAsState(if (appeared) 50f else 0f, animationSpec = tween(durationMillis = 700, delayMillis = 180), label = "health-app-offset")
+    val healthOffset by animateFloatAsState(if (appeared) -50f else 0f, animationSpec = tween(durationMillis = 700, delayMillis = 180), label = "health-connect-offset")
+    val appRotation by animateFloatAsState(if (appeared) 12f else 0f, animationSpec = tween(durationMillis = 700, delayMillis = 180), label = "health-app-rotation")
+    val healthRotation by animateFloatAsState(if (appeared) -12f else 0f, animationSpec = tween(durationMillis = 700, delayMillis = 180), label = "health-connect-rotation")
+    val contentAlpha by animateFloatAsState(if (appeared) 1f else 0f, animationSpec = tween(durationMillis = 450, delayMillis = 300), label = "health-content-alpha")
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -693,27 +802,27 @@ private fun HealthConnectStep(onConnect: () -> Unit, onNotNow: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                Modifier.size(96.dp).clip(RoundedCornerShape(22.dp)).background(WildforceThemeTokens.textPrimary),
+                Modifier.size(96.dp).graphicsLayer { translationX = appOffset; rotationZ = appRotation }.clip(RoundedCornerShape(22.dp)).background(WildforceThemeTokens.textPrimary),
                 contentAlignment = Alignment.Center,
-            ) { Text("W", color = WildforceThemeTokens.backgroundSecondary, style = MaterialTheme.typography.h3, fontWeight = FontWeight.Bold) }
+            ) { Image(painterResource(R.drawable.wildforce_app_icon), contentDescription = "Wildforce", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop) }
             Box(
-                Modifier.size(96.dp).clip(RoundedCornerShape(22.dp)).background(Color(0xFFFF375F)),
+                Modifier.size(96.dp).graphicsLayer { translationX = healthOffset; rotationZ = healthRotation }.clip(RoundedCornerShape(22.dp)).background(Color(0xFFFF375F)),
                 contentAlignment = Alignment.Center,
             ) { Text("♥", color = Color.White, style = MaterialTheme.typography.h3) }
         }
-        Text("Sincroniza con Health Connect", style = MaterialTheme.typography.h5, fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
+        Text("Sincroniza con Health Connect", modifier = Modifier.alpha(contentAlpha), style = MaterialTheme.typography.h5, fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
         Text(
             "Importa ahora tus datos corporales y mantén sincronizadas tus futuras métricas.",
-            modifier = Modifier.padding(top = 12.dp),
+            modifier = Modifier.padding(top = 12.dp).alpha(contentAlpha),
             color = WildforceThemeTokens.textSecondary,
             style = MaterialTheme.typography.body1,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(48.dp))
-        PrimaryAction("CONECTAR HEALTH CONNECT", true, onConnect)
+        Box(Modifier.alpha(contentAlpha)) { PrimaryAction("Conectar Health Connect", true, onConnect) }
         Text(
             "Ahora no",
-            modifier = Modifier.padding(top = 18.dp).clickable(onClick = onNotNow),
+            modifier = Modifier.padding(top = 18.dp).alpha(contentAlpha).clickable(onClick = onNotNow),
             color = WildforceThemeTokens.textSecondary,
             style = MaterialTheme.typography.body1,
         )
@@ -734,7 +843,7 @@ private fun NameStepInput(name: String, onNameChange: (String) -> Unit) {
                 .background(WildforceThemeTokens.textPrimary.copy(alpha = .10f))
                 .padding(16.dp),
             textStyle = MaterialTheme.typography.h4.copy(
-                fontFamily = AntonFontFamily,
+                fontFamily = Exo2FontFamily,
                 fontSize = 34.sp,
                 color = WildforceThemeTokens.textPrimary,
                 textAlign = TextAlign.Center,
@@ -746,7 +855,7 @@ private fun NameStepInput(name: String, onNameChange: (String) -> Unit) {
                         Text(
                             "Tu nombre",
                             color = WildforceThemeTokens.textSecondary,
-                            style = MaterialTheme.typography.h4.copy(fontFamily = AntonFontFamily, fontSize = 34.sp),
+                            style = MaterialTheme.typography.h4.copy(fontFamily = Exo2FontFamily, fontSize = 34.sp, fontWeight = FontWeight.SemiBold),
                         )
                     }
                     input()
@@ -768,13 +877,22 @@ private fun ChoiceOption(
     selected: Boolean,
     onClick: () -> Unit,
 ) {
+    val isWeekday = WorkoutWeekday.entries.any { it.title == title }
+    val icon = onboardingIcon(glyph)
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
-            .background(if (selected) WildforceThemeTokens.textPrimary else Color.White.copy(alpha = 0.10f))
+            .background(if (selected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary.copy(alpha = 0.10f))
             .clickable(onClick = onClick).padding(horizontal = 20.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(glyph, style = MaterialTheme.typography.h5, color = if (selected) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary)
+        if (icon != null) Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = if (selected) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary)
+        else Text(
+            glyph,
+            modifier = if (isWeekday) Modifier.clip(RoundedCornerShape(6.dp)).background(if (selected) WildforceThemeTokens.backgroundSecondary.copy(alpha = .18f) else WildforceThemeTokens.textPrimary.copy(alpha = .10f)).padding(horizontal = 6.dp, vertical = 3.dp) else Modifier,
+            style = MaterialTheme.typography.h6,
+            fontWeight = FontWeight.Bold,
+            color = if (selected) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary,
+        )
         Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
             Text(title, fontWeight = FontWeight.Bold, color = if (selected) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary)
             description?.let {
@@ -783,6 +901,35 @@ private fun ChoiceOption(
         }
         Text(if (selected) "✓" else "", color = WildforceThemeTokens.backgroundSecondary, fontWeight = FontWeight.Bold)
     }
+}
+
+/** Monochrome Android counterparts for the SF Symbols used by the iOS flow. */
+private fun onboardingIcon(glyph: String) = when (glyph) {
+    "↘" -> Icons.Filled.TrendingDown
+    "◆", "ϟ" -> Icons.Filled.FitnessCenter
+    "∞", "↗" -> Icons.Filled.DirectionsRun
+    "◎" -> Icons.Filled.AccessibilityNew
+    "◐" -> Icons.Filled.ChangeCircle
+    "♥" -> Icons.Filled.Favorite
+    "□" -> Icons.Filled.Chair
+    "│" -> Icons.Filled.Person
+    "→" -> Icons.Filled.DirectionsWalk
+    "▦", "▤" -> Icons.Filled.FitnessCenter
+    "⌂" -> Icons.Filled.Home
+    "○", "◔", "◑", "◕", "●" -> Icons.Filled.RadioButtonUnchecked
+    "✦" -> Icons.Filled.AutoAwesome
+    "↕" -> Icons.Filled.UnfoldMore
+    "△" -> Icons.Filled.ChangeHistory
+    "◇" -> Icons.Filled.Apps
+    "☷" -> Icons.Filled.ViewWeek
+    "=" -> Icons.Filled.Tune
+    "♂" -> Icons.Filled.Male
+    "♀" -> Icons.Filled.Female
+    "✓" -> Icons.Filled.CheckCircle
+    "!", "•" -> Icons.Filled.Warning
+    "—" -> Icons.Filled.HorizontalRule
+    "↑" -> Icons.Filled.TrendingUp
+    else -> null
 }
 
 @Composable
@@ -805,19 +952,75 @@ private fun CenteredOnboardingControl(glyph: String, size: Dp, onClick: () -> Un
 
 @Composable
 private fun CompactOption(title:String,selected:Boolean,onClick:()->Unit){
-Text(title,Modifier.clip(RoundedCornerShape(12.dp)).background(if(selected)WildforceThemeTokens.accentGold.copy(alpha=.22f)else Color.White.copy(alpha=.07f)).clickable(onClick=onClick).padding(horizontal=13.dp,vertical=11.dp),color=WildforceThemeTokens.textPrimary,style=MaterialTheme.typography.caption,fontWeight=if(selected)FontWeight.Bold else FontWeight.Normal,maxLines=1)
+Text(title,Modifier.clip(RoundedCornerShape(12.dp)).background(if(selected)WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary.copy(alpha=.10f)).clickable(onClick=onClick).padding(horizontal=13.dp,vertical=11.dp),color=if(selected) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary,style=MaterialTheme.typography.caption,fontWeight=if(selected)FontWeight.Bold else FontWeight.Normal,maxLines=1)
+}
+
+/** Same compact segmented treatment used by iOS for the measurement system. */
+@Composable
+private fun MetricSystemSegmentedControl(selected: MetricSystem, onSelect: (MetricSystem) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(9.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = .12f)).padding(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        MetricSystem.entries.forEach { system ->
+            val isSelected = selected == system
+            Text(
+                system.title,
+                Modifier.weight(1f).clip(RoundedCornerShape(7.dp)).background(if (isSelected) WildforceThemeTokens.background else Color.Transparent).clickable { onSelect(system) }.padding(vertical = 10.dp),
+                color = WildforceThemeTokens.textPrimary,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+/** Native spinner wheels: Android's direct equivalent of SwiftUI's wheel picker. */
+@Composable
+private fun WheelPicker(label: String, values: List<Int>, selected: Int, labelFor: (Int) -> String, modifier: Modifier = Modifier, onSelected: (Int) -> Unit) {
+    val index = values.indexOf(selected).coerceAtLeast(0)
+    Column(modifier.clip(RoundedCornerShape(16.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = .07f)), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+        AndroidView(
+            factory = { context -> NumberPicker(context).apply {
+                minValue = 0; maxValue = values.lastIndex; displayedValues = values.map(labelFor).toTypedArray()
+                wrapSelectorWheel = false
+                setOnValueChangedListener { _, _, newIndex -> onSelected(values[newIndex]) }
+            } },
+            update = { picker ->
+                if (picker.maxValue != values.lastIndex) {
+                    picker.displayedValues = null; picker.minValue = 0; picker.maxValue = values.lastIndex; picker.displayedValues = values.map(labelFor).toTypedArray()
+                }
+                if (picker.value != index) picker.value = index
+            },
+            modifier = Modifier.fillMaxWidth().height(164.dp),
+        )
+    }
+}
+
+@Composable
+private fun WeightWheelPicker(weight: Double, metricSystem: MetricSystem, onSelected: (Double) -> Unit) {
+    val integer = weight.toInt().coerceIn(if (metricSystem == MetricSystem.Metric) 35 else 77, if (metricSystem == MetricSystem.Metric) 250 else 551)
+    val decimal = ((weight - integer) * 10).toInt().coerceIn(0, 9)
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        WheelPicker("Peso", ((if (metricSystem == MetricSystem.Metric) 35 else 77)..(if (metricSystem == MetricSystem.Metric) 250 else 551)).toList(), integer, { it.toString() }, Modifier.weight(1f)) { onSelected(it + decimal / 10.0) }
+        WheelPicker("Decimal", (0..9).toList(), decimal, { ".$it ${if (metricSystem == MetricSystem.Metric) "kg" else "lb"}" }, Modifier.weight(1f)) { onSelected(integer + it / 10.0) }
+    }
 }
 
 /** The iOS equipment grid uses charcoal selected cards; orange is not part of this state. */
 @Composable
-private fun EquipmentOption(title: String, selected: Boolean, onClick: () -> Unit) {
+private fun EquipmentOption(equipment: Equipment, selected: Boolean, onClick: () -> Unit) {
+    val context = LocalContext.current
+    val resourceName = "equipment_" + equipment.storedValue.replace(Regex("([a-z])([A-Z])"), "${'$'}1_${'$'}2").lowercase(Locale.US)
+    val imageResource = remember(equipment) { context.resources.getIdentifier(resourceName, "drawable", context.packageName) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(if (selected) WildforceThemeTokens.textPrimary else Color.White.copy(alpha = .10f))
+            .background(if (selected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary.copy(alpha = .10f))
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(12.dp),
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
             Text(
@@ -826,8 +1029,9 @@ private fun EquipmentOption(title: String, selected: Boolean, onClick: () -> Uni
                 style = MaterialTheme.typography.h6,
             )
         }
+        if (imageResource != 0) Image(painterResource(imageResource), contentDescription = null, modifier = Modifier.fillMaxWidth().height(72.dp).padding(vertical = 6.dp), contentScale = ContentScale.Fit)
         Text(
-            title,
+            equipment.title,
             color = if (selected) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary,
             style = MaterialTheme.typography.caption,
             fontWeight = FontWeight.SemiBold,
@@ -841,15 +1045,17 @@ private fun EquipmentOption(title: String, selected: Boolean, onClick: () -> Uni
 private fun PrimaryAction(title: String, enabled: Boolean, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth().height(52.dp),
+        modifier = Modifier.fillMaxWidth().height(48.dp),
         enabled = enabled,
-        shape = RoundedCornerShape(14.dp),
-        elevation = ButtonDefaults.elevation(defaultElevation = 0.dp, pressedElevation = 0.dp),
+        shape = RoundedCornerShape(8.dp),
+        elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 0.dp),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = WildforceThemeTokens.textPrimary,
             contentColor = WildforceThemeTokens.backgroundSecondary,
+            disabledBackgroundColor = WildforceThemeTokens.textPrimary.copy(alpha = 0.20f),
+            disabledContentColor = WildforceThemeTokens.backgroundSecondary,
         ),
-    ) { Text(title, fontWeight = FontWeight.Bold) }
+    ) { Text(title, fontFamily = Exo2FontFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
 }
 
 @Preview(showBackground = true)

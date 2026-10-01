@@ -10,6 +10,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,8 +19,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.runtime.*
@@ -72,7 +75,8 @@ private class WildforceAccountStore(context: Context) {
     fun clear() = preferences.edit().clear().apply()
 }
 
-private data class AuthResponse(val id: String, val name: String, val email: String, val token: String, val isNewAccount: Boolean)
+/** Auth result shared by the onboarding entry point and the profile account area. */
+data class AuthResponse(val id: String, val name: String, val email: String, val token: String, val isNewAccount: Boolean)
 private data class LinkedAccount(val provider: String, val email: String?)
 
 /** The access snapshot returned by the API, which remains the source of truth. */
@@ -82,6 +86,11 @@ data class SubscriptionAccess(
     val plan: String?,
     val renewsAt: String?,
 )
+
+/** Stores a successful login in the one account store used by sync and billing. */
+fun saveAuthenticatedAccount(context: Context, response: AuthResponse) {
+    WildforceAccountStore(context).save(response)
+}
 
 private suspend fun authenticate(path: String, name: String?, email: String, password: String): Result<AuthResponse> = withContext(Dispatchers.IO) {
     runCatching {
@@ -152,6 +161,7 @@ fun AccountSection(profile: OnboardingProfile, onProfileSynchronized: (Onboardin
         if (account == null) {
             ProfileAccountCard(title = "Cuenta") {
                 ProfileRow("Crear una cuenta", "person.badge.plus") { dialog = AccountDialog.Register }
+                ProfileRow("Ya tengo una cuenta", "login") { dialog = AccountDialog.Login }
             }
             Text("Crea una cuenta para mantener tu progreso disponible en todos tus dispositivos.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(horizontal = 14.dp))
         } else {
@@ -255,7 +265,7 @@ private suspend fun linkGoogle(token: String, idToken: String): Result<Unit> = w
  * local model is not SwiftData-compatible, so this deliberately synchronizes the
  * shared user profile first and never overwrites a returning user's server data.
  */
-private suspend fun synchronizeAccountProfile(response: AuthResponse, local: OnboardingProfile): Result<OnboardingProfile> = withContext(Dispatchers.IO) {
+suspend fun synchronizeAccountProfile(response: AuthResponse, local: OnboardingProfile): Result<OnboardingProfile> = withContext(Dispatchers.IO) {
     runCatching {
         if (!response.isNewAccount) {
             val remote = authenticatedRequest("sync/pull?resource=users", response.token, null)
@@ -316,6 +326,7 @@ private fun ProfileRow(label: String, systemIcon: String, destructive: Boolean =
         val icon = when (systemIcon) {
             "crown.fill" -> Icons.Filled.Star
             "exit_to_app" -> Icons.AutoMirrored.Filled.ExitToApp
+            "login" -> Icons.AutoMirrored.Filled.Login
             else -> Icons.Filled.PersonAdd
         }
         Icon(icon, null, tint = color)
@@ -357,12 +368,12 @@ private fun GoogleAuthenticationButton(
                 .build()
             launcher.launch(GoogleSignIn.getClient(context, options).signInIntent)
         },
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.fillMaxWidth().height(48.dp),
+        shape = RoundedCornerShape(6.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.White,
-            contentColor = Color(0xFF202124),
-            disabledBackgroundColor = Color.White.copy(alpha = .55f),
+            backgroundColor = WildforceThemeTokens.textPrimary,
+            contentColor = WildforceThemeTokens.primaryButtonText,
+            disabledBackgroundColor = WildforceThemeTokens.textPrimary.copy(alpha = .20f),
         ),
     ) {
         Icon(
@@ -372,7 +383,8 @@ private fun GoogleAuthenticationButton(
             tint = Color.Unspecified,
         )
         Spacer(Modifier.width(10.dp))
-        Text(title, modifier = Modifier.padding(vertical = 4.dp))
+        // Google keeps its own system type rather than the Wildforce display face.
+        Text(title, fontFamily = androidx.compose.ui.text.font.FontFamily.Default, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -389,10 +401,11 @@ private enum class PasswordRequirement(val shortLabel: String) {
 }
 
 @Composable
-private fun AuthenticationSheet(register: Boolean, profileName: String, onDismiss: () -> Unit, onSwitch: () -> Unit, onAuthenticated: (AuthResponse) -> Unit) {
+fun AuthenticationSheet(register: Boolean, profileName: String, onDismiss: () -> Unit, onSwitch: () -> Unit, onAuthenticated: (AuthResponse) -> Unit) {
     var email by remember { mutableStateOf("") }; var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }; var submitting by remember { mutableStateOf(false) }
-    var isEmailLoginPresented by remember { mutableStateOf(register) }
+    // iOS opens both login and registration on the social-provider choice first.
+    var isEmailLoginPresented by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         // Keep the bottom sheet above the IME. Without this, focused fields near
@@ -405,27 +418,46 @@ private fun AuthenticationSheet(register: Boolean, profileName: String, onDismis
             ),
             contentAlignment = Alignment.BottomCenter,
         ) {
+            val sheetShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
             Surface(
                 Modifier.fillMaxWidth()
-                    .fillMaxHeight(if (register || isEmailLoginPresented) .68f else .42f)
+                    // Social login/registration matches iOS's medium detent;
+                    // reserve the taller sheet only for the email form.
+                    .fillMaxHeight(if (isEmailLoginPresented) .68f else .48f)
                     .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
                     onClick = {},
-                ),
-                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                color = WildforceThemeTokens.backgroundSecondary,
+                    )
+                    // Match RootBottomNavigation exactly: translucent system
+                    // material, a soft light border, and an elevated shadow.
+                    .shadow(10.dp, sheetShape, clip = false)
+                    .clip(sheetShape)
+                    .background(
+                        if (MaterialTheme.colors.isLight) Color.White.copy(alpha = .88f)
+                        else Color.Black.copy(alpha = .68f),
+                    )
+                    .border(
+                        1.dp,
+                        if (MaterialTheme.colors.isLight) Color.White.copy(alpha = .64f) else Color.White.copy(alpha = .24f),
+                        sheetShape,
+                    ),
+                shape = sheetShape,
+                // The glass modifier draws the translucent material; a normal
+                // Surface color would paint over it and make it opaque.
+                color = Color.Transparent,
+                elevation = 0.dp,
             ) {
                 Column(Modifier.verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Box(Modifier.align(Alignment.CenterHorizontally).size(width = 36.dp, height = 5.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = .35f), RoundedCornerShape(8.dp)))
                     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(if (register) "Crea una cuenta para continuar" else "Bienvenido de nuevo", fontSize = 25.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                        Text(if (register) "Crea una cuenta para continuar" else "Bienvenido de nuevo", fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                         Text(if (register) "Tu plan se guardará y estará listo en todos tus dispositivos." else "Inicia sesión para continuar tu entrenamiento.", color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                     }
-                    if (!register) {
+                    if (!register || !isEmailLoginPresented) {
                         error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
                         GoogleAuthenticationButton(
-                            title = "INICIAR SESIÓN CON GOOGLE",
+                            title = if (register) "Registrarme con Google" else "Iniciar sesión con Google",
                             enabled = !submitting,
                             onIdToken = { idToken ->
                                 scope.launch {
@@ -437,17 +469,26 @@ private fun AuthenticationSheet(register: Boolean, profileName: String, onDismis
                             onError = { error = it },
                         )
                     }
-                    if (!register && !isEmailLoginPresented) {
-                        Text(
-                            "INICIAR SESIÓN CON EMAIL",
-                            Modifier.fillMaxWidth().clickable { error = null; isEmailLoginPresented = true }.padding(8.dp),
-                            color = WildforceThemeTokens.textPrimary,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        )
+                    if (!isEmailLoginPresented) {
+                        Row(
+                            Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).clickable { error = null; isEmailLoginPresented = true }.padding(vertical = 10.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            // SwiftUI uses the outlined `envelope` symbol here.
+                            Icon(Icons.Outlined.Email, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.textPrimary)
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                if (register) "Registrarme con email" else "Iniciar sesión con email",
+                                color = WildforceThemeTokens.textPrimary,
+                                fontFamily = Exo2FontFamily,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            OutlinedTextField(email, { email = it }, label = { Text("Email") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth())
-                            OutlinedTextField(password, { password = it }, label = { Text("Contraseña") }, singleLine = true, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
+                            TextField(email, { email = it }, label = { Text("Email") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)), colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.background, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent))
+                            TextField(password, { password = it }, label = { Text("Contraseña") }, singleLine = true, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)), colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.background, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent))
                             if (register) {
                                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                                     PasswordRequirement.entries.forEach { requirement ->
@@ -461,26 +502,11 @@ private fun AuthenticationSheet(register: Boolean, profileName: String, onDismis
                                 }
                             }
                         }
-                        if (register) {
-                            // iOS keeps the email form first, followed by the social providers.
-                            error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
-                            GoogleAuthenticationButton(
-                                title = "REGISTRARME CON GOOGLE",
-                                enabled = !submitting,
-                                onIdToken = { idToken ->
-                                    scope.launch {
-                                        submitting = true
-                                        authenticateWithGoogle(idToken).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión con Google." }
-                                        submitting = false
-                                    }
-                                },
-                                onError = { error = it },
-                            )
-                        }
+                        error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
                         Button(enabled = !submitting && (!register || PasswordRequirement.entries.all { it.isSatisfiedBy(password) }), onClick = {
                             if (email.isBlank() || password.isBlank()) { error = "Introduce tu email y contraseña para continuar."; return@Button }
                             scope.launch { submitting = true; authenticate(if (register) "auth/register" else "auth/login", if (register) profileName else null, email, password).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión." }; submitting = false }
-                        }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText)) { if (submitting) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp) else Text(if (register) "CREAR CUENTA" else "INICIAR SESIÓN", modifier = Modifier.padding(vertical = 4.dp), letterSpacing = 1.2.sp) }
+                        }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText)) { if (submitting) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp) else Text(if (register) "Crear cuenta" else "Iniciar sesión", modifier = Modifier.padding(vertical = 4.dp), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
                     }
                     if (register || isEmailLoginPresented) {
                         Text(if (register) "Ya tengo una cuenta" else "Crear una cuenta", Modifier.fillMaxWidth().clickable(onClick = onSwitch).padding(8.dp), color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
@@ -499,18 +525,18 @@ fun SubscriptionPaywall(
     onPurchaseCompleted: () -> Unit = {},
 ) {
     val context = LocalContext.current; val activity = context as? Activity; val scope = rememberCoroutineScope()
-    var selected by remember { mutableStateOf(YearlyProductId) }; var products by remember { mutableStateOf<Map<String, ProductDetails>>(emptyMap()) }; var loading by remember { mutableStateOf(true) }; var purchasing by remember { mutableStateOf(false) }; var error by remember { mutableStateOf<String?>(null) }; var pendingPurchase by remember { mutableStateOf<Purchase?>(null) }
-    val billing = remember { BillingClient.newBuilder(context).setListener { result, purchases -> purchasing = false; if (result.responseCode == BillingClient.BillingResponseCode.OK) pendingPurchase = purchases.orEmpty().firstOrNull { it.purchaseState == Purchase.PurchaseState.PURCHASED } else if (result.responseCode != BillingClient.BillingResponseCode.USER_CANCELED) error = result.debugMessage }.enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()).build() }
-    LaunchedEffect(pendingPurchase) {
-        pendingPurchase?.let { purchase ->
+    var selected by remember { mutableStateOf(YearlyProductId) }; var products by remember { mutableStateOf<Map<String, ProductDetails>>(emptyMap()) }; var loading by remember { mutableStateOf(true) }; var purchasing by remember { mutableStateOf(false) }; var error by remember { mutableStateOf<String?>(null) }; var pendingPurchases by remember { mutableStateOf<List<Purchase>>(emptyList()) }
+    val billing = remember { BillingClient.newBuilder(context).setListener { result, purchases -> purchasing = false; if (result.responseCode == BillingClient.BillingResponseCode.OK) pendingPurchases = purchases.orEmpty().filter { it.purchaseState == Purchase.PurchaseState.PURCHASED } else if (result.responseCode != BillingClient.BillingResponseCode.USER_CANCELED) error = result.debugMessage }.enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()).build() }
+    LaunchedEffect(pendingPurchases) {
+        pendingPurchases.forEach { purchase ->
             synchronizeGooglePlayPurchase(context, accountId, purchase).onSuccess {
                 if (!purchase.isAcknowledged) acknowledgePurchase(purchase, billing)
                 onPurchaseCompleted()
             }.onFailure { failure -> error = failure.message ?: "No hemos podido verificar la compra con Google Play." }
-            pendingPurchase = null
         }
+        if (pendingPurchases.isNotEmpty()) pendingPurchases = emptyList()
     }
-    DisposableEffect(billing) { billing.startConnection(object : BillingClientStateListener { override fun onBillingSetupFinished(result: BillingResult) { if (result.responseCode == BillingClient.BillingResponseCode.OK) scope.launch { products = queryProducts(billing); loading = false } else { error = result.debugMessage; loading = false } }; override fun onBillingServiceDisconnected() = Unit }); onDispose { billing.endConnection() } }
+    DisposableEffect(billing) { billing.startConnection(object : BillingClientStateListener { override fun onBillingSetupFinished(result: BillingResult) { if (result.responseCode == BillingClient.BillingResponseCode.OK) scope.launch { products = queryProducts(billing); loading = false; val restored = billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build()); if (restored.billingResult.responseCode == BillingClient.BillingResponseCode.OK) pendingPurchases = restored.purchasesList.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED } else error = restored.billingResult.debugMessage } else { error = result.debugMessage; loading = false } }; override fun onBillingServiceDisconnected() = Unit }); onDispose { billing.endConnection() } }
     Dialog(onDismissRequest = { if (!mandatory) onDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnBackPress = !mandatory, dismissOnClickOutside = !mandatory)) { Surface(Modifier.fillMaxSize(), color = WildforceThemeTokens.background) { Column(Modifier.verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(28.dp)) {
         if (!mandatory) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { Text("Cerrar", Modifier.clickable(onClick = onDismiss).padding(8.dp), color = WildforceThemeTokens.accent) }
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) { Icon(Icons.Filled.Shield, null, Modifier.size(46.dp), tint = WildforceThemeTokens.accent); Text("Entrena con todo tu potencial", fontFamily = AntonFontFamily, fontSize = 30.sp); Text("Obtén la experiencia Wildforce completa, creada alrededor de tu progreso.", color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center) }
@@ -522,7 +548,11 @@ fun SubscriptionPaywall(
         error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
         Button(enabled = !loading && !purchasing && activity != null && !accountId.isNullOrBlank() && products[selected] != null, onClick = {
             val detail = products[selected] ?: return@Button
-            val offer = detail.subscriptionOfferDetails?.firstOrNull() ?: run { error = "Esta suscripción no está disponible ahora mismo."; return@Button }
+            // Prefer the renewable base offer. This avoids accidentally selecting a
+            // one-time introductory phase when Play Console has several offers.
+            val offer = detail.subscriptionOfferDetails?.firstOrNull { candidate ->
+                candidate.pricingPhases.pricingPhaseList.any { it.recurrenceMode == ProductDetails.RecurrenceMode.INFINITE_RECURRING }
+            } ?: detail.subscriptionOfferDetails?.firstOrNull() ?: run { error = "Esta suscripción no está disponible ahora mismo."; return@Button }
             purchasing = true
             val params = BillingFlowParams.newBuilder().setProductDetailsParamsList(listOf(BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(detail).setOfferToken(offer.offerToken).build()))
             accountId?.let { params.setObfuscatedAccountId(obfuscatedAccountId(it)) }
@@ -533,7 +563,10 @@ fun SubscriptionPaywall(
         Text("Restaurar compras", Modifier.fillMaxWidth().clickable {
             scope.launch {
                 val result = billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build())
-                result.purchasesList.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED }.forEach { purchase ->
+                if (result.billingResult.responseCode != BillingClient.BillingResponseCode.OK) { error = result.billingResult.debugMessage; return@launch }
+                val restoredPurchases = result.purchasesList.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED }
+                if (restoredPurchases.isEmpty()) { error = "No hemos encontrado compras activas para restaurar."; return@launch }
+                restoredPurchases.forEach { purchase ->
                     synchronizeGooglePlayPurchase(context, accountId, purchase).onSuccess {
                         if (!purchase.isAcknowledged) acknowledgePurchase(purchase, billing)
                         onPurchaseCompleted()
