@@ -510,11 +510,15 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             workoutState = restoredState,
             subscriptionRequired = subscriptionRequired,
             onSubscriptionPurchaseCompleted = {
+                // StoreKit dismisses iOS's mandatory paywall as soon as the
+                // purchase has been verified by the backend, then refreshes the
+                // app state. Do the same for Google Play: a slow or unrelated
+                // sync failure must not leave a verified purchaser blocked.
+                subscriptionRequired = false
                 coroutineScope.launch {
                     when (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
                         is WorkoutRemoteSync.Outcome.Synchronized -> {
                             preferences.edit().putBoolean("remote_sync_pending", false).apply()
-                            subscriptionRequired = false
                         }
                         WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = hasExpiredSubscription(context)
                         else -> Unit

@@ -59,6 +59,7 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.ui.graphics.asImageBitmap
@@ -132,6 +133,7 @@ fun ProfileScreen(
     var nutritionTextEditor by remember { mutableStateOf<NutritionTextField?>(null) }
     var settingsPicker by remember { mutableStateOf<SettingsPicker?>(null) }
     var selectedSection by remember { mutableStateOf<ProfileSection?>(null) }
+    var accountRevision by remember { mutableStateOf(0) }
     var showsBodyProgress by remember { mutableStateOf(false) }
     var showsBodyMetrics by remember { mutableStateOf(false) }
     val authenticateProgressPhotoSetting = rememberDeviceAuthenticator(
@@ -203,8 +205,7 @@ fun ProfileScreen(
         }
         if (selectedSection == null) { item { ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, avatarPath, avatarRevision, onChangeAvatar) } } }
         if (selectedSection == null) { item { ProfileEntrance(entered, 35) { ProfileExperience(experienceXp, experienceLevel, experienceProgress) } } }
-        if (selectedSection == null) { item { ProfileEntrance(entered, 50) { AccountSection(draft) { remoteProfile -> draft = remoteProfile; saveProfile(remoteProfile) } } } }
-        if (selectedSection == null) { item { ProfileCategoryTree(draft, nutritionProfile, appLanguage) { selectedSection = it } } }
+        if (selectedSection == null) { item { ProfileCategoryTree(draft, nutritionProfile, appLanguage, accountRevision) { selectedSection = it } } }
         // `achievementsSection` is intentionally disabled in the canonical iOS
         // profile view.  Do not render a placeholder rail here: it changes the
         // hierarchy and pushes the four profile destinations below the fold.
@@ -368,6 +369,22 @@ fun ProfileScreen(
                 }
         } } } }
         if (selectedSection == ProfileSection.Faq) { item { FrequentlyAskedQuestions() } }
+        if (selectedSection == ProfileSection.Subscription) { item {
+            AccountSection(
+                profile = draft,
+                destination = AccountProfileDestination.Subscription,
+                onProfileSynchronized = { remoteProfile -> draft = remoteProfile; saveProfile(remoteProfile) },
+                onAccountChanged = { accountRevision++ },
+            )
+        } }
+        if (selectedSection == ProfileSection.Account) { item {
+            AccountSection(
+                profile = draft,
+                destination = AccountProfileDestination.Account,
+                onProfileSynchronized = { remoteProfile -> draft = remoteProfile; saveProfile(remoteProfile) },
+                onAccountChanged = { accountRevision++ },
+            )
+        } }
     }
     picker?.let { current ->
         when (current) {
@@ -464,16 +481,22 @@ private enum class ProfileSection(val title: String, val icon: ImageVector) {
     Fitness("Perfil de fitness", Icons.Filled.FitnessCenter),
     Nutrition("Perfil nutricional", Icons.Filled.Restaurant),
     Settings("Ajustes", Icons.Filled.Settings),
+    Subscription("Suscripción", Icons.Filled.Star),
+    Account("Cuenta", Icons.Filled.Person),
     Faq("Preguntas frecuentes", Icons.Filled.Help),
 }
 
 @Composable
-private fun ProfileCategoryTree(profile: OnboardingProfile, nutritionProfile: NutritionProfilePreferences, appLanguage: String, onSelect: (ProfileSection) -> Unit) {
+private fun ProfileCategoryTree(profile: OnboardingProfile, nutritionProfile: NutritionProfilePreferences, appLanguage: String, accountRevision: Int, onSelect: (ProfileSection) -> Unit) {
+    val context = LocalContext.current
+    val account = remember(accountRevision) { currentWildforceAccount(context) }
     val summaries = mapOf(
         ProfileSection.Body to displayWeight(profile.weightKg, profile.metricSystem).let { "$it ${if (profile.metricSystem == MetricSystem.Imperial) "lb" else "kg"}" },
         ProfileSection.Fitness to "${profile.goal.title} • ${profile.effectiveTrainingLocations().firstOrNull { it.isDefault }?.name ?: profile.gymType.title}",
         ProfileSection.Nutrition to if (nutritionProfile.isConfigured) "${nutritionProfile.dietaryStyle} • ${nutritionProfile.mealsPerDay} comidas" else "Configuración necesaria",
         ProfileSection.Settings to "$appLanguage • ${profile.metricSystem.title}",
+        ProfileSection.Subscription to "Gestionar plan",
+        ProfileSection.Account to (account?.email ?: "Configuración necesaria"),
     )
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(WildforceThemeTokens.backgroundSecondary)) {
         val visibleSections = ProfileSection.entries.filter { it != ProfileSection.Faq }

@@ -113,6 +113,42 @@ object WorkoutHistoryStore {
         } }
     }
 
+    /** Imports completed sets downloaded from another device without replacing local history. */
+    fun importRemoteEntries(context: Context, entries: List<RemoteExerciseHistoryEntry>) {
+        if (entries.isEmpty()) return
+        val preferences = context.getSharedPreferences(PREFERENCES, 0)
+        val importedByKey = entries.groupBy { it.exerciseKey.trim().lowercase() }.filterKeys { it.isNotBlank() }
+        val keys = preferences.getStringSet(HISTORY_KEYS, emptySet()).orEmpty().toMutableSet()
+
+        importedByKey.forEach { (key, imported) ->
+            val existing = historyForKey(context, key)
+            val importedHistory = imported.map { entry ->
+                val details = entry.setReps.mapIndexed { index, reps ->
+                    SetPerformance(index + 1, reps, entry.setWeightsKg.getOrElse(index) { entry.maxWeightKg }, ExerciseSetStyle.Straight)
+                }
+                ExerciseHistoryEntry(
+                    timestampMillis = entry.timestampMillis,
+                    sets = entry.sets,
+                    totalReps = entry.totalReps,
+                    maxWeightKg = entry.maxWeightKg,
+                    volumeKg = entry.setReps.mapIndexed { index, reps -> reps * entry.setWeightsKg.getOrElse(index) { entry.maxWeightKg } }.sum(),
+                    setDetails = details,
+                    feedback = entry.feedback,
+                    note = entry.note,
+                    durationSeconds = entry.durationSeconds,
+                    distanceKm = entry.distanceKm,
+                )
+            }
+            val merged = (existing + importedHistory)
+                .distinctBy { it.timestampMillis }
+                .sortedByDescending { it.timestampMillis }
+                .take(MAX_ENTRIES)
+            preferences.edit().putString(key, historyJson(merged).toString()).apply()
+            keys += key
+        }
+        preferences.edit().putStringSet(HISTORY_KEYS, keys).apply()
+    }
+
     private fun historyForKey(context: Context, key: String): List<ExerciseHistoryEntry> = runCatching {
         val raw = context.getSharedPreferences(PREFERENCES, 0).getString(key, null) ?: return emptyList()
         val array = JSONArray(raw)
@@ -151,6 +187,23 @@ object WorkoutHistoryStore {
             }
         }
     }.getOrDefault(emptyList())
+
+    private fun historyJson(entries: List<ExerciseHistoryEntry>) = JSONArray().apply {
+        entries.forEach { entry ->
+            val details = JSONArray().apply {
+                entry.setDetails.forEach { set ->
+                    put(JSONObject().put("setNumber", set.setNumber).put("reps", set.reps)
+                        .put("weightKg", set.weightKg).put("setStyle", set.setStyle.name)
+                        .put("durationSeconds", set.durationSeconds).put("distanceKm", set.distanceKm))
+                }
+            }
+            put(JSONObject().put("timestamp", entry.timestampMillis).put("sets", entry.sets)
+                .put("reps", entry.totalReps).put("maxWeightKg", entry.maxWeightKg).put("volumeKg", entry.volumeKg)
+                .put("setDetails", details).put("feedback", entry.feedback ?: JSONObject.NULL)
+                .put("note", entry.note ?: JSONObject.NULL).put("durationSeconds", entry.durationSeconds)
+                .put("distanceKm", entry.distanceKm))
+        }
+    }
 
     internal fun record(
         context: Context,

@@ -27,6 +27,21 @@ internal object TrainingSessionHistoryStore {
         preferences.edit().putString(KEY, json.toString()).apply()
     }
 
+    fun importRemote(preferences: SharedPreferences, entries: List<TrainingSessionHistoryEntry>) {
+        if (entries.isEmpty()) return
+        val merged = (load(preferences) + entries)
+            .distinctBy { it.timestampMillis }
+            .sortedByDescending { it.timestampMillis }
+            .take(MAX_ENTRIES)
+        val json = JSONArray().apply {
+            merged.forEach { entry ->
+                put(JSONObject().put("timestamp", entry.timestampMillis).put("duration", entry.durationSeconds)
+                    .put("sets", entry.sets).put("volumeKg", entry.volumeKg).put("focus", entry.focus ?: JSONObject.NULL))
+            }
+        }
+        preferences.edit().putString(KEY, json.toString()).apply()
+    }
+
     fun load(preferences: SharedPreferences): List<TrainingSessionHistoryEntry> = runCatching {
         val array = JSONArray(preferences.getString(KEY, "[]").orEmpty())
         List(array.length()) { index ->

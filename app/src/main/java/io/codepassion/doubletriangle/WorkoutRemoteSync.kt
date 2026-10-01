@@ -63,7 +63,7 @@ internal object WorkoutRemoteSync {
                 val remoteProfile = pullRemoteProfile(context, token, profile)
                 pullRemoteAccountProgress(context, token)
                 pullRemoteExerciseProfiles(context, token)
-                pullWorkoutPlan(token, preferences)
+                pullWorkoutPlans(context, token, preferences)
                 pullRemoteNutrition(context, token)
                 pullRemoteBodyMetrics(context, token, (remoteProfile ?: profile).heightCm)
                 pullRemoteAppSettings(context, token)
@@ -475,16 +475,36 @@ internal object WorkoutRemoteSync {
      * records. Otherwise a freshly generated empty/default plan could win the
      * last-write-wins conflict and hide the user's iOS workouts.
      */
-    private fun pullWorkoutPlan(token: String, preferences: SharedPreferences) {
+    private fun pullWorkoutPlans(context: Context, token: String, preferences: SharedPreferences) {
+        val remotePlans = get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=workout-plans"))
+            .optJSONArray("data").liveRecords()
+        if (remotePlans.isEmpty()) return
         val response = get(token, WildforceApiEnvironment.apiUrl("sync/workout-days"))
         val remoteDays = response.optJSONArray("data") ?: return
-        if (remoteDays.length() == 0) return
+        importRemoteWorkoutHistory(context, remoteDays)
+
+        val plans = remotePlans.mapNotNull { plan ->
+            val planId = plan.optString("id").takeIf(String::isNotBlank) ?: return@mapNotNull null
+            remotePlanJson(plan, planId, remoteDays)
+        }
+        if (plans.isEmpty()) return
+        val active = plans.firstOrNull { it.status.equals("active", ignoreCase = true) } ?: plans.first()
+        // Keep every completed mesocycle locally. The hub renders the selected
+        // active plan while its history remains available to overview screens.
+        plans.filterNot { it.id == active.id }.forEach { archived ->
+            WorkoutPlanArchiveStore.archive(preferences, archived.rawJson)
+        }
+        preferences.edit().putString("workout_plan_json", active.rawJson)
+            .putString(planKey, active.id)
+            .putBoolean("remote_plan_imported", true).apply()
+    }
+
+    private fun remotePlanJson(plan: JSONObject, planId: String, remoteDays: JSONArray): RemotePlan? {
         val workouts = JSONArray()
-        var planId: String? = null
         for (index in 0 until remoteDays.length()) {
             val day = remoteDays.optJSONObject(index) ?: continue
             if (!day.isNull("deleted_at")) continue
-            planId = planId ?: day.optString("workout_plan_id").takeIf(String::isNotBlank)
+            if (day.optString("workout_plan_id") != planId) continue
             val blocks = JSONArray()
             val rawBlocks = day.optJSONArray("blocks") ?: JSONArray()
             for (blockIndex in 0 until rawBlocks.length()) {
@@ -494,17 +514,65 @@ internal object WorkoutRemoteSync {
                     .put("rounds", block.optInt("rounds", 1)).put("restAfterBlockSeconds", block.opt("rest_after_block_seconds"))
                     .put("notes", block.opt("notes")).put("exercises", remoteExercises(block.optJSONArray("exercises"))))
             }
+            val directExercises = remoteExercises(day.optJSONArray("exercises"))
             workouts.put(JSONObject().put("id", day.optString("id")).put("remoteId", day.optString("id")).put("title", day.optString("title", "Sesión ${index + 1}"))
                 .put("focus", day.optString("focus", "Fitness general")).put("dayType", day.optString("day_type", "strength"))
                 .put("status", day.optString("status", "planned").uppercase()).put("weekday", day.optString("intended_weekday", "MONDAY").uppercase())
-                .put("estimatedDurationMinutes", day.optInt("estimated_duration_minutes", 50)).put("blocks", blocks))
+                .put("estimatedDurationMinutes", day.optInt("estimated_duration_minutes", 50)).put("blocks", blocks)
+                .put("exercises", directExercises))
         }
-        if (workouts.length() == 0) return
-        val root = JSONObject().put("planName", "Plan sincronizado").put("phase", "Plan de tu cuenta")
-            .put("cycleLength", 1).put("mesocycleNumber", 1).put("phaseWeek", 1).put("workouts", workouts)
-        preferences.edit().putString("workout_plan_json", root.toString())
-            .putString(planKey, planId ?: stableId("remote-plan"))
-            .putBoolean("remote_plan_imported", true).apply()
+        if (workouts.length() == 0) return null
+        val cycleLength = plan.optInt("cycle_length", 1).coerceAtLeast(1)
+        val phaseWeek = plan.optInt("phase_week", 1).coerceIn(1, cycleLength)
+        val mesocycleNumber = plan.optInt("mesocycle_number", 1).coerceAtLeast(1)
+        val root = JSONObject().put("planName", plan.optString("name", "Plan sincronizado"))
+            .put("phase", plan.optString("phase", "Plan de tu cuenta"))
+            .put("cycleLength", cycleLength).put("mesocycleNumber", mesocycleNumber)
+            .put("mesocycleIndex", mesocycleNumber).put("weekIndex", phaseWeek)
+            .put("phaseWeek", phaseWeek).put("workouts", workouts)
+        return RemotePlan(planId, plan.optString("status"), root.toString())
+    }
+
+    private fun importRemoteWorkoutHistory(context: Context, remoteDays: JSONArray) {
+        val exerciseEntries = mutableListOf<io.codepassion.doubletriangle.feature.workout.RemoteExerciseHistoryEntry>()
+        val sessions = mutableListOf<TrainingSessionHistoryEntry>()
+        for (index in 0 until remoteDays.length()) {
+            val day = remoteDays.optJSONObject(index) ?: continue
+            if (!day.isNull("deleted_at")) continue
+            val results = mutableListOf<io.codepassion.doubletriangle.feature.workout.RemoteExerciseHistoryEntry>()
+            fun collect(exercises: JSONArray?) {
+                exercises ?: return
+                for (exerciseIndex in 0 until exercises.length()) {
+                    val exercise = exercises.optJSONObject(exerciseIndex) ?: continue
+                    val key = exercise.optString("exercise").trim().lowercase()
+                    if (key.isBlank()) continue
+                    val exerciseResults = exercise.optJSONArray("exercise_results") ?: continue
+                    for (resultIndex in 0 until exerciseResults.length()) {
+                        val result = exerciseResults.optJSONObject(resultIndex) ?: continue
+                        if (!result.isNull("deleted_at")) continue
+                        val timestamp = runCatching { java.time.Instant.parse(result.optString("completed_at")).toEpochMilli() }.getOrNull() ?: continue
+                        val reps = result.optJSONArray("per_set_reps").intValues()
+                        val weights = result.optJSONArray("per_set_weights_kg").doubleValues()
+                        val entry = io.codepassion.doubletriangle.feature.workout.RemoteExerciseHistoryEntry(
+                            exerciseKey = key, timestampMillis = timestamp,
+                            sets = result.optInt("completed_sets", reps.size), totalReps = result.optInt("completed_reps", reps.sum()),
+                            maxWeightKg = result.optDouble("completed_weight", weights.maxOrNull() ?: 0.0),
+                            setReps = reps, setWeightsKg = weights, feedback = result.optString("feedback").takeIf(String::isNotBlank),
+                            note = result.optString("notes").takeIf(String::isNotBlank), durationSeconds = result.optInt("completed_duration_seconds"),
+                            distanceKm = result.optDouble("completed_distance_km"),
+                        )
+                        exerciseEntries += entry; results += entry
+                    }
+                }
+            }
+            collect(day.optJSONArray("exercises"))
+            day.optJSONArray("blocks")?.let { blocks -> for (blockIndex in 0 until blocks.length()) collect(blocks.optJSONObject(blockIndex)?.optJSONArray("exercises")) }
+            results.groupBy { it.timestampMillis }.forEach { (timestamp, completed) ->
+                sessions += TrainingSessionHistoryEntry(timestamp, completed.sumOf { it.durationSeconds }, completed.sumOf { it.sets }, completed.sumOf { entry -> entry.setReps.mapIndexed { set, reps -> reps * entry.setWeightsKg.getOrElse(set) { entry.maxWeightKg } }.sum() }, day.optString("focus").takeIf(String::isNotBlank))
+            }
+        }
+        WorkoutHistoryStore.importRemoteEntries(context, exerciseEntries)
+        TrainingSessionHistoryStore.importRemote(context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE), sessions)
     }
 
     private fun remoteExercises(entries: JSONArray?): JSONArray = JSONArray().apply {
@@ -652,6 +720,8 @@ internal object WorkoutRemoteSync {
         val xpLevel: Int,
     )
 
+    private data class RemotePlan(val id: String, val status: String, val rawJson: String)
+
     private fun JSONArray?.liveRecords(): List<JSONObject> = buildList {
         this@liveRecords ?: return@buildList
         for (index in 0 until this@liveRecords.length()) {
@@ -660,6 +730,16 @@ internal object WorkoutRemoteSync {
     }
 
     private fun JSONArray?.firstLiveRecord(): JSONObject? = liveRecords().firstOrNull()
+
+    private fun JSONArray?.intValues(): List<Int> = buildList {
+        this@intValues ?: return@buildList
+        for (index in 0 until this@intValues.length()) add(this@intValues.optInt(index))
+    }
+
+    private fun JSONArray?.doubleValues(): List<Double> = buildList {
+        this@doubleValues ?: return@buildList
+        for (index in 0 until this@doubleValues.length()) add(this@doubleValues.optDouble(index))
+    }
 
     private fun <T> JSONArray?.storedValues(values: Iterable<T>, storedValue: (T) -> String): Set<T> = buildSet {
         this@storedValues ?: return@buildSet

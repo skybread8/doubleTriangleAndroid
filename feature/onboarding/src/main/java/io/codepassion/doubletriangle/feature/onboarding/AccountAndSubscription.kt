@@ -75,6 +75,9 @@ private class WildforceAccountStore(context: Context) {
     fun clear() = preferences.edit().clear().apply()
 }
 
+/** Current account snapshot for profile row summaries. Credentials remain private to this file. */
+fun currentWildforceAccount(context: Context): WildforceAccount? = WildforceAccountStore(context).account()
+
 /** Auth result shared by the onboarding entry point and the profile account area. */
 data class AuthResponse(val id: String, val name: String, val email: String, val token: String, val isNewAccount: Boolean)
 private data class LinkedAccount(val provider: String, val email: String?)
@@ -150,21 +153,28 @@ suspend fun subscriptionAccess(token: String): Result<SubscriptionAccess> = with
     }
 }
 
+enum class AccountProfileDestination { Account, Subscription }
+
 @Composable
-fun AccountSection(profile: OnboardingProfile, onProfileSynchronized: (OnboardingProfile) -> Unit) {
+fun AccountSection(
+    profile: OnboardingProfile,
+    destination: AccountProfileDestination,
+    onProfileSynchronized: (OnboardingProfile) -> Unit,
+    onAccountChanged: () -> Unit = {},
+) {
     val context = LocalContext.current
     val store = remember { WildforceAccountStore(context) }
     val scope = rememberCoroutineScope()
     var account by remember { mutableStateOf(store.account()) }
     var dialog by remember { mutableStateOf<AccountDialog?>(null) }
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        if (account == null) {
+        if (destination == AccountProfileDestination.Account && account == null) {
             ProfileAccountCard(title = "Cuenta") {
                 ProfileRow("Crear una cuenta", "person.badge.plus") { dialog = AccountDialog.Register }
                 ProfileRow("Ya tengo una cuenta", "login") { dialog = AccountDialog.Login }
             }
             Text("Crea una cuenta para mantener tu progreso disponible en todos tus dispositivos.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(horizontal = 14.dp))
-        } else {
+        } else if (destination == AccountProfileDestination.Account) {
             ProfileAccountCard(title = "Cuenta") {
                 Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.Email, null, tint = WildforceThemeTokens.textPrimary)
@@ -177,13 +187,18 @@ fun AccountSection(profile: OnboardingProfile, onProfileSynchronized: (Onboardin
                     context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
                         .edit().remove("remote_sync_pending").apply()
                     account = null
+                    onAccountChanged()
                 }
             }
             GoogleLinkedAccountCard(token = store.token())
         }
-        ProfileAccountCard(title = "Suscripción") {
-            if (account == null) ProfileRow("Crea una cuenta para suscribirte", "person.badge.plus") { dialog = AccountDialog.Register }
-            else ProfileRow("Obtener Wildforce Premium", "crown.fill") { dialog = AccountDialog.Paywall }
+        if (destination == AccountProfileDestination.Subscription) {
+            SubscriptionDetailsCard(
+                token = store.token(),
+                hasAccount = account != null,
+                onRegister = { dialog = AccountDialog.Register },
+                onPaywall = { dialog = AccountDialog.Paywall },
+            )
         }
     }
     when (dialog) {
@@ -196,6 +211,7 @@ fun AccountSection(profile: OnboardingProfile, onProfileSynchronized: (Onboardin
                 .putBoolean("remote_sync_import_required", !response.isNewAccount)
                 .apply()
             account = store.account()
+            onAccountChanged()
             dialog = null
             scope.launch { synchronizeAccountProfile(response, profile).onSuccess(onProfileSynchronized) }
         }
@@ -206,6 +222,54 @@ fun AccountSection(profile: OnboardingProfile, onProfileSynchronized: (Onboardin
         null -> Unit
     }
 }
+
+/** Android counterpart of iOS's SubscriptionDetailsView. */
+@Composable
+private fun SubscriptionDetailsCard(
+    token: String?,
+    hasAccount: Boolean,
+    onRegister: () -> Unit,
+    onPaywall: () -> Unit,
+) {
+    var access by remember(token) { mutableStateOf<SubscriptionAccess?>(null) }
+    var loading by remember(token) { mutableStateOf(token != null) }
+    var error by remember(token) { mutableStateOf<String?>(null) }
+    LaunchedEffect(token) {
+        if (token == null) return@LaunchedEffect
+        subscriptionAccess(token)
+            .onSuccess { access = it }
+            .onFailure { error = it.message ?: "No se ha podido consultar la suscripción." }
+        loading = false
+    }
+    ProfileAccountCard(title = "Suscripción") {
+        when {
+            !hasAccount -> ProfileRow("Crea una cuenta para suscribirte", "person.badge.plus", onClick = onRegister)
+            loading -> Text("Cargando…", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 10.dp))
+            else -> {
+                access?.let { subscription ->
+                    SubscriptionDetailRow("Plan", subscription.plan?.replaceFirstChar { it.uppercase() } ?: "Sin suscripción")
+                    SubscriptionDetailRow("Estado", subscription.status?.replaceFirstChar { it.uppercase() } ?: if (subscription.hasAccess) "Activo" else "Sin acceso")
+                    subscription.renewsAt?.let { SubscriptionDetailRow(if (subscription.hasAccess) "Renueva" else "Finaliza", formatSubscriptionDate(it)) }
+                }
+                ProfileRow(if (access?.hasAccess == true) "Ver opciones de suscripción" else "Obtener Wildforce Premium", "crown.fill", onClick = onPaywall)
+            }
+        }
+        error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption, modifier = Modifier.padding(vertical = 6.dp)) }
+    }
+}
+
+@Composable
+private fun SubscriptionDetailRow(label: String, value: String) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, color = WildforceThemeTokens.textPrimary)
+        Text(value, color = WildforceThemeTokens.textSecondary)
+    }
+}
+
+private fun formatSubscriptionDate(value: String): String = runCatching {
+    java.time.OffsetDateTime.parse(value).toLocalDate()
+        .format(java.time.format.DateTimeFormatter.ofPattern("d MMM uuuu", java.util.Locale("es", "ES")))
+}.getOrElse { value.substringBefore('T') }
 
 @Composable
 private fun GoogleLinkedAccountCard(token: String?) {
