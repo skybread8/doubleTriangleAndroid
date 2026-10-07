@@ -159,6 +159,26 @@ enum class WorkoutWeekday(val storedValue: String, val title: String, val glyph:
     Friday("friday", "Viernes", "V"), Saturday("saturday", "Sábado", "S"),
     Sunday("sunday", "Domingo", "D");
 
+    /** iOS derives its weekday-square icon from the selected app language. */
+    fun localizedInitial(language: String): String {
+        val locale = Locale.forLanguageTag(when (language) {
+            "English" -> "en"
+            "Català" -> "ca"
+            "Français" -> "fr"
+            "Italiano" -> "it"
+            "Português" -> "pt"
+            "Deutsch" -> "de"
+            "中文（简体）" -> "zh-Hans"
+            "Nederlands" -> "nl"
+            "日本語" -> "ja"
+            else -> "es"
+        })
+        return java.time.DayOfWeek.of(ordinal + 1)
+            .getDisplayName(TextStyle.FULL, locale)
+            .take(1)
+            .uppercase(locale)
+    }
+
     companion object {
         fun fromStoredValues(values: Set<String>?) =
             entries.filterTo(mutableSetOf()) { it.storedValue in values.orEmpty() }
@@ -429,7 +449,7 @@ fun OnboardingScreen(
                 onContinue = { step = 5 },
             ) {
                 WorkoutWeekday.entries.forEach { day ->
-                    ChoiceOption(day.title, null, day.glyph, day in workoutDays) {
+                    ChoiceOption(day.title, null, day.localizedInitial(appLanguage), day in workoutDays) {
                         workoutDays = if (day in workoutDays && workoutDays.size > 1) workoutDays - day else workoutDays + day
                     }
                     Spacer(Modifier.height(10.dp))
@@ -594,7 +614,28 @@ fun OnboardingScreen(
     if (isLoginVisible) {
         AuthenticationSheet(
             register = authenticationRegisters,
-            profileName = name,
+            profile = OnboardingProfile(
+                name = name.trim(),
+                goal = goal ?: FitnessGoal.GeneralFitness,
+                lifestyle = lifestyle ?: LifestyleLevel.ModeratelyActive,
+                workoutDays = workoutDays,
+                preferredWorkoutDurationMinutes = duration,
+                trainingLevel = trainingLevel,
+                trainingSplitPreference = trainingSplit,
+                bodyCompositionPhase = bodyPhase.takeIf { showsBodyComposition() },
+                customWorkoutFocuses = customFocuses.filterKeys { it in workoutDays },
+                gymType = gymType ?: GymType.SmallGym,
+                availableEquipment = equipment,
+                movementRestrictions = restrictions,
+                isHealthConnectEnabled = healthConnectEnabled == true,
+                birthMonth = birthMonth,
+                birthYear = birthYear,
+                gender = gender ?: Gender.Male,
+                metricSystem = metricSystem,
+                heightCm = heightCm,
+                weightKg = weightKg,
+                appLanguage = appLanguage,
+            ),
             onDismiss = { isLoginVisible = false },
             onSwitch = { authenticationRegisters = !authenticationRegisters },
             onAuthenticated = { response ->

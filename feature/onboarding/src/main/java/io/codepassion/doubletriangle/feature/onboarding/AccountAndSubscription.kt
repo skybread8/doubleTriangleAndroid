@@ -95,16 +95,20 @@ fun saveAuthenticatedAccount(context: Context, response: AuthResponse) {
     WildforceAccountStore(context).save(response)
 }
 
-private suspend fun authenticate(path: String, name: String?, email: String, password: String): Result<AuthResponse> = withContext(Dispatchers.IO) {
+private suspend fun authenticate(context: Context, path: String, profile: OnboardingProfile?, email: String, password: String): Result<AuthResponse> = withContext(Dispatchers.IO) {
     runCatching {
         val connection = (URL(WildforceApiEnvironment.apiUrl(path)).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"; doOutput = true; setRequestProperty("Content-Type", "application/json")
             connectTimeout = 15_000; readTimeout = 15_000
         }
         val payload = JSONObject().put("email", email.trim()).put("password", password).put("device_name", "Wildforce Android")
-        // Same behaviour as iOS Registration: keep one password field in the UI
-        // and send its value as Laravel's required password_confirmation field.
-        if (name != null) payload.put("name", name).put("password_confirmation", password)
+        // Registration creates the full initial graph. Its shape is shared by
+        // email and social registration endpoints, so the first sync updates
+        // these rows instead of creating duplicates.
+        if (profile != null) {
+            payload.put("password_confirmation", password)
+                .put("initial_data", initialRegistrationData(context, profile))
+        }
         OutputStreamWriter(connection.outputStream).use { it.write(payload.toString()) }
         val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
         val text = BufferedReader(stream.reader()).use { it.readText() }
@@ -115,21 +119,86 @@ private suspend fun authenticate(path: String, name: String?, email: String, pas
 }
 
 /** Mirrors iOS's GoogleAuthenticationCredentials: the backend exchanges this ID token for our bearer token. */
-private suspend fun authenticateWithGoogle(idToken: String): Result<AuthResponse> = withContext(Dispatchers.IO) {
+private suspend fun authenticateWithGoogle(context: Context, idToken: String, profile: OnboardingProfile?): Result<AuthResponse> = withContext(Dispatchers.IO) {
     runCatching {
-        val connection = (URL(WildforceApiEnvironment.apiUrl("auth/google")).openConnection() as HttpURLConnection).apply {
+        val path = if (profile == null) "auth/google" else "auth/google/register"
+        val connection = (URL(WildforceApiEnvironment.apiUrl(path)).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"; doOutput = true; setRequestProperty("Content-Type", "application/json")
             connectTimeout = 15_000; readTimeout = 15_000
         }
-        OutputStreamWriter(connection.outputStream).use {
-            it.write(JSONObject().put("id_token", idToken).put("device_name", "Wildforce Android").toString())
-        }
+        val payload = JSONObject().put("id_token", idToken).put("device_name", "Wildforce Android")
+        profile?.let { payload.put("initial_data", initialRegistrationData(context, it)) }
+        OutputStreamWriter(connection.outputStream).use { it.write(payload.toString()) }
         val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
         val text = BufferedReader(stream.reader()).use { it.readText() }
         if (connection.responseCode !in 200..299) throw IllegalStateException(apiErrorMessage(text, "No hemos podido iniciar sesión con Google."))
         val body = JSONObject(text); val user = body.getJSONObject("user")
         AuthResponse(user.getString("id"), user.getString("name"), user.getString("email"), body.getString("token"), connection.responseCode == HttpURLConnection.HTTP_CREATED)
     }
+}
+
+/** Builds the backend's registration graph, matching the current iOS contract. */
+internal fun initialRegistrationData(context: Context, profile: OnboardingProfile): JSONObject {
+    val userId = java.util.UUID.randomUUID().toString()
+    fun childId(name: String) = java.util.UUID.nameUUIDFromBytes("$userId:$name".toByteArray()).toString()
+    val location = profile.effectiveTrainingLocations().firstOrNull { it.isDefault }
+        ?: profile.effectiveTrainingLocations().first()
+    val detailPreferences = context.getSharedPreferences("wildforce_profile_details", Context.MODE_PRIVATE)
+    val notificationPreferences = context.getSharedPreferences("wildforce_notification_settings", Context.MODE_PRIVATE)
+    return JSONObject()
+        .put("user", JSONObject()
+            .put("id", userId)
+            .put("name", profile.name)
+            .put("height", profile.heightCm)
+            .put("weight", profile.weightKg)
+            .put("birth_date", "%04d-%02d-01T00:00:00Z".format(profile.birthYear, profile.birthMonth))
+            .put("gender", profile.gender.storedValue)
+            .put("language", backendLanguage(profile.appLanguage))
+            .put("metric_system", profile.metricSystem.storedValue))
+        .put("training_preferences", JSONObject()
+            .put("id", childId("training-preferences"))
+            .put("goal", profile.goal.storedValue)
+            .put("lifestyle", profile.lifestyle.storedValue)
+            .put("gym_type", profile.gymType.storedValue)
+            .put("general_training_level", profile.trainingLevel.storedValue)
+            .put("training_split_preference", profile.trainingSplitPreference.storedValue)
+            .put("preferred_workout_duration_minutes", profile.preferredWorkoutDurationMinutes)
+            .put("workout_days", org.json.JSONArray(profile.workoutDays.map { it.storedValue }))
+            .put("custom_workout_focuses", JSONObject(profile.customWorkoutFocuses.mapKeys { it.key.storedValue }.mapValues { it.value.storedValue }))
+            .put("movement_restrictions", org.json.JSONArray(profile.movementRestrictions.map { it.storedValue }))
+            .put("body_composition_phase", profile.bodyCompositionPhase?.storedValue ?: "automatic")
+            .put("skips_warmups", profile.skipsWarmups)
+            .put("skips_cooldowns", profile.skipsCooldowns)
+            .put("skips_rest_periods", profile.skipsRestPeriods))
+        .put("training_location", JSONObject()
+            .put("id", childId("training-location"))
+            .put("name", location.name)
+            .put("is_default", true)
+            .put("sort_order", 0)
+            .put("equipment", org.json.JSONArray(location.equipment.map { it.storedValue })))
+        .put("app_settings", JSONObject()
+            .put("id", childId("app-settings"))
+            .put("is_health_kit_enabled", profile.isHealthConnectEnabled)
+            .put("is_watch_auto_tracking_enabled", detailPreferences.getBoolean("amazfit_watch_enabled", false))
+            .put("is_screen_on_during_workout_enabled", detailPreferences.getBoolean("keep_screen_on", true))
+            .put("is_notifications_enabled", notificationPreferences.getBoolean("enabled", true))
+            .put("is_full_focus_mode_enabled", detailPreferences.getBoolean("full_focus", false))
+            .put("has_seen_notification_request", detailPreferences.getBoolean("has_seen_notification_request", false))
+            .put("has_seen_body_progress_tutorial", detailPreferences.getBoolean("has_seen_body_progress_tutorial", false))
+            .put("has_rated_app", detailPreferences.getBoolean("has_rated_app", false)))
+}
+
+private fun backendLanguage(language: String): String = when (language) {
+    "English" -> "en"
+    "Català" -> "ca"
+    "Français" -> "fr"
+    "Italiano" -> "it"
+    "Português" -> "pt"
+    "Deutsch" -> "de"
+    "中文（简体）" -> "zh-Hans"
+    "Nederlands" -> "nl"
+    "日本語" -> "ja"
+    else -> "es"
 }
 
 private fun apiErrorMessage(body: String, fallback: String): String = runCatching {
@@ -202,7 +271,7 @@ fun AccountSection(
         }
     }
     when (dialog) {
-        AccountDialog.Login, AccountDialog.Register -> AuthenticationSheet(dialog == AccountDialog.Register, profile.name, onDismiss = { dialog = null }, onSwitch = { dialog = if (dialog == AccountDialog.Login) AccountDialog.Register else AccountDialog.Login }) { response ->
+        AccountDialog.Login, AccountDialog.Register -> AuthenticationSheet(dialog == AccountDialog.Register, profile, onDismiss = { dialog = null }, onSwitch = { dialog = if (dialog == AccountDialog.Login) AccountDialog.Register else AccountDialog.Login }) { response ->
             store.save(response)
             context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE).edit()
                 .putBoolean("remote_sync_pending", true)
@@ -465,12 +534,13 @@ private enum class PasswordRequirement(val shortLabel: String) {
 }
 
 @Composable
-fun AuthenticationSheet(register: Boolean, profileName: String, onDismiss: () -> Unit, onSwitch: () -> Unit, onAuthenticated: (AuthResponse) -> Unit) {
+fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss: () -> Unit, onSwitch: () -> Unit, onAuthenticated: (AuthResponse) -> Unit) {
     var email by remember { mutableStateOf("") }; var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }; var submitting by remember { mutableStateOf(false) }
     // iOS opens both login and registration on the social-provider choice first.
     var isEmailLoginPresented by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current.applicationContext
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         // Keep the bottom sheet above the IME. Without this, focused fields near
         // the bottom are hidden by the keyboard on smaller screens.
@@ -526,7 +596,7 @@ fun AuthenticationSheet(register: Boolean, profileName: String, onDismiss: () ->
                             onIdToken = { idToken ->
                                 scope.launch {
                                     submitting = true
-                                    authenticateWithGoogle(idToken).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión con Google." }
+                                    authenticateWithGoogle(context, idToken, profile.takeIf { register }).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión con Google." }
                                     submitting = false
                                 }
                             },
@@ -569,7 +639,7 @@ fun AuthenticationSheet(register: Boolean, profileName: String, onDismiss: () ->
                         error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
                         Button(enabled = !submitting && (!register || PasswordRequirement.entries.all { it.isSatisfiedBy(password) }), onClick = {
                             if (email.isBlank() || password.isBlank()) { error = "Introduce tu email y contraseña para continuar."; return@Button }
-                            scope.launch { submitting = true; authenticate(if (register) "auth/register" else "auth/login", if (register) profileName else null, email, password).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión." }; submitting = false }
+                            scope.launch { submitting = true; authenticate(context, if (register) "auth/register" else "auth/login", profile.takeIf { register }, email, password).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión." }; submitting = false }
                         }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText)) { if (submitting) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp) else Text(if (register) "Crear cuenta" else "Iniciar sesión", modifier = Modifier.padding(vertical = 4.dp), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
                     }
                     if (register || isEmailLoginPresented) {

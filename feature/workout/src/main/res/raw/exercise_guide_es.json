@@ -139,6 +139,20 @@
       "Maintain a stable core to avoid excessive arching."
     ]
   },
+  "dumbbellInclineBenchPress": {
+    "description": "Press con mancuernas en banco inclinado para enfatizar la parte superior del pecho con recorrido independiente en cada brazo.",
+    "instructions": [
+      "Ajusta el banco entre 30 y 45 grados y apoya una mancuerna sobre cada muslo.",
+      "Recuéstate y coloca las mancuernas a la altura de la parte superior del pecho.",
+      "Presiona hacia arriba hasta extender los brazos manteniendo las muñecas sobre los codos.",
+      "Baja las mancuernas de forma controlada hasta la posición inicial."
+    ],
+    "tips": [
+      "Mantén los omóplatos retraídos contra el banco.",
+      "Usa una inclinación moderada para mantener el énfasis en el pecho superior.",
+      "Evita que los codos se abran en exceso durante el recorrido."
+    ]
+  },
   "overheadPress": {
     "description": "Un press vertical potente que desarrolla hombros anchos y estabilidad en el tren superior.",
     "instructions": [

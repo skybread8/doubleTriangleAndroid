@@ -370,14 +370,23 @@ fun WorkoutHubScreen(
 @Composable
 private fun ProfileChangedPlanBanner(onRecreatePlan: () -> Unit) {
     Column(
-        Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 8.dp)
-            .liquidGlass(RoundedCornerShape(14.dp)).padding(14.dp),
+        // Keep this as a quiet, full-width warning row. The iOS home puts the
+        // recreation prompt in an orange-tinted list row rather than in a
+        // floating glass card.
+        Modifier.fillMaxWidth()
+            .background(Color(0xFFFF9800).copy(alpha = 0.10f))
+            .padding(horizontal = 18.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Warning, contentDescription = null, tint = Color(0xFFFF9800))
+            Icon(
+                Icons.Filled.Warning,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = Color(0xFFFF9800),
+            )
             Column {
-                Text("PERFIL MODIFICADO", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                Text("Perfil modificado", style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                 Text(
                     "Tu perfil de entrenamiento ha cambiado desde que se creó este plan. Recrea el plan para obtener mejores resultados.",
                     style = MaterialTheme.typography.body2,
@@ -390,7 +399,7 @@ private fun ProfileChangedPlanBanner(onRecreatePlan: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF9800), contentColor = Color.White),
             shape = RoundedCornerShape(8.dp),
-        ) { Text("RECREAR PLAN", fontWeight = FontWeight.Bold) }
+        ) { Text("Recrear plan", fontWeight = FontWeight.SemiBold) }
     }
 }
 
@@ -1604,7 +1613,7 @@ fun ActiveWorkoutScreen(
     onGenerateNextPlan: () -> Unit = {},
     onWorkoutChanged: (WorkoutDaySummary) -> Unit = {},
     onExit: () -> Unit,
-    onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double, streak: Int, completedOn: LocalDate) -> Unit,
+    onFinish: (durationSeconds: Int, completedSets: Int, volumeKg: Double, streak: Int, completedOn: LocalDate, skippedExerciseIndices: Set<Int>) -> Unit,
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current.applicationContext
     val haptics = LocalHapticFeedback.current
@@ -1671,6 +1680,7 @@ fun ActiveWorkoutScreen(
     var feedbackByExercise by remember(workout.id) { mutableStateOf(restored?.feedbackByExercise ?: emptyMap()) }
     var notesByExercise by remember(workout.id) { mutableStateOf(restored?.notesByExercise ?: emptyMap()) }
     var completedSetRecords by remember(workout.id) { mutableStateOf(restored?.completedSetRecords ?: emptyList()) }
+    var skippedExerciseIndices by remember(workout.id) { mutableStateOf(restored?.skippedExerciseIndices ?: emptySet()) }
     val initialExerciseDuration = workout.exercises.firstOrNull()?.resolvedTargetDurationSeconds()
     var exerciseTimeRemaining by remember(workout.id) { mutableStateOf(restored?.exerciseTimeRemaining ?: initialExerciseDuration) }
     var exerciseTimeInitial by remember(workout.id) { mutableStateOf(restored?.exerciseTimeInitial?.takeIf { it > 0 } ?: (initialExerciseDuration ?: 0)) }
@@ -2109,6 +2119,7 @@ fun ActiveWorkoutScreen(
                     elapsedSeconds = latest.elapsedSeconds
                     exerciseTimeRemaining = latest.exerciseTimeRemaining
                     exerciseTimerRunning = latest.exerciseTimerRunning
+                    skippedExerciseIndices = latest.skippedExerciseIndices
                 }
                 // If Android had released the workout composition, watch
                 // commands were persisted by the local bridge. Apply them only
@@ -2130,6 +2141,7 @@ fun ActiveWorkoutScreen(
                     exerciseTimeInitial = exerciseTimeInitial, exerciseTimerRunning = exerciseTimerRunning,
                     addedSetsByExercise = addedSetsByExercise, completedDistanceKm = completedDistanceKm,
                     restContext = restContext,
+                    skippedExerciseIndices = skippedExerciseIndices,
                 )
                 WorkoutSessionStore.save(context, workout.id, snapshot)
                 val refreshIntent = android.content.Intent(context, WorkoutForegroundService::class.java)
@@ -2194,7 +2206,7 @@ fun ActiveWorkoutScreen(
             initializedExerciseIndex = exerciseIndex
         }
     }
-    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, restContext, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, pendingNote, showsSummary, exerciseStats, feedbackByExercise, notesByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning, addedSetsByExercise, completedDistanceKm) {
+    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restBetweenExercises, restContext, elapsedSeconds, totalCompletedSets, totalVolumeKg, pendingFeedback, selectedFeedback, pendingNote, showsSummary, exerciseStats, feedbackByExercise, notesByExercise, completedSetRecords, exerciseTimeRemaining, exerciseTimeInitial, exerciseTimerRunning, addedSetsByExercise, completedDistanceKm, skippedExerciseIndices) {
         // After ON_PAUSE the foreground service owns the persisted session.
         // Compose can remain alive briefly in the background, so its stale
         // local timer must never overwrite an action (for example Omitir)
@@ -2228,6 +2240,7 @@ fun ActiveWorkoutScreen(
                 addedSetsByExercise = addedSetsByExercise,
                 completedDistanceKm = completedDistanceKm,
                 restContext = restContext,
+                skippedExerciseIndices = skippedExerciseIndices,
             )
             WorkoutSessionStore.save(context, workout.id, snapshot)
             WorkoutSessionStore.saveLegacy(/*
@@ -2344,6 +2357,10 @@ fun ActiveWorkoutScreen(
             confirmButton = { TextButton(onClick = {
                 showsSkipExerciseConfirmation = false
                 val nextIndex = if (skipsWholeBlock) currentPathBlock?.exercises?.flatMap { it.executionIndices }?.maxOrNull()?.plus(1) else exerciseIndex + 1
+                val skippedNow = if (skipsWholeBlock) {
+                    currentPathBlock?.exercises?.flatMap { it.executionIndices }?.toSet().orEmpty()
+                } else setOf(exerciseIndex)
+                skippedExerciseIndices = skippedExerciseIndices + skippedNow
                 restRemaining = null
                 if (nextIndex == null || nextIndex > workout.exercises.lastIndex) {
                     completedOn = completedOn ?: LocalDate.now()
@@ -2416,7 +2433,7 @@ fun ActiveWorkoutScreen(
             CompletionProgressStore.commit(context, progress, completedOn ?: LocalDate.now())
             WorkoutSessionStore.clear(context, workout.id)
         }
-        runCatching { onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg, progress.streakAfter, completedOn ?: LocalDate.now()) }
+        runCatching { onFinish(elapsedSeconds, totalCompletedSets, totalVolumeKg, progress.streakAfter, completedOn ?: LocalDate.now(), skippedExerciseIndices) }
     }
 
     if (showsSummary) {

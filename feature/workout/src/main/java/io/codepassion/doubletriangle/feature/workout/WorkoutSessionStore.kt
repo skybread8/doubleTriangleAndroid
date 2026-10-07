@@ -30,6 +30,9 @@ internal data class WorkoutSessionSnapshot(
     val completedDistanceKm: Double = 0.0,
     val restContext: WorkoutRestContext? = null,
     val exerciseTimerFinishedWhileAway: Boolean = false,
+    /** Exercises deliberately omitted from this active session. Kept separately
+     * from completed sets so summaries never report them as performed. */
+    val skippedExerciseIndices: Set<Int> = emptySet(),
     val updatedAtMillis: Long = System.currentTimeMillis(),
 ) {
     /** Backward-compatible constructor for snapshots created before the
@@ -108,6 +111,9 @@ object WorkoutSessionStore {
         val savedRestRemaining = if (json.isNull("restRemaining")) null else json.getInt("restRemaining")
         val savedExerciseTime = if (json.isNull("exerciseTimeRemaining")) null else json.optInt("exerciseTimeRemaining")
         val exerciseTimerWasRunning = json.optBoolean("exerciseTimerRunning")
+        val skipped = json.optJSONArray("skippedExerciseIndices")?.let { values ->
+            buildSet { for (index in 0 until values.length()) add(values.optInt(index)) }
+        }.orEmpty()
         WorkoutSessionSnapshot(
             exerciseIndex = json.optInt("exerciseIndex", 0), completedByExercise = completed,
             reps = json.optInt("reps", 1), weightKg = json.optDouble("weightKg", 0.0),
@@ -130,6 +136,7 @@ object WorkoutSessionStore {
             restContext = runCatching { WorkoutRestContext.valueOf(json.optString("restContext")) }.getOrNull()
                 ?: if (json.optBoolean("restBetweenExercises")) WorkoutRestContext.BeforeNextBlock else savedRestRemaining?.let { WorkoutRestContext.BetweenSets },
             exerciseTimerFinishedWhileAway = exerciseTimerWasRunning && savedExerciseTime != null && savedExerciseTime <= elapsedWhileAway,
+            skippedExerciseIndices = skipped,
             updatedAtMillis = System.currentTimeMillis(),
         )
     }.getOrNull()
@@ -177,6 +184,7 @@ object WorkoutSessionStore {
             .put("addedSetsByExercise", addedSets)
             .put("completedDistanceKm", snapshot.completedDistanceKm)
             .put("restContext", snapshot.restContext?.name ?: JSONObject.NULL)
+            .put("skippedExerciseIndices", org.json.JSONArray(snapshot.skippedExerciseIndices.sorted()))
         context.getSharedPreferences(PREFERENCES, 0).edit().putString(workoutId, json.toString()).apply()
     }
 

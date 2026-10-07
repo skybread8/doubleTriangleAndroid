@@ -62,6 +62,7 @@ object ExerciseVisualCatalog {
         "pushUp" to ExerciseVisualMetadata(listOf(MuscleVisual.Chest), listOf(MuscleVisual.Shoulders, MuscleVisual.Triceps)),
         "benchPress" to ExerciseVisualMetadata(listOf(MuscleVisual.Chest), listOf(MuscleVisual.Triceps, MuscleVisual.Shoulders)),
         "inclineBenchPress" to ExerciseVisualMetadata(listOf(MuscleVisual.Chest), listOf(MuscleVisual.Shoulders, MuscleVisual.Triceps)),
+        "dumbbellInclineBenchPress" to ExerciseVisualMetadata(listOf(MuscleVisual.Chest), listOf(MuscleVisual.Shoulders, MuscleVisual.Triceps)),
         "overheadPress" to ExerciseVisualMetadata(listOf(MuscleVisual.Shoulders), listOf(MuscleVisual.Triceps, MuscleVisual.Abs)),
         "lateralRaise" to ExerciseVisualMetadata(listOf(MuscleVisual.Shoulders)),
         "chestDip" to ExerciseVisualMetadata(listOf(MuscleVisual.Chest), listOf(MuscleVisual.Triceps, MuscleVisual.Shoulders)),
@@ -93,6 +94,7 @@ object ExerciseVisualCatalog {
 
     fun equipmentFor(imageKey: String?): List<String> = when (imageKey?.trim()) {
         "benchPress", "inclineBenchPress", "chestDip" -> listOf("Banco ajustable")
+        "dumbbellInclineBenchPress" -> listOf("Banco ajustable", "Mancuernas")
         "latPulldown", "seatedCableRow", "facePull", "tricepsPushdown" -> listOf("Máquina de poleas")
         "barbellBackSquat", "deadlift", "romanianDeadlift", "bentOverRow" -> listOf("Barra y discos")
         "gobletSquat", "overheadPress", "lateralRaise", "bicepsCurl", "hammerCurl" -> listOf("Mancuernas")
@@ -104,6 +106,7 @@ object ExerciseVisualCatalog {
     /** Uses the same equipment illustrations as iOS's WorkoutEquipmentScroll. */
     internal fun equipmentVisualsFor(imageKey: String?): List<EquipmentVisual> = when (imageKey?.trim()) {
         "benchPress", "inclineBenchPress", "chestDip" -> listOf(EquipmentVisual.AdjustableBench)
+        "dumbbellInclineBenchPress" -> listOf(EquipmentVisual.AdjustableBench, EquipmentVisual.Dumbbells)
         "latPulldown", "seatedCableRow", "facePull", "tricepsPushdown" -> listOf(EquipmentVisual.CableMachine)
         "barbellBackSquat", "deadlift", "romanianDeadlift", "bentOverRow" -> listOf(EquipmentVisual.OlympicBarbell)
         "gobletSquat", "overheadPress", "lateralRaise", "bicepsCurl", "hammerCurl" -> listOf(EquipmentVisual.Dumbbells)

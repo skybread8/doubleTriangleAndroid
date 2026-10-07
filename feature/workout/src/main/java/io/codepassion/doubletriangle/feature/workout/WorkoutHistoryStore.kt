@@ -164,7 +164,7 @@ object WorkoutHistoryStore {
                                 SetPerformance(
                                     set.getInt("setNumber"), set.getInt("reps"), set.getDouble("weightKg"),
                                     runCatching { ExerciseSetStyle.valueOf(set.optString("setStyle")) }.getOrDefault(ExerciseSetStyle.Straight),
-                                    set.optInt("durationSeconds"), set.optDouble("distanceKm"),
+                                    set.optInt("durationSeconds"), set.optDouble("distanceKm", 0.0).takeIf(Double::isFinite) ?: 0.0,
                                 ),
                             )
                         }
@@ -181,7 +181,7 @@ object WorkoutHistoryStore {
                         feedback = item.optString("feedback").takeIf(String::isNotBlank),
                         note = item.optString("note").takeIf(String::isNotBlank),
                         durationSeconds = item.optInt("durationSeconds"),
-                        distanceKm = item.optDouble("distanceKm"),
+                        distanceKm = item.optDouble("distanceKm", 0.0).takeIf(Double::isFinite) ?: 0.0,
                     ),
                 )
             }

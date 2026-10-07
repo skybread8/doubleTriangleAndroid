@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.Equipment
 import io.codepassion.doubletriangle.feature.onboarding.GymType
@@ -14,11 +15,14 @@ import io.codepassion.doubletriangle.feature.onboarding.TrainingLocationProfile
 import io.codepassion.doubletriangle.feature.onboarding.TrainingSplitPreference
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutFocus
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
+import io.codepassion.doubletriangle.feature.onboarding.effectiveTrainingLocations
 import io.codepassion.doubletriangle.core.model.WildforceApiEnvironment
 import io.codepassion.doubletriangle.feature.workout.WorkoutHistoryStore
 import io.codepassion.doubletriangle.nutrition.NutritionStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -39,6 +43,9 @@ internal object WorkoutRemoteSync {
     private const val nutritionItemIDsKey = "nutrition_item_ids"
     private const val accountProgressPrefs = "wildforce_account_progress"
     private const val exerciseProfilesKey = "exercise_profiles"
+    private const val skippedExercisesPrefs = "wildforce_skipped_exercises"
+    private const val skippedExercisesKey = "entries"
+    private val synchronizationMutex = Mutex()
 
     sealed interface Outcome {
         /** A first-device import can replace the in-memory profile before the UI is shown. */
@@ -48,7 +55,21 @@ internal object WorkoutRemoteSync {
         data class Failed(val message: String?) : Outcome
     }
 
-    suspend fun synchronize(context: Context, profile: OnboardingProfile, preferences: SharedPreferences): Outcome = withContext(Dispatchers.IO) {
+    /** Records completed-session omissions until the corresponding plan graph has uploaded them. */
+    fun recordSkippedExercises(context: Context, workoutId: String, exerciseIndices: Set<Int>) {
+        if (exerciseIndices.isEmpty()) return
+        val preferences = context.getSharedPreferences(skippedExercisesPrefs, Context.MODE_PRIVATE)
+        val entries = preferences.getStringSet(skippedExercisesKey, emptySet()).orEmpty().toMutableSet()
+        val timestamp = System.currentTimeMillis()
+        exerciseIndices.forEach { index ->
+            entries.removeAll { it.substringBefore('|') == workoutId && it.substringAfter('|').substringBefore('|').toIntOrNull() == index }
+            entries += "$workoutId|$index|$timestamp"
+        }
+        preferences.edit().putStringSet(skippedExercisesKey, entries).apply()
+    }
+
+    suspend fun synchronize(context: Context, profile: OnboardingProfile, preferences: SharedPreferences): Outcome = synchronizationMutex.withLock {
+        withContext(Dispatchers.IO) {
         val account = context.getSharedPreferences(accountPrefs, 0)
         val token = account.getString("token", null) ?: return@withContext Outcome.NoAccount
         val userId = account.getString("id", null) ?: return@withContext Outcome.NoAccount
@@ -82,9 +103,9 @@ internal object WorkoutRemoteSync {
             // User is a first-class iOS sync resource. Keeping it here ensures
             // profile edits made on Android are visible to the other platform.
             push(token, "users", JSONArray().put(record(userId, now)
-                .put("name", profileToSync.name).put("height_cm", profileToSync.heightCm).put("weight_kg", profileToSync.weightKg)
+                .put("name", profileToSync.name).put("height", profileToSync.heightCm).put("weight", profileToSync.weightKg)
                 .put("birth_date", "%04d-%02d-01".format(profileToSync.birthYear, profileToSync.birthMonth))
-                .put("gender", profileToSync.gender.storedValue).put("language", profileToSync.appLanguage)
+                .put("gender", profileToSync.gender.storedValue).put("language", AppLocale.languageTag(profileToSync.appLanguage))
                 .put("metric_system", profileToSync.metricSystem.storedValue)
                 .put("current_streak", progress.currentStreak).put("longest_streak", progress.longestStreak)
                 .put("last_completed_workout_at", progress.lastCompletedWorkoutAt ?: JSONObject.NULL)
@@ -103,7 +124,10 @@ internal object WorkoutRemoteSync {
             val remoteLocationIds = context.getSharedPreferences("wildforce_remote_sync", Context.MODE_PRIVATE)
                 .getString("training_location_ids", "[]")?.let(::JSONArray) ?: JSONArray()
             push(token, "training-locations", JSONArray().apply {
-                profileToSync.trainingLocations.forEachIndexed { index, location -> put(record(
+                // An empty explicit list still represents the selected gym and
+                // equipment. Persist that effective default as a first-class
+                // location so iOS and the backend receive the same context.
+                profileToSync.effectiveTrainingLocations().forEachIndexed { index, location -> put(record(
                     remoteLocationIds.optString(index).takeIf(::isUuid) ?: stableId("$userId:location:$index"), now)
                     .put("name", location.name).put("is_default", location.isDefault).put("sort_order", index)
                     .put("equipment", JSONArray(location.equipment.map { it.storedValue }))) }
@@ -131,8 +155,10 @@ internal object WorkoutRemoteSync {
             }
             Outcome.Synchronized(importedProfile)
         } catch (error: Exception) {
+            Log.w("WorkoutRemoteSync", "Synchronization failed", error)
             if (error is SubscriptionRequiredException) Outcome.SubscriptionRequired
             else Outcome.Failed(error.message)
+        }
         }
     }
 
@@ -147,8 +173,8 @@ internal object WorkoutRemoteSync {
         val userProfile = remoteUser?.let { user ->
             local.copy(
                 name = user.optString("name", local.name).ifBlank { local.name },
-                heightCm = user.optInt("height_cm", local.heightCm).takeIf { it in 120..230 } ?: local.heightCm,
-                weightKg = user.optDouble("weight_kg", local.weightKg).takeIf { it.isFinite() && it in 35.0..250.0 } ?: local.weightKg,
+                heightCm = user.optInt("height", user.optInt("height_cm", local.heightCm)).takeIf { it in 120..230 } ?: local.heightCm,
+                weightKg = user.optDouble("weight", user.optDouble("weight_kg", local.weightKg)).takeIf { it.isFinite() && it in 35.0..250.0 } ?: local.weightKg,
                 birthYear = user.optString("birth_date").take(4).toIntOrNull()?.coerceIn(1920, java.time.Year.now().value) ?: local.birthYear,
                 birthMonth = user.optString("birth_date").drop(5).take(2).toIntOrNull()?.coerceIn(1, 12) ?: local.birthMonth,
                 appLanguage = user.optString("language", local.appLanguage).ifBlank { local.appLanguage },
@@ -266,7 +292,7 @@ internal object WorkoutRemoteSync {
 
     /** Imports the iOS nutrition graph so a new Android device does not upload an empty plan over it. */
     private fun pullRemoteNutrition(context: Context, token: String) {
-        get(token, WildforceApiEnvironment.apiUrl("sync/nutrition-plans")).optJSONArray("data")
+        get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=nutrition-plans")).optJSONArray("data")
             ?.firstLiveRecord()?.let { NutritionStore.importRemotePlan(context, it) }
         get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=nutrition-profiles")).optJSONArray("data")
             ?.firstLiveRecord()?.let { NutritionStore.importRemotePreferences(context, it) }
@@ -443,12 +469,6 @@ internal object WorkoutRemoteSync {
 
     /** Restores media only during the authoritative first-account import. */
     private fun pullRemoteMedia(context: Context, token: String) {
-        val profilePreferences = context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
-        val avatar = File(context.filesDir, "profile-avatar.png")
-        if (download(token, WildforceApiEnvironment.apiUrl("users/avatar"), avatar)) {
-            profilePreferences.edit().putString("avatar_path", avatar.absolutePath).apply()
-        }
-
         val sessions = get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=body-progress-photo-sessions")).optJSONArray("data") ?: return
         val localSessions = JSONArray()
         val folder = File(context.filesDir, "body_progress_photos").apply { mkdirs() }
@@ -479,8 +499,7 @@ internal object WorkoutRemoteSync {
         val remotePlans = get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=workout-plans"))
             .optJSONArray("data").liveRecords()
         if (remotePlans.isEmpty()) return
-        val response = get(token, WildforceApiEnvironment.apiUrl("sync/workout-days"))
-        val remoteDays = response.optJSONArray("data") ?: return
+        val remoteDays = pullRemoteWorkoutDays(token)
         importRemoteWorkoutHistory(context, remoteDays)
 
         val plans = remotePlans.mapNotNull { plan ->
@@ -499,6 +518,37 @@ internal object WorkoutRemoteSync {
             .putBoolean("remote_plan_imported", true).apply()
     }
 
+    /**
+     * The generic sync endpoint exposes normalized workout records. Rebuild the
+     * graph expected by the Android plan importer instead of relying on the
+     * removed legacy `sync/workout-days` endpoint.
+     */
+    private fun pullRemoteWorkoutDays(token: String): JSONArray {
+        fun records(resource: String) = get(token, WildforceApiEnvironment.apiUrl("sync/pull?resource=$resource"))
+            .optJSONArray("data").liveRecords()
+
+        val days = records("workout-days")
+        val blocks = records("workout-blocks")
+        val exercises = records("planned-exercises")
+        val results = records("exercise-results")
+        val resultsByExercise = results.groupBy { it.optString("planned_exercise_id") }
+        val exercisesByBlock = exercises.groupBy { it.optString("workout_block_id") }
+        val blocksByDay = blocks.groupBy { it.optString("workout_day_id") }
+
+        exercises.forEach { exercise ->
+            exercise.put("exercise_results", JSONArray(resultsByExercise[exercise.optString("id")].orEmpty()))
+        }
+        blocks.forEach { block ->
+            block.put("exercises", JSONArray(exercisesByBlock[block.optString("id")].orEmpty()))
+        }
+        return JSONArray().apply {
+            days.forEach { day ->
+                day.put("blocks", JSONArray(blocksByDay[day.optString("id")].orEmpty()))
+                put(day)
+            }
+        }
+    }
+
     private fun remotePlanJson(plan: JSONObject, planId: String, remoteDays: JSONArray): RemotePlan? {
         val workouts = JSONArray()
         for (index in 0 until remoteDays.length()) {
@@ -514,12 +564,19 @@ internal object WorkoutRemoteSync {
                     .put("rounds", block.optInt("rounds", 1)).put("restAfterBlockSeconds", block.opt("rest_after_block_seconds"))
                     .put("notes", block.opt("notes")).put("exercises", remoteExercises(block.optJSONArray("exercises"))))
             }
-            val directExercises = remoteExercises(day.optJSONArray("exercises"))
+            // iOS no longer models day-level exercises. Read the legacy shape
+            // only by migrating it into a standard block, never re-emitting it.
+            if (blocks.length() == 0) {
+                val legacyExercises = remoteExercises(day.optJSONArray("exercises"))
+                if (legacyExercises.length() > 0) {
+                    blocks.put(JSONObject().put("remoteId", "legacy-direct-exercises").put("type", "standard")
+                        .put("rounds", 1).put("exercises", legacyExercises))
+                }
+            }
             workouts.put(JSONObject().put("id", day.optString("id")).put("remoteId", day.optString("id")).put("title", day.optString("title", "Sesión ${index + 1}"))
                 .put("focus", day.optString("focus", "Fitness general")).put("dayType", day.optString("day_type", "strength"))
                 .put("status", day.optString("status", "planned").uppercase()).put("weekday", day.optString("intended_weekday", "MONDAY").uppercase())
-                .put("estimatedDurationMinutes", day.optInt("estimated_duration_minutes", 50)).put("blocks", blocks)
-                .put("exercises", directExercises))
+                .put("estimatedDurationMinutes", day.optInt("estimated_duration_minutes", 50)).put("blocks", blocks))
         }
         if (workouts.length() == 0) return null
         val cycleLength = plan.optInt("cycle_length", 1).coerceAtLeast(1)
@@ -559,7 +616,7 @@ internal object WorkoutRemoteSync {
                             maxWeightKg = result.optDouble("completed_weight", weights.maxOrNull() ?: 0.0),
                             setReps = reps, setWeightsKg = weights, feedback = result.optString("feedback").takeIf(String::isNotBlank),
                             note = result.optString("notes").takeIf(String::isNotBlank), durationSeconds = result.optInt("completed_duration_seconds"),
-                            distanceKm = result.optDouble("completed_distance_km"),
+                            distanceKm = result.optDouble("completed_distance_km", 0.0).takeIf(Double::isFinite) ?: 0.0,
                         )
                         exerciseEntries += entry; results += entry
                     }
@@ -581,14 +638,81 @@ internal object WorkoutRemoteSync {
             val exercise = entries.optJSONObject(index) ?: continue
             if (!exercise.isNull("deleted_at")) continue
             val min = exercise.opt("reps_min"); val max = exercise.opt("reps_max")
-            put(JSONObject().put("remoteId", exercise.optString("id")).put("name", exercise.optString("exercise", "Ejercicio"))
+            val exerciseCatalogId = exercise.optString("exercise", "Ejercicio")
+            put(JSONObject().put("remoteId", exercise.optString("id")).put("name", exerciseCatalogId).put("imageKey", exerciseCatalogId)
                 .put("sets", exercise.optInt("sets", 1)).put("repsMin", min).put("repsMax", max)
                 .put("reps", if (min is Number && max is Number) "${min.toInt()}-${max.toInt()}" else "")
                 .put("restSeconds", exercise.optInt("rest_seconds", 0)).put("targetWeightKg", exercise.opt("target_weight_kg"))
                 .put("targetReps", exercise.opt("target_reps")).put("targetWeightsKg", exercise.opt("target_weights_kg"))
                 .put("targetDurationMinutes", exercise.opt("target_duration_minutes")).put("targetDurationSeconds", exercise.opt("target_duration_seconds"))
-                .put("targetDistanceKm", exercise.opt("target_distance_km")).put("setStyle", "Straight")
-                .put("setStyleParameters", exercise.opt("set_style_configuration")))
+                .put("targetDistanceKm", exercise.opt("target_distance_km")).put("setStyle", androidSetStyle(exercise.optJSONObject("set_style_configuration")?.optString("style")))
+                .put("setStyleParameters", androidSetStyleParameters(exercise.optJSONObject("set_style_configuration"))))
+        }
+    }
+
+    /** The backend requires a `style` field even when no style-specific options are set. */
+    private fun backendSetStyleConfiguration(item: JSONObject): JSONObject {
+        val parameters = item.optJSONObject("setStyleParameters") ?: JSONObject()
+        return JSONObject().put("style", backendSetStyle(item.optString("setStyle")))
+            .put("applies_to_final_set_only", parameters.opt("appliesToFinalSetOnly"))
+            .put("drop_count", parameters.opt("dropCount"))
+            .put("drop_weight_percent", parameters.opt("dropWeightPercent"))
+            .put("backoff_set_count", parameters.opt("backoffSetCount"))
+            .put("backoff_weight_percent", parameters.opt("backoffWeightPercent"))
+            .put("intra_set_rest_seconds", parameters.opt("intraSetRestSeconds"))
+            .put("tempo", parameters.opt("tempo"))
+            .put("target_rir", parameters.opt("targetRir"))
+    }
+
+    private fun androidSetStyleParameters(configuration: JSONObject?): JSONObject = JSONObject().apply {
+        configuration ?: return@apply
+        put("appliesToFinalSetOnly", configuration.opt("applies_to_final_set_only"))
+        put("dropCount", configuration.opt("drop_count"))
+        put("dropWeightPercent", configuration.opt("drop_weight_percent"))
+        put("backoffSetCount", configuration.opt("backoff_set_count"))
+        put("backoffWeightPercent", configuration.opt("backoff_weight_percent"))
+        put("intraSetRestSeconds", configuration.opt("intra_set_rest_seconds"))
+        put("tempo", configuration.opt("tempo"))
+        put("targetRir", configuration.opt("target_rir"))
+    }
+
+    private fun backendSetStyle(value: String): String = when (value.trim().lowercase()) {
+        "warmup" -> "warmup"
+        "straight" -> "straight"
+        "topsetbackoff", "top_set_backoff" -> "topSetBackoff"
+        "ascendingpyramid", "ascending_pyramid" -> "ascendingPyramid"
+        "dropset", "drop_set" -> "dropSet"
+        "restpause", "rest_pause" -> "restPause"
+        "intervals" -> "intervals"
+        "tempo" -> "tempo"
+        else -> "straight"
+    }
+
+    private fun androidSetStyle(value: String?): String = when (backendSetStyle(value.orEmpty())) {
+        "warmup" -> "Warmup"
+        "topSetBackoff" -> "TopSetBackoff"
+        "ascendingPyramid" -> "AscendingPyramid"
+        "dropSet" -> "DropSet"
+        "restPause" -> "RestPause"
+        "intervals" -> "Intervals"
+        "tempo" -> "Tempo"
+        else -> "Straight"
+    }
+
+    private fun backendWorkoutFocus(value: String): String {
+        if (value in setOf("fullBody", "upperBody", "lowerBody", "push", "pull", "legs", "core", "cardio", "mobility", "recovery")) return value
+        val normalized = value.lowercase()
+        return when {
+            normalized.contains("empuj") || normalized.contains("pecho") || normalized.contains("hombro") || normalized.contains("trícep") || normalized.contains("tricep") -> "push"
+            normalized.contains("tirón") || normalized.contains("tiron") || normalized.contains("espalda") || normalized.contains("bícep") || normalized.contains("bicep") -> "pull"
+            normalized.contains("pierna") || normalized.contains("glúte") || normalized.contains("glute") -> "legs"
+            normalized.contains("core") || normalized.contains("abdom") -> "core"
+            normalized.contains("cardio") || normalized.contains("resistencia") -> "cardio"
+            normalized.contains("movilidad") || normalized.contains("mobility") -> "mobility"
+            normalized.contains("recuper") -> "recovery"
+            normalized.contains("superior") || normalized.contains("upper") -> "upperBody"
+            normalized.contains("inferior") || normalized.contains("lower") -> "lowerBody"
+            else -> "fullBody"
         }
     }
 
@@ -600,38 +724,83 @@ internal object WorkoutRemoteSync {
             .put("phase_week", root.optInt("phaseWeek", 1)).put("cycle_length", root.optInt("cycleLength", 1))
             .put("body_composition_phase", profile.bodyCompositionPhase?.storedValue ?: JSONObject.NULL)))
         val days = root.optJSONArray("workouts") ?: JSONArray(); val dayRecords = JSONArray(); val blocks = JSONArray(); val exercises = JSONArray(); val plannedExerciseIds = mutableMapOf<String, String>()
+        val skippedExercises = skippedExerciseTimestamps(context)
+        val uploadedSkippedExerciseKeys = mutableSetOf<String>()
         for (dayIndex in 0 until days.length()) {
             val day = days.getJSONObject(dayIndex); val dayId = day.optString("remoteId").takeIf(::isUuid) ?: stableId("$planId:${day.optString("id", dayIndex.toString())}")
-            dayRecords.put(record(dayId, now).put("workout_plan_id", planId).put("title", day.optString("title", "Sesión ${dayIndex + 1}")).put("focus", day.optString("focus", "fullBody")).put("status", day.optString("status", "PLANNED").lowercase()).put("order_index", dayIndex).put("intended_weekday", day.optString("weekday").lowercase()).put("day_type", day.optString("dayType")).put("estimated_duration_minutes", day.optInt("estimatedDurationMinutes", 50)))
+            val localWorkoutId = day.optString("id", dayIndex.toString())
+            var executionIndex = 0
+            dayRecords.put(record(dayId, now).put("workout_plan_id", planId).put("kind", "workout").put("title", day.optString("title", "Sesión ${dayIndex + 1}")).put("focus", backendWorkoutFocus(day.optString("focus"))).put("status", day.optString("status", "PLANNED").lowercase()).put("did_count_toward_streak", false).put("order_index", dayIndex).put("intended_weekday", day.optString("weekday").lowercase()).put("day_type", day.optString("dayType")).put("creation_source", "generated").put("estimated_duration_minutes", day.optInt("estimatedDurationMinutes", 50)))
             val dayBlocks = day.optJSONArray("blocks") ?: JSONArray()
-            for (blockIndex in 0 until dayBlocks.length()) {
-                val block = dayBlocks.getJSONObject(blockIndex); val blockId = block.optString("remoteId").takeIf(::isUuid) ?: stableId("$dayId:$blockIndex")
+            // The backend now requires every planned exercise to belong to a
+            // block. Older Android plans can still contain direct day-level
+            // exercises, so give those a deterministic standard block instead
+            // of silently dropping them (or submitting a null foreign key).
+            val blocksToSync = JSONArray().apply {
+                for (blockIndex in 0 until dayBlocks.length()) put(dayBlocks.getJSONObject(blockIndex))
+                day.optJSONArray("exercises")?.takeIf { it.length() > 0 }?.let { directExercises ->
+                    put(JSONObject().put("id", "direct-exercises").put("type", "standard").put("rounds", 1).put("exercises", directExercises))
+                }
+            }
+            for (blockIndex in 0 until blocksToSync.length()) {
+                val block = blocksToSync.getJSONObject(blockIndex); val blockId = block.optString("remoteId").takeIf(::isUuid) ?: stableId("$dayId:${block.optString("id", blockIndex.toString())}")
                 blocks.put(record(blockId, now).put("workout_day_id", dayId).put("type", block.optString("type", "standard")).put("order_index", blockIndex).put("rounds", block.optInt("rounds", 1)).put("rest_after_block_seconds", block.opt("restAfterBlockSeconds")).put("notes", block.opt("notes")))
                 val entries = block.optJSONArray("exercises") ?: JSONArray()
                 for (exerciseIndex in 0 until entries.length()) {
                     val item = entries.getJSONObject(exerciseIndex); val exerciseId = item.optString("remoteId").takeIf(::isUuid) ?: stableId("$blockId:$exerciseIndex")
                     val historyKey = item.optString("imageKey").trim().ifBlank { item.optString("name").trim() }.lowercase()
                     if (historyKey.isNotBlank()) plannedExerciseIds.putIfAbsent(historyKey, exerciseId)
-                    exercises.put(record(exerciseId, now).put("workout_day_id", dayId).put("workout_block_id", blockId).put("exercise", item.optString("name")).put("order_index", exerciseIndex).put("sets", item.optInt("sets", 1)).put("reps_min", item.opt("repsMin")).put("reps_max", item.opt("repsMax")).put("target_reps", item.opt("targetReps")).put("target_weight_kg", item.opt("targetWeightKg")).put("target_weights_kg", item.opt("targetWeightsKg")).put("target_duration_minutes", item.opt("targetDurationMinutes")).put("target_duration_seconds", item.opt("targetDurationSeconds")).put("target_distance_km", item.opt("targetDistanceKm")).put("rest_seconds", item.optInt("restSeconds", 0)).put("set_style_configuration", item.opt("setStyleParameters")))
+                    // The API validates the Exercise enum. `name` is localized
+                    // display text; `imageKey` is Android's canonical catalog
+                    // identifier shared with iOS and the backend.
+                    val exerciseCatalogId = item.optString("imageKey").trim()
+                    require(exerciseCatalogId.isNotBlank()) { "El ejercicio ${item.optString("name", exerciseIndex.toString())} no tiene identificador de catálogo." }
+                    val skippedKey = "$localWorkoutId|$executionIndex"
+                    val record = record(exerciseId, now).put("workout_day_id", dayId).put("workout_block_id", blockId).put("exercise", exerciseCatalogId).put("order_index", exerciseIndex).put("sets", item.optInt("sets", 1)).put("reps_min", item.opt("repsMin")).put("reps_max", item.opt("repsMax")).put("target_reps", item.opt("targetReps")).put("target_weight_kg", item.opt("targetWeightKg")).put("target_weights_kg", item.opt("targetWeightsKg")).put("target_duration_minutes", item.opt("targetDurationMinutes")).put("target_duration_seconds", item.opt("targetDurationSeconds")).put("target_distance_km", item.opt("targetDistanceKm")).put("rest_seconds", item.optInt("restSeconds", 0)).put("set_style_configuration", backendSetStyleConfiguration(item))
+                    skippedExercises[skippedKey]?.let { timestamp ->
+                        record.put("skipped_at", java.time.Instant.ofEpochMilli(timestamp).toString())
+                        uploadedSkippedExerciseKeys += skippedKey
+                    }
+                    exercises.put(record)
+                    executionIndex += 1
                 }
             }
         }
         push(token, "workout-days", dayRecords); push(token, "workout-blocks", blocks); push(token, "planned-exercises", exercises)
+        if (uploadedSkippedExerciseKeys.isNotEmpty()) clearSkippedExercises(context, uploadedSkippedExerciseKeys)
         val results = JSONArray()
         WorkoutHistoryStore.remoteEntries(context = context).forEach { entry ->
             val plannedExerciseId = plannedExerciseIds[entry.exerciseKey] ?: return@forEach
             results.put(record(stableId("$plannedExerciseId:${entry.timestampMillis}"), now)
                 .put("planned_exercise_id", plannedExerciseId).put("feedback", entry.feedback ?: "justRight")
                 .put("completed_at", java.time.Instant.ofEpochMilli(entry.timestampMillis).toString())
-                .put("completed_sets", entry.sets).put("completed_reps", entry.totalReps).put("completed_weight", entry.maxWeightKg)
-                .put("per_set_reps", JSONArray(entry.setReps)).put("per_set_weights_kg", JSONArray(entry.setWeightsKg))
+                .put("completed_sets", entry.sets).put("completed_reps", entry.totalReps).put("completed_weight", entry.maxWeightKg.finiteOrZero())
+                .put("per_set_reps", JSONArray(entry.setReps)).put("per_set_weights_kg", JSONArray(entry.setWeightsKg.map { it.finiteOrZero() }))
                 .put("completed_duration_seconds", entry.durationSeconds).put("completed_duration_minutes", entry.durationSeconds / 60)
-                .put("completed_distance_km", entry.distanceKm).put("notes", entry.note ?: JSONObject.NULL))
+                .put("completed_distance_km", entry.distanceKm.finiteOrZero()).put("notes", entry.note ?: JSONObject.NULL))
         }
         push(token, "exercise-results", results)
     }
 
     private fun record(id: String, now: String) = JSONObject().put("id", id).put("created_at", now).put("updated_at", now)
+
+    private fun Double.finiteOrZero(): Double = if (isFinite()) this else 0.0
+
+    private fun skippedExerciseTimestamps(context: Context): Map<String, Long> =
+        context.getSharedPreferences(skippedExercisesPrefs, Context.MODE_PRIVATE)
+            .getStringSet(skippedExercisesKey, emptySet()).orEmpty().mapNotNull { entry ->
+                val separator = entry.lastIndexOf('|')
+                val timestamp = entry.substring(separator + 1).toLongOrNull() ?: return@mapNotNull null
+                entry.substring(0, separator).takeIf { it.count { character -> character == '|' } == 1 }?.let { it to timestamp }
+            }.toMap()
+
+    private fun clearSkippedExercises(context: Context, keys: Set<String>) {
+        val preferences = context.getSharedPreferences(skippedExercisesPrefs, Context.MODE_PRIVATE)
+        val remaining = preferences.getStringSet(skippedExercisesKey, emptySet()).orEmpty().filterNot { entry ->
+            entry.substringBeforeLast('|') in keys
+        }.toSet()
+        preferences.edit().putStringSet(skippedExercisesKey, remaining).apply()
+    }
     private fun stableId(value: String) = UUID.nameUUIDFromBytes(value.toByteArray()).toString()
     /** The shared API accepts at most 100 generic records per request, like iOS. */
     private fun push(token: String, resource: String, records: JSONArray) {
@@ -651,7 +820,11 @@ internal object WorkoutRemoteSync {
         OutputStreamWriter(connection.outputStream).use { it.write(JSONObject().put("resource", resource).put("records", records).toString()) }
         val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
         val response = BufferedReader(stream.reader()).use { it.readText() }
-        if (connection.responseCode !in 200..299) throw apiException(response, "No se pudo sincronizar $resource")
+        if (connection.responseCode !in 200..299) {
+            val error = apiException(response, "No se pudo sincronizar $resource")
+            Log.w("WorkoutRemoteSync", "Sync resource $resource rejected with HTTP ${connection.responseCode}: ${error.message}")
+            throw error
+        }
     }
 
     private fun get(token: String, url: String): JSONObject {

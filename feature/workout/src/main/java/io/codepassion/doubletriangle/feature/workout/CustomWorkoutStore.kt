@@ -226,7 +226,8 @@ private val iosSubstitutionCandidates = mapOf(
     "romanianDeadlift" to listOf("hamstringCurl", "deadlift"),
     "pushUp" to listOf("declinePushUp", "benchPress", "chestPressMachine", "chestFly"),
     "benchPress" to listOf("inclineBenchPress", "chestPressMachine", "pushUp", "dumbbellBenchPress", "smithMachineBenchPress"),
-    "inclineBenchPress" to listOf("benchPress", "chestPressMachine", "pushUp"),
+    "inclineBenchPress" to listOf("dumbbellInclineBenchPress", "benchPress", "chestPressMachine", "pushUp"),
+    "dumbbellInclineBenchPress" to listOf("inclineBenchPress", "benchPress", "chestPressMachine", "pushUp"),
     "overheadPress" to listOf("dumbbellOverheadPress", "arnoldPress", "lateralRaise"),
     "lateralRaise" to listOf("overheadPress", "arnoldPress", "frontRaise"),
     "chestDip" to listOf("tricepsDip", "tricepsPushdown", "overheadTricepsExtension", "ringDip"),
@@ -275,7 +276,7 @@ internal fun rankExerciseReplacements(
 internal object CustomExerciseCatalog {
     private val spanishNames = mapOf(
         "airSquat" to "Sentadilla libre", "gobletSquat" to "Sentadilla goblet", "barbellBackSquat" to "Sentadilla con barra",
-        "benchPress" to "Press de banca", "inclineBenchPress" to "Press inclinado", "pushUp" to "Flexiones",
+        "benchPress" to "Press de banca", "inclineBenchPress" to "Press inclinado", "dumbbellInclineBenchPress" to "Press inclinado con mancuernas", "pushUp" to "Flexiones",
         "pullUp" to "Dominadas", "dumbbellRow" to "Remo con mancuerna", "bentOverRow" to "Remo con barra",
         "deadlift" to "Peso muerto", "romanianDeadlift" to "Peso muerto rumano", "walkingLunge" to "Zancadas",
         "overheadPress" to "Press militar", "bicepsCurl" to "Curl de bíceps", "chestDip" to "Fondos", "plank" to "Plancha",

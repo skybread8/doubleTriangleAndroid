@@ -228,6 +228,12 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
     var notes by remember(initial) { mutableStateOf(initial.notes) }
     var type by remember(initial) { mutableStateOf(initial.type) }
     var barcode by remember(initialBarcode) { mutableStateOf(initialBarcode) }
+    var brands by remember { mutableStateOf("") }
+    var contributionFront by remember { mutableStateOf<Uri?>(null) }
+    var contributionNutrition by remember { mutableStateOf<Uri?>(null) }
+    var contributionMessage by remember { mutableStateOf<String?>(null) }
+    val contributionFrontPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { contributionFront = it }
+    val contributionNutritionPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { contributionNutrition = it }
     var secondName by remember(initial) { mutableStateOf(secondItem?.name.orEmpty()) }
     var secondCalories by remember(initial) { mutableStateOf(secondItem?.calories?.toString().orEmpty()) }
     var secondProtein by remember(initial) { mutableStateOf(secondItem?.protein?.toString().orEmpty()) }
@@ -270,12 +276,35 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
             }
         }
         item { OutlinedTextField(name, { name = it.take(80) }, Modifier.fillMaxWidth(), label = { Text(if (describeMode) "Describe lo que has comido" else "Alimento o comida") }, minLines = if (describeMode) 3 else 1) }
-        if (describeMode) item { OutlinedButton(onClick = { scope.launch { runAnalysis { NutritionAnalyzer.describe(name) } } }, enabled = name.isNotBlank() && !analyzing, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Filled.AutoAwesome, null, tint = NutritionCoral); Text("ANALIZAR DESCRIPCIÓN", Modifier.padding(start = 8.dp), color = NutritionCoral) } }
+        if (barcodeMode) {
+            item { OutlinedTextField(brands, { brands = it.take(80) }, Modifier.fillMaxWidth(), label = { Text("Marca para contribuir") }, singleLine = true) }
+        }
+        if (describeMode) item { OutlinedButton(onClick = { scope.launch { runAnalysis { NutritionAnalyzer.describe(context, name) } } }, enabled = name.isNotBlank() && !analyzing, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Filled.AutoAwesome, null, tint = NutritionCoral); Text("ANALIZAR DESCRIPCIÓN", Modifier.padding(start = 8.dp), color = NutritionCoral) } }
         if (analyzing) item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) { CircularProgressIndicator(Modifier.size(22.dp), color = NutritionCoral, strokeWidth = 2.dp); Text(if (labelMode) "Leyendo etiqueta…" else "Analizando nutrición…", Modifier.padding(start = 10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }
         analysisError?.let { message -> item { Text(message, color = MaterialTheme.colors.error, style = MaterialTheme.typography.caption, modifier = Modifier.background(MaterialTheme.colors.error.copy(alpha = .08f), RoundedCornerShape(10.dp)).padding(10.dp)) } }
         item { Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(7.dp)) { MealType.entries.forEach { item -> FilterChip(item.title, item == type) { type = item } } } }
         item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Calorías", calories, { calories = digits(it) }, Modifier.weight(1f)); NumberField("Proteína g", protein, { protein = digits(it) }, Modifier.weight(1f)) } }
         item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Carbos g", carbs, { carbs = digits(it) }, Modifier.weight(1f)); NumberField("Grasa g", fat, { fat = digits(it) }, Modifier.weight(1f)) } }
+        if (barcodeMode) {
+            item { Text("Si el producto no existe en Open Food Facts, puedes añadirlo con fotos del frontal y de la tabla nutricional.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+            item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { contributionFrontPicker.launch("image/*") }, modifier = Modifier.weight(1f)) { Text(if (contributionFront == null) "FOTO FRONTAL" else "FRONTAL ✓") }
+                OutlinedButton(onClick = { contributionNutritionPicker.launch("image/*") }, modifier = Modifier.weight(1f)) { Text(if (contributionNutrition == null) "FOTO NUTRICIÓN" else "NUTRICIÓN ✓") }
+            } }
+            item {
+                val canContribute = barcode.length in 8..14 && name.isNotBlank() && brands.isNotBlank() && (calories.toDoubleOrNull() ?: 0.0) > 0 && contributionFront != null && contributionNutrition != null && !analyzing
+                OutlinedButton(onClick = {
+                    scope.launch {
+                        analyzing = true; contributionMessage = null
+                        runCatching { withContext(Dispatchers.IO) { NutritionAnalyzer.contributeOpenFoodFacts(context, barcode, name.trim(), brands.trim(), calories.toDoubleOrNull() ?: 0.0, protein.toDoubleOrNull() ?: 0.0, carbs.toDoubleOrNull() ?: 0.0, fat.toDoubleOrNull() ?: 0.0, contributionFront!!, contributionNutrition!!) } }
+                            .onSuccess { contributionMessage = "Producto enviado a Open Food Facts." }
+                            .onFailure { contributionMessage = it.message ?: "No se pudo enviar el producto." }
+                        analyzing = false
+                    }
+                }, enabled = canContribute, modifier = Modifier.fillMaxWidth()) { Text("CONTRIBUIR PRODUCTO") }
+            }
+            contributionMessage?.let { message -> item { Text(message, style = MaterialTheme.typography.caption, color = if (message.startsWith("Producto enviado")) NutritionCoral else MaterialTheme.colors.error) } }
+        }
         item {
             TextButton(onClick = { showSecondItem = !showSecondItem }) { Icon(if (showSecondItem) Icons.Filled.Remove else Icons.Filled.Add, null, tint = NutritionCoral); Text(if (showSecondItem) "QUITAR ALIMENTO" else "AÑADIR OTRO ALIMENTO", Modifier.padding(start = 6.dp), color = NutritionCoral) }
         }

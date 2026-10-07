@@ -794,7 +794,11 @@ private fun WildforceApp(
     val profileDetailPreferences = remember { appContext.getSharedPreferences("wildforce_profile_details", 0) }
     var keepScreenOnDuringWorkout by remember { mutableStateOf(profileDetailPreferences.getBoolean("keep_screen_on", true)) }
     val workoutPlanStore = remember(appPreferences) { WorkoutPlanStateStore(appPreferences) }
-    var avatarPath by remember { mutableStateOf(appPreferences.getString("avatar_path", null)) }
+    // A migrated preference can point to the private files directory of the
+    // previous application id. Do not hand that non-existent path to Compose.
+    var avatarPath by remember {
+        mutableStateOf(appPreferences.getString("avatar_path", null)?.takeIf { File(it).isFile })
+    }
     var avatarRevision by remember { mutableStateOf(0) }
     val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri ?: return@rememberLauncherForActivityResult
@@ -871,7 +875,8 @@ private fun WildforceApp(
                 activeWorkout = updated
             },
             onExit = { activeWorkout = null },
-            onFinish = { duration, sets, volume, streak, completedOn ->
+            onFinish = { duration, sets, volume, streak, completedOn, skippedExerciseIndices ->
+                WorkoutRemoteSync.recordSkippedExercises(appContext, workout.id, skippedExerciseIndices)
                 val completedDates = appPreferences
                     .getStringSet("completed_workout_local_dates", emptySet())
                     .orEmpty()

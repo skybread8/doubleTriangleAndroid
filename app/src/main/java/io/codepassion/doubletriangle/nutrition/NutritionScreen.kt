@@ -1,5 +1,6 @@
 package io.codepassion.doubletriangle.nutrition
 
+import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -91,6 +92,7 @@ fun NutritionScreen(
     var plannedTitle by remember { mutableStateOf<String?>(null) }
     var generatingPlan by remember { mutableStateOf(false) }
     var generationError by remember { mutableStateOf<String?>(null) }
+    val planGenerationPreferences = remember { context.getSharedPreferences("wildforce_nutrition_generation", Context.MODE_PRIVATE) }
     var energyHistory by remember { mutableStateOf<Map<LocalDate, NutritionEnergyPoint>>(emptyMap()) }
 
     LaunchedEffect(profile) {
@@ -109,8 +111,17 @@ fun NutritionScreen(
     fun reload() { meals = NutritionStore.load(context, selectedDate) }
 
     fun requestPlanGeneration() {
+        if (generatingPlan) return
+        val now = System.currentTimeMillis()
+        val lastAttempt = planGenerationPreferences.getLong("last_remote_plan_attempt", 0)
+        val remainingMillis = 60_000 - (now - lastAttempt)
+        if (remainingMillis > 0) {
+            generationError = "Espera ${((remainingMillis + 999) / 1_000)} segundos antes de volver a generar el plan."
+            return
+        }
         generationError = null
         generatingPlan = true
+        planGenerationPreferences.edit().putLong("last_remote_plan_attempt", now).apply()
         scope.launch {
             runCatching { NutritionAIPlanner.generate(context, profile, targets, preferences, today) }
                 .onSuccess { generatedPlan = it; planVersion = NutritionStore.regeneratePlan(context) }
