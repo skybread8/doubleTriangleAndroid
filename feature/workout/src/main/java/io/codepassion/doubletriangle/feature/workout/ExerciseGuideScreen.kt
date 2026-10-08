@@ -1,6 +1,10 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -25,7 +29,11 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -73,6 +81,8 @@ internal fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBa
     val coachMedia = remember(exercise.imageKey) { CoachExerciseMediaStore.latest(context, exercise.imageKey) }
     val visualMetadata = remember(exercise.imageKey) { ExerciseVisualCatalog.metadata(exercise.imageKey) }
     val equipment = remember(exercise.imageKey) { ExerciseVisualCatalog.equipmentFor(exercise.imageKey) }
+    var appeared by remember(exercise.imageKey) { mutableStateOf(false) }
+    LaunchedEffect(exercise.imageKey) { appeared = true }
     Box(Modifier.fillMaxSize().background(WildforceThemeTokens.backgroundSecondary)) {
         RemoteTrainingImage(coachMedia?.imageUrl ?: exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.fillMaxWidth().height(500.dp))
         Box(Modifier.fillMaxWidth().height(500.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.55f), Color.Transparent, WildforceThemeTokens.backgroundSecondary))))
@@ -81,7 +91,11 @@ internal fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBa
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = WildforceThemeTokens.imageControlContent, modifier = Modifier.size(22.dp))
             }
             Spacer(Modifier.height(255.dp))
-            Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(topStart = 38.dp, topEnd = 38.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(20.dp)) {
+            AnimatedVisibility(
+                visible = appeared,
+                enter = fadeIn(tween(280, delayMillis = 80)) + slideInVertically(tween(320, delayMillis = 80)) { it / 12 },
+            ) {
+                Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(topStart = 38.dp, topEnd = 38.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(20.dp)) {
                 Text(exercise.name.uppercase(), fontFamily = AntonFontFamily, fontSize = 34.sp, color = WildforceThemeTokens.textPrimary, maxLines = 2)
                 Text("${exercise.sets} series · ${exercise.reps} reps", color = WildforceThemeTokens.textSecondary)
                 Spacer(Modifier.height(22.dp))
@@ -152,6 +166,7 @@ internal fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBa
                     }
                 }
                 Spacer(Modifier.height(30.dp))
+                }
             }
         }
     }

@@ -1,6 +1,13 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import android.content.Context
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -108,7 +115,17 @@ private fun OnboardingScaffold(total: Int, step: Int, eyebrow: String, title: St
                 Column { Text(eyebrow.uppercase(), color = WildforceThemeTokens.accentGold, fontSize = 12.sp, fontWeight = FontWeight.Bold); Text(title, color = WildforceThemeTokens.textPrimary, fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, fontSize = 24.sp) }
             }
             Text(description, Modifier.padding(top = 16.dp), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.body1)
-            body()
+            // iOS moves each onboarding page in from below when the step changes.
+            // Key the Android content to the same step so informative cards do not
+            // snap between unrelated states.
+            AnimatedContent(
+                targetState = step,
+                transitionSpec = {
+                    (fadeIn(tween(260)) + slideInVertically(tween(300)) { it / 8 }) togetherWith
+                        (fadeOut(tween(160)) + slideOutVertically(tween(180)) { -it / 12 })
+                },
+                label = "workout-feature-onboarding-step",
+            ) { body() }
         }
         Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 24.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (onBack != null) TextButton(onClick = onBack, modifier = Modifier.height(48.dp)) { Text("VOLVER", color = WildforceThemeTokens.textSecondary) }

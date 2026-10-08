@@ -19,14 +19,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
@@ -101,14 +106,16 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, planHistory: List
 @Composable
 private fun PlanSessionRow(workout: WorkoutDaySummary, onClick: () -> Unit) {
     val statusColor = when (workout.status) { WorkoutStatus.Completed -> Color(0xFF26A269); WorkoutStatus.Skipped -> WildforceThemeTokens.textSecondary; WorkoutStatus.Planned -> WildforceThemeTokens.accentGold }
+    val statusScale = remember(workout.status) { Animatable(.78f) }
+    LaunchedEffect(workout.status) { statusScale.animateTo(1f, spring(dampingRatio = .55f, stiffness = 560f)) }
     Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).clickable(onClick = onClick).padding(13.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(42.dp).clip(CircleShape).background(statusColor.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {
-            Text(if (workout.status == WorkoutStatus.Completed) "✓" else if (workout.status == WorkoutStatus.Skipped) "–" else workout.order.toString(), fontWeight = FontWeight.Bold, color = statusColor)
+            Text(if (workout.status == WorkoutStatus.Completed) "✓" else if (workout.status == WorkoutStatus.Skipped) "–" else workout.order.toString(), Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, fontWeight = FontWeight.Bold, color = statusColor)
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(workout.title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
             Text(workout.scheduledDay.getDisplayName(TextStyle.SHORT, Locale.forLanguageTag("es-ES")) + " · ${workout.estimatedMinutes} min", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
         }
-        Text(when (workout.status) { WorkoutStatus.Completed -> "COMPLETADO"; WorkoutStatus.Skipped -> "OMITIDO"; WorkoutStatus.Planned -> "ABRIR" }, style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = statusColor)
+        Text(when (workout.status) { WorkoutStatus.Completed -> "COMPLETADO"; WorkoutStatus.Skipped -> "OMITIDO"; WorkoutStatus.Planned -> "ABRIR" }, Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = statusColor)
     }
 }

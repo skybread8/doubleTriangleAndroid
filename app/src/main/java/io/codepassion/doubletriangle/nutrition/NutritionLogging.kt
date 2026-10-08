@@ -11,6 +11,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +20,14 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -25,6 +35,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,6 +55,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -184,9 +196,13 @@ internal fun NutritionLogFlow(
                     }
                 }
             } else if (method == LogMethod.Recent) {
-                RecentPicker(recent, onBack = { method = null }, onSelected = { source ->
-                    onSave(source.copy(id = System.currentTimeMillis(), type = mealType, loggedDate = selectedDate, source = "recent", isBookmarked = false))
-                })
+                RecentPicker(
+                    recent = recent,
+                    mealType = mealType,
+                    date = selectedDate,
+                    onBack = { method = null },
+        onSave = onSave,
+                )
             } else if (method == LogMethod.Search) {
                 FoodSearch(mealType, selectedDate, onBack = { method = null }, onSave = onSave)
             } else if (method == LogMethod.Photo && (photoUri != null || photoBitmap != null)) {
@@ -201,7 +217,9 @@ internal fun NutritionLogFlow(
             } else {
                 MealEditor(
                     title = method!!.title,
-                    initial = initialEntry ?: defaultFor(method!!, mealType, selectedDate, photoUri).copy(name = initialTitle ?: defaultFor(method!!, mealType, selectedDate, photoUri).name),
+                initial = (initialEntry ?: defaultFor(method!!, mealType, selectedDate, photoUri)).let { draft ->
+                    draft.copy(name = initialTitle ?: draft.name)
+                },
                     onBack = { method = null; photoUri = null },
                     onSave = onSave,
                     photoLabel = photoUri?.lastPathSegment ?: if (photoBitmap != null) "Captura de cámara" else null,
@@ -239,7 +257,7 @@ internal fun NutritionLogFlow(
 
 @Composable
 private fun PrimaryMethod(method: LogMethod, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier, onClick: () -> Unit) {
-    Column(modifier.height(108.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = .08f), RoundedCornerShape(14.dp)).clickable(onClick = onClick).padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+    Column(modifier.height(108.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = .08f), RoundedCornerShape(14.dp)).then(methodPressModifier(onClick)).padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Icon(icon, null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(28.dp))
         Text(method.title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
     }
@@ -247,7 +265,7 @@ private fun PrimaryMethod(method: LogMethod, icon: androidx.compose.ui.graphics.
 
 @Composable
 private fun MethodRow(method: LogMethod, onClick: () -> Unit) {
-    Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().then(methodPressModifier(onClick)).padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Icon(when (method) { LogMethod.Recent -> Icons.Filled.History; LogMethod.Label -> Icons.Filled.DocumentScanner; LogMethod.Search -> Icons.Filled.Search; else -> Icons.Filled.Edit }, null, modifier = Modifier.size(44.dp).padding(10.dp), tint = NutritionCoral)
         Column(Modifier.weight(1f)) { Text(method.title, color = WildforceThemeTokens.textPrimary); Text(method.description, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
         Icon(Icons.Filled.ChevronRight, null, tint = WildforceThemeTokens.textSecondary)
@@ -255,16 +273,135 @@ private fun MethodRow(method: LogMethod, onClick: () -> Unit) {
 }
 
 @Composable
-private fun RecentPicker(recent: List<MealLog>, onBack: () -> Unit, onSelected: (MealLog) -> Unit) {
+private fun methodPressModifier(onClick: () -> Unit): Modifier {
+    val interactions = remember { MutableInteractionSource() }
+    val pressed by interactions.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) .96f else 1f,
+        animationSpec = spring(dampingRatio = .58f, stiffness = 620f),
+        label = "nutrition-method-press",
+    )
+    return Modifier
+        .graphicsLayer { scaleX = scale; scaleY = scale }
+        .clickable(interactionSource = interactions, indication = null, onClick = onClick)
+}
+
+@Composable
+private fun RecentPicker(
+    recent: List<MealLog>,
+    mealType: MealType,
+    date: LocalDate,
+    onBack: () -> Unit,
+    onSave: (MealLog) -> Unit,
+) {
+    val context = LocalContext.current.applicationContext
+    var recentEntries by remember(recent) { mutableStateOf(recent) }
+    var query by remember { mutableStateOf("") }
+    var filter by remember { mutableStateOf<MealType?>(null) }
+    var bookmarksOnly by remember { mutableStateOf(false) }
+    var selectedIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
+    var review by remember { mutableStateOf<List<MealLog>?>(null) }
+
+    review?.let { selected ->
+        val copiedItems = selected.flatMap { entry ->
+            entry.items.ifEmpty {
+                listOf(MealItem(entry.name, entry.calories, entry.protein, entry.carbs, entry.fat))
+            }
+        }
+        val totals = copiedItems.fold(NutritionTargets(0, 0, 0, 0)) { total, item ->
+            NutritionTargets(total.calories + item.calories, total.protein + item.protein, total.carbs + item.carbs, total.fat + item.fat)
+        }
+        MealEditor(
+            title = "REVISAR ${if (selected.size == 1) "COMIDA" else "COMIDAS"}",
+            initial = MealLog(
+                id = System.currentTimeMillis(),
+                name = selected.singleOrNull()?.name ?: "",
+                calories = totals.calories,
+                protein = totals.protein,
+                carbs = totals.carbs,
+                fat = totals.fat,
+                type = mealType,
+                loggedDate = date,
+                source = "recent",
+                items = copiedItems,
+            ),
+            onBack = { review = null },
+            onSave = onSave,
+            photoLabel = null,
+            photoUri = null,
+            photoBitmap = null,
+            describeMode = false,
+            barcodeMode = false,
+            labelMode = false,
+            initialBarcode = "",
+        )
+        return
+    }
+
+    val visible = recentEntries.filter { entry ->
+        val matchesText = query.isBlank() || listOf(entry.name, entry.notes, entry.items.joinToString(" ") { it.name })
+            .any { it.contains(query.trim(), ignoreCase = true) }
+        val matchesType = filter == null || entry.type == filter
+        matchesText && matchesType && (!bookmarksOnly || entry.isBookmarked)
+    }
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item { SheetHeader("COMIDAS RECIENTES", onBack) }
-        if (recent.isEmpty()) item { EmptyState("Sin comidas recientes", "Los alimentos que registres aparecerán aquí para repetirlos rápidamente.") }
-        items(recent, key = { it.id }) { entry ->
-            Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).clickable { onSelected(entry) }.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Restaurant, null, tint = NutritionCoral)
-                Column(Modifier.weight(1f).padding(horizontal = 12.dp)) { Text(entry.name, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary); Text("${entry.type.title} · ${entry.calories} kcal", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
-                Icon(Icons.Filled.AddCircle, "Añadir", tint = NutritionCoral)
+        item {
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it.take(80) },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Buscar comidas o alimentos") },
+                leadingIcon = { Icon(Icons.Filled.Search, null) },
+                singleLine = true,
+            )
+        }
+        item {
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                FilterChip("Todas", filter == null && !bookmarksOnly) { filter = null; bookmarksOnly = false }
+                FilterChip("Guardadas", bookmarksOnly) { filter = null; bookmarksOnly = true }
+                MealType.entries.forEach { type -> FilterChip(type.title, filter == type) { filter = type; bookmarksOnly = false } }
             }
+        }
+        if (visible.isEmpty()) item {
+            EmptyState(
+                if (recent.isEmpty()) "Sin comidas recientes" else "No hay coincidencias",
+                if (recent.isEmpty()) "Los alimentos que registres aparecerán aquí para repetirlos rápidamente." else "Prueba con otra búsqueda o filtro.",
+            )
+        }
+        items(visible, key = { it.id }) { entry ->
+            val selected = entry.id in selectedIds
+            Row(
+                Modifier.fillMaxWidth()
+                    .background(if (selected) NutritionCoral.copy(alpha = .14f) else WildforceThemeTokens.textSecondary.copy(alpha = .08f), RoundedCornerShape(16.dp))
+                    .clickable { selectedIds = if (selected) selectedIds - entry.id else selectedIds + entry.id }
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(if (selected) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked, if (selected) "Seleccionada" else "Seleccionar", tint = if (selected) NutritionCoral else WildforceThemeTokens.textSecondary)
+                Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(entry.name, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.weight(1f))
+                        IconButton(onClick = {
+                            val updated = entry.copy(isBookmarked = !entry.isBookmarked)
+                            NutritionStore.save(context, entry.loggedDate, NutritionStore.load(context, entry.loggedDate).map { if (it.id == entry.id) updated else it })
+                            recentEntries = recentEntries.map { if (it.id == entry.id) updated else it }
+                        }, modifier = Modifier.size(36.dp)) {
+                            Icon(if (entry.isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, if (entry.isBookmarked) "Quitar de guardadas" else "Guardar", tint = if (entry.isBookmarked) NutritionCoral else WildforceThemeTokens.textSecondary, modifier = Modifier.size(18.dp))
+                        }
+                    }
+                    Text("${entry.type.title} · ${entry.calories} kcal", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    entry.items.takeIf { it.isNotEmpty() }?.let { foods -> Text(foods.joinToString(" · ") { it.name }, maxLines = 1, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                }
+            }
+        }
+        if (selectedIds.isNotEmpty()) item {
+            Button(
+                onClick = { review = recentEntries.filter { it.id in selectedIds } },
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary),
+                shape = RoundedCornerShape(14.dp),
+            ) { Text(if (selectedIds.size == 1) "REVISAR 1 COMIDA" else "REVISAR ${selectedIds.size} COMIDAS", fontWeight = FontWeight.Bold) }
         }
     }
 }
@@ -277,14 +414,28 @@ private fun FoodSearch(type: MealType, date: LocalDate, onBack: () -> Unit, onSa
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var selectedFood by remember { mutableStateOf<NutritionSearchFood?>(null) }
-    selectedFood?.let { food ->
+    var portionDraft by remember { mutableStateOf<MealLog?>(null) }
+    if (portionDraft != null) {
+        val draft = requireNotNull(portionDraft)
         MealEditor(
             title = "REVISAR ALIMENTO",
-            initial = MealLog(System.currentTimeMillis(), food.name, food.calories, food.protein, food.carbs, food.fat, type, date, food.brand, "search", items = listOf(MealItem(food.name, food.calories, food.protein, food.carbs, food.fat, brand = food.brand, quantity = 1.0, unit = food.servingGrams?.let { "g" }.orEmpty(), grams = food.servingGrams))),
-            onBack = { selectedFood = null }, onSave = onSave, photoLabel = null, photoUri = null, photoBitmap = null,
+            initial = draft,
+            onBack = { portionDraft = null }, onSave = onSave, photoLabel = null, photoUri = null, photoBitmap = null,
             describeMode = false, barcodeMode = false, labelMode = false, initialBarcode = "",
         )
-    } ?: LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    } else if (selectedFood != null) {
+        val food = requireNotNull(selectedFood)
+        FoodPortionReview(
+            food = food,
+            onBack = { selectedFood = null },
+            onReview = { grams, calories, protein, carbs, fat ->
+                portionDraft = MealLog(
+                    System.currentTimeMillis(), food.name, calories, protein, carbs, fat, type, date, food.brand, "search",
+                    items = listOf(MealItem(food.name, calories, protein, carbs, fat, brand = food.brand, quantity = grams, unit = "g", grams = grams)),
+                )
+            },
+        )
+    } else LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item { SheetHeader("BUSCAR ALIMENTO", onBack) }
         item { Row(verticalAlignment = Alignment.CenterVertically) { OutlinedTextField(query, { query = it.take(100) }, Modifier.weight(1f), label = { Text("Buscar alimento") }, leadingIcon = { Icon(Icons.Filled.Search, null) }, singleLine = true); IconButton(onClick = { scope.launch { loading = true; error = null; runCatching { withContext(Dispatchers.IO) { NutritionAnalyzer.searchFoods(query) } }.onSuccess { results = it }.onFailure { error = it.message ?: "No se pudo buscar el alimento" }; loading = false } }, enabled = query.trim().length >= 2 && !loading) { if (loading) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = NutritionCoral) else Icon(Icons.Filled.Search, "Buscar", tint = NutritionCoral) } } }
         error?.let { message -> item { Text(message, color = MaterialTheme.colors.error, style = MaterialTheme.typography.caption) } }
@@ -294,6 +445,45 @@ private fun FoodSearch(type: MealType, date: LocalDate, onBack: () -> Unit, onSa
                 Column(Modifier.weight(1f)) { Text(food.name, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold); Text(food.brand.ifBlank { "Alimento genérico" }, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); Text("P ${food.protein}g  ·  C ${food.carbs}g  ·  G ${food.fat}g", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 Text("${food.calories} kcal", fontWeight = FontWeight.Bold, color = NutritionCoral)
             }
+        }
+    }
+}
+
+/** The catalogue values are for a serving; iOS always asks for the consumed grams before review. */
+@Composable
+private fun FoodPortionReview(
+    food: NutritionSearchFood,
+    onBack: () -> Unit,
+    onReview: (grams: Double, calories: Int, protein: Int, carbs: Int, fat: Int) -> Unit,
+) {
+    var gramsText by remember(food) { mutableStateOf((food.servingGrams ?: 100.0).toInt().toString()) }
+    val grams = gramsText.toDoubleOrNull()?.coerceIn(1.0, 5_000.0) ?: 0.0
+    val serving = food.servingGrams ?: 100.0
+    val factor = if (serving > 0) grams / serving else 0.0
+    val calories = (food.calories * factor).toInt()
+    val protein = (food.protein * factor).toInt()
+    val carbs = (food.carbs * factor).toInt()
+    val fat = (food.fat * factor).toInt()
+    LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        item { SheetHeader("CANTIDAD", onBack) }
+        item {
+            Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (food.brand.isNotBlank()) Text(food.brand, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                Text(food.name, style = MaterialTheme.typography.h6, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                Text("Indica la cantidad que has consumido.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            }
+        }
+        item { NumberField("Cantidad (g)", gramsText, { gramsText = it.filter(Char::isDigit).take(4) }, Modifier.fillMaxWidth()) }
+        item { PhotoMacroSummary(NutritionTargets(calories, protein, carbs, fat)) }
+        item { Text("Valores para ${grams.toInt()} g · el catálogo informa una ración de ${serving.toInt()} g", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+        item {
+            Button(
+                onClick = { onReview(grams, calories, protein, carbs, fat) },
+                enabled = grams > 0,
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+                colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary),
+                shape = RoundedCornerShape(14.dp),
+            ) { Text("REVISAR INGESTA", fontWeight = FontWeight.Bold) }
         }
     }
 }
@@ -322,6 +512,9 @@ private fun PhotoAnalysisReview(
     var error by remember { mutableStateOf<String?>(null) }
     var correction by remember { mutableStateOf("") }
     var showingCorrection by remember { mutableStateOf(false) }
+    // Keep the row in composition briefly so a deletion has the same springy
+    // collapse as the iOS review screen instead of disappearing abruptly.
+    var removingFoodIndex by remember { mutableStateOf<Int?>(null) }
 
     fun apply(analysis: NutritionAnalysis) {
         title = analysis.name.ifBlank { "Comida fotografiada" }
@@ -382,20 +575,32 @@ private fun PhotoAnalysisReview(
             item { Text("ALIMENTOS DETECTADOS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) }
             items(foods.indices.toList()) { index ->
                 val food = foods[index]
-                Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedTextField(food.name, { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(name = value.take(80)) else current } }, Modifier.weight(1f), label = { Text("Alimento") }, singleLine = true)
-                        IconButton(onClick = { foods = foods.filterIndexed { itemIndex, _ -> itemIndex != index } }, enabled = foods.size > 1) { Icon(Icons.Filled.DeleteOutline, "Eliminar alimento", tint = NutritionRed) }
+                AnimatedVisibility(
+                    visible = removingFoodIndex != index,
+                    exit = shrinkVertically() + fadeOut(),
+                ) {
+                    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedTextField(food.name, { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(name = value.take(80)) else current } }, Modifier.weight(1f), label = { Text("Alimento") }, singleLine = true)
+                            IconButton(onClick = {
+                                removingFoodIndex = index
+                                scope.launch {
+                                    delay(220)
+                                    foods = foods.filterIndexed { itemIndex, _ -> itemIndex != index }
+                                    removingFoodIndex = null
+                                }
+                            }, enabled = foods.size > 1 && removingFoodIndex == null) { Icon(Icons.Filled.DeleteOutline, "Eliminar alimento", tint = NutritionRed) }
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            NumberField("kcal", food.calories.toString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(calories = value.toIntOrNull()?.coerceIn(0, 8000) ?: 0) else current } }, Modifier.weight(1f))
+                            NumberField("Proteína", food.protein.toString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(protein = value.toIntOrNull()?.coerceIn(0, 500) ?: 0) else current } }, Modifier.weight(1f))
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            NumberField("Carbos", food.carbs.toString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(carbs = value.toIntOrNull()?.coerceIn(0, 1000) ?: 0) else current } }, Modifier.weight(1f))
+                            NumberField("Grasa", food.fat.toString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(fat = value.toIntOrNull()?.coerceIn(0, 500) ?: 0) else current } }, Modifier.weight(1f))
+                        }
+                        NumberField("Cantidad en gramos", food.grams?.toInt()?.toString().orEmpty(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(grams = value.toDoubleOrNull()?.coerceIn(0.0, 5_000.0)) else current } }, Modifier.fillMaxWidth())
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NumberField("kcal", food.calories.toString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(calories = value.toIntOrNull()?.coerceIn(0, 8000) ?: 0) else current } }, Modifier.weight(1f))
-                        NumberField("Proteína", food.protein.toString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(protein = value.toIntOrNull()?.coerceIn(0, 500) ?: 0) else current } }, Modifier.weight(1f))
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NumberField("Carbos", food.carbs.toString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(carbs = value.toIntOrNull()?.coerceIn(0, 1000) ?: 0) else current } }, Modifier.weight(1f))
-                        NumberField("Grasa", food.fat.toString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(fat = value.toIntOrNull()?.coerceIn(0, 500) ?: 0) else current } }, Modifier.weight(1f))
-                    }
-                    NumberField("Cantidad en gramos", food.grams?.toInt()?.toString().orEmpty(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(grams = value.toDoubleOrNull()?.coerceIn(0.0, 5_000.0)) else current } }, Modifier.fillMaxWidth())
                 }
             }
             item { TextButton(onClick = { foods = foods + MealItem("", 0, 0, 0, 0) }) { Icon(Icons.Filled.Add, null, tint = NutritionCoral); Text("AÑADIR ALIMENTO", Modifier.padding(start = 6.dp), color = NutritionCoral) } }
@@ -441,7 +646,6 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val firstItem = initial.items.firstOrNull()
-    val secondItem = initial.items.getOrNull(1)
     var name by remember(initial) { mutableStateOf(firstItem?.name ?: initial.name) }
     var calories by remember(initial) { mutableStateOf((firstItem?.calories ?: initial.calories).takeIf { it > 0 }?.toString().orEmpty()) }
     var protein by remember(initial) { mutableStateOf((firstItem?.protein ?: initial.protein).takeIf { it > 0 }?.toString().orEmpty()) }
@@ -450,6 +654,11 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
     // A label's figures are normalized per 100 g, just as in the iOS label-review flow.
     // The consumed amount remains independently editable and scales the saved item.
     var consumedLabelGrams by remember(initial, labelMode) { mutableStateOf((firstItem?.grams ?: 100.0).toInt().toString()) }
+    var barcodeServings by remember(initial, barcodeMode) { mutableStateOf((firstItem?.quantity ?: 1.0).toInt().coerceAtLeast(1).toString()) }
+    var barcodeServingGrams by remember(initial, barcodeMode) { mutableStateOf((firstItem?.grams ?: 100.0).toInt().toString()) }
+    var itemQuantity by remember(initial) { mutableStateOf((firstItem?.quantity ?: 1.0).toInt().coerceAtLeast(1).toString()) }
+    var itemUnit by remember(initial) { mutableStateOf(firstItem?.unit.orEmpty()) }
+    var itemGrams by remember(initial) { mutableStateOf(firstItem?.grams?.toInt()?.toString().orEmpty()) }
     var notes by remember(initial) { mutableStateOf(initial.notes) }
     var type by remember(initial) { mutableStateOf(initial.type) }
     var barcode by remember(initialBarcode) { mutableStateOf(initialBarcode) }
@@ -459,15 +668,13 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
     var contributionMessage by remember { mutableStateOf<String?>(null) }
     val contributionFrontPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { contributionFront = it }
     val contributionNutritionPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { contributionNutrition = it }
-    var secondName by remember(initial) { mutableStateOf(secondItem?.name.orEmpty()) }
-    var secondCalories by remember(initial) { mutableStateOf(secondItem?.calories?.toString().orEmpty()) }
-    var secondProtein by remember(initial) { mutableStateOf(secondItem?.protein?.toString().orEmpty()) }
-    var secondCarbs by remember(initial) { mutableStateOf(secondItem?.carbs?.toString().orEmpty()) }
-    var secondFat by remember(initial) { mutableStateOf(secondItem?.fat?.toString().orEmpty()) }
-    var showSecondItem by remember(initial) { mutableStateOf(initial.items.size > 1) }
-    var extraItems by remember(initial) { mutableStateOf(initial.items.drop(2)) }
+    // One repeatable list is used for every additional food. Keeping a separate
+    // "second food" branch rendered the same add affordance twice on Android.
+    var extraItems by remember(initial) { mutableStateOf(initial.items.drop(1)) }
+    var removingExtraItemIndex by remember(initial) { mutableStateOf<Int?>(null) }
     var analyzing by remember { mutableStateOf(false) }
     var analysisError by remember { mutableStateOf<String?>(null) }
+    var reviewAppeared by remember(initial) { mutableStateOf(false) }
 
     suspend fun runAnalysis(block: () -> NutritionAnalysis) {
         analyzing = true
@@ -480,6 +687,7 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                 carbs = result.carbs.toString()
                 fat = result.fat.toString()
                 notes = result.notes
+                result.servingGrams?.let { barcodeServingGrams = it.toInt().coerceAtLeast(1).toString() }
             }
             .onFailure { analysisError = it.message ?: "No se pudo completar el análisis" }
         analyzing = false
@@ -492,8 +700,9 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
     LaunchedEffect(initialBarcode) {
         if (initialBarcode.isNotBlank()) runAnalysis { NutritionAnalyzer.barcode(initialBarcode) }
     }
+    LaunchedEffect(initial) { reviewAppeared = true }
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-        item { SheetHeader(title.uppercase(), onBack) }
+        item { ReviewAppearance(reviewAppeared, 0) { SheetHeader(title.uppercase(), onBack) } }
         if (photoLabel != null) item { Row(Modifier.fillMaxWidth().background(NutritionCoral.copy(alpha = .08f), RoundedCornerShape(14.dp)).padding(14.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.Image, null, tint = NutritionCoral); Text("Imagen seleccionada · $photoLabel", Modifier.padding(start = 10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary) } }
         if (barcodeMode) item {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -501,7 +710,14 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                 IconButton(onClick = { scope.launch { runAnalysis { NutritionAnalyzer.barcode(barcode) } } }, enabled = barcode.length >= 8 && !analyzing) { Icon(Icons.Filled.Search, "Buscar producto", tint = NutritionCoral) }
             }
         }
-        item { OutlinedTextField(name, { name = it.take(80) }, Modifier.fillMaxWidth(), label = { Text(if (describeMode) "Describe lo que has comido" else "Alimento o comida") }, minLines = if (describeMode) 3 else 1) }
+        if (!labelMode && !barcodeMode) item {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                NumberField("Cantidad", itemQuantity, { itemQuantity = digits(it) }, Modifier.weight(1f))
+                OutlinedTextField(itemUnit, { itemUnit = it.take(24) }, Modifier.weight(1f), label = { Text("Unidad") }, singleLine = true)
+            }
+        }
+        if (!labelMode && !barcodeMode) item { NumberField("Peso total (g, opcional)", itemGrams, { itemGrams = digits(it) }, Modifier.fillMaxWidth()) }
+        item { ReviewAppearance(reviewAppeared, 70) { OutlinedTextField(name, { name = it.take(80) }, Modifier.fillMaxWidth(), label = { Text(if (describeMode) "Describe lo que has comido" else "Alimento o comida") }, minLines = if (describeMode) 3 else 1) } }
         if (barcodeMode) {
             item { OutlinedTextField(brands, { brands = it.take(80) }, Modifier.fillMaxWidth(), label = { Text("Marca para contribuir") }, singleLine = true) }
         }
@@ -509,10 +725,16 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
         if (analyzing) item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) { CircularProgressIndicator(Modifier.size(22.dp), color = NutritionCoral, strokeWidth = 2.dp); Text(if (labelMode) "Leyendo etiqueta…" else "Analizando nutrición…", Modifier.padding(start = 10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }
         analysisError?.let { message -> item { Text(message, color = MaterialTheme.colors.error, style = MaterialTheme.typography.caption, modifier = Modifier.background(MaterialTheme.colors.error.copy(alpha = .08f), RoundedCornerShape(10.dp)).padding(10.dp)) } }
         item { Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(7.dp)) { MealType.entries.forEach { item -> FilterChip(item.title, item == type) { type = item } } } }
-        item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField(if (labelMode) "kcal /100g" else "Calorías", calories, { calories = digits(it) }, Modifier.weight(1f)); NumberField(if (labelMode) "Proteína /100g" else "Proteína g", protein, { protein = digits(it) }, Modifier.weight(1f)) } }
-        item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField(if (labelMode) "Carbos /100g" else "Carbos g", carbs, { carbs = digits(it) }, Modifier.weight(1f)); NumberField(if (labelMode) "Grasa /100g" else "Grasa g", fat, { fat = digits(it) }, Modifier.weight(1f)) } }
+        item { ReviewAppearance(reviewAppeared, 130) { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField(if (labelMode || barcodeMode) "kcal /100g" else "Calorías", calories, { calories = digits(it) }, Modifier.weight(1f)); NumberField(if (labelMode || barcodeMode) "Proteína /100g" else "Proteína g", protein, { protein = digits(it) }, Modifier.weight(1f)) } } }
+        item { ReviewAppearance(reviewAppeared, 170) { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField(if (labelMode || barcodeMode) "Carbos /100g" else "Carbos g", carbs, { carbs = digits(it) }, Modifier.weight(1f)); NumberField(if (labelMode || barcodeMode) "Grasa /100g" else "Grasa g", fat, { fat = digits(it) }, Modifier.weight(1f)) } } }
         if (labelMode) item {
             NumberField("Cantidad consumida (g)", consumedLabelGrams, { consumedLabelGrams = digits(it) }, Modifier.fillMaxWidth())
+        }
+        if (barcodeMode) item {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                NumberField("Raciones", barcodeServings, { barcodeServings = digits(it) }, Modifier.weight(1f))
+                NumberField("g / ración", barcodeServingGrams, { barcodeServingGrams = digits(it) }, Modifier.weight(1f))
+            }
         }
         if (barcodeMode) {
             item { Text("Si el producto no existe en Open Food Facts, puedes añadirlo con fotos del frontal y de la tabla nutricional.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
@@ -534,27 +756,33 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
             }
             contributionMessage?.let { message -> item { Text(message, style = MaterialTheme.typography.caption, color = if (message.startsWith("Producto enviado")) NutritionCoral else MaterialTheme.colors.error) } }
         }
-        item {
-            TextButton(onClick = { showSecondItem = !showSecondItem }) { Icon(if (showSecondItem) Icons.Filled.Remove else Icons.Filled.Add, null, tint = NutritionCoral); Text(if (showSecondItem) "QUITAR ALIMENTO" else "AÑADIR OTRO ALIMENTO", Modifier.padding(start = 6.dp), color = NutritionCoral) }
-        }
-        if (showSecondItem) {
-            item { OutlinedTextField(secondName, { secondName = it.take(80) }, Modifier.fillMaxWidth(), label = { Text("Segundo alimento") }, singleLine = true) }
-            item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Calorías", secondCalories, { secondCalories = digits(it) }, Modifier.weight(1f)); NumberField("Proteína g", secondProtein, { secondProtein = digits(it) }, Modifier.weight(1f)) } }
-            item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Carbos g", secondCarbs, { secondCarbs = digits(it) }, Modifier.weight(1f)); NumberField("Grasa g", secondFat, { secondFat = digits(it) }, Modifier.weight(1f)) } }
-        }
         itemsIndexed(extraItems, key = { index, _ -> index }) { index, food ->
-            Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(food.name, { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(name = value.take(80)) else current } }, Modifier.weight(1f), label = { Text("Otro alimento") }, singleLine = true)
-                    IconButton(onClick = { extraItems = extraItems.filterIndexed { itemIndex, _ -> itemIndex != index } }) { Icon(Icons.Filled.DeleteOutline, "Eliminar alimento", tint = NutritionRed) }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NumberField("Calorías", food.calories.toString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(calories = value.toIntOrNull()?.coerceIn(0, 8000) ?: 0) else current } }, Modifier.weight(1f))
-                    NumberField("Proteína g", food.protein.toString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(protein = value.toIntOrNull()?.coerceIn(0, 500) ?: 0) else current } }, Modifier.weight(1f))
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NumberField("Carbos g", food.carbs.toString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(carbs = value.toIntOrNull()?.coerceIn(0, 1000) ?: 0) else current } }, Modifier.weight(1f))
-                    NumberField("Grasa g", food.fat.toString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(fat = value.toIntOrNull()?.coerceIn(0, 500) ?: 0) else current } }, Modifier.weight(1f))
+            AnimatedVisibility(visible = removingExtraItemIndex != index, exit = shrinkVertically() + fadeOut()) {
+                Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedTextField(food.name, { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(name = value.take(80)) else current } }, Modifier.weight(1f), label = { Text("Otro alimento") }, singleLine = true)
+                        IconButton(onClick = {
+                            removingExtraItemIndex = index
+                            scope.launch {
+                                delay(220)
+                                extraItems = extraItems.filterIndexed { itemIndex, _ -> itemIndex != index }
+                                removingExtraItemIndex = null
+                            }
+                        }, enabled = removingExtraItemIndex == null) { Icon(Icons.Filled.DeleteOutline, "Eliminar alimento", tint = NutritionRed) }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        NumberField("Calorías", food.calories.toString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(calories = value.toIntOrNull()?.coerceIn(0, 8000) ?: 0) else current } }, Modifier.weight(1f))
+                        NumberField("Proteína g", food.protein.toString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(protein = value.toIntOrNull()?.coerceIn(0, 500) ?: 0) else current } }, Modifier.weight(1f))
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        NumberField("Carbos g", food.carbs.toString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(carbs = value.toIntOrNull()?.coerceIn(0, 1000) ?: 0) else current } }, Modifier.weight(1f))
+                        NumberField("Grasa g", food.fat.toString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(fat = value.toIntOrNull()?.coerceIn(0, 500) ?: 0) else current } }, Modifier.weight(1f))
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        NumberField("Cantidad", food.quantity.toInt().coerceAtLeast(1).toString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(quantity = value.toDoubleOrNull()?.coerceIn(1.0, 1_000.0) ?: 1.0) else current } }, Modifier.weight(1f))
+                        OutlinedTextField(food.unit, { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(unit = value.take(24)) else current } }, Modifier.weight(1f), label = { Text("Unidad") }, singleLine = true)
+                    }
+                    NumberField("Peso total (g, opcional)", food.grams?.toInt()?.toString().orEmpty(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(grams = value.toDoubleOrNull()?.coerceIn(1.0, 5_000.0)) else current } }, Modifier.fillMaxWidth())
                 }
             }
         }
@@ -564,25 +792,30 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                 Text("AÑADIR OTRO ALIMENTO", Modifier.padding(start = 6.dp), color = NutritionCoral)
             }
         }
-        item { OutlinedTextField(notes, { notes = it.take(240) }, Modifier.fillMaxWidth(), label = { Text("Notas (opcional)") }, minLines = 2) }
+        item { ReviewAppearance(reviewAppeared, 210) { OutlinedTextField(notes, { notes = it.take(240) }, Modifier.fillMaxWidth(), label = { Text("Notas (opcional)") }, minLines = 2) } }
         item {
-            Button(
+            ReviewAppearance(reviewAppeared, 260) { Button(
                 onClick = {
                     val labelFactor = if (labelMode) (consumedLabelGrams.toDoubleOrNull()?.coerceIn(1.0, 5_000.0) ?: 100.0) / 100.0 else 1.0
+                    val barcodeFactor = if (barcodeMode) {
+                        val servings = barcodeServings.toDoubleOrNull()?.coerceIn(1.0, 100.0) ?: 1.0
+                        val gramsPerServing = barcodeServingGrams.toDoubleOrNull()?.coerceIn(1.0, 5_000.0) ?: 100.0
+                        servings * gramsPerServing / 100.0
+                    } else 1.0
+                    val factor = labelFactor * barcodeFactor
                     val first = MealItem(
                         name.trim(),
-                        ((calories.toIntOrNull() ?: 0) * labelFactor).toInt(),
-                        ((protein.toIntOrNull() ?: 0) * labelFactor).toInt(),
-                        ((carbs.toIntOrNull() ?: 0) * labelFactor).toInt(),
-                        ((fat.toIntOrNull() ?: 0) * labelFactor).toInt(),
+                        ((calories.toIntOrNull() ?: 0) * factor).toInt(),
+                        ((protein.toIntOrNull() ?: 0) * factor).toInt(),
+                        ((carbs.toIntOrNull() ?: 0) * factor).toInt(),
+                        ((fat.toIntOrNull() ?: 0) * factor).toInt(),
                         brand = if (barcodeMode) brands.trim() else firstItem?.brand.orEmpty(),
-                        quantity = if (labelMode) consumedLabelGrams.toDoubleOrNull()?.coerceIn(1.0, 5_000.0) ?: 100.0 else firstItem?.quantity ?: 1.0,
-                        unit = if (labelMode) "g" else firstItem?.unit.orEmpty(),
-                        grams = if (labelMode) consumedLabelGrams.toDoubleOrNull()?.coerceIn(1.0, 5_000.0) ?: 100.0 else firstItem?.grams,
+                        quantity = when { labelMode -> consumedLabelGrams.toDoubleOrNull()?.coerceIn(1.0, 5_000.0) ?: 100.0; barcodeMode -> barcodeServings.toDoubleOrNull()?.coerceIn(1.0, 100.0) ?: 1.0; else -> itemQuantity.toDoubleOrNull()?.coerceIn(1.0, 1_000.0) ?: 1.0 },
+                        unit = when { labelMode -> "g"; barcodeMode -> "ración"; else -> itemUnit.trim() },
+                        grams = when { labelMode -> consumedLabelGrams.toDoubleOrNull()?.coerceIn(1.0, 5_000.0) ?: 100.0; barcodeMode -> (barcodeServings.toDoubleOrNull()?.coerceIn(1.0, 100.0) ?: 1.0) * (barcodeServingGrams.toDoubleOrNull()?.coerceIn(1.0, 5_000.0) ?: 100.0); else -> itemGrams.toDoubleOrNull()?.coerceIn(1.0, 5_000.0) },
                     )
                     val itemList = buildList {
                         add(first)
-                        if (showSecondItem && secondName.isNotBlank()) add(MealItem(secondName.trim(), secondCalories.toIntOrNull() ?: 0, secondProtein.toIntOrNull() ?: 0, secondCarbs.toIntOrNull() ?: 0, secondFat.toIntOrNull() ?: 0))
                         addAll(extraItems.filter { it.name.isNotBlank() })
                     }
                     onSave(initial.copy(name = name.trim(), calories = itemList.sumOf { it.calories }, protein = itemList.sumOf { it.protein }, carbs = itemList.sumOf { it.carbs }, fat = itemList.sumOf { it.fat }, type = type, notes = notes.trim(), items = itemList))
@@ -591,9 +824,17 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary),
                 shape = RoundedCornerShape(14.dp),
-            ) { Text("GUARDAR INGESTA", fontWeight = FontWeight.Bold) }
+            ) { Text("GUARDAR INGESTA", fontWeight = FontWeight.Bold) } }
         }
     }
+}
+
+@Composable
+private fun ReviewAppearance(visible: Boolean, delayMillis: Int, content: @Composable () -> Unit) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(tween(260, delayMillis = delayMillis)) + slideInVertically(tween(300, delayMillis = delayMillis)) { it / 14 },
+    ) { content() }
 }
 
 @Composable private fun SheetHeader(title: String, onBack: () -> Unit) { Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Atrás", modifier = Modifier.size(22.dp)) }; Text(title, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary) } }

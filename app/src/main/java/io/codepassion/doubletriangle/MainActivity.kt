@@ -1150,7 +1150,10 @@ private fun ActiveWorkoutAccessory(
                 text = androidx.compose.ui.res.stringResource(R.string.ios_catalog_d640c7421da06661),
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
-                    .background(WildforceThemeTokens.accentGold.copy(alpha = 0.14f))
+                    // iOS uses AccentColor at 14% opacity here (not the
+                    // workout's orange emphasis), so this adapts from dark
+                    // gray in light mode to white in dark mode as it does there.
+                    .background(WildforceThemeTokens.accent.copy(alpha = 0.14f))
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 style = androidx.compose.material.MaterialTheme.typography.subtitle2.copy(fontSize = 15.sp),
                 fontWeight = FontWeight.SemiBold,

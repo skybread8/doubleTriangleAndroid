@@ -35,12 +35,17 @@ import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -137,6 +142,7 @@ fun ProfileScreen(
     var nutritionTextEditor by remember { mutableStateOf<NutritionTextField?>(null) }
     var settingsPicker by remember { mutableStateOf<SettingsPicker?>(null) }
     var selectedSection by remember { mutableStateOf<ProfileSection?>(null) }
+    var sectionEntered by remember { mutableStateOf(false) }
     var accountRevision by remember { mutableStateOf(0) }
     var showsBodyProgress by remember { mutableStateOf(false) }
     var showsBodyMetrics by remember { mutableStateOf(false) }
@@ -194,6 +200,10 @@ fun ProfileScreen(
             .edit().putBoolean("remote_sync_pending", true).apply()
     }
     LaunchedEffect(Unit) { entered = true }
+    LaunchedEffect(selectedSection) {
+        sectionEntered = false
+        if (selectedSection != null) sectionEntered = true
+    }
     LaunchedEffect(draft, heightInput, weightInput, durationInput, birthYearInput) {
         saveProfile(validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput))
     }
@@ -214,13 +224,13 @@ fun ProfileScreen(
                 }
             }
         }
-        if (selectedSection == null) { item { ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, avatarPath, avatarRevision, onChangeAvatar) } } }
+        if (selectedSection == null) { item { ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, avatarPath, avatarRevision, onChangeAvatar, entered) } } }
         if (selectedSection == null) { item { ProfileEntrance(entered, 35) { ProfileExperience(experienceXp, experienceLevel, experienceProgress) } } }
-        if (selectedSection == null) { item { ProfileCategoryTree(draft, nutritionProfile, appLanguage, accountRevision) { selectedSection = it } } }
+        if (selectedSection == null) { item { ProfileEntrance(entered, 75) { ProfileCategoryTree(draft, nutritionProfile, appLanguage, accountRevision) { selectedSection = it } } } }
         // `achievementsSection` is intentionally disabled in the canonical iOS
         // profile view.  Do not render a placeholder rail here: it changes the
         // hierarchy and pushes the four profile destinations below the fold.
-        if (selectedSection == ProfileSection.Body) { item { Section("Cuerpo") {
+        if (selectedSection == ProfileSection.Body) { item { ProfileEntrance(sectionEntered, 105) { Section("Cuerpo") {
                 ChoiceButton("Sexo", draft.gender.title, icon = Icons.Filled.Person) { picker = Picker.Gender }
                 ChoiceButton("Fecha de nacimiento", "${monthName(draft.birthMonth)} $birthYearInput", icon = Icons.Filled.Person) { picker = Picker.BirthMonth }
                 NumberField("Año de nacimiento", birthYearInput, { birthYearInput = it.filter(Char::isDigit).take(4) }, Modifier.fillMaxWidth())
@@ -228,7 +238,7 @@ fun ProfileScreen(
                 ChoiceButton("Métricas corporales", bodyMetrics.lastOrNull()?.let { displayWeight(it.weightKg, draft.metricSystem) + if (draft.metricSystem == MetricSystem.Imperial) " lb" else " kg" } ?: "Sin registros", icon = Icons.Filled.FitnessCenter) { showsBodyMetrics = true }
                 ChoiceButton("Fotos de progreso corporal", BodyProgressStore.load(profileContext).size.let { if (it == 0) "Sin fotos todavía" else "$it check-ins" }, icon = Icons.Filled.PhotoCamera) { showsBodyProgress = !showsBodyProgress }
             }
-        } }
+        } } }
         if (selectedSection == ProfileSection.Body) { item {
             // Detail sections are rendered directly once selected. Keeping them out of
             // AnimatedVisibility avoids a LazyColumn re-measure race when switching
@@ -238,13 +248,13 @@ fun ProfileScreen(
                 measurements = bodyComposition,
             )
         } }
-        if (selectedSection == ProfileSection.Fitness) { item { ProfileEntrance(entered, 105) { Section("Entrenamiento") {
+        if (selectedSection == ProfileSection.Fitness) { item { ProfileEntrance(sectionEntered, 105) { Section("Entrenamiento") {
                 ChoiceButton("Objetivo", draft.goal.title, icon = Icons.Filled.FitnessCenter) { picker = Picker.Goal }
                 ChoiceButton("Estilo de vida", draft.lifestyle.title, draft.lifestyle.description, Icons.Filled.Person) { picker = Picker.Lifestyle }
                 ChoiceButton("Nivel de entrenamiento", draft.trainingLevel.title, draft.trainingLevel.description, Icons.Filled.FitnessCenter) { picker = Picker.Level }
                 if (draft.goal.supportsBodyComposition && draft.trainingLevel.supportsBodyComposition) ChoiceButton("Intención de composición corporal", draft.bodyCompositionPhase?.title ?: "Automático", icon = Icons.Filled.Person) { picker = Picker.Body }
             } } } }
-        if (selectedSection == ProfileSection.Fitness) { item { ProfileEntrance(entered, 155) { Section("Configuración de entrenamiento") {
+        if (selectedSection == ProfileSection.Fitness) { item { ProfileEntrance(sectionEntered, 155) { Section("Configuración de entrenamiento") {
                 ChoiceButton("Configuración", draft.trainingSplitPreference.title) { picker = Picker.Split }
                 Text("Días de entrenamiento", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 draft.workoutDays.toList().let { days ->
@@ -264,13 +274,13 @@ fun ProfileScreen(
                 TogglePreference("Omitir periodos de descanso", "Salta directamente a la siguiente serie o ejercicio durante el entrenamiento.", draft.skipsRestPeriods, Icons.Filled.FitnessCenter) { draft = draft.copy(skipsRestPeriods = !draft.skipsRestPeriods) }
                 OutlinedTextField(draft.workoutPlannerNotes, { draft = draft.copy(workoutPlannerNotes = it.take(500)) }, Modifier.fillMaxWidth(), label = { Text("Notas para el planificador") }, minLines = 2, maxLines = 4)
             } } } }
-        if (selectedSection == ProfileSection.Fitness) { item { ProfileEntrance(entered, 205) { Section("Entorno") {
+        if (selectedSection == ProfileSection.Fitness) { item { ProfileEntrance(sectionEntered, 205) { Section("Entorno") {
                 ChoiceButton("Tipo de gimnasio", draft.gymType.title) { picker = Picker.Gym }
                 ChoiceButton("Ubicaciones de entrenamiento", draft.effectiveTrainingLocations().joinToString(" · ") { if (it.isDefault) "${it.name} (principal)" else it.name }) { showsTrainingLocations = true }
                 ChoiceButton("Equipamiento disponible", "${draft.availableEquipment.size} seleccionado(s)") { picker = Picker.Equipment }
                 ChoiceButton("Restricciones o molestias", draft.movementRestrictions.takeIf { it.isNotEmpty() }?.size?.let { "$it seleccionado(s)" } ?: "Ninguna") { picker = Picker.Restrictions }
             } } } }
-        if (selectedSection == ProfileSection.Nutrition) { item { ProfileEntrance(entered, 235) {
+        if (selectedSection == ProfileSection.Nutrition) { item { ProfileEntrance(sectionEntered, 235) {
                 if (!nutritionProfile.isConfigured) Section("Perfil nutricional") {
                     Text("Configuración nutricional necesaria", style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
                     Text("Crea tu perfil nutricional para guardar preferencias alimentarias, restricciones y valores predeterminados de planificación en un solo lugar.", style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
@@ -291,25 +301,25 @@ fun ProfileScreen(
                 }
             }
         } }
-        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(entered, 255) { Section("Preferencias") {
+        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 255) { Section("Preferencias") {
                 ChoiceButton("Esfuerzo al cocinar", nutritionProfile.cookingEffort, icon = Icons.Filled.LocalFireDepartment) { nutritionPicker = NutritionPicker.CookingEffort }
                 ChoiceButton("Sensibilidad al presupuesto", nutritionProfile.budgetSensitivity, icon = Icons.Filled.Settings) { nutritionPicker = NutritionPicker.BudgetSensitivity }
                 ChoiceButton("Fuentes de proteína", nutritionProfile.preferredProteinSources.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.ProteinSources }
                 ChoiceButton("Alimentos que no te gustan", nutritionProfile.dislikes.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.Dislikes }
             } } } }
-        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(entered, 275) { Section("Restricciones") {
+        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 275) { Section("Restricciones") {
                 ChoiceButton("Alimentos excluidos", nutritionProfile.excludedFoods.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.ExcludedFoods }
                 ChoiceButton("Alergias o intolerancias", nutritionProfile.allergiesAndIntolerances.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.Allergies }
             } } } }
-        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(entered, 295) { Section("Notas") {
+        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 295) { Section("Notas") {
                 ChoiceButton("Notas", nutritionProfile.notes.ifBlank { "Ninguna" }, icon = Icons.Filled.Settings) { nutritionTextEditor = NutritionTextField.Notes }
             } } } }
-        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(entered, 245) { Section("Preferencias") {
+        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 245) { Section("Preferencias") {
                 ChoiceButton("Idioma", appLanguage, icon = Icons.Filled.Settings) { settingsPicker = SettingsPicker.Language }
                 ChoiceButton("Sistema métrico", draft.metricSystem.title, icon = Icons.Filled.Settings) { picker = Picker.Metric }
                 ChoiceButton("Tema", appTheme, icon = Icons.Filled.Settings) { settingsPicker = SettingsPicker.Theme }
             } } } }
-        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(entered, 265) { Section("Entorno") {
+        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 265) { Section("Entorno") {
                 ChoiceButton("Preguntas frecuentes", "Respuestas sobre entrenamiento, nutrición, Android y tu cuenta.", icon = Icons.Filled.Help) { selectedSection = ProfileSection.Faq }
                 TogglePreference("Health Connect", "Guarda entrenamientos y sincroniza medidas corporales con Health Connect.", draft.isHealthConnectEnabled, Icons.Filled.FitnessCenter) {
                     if (draft.isHealthConnectEnabled) {
@@ -368,7 +378,7 @@ fun ProfileScreen(
                     notificationPreferences.edit().putBoolean("rest_alerts", restAlertsEnabled).apply()
                 }
             } } } }
-        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(entered, 285) { Section("Privacidad") {
+        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 285) { Section("Privacidad") {
                 TogglePreference("Bloquear fotos de progreso", "Requiere la autenticación del dispositivo para abrir las fotos de progreso corporal.", progressPhotoLockEnabled, Icons.Filled.Settings) {
                     val enable = !progressPhotoLockEnabled
                     pendingProgressPhotoLockValue = enable
@@ -483,8 +493,8 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun ProfileEntrance(visible: Boolean, delayMillis: Int, content: @Composable () -> Unit) {
-    AnimatedVisibility(visible = visible, enter = fadeIn(tween(330, delayMillis = delayMillis)) + slideInVertically(tween(330, delayMillis = delayMillis)) { it / 16 }) { content() }
+private fun ProfileEntrance(visible: Boolean, delayMillis: Int, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    AnimatedVisibility(modifier = modifier, visible = visible, enter = fadeIn(tween(330, delayMillis = delayMillis)) + slideInVertically(tween(330, delayMillis = delayMillis)) { it / 16 }) { content() }
 }
 
 private enum class ProfileSection(val title: String, val icon: ImageVector) {
@@ -584,8 +594,14 @@ private fun BodyMetricsScreen(
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         row.forEach { kind ->
                             val isSelected = kind == selected
+                            val selectionScale by animateFloatAsState(
+                                targetValue = if (isSelected) 1.035f else 1f,
+                                animationSpec = spring(dampingRatio = .72f, stiffness = 620f),
+                                label = "body-metric-$kind",
+                            )
                             Box(
-                                Modifier.weight(1f).clip(RoundedCornerShape(16.dp))
+                                Modifier.weight(1f).graphicsLayer { scaleX = selectionScale; scaleY = selectionScale }
+                                    .clip(RoundedCornerShape(16.dp))
                                     .background(if (isSelected) WildforceThemeTokens.accent else WildforceThemeTokens.backgroundSecondary)
                                     .clickable { selected = kind }.padding(12.dp),
                             contentAlignment = Alignment.Center,
@@ -602,12 +618,28 @@ private fun BodyMetricsScreen(
         }
         item {
             Section("Progreso de ${selected.title.lowercase()}") {
-                Text(latest?.let { formatBodyMetric(selected, it, profile.metricSystem) } ?: "—", fontFamily = Exo2FontFamily, fontSize = 30.sp, color = WildforceThemeTokens.textPrimary)
+                val latestValue = latest?.let { formatBodyMetric(selected, it, profile.metricSystem) } ?: "—"
+                AnimatedContent(
+                    targetState = latestValue,
+                    transitionSpec = {
+                        (fadeIn(tween(150)) + scaleIn(tween(180), initialScale = .88f)) togetherWith
+                            (fadeOut(tween(110)) + scaleOut(tween(120), targetScale = 1.08f))
+                    },
+                    label = "body-metric-value-$selected",
+                ) { value ->
+                    Text(value, fontFamily = Exo2FontFamily, fontSize = 30.sp, color = WildforceThemeTokens.textPrimary)
+                }
                 Text("Último valor registrado", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     listOf(7 to "7 días", 30 to "30 días", Int.MAX_VALUE to "Todo").forEach { (days, label) ->
                         val active = timeframeDays == days
-                        Text(label, Modifier.weight(1f).clip(RoundedCornerShape(10.dp))
+                        val selectionScale by animateFloatAsState(
+                            targetValue = if (active) 1.035f else 1f,
+                            animationSpec = spring(dampingRatio = .72f, stiffness = 620f),
+                            label = "body-metric-timeframe-$days",
+                        )
+                        Text(label, Modifier.weight(1f).graphicsLayer { scaleX = selectionScale; scaleY = selectionScale }
+                            .clip(RoundedCornerShape(10.dp))
                             .background(if (active) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary.copy(alpha = .12f))
                             .clickable { timeframeDays = days }.padding(vertical = 8.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             style = MaterialTheme.typography.caption, color = if (active) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary)
@@ -622,10 +654,15 @@ private fun BodyMetricsScreen(
                     visibleEntries.takeLast(8).forEach { entry ->
                         val value = entry.valueFor(selected) ?: return@forEach
                         val fraction = ((value - min) / (max - min)).toFloat().coerceIn(.04f, 1f)
+                        val animatedFraction by animateFloatAsState(
+                            targetValue = fraction,
+                            animationSpec = tween(420),
+                            label = "body-metric-history-${entry.date}",
+                        )
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text(entry.date.takeLast(5), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.size(width = 44.dp, height = 20.dp))
                             Box(Modifier.weight(1f).height(8.dp).clip(RoundedCornerShape(8.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = .12f))) {
-                                Box(Modifier.fillMaxWidth(fraction).fillMaxHeight().background(WildforceThemeTokens.accent))
+                                Box(Modifier.fillMaxWidth(animatedFraction).fillMaxHeight().background(WildforceThemeTokens.accent))
                             }
                             Text(formatBodyMetric(selected, value, profile.metricSystem), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
                         }
@@ -806,44 +843,50 @@ private fun navyBodyFat(gender: Gender, heightCm: Double, measurements: BodyComp
 }
 
 @Composable
-private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, completedWorkouts: Int, longestStreak: Int, avatarPath: String?, avatarRevision: Int, onChangeAvatar: () -> Unit) {
+private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, completedWorkouts: Int, longestStreak: Int, avatarPath: String?, avatarRevision: Int, onChangeAvatar: () -> Unit, entered: Boolean) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val avatarSize = if (maxWidth < 380.dp) 88.dp else 110.dp
         val gap = if (maxWidth < 380.dp) 12.dp else 20.dp
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(gap)) {
-            Box(Modifier.size(avatarSize).clickable(onClick = onChangeAvatar)) {
-                val bitmap = remember(avatarPath, avatarRevision) { avatarPath?.let { BitmapFactory.decodeFile(it) } }
-                if (bitmap != null) Image(bitmap.asImageBitmap(), profile.name, Modifier.fillMaxSize().clip(CircleShape), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
-                else Box(
-                    Modifier.fillMaxSize().background(WildforceThemeTokens.textSecondary.copy(alpha = .1f), CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        Icons.Filled.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(if (avatarSize < 100.dp) 44.dp else 55.dp),
-                        tint = WildforceThemeTokens.textSecondary,
-                    )
-                }
-                Box(
-                    Modifier.align(Alignment.BottomEnd).offset((-4).dp, (-4).dp).size(34.dp)
-                        .background(WildforceThemeTokens.accent, CircleShape)
-                        .border(4.dp, WildforceThemeTokens.background, CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(Icons.Filled.PhotoCamera, contentDescription = "Cambiar foto de perfil", modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.primaryButtonText)
+            ProfileEntrance(entered, 100) {
+                Box(Modifier.size(avatarSize).clickable(onClick = onChangeAvatar)) {
+                    val bitmap = remember(avatarPath, avatarRevision) { avatarPath?.let { BitmapFactory.decodeFile(it) } }
+                    if (bitmap != null) Image(bitmap.asImageBitmap(), profile.name, Modifier.fillMaxSize().clip(CircleShape), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+                    else Box(
+                        Modifier.fillMaxSize().background(WildforceThemeTokens.textSecondary.copy(alpha = .1f), CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            Icons.Filled.Person,
+                            contentDescription = null,
+                            modifier = Modifier.size(if (avatarSize < 100.dp) 44.dp else 55.dp),
+                            tint = WildforceThemeTokens.textSecondary,
+                        )
+                    }
+                    Box(
+                        Modifier.align(Alignment.BottomEnd).offset((-4).dp, (-4).dp).size(34.dp)
+                            .background(WildforceThemeTokens.accent, CircleShape)
+                            .border(4.dp, WildforceThemeTokens.background, CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(Icons.Filled.PhotoCamera, contentDescription = "Cambiar foto de perfil", modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.primaryButtonText)
+                    }
                 }
             }
             Column(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = AntonFontFamily, fontSize = 28.sp, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Icon(Icons.Filled.FitnessCenter, contentDescription = null, modifier = Modifier.size(15.dp), tint = WildforceThemeTokens.textSecondary)
-                    Text("${profile.goal.title} • ${profile.trainingLevel.title}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                ProfileEntrance(entered, 120) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = AntonFontFamily, fontSize = 28.sp, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Icon(Icons.Filled.FitnessCenter, contentDescription = null, modifier = Modifier.size(15.dp), tint = WildforceThemeTokens.textSecondary)
+                            Text("${profile.goal.title} • ${profile.trainingLevel.title}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    }
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    ProfileStat("Racha", currentStreak.toString(), Modifier.weight(1f))
-                    ProfileStat("Más larga", longestStreak.toString(), Modifier.weight(1f))
-                    ProfileStat("Entrenos", completedWorkouts.toString(), Modifier.weight(1f))
+                    ProfileEntrance(entered, 180, Modifier.weight(1f)) { ProfileStat("Racha", currentStreak.toString(), Modifier.fillMaxWidth()) }
+                    ProfileEntrance(entered, 220, Modifier.weight(1f)) { ProfileStat("Más larga", longestStreak.toString(), Modifier.fillMaxWidth()) }
+                    ProfileEntrance(entered, 260, Modifier.weight(1f)) { ProfileStat("Entrenos", completedWorkouts.toString(), Modifier.fillMaxWidth()) }
                 }
             }
         }

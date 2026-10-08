@@ -16,7 +16,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
@@ -24,12 +36,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
+import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
@@ -100,6 +113,8 @@ fun NutritionScreen(
     var editingMeal by remember { mutableStateOf<MealLog?>(null) }
     var plannedMethod by remember { mutableStateOf<LogMethod?>(null) }
     var plannedTitle by remember { mutableStateOf<String?>(null) }
+    var plannedMealKey by remember { mutableStateOf<String?>(null) }
+    var dayMealStateVersion by remember { mutableIntStateOf(0) }
     var generatingPlan by remember { mutableStateOf(false) }
     var generationError by remember { mutableStateOf<String?>(null) }
     val planGenerationPreferences = remember { context.getSharedPreferences("wildforce_nutrition_generation", Context.MODE_PRIVATE) }
@@ -165,7 +180,16 @@ fun NutritionScreen(
             onLog = { selectedDate = detailDay!!.date; showLogFlow = true },
             onPlannedMealAction = { meal, method ->
                 selectedDate = detailDay!!.date
-                if (method == LogMethod.Describe) {
+                plannedMealKey = NutritionStore.plannedMealKey(detailDay!!.date, meal)
+                if (method == LogMethod.Manual) {
+                    val planned = meal.toLogDraft(detailDay!!.date).copy(plannedMealKey = plannedMealKey)
+                    NutritionStore.save(context, detailDay!!.date, NutritionStore.load(context, detailDay!!.date) + planned)
+                    scope.launch { HealthConnectNutritionSync.publish(context, NutritionStore.load(context, detailDay!!.date)) }
+                    reload()
+                    plannedMealKey = null
+                    dayMealStateVersion++
+                    queueRemoteSync()
+                } else if (method == LogMethod.Describe) {
                     fridgeTarget = meal.targets
                     showIdeas = true
                 } else {
@@ -173,6 +197,16 @@ fun NutritionScreen(
                     plannedTitle = meal.title
                     showLogFlow = true
                 }
+            },
+            onDiscardPlannedMeal = { meal ->
+                NutritionStore.dismissPlannedMeal(context, detailDay!!.date, meal)
+                dayMealStateVersion++
+            },
+            isSuggestionHidden = { meal ->
+                // Reading this version makes discarding or fulfilling a suggestion redraw this day.
+                dayMealStateVersion
+                NutritionStore.isPlannedMealDismissed(context, detailDay!!.date, meal) ||
+                    NutritionStore.load(context, detailDay!!.date).any { it.plannedMealKey == NutritionStore.plannedMealKey(detailDay!!.date, meal) }
             },
             modifier = Modifier.padding(contentPadding),
         )
@@ -219,13 +253,13 @@ fun NutritionScreen(
             initialMethod = plannedMethod,
             initialTitle = plannedTitle,
             recent = NutritionStore.recent(context),
-            onDismiss = { showLogFlow = false; editingMeal = null; plannedMethod = null; plannedTitle = null },
+            onDismiss = { showLogFlow = false; editingMeal = null; plannedMethod = null; plannedTitle = null; plannedMealKey = null },
             onSave = { entry ->
-                val normalized = entry.copy(loggedDate = selectedDate)
+                val normalized = entry.copy(loggedDate = selectedDate, plannedMealKey = plannedMealKey)
                 val dateEntries = if (editingMeal == null) NutritionStore.load(context, selectedDate) + normalized else NutritionStore.load(context, selectedDate).map { if (it.id == editingMeal!!.id) normalized.copy(id = it.id) else it }
                 NutritionStore.save(context, selectedDate, dateEntries)
                 scope.launch { NutritionStore.load(context, selectedDate).let { HealthConnectNutritionSync.publish(context, it) } }
-                showLogFlow = false; editingMeal = null; plannedMethod = null; plannedTitle = null
+                showLogFlow = false; editingMeal = null; plannedMethod = null; plannedTitle = null; plannedMealKey = null; dayMealStateVersion++
                 reload(); queueRemoteSync()
             },
         )
@@ -233,13 +267,13 @@ fun NutritionScreen(
     if (showTargets) NutritionTargetsDialog(targets, { showTargets = false }) { value ->
         targets = value; NutritionStore.saveTargets(context, value); NutritionStore.clearGeneratedPlan(context); generatedPlan = null; showTargets = false; queueRemoteSync()
     }
-    if (showPreferences) NutritionPreferencesDialog(preferences, { showPreferences = false }) { value ->
+    if (showPreferences) NutritionPreferencesDialog(preferences, { showPreferences = false }, isInitialSetup = !hasNutritionProfile) { value ->
         preferences = value; NutritionStore.savePreferences(context, value); hasNutritionProfile = true; NutritionStore.clearGeneratedPlan(context); generatedPlan = null; showPreferences = false; queueRemoteSync()
     }
     if (showIdeas) MealIdeasDialog(plan.firstOrNull { it.date == selectedDate }, fridgeTarget, { showIdeas = false; fridgeTarget = null }) { planned ->
-        val entry = MealLog(System.currentTimeMillis(), planned.title, planned.targets.calories, planned.targets.protein, planned.targets.carbs, planned.targets.fat, planned.type, selectedDate, planned.guidance, "meal_idea")
+        val entry = MealLog(System.currentTimeMillis(), planned.title, planned.targets.calories, planned.targets.protein, planned.targets.carbs, planned.targets.fat, planned.type, selectedDate, planned.guidance, "meal_idea", plannedMealKey = plannedMealKey)
         val updated = NutritionStore.load(context, selectedDate) + entry
-        NutritionStore.save(context, selectedDate, updated); reload(); showIdeas = false; fridgeTarget = null; queueRemoteSync()
+        NutritionStore.save(context, selectedDate, updated); reload(); showIdeas = false; fridgeTarget = null; plannedMealKey = null; dayMealStateVersion++; queueRemoteSync()
     }
     if (showMoreActions) NutritionMoreActionsDialog(
         onDismiss = { showMoreActions = false },
@@ -274,8 +308,38 @@ fun NutritionScreen(
             },
         )
     }
-    if (generatingPlan) AlertDialog(onDismissRequest = {}, title = { Text("DISEÑANDO TU SEMANA", fontFamily = AntonFontFamily) }, text = { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) { CircularProgressIndicator(color = NutritionCoral); Text("La IA está adaptando calorías, macros, entrenamientos y preferencias alimentarias.", color = WildforceThemeTokens.textSecondary) } }, confirmButton = {})
+    if (generatingPlan) AlertDialog(onDismissRequest = {}, title = { Text("DISEÑANDO TU SEMANA", fontFamily = AntonFontFamily) }, text = { NutritionPlanGenerationAnimation() }, confirmButton = {})
     generationError?.let { message -> AlertDialog(onDismissRequest = { generationError = null }, title = { Text("NO SE PUDO GENERAR EL PLAN", fontFamily = AntonFontFamily) }, text = { Text(message, color = WildforceThemeTokens.textSecondary) }, confirmButton = { TextButton(onClick = { generationError = null; showMoreActions = true }) { Text("REINTENTAR", color = NutritionCoral) } }, dismissButton = { TextButton(onClick = { generationError = null }) { Text("CERRAR") } }) }
+}
+
+/** A planned meal is immediately reviewable with its target macros, like iOS's “log as suggested”. */
+private fun PlannedMeal.toLogDraft(date: LocalDate) = MealLog(
+    id = System.currentTimeMillis(),
+    name = title,
+    calories = targets.calories,
+    protein = targets.protein,
+    carbs = targets.carbs,
+    fat = targets.fat,
+    type = type,
+    loggedDate = date,
+    notes = guidance,
+    source = "planned",
+    items = listOf(MealItem(title, targets.calories, targets.protein, targets.carbs, targets.fat)),
+)
+
+@Composable
+private fun NutritionPlanGenerationAnimation() {
+    val transition = rememberInfiniteTransition(label = "nutrition-plan-generation")
+    val rotation by transition.animateFloat(0f, 360f, infiniteRepeatable(tween(1_800, easing = LinearEasing)), label = "nutrition-plan-ring")
+    val opacity by transition.animateFloat(1f, .58f, infiniteRepeatable(tween(650), RepeatMode.Reverse), label = "nutrition-plan-copy")
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp), modifier = Modifier.fillMaxWidth()) {
+        Box(Modifier.size(72.dp), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(1f, Modifier.fillMaxSize().graphicsLayer { rotationZ = rotation }, NutritionCoral, strokeWidth = 4.dp)
+            Icon(Icons.Filled.Restaurant, null, tint = NutritionCoral, modifier = Modifier.size(28.dp))
+        }
+        Text("Equilibrando tus macros…", color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold, modifier = Modifier.alpha(opacity))
+        Text("La IA está adaptando calorías, macros, entrenamientos y preferencias alimentarias.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    }
 }
 
 @Composable
@@ -301,7 +365,6 @@ private fun NutritionHub(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current.applicationContext
-    var historyExpanded by remember { mutableStateOf(false) }
     val selectedPlan = plan.firstOrNull { it.date == selectedDate }
     Column(modifier.fillMaxSize().liquidGlassBackground()) {
         NutritionCalendar(
@@ -326,19 +389,107 @@ private fun NutritionHub(
                     onClick = onProgress,
                 )
             }
-            item { WeeklyBalanceCard(plan, selectedDate, energyHistory) }
-            item { PlanHeader(plan, preferences, onEditPlan, onEditPreferences, onPlanGrocery, onPlanRegenerate) }
-            items(plan.filter { !it.date.isBefore(today) }.take(7), key = { it.date }) { day ->
-                NutritionDayHeader(day, NutritionStore.load(context, day.date).total(), day.date == today) { onDay(day) }
-            }
-            val history = plan.filter { it.date.isBefore(today) }.sortedByDescending { it.date }
-            if (history.isNotEmpty()) {
-                item { Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { Text("HISTORIAL", Modifier.weight(1f), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary); if (history.size > 3) TextButton(onClick = { historyExpanded = !historyExpanded }) { Text(if (historyExpanded) "OCULTAR" else "VER TODO", color = NutritionCoral) } } }
-                items(if (historyExpanded) history else history.take(3), key = { it.date }) { day ->
-                    NutritionDayHeader(day, NutritionStore.load(context, day.date).total(), false) { onDay(day) }
-                }
+            if (energyHistory.isNotEmpty()) item { WeeklyBalanceCard(plan, selectedDate, energyHistory) }
+            item { DayMealsPreview(selectedDate, today, entries, selectedPlan, onLog) { selectedPlan?.let(onDay) } }
+            if (plan.isNotEmpty()) item {
+                NutritionPlanSummaryCard(
+                    plan = plan,
+                    preferences = preferences,
+                    onClick = { selectedPlan?.let(onDay) ?: onEditPlan() },
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun NutritionPlanSummaryCard(plan: List<NutritionDayPlan>, preferences: NutritionPreferences, onClick: () -> Unit) {
+    val week = plan.take(7)
+    val averageCalories = week.map { it.targets.calories }.average().toInt()
+    Row(
+        Modifier.fillMaxWidth().clip(CircleShape).background(WildforceThemeTokens.backgroundSecondary).clickable(onClick = onClick).padding(horizontal = 24.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("Plan de 7 días", fontFamily = Exo2FontFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                CompactPlanMetric(Icons.Filled.Restaurant, preferences.dietaryStyle)
+                CompactPlanMetric(Icons.Filled.FitnessCenter, "Adaptado al entreno")
+            }
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(averageCalories.toString(), fontFamily = Exo2FontFamily, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                Text(" kcal", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
+            }
+            Text("media diaria", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        }
+        Icon(Icons.Filled.ChevronRight, "Abrir plan", tint = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(start = 12.dp).size(20.dp))
+    }
+}
+
+@Composable
+private fun CompactPlanMetric(icon: ImageVector, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, tint = WildforceThemeTokens.textSecondary, modifier = Modifier.size(12.dp))
+        Text(label, Modifier.padding(start = 5.dp), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary, maxLines = 1)
+    }
+}
+
+/** Mirrors the iOS hub: the current day's meal timeline comes before the compact plan link. */
+@Composable
+private fun DayMealsPreview(
+    selectedDate: LocalDate,
+    today: LocalDate,
+    entries: List<MealLog>,
+    day: NutritionDayPlan?,
+    onAdd: () -> Unit,
+    onOpenDay: () -> Unit,
+) {
+    val context = LocalContext.current.applicationContext
+    val suggestions = day?.meals.orEmpty()
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(if (selectedDate == today) "COMIDAS DE HOY" else "COMIDAS DEL ${selectedDate.format(DateTimeFormatter.ofPattern("d MMM", Locale("es"))).uppercase()}", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
+            Spacer(Modifier.weight(1f))
+            IconButton(onClick = onAdd, Modifier.semantics { contentDescription = "Registrar comida" }) {
+                Icon(Icons.Filled.Add, "Registrar comida", tint = NutritionCoral)
+            }
+        }
+        if (entries.isEmpty() && suggestions.isEmpty()) {
+            Column(
+                Modifier.fillMaxWidth().background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(18.dp)).padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                Text("Aún no hay comidas", fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                Text("Aquí aparecerán las comidas registradas y las sugerencias de tu plan.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            }
+        } else {
+            entries.forEach { entry -> HubMealRow(entry.name, entry.type.title, entry.calories, NutritionGreen, true, onOpenDay) }
+            suggestions.filter { suggestion ->
+                entries.none { it.plannedMealKey == NutritionStore.plannedMealKey(day!!.date, suggestion) } &&
+                    !NutritionStore.isPlannedMealDismissed(context, day!!.date, suggestion)
+            }
+                .forEach { meal -> HubMealRow(meal.title, meal.type.title, meal.targets.calories, NutritionCoral, false, onOpenDay) }
+        }
+    }
+}
+
+@Composable
+private fun HubMealRow(title: String, mealType: String, calories: Int, tint: Color, logged: Boolean, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.backgroundSecondary).clickable(onClick = onClick).padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(40.dp).background(tint.copy(alpha = .13f), RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
+            Icon(if (logged) Icons.Filled.Check else Icons.Filled.Restaurant, null, tint = tint, modifier = Modifier.size(20.dp))
+        }
+        Column(Modifier.weight(1f).padding(start = 11.dp)) {
+            Text(title, fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
+            Text(if (logged) "REGISTRADA · ${mealType.uppercase()}" else mealType.uppercase(), style = MaterialTheme.typography.caption, color = if (logged) NutritionGreen else WildforceThemeTokens.textSecondary)
+        }
+        Text("$calories kcal", fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
+        Icon(Icons.Filled.ChevronRight, null, tint = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(start = 6.dp).size(18.dp))
     }
 }
 
@@ -362,9 +513,15 @@ private fun NutritionPlanHero(onGenerate: () -> Unit) {
     }
 }
 
-/** Static equivalent of the subtle SwiftUI DustParticlesEffectView used in the iOS hero. */
+/** Rising, lightly flickering equivalent of the SwiftUI DustParticlesEffectView in the iOS hero. */
 @Composable
 private fun NutritionHeroParticles(modifier: Modifier = Modifier) {
+    val particlesProgress by rememberInfiniteTransition(label = "nutrition-hero-dust").animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(7_200, easing = LinearEasing), RepeatMode.Restart),
+        label = "nutrition-hero-dust-progress",
+    )
     Canvas(modifier) {
         val particles = listOf(
             Triple(.08f, .18f, 2.5f), Triple(.20f, .72f, 1.5f), Triple(.37f, .12f, 2f),
@@ -372,7 +529,15 @@ private fun NutritionHeroParticles(modifier: Modifier = Modifier) {
             Triple(.91f, .17f, 1.5f), Triple(.88f, .84f, 2.5f), Triple(.12f, .92f, 2f),
         )
         particles.forEachIndexed { index, (x, y, radius) ->
-            drawCircle(Color.White.copy(alpha = if (index % 2 == 0) .16f else .09f), radius.dp.toPx(), Offset(size.width * x, size.height * y))
+            val speed = .13f + (index % 4) * .035f
+            val animatedY = (y - particlesProgress * speed + 1f) % 1f
+            val baseAlpha = if (index % 2 == 0) .16f else .09f
+            val flicker = .72f + ((particlesProgress + index * .17f) % 1f) * .28f
+            drawCircle(
+                Color.White.copy(alpha = baseAlpha * flicker),
+                radius.dp.toPx(),
+                Offset(size.width * x, size.height * animatedY),
+            )
         }
     }
 }
@@ -405,8 +570,15 @@ private fun NutritionCalendar(
             val isSelectable = day != null
             val isSelected = isSelectable && date == selected
             val isPast = date.isBefore(today)
+            // iOS gives the selected day a small spring response rather than a
+            // hard color swap. Compose keeps that cue local to each day cell.
+            val selectionScale by animateFloatAsState(
+                targetValue = if (isSelected) 1.06f else 1f,
+                animationSpec = spring(dampingRatio = .7f, stiffness = 650f),
+                label = "nutrition-calendar-${date}",
+            )
             Column(
-                Modifier.width(54.dp).height(84.dp).clip(RoundedCornerShape(12.dp))
+                Modifier.width(54.dp).height(84.dp).graphicsLayer { scaleX = selectionScale; scaleY = selectionScale }.clip(RoundedCornerShape(12.dp))
                     .background(if (isSelected) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = .08f))
                     .border(1.dp, if (date == today && !isSelected) WildforceThemeTokens.accent.copy(alpha = .15f) else Color.Transparent, RoundedCornerShape(12.dp))
                     .alpha(if (!isSelectable) if (date == today) .72f else .55f else if (isPast) .9f else 1f)
@@ -434,10 +606,15 @@ private fun NutritionCalendar(
 
 @Composable
 private fun CalendarCalorieRing(progress: Float, color: Color) {
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress.coerceIn(0f, 2f),
+        animationSpec = tween(durationMillis = 560),
+        label = "calendar-calorie-ring",
+    )
     Canvas(Modifier.padding(top = 1.dp).size(18.dp)) {
         drawArc(color.copy(alpha = .24f), -90f, 360f, false, style = Stroke(3.dp.toPx(), cap = StrokeCap.Round))
-        drawArc(color, -90f, 360f * progress.coerceIn(0f, 1f), false, style = Stroke(3.dp.toPx(), cap = StrokeCap.Round))
-        if (progress > 1f) drawArc(color, -90f, 360f * (progress - 1f).coerceIn(0f, 1f), false, style = Stroke(1.5.dp.toPx(), cap = StrokeCap.Round))
+        drawArc(color, -90f, 360f * animatedProgress.coerceIn(0f, 1f), false, style = Stroke(3.dp.toPx(), cap = StrokeCap.Round))
+        if (animatedProgress > 1f) drawArc(color, -90f, 360f * (animatedProgress - 1f).coerceIn(0f, 1f), false, style = Stroke(1.5.dp.toPx(), cap = StrokeCap.Round))
     }
 }
 
@@ -460,11 +637,12 @@ private fun DailyProgressCard(date: LocalDate, current: NutritionTargets, target
     // iOS animates the nutrition ring when its totals change; use the same
     // 650 ms cadence here instead of Compose's default spring.
     val animatedProgress by animateFloatAsState(progress, animationSpec = tween(650), label = "calorie progress")
+    val animatedCalories by animateIntAsState(current.calories, animationSpec = tween(650), label = "calorie-value")
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).clickable(onClick = onClick).padding(20.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Text(current.calories.toString(), fontSize = 32.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text(animatedCalories.toString(), fontFamily = Exo2FontFamily, fontSize = 32.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                     Text(" / ${target.calories} kcal", style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(bottom = 4.dp))
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -498,7 +676,7 @@ private fun ProgressRing(progress: Float) {
             drawArc(NutritionCoral, -90f, 360f * progress.coerceIn(0f, 1f), false, style = Stroke(8.dp.toPx(), cap = StrokeCap.Round))
             if (progress > 1f) drawArc(NutritionCoral, -90f, 360f * (progress - 1f).coerceIn(0f, 1f), false, style = Stroke(8.dp.toPx(), cap = StrokeCap.Round))
         }
-        Row(verticalAlignment = Alignment.Bottom) { Text("${(progress * 100).toInt()}", fontSize = 22.sp, color = WildforceThemeTokens.textPrimary); Text("%", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+        Row(verticalAlignment = Alignment.Bottom) { Text("${(progress * 100).toInt()}", fontFamily = Exo2FontFamily, fontSize = 22.sp, color = WildforceThemeTokens.textPrimary); Text("%", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
     }
 }
 
@@ -506,12 +684,13 @@ private fun ProgressRing(progress: Float) {
 private fun MacroProgress(title: String, current: Int, target: Int, color: Color, icon: NutritionMacroIcon, modifier: Modifier) {
     val fraction = if (target > 0) current.toFloat() / target else 0f
     val animatedFraction by animateFloatAsState(fraction, animationSpec = tween(650), label = "$title progress")
+    val animatedCurrent by animateIntAsState(current, animationSpec = tween(650), label = "$title value")
     Column(modifier, verticalArrangement = Arrangement.spacedBy(7.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             NutritionMacroSymbol(icon, tint = color, modifier = Modifier.size(15.dp))
             Text(title, Modifier.padding(start = 5.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
         }
-        Text("$current / $target g", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Text("$animatedCurrent / $target g", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Box(Modifier.fillMaxWidth().height(10.dp).clip(CircleShape).background(WildforceThemeTokens.textSecondary.copy(alpha = .12f))) {
             Box(Modifier.fillMaxWidth(animatedFraction.coerceIn(0f, 1f)).fillMaxHeight().background(color))
         }
@@ -548,8 +727,13 @@ private fun WeeklyBalanceCard(plan: List<NutritionDayPlan>, selected: LocalDate,
                 val point = energyHistory[date]
                 val burned = (point?.totalCalories ?: point?.activeCalories ?: 0.0).toInt()
                 val active = point?.activeCalories?.toInt()?.coerceAtMost(burned) ?: 0
+                val animatedBurnedHeight by animateDpAsState(
+                    targetValue = (118 * burned / maximum).dp,
+                    animationSpec = tween(420),
+                    label = "energy-balance-bar-$date",
+                )
                 Box(Modifier.weight(1f).fillMaxHeight().clickable { inspectedDate = if (inspectedDate == date) null else date }, contentAlignment = Alignment.BottomCenter) {
-                    if (burned > 0) Column(Modifier.fillMaxWidth(.62f).height((118 * burned / maximum).dp), verticalArrangement = Arrangement.Bottom) {
+                    if (burned > 0) Column(Modifier.fillMaxWidth(.62f).height(animatedBurnedHeight), verticalArrangement = Arrangement.Bottom) {
                         Box(Modifier.fillMaxWidth().weight((burned - active).coerceAtLeast(1).toFloat()).background(NutritionRed.copy(alpha = .5f), RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)))
                         if (active > 0) Box(Modifier.fillMaxWidth().weight(active.toFloat()).background(NutritionRed, RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)))
                     }
@@ -630,13 +814,20 @@ private fun PlanMetric(icon: ImageVector, title: String, value: String, onClick:
 internal fun NutritionDayHeader(day: NutritionDayPlan, logged: NutritionTargets, isToday: Boolean, onClick: () -> Unit) {
     val gradient = when (day.energyDemand) { EnergyDemand.High -> listOf(NutritionOrange, NutritionRed); EnergyDemand.Medium -> listOf(NutritionCoral, NutritionOrange); EnergyDemand.Low -> listOf(NutritionGreen, NutritionCoral) }
     val dayTypeColor = when (day.type) { NutritionDayType.Training -> NutritionOrange; NutritionDayType.Rest -> CarbsColor; NutritionDayType.Recovery -> NutritionGreen }
+    var typeBadgeAppeared by remember(day.date, day.type) { mutableStateOf(false) }
+    LaunchedEffect(day.date, day.type) { typeBadgeAppeared = true }
+    val typeBadgeScale by animateFloatAsState(
+        targetValue = if (typeBadgeAppeared) 1f else .8f,
+        animationSpec = spring(dampingRatio = .62f, stiffness = 560f),
+        label = "nutrition-day-type-${day.date}",
+    )
     Column(
         Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(24.dp)).background(Brush.linearGradient(gradient)).clickable(onClick = onClick).padding(16.dp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Row {
-            Column { Text(day.date.format(DateTimeFormatter.ofPattern("d MMMM", Locale("es"))), style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = .82f)); Text(if (isToday) "HOY" else day.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es")).uppercase(), fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = Color.White) }
-            Spacer(Modifier.weight(1f)); Column(horizontalAlignment = Alignment.End) { Text(day.type.title.uppercase(), style = MaterialTheme.typography.caption, color = Color.White, modifier = Modifier.background(dayTypeColor.copy(alpha = .62f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp)); Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) { NutritionMacroSymbol(NutritionMacroIcon.Calories, Color.White, Modifier.size(15.dp)); Text("${day.targets.calories} kcal", Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold, color = Color.White) } }
+            Column { Text(day.date.format(DateTimeFormatter.ofPattern("d MMMM", Locale("es"))), style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = .82f)); Text(if (isToday) "HOY" else day.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es")).uppercase(), fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = Color.White) }
+            Spacer(Modifier.weight(1f)); Column(horizontalAlignment = Alignment.End) { Text(day.type.title.uppercase(), style = MaterialTheme.typography.caption, color = Color.White, modifier = Modifier.graphicsLayer { scaleX = typeBadgeScale; scaleY = typeBadgeScale; alpha = if (typeBadgeAppeared) 1f else 0f }.background(dayTypeColor.copy(alpha = .62f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp)); Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) { NutritionMacroSymbol(NutritionMacroIcon.Calories, Color.White, Modifier.size(15.dp)); Text("${day.targets.calories} kcal", Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold, color = Color.White) } }
         }
         Row(Modifier.background(Color.White.copy(alpha = .12f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.FitnessCenter, null, tint = Color.White, modifier = Modifier.size(14.dp)); Text(day.workoutTitle.uppercase(), Modifier.padding(start = 5.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White) }
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {

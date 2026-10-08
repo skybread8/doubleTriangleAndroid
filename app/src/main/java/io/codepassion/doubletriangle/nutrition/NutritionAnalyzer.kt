@@ -22,6 +22,8 @@ internal data class NutritionAnalysis(
     val fat: Int,
     val notes: String = "",
     val foods: List<NutritionAnalysisFood> = emptyList(),
+    /** Present for barcode products, whose returned macros describe one serving. */
+    val servingGrams: Double? = null,
 )
 
 internal data class NutritionAnalysisFood(
@@ -142,15 +144,17 @@ internal object NutritionAnalyzer {
             val product = root.getJSONObject("product")
             val nutrients = product.optJSONObject("nutriments") ?: JSONObject()
             val servingQuantity = product.optDouble("serving_quantity", 100.0).takeIf { it > 0 } ?: 100.0
-            val ratio = servingQuantity / 100.0
-            fun nutrient(name: String): Int = (nutrients.optDouble("${name}_100g", 0.0) * ratio).toInt().coerceAtLeast(0)
+            // Keep the source values normalized per 100 g. The review screen
+            // applies servings × grams just like iOS's BarcodeAnalysisView.
+            fun nutrient(name: String): Int = nutrients.optDouble("${name}_100g", 0.0).toInt().coerceAtLeast(0)
             return NutritionAnalysis(
                 name = product.optString("product_name_es").ifBlank { product.optString("product_name").ifBlank { "Producto escaneado" } },
-                calories = (nutrients.optDouble("energy-kcal_100g", 0.0) * ratio).toInt().coerceAtLeast(0),
+                calories = nutrients.optDouble("energy-kcal_100g", 0.0).toInt().coerceAtLeast(0),
                 protein = nutrient("proteins"),
                 carbs = nutrient("carbohydrates"),
                 fat = nutrient("fat"),
                 notes = listOf(product.optString("brands"), if (servingQuantity != 100.0) "Porción: ${servingQuantity.toInt()} g" else "Por 100 g").filter { it.isNotBlank() }.joinToString(" · "),
+                servingGrams = servingQuantity,
             )
         } finally {
             connection.disconnect()
@@ -298,7 +302,7 @@ internal object NutritionAnalyzer {
 
     private fun imageInstruction(isLabel: Boolean, correction: String?): String {
         val base = if (isLabel) {
-            "Lee esta etiqueta nutricional. Devuelve los macros correspondientes a una porción e identifica el producto."
+            "Lee esta etiqueta nutricional. Identifica el producto y devuelve calorías, proteína, carbohidratos y grasa POR 100 g, no por ración."
         } else {
             "Identifica cada alimento de esta comida y estima sus cantidades y macros. Los macros totales deben ser la suma de foods."
         }

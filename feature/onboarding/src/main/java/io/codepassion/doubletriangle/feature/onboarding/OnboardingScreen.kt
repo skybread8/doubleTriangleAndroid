@@ -2,6 +2,7 @@ package io.codepassion.doubletriangle.feature.onboarding
 
 import android.widget.NumberPicker
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.LinearEasing
@@ -9,6 +10,7 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -877,10 +879,15 @@ private fun FormStep(
 ) {
     // iOS uses the plain semantic background here; frosted treatment is
     // reserved for modal surfaces, not the onboarding canvas.
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = spring(dampingRatio = .7f, stiffness = 520f),
+        label = "onboarding-step-progress",
+    )
     Column(Modifier.fillMaxSize().background(WildforceThemeTokens.background)) {
         if (showTopBar) {
             LinearProgressIndicator(
-                progress = progress,
+                progress = animatedProgress,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
                 // SwiftUI's linear ProgressView follows the app accent, not the
                 // warm workout-only emphasis color.
@@ -1036,7 +1043,14 @@ private fun ChoiceOption(
                 Text(it, style = MaterialTheme.typography.caption, color = if (selected) WildforceThemeTokens.backgroundSecondary.copy(alpha = .8f) else WildforceThemeTokens.textSecondary, maxLines = 3, overflow = TextOverflow.Ellipsis)
             }
         }
-        Text(if (selected) "✓" else "", color = WildforceThemeTokens.backgroundSecondary, fontWeight = FontWeight.Bold)
+        Box(Modifier.width(24.dp), contentAlignment = Alignment.Center) {
+            androidx.compose.animation.AnimatedVisibility(
+                visible = selected,
+                enter = fadeIn(tween(140)) + scaleIn(spring(dampingRatio = .58f, stiffness = 520f), initialScale = .65f),
+            ) {
+                Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.size(21.dp), tint = WildforceThemeTokens.backgroundSecondary)
+            }
+        }
     }
 }
 

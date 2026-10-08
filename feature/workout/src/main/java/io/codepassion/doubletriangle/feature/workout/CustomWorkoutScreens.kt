@@ -30,6 +30,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -42,11 +43,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -387,13 +392,13 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
             )
             items(modes) { (mode, title) ->
                 val selected = exercise.trackingMode == mode
-                Text(title, Modifier.clip(RoundedCornerShape(11.dp)).background(if (selected) WildforceThemeTokens.accentGold.copy(alpha = 0.18f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.07f)).clickable {
+                AnimatedSelectionChip(title, selected) {
                     onChange(when (mode) {
                         io.codepassion.doubletriangle.core.model.ExerciseTrackingMode.Repetitions -> exercise.copy(trackingMode = mode, targetDurationSeconds = null, targetDurationMinutes = null, targetDistanceKm = null)
                         io.codepassion.doubletriangle.core.model.ExerciseTrackingMode.Duration -> exercise.copy(trackingMode = mode, reps = "${exercise.targetDurationSeconds ?: 30} s", targetDurationSeconds = exercise.targetDurationSeconds ?: 30, targetDurationMinutes = null, targetDistanceKm = null)
                         io.codepassion.doubletriangle.core.model.ExerciseTrackingMode.DurationAndDistance -> exercise.copy(trackingMode = mode, reps = "", targetDurationSeconds = null, targetDurationMinutes = exercise.targetDurationMinutes ?: 10, targetDistanceKm = exercise.targetDistanceKm ?: 1.0)
                     })
-                }.padding(horizontal = 10.dp, vertical = 8.dp), color = WildforceThemeTokens.textPrimary, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+                }
             }
         }
         Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
@@ -437,20 +442,11 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
         LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             items(ExerciseSetStyle.values()) { style ->
                 val selected = exercise.setStyle == style
-                Row(
-                    Modifier
-                        .clip(RoundedCornerShape(11.dp))
-                        .background(if (selected) WildforceThemeTokens.accentGold.copy(alpha = 0.18f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.07f))
-                        .clickable {
-                            val parameters = if (style == exercise.setStyle) exercise.setStyleParameters else io.codepassion.doubletriangle.core.model.SetStyleParameters(
-                                appliesToFinalSetOnly = style in setOf(ExerciseSetStyle.DropSet, ExerciseSetStyle.RestPause),
-                            )
-                            onChange(exercise.copy(setStyle = style, setStyleParameters = parameters))
-                        }
-                        .padding(horizontal = 10.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text("${style.glyph}  ${style.label}", color = if (selected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+                AnimatedSelectionChip("${style.glyph}  ${style.label}", selected) {
+                    val parameters = if (style == exercise.setStyle) exercise.setStyleParameters else io.codepassion.doubletriangle.core.model.SetStyleParameters(
+                        appliesToFinalSetOnly = style in setOf(ExerciseSetStyle.DropSet, ExerciseSetStyle.RestPause),
+                    )
+                    onChange(exercise.copy(setStyle = style, setStyleParameters = parameters))
                 }
             }
         }
@@ -547,13 +543,13 @@ internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, equipmentPr
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(focuses) { option ->
                         val selected = option in selectedFocuses
-                        Text(option, Modifier.clip(RoundedCornerShape(11.dp)).background(if (selected) WildforceThemeTokens.accentGold.copy(alpha = 0.18f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.07f)).clickable { selectedFocuses = selectedFocuses.toMutableSet().also { if (!it.add(option)) it.remove(option) } }.padding(horizontal = 10.dp, vertical = 8.dp), color = WildforceThemeTokens.textPrimary, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+                        AnimatedSelectionChip(option, selected) { selectedFocuses = selectedFocuses.toMutableSet().also { if (!it.add(option)) it.remove(option) } }
                     }
                 }
                 Text(stringResource(R.string.workout_muscle_groups), style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) { items(muscles) { muscle ->
                     val selected = muscle in selectedMuscles
-                    Text(muscle, Modifier.clip(RoundedCornerShape(11.dp)).background(if (selected) WildforceThemeTokens.accentGold.copy(alpha = 0.18f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.07f)).clickable { selectedMuscles = selectedMuscles.toMutableSet().also { if (!it.add(muscle)) it.remove(muscle) } }.padding(horizontal = 10.dp, vertical = 8.dp), color = WildforceThemeTokens.textPrimary, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+                    AnimatedSelectionChip(muscle, selected) { selectedMuscles = selectedMuscles.toMutableSet().also { if (!it.add(muscle)) it.remove(muscle) } }
                 } }
                 Text(stringResource(R.string.workout_estimated_duration_label), style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
                 EditorStepper("MINUTOS", duration.toString(), { duration = (duration - 5).coerceAtLeast(15) }, { duration = (duration + 5).coerceAtMost(180) }, Modifier.fillMaxWidth())
@@ -580,6 +576,26 @@ internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, equipmentPr
             onGenerate(CustomWorkoutRequest(focuses.first(), duration, equipment.trim().ifBlank { defaultEquipment.ifBlank { "Peso corporal" } }, selectedGoal, focuses, selectedMuscles, includeWarmup, includeCooldown))
         }) { Text(stringResource(R.string.workout_generate), color = WildforceThemeTokens.accentGold) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.workout_cancel), color = WildforceThemeTokens.textSecondary) } },
+    )
+}
+
+@Composable
+private fun AnimatedSelectionChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    val scale by animateFloatAsState(
+        targetValue = if (selected) 1.05f else 1f,
+        animationSpec = spring(dampingRatio = 0.58f, stiffness = 520f),
+        label = "workout-request-chip-$label",
+    )
+    Text(
+        label,
+        Modifier
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .clip(RoundedCornerShape(11.dp))
+            .background(if (selected) WildforceThemeTokens.accentGold.copy(alpha = 0.18f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.07f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+        color = WildforceThemeTokens.textPrimary,
+        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
     )
 }
 
@@ -656,6 +672,8 @@ private fun ExercisePickerSectionTitle(title: String) {
     // Keep the 48 dp touch target, but do not turn it into the visual affordance.
     // iOS uses compact stepper glyphs in the manual editor; the previous full-size
     // white discs made three controls dominate a single exercise card.
+    val numericScale = remember(value) { Animatable(.84f) }
+    LaunchedEffect(value) { numericScale.animateTo(1f, spring(dampingRatio = .58f, stiffness = 520f)) }
     Column(modifier.background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(12.dp)).padding(horizontal = 4.dp, vertical = 3.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(title, style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary, maxLines = 1)
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -665,7 +683,7 @@ private fun ExercisePickerSectionTitle(title: String) {
                     Icon(Icons.Filled.Remove, contentDescription = null, tint = WildforceThemeTokens.backgroundSecondary, modifier = Modifier.size(16.dp))
                 }
             }
-            Text(value, Modifier.weight(1f), textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold, maxLines = 1)
+            Text(value, Modifier.weight(1f).graphicsLayer { scaleX = numericScale.value; scaleY = numericScale.value }, textAlign = TextAlign.Center, fontWeight = FontWeight.SemiBold, maxLines = 1)
             val increaseDescription = stringResource(R.string.workout_increase, title)
             Box(Modifier.size(48.dp).semantics { contentDescription = increaseDescription }.clickable(onClick = onPlus), contentAlignment = Alignment.Center) {
                 Box(Modifier.size(30.dp).clip(CircleShape).background(WildforceThemeTokens.textPrimary), contentAlignment = Alignment.Center) {

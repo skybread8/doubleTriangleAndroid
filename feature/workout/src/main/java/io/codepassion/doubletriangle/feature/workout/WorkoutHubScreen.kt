@@ -6,6 +6,7 @@ import android.net.Uri
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
@@ -13,8 +14,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -74,6 +78,7 @@ import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowCircleUp
 import androidx.compose.material.icons.filled.ArrowCircleDown
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CenterFocusStrong
@@ -628,8 +633,15 @@ private fun WeekCalendar(
             val selected = day == selectedDay
             val hasWorkout = day in state.trainingDays
             val completed = day in state.completedDays
+            val selectionScale by animateFloatAsState(
+                targetValue = if (selected) 1.06f else 1f,
+                animationSpec = spring(dampingRatio = 0.7f, stiffness = 650f),
+                label = "workout-calendar-$day",
+            )
             Column(
-                Modifier.weight(1f).alpha(if (hasWorkout) 1f else 0.7f).clip(RoundedCornerShape(12.dp))
+                Modifier.weight(1f).alpha(if (hasWorkout) 1f else 0.7f)
+                    .graphicsLayer { scaleX = selectionScale; scaleY = selectionScale }
+                    .clip(RoundedCornerShape(12.dp))
                     .background(
                         if (selected) WildforceThemeTokens.accent
                         else WildforceThemeTokens.textSecondary.copy(alpha = 0.08f),
@@ -1043,9 +1055,17 @@ private fun workoutDayTypeIcon(dayType: String): ImageVector = when (dayType.low
 
 @Composable
 private fun StatusBadge(label: String, background: Color) {
+    var appeared by remember(label) { mutableStateOf(false) }
+    LaunchedEffect(label) { appeared = true }
+    val scale by animateFloatAsState(
+        targetValue = if (appeared) 1f else .8f,
+        animationSpec = spring(dampingRatio = .62f, stiffness = 560f),
+        label = "workout-status-badge-$label",
+    )
     Text(
         label,
-        Modifier.clip(CircleShape).background(background).padding(horizontal = 10.dp, vertical = 2.dp),
+        Modifier.graphicsLayer { scaleX = scale; scaleY = scale; alpha = if (appeared) 1f else 0f }
+            .clip(CircleShape).background(background).padding(horizontal = 10.dp, vertical = 2.dp),
         color = Color.White,
         style = MaterialTheme.typography.caption,
         fontWeight = FontWeight.Bold,
@@ -1107,7 +1127,11 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
     var showSkipConfirmation by remember { mutableStateOf(false) }
     var showCancelConfirmation by remember(workout.id) { mutableStateOf(false) }
     var skipped by remember(workout.id) { mutableStateOf(workout.status == WorkoutStatus.Skipped) }
+    var skipAppeared by remember(workout.id, skipped) { mutableStateOf(false) }
     var selectedTab by remember(workout.id) { mutableStateOf(WorkoutDetailTab.Exercises) }
+    LaunchedEffect(skipped) {
+        if (skipped) skipAppeared = true
+    }
     if (showingEditor) {
         CustomWorkoutEditorScreen(
             initial = workout,
@@ -1145,9 +1169,15 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
         return
     }
     if (skipped) {
+        val skipIconScale by animateFloatAsState(
+            targetValue = if (skipAppeared) 1f else .68f,
+            animationSpec = spring(dampingRatio = .58f, stiffness = 460f),
+            label = "skipped-workout-icon",
+        )
         Box(Modifier.fillMaxSize().liquidGlassBackground(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
                 Text("‹ VOLVER", Modifier.clickable(onClick = onBack).padding(12.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+                Text("⏭", fontSize = 48.sp, modifier = Modifier.graphicsLayer { scaleX = skipIconScale; scaleY = skipIconScale })
                 Text("DÍA OMITIDO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
                 Text("Este entrenamiento se ha marcado como descanso.", Modifier.padding(top = 8.dp), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 Text("DESHACER", Modifier.clickable { skipped = false; onUnskip() }.padding(14.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
@@ -1246,7 +1276,17 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                 Spacer(Modifier.height(16.dp))
                 WorkoutDetailTabSelector(selected = selectedTab, onSelected = { selectedTab = it }, modifier = Modifier.padding(horizontal = 16.dp))
                 Spacer(Modifier.height(18.dp))
-                if (selectedTab == WorkoutDetailTab.Information) {
+                // Mirrors ExerciseDetailsView's opacity-and-scale transition
+                // between information panels instead of replacing the body abruptly.
+                AnimatedContent(
+                    targetState = selectedTab,
+                    transitionSpec = {
+                        (fadeIn(tween(180)) + scaleIn(initialScale = .98f, animationSpec = tween(220))) togetherWith
+                            (fadeOut(tween(120)) + scaleOut(targetScale = .98f, animationSpec = tween(160)))
+                    },
+                    label = "workout-detail-tab",
+                ) { tab ->
+                if (tab == WorkoutDetailTab.Information) {
                     Column(Modifier.padding(horizontal = 12.dp)) { WorkoutInformationTab(workout) }
                 } else {
                 Column(Modifier.padding(horizontal = 12.dp)) {
@@ -1362,6 +1402,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                     }
                 }
                 Spacer(Modifier.height(30.dp))
+                }
                 }
                 }
             }
@@ -3273,15 +3314,27 @@ private fun ExerciseFeedbackContent(
         Text("Esta información ayudará a personalizar las siguientes sesiones.", Modifier.fillMaxWidth().padding(top = 2.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Row(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             choices.forEach { (emoji, title, _) ->
+                val isSelected = selected == title
+                val selectionOffset by animateDpAsState(
+                    targetValue = if (isSelected) (-6).dp else 0.dp,
+                    animationSpec = spring(dampingRatio = 0.55f, stiffness = 520f),
+                    label = "feedback-offset-$title",
+                )
+                val selectionScale by animateFloatAsState(
+                    targetValue = if (isSelected) 1.06f else 1f,
+                    animationSpec = spring(dampingRatio = 0.55f, stiffness = 520f),
+                    label = "feedback-scale-$title",
+                )
                 Column(
                     Modifier.weight(1f)
-                        .offset(y = if (selected == title) (-6).dp else 0.dp)
+                        .offset(y = selectionOffset)
+                        .graphicsLayer { scaleX = selectionScale; scaleY = selectionScale }
                         .clip(RoundedCornerShape(14.dp))
-                        .background(if (selected == title) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = 0.12f))
-                        .border(1.dp, if (selected == title) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = 0.16f), RoundedCornerShape(14.dp))
+                        .background(if (isSelected) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = 0.12f))
+                        .border(1.dp, if (isSelected) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = 0.16f), RoundedCornerShape(14.dp))
                         .semantics {
                             contentDescription = "Esfuerzo $title"
-                            stateDescription = if (selected == title) "Seleccionado" else "No seleccionado"
+                            stateDescription = if (isSelected) "Seleccionado" else "No seleccionado"
                         }
                         .clickable { haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove); onSelected(title) }
                         .heightIn(min = 92.dp)
@@ -3290,7 +3343,7 @@ private fun ExerciseFeedbackContent(
                     verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
                 ) {
                     Text(emoji, style = MaterialTheme.typography.h6)
-                    Text(title, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = if (selected == title) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2)
+                    Text(title, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = if (isSelected) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2)
                 }
             }
         }
@@ -3524,13 +3577,17 @@ private fun RestActionButton(glyph: String, label: String, primary: Boolean, onC
 private fun CompactMetricStepper(title: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit, modifier: Modifier = Modifier, inputValue: String = value, decimalInput: Boolean = false, onValueEntered: ((String) -> Unit)? = null) {
     var showManualInput by remember { mutableStateOf(false) }
     var manualInput by remember(inputValue) { mutableStateOf(TextFieldValue(inputValue)) }
+    // Compose does not provide SwiftUI's numericText transition. A short
+    // spring pulse keeps every +/- change legible without shifting the row.
+    val numericScale = remember(value) { Animatable(.84f) }
+    LaunchedEffect(value) { numericScale.animateTo(1f, spring(dampingRatio = .58f, stiffness = 520f)) }
     val manualInputFocusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(modifier.background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(14.dp)).padding(10.dp)) {
         Text(title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             CenteredRoundControl("−", 40.dp, onMinus)
-            Text(value, Modifier.clickable(enabled = onValueEntered != null) { manualInput = TextFieldValue(inputValue); showManualInput = true }.padding(horizontal = 3.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
+            Text(value, Modifier.graphicsLayer { scaleX = numericScale.value; scaleY = numericScale.value }.clickable(enabled = onValueEntered != null) { manualInput = TextFieldValue(inputValue); showManualInput = true }.padding(horizontal = 3.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
             CenteredRoundControl("+", 40.dp, onPlus)
         }
     }

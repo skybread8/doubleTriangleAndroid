@@ -5,12 +5,23 @@ import android.content.Context
 import android.app.Activity.RESULT_OK
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -566,6 +577,7 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
                     // Social login/registration matches iOS's medium detent;
                     // reserve the taller sheet only for the email form.
                     .fillMaxHeight(if (isEmailLoginPresented) .68f else .48f)
+                    .animateContentSize(animationSpec = tween(280))
                     .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -592,63 +604,57 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
             ) {
                 Column(Modifier.verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Box(Modifier.align(Alignment.CenterHorizontally).size(width = 36.dp, height = 5.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = .35f), RoundedCornerShape(8.dp)))
-                    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(if (register) "Crea una cuenta para continuar" else "Bienvenido de nuevo", fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                        Text(if (register) "Tu plan se guardará y estará listo en todos tus dispositivos." else "Inicia sesión para continuar tu entrenamiento.", color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                    }
-                    if (!register || !isEmailLoginPresented) {
-                        error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
-                        GoogleAuthenticationButton(
-                            title = if (register) "Registrarme con Google" else "Iniciar sesión con Google",
-                            enabled = !submitting,
-                            onIdToken = { idToken ->
-                                scope.launch {
-                                    submitting = true
-                                    authenticateWithGoogle(context, idToken, profile.takeIf { register }).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión con Google." }
-                                    submitting = false
-                                }
-                            },
-                            onError = { error = it },
-                        )
-                    }
-                    if (!isEmailLoginPresented) {
-                        Row(
-                            Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).clickable { error = null; isEmailLoginPresented = true }.padding(vertical = 10.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            // SwiftUI uses the outlined `envelope` symbol here.
-                            Icon(Icons.Outlined.Email, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.textPrimary)
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                if (register) "Registrarme con email" else "Iniciar sesión con email",
-                                color = WildforceThemeTokens.textPrimary,
-                                fontFamily = Exo2FontFamily,
-                                fontWeight = FontWeight.SemiBold,
-                            )
+                    AnimatedContent(
+                        targetState = register,
+                        transitionSpec = { (fadeIn(tween(240)) + slideInVertically(tween(280)) { it / 8 }) togetherWith (fadeOut(tween(160)) + slideOutVertically(tween(180)) { -it / 10 }) },
+                        label = "authentication-mode",
+                    ) { registering ->
+                        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(if (registering) "Crea una cuenta para continuar" else "Bienvenido de nuevo", fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            Text(if (registering) "Tu plan se guardará y estará listo en todos tus dispositivos." else "Inicia sesión para continuar tu entrenamiento.", color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                         }
-                    } else {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            TextField(email, { email = it }, label = { Text("Email") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)), colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.background, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent))
-                            TextField(password, { password = it }, label = { Text("Contraseña") }, singleLine = true, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)), colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.background, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent))
-                            if (register) {
-                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                                    PasswordRequirement.entries.forEach { requirement ->
-                                        val satisfied = requirement.isSatisfiedBy(password)
-                                        Text(
-                                            "${if (satisfied) "✓" else "○"} ${requirement.shortLabel}",
-                                            style = MaterialTheme.typography.caption,
-                                            color = if (satisfied) Color(0xFF2E7D32) else WildforceThemeTokens.textSecondary,
-                                        )
-                                    }
+                    }
+                    AnimatedContent(
+                        targetState = isEmailLoginPresented,
+                        transitionSpec = { (fadeIn(tween(190)) + slideInVertically(tween(240)) { it / 10 }) togetherWith (fadeOut(tween(130)) + slideOutVertically(tween(180)) { -it / 12 }) },
+                        label = "authentication-provider",
+                    ) { emailFlow ->
+                        if (!emailFlow) {
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
+                                GoogleAuthenticationButton(
+                                    title = if (register) "Registrarme con Google" else "Iniciar sesión con Google",
+                                    enabled = !submitting,
+                                    onIdToken = { idToken -> scope.launch {
+                                        submitting = true
+                                        authenticateWithGoogle(context, idToken, profile.takeIf { register }).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión con Google." }
+                                        submitting = false
+                                    } },
+                                    onError = { error = it },
+                                )
+                                Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).clickable { error = null; isEmailLoginPresented = true }.padding(vertical = 10.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Outlined.Email, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.textPrimary)
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(if (register) "Registrarme con email" else "Iniciar sesión con email", color = WildforceThemeTokens.textPrimary, fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold)
                                 }
                             }
+                        } else {
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                TextField(email, { email = it }, label = { Text("Email") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)), colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.background, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent))
+                                TextField(password, { password = it }, label = { Text("Contraseña") }, singleLine = true, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)), colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.background, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent))
+                                if (register) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                                    PasswordRequirement.entries.forEach { requirement ->
+                                        val satisfied = requirement.isSatisfiedBy(password)
+                                        Text("${if (satisfied) "✓" else "○"} ${requirement.shortLabel}", style = MaterialTheme.typography.caption, color = if (satisfied) Color(0xFF2E7D32) else WildforceThemeTokens.textSecondary)
+                                    }
+                                }
+                                error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
+                                Button(enabled = !submitting && (!register || PasswordRequirement.entries.all { it.isSatisfiedBy(password) }), onClick = {
+                                    if (email.isBlank() || password.isBlank()) { error = "Introduce tu email y contraseña para continuar."; return@Button }
+                                    scope.launch { submitting = true; authenticate(context, if (register) "auth/register" else "auth/login", profile.takeIf { register }, email, password).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión." }; submitting = false }
+                                }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText)) { if (submitting) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp) else Text(if (register) "Crear cuenta" else "Iniciar sesión", modifier = Modifier.padding(vertical = 4.dp), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
+                            }
                         }
-                        error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
-                        Button(enabled = !submitting && (!register || PasswordRequirement.entries.all { it.isSatisfiedBy(password) }), onClick = {
-                            if (email.isBlank() || password.isBlank()) { error = "Introduce tu email y contraseña para continuar."; return@Button }
-                            scope.launch { submitting = true; authenticate(context, if (register) "auth/register" else "auth/login", profile.takeIf { register }, email, password).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión." }; submitting = false }
-                        }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText)) { if (submitting) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp) else Text(if (register) "Crear cuenta" else "Iniciar sesión", modifier = Modifier.padding(vertical = 4.dp), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
                     }
                     if (register || isEmailLoginPresented) {
                         Text(if (register) "Ya tengo una cuenta" else "Crear una cuenta", Modifier.fillMaxWidth().clickable(onClick = onSwitch).padding(8.dp), color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
@@ -668,6 +674,10 @@ fun SubscriptionPaywall(
 ) {
     val context = LocalContext.current; val activity = context as? Activity; val scope = rememberCoroutineScope()
     var selected by remember { mutableStateOf(YearlyProductId) }; var products by remember { mutableStateOf<Map<String, ProductDetails>>(emptyMap()) }; var loading by remember { mutableStateOf(true) }; var purchasing by remember { mutableStateOf(false) }; var error by remember { mutableStateOf<String?>(null) }; var pendingPurchases by remember { mutableStateOf<List<Purchase>>(emptyList()) }
+    var appeared by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { appeared = true }
+    val paywallAlpha by animateFloatAsState(if (appeared) 1f else 0f, tween(220), label = "paywall-alpha")
+    val paywallScale by animateFloatAsState(if (appeared) 1f else .97f, spring(dampingRatio = .82f, stiffness = 420f), label = "paywall-scale")
     val billing = remember { BillingClient.newBuilder(context).setListener { result, purchases -> purchasing = false; if (result.responseCode == BillingClient.BillingResponseCode.OK) pendingPurchases = purchases.orEmpty().filter { it.purchaseState == Purchase.PurchaseState.PURCHASED } else if (result.responseCode != BillingClient.BillingResponseCode.USER_CANCELED) error = result.debugMessage }.enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()).build() }
     LaunchedEffect(pendingPurchases) {
         pendingPurchases.forEach { purchase ->
@@ -679,7 +689,7 @@ fun SubscriptionPaywall(
         if (pendingPurchases.isNotEmpty()) pendingPurchases = emptyList()
     }
     DisposableEffect(billing) { billing.startConnection(object : BillingClientStateListener { override fun onBillingSetupFinished(result: BillingResult) { if (result.responseCode == BillingClient.BillingResponseCode.OK) scope.launch { products = queryProducts(billing); loading = false; val restored = billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build()); if (restored.billingResult.responseCode == BillingClient.BillingResponseCode.OK) pendingPurchases = restored.purchasesList.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED } else error = restored.billingResult.debugMessage } else { error = result.debugMessage; loading = false } }; override fun onBillingServiceDisconnected() = Unit }); onDispose { billing.endConnection() } }
-    Dialog(onDismissRequest = { if (!mandatory) onDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnBackPress = !mandatory, dismissOnClickOutside = !mandatory)) { Surface(Modifier.fillMaxSize(), color = WildforceThemeTokens.background) { Column(Modifier.verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(28.dp)) {
+    Dialog(onDismissRequest = { if (!mandatory) onDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnBackPress = !mandatory, dismissOnClickOutside = !mandatory)) { Surface(Modifier.fillMaxSize().graphicsLayer { alpha = paywallAlpha; scaleX = paywallScale; scaleY = paywallScale }, color = WildforceThemeTokens.background) { Column(Modifier.verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(28.dp)) {
         if (!mandatory) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { Text("Cerrar", Modifier.clickable(onClick = onDismiss).padding(8.dp), color = WildforceThemeTokens.accent) }
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) { Icon(Icons.Filled.Shield, null, Modifier.size(46.dp), tint = WildforceThemeTokens.accent); Text("Entrena con todo tu potencial", fontFamily = AntonFontFamily, fontSize = 30.sp); Text("Obtén la experiencia Wildforce completa, creada alrededor de tu progreso.", color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center) }
         Column(Modifier.fillMaxWidth().background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(20.dp)).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -719,7 +729,19 @@ fun SubscriptionPaywall(
     } } }
 }
 
-@Composable private fun RowScope.PlanCard(title: String, id: String, fallback: String, weekly: String, selected: String, products: Map<String, ProductDetails>, best: Boolean = false, onClick: (String) -> Unit) { val detail = products[id]; val price = detail?.subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice ?: fallback; Column(Modifier.weight(1f).height(154.dp).border(2.dp, if (selected == id) WildforceThemeTokens.accent else Color.Transparent, RoundedCornerShape(18.dp)).background(if (selected == id) WildforceThemeTokens.accent.copy(alpha = .10f) else WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(18.dp)).clickable { onClick(id) }.padding(16.dp)) { if (best) Text("MEJOR VALOR", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.primaryButtonText, modifier = Modifier.background(WildforceThemeTokens.accent, RoundedCornerShape(10.dp)).padding(horizontal = 6.dp, vertical = 2.dp)); Spacer(Modifier.height(if (best) 10.dp else 30.dp)); Text(title, fontWeight = FontWeight.Bold); Text(price, fontSize = 18.sp, fontWeight = FontWeight.Bold); Text("/ ${if (id == YearlyProductId) "año" else "mes"}", style = MaterialTheme.typography.caption); Text(weekly, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }
+@Composable private fun RowScope.PlanCard(title: String, id: String, fallback: String, weekly: String, selected: String, products: Map<String, ProductDetails>, best: Boolean = false, onClick: (String) -> Unit) {
+    val isSelected = selected == id
+    val selectionScale by animateFloatAsState(if (isSelected) 1.035f else 1f, spring(dampingRatio = .65f, stiffness = 560f), label = "subscription-plan-$id")
+    val detail = products[id]
+    val price = detail?.subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice ?: fallback
+    Column(Modifier.weight(1f).height(154.dp).graphicsLayer { scaleX = selectionScale; scaleY = selectionScale }.border(2.dp, if (isSelected) WildforceThemeTokens.accent else Color.Transparent, RoundedCornerShape(18.dp)).background(if (isSelected) WildforceThemeTokens.accent.copy(alpha = .10f) else WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(18.dp)).clickable { onClick(id) }.padding(16.dp)) {
+        if (best) Text("MEJOR VALOR", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.primaryButtonText, modifier = Modifier.background(WildforceThemeTokens.accent, RoundedCornerShape(10.dp)).padding(horizontal = 6.dp, vertical = 2.dp))
+        Spacer(Modifier.height(if (best) 10.dp else 30.dp))
+        Text(title, fontWeight = FontWeight.Bold); Text(price, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text("/ ${if (id == YearlyProductId) "año" else "mes"}", style = MaterialTheme.typography.caption)
+        Text(weekly, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+    }
+}
 
 private suspend fun queryProducts(client: BillingClient): Map<String, ProductDetails> {
     val result = client.queryProductDetails(QueryProductDetailsParams.newBuilder().setProductList(listOf(MonthlyProductId, YearlyProductId).map { QueryProductDetailsParams.Product.newBuilder().setProductId(it).setProductType(BillingClient.ProductType.SUBS).build() }).build())

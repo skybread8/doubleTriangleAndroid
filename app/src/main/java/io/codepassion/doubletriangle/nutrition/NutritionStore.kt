@@ -52,6 +52,8 @@ internal data class MealLog(
     val isBookmarked: Boolean = false,
     val items: List<MealItem> = emptyList(),
     val photoPath: String? = null,
+    /** Local counterpart of iOS's nutritionMealId: hides the fulfilled suggestion. */
+    val plannedMealKey: String? = null,
 )
 
 internal enum class NutritionDayType(val title: String) { Training("Entrenamiento"), Rest("Descanso"), Recovery("Recuperación") }
@@ -101,6 +103,20 @@ internal object NutritionStore {
     private const val PLAN_VERSION_KEY = "nutrition_plan_version"
     private const val GENERATED_PLAN_KEY = "nutrition_generated_plan"
     private const val REMOTE_PLAN_ID_KEY = "nutrition_remote_plan_id"
+    private const val DISMISSED_PLANNED_MEALS_KEY = "nutrition_dismissed_planned_meals"
+
+    fun plannedMealKey(date: LocalDate, meal: PlannedMeal): String =
+        "${date}|${meal.type.name}|${meal.title.trim().lowercase()}"
+
+    fun dismissPlannedMeal(context: Context, date: LocalDate, meal: PlannedMeal) {
+        val prefs = context.getSharedPreferences(PREFS, 0)
+        val dismissed = prefs.getStringSet(DISMISSED_PLANNED_MEALS_KEY, emptySet()).orEmpty() + plannedMealKey(date, meal)
+        prefs.edit().putStringSet(DISMISSED_PLANNED_MEALS_KEY, dismissed).apply()
+    }
+
+    fun isPlannedMealDismissed(context: Context, date: LocalDate, meal: PlannedMeal): Boolean =
+        plannedMealKey(date, meal) in context.getSharedPreferences(PREFS, 0)
+            .getStringSet(DISMISSED_PLANNED_MEALS_KEY, emptySet()).orEmpty()
 
     fun loadPlanVersion(context: Context): Int = context.getSharedPreferences(PREFS, 0).getInt(PLAN_VERSION_KEY, 1).coerceAtLeast(1)
 
@@ -384,7 +400,7 @@ internal object NutritionStore {
                     val fallbackDate = Instant.ofEpochMilli(id).atZone(ZoneId.systemDefault()).toLocalDate()
                     val date = runCatching { LocalDate.parse(item.optString("date")) }.getOrDefault(fallbackDate)
                     val items = item.optJSONArray("items")?.let { array -> buildList { for (itemIndex in 0 until array.length()) { val food = array.getJSONObject(itemIndex); add(MealItem(food.optString("name"), food.optInt("calories"), food.optInt("protein"), food.optInt("carbs"), food.optInt("fat"), food.optString("brand"), food.optDouble("quantity", 1.0), food.optString("unit"), food.optDouble("grams", Double.NaN).takeUnless(Double::isNaN), food.optString("notes"))) } } }.orEmpty()
-                    add(MealLog(id, item.optString("name").trim().ifBlank { "Comida" }, item.optInt("calories").coerceIn(0, 8000), item.optInt("protein").coerceIn(0, 500), item.optInt("carbs").coerceIn(0, 1000), item.optInt("fat").coerceIn(0, 500), runCatching { MealType.valueOf(item.optString("type")) }.getOrDefault(MealType.Snack), date, item.optString("notes"), item.optString("source", "manual"), item.optBoolean("bookmarked", false), items, item.optString("photoPath").takeIf(String::isNotBlank)))
+                    add(MealLog(id, item.optString("name").trim().ifBlank { "Comida" }, item.optInt("calories").coerceIn(0, 8000), item.optInt("protein").coerceIn(0, 500), item.optInt("carbs").coerceIn(0, 1000), item.optInt("fat").coerceIn(0, 500), runCatching { MealType.valueOf(item.optString("type")) }.getOrDefault(MealType.Snack), date, item.optString("notes"), item.optString("source", "manual"), item.optBoolean("bookmarked", false), items, item.optString("photoPath").takeIf(String::isNotBlank), item.optString("plannedMealKey").takeIf(String::isNotBlank)))
                 }
             }
         }.getOrDefault(emptyList())
@@ -394,7 +410,7 @@ internal object NutritionStore {
         val array = JSONArray().apply {
             entries.sortedBy { it.id }.forEach { meal ->
                 val itemArray = JSONArray().apply { meal.items.forEach { food -> put(JSONObject().put("name", food.name).put("calories", food.calories).put("protein", food.protein).put("carbs", food.carbs).put("fat", food.fat).put("brand", food.brand).put("quantity", food.quantity).put("unit", food.unit).put("grams", food.grams).put("notes", food.notes)) } }
-                put(JSONObject().put("id", meal.id).put("date", meal.loggedDate.toString()).put("name", meal.name).put("calories", meal.calories).put("protein", meal.protein).put("carbs", meal.carbs).put("fat", meal.fat).put("type", meal.type.name).put("notes", meal.notes).put("source", meal.source).put("bookmarked", meal.isBookmarked).put("items", itemArray).put("photoPath", meal.photoPath ?: JSONObject.NULL))
+                put(JSONObject().put("id", meal.id).put("date", meal.loggedDate.toString()).put("name", meal.name).put("calories", meal.calories).put("protein", meal.protein).put("carbs", meal.carbs).put("fat", meal.fat).put("type", meal.type.name).put("notes", meal.notes).put("source", meal.source).put("bookmarked", meal.isBookmarked).put("items", itemArray).put("photoPath", meal.photoPath ?: JSONObject.NULL).put("plannedMealKey", meal.plannedMealKey ?: JSONObject.NULL))
             }
         }
         context.getSharedPreferences(PREFS, 0).edit().putString(ENTRIES_KEY, array.toString()).remove(LEGACY_KEY).apply()

@@ -19,10 +19,20 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -227,7 +237,21 @@ private fun AnalyticsHeader(timeframe: AnalyticsTimeframe, onChange: (AnalyticsT
 }
 @Composable internal fun Badge(glyph: String, size: Int = 34) {
     val colors = analyticsColors()
-    Box(Modifier.size(size.dp).background(colors.accentSoft, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) { Text(glyph, color = colors.accentText, fontWeight = FontWeight.Bold, fontSize = (size * .4f).sp) }
+    var appeared by remember(glyph) { mutableStateOf(false) }
+    LaunchedEffect(glyph) { appeared = true }
+    // Equivalent to the SwiftUI symbol bounce used by analytics cards: each
+    // contextual badge gets one restrained spring entrance rather than a
+    // permanently animated icon.
+    val scale by animateFloatAsState(
+        targetValue = if (appeared) 1f else .72f,
+        animationSpec = spring(dampingRatio = .58f, stiffness = 520f),
+        label = "analytics-badge-$glyph",
+    )
+    Box(
+        Modifier.size(size.dp).graphicsLayer { scaleX = scale; scaleY = scale }
+            .background(colors.accentSoft, RoundedCornerShape(12.dp)),
+        contentAlignment = Alignment.Center,
+    ) { Text(glyph, color = colors.accentText, fontWeight = FontWeight.Bold, fontSize = (size * .4f).sp) }
 }
 @Composable internal fun SectionHeader(title: String, subtitle: String, glyph: String) {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
@@ -241,10 +265,24 @@ private fun AnalyticsHeader(timeframe: AnalyticsTimeframe, onChange: (AnalyticsT
     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         items.forEach { item ->
             Column(Modifier.width(164.dp).background(colors.card, RoundedCornerShape(22.dp)).border(1.dp, colors.border, RoundedCornerShape(22.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Badge(item.glyph); Text(item.value, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Badge(item.glyph); AnimatedKpiValue(item.value)
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(item.title, style = MaterialTheme.typography.body2); if (item.subtitle.isNotEmpty()) Text(item.subtitle, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 2) }
             }
         }
+    }
+}
+
+@Composable
+private fun AnimatedKpiValue(value: String) {
+    AnimatedContent(
+        targetState = value,
+        transitionSpec = {
+            (fadeIn(tween(150)) + scaleIn(tween(180), initialScale = .88f)) togetherWith
+                (fadeOut(tween(110)) + scaleOut(tween(120), targetScale = 1.08f))
+        },
+        label = "analytics-kpi-value",
+    ) { displayed ->
+        Text(displayed, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -506,7 +544,7 @@ private fun AnalyticsMiniCharts(
 @Composable private fun HighlightGrid(metrics: List<Kpi>, title: String = "Resumen") {
     val colors = analyticsColors()
     Text(title, style = MaterialTheme.typography.h6)
-    metrics.chunked(2).forEach { row -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { row.forEach { metric -> Column(Modifier.weight(1f).background(colors.inset, RoundedCornerShape(16.dp)).border(1.dp, colors.border, RoundedCornerShape(16.dp)).padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { Text(metric.glyph, color = colors.accentText); Text(metric.value, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis); Text(metric.title, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textPrimary) } }; if (row.size == 1) Spacer(Modifier.weight(1f)) } }
+    metrics.chunked(2).forEach { row -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { row.forEach { metric -> Column(Modifier.weight(1f).background(colors.inset, RoundedCornerShape(16.dp)).border(1.dp, colors.border, RoundedCornerShape(16.dp)).padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { Text(metric.glyph, color = colors.accentText); AnimatedKpiValue(metric.value); Text(metric.title, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textPrimary) } }; if (row.size == 1) Spacer(Modifier.weight(1f)) } }
 }
 
 @Composable

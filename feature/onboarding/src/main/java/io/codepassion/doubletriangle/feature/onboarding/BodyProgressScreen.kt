@@ -7,11 +7,15 @@ import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.Canvas
@@ -194,6 +198,14 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
     val requestCameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { cameraPermissionGranted = it }
     var useFrontCamera by remember { mutableStateOf(context.getSharedPreferences("wildforce_body_progress", 0).getBoolean("preferred_front_camera", false)) }
     var cameraCaptureAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    // iOS springs the countdown bubble for each tick; key the Animatable by
+    // the remaining second so 3 → 2 → 1 is perceived as three distinct beats.
+    val countdownScale = remember(countdown) { Animatable(if (countdown == null) 0f else .68f) }
+    LaunchedEffect(countdown) {
+        if (countdown != null) {
+            countdownScale.animateTo(1f, spring(dampingRatio = .58f, stiffness = 480f))
+        }
+    }
     val image = if (step == Step.Front) front else profile
     val referencePath = sessions.maxByOrNull { it.date }?.let { if (step == Step.Front) it.frontPath else it.profilePath }
     fun startCamera() {
@@ -235,7 +247,17 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
                     }
                 }
             } else Image(image.asImageBitmap(), step.label, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-            countdown?.let { Text(it.toString(), style = MaterialTheme.typography.h1, color = Color.White) }
+            countdown?.let {
+                Text(
+                    it.toString(),
+                    style = MaterialTheme.typography.h1,
+                    color = Color.White,
+                    modifier = Modifier.graphicsLayer {
+                        scaleX = countdownScale.value
+                        scaleY = countdownScale.value
+                    },
+                )
+            }
         }
         Toggle(listOf(Overlay.Guide, Overlay.Reference), overlay, { it.label }) { overlay = it }
         if (image == null) {
@@ -302,7 +324,14 @@ private enum class Overlay(val label: String) { Guide("Guía"), Reference("Refer
                 tryAwaitRelease()
                 revealReference = false
             })
-        }) { val item = if (revealReference) before else current; ComparePhoto(item, path(item), if (revealReference) "Antes" else "Ahora · mantén pulsado para ver antes", Modifier.fillMaxSize()) }
+        }) {
+            // iOS cross-fades while the comparison press is held. This avoids
+            // a disorienting hard replacement between the two photos.
+            Crossfade(targetState = revealReference, animationSpec = tween(180), label = "body-progress-reveal") { showingReference ->
+                val item = if (showingReference) before else current
+                ComparePhoto(item, path(item), if (showingReference) "Antes" else "Ahora · mantén pulsado para ver antes", Modifier.fillMaxSize())
+            }
+        }
         if (sessions.size > 1) {
             val timeline = sessions.sortedBy { it.date }
             val selectedIndex = timeline.indexOfFirst { it.id == current.id }.coerceAtLeast(0)
@@ -330,7 +359,11 @@ private enum class Overlay(val label: String) { Guide("Guía"), Reference("Refer
 private enum class Angle(val label: String) { Front("Frontal"), Profile("Perfil") }
 private enum class ComparisonMode(val label: String) { Reveal("Mantener pulsado"), SideBySide("Lado a lado") }
 
-@Composable private fun <T> Toggle(items: List<T>, selected: T, label: (T) -> String, select: (T) -> Unit) = Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) { items.forEach { item -> Text(label(item), Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).background(if (item == selected) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary.copy(alpha = .12f)).clickable { select(item) }.padding(vertical = 9.dp), color = if (item == selected) Color.White else WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption, textAlign = TextAlign.Center) } }
+@Composable private fun <T> Toggle(items: List<T>, selected: T, label: (T) -> String, select: (T) -> Unit) = Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) { items.forEach { item ->
+    val isSelected = item == selected
+    val selectionScale by animateFloatAsState(if (isSelected) 1.035f else 1f, spring(dampingRatio = .7f, stiffness = 620f), label = "body-progress-toggle-${label(item)}")
+    Text(label(item), Modifier.weight(1f).graphicsLayer { scaleX = selectionScale; scaleY = selectionScale }.clip(RoundedCornerShape(10.dp)).background(if (isSelected) WildforceThemeTokens.accentGold else WildforceThemeTokens.textSecondary.copy(alpha = .12f)).clickable { select(item) }.padding(vertical = 9.dp), color = if (isSelected) Color.White else WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption, textAlign = TextAlign.Center)
+} }
 @Composable private fun ComparePhoto(session: BodyProgressSession, path: String, label: String, modifier: Modifier) = Box(modifier.clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = .10f))) {
     Photo(path, Modifier.fillMaxSize())
     Box(Modifier.fillMaxWidth().height(48.dp).align(Alignment.BottomCenter).background(Color.Black.copy(alpha = .46f)))
