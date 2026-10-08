@@ -1,6 +1,8 @@
 package io.codepassion.doubletriangle.nutrition
 
 import android.content.Context
+import io.codepassion.doubletriangle.NutritionStatusWidget
+import io.codepassion.doubletriangle.WildforceNotificationScheduler
 import io.codepassion.doubletriangle.feature.onboarding.BodyCompositionPhase
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
@@ -22,7 +24,19 @@ internal enum class MealType(val title: String) {
 
 internal data class NutritionTargets(val calories: Int = 2350, val protein: Int = 165, val carbs: Int = 250, val fat: Int = 75)
 
-internal data class MealItem(val name: String, val calories: Int, val protein: Int, val carbs: Int, val fat: Int)
+/** Mirrors iOS NutritionLogItem so reviewed food metadata survives local storage and sync. */
+internal data class MealItem(
+    val name: String,
+    val calories: Int,
+    val protein: Int,
+    val carbs: Int,
+    val fat: Int,
+    val brand: String = "",
+    val quantity: Double = 1.0,
+    val unit: String = "",
+    val grams: Double? = null,
+    val notes: String = "",
+)
 
 internal data class MealLog(
     val id: Long,
@@ -37,6 +51,7 @@ internal data class MealLog(
     val source: String = "manual",
     val isBookmarked: Boolean = false,
     val items: List<MealItem> = emptyList(),
+    val photoPath: String? = null,
 )
 
 internal enum class NutritionDayType(val title: String) { Training("Entrenamiento"), Rest("Descanso"), Recovery("Recuperación") }
@@ -85,6 +100,7 @@ internal object NutritionStore {
     private const val PROFILE_KEY = "nutrition_profile"
     private const val PLAN_VERSION_KEY = "nutrition_plan_version"
     private const val GENERATED_PLAN_KEY = "nutrition_generated_plan"
+    private const val REMOTE_PLAN_ID_KEY = "nutrition_remote_plan_id"
 
     fun loadPlanVersion(context: Context): Int = context.getSharedPreferences(PREFS, 0).getInt(PLAN_VERSION_KEY, 1).coerceAtLeast(1)
 
@@ -108,11 +124,22 @@ internal object NutritionStore {
     fun saveGeneratedPlan(context: Context, plan: List<NutritionDayPlan>) {
         val days = JSONArray().apply { plan.forEach { day -> put(JSONObject().put("date", day.date.toString()).put("type", day.type.name).put("demand", day.energyDemand.name).put("targets", day.targets.toJson()).put("workoutTitle", day.workoutTitle).put("notes", day.notes).put("pre", day.preWorkoutGuidance).put("post", day.postWorkoutGuidance).put("meals", JSONArray().apply { day.meals.forEach { meal -> put(JSONObject().put("title", meal.title).put("type", meal.type.name).put("targets", meal.targets.toJson()).put("guidance", meal.guidance).put("foods", JSONArray().apply { meal.foods.forEach { (name, grams) -> put(JSONObject().put("name", name).put("grams", grams)) } })) } })) } }
         context.getSharedPreferences(PREFS, 0).edit().putString(GENERATED_PLAN_KEY, days.toString()).apply()
+        NutritionStatusWidget.refresh(context)
+    }
+
+    fun remotePlanId(context: Context): String? = context.getSharedPreferences(PREFS, 0)
+        .getString(REMOTE_PLAN_ID_KEY, null)?.takeIf { it.matches(Regex("[0-9a-fA-F-]{36}")) }
+
+    fun rememberRemotePlanId(context: Context, id: String) {
+        if (id.matches(Regex("[0-9a-fA-F-]{36}"))) {
+            context.getSharedPreferences(PREFS, 0).edit().putString(REMOTE_PLAN_ID_KEY, id).apply()
+        }
     }
 
     /** Converts the graph returned by iOS's `/sync/nutrition-plans` endpoint to Android's local plan. */
     fun importRemotePlan(context: Context, remote: JSONObject) {
         val days = remote.optJSONArray("days") ?: return
+        rememberRemotePlanId(context, remote.optString("id"))
         val plan = buildList {
             for (index in 0 until days.length()) {
                 val day = days.optJSONObject(index) ?: continue
@@ -153,13 +180,13 @@ internal object NutritionStore {
     /** Restores dietary preferences before Android's next push, matching iOS's initial snapshot. */
     fun importRemotePreferences(context: Context, remote: JSONObject) {
         savePreferences(context, NutritionPreferences(
-            dietaryStyle = remote.optString("dietary_style", "Omnívora"),
+            dietaryStyle = dietaryStyleDisplayName(remote.optString("dietary_style", "standard")),
             mealsPerDay = remote.optInt("meals_per_day_preference", 4).coerceIn(1, 8),
             wantsSuggestions = remote.optBoolean("wants_meal_suggestions", true),
             eatingWindowStartHour = remote.optionalHour("preferred_eating_window_start_hour"),
             eatingWindowEndHour = remote.optionalHour("preferred_eating_window_end_hour"),
-            cookingEffort = remote.optString("cooking_effort", "Medio"),
-            budgetSensitivity = remote.optString("budget_sensitivity", "Media"),
+            cookingEffort = cookingEffortDisplayName(remote.optString("cooking_effort", "medium")),
+            budgetSensitivity = budgetSensitivityDisplayName(remote.optString("budget_sensitivity", "medium")),
             preferredProteinSources = remote.stringList("preferred_protein_sources"), dislikes = remote.stringList("dislikes"),
             excludedFoods = remote.stringList("excluded_foods"), allergiesAndIntolerances = remote.stringList("allergies_and_intolerances"),
             notes = remote.optString("notes"),
@@ -184,6 +211,11 @@ internal object NutritionStore {
                 protein = item.optDouble("protein_grams").toInt().coerceIn(0, 500),
                 carbs = item.optDouble("carbs_grams").toInt().coerceIn(0, 1000),
                 fat = item.optDouble("fat_grams").toInt().coerceIn(0, 500),
+                brand = item.optString("brand"),
+                quantity = item.optDouble("quantity", 1.0).coerceAtLeast(0.0),
+                unit = item.optString("unit"),
+                grams = item.optDouble("amount_grams", Double.NaN).takeUnless(Double::isNaN),
+                notes = item.optString("notes"),
             )
         }
 
@@ -215,6 +247,7 @@ internal object NutritionStore {
 
     fun clearGeneratedPlan(context: Context) {
         context.getSharedPreferences(PREFS, 0).edit().remove(GENERATED_PLAN_KEY).apply()
+        NutritionStatusWidget.refresh(context)
     }
 
     fun loadTargets(context: Context, profile: OnboardingProfile? = null): NutritionTargets = runCatching {
@@ -225,24 +258,24 @@ internal object NutritionStore {
 
     fun saveTargets(context: Context, targets: NutritionTargets) {
         context.getSharedPreferences(PREFS, 0).edit().putString(TARGETS_KEY, targets.toJson().toString()).apply()
+        NutritionStatusWidget.refresh(context)
     }
 
     fun loadPreferences(context: Context): NutritionPreferences = runCatching {
         val own = JSONObject(context.getSharedPreferences(PREFS, 0).getString(PROFILE_KEY, "{}") ?: "{}")
         val profile = JSONObject(context.getSharedPreferences("wildforce_profile_details", 0).getString("nutrition_profile", "{}") ?: "{}")
-        // A locally edited profile is authoritative. The onboarding profile is only a
-        // migration/default source; otherwise later edits would appear not to save.
-        val json = if (own.has("dietaryStyle") || own.has("mealsPerDay")) own
-        else if (profile.optBoolean("isConfigured", false)) profile
-        else own
+        // The dedicated Android Profile screen and the Nutrition hub edit the
+        // same profile. Its configured snapshot is authoritative so an edit in
+        // either surface is immediately reflected by the other, like iOS.
+        val json = if (profile.optBoolean("isConfigured", false)) profile else own
         NutritionPreferences(
-            dietaryStyle = json.optString("dietaryStyle", "Omnívora"),
+            dietaryStyle = dietaryStyleDisplayName(json.optString("dietaryStyle", "standard")),
             mealsPerDay = json.optInt("mealsPerDay", 4).coerceIn(1, 8),
             wantsSuggestions = json.optBoolean("wantsMealSuggestions", json.optBoolean("wantsSuggestions", true)),
             eatingWindowStartHour = json.optionalHour("eatingWindowStartHour"),
             eatingWindowEndHour = json.optionalHour("eatingWindowEndHour"),
-            cookingEffort = json.optString("cookingEffort", "Medio"),
-            budgetSensitivity = json.optString("budgetSensitivity", "Media"),
+            cookingEffort = cookingEffortDisplayName(json.optString("cookingEffort", "medium")),
+            budgetSensitivity = budgetSensitivityDisplayName(json.optString("budgetSensitivity", "medium")),
             preferredProteinSources = json.stringList("preferredProteinSources"),
             dislikes = json.stringList("dislikes"),
             excludedFoods = json.stringList("excludedFoods"),
@@ -251,21 +284,47 @@ internal object NutritionStore {
         )
     }.getOrDefault(NutritionPreferences())
 
+    /**
+     * iOS creates a NutritionProfile during its nutrition onboarding and never
+     * generates a plan until that record exists.  Defaults are useful for
+     * rendering an empty state, but must not be mistaken for a user choice.
+     */
+    fun hasNutritionProfile(context: Context): Boolean = runCatching {
+        val own = JSONObject(context.getSharedPreferences(PREFS, 0).getString(PROFILE_KEY, "{}") ?: "{}")
+        if (own.has("dietaryStyle") || own.has("mealsPerDay")) return@runCatching true
+
+        val onboarding = JSONObject(
+            context.getSharedPreferences("wildforce_profile_details", 0)
+                .getString("nutrition_profile", "{}") ?: "{}",
+        )
+        onboarding.optBoolean("isConfigured", false)
+    }.getOrDefault(false)
+
     fun savePreferences(context: Context, value: NutritionPreferences) {
         val json = JSONObject()
-            .put("dietaryStyle", value.dietaryStyle)
+            .put("dietaryStyle", dietaryStyleDisplayName(value.dietaryStyle))
             .put("mealsPerDay", value.mealsPerDay)
             .put("wantsSuggestions", value.wantsSuggestions)
             .put("eatingWindowStartHour", value.eatingWindowStartHour)
             .put("eatingWindowEndHour", value.eatingWindowEndHour)
-            .put("cookingEffort", value.cookingEffort)
-            .put("budgetSensitivity", value.budgetSensitivity)
+            .put("cookingEffort", cookingEffortDisplayName(value.cookingEffort))
+            .put("budgetSensitivity", budgetSensitivityDisplayName(value.budgetSensitivity))
             .put("preferredProteinSources", JSONArray(value.preferredProteinSources))
             .put("dislikes", JSONArray(value.dislikes))
             .put("excludedFoods", JSONArray(value.excludedFoods))
             .put("allergiesAndIntolerances", JSONArray(value.allergiesAndIntolerances))
             .put("notes", value.notes)
         context.getSharedPreferences(PREFS, 0).edit().putString(PROFILE_KEY, json.toString()).apply()
+        // ProfileScreen lives in the onboarding feature module and owns this
+        // view of the same preferences. Keep both stores in lockstep until
+        // the app has a shared repository for these settings.
+        context.getSharedPreferences("wildforce_profile_details", 0).edit()
+            .putString("nutrition_profile", JSONObject(json.toString())
+                .put("isConfigured", true)
+                .put("wantsMealSuggestions", value.wantsSuggestions)
+                .toString())
+            .apply()
+        NutritionStatusWidget.refresh(context)
     }
 
     fun load(context: Context, date: LocalDate = LocalDate.now()): List<MealLog> = all(context).filter { it.loggedDate == date }.sortedBy { it.id }
@@ -275,6 +334,14 @@ internal object NutritionStore {
 
     /** Returns every local entry so the account synchronizer can upload its complete history. */
     fun allForSync(context: Context): List<MealLog> = all(context)
+
+    /** Attaches a private image downloaded for an existing server log without creating a new log. */
+    fun attachRemotePhoto(context: Context, remoteEntryId: String, path: String) {
+        val localId = stableRemoteLogId(remoteEntryId, 0)
+        val entries = all(context)
+        if (entries.none { it.id == localId }) return
+        write(context, entries.map { entry -> if (entry.id == localId) entry.copy(photoPath = path) else entry })
+    }
 
     fun save(context: Context, date: LocalDate, meals: List<MealLog>) {
         write(context, all(context).filterNot { it.loggedDate == date } + meals.map { it.copy(loggedDate = date) })
@@ -316,8 +383,8 @@ internal object NutritionStore {
                     val id = item.optLong("id", System.currentTimeMillis() + index)
                     val fallbackDate = Instant.ofEpochMilli(id).atZone(ZoneId.systemDefault()).toLocalDate()
                     val date = runCatching { LocalDate.parse(item.optString("date")) }.getOrDefault(fallbackDate)
-                    val items = item.optJSONArray("items")?.let { array -> buildList { for (itemIndex in 0 until array.length()) { val food = array.getJSONObject(itemIndex); add(MealItem(food.optString("name"), food.optInt("calories"), food.optInt("protein"), food.optInt("carbs"), food.optInt("fat"))) } } }.orEmpty()
-                    add(MealLog(id, item.optString("name").trim().ifBlank { "Comida" }, item.optInt("calories").coerceIn(0, 8000), item.optInt("protein").coerceIn(0, 500), item.optInt("carbs").coerceIn(0, 1000), item.optInt("fat").coerceIn(0, 500), runCatching { MealType.valueOf(item.optString("type")) }.getOrDefault(MealType.Snack), date, item.optString("notes"), item.optString("source", "manual"), item.optBoolean("bookmarked", false), items))
+                    val items = item.optJSONArray("items")?.let { array -> buildList { for (itemIndex in 0 until array.length()) { val food = array.getJSONObject(itemIndex); add(MealItem(food.optString("name"), food.optInt("calories"), food.optInt("protein"), food.optInt("carbs"), food.optInt("fat"), food.optString("brand"), food.optDouble("quantity", 1.0), food.optString("unit"), food.optDouble("grams", Double.NaN).takeUnless(Double::isNaN), food.optString("notes"))) } } }.orEmpty()
+                    add(MealLog(id, item.optString("name").trim().ifBlank { "Comida" }, item.optInt("calories").coerceIn(0, 8000), item.optInt("protein").coerceIn(0, 500), item.optInt("carbs").coerceIn(0, 1000), item.optInt("fat").coerceIn(0, 500), runCatching { MealType.valueOf(item.optString("type")) }.getOrDefault(MealType.Snack), date, item.optString("notes"), item.optString("source", "manual"), item.optBoolean("bookmarked", false), items, item.optString("photoPath").takeIf(String::isNotBlank)))
                 }
             }
         }.getOrDefault(emptyList())
@@ -326,11 +393,15 @@ internal object NutritionStore {
     private fun write(context: Context, entries: List<MealLog>) {
         val array = JSONArray().apply {
             entries.sortedBy { it.id }.forEach { meal ->
-                val itemArray = JSONArray().apply { meal.items.forEach { food -> put(JSONObject().put("name", food.name).put("calories", food.calories).put("protein", food.protein).put("carbs", food.carbs).put("fat", food.fat)) } }
-                put(JSONObject().put("id", meal.id).put("date", meal.loggedDate.toString()).put("name", meal.name).put("calories", meal.calories).put("protein", meal.protein).put("carbs", meal.carbs).put("fat", meal.fat).put("type", meal.type.name).put("notes", meal.notes).put("source", meal.source).put("bookmarked", meal.isBookmarked).put("items", itemArray))
+                val itemArray = JSONArray().apply { meal.items.forEach { food -> put(JSONObject().put("name", food.name).put("calories", food.calories).put("protein", food.protein).put("carbs", food.carbs).put("fat", food.fat).put("brand", food.brand).put("quantity", food.quantity).put("unit", food.unit).put("grams", food.grams).put("notes", food.notes)) } }
+                put(JSONObject().put("id", meal.id).put("date", meal.loggedDate.toString()).put("name", meal.name).put("calories", meal.calories).put("protein", meal.protein).put("carbs", meal.carbs).put("fat", meal.fat).put("type", meal.type.name).put("notes", meal.notes).put("source", meal.source).put("bookmarked", meal.isBookmarked).put("items", itemArray).put("photoPath", meal.photoPath ?: JSONObject.NULL))
             }
         }
         context.getSharedPreferences(PREFS, 0).edit().putString(ENTRIES_KEY, array.toString()).remove(LEGACY_KEY).apply()
+        NutritionStatusWidget.refresh(context)
+        // Keep pending meal reminders in sync immediately after additions,
+        // edits, deletions and incoming server changes.
+        WildforceNotificationScheduler.scheduleNutritionReminder(context)
     }
 
     private fun targetsFor(profile: OnboardingProfile): NutritionTargets {
@@ -369,6 +440,45 @@ internal object NutritionStore {
 
 private fun stableRemoteLogId(value: String, fallback: Int): Long =
     value.hashCode().toLong().and(Long.MAX_VALUE).takeIf { it != 0L } ?: fallback.toLong() + 1
+
+/** Android labels mirror the Spanish UI while the sync contract keeps iOS's raw enum values. */
+internal fun dietaryStyleDisplayName(value: String): String = when (value.trim().lowercase()) {
+    "vegetarian", "vegetariana" -> "Vegetariana"
+    "vegan", "vegana" -> "Vegana"
+    "pescatarian", "pescetarian", "pescetariana" -> "Pescetariana"
+    else -> "Omnívora"
+}
+
+internal fun dietaryStyleSyncValue(value: String): String = when (dietaryStyleDisplayName(value)) {
+    "Vegetariana" -> "vegetarian"
+    "Vegana" -> "vegan"
+    "Pescetariana" -> "pescatarian"
+    else -> "standard"
+}
+
+internal fun cookingEffortDisplayName(value: String): String = when (value.trim().lowercase()) {
+    "low", "bajo" -> "Bajo"
+    "high", "alto" -> "Alto"
+    else -> "Medio"
+}
+
+internal fun cookingEffortSyncValue(value: String): String = when (cookingEffortDisplayName(value)) {
+    "Bajo" -> "low"
+    "Alto" -> "high"
+    else -> "medium"
+}
+
+internal fun budgetSensitivityDisplayName(value: String): String = when (value.trim().lowercase()) {
+    "low", "baja" -> "Baja"
+    "high", "alta" -> "Alta"
+    else -> "Media"
+}
+
+internal fun budgetSensitivitySyncValue(value: String): String = when (budgetSensitivityDisplayName(value)) {
+    "Baja" -> "low"
+    "Alta" -> "high"
+    else -> "medium"
+}
 
 private fun mealTypeFromRemote(value: String) = when (value.lowercase()) {
     "breakfast" -> MealType.Breakfast; "lunch" -> MealType.Lunch; "dinner" -> MealType.Dinner; else -> MealType.Snack

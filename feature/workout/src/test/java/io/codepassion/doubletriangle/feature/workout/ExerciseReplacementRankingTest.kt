@@ -7,11 +7,11 @@ import org.junit.Test
 
 class ExerciseReplacementRankingTest {
     private val catalog = listOf(
-        ExerciseChoice("Sentadilla libre", "airSquat"),
-        ExerciseChoice("Sentadilla goblet", "gobletSquat"),
-        ExerciseChoice("Sentadilla con barra", "barbellBackSquat"),
-        ExerciseChoice("Peso muerto", "deadlift"),
-        ExerciseChoice("Press de banca", "benchPress"),
+        ExerciseChoice("Sentadilla libre", "airSquat", primaryMuscles = setOf("quads")),
+        ExerciseChoice("Sentadilla goblet", "gobletSquat", primaryMuscles = setOf("quads")),
+        ExerciseChoice("Sentadilla con barra", "barbellBackSquat", listOf("barbellFrontSquat", "legPress", "gobletSquat"), setOf("quads", "glutes")),
+        ExerciseChoice("Peso muerto", "deadlift", primaryMuscles = setOf("hamstrings", "glutes", "back")),
+        ExerciseChoice("Press de banca", "benchPress", listOf("inclineBenchPress", "chestPressMachine", "pushUp", "dumbbellBenchPress", "smithMachineBenchPress"), setOf("chest")),
     )
 
     @Test
@@ -30,8 +30,9 @@ class ExerciseReplacementRankingTest {
     fun `uses the movement family before alphabetical order`() {
         val replacing = ExerciseSummary("Dominadas", "pullUp", 3, "8", 90)
         val choices = catalog + listOf(
-            ExerciseChoice("Jalón al pecho", "latPulldown"),
-            ExerciseChoice("Remo sentado", "seatedCableRow"),
+            ExerciseChoice("Dominadas", "pullUp", listOf("chinUp", "latPulldown", "seatedCableRow"), setOf("back")),
+            ExerciseChoice("Jalón al pecho", "latPulldown", primaryMuscles = setOf("back")),
+            ExerciseChoice("Remo sentado", "seatedCableRow", primaryMuscles = setOf("back")),
         )
 
         assertEquals("latPulldown", rankExerciseReplacements(choices, replacing).first().imageKey)

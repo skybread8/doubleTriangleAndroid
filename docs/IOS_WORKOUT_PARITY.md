@@ -273,6 +273,13 @@ The remaining unchecked items are intentionally not implied to be complete. In p
 - Confirming a replacement plan clears every prior plan-session snapshot plus its foreground timer, notification actions, notification and watch bridge, matching iOS's completed-plan transition rather than offering a stale session to resume.
 - Added identity-contract coverage and verified with `:app:testDebugUnitTest :feature:workout:compileDebugKotlin :app:compileDebugKotlin`.
 
+### 2026-10-07 — celebration motion parity pass
+
+- Added the Android counterpart of iOS record confetti: seeded, falling, fading and rotating particles behind the record cards, without intercepting input.
+- Added the repeating flame pulse for streaks, plus the level-up star pulse and slow rotation from the iOS celebration views.
+- Added the animated notification-card stack to Android's completion notification education, matching the iOS hierarchy while retaining Android's native permission request.
+- Verified source compilation with `:feature:workout:compileDebugKotlin`; matched-viewport screenshots and reduced-motion hardware validation remain open.
+
 ## Visual evidence log
 
 ### 2026-08-27 — source-level comparison, active workout

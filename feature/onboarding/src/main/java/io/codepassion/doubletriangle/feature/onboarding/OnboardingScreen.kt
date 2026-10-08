@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -17,6 +18,9 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -81,6 +85,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -655,13 +660,24 @@ fun OnboardingScreen(
 @Composable
 private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit) {
     var appeared by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { delay(100); appeared = true }
+    LaunchedEffect(Unit) { appeared = true }
+    // The iOS cover reveals each element separately instead of fading the whole
+    // column at once. Keeping these timelines independent makes the Android
+    // entrance feel equally paced and keeps the button from competing with the logo.
+    val logoAlpha by animateFloatAsState(if (appeared) 1f else 0f, tween(800, delayMillis = 100), label = "cover-logo-alpha")
+    val logoOffset by animateFloatAsState(if (appeared) 0f else 30f, tween(800, delayMillis = 100), label = "cover-logo-offset")
+    val logoBlur by animateFloatAsState(if (appeared) 0f else 20f, tween(800, delayMillis = 100), label = "cover-logo-blur")
+    val copyAlpha by animateFloatAsState(if (appeared) 1f else 0f, tween(900, delayMillis = 300), label = "cover-copy-alpha")
+    val copyOffset by animateFloatAsState(if (appeared) 0f else 30f, tween(900, delayMillis = 300), label = "cover-copy-offset")
+    val actionAlpha by animateFloatAsState(if (appeared) 1f else 0f, tween(800, delayMillis = 600), label = "cover-action-alpha")
+    val actionOffset by animateFloatAsState(if (appeared) 0f else 10f, tween(800, delayMillis = 600), label = "cover-action-offset")
+    val actionScale by animateFloatAsState(if (appeared) 1f else .8f, tween(800, delayMillis = 600), label = "cover-action-scale")
     val dust = rememberInfiniteTransition(label = "cover-dust")
-    val dustDrift by dust.animateFloat(
-        initialValue = -10f,
-        targetValue = 10f,
-        animationSpec = infiniteRepeatable(tween(4200, easing = LinearEasing), RepeatMode.Reverse),
-        label = "cover-dust-drift",
+    val dustTime by dust.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(24_000, easing = LinearEasing)),
+        label = "cover-dust-time",
     )
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         Image(
@@ -675,11 +691,10 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit) {
                 Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.35f), Color.Black)),
             ),
         )
-        // iOS uses a subtle moving dust layer over the photo. These low-contrast
-        // particles preserve that depth without compromising text readability.
-        listOf(24 to 90, 310 to 170, 85 to 360, 280 to 510, 180 to 250).forEachIndexed { index, (x, y) ->
-            Box(Modifier.offset(x = (x + dustDrift * (index + 1) / 4).dp, y = (y + dustDrift * (if (index % 2 == 0) 1 else -1)).dp).size((2 + index % 3).dp).background(Color.White.copy(alpha = .22f), CircleShape))
-        }
+        // Match DustParticlesEffectView on iOS: many fine, floating circles rather
+        // than a handful of decorative dots. Their deterministic seed means they do
+        // not jump to a new layout when this composable recomposes.
+        FloatingDustOverlay(progress = dustTime)
         Column(
             modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 50.dp, vertical = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -687,7 +702,7 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit) {
             Image(
                 painter = painterResource(R.drawable.logo_white),
                 contentDescription = "Wildforce",
-                modifier = Modifier.fillMaxWidth().height(82.dp).alpha(if (appeared) 1f else 0f).graphicsLayer { translationY = if (appeared) 0f else 30f },
+                modifier = Modifier.fillMaxWidth().height(82.dp).alpha(logoAlpha).offset(y = logoOffset.dp).blur(logoBlur.dp),
                 contentScale = ContentScale.Fit,
             )
             Text(
@@ -696,10 +711,12 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit) {
                 color = Color(0xFFA7A6AE),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.body1.copy(fontSize = 18.sp, letterSpacing = 4.sp),
-                modifier = Modifier.alpha(if (appeared) 1f else 0f),
+                modifier = Modifier.alpha(copyAlpha).offset(y = copyOffset.dp),
             )
             Spacer(Modifier.height(40.dp))
-            Box(Modifier.alpha(if (appeared) 1f else 0f)) { PrimaryAction("Empezar", true, onStart) }
+            Box(Modifier.alpha(actionAlpha).offset(y = actionOffset.dp).graphicsLayer { scaleX = actionScale; scaleY = actionScale }) {
+                PrimaryAction("Empezar", true, onStart)
+            }
             Text(
                 "Ya tengo una cuenta",
                 modifier = Modifier.padding(top = 18.dp).clickable(onClick = onLogin).padding(8.dp),
@@ -707,6 +724,23 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit) {
                 style = MaterialTheme.typography.caption,
                 fontWeight = FontWeight.SemiBold,
             )
+        }
+    }
+}
+
+@Composable
+private fun FloatingDustOverlay(progress: Float) {
+    Canvas(Modifier.fillMaxSize()) {
+        repeat(64) { seed ->
+            val seedValue = seed.toFloat()
+            val initialX = ((kotlin.math.sin(seedValue * 12.9898f) + 1f) / 2f) * size.width
+            val initialY = ((kotlin.math.cos(seedValue * 78.233f) + 1f) / 2f) * size.height
+            val radius = 0.6f + kotlin.math.abs(kotlin.math.sin(seedValue * 3.7f)) * 1.8f
+            val baseAlpha = 0.10f + kotlin.math.abs(kotlin.math.cos(seedValue * 5.1f)) * 0.50f
+            val rise = size.height * (0.30f + kotlin.math.abs(kotlin.math.sin(seedValue * 2.9f)) * 0.70f) * progress
+            val y = (initialY - rise + size.height) % size.height
+            val flicker = 0.65f + 0.35f * kotlin.math.sin(progress * 6.283185f + seedValue)
+            drawCircle(Color.White.copy(alpha = baseAlpha * flicker), radius = radius, center = androidx.compose.ui.geometry.Offset(initialX, y))
         }
     }
 }
@@ -743,10 +777,64 @@ private fun PlanGenerationStep(
                 PrimaryAction("Empezar a entrenar", true, onStartTraining)
             }
             else -> {
-                Spacer(Modifier.height(156.dp))
-                CircularProgressIndicator(color = WildforceThemeTokens.textPrimary, modifier = Modifier.size(56.dp).align(Alignment.CenterHorizontally))
-                Text("Creando tu plan", modifier = Modifier.fillMaxWidth().padding(top = 20.dp), style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
-                Text(if (isGenerating) "Estamos preparando tus entrenamientos." else "Preparando…", modifier = Modifier.fillMaxWidth(), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.body1, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(110.dp))
+                PlanCreationAnimation()
+                Text(if (isGenerating) "Estamos preparando tus entrenamientos." else "Preparando…", modifier = Modifier.fillMaxWidth().padding(top = 20.dp), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.body1, textAlign = TextAlign.Center)
+            }
+        }
+    }
+}
+
+/** Android equivalent of iOS CreatePlanAnimationView and its notification stack. */
+@Composable
+private fun PlanCreationAnimation() {
+    val steps = remember {
+        listOf(
+            "Analizando tus objetivos…", "Evaluando tu equipamiento…", "Optimizando la división semanal…",
+            "Calculando cargas objetivo…", "Revisando restricciones de movimiento…", "Personalizando ejercicios…",
+            "Equilibrando volumen e intensidad…", "Terminando tu plan personalizado…",
+        )
+    }
+    var step by remember { mutableStateOf(0) }
+    var completed by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            completed = false
+            delay(2_450)
+            completed = true
+            delay(650)
+            step = (step + 1) % steps.size
+        }
+    }
+    val transition = rememberInfiniteTransition(label = "plan-creation")
+    val ringRotation by transition.animateFloat(0f, 360f, infiniteRepeatable(tween(1_800, easing = LinearEasing)), label = "plan-creation-ring")
+    val pulse by transition.animateFloat(1f, .72f, infiniteRepeatable(tween(650), RepeatMode.Reverse), label = "plan-creation-pulse")
+    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(28.dp)) {
+        Box(Modifier.height(190.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
+            repeat(3) { index ->
+                val depth = index - 1
+                Box(
+                    Modifier.width(240.dp).height(78.dp)
+                        .offset(y = (depth * 44).dp)
+                        .graphicsLayer { scaleX = 1f - kotlin.math.abs(depth) * .08f; scaleY = scaleX; alpha = if (depth == 0) 1f else .68f }
+                        .clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.backgroundSecondary.copy(alpha = .92f)).padding(14.dp),
+                ) {
+                    Text("✦", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.h5)
+                    Text("Tu plan se está preparando", modifier = Modifier.padding(start = 36.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
+                }
+            }
+            CircularProgressIndicator(
+                progress = 1f,
+                modifier = Modifier.size(62.dp).graphicsLayer { rotationZ = ringRotation },
+                color = WildforceThemeTokens.accentGold,
+                backgroundColor = Color.Transparent,
+                strokeWidth = 3.dp,
+            )
+        }
+        Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(if (completed) "✓" else "○", color = if (completed) Color(0xFF43A047) else WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.h5)
+            AnimatedContent(targetState = step, label = "plan-creation-step") { current ->
+                Text(steps[current], modifier = Modifier.padding(start = 10.dp).alpha(if (completed) 1f else pulse), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -920,10 +1008,18 @@ private fun ChoiceOption(
 ) {
     val isWeekday = WorkoutWeekday.entries.any { it.title == title }
     val icon = onboardingIcon(glyph)
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val pressScale by animateFloatAsState(
+        targetValue = if (pressed) .97f else 1f,
+        animationSpec = spring(dampingRatio = .7f, stiffness = 700f),
+        label = "onboarding-choice-press",
+    )
     Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp))
+        Modifier.fillMaxWidth().graphicsLayer { scaleX = pressScale; scaleY = pressScale }.clip(RoundedCornerShape(16.dp))
             .background(if (selected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary.copy(alpha = 0.10f))
-            .clickable(onClick = onClick).padding(horizontal = 20.dp, vertical = 16.dp),
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+            .padding(horizontal = 20.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = if (selected) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary)

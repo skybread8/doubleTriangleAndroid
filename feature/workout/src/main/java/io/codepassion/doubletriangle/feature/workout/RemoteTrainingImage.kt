@@ -61,7 +61,11 @@ fun exerciseImageUrl(imageKey: String?, gender: String): String? =
 internal fun exerciseTutorialImageUrl(imageKey: String?): String? =
     imageKey?.takeIf(String::isNotBlank)?.let { "$IMAGE_BASE/tutorial/${it}_female.png" }
 
-internal fun workoutCoverUrl(focus: String, gender: String, order: Int): String {
+/**
+ * Mirrors `WorkoutDay.coverImage()` on iOS: a workout keeps the same cover
+ * variant even when its display order changes.
+ */
+internal fun workoutCoverUrl(focus: String, gender: String, workoutId: String): String {
     val normalized = focus.lowercase()
     val focusKey = when {
         "empuje" in normalized || "push" in normalized -> "push"
@@ -75,7 +79,14 @@ internal fun workoutCoverUrl(focus: String, gender: String, order: Int): String 
         "recuper" in normalized || "recovery" in normalized -> "recovery"
         else -> "fullBody"
     }
-    val variant = ((order - 1).coerceAtLeast(0) % 5) + 1
+    val compactUuid = workoutId.filter(Char::isLetterOrDigit)
+    val uuidByteSum = compactUuid
+        .takeIf { it.length == 32 && it.all { character -> character.digitToIntOrNull(16) != null } }
+        ?.chunked(2)
+        ?.sumOf { byte -> byte.toInt(16) }
+        // Local/demo workouts do not have a UUID. Keep their fallback stable too.
+        ?: workoutId.encodeToByteArray().sumOf { byte -> byte.toInt() and 0xFF }
+    val variant = (uuidByteSum % 5) + 1
     return "$IMAGE_BASE/covers/cover_${focusKey}_${gender}_$variant.png"
 }
 

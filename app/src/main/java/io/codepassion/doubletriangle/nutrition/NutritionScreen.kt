@@ -17,11 +17,14 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -40,6 +43,7 @@ import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
+import io.codepassion.doubletriangle.WorkoutRemoteSync
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -72,16 +76,22 @@ fun NutritionScreen(
     var selectedDate by remember { mutableStateOf(today) }
     var targets by remember(profile) { mutableStateOf(NutritionStore.loadTargets(context, profile)) }
     var preferences by remember { mutableStateOf(NutritionStore.loadPreferences(context)) }
+    var hasNutritionProfile by remember { mutableStateOf(NutritionStore.hasNutritionProfile(context)) }
     var planVersion by remember { mutableStateOf(NutritionStore.loadPlanVersion(context)) }
     val fallbackPlan = remember(profile, targets, preferences, today, planVersion) { NutritionStore.weekPlan(profile, targets, today, preferences, planVersion) }
     var generatedPlan by remember(profile) { mutableStateOf(NutritionStore.loadGeneratedPlan(context)) }
+    // A generated week is only a draft until the person explicitly accepts it.
+    // This prevents an accidental regeneration from replacing the active plan.
+    var generatedPlanPreview by remember { mutableStateOf<List<NutritionDayPlan>?>(null) }
     val plan = generatedPlan ?: fallbackPlan
     var meals by remember(selectedDate) { mutableStateOf(NutritionStore.load(context, selectedDate)) }
     var showLogFlow by remember { mutableStateOf(false) }
     var showEntries by remember { mutableStateOf(false) }
     var detailDay by remember { mutableStateOf<NutritionDayPlan?>(null) }
     var showTargets by remember { mutableStateOf(false) }
-    var showPreferences by remember { mutableStateOf(false) }
+    // Mirrors iOS: entering Nutrition without a profile starts configuration
+    // instead of silently treating the default omnivore value as a choice.
+    var showPreferences by remember { mutableStateOf(!hasNutritionProfile) }
     var showIdeas by remember { mutableStateOf(false) }
     var fridgeTarget by remember { mutableStateOf<NutritionTargets?>(null) }
     var showMoreActions by remember { mutableStateOf(false) }
@@ -110,8 +120,25 @@ fun NutritionScreen(
 
     fun reload() { meals = NutritionStore.load(context, selectedDate) }
 
+    // Equivalent to iOS's scheduled sync after a SwiftData save. Keep the
+    // pending marker if transport fails so the next foreground sync retries.
+    fun queueRemoteSync() {
+        val syncProfile = profile ?: return
+        val syncPreferences = context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
+        syncPreferences.edit().putBoolean("remote_sync_pending", true).apply()
+        scope.launch {
+            if (WorkoutRemoteSync.synchronize(context, syncProfile, syncPreferences) is WorkoutRemoteSync.Outcome.Synchronized) {
+                syncPreferences.edit().putBoolean("remote_sync_pending", false).apply()
+            }
+        }
+    }
+
     fun requestPlanGeneration() {
         if (generatingPlan) return
+        if (!hasNutritionProfile) {
+            showPreferences = true
+            return
+        }
         val now = System.currentTimeMillis()
         val lastAttempt = planGenerationPreferences.getLong("last_remote_plan_attempt", 0)
         val remainingMillis = 60_000 - (now - lastAttempt)
@@ -124,7 +151,7 @@ fun NutritionScreen(
         planGenerationPreferences.edit().putLong("last_remote_plan_attempt", now).apply()
         scope.launch {
             runCatching { NutritionAIPlanner.generate(context, profile, targets, preferences, today) }
-                .onSuccess { generatedPlan = it; planVersion = NutritionStore.regeneratePlan(context) }
+                .onSuccess { generatedPlanPreview = it }
                 .onFailure { generationError = it.message ?: "No se pudo generar el plan" }
             generatingPlan = false
         }
@@ -157,7 +184,7 @@ fun NutritionScreen(
             onBack = { showEntries = false },
             onAdd = { showLogFlow = true },
             onEdit = { editingMeal = it; showLogFlow = true },
-            onChanged = { updated -> NutritionStore.save(context, selectedDate, updated); meals = updated },
+            onChanged = { updated -> NutritionStore.save(context, selectedDate, updated); meals = updated; queueRemoteSync() },
             modifier = Modifier.padding(contentPadding),
         )
     } else {
@@ -199,20 +226,20 @@ fun NutritionScreen(
                 NutritionStore.save(context, selectedDate, dateEntries)
                 scope.launch { NutritionStore.load(context, selectedDate).let { HealthConnectNutritionSync.publish(context, it) } }
                 showLogFlow = false; editingMeal = null; plannedMethod = null; plannedTitle = null
-                reload()
+                reload(); queueRemoteSync()
             },
         )
     }
     if (showTargets) NutritionTargetsDialog(targets, { showTargets = false }) { value ->
-        targets = value; NutritionStore.saveTargets(context, value); NutritionStore.clearGeneratedPlan(context); generatedPlan = null; showTargets = false
+        targets = value; NutritionStore.saveTargets(context, value); NutritionStore.clearGeneratedPlan(context); generatedPlan = null; showTargets = false; queueRemoteSync()
     }
     if (showPreferences) NutritionPreferencesDialog(preferences, { showPreferences = false }) { value ->
-        preferences = value; NutritionStore.savePreferences(context, value); NutritionStore.clearGeneratedPlan(context); generatedPlan = null; showPreferences = false
+        preferences = value; NutritionStore.savePreferences(context, value); hasNutritionProfile = true; NutritionStore.clearGeneratedPlan(context); generatedPlan = null; showPreferences = false; queueRemoteSync()
     }
     if (showIdeas) MealIdeasDialog(plan.firstOrNull { it.date == selectedDate }, fridgeTarget, { showIdeas = false; fridgeTarget = null }) { planned ->
         val entry = MealLog(System.currentTimeMillis(), planned.title, planned.targets.calories, planned.targets.protein, planned.targets.carbs, planned.targets.fat, planned.type, selectedDate, planned.guidance, "meal_idea")
         val updated = NutritionStore.load(context, selectedDate) + entry
-        NutritionStore.save(context, selectedDate, updated); reload(); showIdeas = false; fridgeTarget = null
+        NutritionStore.save(context, selectedDate, updated); reload(); showIdeas = false; fridgeTarget = null; queueRemoteSync()
     }
     if (showMoreActions) NutritionMoreActionsDialog(
         onDismiss = { showMoreActions = false },
@@ -234,6 +261,19 @@ fun NutritionScreen(
             NutritionStore.save(context, selectedDate, updated); reload(); showFulfill = false
         },
     )
+    generatedPlanPreview?.let { preview ->
+        NutritionPlanPreviewDialog(
+            plan = preview,
+            onDismiss = { generatedPlanPreview = null },
+            onSave = {
+                NutritionStore.saveGeneratedPlan(context, preview)
+                generatedPlan = preview
+                generatedPlanPreview = null
+                planVersion = NutritionStore.regeneratePlan(context)
+                queueRemoteSync()
+            },
+        )
+    }
     if (generatingPlan) AlertDialog(onDismissRequest = {}, title = { Text("DISEÑANDO TU SEMANA", fontFamily = AntonFontFamily) }, text = { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) { CircularProgressIndicator(color = NutritionCoral); Text("La IA está adaptando calorías, macros, entrenamientos y preferencias alimentarias.", color = WildforceThemeTokens.textSecondary) } }, confirmButton = {})
     generationError?.let { message -> AlertDialog(onDismissRequest = { generationError = null }, title = { Text("NO SE PUDO GENERAR EL PLAN", fontFamily = AntonFontFamily) }, text = { Text(message, color = WildforceThemeTokens.textSecondary) }, confirmButton = { TextButton(onClick = { generationError = null; showMoreActions = true }) { Text("REINTENTAR", color = NutritionCoral) } }, dismissButton = { TextButton(onClick = { generationError = null }) { Text("CERRAR") } }) }
 }
@@ -304,20 +344,36 @@ private fun NutritionHub(
 
 @Composable
 private fun NutritionPlanHero(onGenerate: () -> Unit) {
-    Column(
+    Box(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))
-            .background(Brush.linearGradient(listOf(NutritionOrange, NutritionCoral), start = Offset.Zero, end = Offset(600f, 600f)))
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .background(Brush.linearGradient(listOf(NutritionOrange, NutritionCoral), start = Offset.Zero, end = Offset(600f, 600f))),
     ) {
-        Row(verticalAlignment = Alignment.Top) {
-            Column(Modifier.weight(1f)) {
-                Text("ACTIVA TU SEMANA", fontFamily = AntonFontFamily, fontSize = 30.sp, color = Color.White)
-                Text("Crea un plan día a día adaptado a tus entrenamientos, objetivos y preferencias.", color = Color.White.copy(alpha = .9f), modifier = Modifier.padding(top = 8.dp))
+        NutritionHeroParticles(Modifier.matchParentSize())
+        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(verticalAlignment = Alignment.Top) {
+                Column(Modifier.weight(1f)) {
+                    Text("ACTIVA TU SEMANA", fontFamily = AntonFontFamily, fontSize = 30.sp, color = Color.White)
+                    Text("Crea un plan día a día adaptado a tus entrenamientos, objetivos y preferencias.", color = Color.White.copy(alpha = .9f), modifier = Modifier.padding(top = 8.dp))
+                }
+                Box(Modifier.size(54.dp).background(Color.White.copy(alpha = .18f), CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Restaurant, null, tint = Color.White, modifier = Modifier.size(28.dp)) }
             }
-            Box(Modifier.size(54.dp).background(Color.White.copy(alpha = .18f), CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Restaurant, null, tint = Color.White, modifier = Modifier.size(28.dp)) }
+            Button(onClick = onGenerate, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), shape = RoundedCornerShape(14.dp)) { Text("GENERAR PLAN", modifier = Modifier.padding(vertical = 5.dp)) }
         }
-        Button(onClick = onGenerate, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), shape = RoundedCornerShape(14.dp)) { Text("GENERAR PLAN", modifier = Modifier.padding(vertical = 5.dp)) }
+    }
+}
+
+/** Static equivalent of the subtle SwiftUI DustParticlesEffectView used in the iOS hero. */
+@Composable
+private fun NutritionHeroParticles(modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val particles = listOf(
+            Triple(.08f, .18f, 2.5f), Triple(.20f, .72f, 1.5f), Triple(.37f, .12f, 2f),
+            Triple(.52f, .46f, 1.5f), Triple(.65f, .20f, 3f), Triple(.78f, .64f, 2f),
+            Triple(.91f, .17f, 1.5f), Triple(.88f, .84f, 2.5f), Triple(.12f, .92f, 2f),
+        )
+        particles.forEachIndexed { index, (x, y, radius) ->
+            drawCircle(Color.White.copy(alpha = if (index % 2 == 0) .16f else .09f), radius.dp.toPx(), Offset(size.width * x, size.height * y))
+        }
     }
 }
 
@@ -330,8 +386,10 @@ private fun NutritionCalendar(
     onSelect: (LocalDate) -> Unit,
 ) {
     val planDates = plan.associateBy { it.date }
-    val firstVisibleDate = minOf(plan.minOfOrNull { it.date } ?: today, today.minusDays(7))
-    val lastVisibleDate = maxOf(plan.maxOfOrNull { it.date } ?: today, today.plusDays(14))
+    // Same three-week window as iOS: previous Monday through 20 days after the current Monday.
+    val currentMonday = today.minusDays((today.dayOfWeek.value - 1).toLong())
+    val firstVisibleDate = minOf(plan.minOfOrNull { it.date } ?: today, currentMonday.minusDays(7))
+    val lastVisibleDate = maxOf(plan.maxOfOrNull { it.date } ?: today, currentMonday.plusDays(20))
     val visibleDates = generateSequence(firstVisibleDate) { date -> date.plusDays(1).takeIf { !it.isAfter(lastVisibleDate) } }.toList()
     val selectedIndex = visibleDates.indexOf(selected).coerceAtLeast(0)
     val calendarState = rememberLazyListState(initialFirstVisibleItemIndex = (selectedIndex - 2).coerceAtLeast(0))
@@ -350,6 +408,8 @@ private fun NutritionCalendar(
             Column(
                 Modifier.width(54.dp).height(84.dp).clip(RoundedCornerShape(12.dp))
                     .background(if (isSelected) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = .08f))
+                    .border(1.dp, if (date == today && !isSelected) WildforceThemeTokens.accent.copy(alpha = .15f) else Color.Transparent, RoundedCornerShape(12.dp))
+                    .alpha(if (!isSelectable) if (date == today) .72f else .55f else if (isPast) .9f else 1f)
                     .clickable(enabled = isSelectable) { onSelect(date) }.padding(vertical = 9.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -424,7 +484,14 @@ private fun DailyProgressCard(date: LocalDate, current: NutritionTargets, target
 
 @Composable
 private fun ProgressRing(progress: Float) {
-    Box(Modifier.size(92.dp), contentAlignment = Alignment.Center) {
+    // iOS gives the completed calorie ring a short spring lift; retain the
+    // same state-driven cue on Android instead of leaving the threshold static.
+    val scale by animateFloatAsState(
+        targetValue = if (progress >= 1f) 1.03f else 1f,
+        animationSpec = spring(dampingRatio = .6f),
+        label = "nutrition-ring-complete",
+    )
+    Box(Modifier.size(92.dp).graphicsLayer { scaleX = scale; scaleY = scale }, contentAlignment = Alignment.Center) {
         val track = WildforceThemeTokens.textSecondary.copy(alpha = .14f)
         Canvas(Modifier.fillMaxSize()) {
             drawArc(track, -90f, 360f, false, style = Stroke(8.dp.toPx(), cap = StrokeCap.Round))
@@ -562,13 +629,14 @@ private fun PlanMetric(icon: ImageVector, title: String, value: String, onClick:
 @Composable
 internal fun NutritionDayHeader(day: NutritionDayPlan, logged: NutritionTargets, isToday: Boolean, onClick: () -> Unit) {
     val gradient = when (day.energyDemand) { EnergyDemand.High -> listOf(NutritionOrange, NutritionRed); EnergyDemand.Medium -> listOf(NutritionCoral, NutritionOrange); EnergyDemand.Low -> listOf(NutritionGreen, NutritionCoral) }
+    val dayTypeColor = when (day.type) { NutritionDayType.Training -> NutritionOrange; NutritionDayType.Rest -> CarbsColor; NutritionDayType.Recovery -> NutritionGreen }
     Column(
         Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(24.dp)).background(Brush.linearGradient(gradient)).clickable(onClick = onClick).padding(16.dp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Row {
             Column { Text(day.date.format(DateTimeFormatter.ofPattern("d MMMM", Locale("es"))), style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = .82f)); Text(if (isToday) "HOY" else day.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es")).uppercase(), fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = Color.White) }
-            Spacer(Modifier.weight(1f)); Column(horizontalAlignment = Alignment.End) { Text(day.type.title.uppercase(), style = MaterialTheme.typography.caption, color = Color.White, modifier = Modifier.background(Color.White.copy(alpha = .14f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp)); Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) { NutritionMacroSymbol(NutritionMacroIcon.Calories, Color.White, Modifier.size(15.dp)); Text("${day.targets.calories} kcal", Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold, color = Color.White) } }
+            Spacer(Modifier.weight(1f)); Column(horizontalAlignment = Alignment.End) { Text(day.type.title.uppercase(), style = MaterialTheme.typography.caption, color = Color.White, modifier = Modifier.background(dayTypeColor.copy(alpha = .62f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp)); Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) { NutritionMacroSymbol(NutritionMacroIcon.Calories, Color.White, Modifier.size(15.dp)); Text("${day.targets.calories} kcal", Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold, color = Color.White) } }
         }
         Row(Modifier.background(Color.White.copy(alpha = .12f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.FitnessCenter, null, tint = Color.White, modifier = Modifier.size(14.dp)); Text(day.workoutTitle.uppercase(), Modifier.padding(start = 5.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White) }
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {

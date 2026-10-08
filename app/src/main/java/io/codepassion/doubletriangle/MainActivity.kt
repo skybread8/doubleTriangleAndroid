@@ -871,7 +871,10 @@ private fun WildforceApp(
                     workouts = displayedWorkoutState.workouts.map { candidate -> if (candidate.id == updated.id) updated else candidate },
                 )
                 displayedWorkoutState = updatedState
-                if (!updated.id.startsWith("custom-")) workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(updatedState))
+                if (!updated.id.startsWith("custom-")) {
+                    workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(updatedState))
+                    appPreferences.edit().putBoolean("remote_sync_pending", true).apply()
+                }
                 activeWorkout = updated
             },
             onExit = { activeWorkout = null },
@@ -906,7 +909,7 @@ private fun WildforceApp(
             activeWorkout = workout
         }, onSkip = {
             val skipped = appPreferences.getStringSet("skipped_workouts", emptySet()).orEmpty() + workout.id
-            appPreferences.edit().putStringSet("skipped_workouts", skipped).apply()
+            appPreferences.edit().putStringSet("skipped_workouts", skipped).putBoolean("remote_sync_pending", true).apply()
             val skippedState = displayedWorkoutState.copy(
                 workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Skipped) else it },
             )
@@ -922,7 +925,7 @@ private fun WildforceApp(
             }
         }, onUnskip = {
             val skipped = appPreferences.getStringSet("skipped_workouts", emptySet()).orEmpty() - workout.id
-            appPreferences.edit().putStringSet("skipped_workouts", skipped).apply()
+            appPreferences.edit().putStringSet("skipped_workouts", skipped).putBoolean("remote_sync_pending", true).apply()
             val unskippedState = displayedWorkoutState.copy(
                 workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Planned) else it },
             )

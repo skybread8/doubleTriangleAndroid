@@ -180,7 +180,7 @@ internal fun CustomWorkoutsScreen(
                         .clickable { onOpen(workout) },
                 ) {
                     RemoteTrainingImage(
-                        workoutCoverUrl(workout.focus, gender, workout.order),
+                        workoutCoverUrl(workout.focus, gender, workout.id),
                         workout.title,
                         Modifier.fillMaxSize(),
                     )

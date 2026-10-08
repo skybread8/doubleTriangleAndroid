@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +38,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.runtime.Composable
@@ -49,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.Icons
@@ -182,6 +186,13 @@ fun ProfileScreen(
         BodyMetricsStore.record(profileContext, value)
         onSave(value)
     }
+    // Nutrition can be edited from this profile tab or from its own hub. Both
+    // must enter the same remote-sync path so neither device silently wins.
+    fun saveNutritionProfile(value: NutritionProfilePreferences) {
+        ProfileDetailPreferencesStore.saveNutrition(profileContext, value)
+        profileContext.getSharedPreferences("wildforce_profile", 0)
+            .edit().putBoolean("remote_sync_pending", true).apply()
+    }
     LaunchedEffect(Unit) { entered = true }
     LaunchedEffect(draft, heightInput, weightInput, durationInput, birthYearInput) {
         saveProfile(validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput))
@@ -264,7 +275,7 @@ fun ProfileScreen(
                     Text("Configuración nutricional necesaria", style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
                     Text("Crea tu perfil nutricional para guardar preferencias alimentarias, restricciones y valores predeterminados de planificación en un solo lugar.", style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
                     Button(
-                        onClick = { nutritionProfile = nutritionProfile.copy(isConfigured = true); ProfileDetailPreferencesStore.saveNutrition(profileContext, nutritionProfile) },
+                        onClick = { nutritionProfile = nutritionProfile.copy(isConfigured = true); saveNutritionProfile(nutritionProfile) },
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary),
                         shape = RoundedCornerShape(14.dp),
@@ -275,7 +286,7 @@ fun ProfileScreen(
                     ChoiceButton("Ventana de alimentación", nutritionProfile.eatingWindowLabel(), icon = Icons.Filled.Restaurant) { nutritionPicker = NutritionPicker.EatingWindow }
                     TogglePreference("Sugerencias de comidas", "Muestra ideas sencillas junto a calorías, macros y recomendaciones para el entrenamiento.", nutritionProfile.wantsMealSuggestions, Icons.Filled.Restaurant) {
                         nutritionProfile = nutritionProfile.copy(wantsMealSuggestions = !nutritionProfile.wantsMealSuggestions)
-                        ProfileDetailPreferencesStore.saveNutrition(profileContext, nutritionProfile)
+                        saveNutritionProfile(nutritionProfile)
                     }
                 }
             }
@@ -411,14 +422,14 @@ fun ProfileScreen(
     nutritionPicker?.let { current ->
         ProfileOptionPickerDialog(current.title, current.options, onDismiss = { nutritionPicker = null }) { selected ->
             nutritionProfile = current.apply(nutritionProfile, selected)
-            ProfileDetailPreferencesStore.saveNutrition(profileContext, nutritionProfile)
+            saveNutritionProfile(nutritionProfile)
             nutritionPicker = null
         }
     }
     nutritionTextEditor?.let { field ->
         NutritionTextEditorDialog(field, nutritionProfile, onDismiss = { nutritionTextEditor = null }) { value ->
             nutritionProfile = field.apply(nutritionProfile, value)
-            ProfileDetailPreferencesStore.saveNutrition(profileContext, nutritionProfile)
+            saveNutritionProfile(nutritionProfile)
             nutritionTextEditor = null
         }
     }
@@ -878,10 +889,10 @@ private fun minimumTotalXp(level: Int): Int {
 }
 
 private sealed class NutritionPicker(val title: String, val options: List<String>) {
-    data object DietaryStyle : NutritionPicker("Estilo alimentario", listOf("Estándar", "Vegetariana", "Vegana", "Pescetariana"))
+    data object DietaryStyle : NutritionPicker("Estilo alimentario", listOf("Omnívora", "Vegetariana", "Vegana", "Pescetariana"))
     data object MealsPerDay : NutritionPicker("Comidas al día", (1..8).map { "$it" })
     data object EatingWindow : NutritionPicker("Ventana de alimentación", listOf("Flexible", "06:00 - 18:00", "08:00 - 20:00", "10:00 - 22:00", "12:00 - 20:00"))
-    data object CookingEffort : NutritionPicker("Esfuerzo al cocinar", listOf("Rápido y fácil", "Moderado", "Gourmet"))
+    data object CookingEffort : NutritionPicker("Esfuerzo al cocinar", listOf("Bajo", "Medio", "Alto"))
     data object BudgetSensitivity : NutritionPicker("Sensibilidad al presupuesto", listOf("Baja", "Media", "Alta"))
 
     fun apply(profile: NutritionProfilePreferences, selected: String): NutritionProfilePreferences = when (this) {
@@ -1111,7 +1122,12 @@ private fun TogglePickerRow(label: String, selected: Boolean, onToggle: () -> Un
 }
 
 @Composable private fun Section(title: String, content: @Composable () -> Unit) { Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) { Text(title, fontFamily = Exo2FontFamily, fontSize = 18.sp, color = WildforceThemeTokens.textPrimary); Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(horizontal = 14.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) { content() } } }
-@Composable private fun ChoiceButton(label: String, value: String, description: String? = null, icon: ImageVector? = null, onClick: () -> Unit) { Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 10.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { icon?.let { Icon(it, contentDescription = null, modifier = Modifier.padding(end = 12.dp).size(20.dp), tint = WildforceThemeTokens.textSecondary) }; Column(Modifier.weight(1f)) { Text(label, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis); description?.let { Text(it, Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 3, overflow = TextOverflow.Ellipsis) } }; Text(value, Modifier.padding(start = 10.dp).weight(.85f), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.End, maxLines = 2, overflow = TextOverflow.Ellipsis); Text("›", Modifier.padding(start = 8.dp), color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold) } }
+@Composable private fun ChoiceButton(label: String, value: String, description: String? = null, icon: ImageVector? = null, onClick: () -> Unit) {
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val scale by animateFloatAsState(if (pressed) .97f else 1f, spring(dampingRatio = .7f, stiffness = 700f), label = "profile-choice-press")
+    Row(Modifier.fillMaxWidth().graphicsLayer { scaleX = scale; scaleY = scale }.clickable(interactionSource = interaction, indication = null, onClick = onClick).padding(vertical = 10.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { icon?.let { Icon(it, contentDescription = null, modifier = Modifier.padding(end = 12.dp).size(20.dp), tint = WildforceThemeTokens.textSecondary) }; Column(Modifier.weight(1f)) { Text(label, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis); description?.let { Text(it, Modifier.padding(top = 3.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 3, overflow = TextOverflow.Ellipsis) } }; Text(value, Modifier.padding(start = 10.dp).weight(.85f), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.End, maxLines = 2, overflow = TextOverflow.Ellipsis); Text("›", Modifier.padding(start = 8.dp), color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold) }
+}
 @Composable
 private fun NumberField(
     label: String,

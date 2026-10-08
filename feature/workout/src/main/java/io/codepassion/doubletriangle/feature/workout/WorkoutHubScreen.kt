@@ -15,6 +15,11 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -116,6 +121,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -320,10 +326,7 @@ fun WorkoutHubScreen(
     }
     if (generatingCustomWorkout) {
         Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.35f)), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator(color = WildforceThemeTokens.accentGold)
-                Text("GENERANDO ENTRENAMIENTO CON IA…", Modifier.padding(top = 12.dp), color = Color.White, fontWeight = FontWeight.Bold)
-            }
+            PlanGenerationOverlay()
         }
     }
     customGenerationError?.let { error ->
@@ -364,6 +367,26 @@ fun WorkoutHubScreen(
             },
             dismissButton = { TextButton(onClick = { customGenerationError = null }) { Text("CERRAR", color = WildforceThemeTokens.textSecondary) } },
         )
+    }
+}
+
+/** Native counterpart of iOS CreatePlanAnimationView for custom-workout AI generation. */
+@Composable
+private fun PlanGenerationOverlay() {
+    val transition = rememberInfiniteTransition(label = "custom-workout-generation")
+    val rotation by transition.animateFloat(0f, 360f, infiniteRepeatable(tween(1_800, easing = LinearEasing)), label = "custom-workout-ring")
+    val pulse by transition.animateFloat(1f, .55f, infiniteRepeatable(tween(650), RepeatMode.Reverse), label = "custom-workout-copy")
+    Column(
+        Modifier.clip(RoundedCornerShape(24.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(horizontal = 32.dp, vertical = 28.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Box(Modifier.size(68.dp), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(progress = 1f, modifier = Modifier.fillMaxSize().graphicsLayer { rotationZ = rotation }, color = WildforceThemeTokens.accentGold, strokeWidth = 4.dp)
+            Icon(Icons.Filled.AutoAwesome, null, tint = WildforceThemeTokens.accentGold, modifier = Modifier.size(26.dp))
+        }
+        Text("GENERANDO ENTRENAMIENTO CON IA…", color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold, modifier = Modifier.alpha(pulse))
+        Text("Personalizando ejercicios y volumen", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
     }
 }
 
@@ -880,20 +903,33 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, onClick: () 
     Card(Modifier.fillMaxWidth().clickable(onClick = onClick), shape = RoundedCornerShape(14.dp), elevation = 0.dp) {
         Box(Modifier.fillMaxWidth().height(180.dp)) {
             RemoteTrainingImage(
-                url = workoutCoverUrl(workout.focus, gender, workout.order),
+                url = workoutCoverUrl(workout.focus, gender, workout.id),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
             )
+            // Same two-layer treatment as WorkoutDayHeaderView on iOS. The
+            // previous single gradient began too high and muddied the artwork.
+            Box(
+                Modifier.fillMaxSize().background(
+                    Brush.verticalGradient(
+                        listOf(Color.Black.copy(alpha = 0.80f), Color.Transparent),
+                        startY = 180f,
+                        endY = 90f,
+                    ),
+                ),
+            )
+            Box(
+                Modifier.fillMaxSize().background(
+                    Brush.horizontalGradient(
+                        listOf(Color.Black.copy(alpha = 0.30f), Color.Transparent),
+                        startX = 0f,
+                        endX = 180f,
+                    ),
+                ),
+            )
             Column(
                 Modifier.fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(Color.Transparent, Color.Black.copy(alpha = 0.80f)),
-                            startY = 72f,
-                            endY = 180f,
-                        ),
-                    )
-                    .padding(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 10.dp),
+                    .padding(start = 12.dp, top = 8.dp, end = 12.dp),
             ) {
                 Text(
                     "DÍA ${workout.order}",
@@ -922,15 +958,17 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, onClick: () 
                     Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp)
-                        .horizontalScroll(rememberScrollState())
                         .semantics {
                             contentDescription = "${workout.focus}, ${workout.dayType}, ${workout.estimatedMinutes} min"
                         },
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    WorkoutCardMetadata(Icons.Filled.MyLocation, workout.focus)
-                    WorkoutCardMetadata(workoutDayTypeIcon(workout.dayType), workout.dayType)
+                    // iOS presents this as one non-scrolling HStack. The
+                    // descriptive fields therefore truncate cleanly instead
+                    // of exposing clipped, scrollable fragments.
+                    WorkoutCardMetadata(Icons.Filled.MyLocation, workout.focus, modifier = Modifier.weight(1f))
+                    WorkoutCardMetadata(workoutDayTypeIcon(workout.dayType), workout.dayType, modifier = Modifier.weight(1f))
                     WorkoutCardMetadata(
                         Icons.Filled.Timer,
                         if (workout.status == WorkoutStatus.Completed) {
@@ -963,8 +1001,13 @@ private fun workoutDetailStatus(status: WorkoutStatus): Pair<String, Color>? = w
 }
 
 @Composable
-private fun WorkoutCardMetadata(icon: ImageVector, label: String, iconTint: Color = Color.White.copy(alpha = 0.82f)) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+private fun WorkoutCardMetadata(
+    icon: ImageVector,
+    label: String,
+    iconTint: Color = Color.White.copy(alpha = 0.82f),
+    modifier: Modifier = Modifier,
+) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp), tint = iconTint)
         Text(
             label,
@@ -1114,7 +1157,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
     }
     Box(Modifier.fillMaxSize().liquidGlassBackground()) {
         RemoteTrainingImage(
-            url = workoutCoverUrl(workout.focus, gender, workout.order),
+            url = workoutCoverUrl(workout.focus, gender, workout.id),
             contentDescription = workout.title,
             modifier = Modifier.fillMaxWidth().height(detailHeroHeight),
         )
@@ -2924,6 +2967,13 @@ private fun SetTrackingRows(
         val setNumber = setIndex + 1
         val completed = setIndex < completedSets
         val current = setIndex == completedSets
+        // Mirrors the iOS checkmark's spring/bounce when a set flips from pending
+        // to complete, rather than only animating insertion/removal of the row.
+        val completionScale by animateFloatAsState(
+            targetValue = if (completed) 1f else .72f,
+            animationSpec = spring(dampingRatio = .5f, stiffness = 520f),
+            label = "set-completion-$exerciseIndex-$setNumber",
+        )
         val record = records.lastOrNull { it.exerciseIndex == exerciseIndex && it.setNumber == setNumber }
         if (current && currentEditor != null) {
             AnimatedVisibility(
@@ -2946,7 +2996,12 @@ private fun SetTrackingRows(
                     .padding(horizontal = if (dense) 10.dp else 12.dp, vertical = if (dense) 6.dp else 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(if (completed) "✓" else setNumber.toString(), Modifier.width(34.dp), color = if (completed) Color(0xFF2EAF68) else WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
+                Text(
+                    if (completed) "✓" else setNumber.toString(),
+                    Modifier.width(34.dp).graphicsLayer { scaleX = completionScale; scaleY = completionScale },
+                    color = if (completed) Color(0xFF2EAF68) else WildforceThemeTokens.textPrimary,
+                    fontWeight = FontWeight.Bold,
+                )
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                     Text("Reps", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                     Spacer(Modifier.width(6.dp))

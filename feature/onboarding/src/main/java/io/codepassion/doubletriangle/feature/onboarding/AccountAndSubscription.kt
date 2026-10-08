@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import com.android.billingclient.api.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -542,6 +544,12 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
     val scope = rememberCoroutineScope()
     val context = LocalContext.current.applicationContext
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        // Dialogs dim their host window by default. That dark scrim made this
+        // sheet appear opaque even though its own material is translucent,
+        // unlike the root menu. Let the sheet's glass material provide the
+        // overlay instead.
+        val dialogWindow = (LocalView.current.parent as? DialogWindowProvider)?.window
+        SideEffect { dialogWindow?.setDimAmount(0f) }
         // Keep the bottom sheet above the IME. Without this, focused fields near
         // the bottom are hidden by the keyboard on smaller screens.
         Box(

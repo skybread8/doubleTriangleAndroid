@@ -96,53 +96,120 @@ object WorkoutPlanGenerator {
             val days = plan.optJSONArray("workout_days") ?: JSONArray()
             for (dayIndex in 0 until days.length()) {
                 val day = days.optJSONObject(dayIndex) ?: continue
-                put(JSONObject().put("id", day.optString("id")).put("title", day.optString("title"))
-                    .put("focus", day.optString("focus")).put("dayType", day.optString("day_type", "strength"))
-                    .put("status", day.optString("status", "planned").uppercase())
-                    .put("weekday", day.optString("intended_weekday", "MONDAY").uppercase())
-                    .put("estimatedDurationMinutes", day.optInt("estimated_duration_minutes", 50))
-                    .put("blocks", JSONArray().apply {
-                        val blocks = day.optJSONArray("blocks") ?: JSONArray()
-                        for (blockIndex in 0 until blocks.length()) {
-                            val block = blocks.optJSONObject(blockIndex) ?: continue
-                            put(JSONObject().put("type", block.optString("type", "standard"))
-                                .put("rounds", block.optInt("rounds", 1))
-                                .put("restAfterBlockSeconds", block.opt("rest_after_block_seconds"))
-                                .put("notes", block.opt("notes"))
-                                .put("exercises", JSONArray().apply {
-                                    val exercises = block.optJSONArray("exercises") ?: JSONArray()
-                                    for (exerciseIndex in 0 until exercises.length()) {
-                                        val exercise = exercises.optJSONObject(exerciseIndex) ?: continue
-                                        val style = exercise.optJSONObject("set_style_configuration")
-                                        put(JSONObject().put("name", exercise.optString("exercise", "Ejercicio"))
-                                            .put("imageKey", exercise.optString("exercise"))
-                                            .put("sets", exercise.optInt("sets", 1))
-                                            .put("repsMin", exercise.opt("reps_min")).put("repsMax", exercise.opt("reps_max"))
-                                            .put("restSeconds", exercise.optInt("rest_seconds", 0))
-                                            .put("targetWeightKg", exercise.opt("target_weight_kg"))
-                                            .put("targetReps", exercise.opt("target_reps")).put("targetWeightsKg", exercise.opt("target_weights_kg"))
-                                            .put("targetDurationMinutes", exercise.opt("target_duration_minutes")).put("targetDurationSeconds", exercise.opt("target_duration_seconds"))
-                                            .put("targetDistanceKm", exercise.opt("target_distance_km"))
-                                            .put("setStyle", style?.optString("style", "straight") ?: "straight")
-                                            .put("setStyleParameters", JSONObject().put("appliesToFinalSetOnly", style?.opt("applies_to_final_set_only"))
-                                                .put("dropCount", style?.opt("drop_count")).put("dropWeightPercent", style?.opt("drop_weight_percent"))
-                                                .put("backoffSetCount", style?.opt("backoff_set_count")).put("backoffWeightPercent", style?.opt("backoff_weight_percent"))
-                                                .put("intraSetRestSeconds", style?.opt("intra_set_rest_seconds")).put("tempo", style?.opt("tempo")).put("targetRir", style?.opt("target_rir"))))
-                                    }
-                                }))
-                        }
-                    }))
+                put(remoteWorkoutDayToLocalJson(day))
             }
         })
     }.toString()
 
+    private fun remoteWorkoutDayToLocalJson(day: JSONObject): JSONObject = JSONObject()
+        .put("id", day.optString("id"))
+        .put("title", day.optString("title"))
+        .put("focus", day.optString("focus"))
+        .put("dayType", day.optString("day_type", "strength"))
+        .put("status", day.optString("status", "planned").uppercase())
+        .put("weekday", day.optString("intended_weekday", "MONDAY").uppercase())
+        .put("estimatedDurationMinutes", day.optInt("estimated_duration_minutes", 50))
+        .put("blocks", JSONArray().apply {
+            val blocks = day.optJSONArray("blocks") ?: JSONArray()
+            for (blockIndex in 0 until blocks.length()) {
+                val block = blocks.optJSONObject(blockIndex) ?: continue
+                put(JSONObject().put("type", block.optString("type", "standard"))
+                    .put("rounds", block.optInt("rounds", 1))
+                    .put("restAfterBlockSeconds", block.opt("rest_after_block_seconds"))
+                    .put("notes", block.opt("notes"))
+                    .put("exercises", JSONArray().apply {
+                        val exercises = block.optJSONArray("exercises") ?: JSONArray()
+                        for (exerciseIndex in 0 until exercises.length()) {
+                            val exercise = exercises.optJSONObject(exerciseIndex) ?: continue
+                            val style = exercise.optJSONObject("set_style_configuration")
+                            put(JSONObject().put("name", exercise.optString("exercise", "Ejercicio"))
+                                .put("imageKey", exercise.optString("exercise"))
+                                .put("sets", exercise.optInt("sets", 1))
+                                .put("repsMin", exercise.opt("reps_min")).put("repsMax", exercise.opt("reps_max"))
+                                .put("restSeconds", exercise.optInt("rest_seconds", 0))
+                                .put("targetWeightKg", exercise.opt("target_weight_kg"))
+                                .put("targetReps", exercise.opt("target_reps")).put("targetWeightsKg", exercise.opt("target_weights_kg"))
+                                .put("targetDurationMinutes", exercise.opt("target_duration_minutes")).put("targetDurationSeconds", exercise.opt("target_duration_seconds"))
+                                .put("targetDistanceKm", exercise.opt("target_distance_km"))
+                                .put("setStyle", style?.optString("style", "straight") ?: "straight")
+                                .put("setStyleParameters", JSONObject().put("appliesToFinalSetOnly", style?.opt("applies_to_final_set_only"))
+                                    .put("dropCount", style?.opt("drop_count")).put("dropWeightPercent", style?.opt("drop_weight_percent"))
+                                    .put("backoffSetCount", style?.opt("backoff_set_count")).put("backoffWeightPercent", style?.opt("backoff_weight_percent"))
+                                    .put("intraSetRestSeconds", style?.opt("intra_set_rest_seconds")).put("tempo", style?.opt("tempo")).put("targetRir", style?.opt("target_rir"))))
+                        }
+                    }))
+            }
+        })
+
+    private fun remoteSingleWorkoutToLocalJson(workout: JSONObject): String = JSONObject()
+        .put("planName", "Sesión personalizada")
+        .put("phase", "Sesión generada con IA")
+        .put("workouts", JSONArray().put(remoteWorkoutDayToLocalJson(workout)))
+        .toString()
+
     suspend fun generateCustom(profile: OnboardingProfile, request: CustomWorkoutRequest, context: Context? = null): WorkoutDaySummary = withContext(Dispatchers.IO) {
-        val (_, state) = generateWithInstruction(
-            profile.copy(workoutDays = setOf(WorkoutWeekday.Monday)),
-            "Genera UNA ÚNICA sesión personalizada para MONDAY. Objetivo: ${request.goal ?: "el objetivo habitual (${profile.goal.title})"}. Enfoques elegidos: ${request.focuses.joinToString().ifBlank { request.focus }}. Grupos musculares elegidos: ${request.muscleGroups.joinToString().ifBlank { "cualquiera" }}. Duración objetivo: ${request.durationMinutes} minutos. Incluye calentamiento: ${request.includeWarmup}. Incluye vuelta a la calma: ${request.includeCooldown}. El equipamiento temporal de esta sesión es exactamente: ${request.equipment.ifBlank { "peso corporal" }}. Sustituye con él el equipamiento habitual del perfil: no añadas ni presupongas máquinas, barras o accesorios que no figuren en esta lista. Devuelve un único objeto dentro de `workouts` y aplica las mismas reglas de bloques, prescripciones y seguridad que el plan semanal.",
-            context,
-        )
-        state.workouts.first().copy(id = "custom-ai-${UUID.randomUUID()}", order = 1, estimatedMinutes = request.durationMinutes, status = WorkoutStatus.Planned)
+        generateRemoteCustomWorkout(profile, request, requireNotNull(context) { "Inicia sesión para generar la sesión." })
+    }
+
+    /** Mirrors iOS: one-off workouts are generated by the authenticated backend, never by a device API key. */
+    private fun generateRemoteCustomWorkout(profile: OnboardingProfile, request: CustomWorkoutRequest, context: Context): WorkoutDaySummary {
+        val token = context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE).getString("token", null)
+            ?: error("Inicia sesión para generar la sesión.")
+        val payload = JSONObject()
+            .put("goal", apiGoal(request.goal ?: profile.goal.storedValue))
+            .put("focuses", JSONArray(request.focuses.ifEmpty { setOf(request.focus) }.map(::apiFocus)))
+            .put("muscleGroups", JSONArray(request.muscleGroups))
+            .put("equipment", JSONArray(request.equipment.split(',', ';', '\n').map(String::trim).filter(String::isNotBlank).ifEmpty { listOf("bodyweight") }))
+            .put("includeWarmup", request.includeWarmup)
+            .put("includeCooldown", request.includeCooldown)
+            .put("durationMinutes", request.durationMinutes.coerceIn(10, 180))
+        val connection = (URL(WildforceApiEnvironment.apiUrl("workout-days/generate")).openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            doOutput = true
+            connectTimeout = 30_000
+            readTimeout = 180_000
+            setRequestProperty("Accept", "application/json")
+            setRequestProperty("Content-Type", "application/json")
+            setRequestProperty("Authorization", "Bearer $token")
+            setRequestProperty("Idempotency-Key", UUID.randomUUID().toString())
+        }
+        try {
+            connection.outputStream.use { it.write(payload.toString().toByteArray()) }
+            val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
+            val response = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+            check(connection.responseCode in 200..299) {
+                JSONObject(response).optString("message").ifBlank { "El servidor devolvió HTTP ${connection.responseCode}" }
+            }
+            val workout = JSONObject(response).getJSONObject("data")
+            return parse(remoteSingleWorkoutToLocalJson(workout), profile.name, profile.goal.title)
+                .workouts.first()
+                .copy(id = "custom-ai-${UUID.randomUUID()}", order = 1, estimatedMinutes = request.durationMinutes, status = WorkoutStatus.Planned)
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun apiGoal(value: String): String = when (value.trim().lowercase()) {
+        "perder peso", "loseweight" -> "loseWeight"
+        "ganar músculo", "ganar musculo", "buildmuscle" -> "buildMuscle"
+        "ganar fuerza", "gainstrength" -> "gainStrength"
+        "mejorar resistencia", "improveendurance" -> "improveEndurance"
+        "mejorar movilidad", "improvemobility" -> "improveMobility"
+        "recomposición corporal", "recomposicion corporal", "bodyrecomposition" -> "bodyRecomposition"
+        else -> "generalFitness"
+    }
+
+    private fun apiFocus(value: String): String = when (value.trim().lowercase()) {
+        "cuerpo completo", "fullbody" -> "fullBody"
+        "tren superior", "upperbody" -> "upperBody"
+        "tren inferior", "lowerbody", "piernas", "legs" -> "lowerBody"
+        "empuje", "push", "pecho", "chest" -> "chest"
+        "tirón", "tiron", "pull", "espalda", "back" -> "back"
+        "hombros", "shoulders" -> "shoulders"
+        "brazos", "arms" -> "arms"
+        "core" -> "core"
+        "cardio" -> "cardio"
+        else -> "mobility"
     }
 
     suspend fun adaptWorkout(profile: OnboardingProfile, workout: WorkoutDaySummary, request: CustomWorkoutRequest, context: Context? = null): WorkoutDaySummary = withContext(Dispatchers.IO) {

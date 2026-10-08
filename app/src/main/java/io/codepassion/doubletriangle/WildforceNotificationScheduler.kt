@@ -13,6 +13,8 @@ import android.os.Build
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import io.codepassion.doubletriangle.feature.workout.WorkoutNotificationPreferences
+import io.codepassion.doubletriangle.nutrition.MealType
+import io.codepassion.doubletriangle.nutrition.NutritionStore
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -71,8 +73,29 @@ internal object WildforceNotificationScheduler {
     }
 
     fun scheduleNutritionReminder(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.cancel(pendingIntent(context, NUTRITION_ALARM))
         if (!WorkoutNotificationPreferences.remindersEnabled(context)) return
-        schedule(context, NUTRITION_ALARM, LocalDate.now().atTime(LocalTime.of(20, 0)), CHANNEL_NUTRITION, "Registro nutricional", "¿Has registrado tus comidas de hoy?")
+
+        // Mirrors iOS: reminders follow the meals actually planned for today,
+        // rather than a generic fixed-hour nudge. A day with no food log yet
+        // is deliberately left alone.
+        val now = LocalDateTime.now()
+        val next = pendingNutritionCheckpoints(context, now)
+            .filter { it.at.isAfter(now) }
+            .minByOrNull { it.at }
+            ?: return
+        val mealsAtCheckpoint = pendingNutritionCheckpoints(context, now)
+            .filter { it.at == next.at }
+            .map { it.title }
+        schedule(
+            context,
+            NUTRITION_ALARM,
+            next.at,
+            CHANNEL_NUTRITION,
+            "Registra tus comidas",
+            nutritionReminderBody(mealsAtCheckpoint),
+        )
     }
 
     fun cancelAll(context: Context) {
@@ -156,12 +179,57 @@ internal object WildforceNotificationScheduler {
 
     private fun workoutReminderTitle(context: Context): String =
         context.resources.getStringArray(R.array.workout_reminder_titles).random()
+
+    /** Planned breakfast/lunch/dinner checkpoints, using the same iOS ranges: 12:00, 17:00 and 21:00. */
+    private fun pendingNutritionCheckpoints(context: Context, now: LocalDateTime): List<NutritionCheckpoint> {
+        val today = now.toLocalDate()
+        val logged = NutritionStore.load(context, today)
+        if (logged.isEmpty()) return emptyList()
+        val planned = NutritionStore.loadGeneratedPlan(context)
+            ?.firstOrNull { it.date == today }
+            ?.meals
+            .orEmpty()
+        val loggedTypes = logged.map { it.type }.toSet()
+        return planned
+            .filter { it.type in reminderMealTypes && it.type !in loggedTypes }
+            .map { NutritionCheckpoint(it.title.ifBlank { it.type.title }, today.atTime(reminderTime(it.type))) }
+    }
+
+    /** A notification remains valid only while at least one of its meals is still overdue. */
+    fun nutritionReminderDue(context: Context, now: LocalDateTime = LocalDateTime.now()): Boolean =
+        pendingNutritionCheckpoints(context, now).any { !it.at.isAfter(now) }
+
+    private fun reminderTime(type: MealType): LocalTime = when (type) {
+        MealType.Breakfast -> LocalTime.of(12, 0)
+        MealType.Lunch -> LocalTime.of(17, 0)
+        MealType.Dinner -> LocalTime.of(21, 0)
+        MealType.Snack -> error("Snack has no logging checkpoint")
+    }
+
+    private fun nutritionReminderBody(names: List<String>): String = when (names.size) {
+        0 -> "Aún te quedan comidas por registrar hoy."
+        1 -> "Aún tienes que registrar ${names.first()} hoy."
+        2 -> "Aún tienes que registrar ${names[0]} y ${names[1]} hoy."
+        else -> "Aún tienes que registrar ${names.dropLast(1).joinToString(", ")} y ${names.last()} hoy."
+    }
+
+    private data class NutritionCheckpoint(val title: String, val at: LocalDateTime)
+
+    private val reminderMealTypes = setOf(MealType.Breakfast, MealType.Lunch, MealType.Dinner)
 }
 
 internal class WildforceNotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (!WorkoutNotificationPreferences.remindersEnabled(context)) return
         val channel = intent.getStringExtra("channel") ?: WildforceNotificationScheduler.CHANNEL_WORKOUT
+        if (channel == WildforceNotificationScheduler.CHANNEL_NUTRITION) {
+            // A meal might have been logged after this alarm was queued.
+            // Re-evaluate it before showing anything, then queue only the
+            // next still-pending planned checkpoint.
+            val isStillDue = WildforceNotificationScheduler.nutritionReminderDue(context)
+            WildforceNotificationScheduler.scheduleNutritionReminder(context)
+            if (!isStillDue) return
+        }
         val title = intent.getStringExtra("title") ?: "Wildforce"
         val body = intent.getStringExtra("body") ?: "Tienes una actividad pendiente."
         WildforceNotificationScheduler.ensureChannels(context)

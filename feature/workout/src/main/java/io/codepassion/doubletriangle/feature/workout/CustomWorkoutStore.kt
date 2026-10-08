@@ -197,8 +197,22 @@ private fun JSONObject.optIntOrNull(name: String): Int? = takeIf { has(name) && 
 private fun JSONObject.optDoubleOrNull(name: String): Double? = takeIf { has(name) && !isNull(name) }?.optDouble(name)
 private fun JSONObject.optIntList(name: String): List<Int>? = optJSONArray(name)?.let { array -> List(array.length()) { array.optInt(it) } }
 private fun JSONObject.optDoubleList(name: String): List<Double>? = optJSONArray(name)?.let { array -> List(array.length()) { array.optDouble(it) } }
+private fun JSONObject.stringList(name: String): List<String> = optJSONArray(name)?.let { array ->
+    List(array.length()) { index -> array.optString(index) }.filter(String::isNotBlank)
+}.orEmpty()
 
-internal data class ExerciseChoice(val name: String, val imageKey: String)
+/**
+ * A picker-ready projection of the canonical exercise catalog.
+ *
+ * Keep the fields that define replacement grouping here instead of maintaining a
+ * second, partial Android-only map. This is the same source data used by iOS.
+ */
+internal data class ExerciseChoice(
+    val name: String,
+    val imageKey: String,
+    val substitutionCandidates: List<String> = emptyList(),
+    val primaryMuscles: Set<String> = emptySet(),
+)
 
 /** Mirrors `SwapExerciseView` on iOS: candidates first, then exercises with a
  * shared primary muscle, followed by every remaining exercise. */
@@ -211,56 +225,22 @@ internal data class ExerciseReplacementSections(
         get() = recommendedSubstitutes + sameMuscleGroup + allOtherExercises
 }
 
-/**
- * Android's picker catalogue is a subset of the canonical iOS exercise
- * catalogue. Keep the exact iOS substitution order for every exercise it
- * contains; candidates absent from Android's local catalogue are omitted.
- */
-private val iosSubstitutionCandidates = mapOf(
-    "airSquat" to listOf("gobletSquat", "legPress", "walkingLunge"),
-    "gobletSquat" to listOf("airSquat", "barbellBackSquat", "legPress"),
-    "barbellBackSquat" to listOf("barbellFrontSquat", "legPress", "gobletSquat"),
-    "legPress" to listOf("barbellBackSquat", "gobletSquat", "airSquat"),
-    "walkingLunge" to listOf("reverseLunge", "stepUp", "bulgarianSplitSquat"),
-    "deadlift" to listOf("romanianDeadlift", "gluteBridge", "seatedLegCurl"),
-    "romanianDeadlift" to listOf("hamstringCurl", "deadlift"),
-    "pushUp" to listOf("declinePushUp", "benchPress", "chestPressMachine", "chestFly"),
-    "benchPress" to listOf("inclineBenchPress", "chestPressMachine", "pushUp", "dumbbellBenchPress", "smithMachineBenchPress"),
-    "inclineBenchPress" to listOf("dumbbellInclineBenchPress", "benchPress", "chestPressMachine", "pushUp"),
-    "dumbbellInclineBenchPress" to listOf("inclineBenchPress", "benchPress", "chestPressMachine", "pushUp"),
-    "overheadPress" to listOf("dumbbellOverheadPress", "arnoldPress", "lateralRaise"),
-    "lateralRaise" to listOf("overheadPress", "arnoldPress", "frontRaise"),
-    "chestDip" to listOf("tricepsDip", "tricepsPushdown", "overheadTricepsExtension", "ringDip"),
-    "tricepsPushdown" to listOf("chestDip", "overheadTricepsExtension", "tricepsDip"),
-    "pullUp" to listOf("chinUp", "latPulldown", "seatedCableRow"),
-    "latPulldown" to listOf("pullUp", "chinUp", "seatedCableRow"),
-    "seatedCableRow" to listOf("bentOverRow", "singleArmDumbbellRow", "latPulldown", "seatedMachineRow"),
-    "bentOverRow" to listOf("seatedCableRow", "dumbbellBentOverRow", "deadlift", "dumbbellBentOverRow", "smithMachineBentOverRow"),
-    "facePull" to listOf("rearDeltFly", "thoracicRotation", "machineRearDeltFly"),
-    "bicepsCurl" to listOf("hammerCurl", "chinUp"),
-    "hammerCurl" to listOf("bicepsCurl", "cableCurl", "bayesianCableCurl"),
-    "plank" to listOf("sidePlank", "deadBug", "birdDog"),
-    "sidePlank" to listOf("plank", "russianTwist"),
-    "deadBug" to listOf("birdDog", "plank", "bicycleCrunch"),
-    "mountainClimber" to listOf("burpee", "jumpRope", "bicycleCrunch"),
-)
-
 internal fun exerciseReplacementSections(
     catalog: List<ExerciseChoice>,
     replacing: ExerciseSummary,
 ): ExerciseReplacementSections {
     val currentKey = replacing.imageKey?.trim()
     val current = catalog.firstOrNull { it.imageKey.equals(currentKey, ignoreCase = true) }
-    val candidates = iosSubstitutionCandidates[current?.imageKey ?: currentKey]
+    val candidates = current?.substitutionCandidates
         .orEmpty()
         .mapNotNull { key -> catalog.firstOrNull { it.imageKey.equals(key, ignoreCase = true) } }
     val candidateKeys = candidates.map { it.imageKey.lowercase() }.toSet()
-    val currentPrimaryMuscles = ExerciseVisualCatalog.metadata(current?.imageKey ?: currentKey)?.primary.orEmpty().toSet()
+    val currentPrimaryMuscles = current?.primaryMuscles.orEmpty()
     val remaining = catalog.filterNot { choice ->
         choice.imageKey.equals(currentKey, ignoreCase = true) || choice.imageKey.lowercase() in candidateKeys
     }
     val sameMuscleGroup = remaining.filter { choice ->
-        !ExerciseVisualCatalog.metadata(choice.imageKey)?.primary.orEmpty().toSet().intersect(currentPrimaryMuscles).isEmpty()
+        choice.primaryMuscles.intersect(currentPrimaryMuscles).isNotEmpty()
     }.sortedBy { it.name }
     val sameKeys = sameMuscleGroup.map { it.imageKey.lowercase() }.toSet()
     val allOtherExercises = remaining.filterNot { it.imageKey.lowercase() in sameKeys }.sortedBy { it.name }
@@ -283,8 +263,17 @@ internal object CustomExerciseCatalog {
     )
 
     fun load(context: Context): List<ExerciseChoice> = runCatching {
-        val root = JSONObject(context.resources.openRawResource(R.raw.exercise_guide_es).bufferedReader().use { it.readText() })
-        root.keys().asSequence().map { key -> ExerciseChoice(spanishNames[key] ?: humanize(key), key) }.sortedBy { it.name }.toList()
+        val catalog = JSONArray(context.resources.openRawResource(R.raw.exercise_catalog).bufferedReader().use { it.readText() })
+        List(catalog.length()) { index ->
+            val item = catalog.getJSONObject(index)
+            val key = item.getString("id")
+            ExerciseChoice(
+                name = spanishNames[key] ?: item.optString("name").ifBlank { humanize(key) },
+                imageKey = key,
+                substitutionCandidates = item.stringList("substitutionCandidates"),
+                primaryMuscles = item.stringList("primaryMuscles").toSet(),
+            )
+        }.sortedBy { it.name }
     }.getOrDefault(spanishNames.map { ExerciseChoice(it.value, it.key) }.sortedBy { it.name })
 
     private fun humanize(value: String): String = value.replace(Regex("([a-z])([A-Z])"), "$1 $2").replaceFirstChar { it.uppercase() }

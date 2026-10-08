@@ -70,10 +70,11 @@ internal object ExerciseGuideRepository {
 internal fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val guide = remember(exercise.imageKey) { ExerciseGuideRepository.get(context, exercise.imageKey) }
+    val coachMedia = remember(exercise.imageKey) { CoachExerciseMediaStore.latest(context, exercise.imageKey) }
     val visualMetadata = remember(exercise.imageKey) { ExerciseVisualCatalog.metadata(exercise.imageKey) }
     val equipment = remember(exercise.imageKey) { ExerciseVisualCatalog.equipmentFor(exercise.imageKey) }
     Box(Modifier.fillMaxSize().background(WildforceThemeTokens.backgroundSecondary)) {
-        RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.fillMaxWidth().height(500.dp))
+        RemoteTrainingImage(coachMedia?.imageUrl ?: exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.fillMaxWidth().height(500.dp))
         Box(Modifier.fillMaxWidth().height(500.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.55f), Color.Transparent, WildforceThemeTokens.backgroundSecondary))))
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 112.dp)) {
             Box(Modifier.padding(14.dp).size(48.dp).clip(CircleShape).background(WildforceThemeTokens.imageControlBackground).clickable(onClick = onBack), contentAlignment = Alignment.Center) {
@@ -120,10 +121,15 @@ internal fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBa
                 }
                 Text(guide?.description?.takeIf(String::isNotBlank) ?: "Ejecuta el movimiento con control y mantén una postura estable.", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 12.dp))
                 if (!exercise.imageKey.isNullOrBlank()) RemoteTrainingImage(
-                    url = exerciseTutorialImageUrl(exercise.imageKey), contentDescription = "Tutorial de ${exercise.name}",
+                    url = coachMedia?.imageUrl ?: exerciseTutorialImageUrl(exercise.imageKey), contentDescription = "Tutorial de ${exercise.name}",
                     modifier = Modifier.fillMaxWidth().height(230.dp).clip(RoundedCornerShape(24.dp)),
                     contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                 )
+                coachMedia?.youtubeUrl?.let { url ->
+                    androidx.compose.material.OutlinedButton(onClick = {
+                        context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)))
+                    }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) { Text("VER VÍDEO DEL ENTRENADOR") }
+                }
                 val instructions = guide?.instructions?.takeIf { it.isNotEmpty() } ?: listOf("Coloca el cuerpo en la posición inicial.", "Realiza el recorrido sin rebotes.", "Vuelve lentamente a la posición inicial.")
                 if (instructions.isNotEmpty()) {
                     SectionTitle("PASOS")

@@ -11,11 +11,17 @@ import android.os.Build
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,8 +54,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -203,7 +211,9 @@ private fun DurationWarning(onCancel: () -> Unit, onContinue: () -> Unit) {
 }
 
 @Composable
-private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: () -> Unit) {
+    Box(Modifier.fillMaxSize()) {
+        CelebrationFrame(onContinue = onContinue) {
     val locale = LocalLocale.current.platformLocale
     var visibleRecords by remember { mutableStateOf(0) }
     LaunchedEffect(records) {
@@ -213,22 +223,25 @@ private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: (
             visibleRecords = index + 1
         }
     }
-    Text("🏅", style = MaterialTheme.typography.h2)
-    Text(if (records.size == 1) "NUEVO RÉCORD" else "NUEVOS RÉCORDS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-    Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(top = 18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        records.forEachIndexed { index, record ->
-            AnimatedVisibility(
-                visible = index < visibleRecords,
-                enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 },
-            ) {
-                Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).padding(16.dp)) {
-                    Text(record.exerciseName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                    Text(record.label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold)
-                    Text(String.format(locale, "%.1f %s", record.newValue, record.unit), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-                Text(String.format(locale, "Antes %.1f · +%.1f %s", record.previousValue, record.newValue - record.previousValue, record.unit), color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            Text("🏅", style = MaterialTheme.typography.h2)
+            Text(if (records.size == 1) "NUEVO RÉCORD" else "NUEVOS RÉCORDS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+            Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(top = 18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                records.forEachIndexed { index, record ->
+                    AnimatedVisibility(
+                        visible = index < visibleRecords,
+                        enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 },
+                    ) {
+                        Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).padding(16.dp)) {
+                            Text(record.exerciseName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                            Text(record.label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold)
+                            Text(String.format(locale, "%.1f %s", record.newValue, record.unit), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+                            Text(String.format(locale, "Antes %.1f · +%.1f %s", record.previousValue, record.newValue - record.previousValue, record.unit), color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                        }
+                    }
                 }
             }
         }
+        ConfettiOverlay(intensity = if (records.size == 1) .7f else 1.2f)
     }
 }
 
@@ -302,7 +315,9 @@ private fun StreakCelebration(streak: Int, onContinue: () -> Unit) = Celebration
     LaunchedEffect(Unit) { revealStreak = true }
     val displayedStreak by animateIntAsState(if (revealStreak) streak else (streak - 1).coerceAtLeast(0), animationSpec = tween(700, delayMillis = 120))
     Spacer(Modifier.weight(1f))
-    Text("🔥", style = MaterialTheme.typography.h1)
+    val transition = rememberInfiniteTransition(label = "streak-flame")
+    val flameScale by transition.animateFloat(1f, 1.10f, infiniteRepeatable(tween(100), RepeatMode.Reverse), label = "streak-flame-scale")
+    Text("🔥", modifier = Modifier.graphicsLayer { scaleX = flameScale; scaleY = flameScale }, style = MaterialTheme.typography.h1)
     Text(displayedStreak.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
     Text(if (streak == 1) "DÍA DE RACHA" else "DÍAS DE RACHA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color(0xFFF07818))
     val streakMessage = when {
@@ -345,7 +360,10 @@ private fun LevelUpCelebration(level: Int, onContinue: () -> Unit) = Celebration
     LaunchedEffect(Unit) { revealLevel = true }
     val displayedLevel by animateIntAsState(if (revealLevel) level else (level - 1).coerceAtLeast(1), animationSpec = tween(750, delayMillis = 150))
     Spacer(Modifier.weight(1f))
-    Text("★", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
+    val transition = rememberInfiniteTransition(label = "level-star")
+    val starScale by transition.animateFloat(1f, 1.10f, infiniteRepeatable(tween(1_400), RepeatMode.Reverse), label = "level-star-pulse")
+    val starRotation by transition.animateFloat(0f, 360f, infiniteRepeatable(tween(10_000, easing = LinearEasing)), label = "level-star-rotation")
+    Text("★", modifier = Modifier.graphicsLayer { scaleX = starScale; scaleY = starScale; rotationZ = starRotation }, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
     Text("NUEVO NIVEL", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text(displayedLevel.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
     Text("Tu constancia sigue dando resultados.", color = WildforceThemeTokens.textSecondary)
@@ -409,10 +427,63 @@ private fun NotificationEducationCelebration(context: Context, onContinue: () ->
     },
 ) {
     Spacer(Modifier.weight(1f))
+    NotificationStackMockup()
     Text("🔔", style = MaterialTheme.typography.h1)
     Text("MANTÉN LA CONSTANCIA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text("Activa recordatorios antes de tus entrenamientos y avisos cuando termine un descanso.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
+}
+
+@Composable
+private fun NotificationStackMockup() {
+    val transition = rememberInfiniteTransition(label = "notification-stack")
+    val cycle by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(2_000, easing = LinearEasing)), label = "notification-stack-cycle")
+    Box(Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+        repeat(3) { index ->
+            val position = index - 1
+            Box(
+                Modifier.fillMaxWidth(.78f).height(62.dp)
+                    .graphicsLayer {
+                        val drift = if (position == 0) -cycle * 18f else if (position == 2) cycle * 18f else 0f
+                        translationY = position * 36f + drift
+                        scaleX = if (position == 0) .90f else 1f
+                        scaleY = scaleX
+                        alpha = if (position == 0) .60f else if (position == 2) .72f else 1f
+                    }
+                    .clip(RoundedCornerShape(16.dp)).background(WildforceThemeTokens.backgroundSecondary.copy(alpha = .94f)).padding(12.dp),
+            ) {
+                Text("🔔", style = MaterialTheme.typography.body1)
+                Column(Modifier.padding(start = 30.dp)) {
+                    Text("Hora de entrenar", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption)
+                    Text("Tu yo futuro te lo agradecerá.", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption, maxLines = 1)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConfettiOverlay(intensity: Float) {
+    val transition = rememberInfiniteTransition(label = "completion-confetti")
+    val time by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(4_400, easing = LinearEasing)), label = "completion-confetti-time")
+    val colors = listOf(WildforceThemeTokens.accentGold, Color(0xFFFF9800), Color(0xFFFFEB3B), Color(0xFF43A047), Color(0xFFE53935))
+    Canvas(Modifier.fillMaxSize()) {
+        repeat((18 * intensity).toInt()) { index ->
+            val seed = (index + 1).toFloat()
+            val duration = .62f + kotlin.math.abs(kotlin.math.sin(seed * 1.3f)) * .38f
+            val start = kotlin.math.abs(kotlin.math.cos(seed * 2.7f)) * .20f
+            val progress = ((time - start + 1f) % 1f) / duration
+            if (progress <= 1f) {
+                val width = 8f + kotlin.math.abs(kotlin.math.cos(seed * 1.9f)) * 12f
+                val x = ((kotlin.math.sin(seed * 17f) + 1f) / 2f) * size.width + kotlin.math.sin(progress * 6.283185f) * kotlin.math.sin(seed * .8f) * 28f
+                val y = -width + progress * (size.height + width * 2f)
+                val alpha = when { progress < .1f -> progress / .1f; progress > .9f -> (1f - progress) / .1f; else -> 1f }
+                rotate(degrees = (time * 360f + seed * 37f), pivot = androidx.compose.ui.geometry.Offset(x, y)) {
+                    drawRoundRect(colors[index % colors.size].copy(alpha = alpha * .9f), topLeft = androidx.compose.ui.geometry.Offset(x - width / 2f, y - width * .27f), size = androidx.compose.ui.geometry.Size(width, width * .55f), cornerRadius = androidx.compose.ui.geometry.CornerRadius(width * .2f))
+                }
+            }
+        }
+    }
 }
 
 @Composable

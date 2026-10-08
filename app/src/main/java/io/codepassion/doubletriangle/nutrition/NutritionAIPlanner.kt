@@ -1,6 +1,12 @@
 package io.codepassion.doubletriangle.nutrition
 
 import android.content.Context
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
+import androidx.health.connect.client.request.ReadRecordsRequest
+import androidx.health.connect.client.time.TimeRangeFilter
 import io.codepassion.wildforce.android.BuildConfig
 import io.codepassion.doubletriangle.core.model.WildforceApiEnvironment
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
@@ -11,6 +17,7 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDate
+import java.time.ZoneId
 import java.util.UUID
 
 internal object NutritionAIPlanner {
@@ -20,11 +27,18 @@ internal object NutritionAIPlanner {
         val connection = URL(WildforceApiEnvironment.apiUrl("nutrition-plans/generate")).openConnection() as HttpURLConnection
         try {
             connection.requestMethod = "POST"
+            connection.doOutput = true
             connection.connectTimeout = 30_000
             connection.readTimeout = 180_000
             connection.setRequestProperty("Accept", "application/json")
+            connection.setRequestProperty("Content-Type", "application/json")
             connection.setRequestProperty("Authorization", "Bearer $token")
             connection.setRequestProperty("Idempotency-Key", UUID.randomUUID().toString())
+            val dailyEnergy = recentDailyEnergy(context)
+            val requestBody = JSONObject().apply {
+                if (dailyEnergy.length() > 0) put("daily_energy", dailyEnergy)
+            }
+            connection.outputStream.use { it.write(requestBody.toString().toByteArray()) }
             val response = (if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream)?.bufferedReader()?.use { it.readText() }.orEmpty()
             if (connection.responseCode in 500..599) {
                 return@withContext generateLocally(context, profile, targets, preferences, start)
@@ -35,10 +49,59 @@ internal object NutritionAIPlanner {
             }
             val plan = JSONObject(response).getJSONObject("data")
             val generated = remoteDays(plan.optJSONArray("days") ?: JSONArray())
-            check(generated.isNotEmpty()) { "El servidor devolvió un plan nutricional vacío" }
-            NutritionStore.saveGeneratedPlan(context, generated)
+            NutritionStore.rememberRemotePlanId(context, plan.optString("id"))
+            // The endpoint can successfully persist the plan shell while the
+            // upstream AI returns no days. iOS tolerates that response, but an
+            // empty plan is not useful in Android. Fill that exact remote plan
+            // with the local parity fallback on the next queued sync instead
+            // of showing an error or creating a second plan.
+            if (generated.isEmpty()) {
+                return@withContext generateLocally(context, profile, targets, preferences, start)
+            }
             generated
         } finally { connection.disconnect() }
+    }
+
+    /**
+     * Mirrors iOS's 21-day Apple Health payload.  Health Connect exposes total
+     * energy rather than basal energy, so basal is derived only when both
+     * record types are available.  Missing Health permissions deliberately
+     * result in no payload and let the backend use its formula estimate.
+     */
+    private suspend fun recentDailyEnergy(context: Context): JSONArray {
+        if (HealthConnectClient.getSdkStatus(context) != HealthConnectClient.SDK_AVAILABLE) return JSONArray()
+        val client = HealthConnectClient.getOrCreate(context)
+        val granted = client.permissionController.getGrantedPermissions()
+        val canReadActive = HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class) in granted
+        val canReadTotal = HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class) in granted
+        if (!canReadActive && !canReadTotal) return JSONArray()
+
+        val zone = ZoneId.systemDefault()
+        val today = LocalDate.now(zone)
+        val start = today.minusDays(20).atStartOfDay(zone).toInstant()
+        val end = today.plusDays(1).atStartOfDay(zone).toInstant()
+        val active = if (canReadActive) client.readRecords(
+            ReadRecordsRequest(ActiveCaloriesBurnedRecord::class, TimeRangeFilter.between(start, end)),
+        ).records else emptyList()
+        val total = if (canReadTotal) client.readRecords(
+            ReadRecordsRequest(TotalCaloriesBurnedRecord::class, TimeRangeFilter.between(start, end)),
+        ).records else emptyList()
+
+        return JSONArray().apply {
+            for (offset in 20 downTo 0) {
+                val date = today.minusDays(offset.toLong())
+                val activeCalories = active.filter { it.startTime.atZone(zone).toLocalDate() == date }
+                    .sumOf { it.energy.inKilocalories }
+                val totalCalories = total.filter { it.startTime.atZone(zone).toLocalDate() == date }
+                    .sumOf { it.energy.inKilocalories }
+                // Do not invent zeroes for a day with no measured data.
+                if (activeCalories > 0.0 || totalCalories > 0.0) {
+                    put(JSONObject().put("date", date.toString()).put("active_calories", activeCalories).apply {
+                        if (totalCalories > 0.0) put("basal_calories", (totalCalories - activeCalories).coerceAtLeast(0.0))
+                    })
+                }
+            }
+        }
     }
 
     /** Temporary parity fallback: iOS keeps a local OpenAI planner for server outages. */
@@ -66,7 +129,7 @@ internal object NutritionAIPlanner {
             check(connection.responseCode in 200..299) { JSONObject(response).optJSONObject("error")?.optString("message") ?: "La IA devolvió HTTP ${connection.responseCode}" }
             val json = JSONObject(JSONObject(response).getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content"))
             val deterministicPlan = NutritionStore.weekPlan(profile, targets, start, preferences, NutritionStore.loadPlanVersion(context))
-            return parse(json, deterministicPlan, preferences).also { NutritionStore.saveGeneratedPlan(context, it) }
+            return parse(json, deterministicPlan, preferences)
         } finally { connection.disconnect() }
     }
 
