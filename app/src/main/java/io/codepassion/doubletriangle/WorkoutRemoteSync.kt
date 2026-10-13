@@ -95,12 +95,13 @@ internal object WorkoutRemoteSync {
         try {
             val hasPendingLocalChanges = preferences.getBoolean("remote_sync_pending", false)
             val shouldImportRemoteSnapshot = preferences.getBoolean("remote_sync_import_required", false) || preferences.getString("workout_plan_json", null).isNullOrBlank()
-            // Match iOS: refresh the remote snapshot on every synchronization
-            // unless Android has local changes waiting to be uploaded. This is
-            // required when the plan was updated from another device while an
-            // older plan is still present in Android's local store.
-            val shouldPullRemote = !hasPendingLocalChanges
-            val shouldPushLocal = hasPendingLocalChanges && !shouldPullRemote
+            // Match iOS: every synchronization pulls first and then pushes local
+            // changes. Keep the local projection in memory while pulling so a
+            // pending Android edit is not replaced before it is uploaded.
+            val pendingPlanJson = preferences.getString("workout_plan_json", null)
+            val pendingPlanId = preferences.getString(planKey, null)
+            val shouldPullRemote = true
+            val shouldPushLocal = hasPendingLocalChanges
             val importedProfile = if (shouldPullRemote) {
                 val remote = pullRemoteSnapshot(token)
                 val remoteProfile = pullRemoteProfile(context, remote, profile)
@@ -118,9 +119,14 @@ internal object WorkoutRemoteSync {
                 if (shouldImportRemoteSnapshot) {
                     preferences.edit().remove("remote_sync_import_required").apply()
                 }
+                if (hasPendingLocalChanges && pendingPlanJson != null) {
+                    preferences.edit().putString("workout_plan_json", pendingPlanJson)
+                        .apply { pendingPlanId?.let { putString(planKey, it) } }
+                        .apply()
+                }
                 remoteProfile
             } else null
-            val profileToSync = importedProfile ?: profile
+            val profileToSync = if (hasPendingLocalChanges) profile else importedProfile ?: profile
             if (shouldPushLocal) {
             val now = java.time.Instant.now().toString()
             val progress = accountProgress(context)
