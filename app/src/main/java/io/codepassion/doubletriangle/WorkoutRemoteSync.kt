@@ -88,12 +88,12 @@ internal object WorkoutRemoteSync {
         try {
             val hasPendingLocalChanges = preferences.getBoolean("remote_sync_pending", false)
             val shouldImportRemoteSnapshot = preferences.getBoolean("remote_sync_import_required", false) || preferences.getString("workout_plan_json", null).isNullOrBlank()
-            // A first install must never manufacture an Android snapshot over an
-            // existing account. Later, only an explicitly queued local mutation
-            // is pushed. In particular, do not give every app launch a new
-            // server timestamp: that was overwriting newer iOS records.
-            val shouldPullRemote = shouldImportRemoteSnapshot || !hasPendingLocalChanges
-            val shouldPushLocal = hasPendingLocalChanges && !shouldImportRemoteSnapshot
+            // Match iOS: refresh the remote snapshot on every synchronization
+            // unless Android has local changes waiting to be uploaded. This is
+            // required when the plan was updated from another device while an
+            // older plan is still present in Android's local store.
+            val shouldPullRemote = !hasPendingLocalChanges
+            val shouldPushLocal = hasPendingLocalChanges && !shouldPullRemote
             val importedProfile = if (shouldPullRemote) {
                 val remote = pullRemoteSnapshot(token)
                 val remoteProfile = pullRemoteProfile(context, remote, profile)
