@@ -200,6 +200,7 @@ fun WorkoutHubScreen(
     onRecreatePlan: () -> Unit = {},
     avatarPath: String? = null,
     avatarRevision: Int = 0,
+    appLanguage: String = "Español",
     customAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null,
 ) {
     var selectedDay by remember { mutableStateOf<DayOfWeek?>(null) }
@@ -265,6 +266,7 @@ fun WorkoutHubScreen(
                     state = state,
                     selectedDay = selectedDay,
                     onDaySelected = { selectedDay = if (selectedDay == it) null else it },
+                    appLanguage = appLanguage,
                     modifier = Modifier.padding(start = 28.dp, top = 12.dp, end = 28.dp),
                 )
             }
@@ -620,10 +622,15 @@ private fun WeekCalendar(
     state: WorkoutHubState,
     selectedDay: DayOfWeek?,
     onDaySelected: (DayOfWeek) -> Unit,
+    appLanguage: String,
     modifier: Modifier = Modifier,
 ) {
     val today = LocalDate.now()
-    val locale = LocalLocale.current.platformLocale
+    val locale = java.util.Locale.forLanguageTag(when (appLanguage) {
+        "English" -> "en"; "Català" -> "ca"; "Français" -> "fr"; "Italiano" -> "it"
+        "Português" -> "pt"; "Deutsch" -> "de"; "中文（简体）" -> "zh-Hans"
+        "Nederlands" -> "nl"; "日本語" -> "ja"; else -> "es"
+    })
     val monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
     // Mirrors SevenDayWorkoutCalendarView on iOS: planned days have a 6 dp
     // accent dot, while completed days use the system-green filled checkmark.
@@ -733,6 +740,10 @@ private fun WorkoutPlan(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 160.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        if (state.workouts.isEmpty() && state.planName.isBlank()) {
+            item { EmptyRemotePlanCard() }
+            return@LazyColumn
+        }
         item {
             MesocycleHeaderCard(state, onMesocycleSelected)
         }
@@ -745,6 +756,19 @@ private fun WorkoutPlan(
                 WorkoutCard(workout, gender) { onWorkoutSelected(workout) }
             }
         }
+    }
+}
+
+@Composable
+private fun EmptyRemotePlanCard() {
+    Column(
+        Modifier.fillMaxWidth()
+            .background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(20.dp))
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text("Tu plan estará disponible al completar la sincronización.", color = WildforceThemeTokens.textPrimary)
+        Text("No mostraremos un plan de ejemplo para esta cuenta.", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.body2)
     }
 }
 
@@ -1110,6 +1134,24 @@ private fun cancelWorkoutSession(context: android.content.Context, workoutId: St
     WildforceWatchLocalBridge.stop(context)
 }
 
+/** Public completed-workout card, matching iOS's `workoutDayShareURL`. */
+internal fun completedWorkoutShareId(context: android.content.Context, workoutId: String): String? {
+    if (runCatching { java.util.UUID.fromString(workoutId) }.isSuccess) return workoutId
+    val planId = context.getSharedPreferences("wildforce_remote_sync", android.content.Context.MODE_PRIVATE)
+        .getString("remote_workout_plan_id", null) ?: return null
+    return java.util.UUID.nameUUIDFromBytes("$planId:$workoutId".toByteArray()).toString()
+}
+
+private fun shareCompletedWorkout(context: android.content.Context, workoutId: String) {
+    val remoteId = completedWorkoutShareId(context, workoutId) ?: return
+    val baseUrl = io.codepassion.doubletriangle.core.model.WildforceApiEnvironment.apiBaseUrl.removeSuffix("/api")
+    val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(android.content.Intent.EXTRA_TEXT, "$baseUrl/workout-days/$remoteId/share")
+    }
+    context.startActivity(android.content.Intent.createChooser(intent, "Compartir entrenamiento"))
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun WorkoutHubPreview() = WildforceTheme { WorkoutHubScreen(PaddingValues()) }
@@ -1212,6 +1254,15 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                     // its badge here, not between the day label and title.
                     workoutDetailStatus(workout.status)?.let { (label, color) ->
                         StatusBadge(label, color)
+                    }
+                    if (workout.status == WorkoutStatus.Completed && completedWorkoutShareId(detailContext, workout.id) != null) {
+                        Text(
+                            "COMPARTIR",
+                            Modifier.padding(start = 10.dp, end = 12.dp).clickable { shareCompletedWorkout(detailContext, workout.id) }.padding(10.dp),
+                            color = Color.White,
+                            style = MaterialTheme.typography.caption,
+                            fontWeight = FontWeight.Bold,
+                        )
                     }
                 } else {
                     Box {
@@ -2613,7 +2664,6 @@ fun ActiveWorkoutScreen(
                     val canEditSuperset = currentPathBlock?.type == WorkoutBlockType.Superset
                     ActiveWorkoutMenuItem("＋", "Añadir ejercicio") { showsExerciseMenu = false; exercisePickerMode = ExercisePickerMode.Add }
                     ActiveWorkoutMenuItem("↔", "Sustituir ejercicio") { showsExerciseMenu = false; exercisePickerMode = ExercisePickerMode.Swap }
-                    ActiveWorkoutMenuItem("↑", "Mover arriba", enabled = sectionPosition > 0) { showsExerciseMenu = false; moveCurrentExercise(-1) }
                     ActiveWorkoutMenuItem("↓", "Mover abajo", enabled = sectionPosition >= 0 && sectionPosition < sectionIndices.lastIndex) { showsExerciseMenu = false; moveCurrentExercise(1) }
                     if (canCreateSuperset) {
                         Divider()

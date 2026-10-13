@@ -93,6 +93,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.core.view.WindowCompat
 import android.graphics.Color as AndroidColor
 import io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository
+import io.codepassion.doubletriangle.core.model.UserSummary
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
@@ -434,9 +435,23 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             }
         }
     } else {
+        val hasRemoteSession = context.getSharedPreferences("wildforce_account", 0).getString("token", null) != null
         val baseState = generatedWorkoutState ?: workoutPlanStore.currentPlanJson()?.let { json ->
             runCatching { WorkoutPlanGenerator.parse(json, currentProfile.name, currentProfile.goal.title) }.getOrNull()
-        } ?: PreviewWorkoutRepository.load(currentProfile.name, currentProfile.goal.title)
+        } ?: if (hasRemoteSession) {
+            // iOS never substitutes a sample plan for an authenticated account
+            // whose initial sync is still pending, unavailable, or blocked by
+            // subscription access. Keep the hub empty behind its loading/error
+            // or paywall state until a real plan has been pulled.
+            WorkoutHubState(
+                user = UserSummary(currentProfile.name, currentProfile.goal.title, 0),
+                trainingDays = emptySet(),
+                completedDays = emptySet(),
+                planName = "",
+                phase = "",
+                workouts = emptyList(),
+            )
+        } else PreviewWorkoutRepository.load(currentProfile.name, currentProfile.goal.title)
         val completedIds = preferences.getStringSet("completed_workouts", emptySet()).orEmpty()
         val completedDatesByWorkout = preferences.getStringSet("completed_workout_local_dates", emptySet())
             .orEmpty()
@@ -463,7 +478,6 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
         )
         var subscriptionRequired by remember { mutableStateOf(false) }
         LaunchedEffect(currentProfile.name, workoutPlanStore.currentPlanJson()) {
-            val hasRemoteSession = context.getSharedPreferences("wildforce_account", 0).getString("token", null) != null
             if (preferences.getBoolean("remote_sync_pending", false) || hasRemoteSession) {
                 when (val result = WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
                     is WorkoutRemoteSync.Outcome.Synchronized -> {
