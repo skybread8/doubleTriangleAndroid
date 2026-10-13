@@ -91,12 +91,14 @@ fun NutritionScreen(
     var preferences by remember { mutableStateOf(NutritionStore.loadPreferences(context)) }
     var hasNutritionProfile by remember { mutableStateOf(NutritionStore.hasNutritionProfile(context)) }
     var planVersion by remember { mutableStateOf(NutritionStore.loadPlanVersion(context)) }
-    val fallbackPlan = remember(profile, targets, preferences, today, planVersion) { NutritionStore.weekPlan(profile, targets, today, preferences, planVersion) }
+    // iOS only renders planned days after a plan has actually been generated.
+    // Keeping the local fallback here made Android show synthetic meals and a
+    // misleading weekly calendar before the user created a plan.
     var generatedPlan by remember(profile) { mutableStateOf(NutritionStore.loadGeneratedPlan(context)) }
     // A generated week is only a draft until the person explicitly accepts it.
     // This prevents an accidental regeneration from replacing the active plan.
     var generatedPlanPreview by remember { mutableStateOf<List<NutritionDayPlan>?>(null) }
-    val plan = generatedPlan ?: fallbackPlan
+    val plan = generatedPlan ?: emptyList()
     var meals by remember(selectedDate) { mutableStateOf(NutritionStore.load(context, selectedDate)) }
     var showLogFlow by remember { mutableStateOf(false) }
     var showEntries by remember { mutableStateOf(false) }
@@ -167,24 +169,28 @@ fun NutritionScreen(
         scope.launch {
             runCatching { NutritionAIPlanner.generate(context, profile, targets, preferences, today) }
                 .onSuccess { generatedPlanPreview = it }
-                .onFailure { generationError = it.message ?: "No se pudo generar el plan" }
+                .onFailure { generationError = "No se pudo generar el plan. Comprueba tu conexión e inténtalo de nuevo." }
             generatingPlan = false
         }
     }
 
-    if (detailDay != null) {
+    // Keep a stable copy for the lifetime of this composition. A back event changes
+    // detailDay immediately, while callbacks from the outgoing detail tree may still
+    // run during that frame; reading detailDay!! there could therefore crash.
+    val activeDetailDay = detailDay
+    if (activeDetailDay != null) {
         NutritionDayDetail(
-            day = detailDay!!,
-            entries = NutritionStore.load(context, detailDay!!.date),
+            day = activeDetailDay,
+            entries = NutritionStore.load(context, activeDetailDay.date),
             onBack = { detailDay = null },
-            onLog = { selectedDate = detailDay!!.date; showLogFlow = true },
+            onLog = { selectedDate = activeDetailDay.date; showLogFlow = true },
             onPlannedMealAction = { meal, method ->
-                selectedDate = detailDay!!.date
-                plannedMealKey = NutritionStore.plannedMealKey(detailDay!!.date, meal)
+                selectedDate = activeDetailDay.date
+                plannedMealKey = NutritionStore.plannedMealKey(activeDetailDay.date, meal)
                 if (method == LogMethod.Manual) {
-                    val planned = meal.toLogDraft(detailDay!!.date).copy(plannedMealKey = plannedMealKey)
-                    NutritionStore.save(context, detailDay!!.date, NutritionStore.load(context, detailDay!!.date) + planned)
-                    scope.launch { HealthConnectNutritionSync.publish(context, NutritionStore.load(context, detailDay!!.date)) }
+                    val planned = meal.toLogDraft(activeDetailDay.date).copy(plannedMealKey = plannedMealKey)
+                    NutritionStore.save(context, activeDetailDay.date, NutritionStore.load(context, activeDetailDay.date) + planned)
+                    scope.launch { HealthConnectNutritionSync.publish(context, NutritionStore.load(context, activeDetailDay.date)) }
                     reload()
                     plannedMealKey = null
                     dayMealStateVersion++
@@ -199,14 +205,14 @@ fun NutritionScreen(
                 }
             },
             onDiscardPlannedMeal = { meal ->
-                NutritionStore.dismissPlannedMeal(context, detailDay!!.date, meal)
+                NutritionStore.dismissPlannedMeal(context, activeDetailDay.date, meal)
                 dayMealStateVersion++
             },
             isSuggestionHidden = { meal ->
                 // Reading this version makes discarding or fulfilling a suggestion redraw this day.
                 dayMealStateVersion
-                NutritionStore.isPlannedMealDismissed(context, detailDay!!.date, meal) ||
-                    NutritionStore.load(context, detailDay!!.date).any { it.plannedMealKey == NutritionStore.plannedMealKey(detailDay!!.date, meal) }
+                NutritionStore.isPlannedMealDismissed(context, activeDetailDay.date, meal) ||
+                    NutritionStore.load(context, activeDetailDay.date).any { it.plannedMealKey == NutritionStore.plannedMealKey(activeDetailDay.date, meal) }
             },
             modifier = Modifier.padding(contentPadding),
         )
@@ -366,6 +372,9 @@ private fun NutritionHub(
 ) {
     val context = LocalContext.current.applicationContext
     val selectedPlan = plan.firstOrNull { it.date == selectedDate }
+    // iOS exposes the hero again when the active plan reaches its last day,
+    // allowing the user to generate the next week without opening settings.
+    val planReachesLastDay = plan.maxOfOrNull { it.date }?.let { selectedDate >= it } == true
     Column(modifier.fillMaxSize().liquidGlassBackground()) {
         NutritionCalendar(
             plan = plan,
@@ -379,7 +388,7 @@ private fun NutritionHub(
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 160.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            if (!hasGeneratedPlan) item { NutritionPlanHero(onGeneratePlan) }
+            if (!hasGeneratedPlan || planReachesLastDay) item { NutritionPlanHero(onGeneratePlan, hasGeneratedPlan, planReachesLastDay) }
             item { IntakeActions(selectedDate, today, onToday, onLog, onIdeas) }
             item {
                 DailyProgressCard(
@@ -494,7 +503,7 @@ private fun HubMealRow(title: String, mealType: String, calories: Int, tint: Col
 }
 
 @Composable
-private fun NutritionPlanHero(onGenerate: () -> Unit) {
+private fun NutritionPlanHero(onGenerate: () -> Unit, hasGeneratedPlan: Boolean, planReachesLastDay: Boolean) {
     Box(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))
             .background(Brush.linearGradient(listOf(NutritionOrange, NutritionCoral), start = Offset.Zero, end = Offset(600f, 600f))),
@@ -503,12 +512,12 @@ private fun NutritionPlanHero(onGenerate: () -> Unit) {
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(verticalAlignment = Alignment.Top) {
                 Column(Modifier.weight(1f)) {
-                    Text("ACTIVA TU SEMANA", fontFamily = AntonFontFamily, fontSize = 30.sp, color = Color.White)
-                    Text("Crea un plan día a día adaptado a tus entrenamientos, objetivos y preferencias.", color = Color.White.copy(alpha = .9f), modifier = Modifier.padding(top = 8.dp))
+                    Text("ACTIVA TU SEMANA", fontFamily = AntonFontFamily, fontSize = 32.sp, color = Color.White)
+                    Text("Crea un plan día a día adaptado a tus entrenamientos, objetivos y preferencias.", fontSize = 15.sp, color = Color.White.copy(alpha = .9f), modifier = Modifier.padding(top = 8.dp))
                 }
                 Box(Modifier.size(54.dp).background(Color.White.copy(alpha = .18f), CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Restaurant, null, tint = Color.White, modifier = Modifier.size(28.dp)) }
             }
-            Button(onClick = onGenerate, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), shape = RoundedCornerShape(14.dp)) { Text("GENERAR PLAN", modifier = Modifier.padding(vertical = 5.dp)) }
+            Button(onClick = onGenerate, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(50.dp), elevation = ButtonDefaults.elevation(defaultElevation = 5.dp, pressedElevation = 2.dp)) { Text(if (!hasGeneratedPlan) "GENERAR PLAN" else if (planReachesLastDay) "GENERAR NUEVA SEMANA" else "REGENERAR PLAN", fontFamily = Exo2FontFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp, modifier = Modifier.padding(vertical = 2.dp)) }
         }
     }
 }
@@ -621,7 +630,7 @@ private fun CalendarCalorieRing(progress: Float, color: Color) {
 @Composable
 private fun IntakeActions(date: LocalDate, today: LocalDate, onToday: () -> Unit, onLog: () -> Unit, onIdeas: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(if (date == today) "Ingesta de hoy" else "Ingesta del ${date.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale("es")))}", style = MaterialTheme.typography.subtitle1, color = WildforceThemeTokens.textPrimary)
+        Text(if (date == today) "Ingesta de hoy" else "Ingesta del ${date.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale("es")))}", fontFamily = Exo2FontFamily, fontSize = 18.sp, color = WildforceThemeTokens.textPrimary)
         Spacer(Modifier.weight(1f))
         if (date != today) TextButton(onClick = onToday) { Text("Hoy", color = NutritionCoral) }
         else {
@@ -701,12 +710,15 @@ private fun MacroProgress(title: String, current: Int, target: Int, color: Color
 private fun WeeklyBalanceCard(plan: List<NutritionDayPlan>, selected: LocalDate, energyHistory: Map<LocalDate, NutritionEnergyPoint>) {
     val context = LocalContext.current.applicationContext
     // iOS exposes the previous 15 days, including both intake and the Health data.
-    val dates = remember(selected) { (0L..14L).map { selected.minusDays(it) }.reversed() }
-    val history = remember(selected) { dates.map { date -> NutritionStore.load(context, date).sumOf { it.calories } } }
-    var inspectedDate by remember(selected) { mutableStateOf<LocalDate?>(null) }
+    // The window is anchored to today, not to the currently inspected meal day.
+    // Selecting an older day must not make the energy-balance chart jump in time.
+    val today = LocalDate.now()
+    val dates = remember(today) { (0L..14L).map { today.minusDays(it) }.reversed() }
+    val history = remember(today, selected) { dates.map { date -> NutritionStore.load(context, date).sumOf { it.calories } } }
+    var inspectedDate by remember(today) { mutableStateOf<LocalDate?>(null) }
     if (energyHistory.isEmpty()) return
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text("BALANCE ENERGÉTICO", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary); Text(inspectedDate?.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale("es")))?.uppercase() ?: "ÚLTIMOS 15 DÍAS", style = MaterialTheme.typography.caption, color = NutritionCoral) }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text("Balance energético", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary); Text(inspectedDate?.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale("es"))) ?: "Últimos 15 días", style = MaterialTheme.typography.caption, color = NutritionCoral) }
         val historicalIndexes = dates.indices.filter { dates[it] != LocalDate.now() }
         val averageEaten = historicalIndexes.map { history[it] }.filter { it > 0 }.average().takeIf { !it.isNaN() }?.toInt() ?: 0
         val burnedValues = historicalIndexes.mapNotNull { energyHistory[dates[it]]?.totalCalories }
@@ -715,9 +727,9 @@ private fun WeeklyBalanceCard(plan: List<NutritionDayPlan>, selected: LocalDate,
         val displayedEaten = inspectedIndex?.let { history[it] } ?: averageEaten
         val displayedBurned = inspectedIndex?.let { index -> energyHistory[dates[index]]?.totalCalories?.toInt() } ?: averageBurned
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            BalanceMetric(if (inspectedIndex == null) "MEDIA INGESTA" else "INGERIDA", if (displayedEaten > 0) "$displayedEaten kcal" else "—", NutritionCoral)
-            BalanceMetric(if (inspectedIndex == null) "MEDIA QUEMADA" else "QUEMADA", displayedBurned?.let { "$it kcal" } ?: "—", NutritionRed)
-            BalanceMetric("BALANCE", displayedBurned?.let { "${if (displayedEaten - it > 0) "+" else ""}${displayedEaten - it} kcal" } ?: "—", if ((displayedBurned ?: displayedEaten) > displayedEaten) NutritionGreen else NutritionOrange)
+            BalanceMetric(if (inspectedIndex == null) "Media ingerida" else "Ingerida", if (displayedEaten > 0) "$displayedEaten kcal" else "—", WildforceThemeTokens.textPrimary)
+            BalanceMetric(if (inspectedIndex == null) "Media quemada" else "Quemada", displayedBurned?.let { "$it kcal" } ?: "—", NutritionRed)
+            BalanceMetric("Balance", displayedBurned?.let { "${if (displayedEaten - it > 0) "+" else ""}${displayedEaten - it} kcal" } ?: "—", if ((displayedBurned ?: displayedEaten) > displayedEaten) NutritionGreen else NutritionOrange)
         }
         val chartBurnedValues = dates.mapNotNull { energyHistory[it]?.totalCalories ?: energyHistory[it]?.activeCalories }.map { it.toInt() }
         val maximum = (history + chartBurnedValues).maxOrNull()?.coerceAtLeast(1) ?: 1
@@ -747,7 +759,7 @@ private fun WeeklyBalanceCard(plan: List<NutritionDayPlan>, selected: LocalDate,
                 Text(date.format(DateTimeFormatter.ofPattern("d MMM", Locale("es"))), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) { BalanceLegend(NutritionRed.copy(alpha = .5f), "Base"); BalanceLegend(NutritionRed, "Activa"); BalanceLegend(WildforceThemeTokens.textPrimary, "Ingerida") }
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) { BalanceLegend(NutritionRed.copy(alpha = .5f), "Estándar"); BalanceLegend(NutritionRed, "Activa"); BalanceLegend(WildforceThemeTokens.textPrimary, "Ingerida") }
     }
 }
 

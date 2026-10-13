@@ -54,7 +54,7 @@ internal object WorkoutRemoteSync {
         "users", "user-app-settings", "subscriptions", "training-preferences", "training-locations",
         "body-metric-entries", "body-progress-photo-sessions", "exercise-profiles", "nutrition-profiles",
         "workout-plans", "workout-days", "workout-blocks", "planned-exercises", "exercise-results",
-        "coach-exercise-media", "nutrition-plans", "nutrition-days", "nutrition-meals",
+        "coach-exercise-content", "nutrition-plans", "nutrition-days", "nutrition-meals",
         "nutrition-log-entries", "nutrition-log-items",
     )
     private val synchronizationMutex = Mutex()
@@ -103,7 +103,7 @@ internal object WorkoutRemoteSync {
                 pullRemoteNutrition(context, token, remote)
                 pullRemoteBodyMetrics(context, remote.records("body-metric-entries"), (remoteProfile ?: profile).heightCm)
                 pullRemoteAppSettings(context, remote)
-                CoachExerciseMediaStore.replace(context, remote.records("coach-exercise-media"))
+                CoachExerciseMediaStore.replace(context, remote.records("coach-exercise-content"))
                 // iOS pulls media on every synchronization. The local store
                 // de-duplicates sessions, so this also restores progress photos
                 // added from another device after the first Android sign-in.
@@ -586,6 +586,7 @@ internal object WorkoutRemoteSync {
      */
     private fun pullWorkoutPlans(context: Context, remote: RemoteSnapshot, preferences: SharedPreferences) {
         val remotePlans = remote.records("workout-plans").liveRecords()
+        Log.d("WorkoutRemoteSync", "Pulled workout-plans=${remotePlans.size}, workout-days=${remote.records("workout-days").liveRecords().size}")
         if (remotePlans.isEmpty()) return
         val remoteDays = pullRemoteWorkoutDays(remote)
         importRemoteWorkoutHistory(context, remoteDays)
@@ -595,7 +596,16 @@ internal object WorkoutRemoteSync {
             remotePlanJson(plan, planId, remoteDays)
         }
         if (plans.isEmpty()) return
-        val active = plans.firstOrNull { it.status.equals("active", ignoreCase = true) } ?: plans.first()
+        // Match iOS User.currentWorkoutPlan exactly: active plans first, then
+        // newest updatedAt, createdAt, and finally UUID as a deterministic tie
+        // breaker. Do not infer the current plan from mesocycle numbers.
+        val activeCandidates = plans.filter { it.status.equals("active", ignoreCase = true) }
+        val active = (activeCandidates.ifEmpty { plans }).maxWithOrNull(
+            compareBy<RemotePlan> { it.updatedAt }
+                .thenBy { it.createdAt }
+                .thenBy { it.id }
+        ) ?: plans.first()
+        Log.d("WorkoutRemoteSync", "Selected plan id=${active.id}, status=${active.status}, mesocycle=${active.mesocycleNumber}, createdAt=${active.createdAt}, updatedAt=${active.updatedAt}")
         // Keep every completed mesocycle locally. The hub renders the selected
         // active plan while its history remains available to overview screens.
         plans.filterNot { it.id == active.id }.forEach { archived ->
@@ -666,15 +676,27 @@ internal object WorkoutRemoteSync {
                 .put("estimatedDurationMinutes", day.optInt("estimated_duration_minutes", 50)).put("blocks", blocks))
         }
         if (workouts.length() == 0) return null
-        val cycleLength = plan.optInt("cycle_length", 1).coerceAtLeast(1)
-        val phaseWeek = plan.optInt("phase_week", 1).coerceIn(1, cycleLength)
-        val mesocycleNumber = plan.optInt("mesocycle_number", 1).coerceAtLeast(1)
+        // The API normally returns snake_case, but Android also receives
+        // locally-created/legacy payloads using the JSON names emitted by the
+        // plan generator. Read both forms so a downloaded plan keeps its real
+        // progression metadata instead of silently falling back to 1.
+        val cycleLength = plan.optInt("cycle_length", plan.optInt("cycleLength", 1)).coerceAtLeast(1)
+        val phaseWeek = plan.optInt("phase_week", plan.optInt("phaseWeek", 1)).coerceIn(1, cycleLength)
+        val mesocycleNumber = plan.optInt("mesocycle_number", plan.optInt("mesocycleNumber", 1)).coerceAtLeast(1)
+        val mesocycleIndex = plan.optInt("mesocycle_index", plan.optInt("mesocycleIndex", ((mesocycleNumber - 1) / cycleLength) + 1)).coerceAtLeast(1)
         val root = JSONObject().put("planName", plan.optString("name", "Plan sincronizado"))
             .put("phase", plan.optString("phase", "Plan de tu cuenta"))
             .put("cycleLength", cycleLength).put("mesocycleNumber", mesocycleNumber)
-            .put("mesocycleIndex", mesocycleNumber).put("weekIndex", phaseWeek)
+            .put("mesocycleIndex", mesocycleIndex).put("weekIndex", phaseWeek)
             .put("phaseWeek", phaseWeek).put("workouts", workouts)
-        return RemotePlan(planId, plan.optString("status"), root.toString())
+        return RemotePlan(
+            id = planId,
+            status = plan.optString("status"),
+            mesocycleNumber = mesocycleNumber,
+            updatedAt = plan.optString("updated_at", plan.optString("updatedAt")),
+            createdAt = plan.optString("created_at", plan.optString("createdAt")),
+            rawJson = root.toString(),
+        )
     }
 
     private fun importRemoteWorkoutHistory(context: Context, remoteDays: JSONArray) {
@@ -859,7 +881,7 @@ internal object WorkoutRemoteSync {
         WorkoutHistoryStore.remoteEntries(context = context).forEach { entry ->
             val plannedExerciseId = plannedExerciseIds[entry.exerciseKey] ?: return@forEach
             results.put(record(stableId("$plannedExerciseId:${entry.timestampMillis}"), now)
-                .put("planned_exercise_id", plannedExerciseId).put("feedback", entry.feedback ?: "justRight")
+                .put("planned_exercise_id", plannedExerciseId).put("feedback", backendExerciseFeedback(entry.feedback))
                 .put("completed_at", java.time.Instant.ofEpochMilli(entry.timestampMillis).toString())
                 .put("completed_sets", entry.sets).put("completed_reps", entry.totalReps).put("completed_weight", entry.maxWeightKg.finiteOrZero())
                 .put("per_set_reps", JSONArray(entry.setReps)).put("per_set_weights_kg", JSONArray(entry.setWeightsKg.map { it.finiteOrZero() }))
@@ -870,6 +892,17 @@ internal object WorkoutRemoteSync {
     }
 
     private fun record(id: String, now: String) = JSONObject().put("id", id).put("created_at", now).put("updated_at", now)
+
+    /** Uses the same Codable values as iOS and the backend ExerciseFeedback enum. */
+    private fun backendExerciseFeedback(value: String?): String = when (value.orEmpty().trim().lowercase()
+        .replace("_", "").replace("-", "").replace(" ", "")) {
+        "veryeasy", "mu fácil", "muyfacil" -> "veryEasy"
+        "easy", "facil", "fácil" -> "easy"
+        "justright", "normal", "justo" -> "justRight"
+        "hard", "dificil", "difícil" -> "hard"
+        "veryhard", "muydificil", "muydifícil" -> "veryHard"
+        else -> "justRight"
+    }
 
     private fun Double.finiteOrZero(): Double = if (isFinite()) this else 0.0
 
@@ -1004,8 +1037,10 @@ internal object WorkoutRemoteSync {
 
     private fun apiException(response: String, fallback: String): Exception {
         val error = runCatching { JSONObject(response) }.getOrNull()
-        return if (error?.optString("code") == "subscription_required") SubscriptionRequiredException
-        else IllegalStateException(error?.optString("message", fallback) ?: fallback)
+        if (error?.optString("code") == "subscription_required") return SubscriptionRequiredException
+        val detail = error?.optString("message")?.takeIf(String::isNotBlank)
+            ?: response.trim().takeIf(String::isNotBlank)
+        return IllegalStateException(detail ?: fallback)
     }
 
     private data object SubscriptionRequiredException : Exception()
@@ -1023,7 +1058,14 @@ internal object WorkoutRemoteSync {
         val xpLevel: Int,
     )
 
-    private data class RemotePlan(val id: String, val status: String, val rawJson: String)
+    private data class RemotePlan(
+        val id: String,
+        val status: String,
+        val mesocycleNumber: Int,
+        val updatedAt: String,
+        val createdAt: String,
+        val rawJson: String,
+    )
 
     private fun JSONArray?.liveRecords(): List<JSONObject> = buildList {
         this@liveRecords ?: return@buildList

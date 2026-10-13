@@ -12,6 +12,24 @@ class NutritionStoreTest {
     private val monday = LocalDate.of(2026, 8, 24)
 
     @Test
+    fun `nutrition decimal parser accepts both locale separators`() {
+        assertEquals(1.5, "1,5".decimalOrNull()!!, 0.0001)
+        assertEquals(1.5, "1.5".decimalOrNull()!!, 0.0001)
+        assertTrue("abc".decimalOrNull() == null)
+    }
+
+    @Test
+    fun `energy balance window is chronological and anchored to today`() {
+        val today = LocalDate.of(2026, 10, 9)
+        val window = nutritionEnergyWindow(today, 15)
+
+        assertEquals(15, window.size)
+        assertEquals(LocalDate.of(2026, 9, 25), window.first())
+        assertEquals(today, window.last())
+        assertTrue(window.zipWithNext().all { (previous, next) -> next == previous.plusDays(1) })
+    }
+
+    @Test
     fun `plan mirrors workout days and shifts their energy targets`() {
         val profile = OnboardingProfile(
             name = "Alex",

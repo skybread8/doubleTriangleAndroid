@@ -137,6 +137,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -913,20 +914,25 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, onClick: () 
         if (workout.status == WorkoutStatus.Completed) WorkoutCompletionMetricsStore.load(sessionContext, workout.id) else null
     }
     Card(Modifier.fillMaxWidth().clickable(onClick = onClick), shape = RoundedCornerShape(14.dp), elevation = 0.dp) {
-        Box(Modifier.fillMaxWidth().height(180.dp)) {
+        BoxWithConstraints(Modifier.fillMaxWidth().height(180.dp)) {
+            val density = LocalDensity.current
+            val cardWidthPx = with(density) { maxWidth.toPx() }
+            val cardHeightPx = with(density) { maxHeight.toPx() }
             RemoteTrainingImage(
                 url = workoutCoverUrl(workout.focus, gender, workout.id),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
             )
-            // Same two-layer treatment as WorkoutDayHeaderView on iOS. The
-            // previous single gradient began too high and muddied the artwork.
+            // Match WorkoutDayHeaderView on iOS: the fades run from the
+            // bottom/leading edges to the card midpoint. These must use the
+            // measured size, not fixed pixels, so density does not change the
+            // apparent strength of the dark treatment.
             Box(
                 Modifier.fillMaxSize().background(
                     Brush.verticalGradient(
                         listOf(Color.Black.copy(alpha = 0.80f), Color.Transparent),
-                        startY = 180f,
-                        endY = 90f,
+                        startY = cardHeightPx,
+                        endY = cardHeightPx / 2f,
                     ),
                 ),
             )
@@ -935,7 +941,7 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, onClick: () 
                     Brush.horizontalGradient(
                         listOf(Color.Black.copy(alpha = 0.30f), Color.Transparent),
                         startX = 0f,
-                        endX = 180f,
+                        endX = cardWidthPx / 2f,
                     ),
                 ),
             )

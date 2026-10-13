@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
+import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
@@ -100,7 +101,7 @@ internal fun NutritionPlanPreviewDialog(
                 }
                 Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text("DESCARTAR") }
-                    Button(onClick = onSave, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(backgroundColor = NutritionCoral)) { Text("GUARDAR PLAN", color = Color.White) }
+                    Button(onClick = onSave, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Text("GUARDAR PLAN", fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
                 }
             }
         }
@@ -119,7 +120,7 @@ internal fun NutritionDayDetail(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier.fillMaxSize().liquidGlassBackground()) {
-        TopBar(day.date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, Locale("es")).replaceFirstChar { it.uppercase() }, onBack, onLog)
+        TopBar(day.date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, Locale("es")).replaceFirstChar { it.uppercase() }, onBack)
         LazyColumn(contentPadding = PaddingValues(16.dp, 8.dp, 16.dp, 160.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
             item { NutritionDayHeader(day, entries.total(), day.date == LocalDate.now()) {} }
             item { MacroSummary(day.targets) }
@@ -142,7 +143,14 @@ internal fun NutritionDayDetail(
                     }
                 }
             }
-            item { Text("COMIDAS DEL DÍA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary) }
+            item {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text("COMIDAS DEL DÍA", Modifier.weight(1f), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
+                    IconButton(onClick = onLog) {
+                        Icon(Icons.Filled.Add, "Registrar ingesta", tint = NutritionCoral)
+                    }
+                }
+            }
             if (entries.isEmpty() && day.meals.isEmpty()) {
                 item { EmptyState("Aún no hay comidas", "Añade una ingesta o activa las sugerencias en tu perfil nutricional.") }
             }
@@ -328,7 +336,7 @@ private fun EntryCard(entry: MealLog, onBookmark: () -> Unit, onDelete: () -> Un
 @Composable
 internal fun NutritionTargetsDialog(initial: NutritionTargets, onDismiss: () -> Unit, onSave: (NutritionTargets) -> Unit) {
     var calories by remember { mutableStateOf(initial.calories.toString()) }; var protein by remember { mutableStateOf(initial.protein.toString()) }; var carbs by remember { mutableStateOf(initial.carbs.toString()) }; var fat by remember { mutableStateOf(initial.fat.toString()) }
-    AlertDialog(onDismissRequest = onDismiss, title = { Text("OBJETIVOS DIARIOS", fontFamily = AntonFontFamily) }, text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Calorías", calories, { calories = it.filter(Char::isDigit) }, Modifier.fillMaxWidth()); Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Proteína", protein, { protein = it.filter(Char::isDigit) }, Modifier.weight(1f)); NumberField("Carbos", carbs, { carbs = it.filter(Char::isDigit) }, Modifier.weight(1f)); NumberField("Grasa", fat, { fat = it.filter(Char::isDigit) }, Modifier.weight(1f)) } } }, confirmButton = { Button(onClick = { onSave(NutritionTargets(calories.toIntOrNull()?.coerceIn(500, 8000) ?: initial.calories, protein.toIntOrNull()?.coerceIn(0, 500) ?: initial.protein, carbs.toIntOrNull()?.coerceIn(0, 1000) ?: initial.carbs, fat.toIntOrNull()?.coerceIn(0, 500) ?: initial.fat)) }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary)) { Text("GUARDAR", color = WildforceThemeTokens.backgroundSecondary) } }, dismissButton = { TextButton(onClick = onDismiss) { Text("CANCELAR") } })
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("OBJETIVOS DIARIOS", fontFamily = AntonFontFamily) }, text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Calorías", calories, { calories = it.filter(Char::isDigit) }, Modifier.fillMaxWidth()); Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Proteína", protein, { protein = it.filter(Char::isDigit) }, Modifier.weight(1f)); NumberField("Carbos", carbs, { carbs = it.filter(Char::isDigit) }, Modifier.weight(1f)); NumberField("Grasa", fat, { fat = it.filter(Char::isDigit) }, Modifier.weight(1f)) } } }, confirmButton = { Button(onClick = { onSave(NutritionTargets(calories.toIntOrNull()?.coerceIn(500, 8000) ?: initial.calories, protein.toIntOrNull()?.coerceIn(0, 500) ?: initial.protein, carbs.toIntOrNull()?.coerceIn(0, 1000) ?: initial.carbs, fat.toIntOrNull()?.coerceIn(0, 500) ?: initial.fat)) }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Text("GUARDAR", fontFamily = Exo2FontFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) } }, dismissButton = { TextButton(onClick = onDismiss) { Text("CANCELAR") } })
 }
 
 @Composable
@@ -390,7 +398,7 @@ internal fun NutritionPreferencesDialog(initial: NutritionPreferences, onDismiss
                     allergiesAndIntolerances = allergies.toNutritionList(),
                     notes = notes.trim(),
                 ))
-            }, colors = ButtonDefaults.buttonColors(backgroundColor = NutritionCoral)) { Text("GUARDAR", color = Color.White) }
+            }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Text("GUARDAR", fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("CANCELAR") } },
     )
@@ -456,7 +464,7 @@ private fun NutritionOnboardingDialog(initial: NutritionPreferences, onDismiss: 
                 }
                 Button(onClick = {
                     if (step < 3) step++ else onSave(initial.copy(dietaryStyle = style, mealsPerDay = meals, wantsSuggestions = suggestions, excludedFoods = excluded.toNutritionList(), allergiesAndIntolerances = allergies.toNutritionList()))
-                }, modifier = Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), shape = RoundedCornerShape(14.dp)) { Text(if (step == 3) "GUARDAR CONFIGURACIÓN" else "CONTINUAR", fontWeight = FontWeight.Bold) }
+                }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Text(if (step == 3) "GUARDAR CONFIGURACIÓN" else "CONTINUAR", fontFamily = Exo2FontFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
             }
         }
     }
@@ -533,10 +541,10 @@ internal fun MealIdeasDialog(day: NutritionDayPlan?, targetOverride: NutritionTa
                         .onSuccess { idea ->
                             onSelect(PlannedMeal(idea.name, MealType.Snack, NutritionTargets(idea.calories, idea.protein, idea.carbs, idea.fat), idea.notes, ingredients.split(",").mapNotNull { ingredient -> ingredient.trim().takeIf(String::isNotBlank)?.let { it to 0 } }))
                         }
-                        .onFailure { error = it.message ?: "No se pudo crear la idea" }
+                        .onFailure { error = "No se pudo crear la idea. Comprueba tu conexión e inténtalo de nuevo." }
                     creating = false
                 }
-            }, enabled = ingredients.isNotBlank() && !creating, colors = ButtonDefaults.buttonColors(backgroundColor = NutritionCoral)) { Icon(Icons.Filled.Kitchen, null, modifier = Modifier.size(17.dp)); Text("CREAR IDEA", Modifier.padding(start = 7.dp), color = Color.White) }
+            }, enabled = ingredients.isNotBlank() && !creating, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Icon(Icons.Filled.Kitchen, null, modifier = Modifier.size(17.dp)); Text("CREAR IDEA", Modifier.padding(start = 7.dp), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
         },
         dismissButton = { TextButton(onClick = onDismiss, enabled = !creating) { Text("CANCELAR") } },
     )

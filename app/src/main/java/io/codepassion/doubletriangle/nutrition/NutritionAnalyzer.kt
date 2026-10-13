@@ -24,6 +24,10 @@ internal data class NutritionAnalysis(
     val foods: List<NutritionAnalysisFood> = emptyList(),
     /** Present for barcode products, whose returned macros describe one serving. */
     val servingGrams: Double? = null,
+    /** Brand is supplied by the barcode catalogue and shown in its product card. */
+    val brand: String = "",
+    /** Optional packshot supplied by Open Food Facts for the barcode review card. */
+    val imageUrl: String = "",
 )
 
 internal data class NutritionAnalysisFood(
@@ -155,6 +159,8 @@ internal object NutritionAnalyzer {
                 fat = nutrient("fat"),
                 notes = listOf(product.optString("brands"), if (servingQuantity != 100.0) "Porción: ${servingQuantity.toInt()} g" else "Por 100 g").filter { it.isNotBlank() }.joinToString(" · "),
                 servingGrams = servingQuantity,
+                brand = product.optString("brands"),
+                imageUrl = product.optString("image_front_url"),
             )
         } finally {
             connection.disconnect()

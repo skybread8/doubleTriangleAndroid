@@ -677,26 +677,33 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit) {
     val dust = rememberInfiniteTransition(label = "cover-dust")
     val dustTime by dust.animateFloat(
         initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(24_000, easing = LinearEasing)),
+        // DustParticlesEffectView on iOS uses the wall-clock time and moves at
+        // 6–20 px/s.  Use a long cycle here so the particles don't visibly jump
+        // back to their initial positions every few seconds.
+        targetValue = 1_800f,
+        animationSpec = infiniteRepeatable(tween(1_800_000, easing = LinearEasing)),
         label = "cover-dust-time",
     )
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         Image(
             painter = painterResource(R.drawable.onboarding_cover),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
+            // This is the same -160pt framing used by OnboardingCoverStepView
+            // on iOS. It keeps the warm bokeh in the left half of the image
+            // around the logo instead of hiding it below the fold.
+            modifier = Modifier.fillMaxSize().offset(y = (-160).dp),
             contentScale = ContentScale.Crop,
         )
         Box(
             Modifier.fillMaxSize().background(
-                Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.35f), Color.Black)),
+                Brush.verticalGradient(listOf(Color.Transparent, Color.Black, Color.Black)),
             ),
         )
-        // Match DustParticlesEffectView on iOS: many fine, floating circles rather
-        // than a handful of decorative dots. Their deterministic seed means they do
-        // not jump to a new layout when this composable recomposes.
-        FloatingDustOverlay(progress = dustTime)
+        // The photograph supplies the bokeh, while these larger, slow lights make
+        // the ambient motion immediately legible on Android displays.
+        FloatingAmbientOrbs(timeSeconds = dustTime)
+        // Exact counterpart of iOS's DustParticlesEffectView.
+        FloatingDustOverlay(timeSeconds = dustTime)
         Column(
             modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 50.dp, vertical = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -731,7 +738,37 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit) {
 }
 
 @Composable
-private fun FloatingDustOverlay(progress: Float) {
+private fun FloatingAmbientOrbs(timeSeconds: Float) {
+    Canvas(Modifier.fillMaxSize()) {
+        // Fixed anchors prevent the decoration jumping at recomposition. Their
+        // drift is intentionally slow enough to feel like floating light, but
+        // pronounced enough to be noticed without waiting for an entrance replay.
+        val orbs = listOf(
+            floatArrayOf(.08f, .20f, 16f, .38f, .42f, 0f),
+            floatArrayOf(.89f, .18f, 24f, .30f, .34f, 1.3f),
+            floatArrayOf(.14f, .48f, 20f, .42f, .30f, 2.2f),
+            floatArrayOf(.90f, .52f, 13f, .32f, .38f, 3.5f),
+            floatArrayOf(.07f, .74f, 28f, .28f, .32f, 4.1f),
+            floatArrayOf(.88f, .78f, 18f, .40f, .36f, 5.0f),
+        )
+        orbs.forEachIndexed { index, orb ->
+            val phase = timeSeconds * orb[4] + orb[5]
+            val center = androidx.compose.ui.geometry.Offset(
+                x = size.width * orb[0] + kotlin.math.sin(phase) * 16.dp.toPx(),
+                y = size.height * orb[1] + kotlin.math.cos(phase * .82f) * 22.dp.toPx(),
+            )
+            val radius = orb[2].dp.toPx()
+            val pulse = .72f + .28f * kotlin.math.sin(phase * 1.15f)
+            val tint = if (index % 3 == 0) WildforceThemeTokens.accentGold else Color.White
+            drawCircle(tint.copy(alpha = .09f * pulse), radius * 2.4f, center)
+            drawCircle(tint.copy(alpha = .17f * pulse), radius * 1.45f, center)
+            drawCircle(tint.copy(alpha = orb[3] * pulse), radius, center)
+        }
+    }
+}
+
+@Composable
+private fun FloatingDustOverlay(timeSeconds: Float) {
     Canvas(Modifier.fillMaxSize()) {
         repeat(64) { seed ->
             val seedValue = seed.toFloat()
@@ -739,10 +776,13 @@ private fun FloatingDustOverlay(progress: Float) {
             val initialY = ((kotlin.math.cos(seedValue * 78.233f) + 1f) / 2f) * size.height
             val radius = 0.6f + kotlin.math.abs(kotlin.math.sin(seedValue * 3.7f)) * 1.8f
             val baseAlpha = 0.10f + kotlin.math.abs(kotlin.math.cos(seedValue * 5.1f)) * 0.50f
-            val rise = size.height * (0.30f + kotlin.math.abs(kotlin.math.sin(seedValue * 2.9f)) * 0.70f) * progress
-            val y = (initialY - rise + size.height) % size.height
-            val flicker = 0.65f + 0.35f * kotlin.math.sin(progress * 6.283185f + seedValue)
-            drawCircle(Color.White.copy(alpha = baseAlpha * flicker), radius = radius, center = androidx.compose.ui.geometry.Offset(initialX, y))
+            val riseSpeed = 6f + kotlin.math.abs(kotlin.math.sin(seedValue * 2.9f)) * 14f
+            val wrapHeight = size.height + 24.dp.toPx()
+            val yRaw = initialY - (timeSeconds * riseSpeed % wrapHeight) - 12.dp.toPx()
+            val y = if (yRaw < -12.dp.toPx()) yRaw + wrapHeight else yRaw
+            // In iOS the wobble and twinkle coefficients are deliberately zero,
+            // leaving a calm, slow dust-in-light treatment instead of a glitter.
+            drawCircle(Color.White.copy(alpha = baseAlpha * .65f), radius = radius, center = androidx.compose.ui.geometry.Offset(initialX, y))
         }
     }
 }
