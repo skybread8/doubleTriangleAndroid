@@ -122,7 +122,6 @@ import io.codepassion.doubletriangle.feature.onboarding.saveAuthenticatedAccount
 import io.codepassion.doubletriangle.feature.onboarding.synchronizeAccountProfile
 import io.codepassion.doubletriangle.feature.onboarding.ProfileScreen
 import io.codepassion.doubletriangle.feature.onboarding.SubscriptionPaywall
-import io.codepassion.doubletriangle.feature.onboarding.subscriptionAccess
 import io.codepassion.doubletriangle.feature.workout.ActiveWorkoutScreen
 import io.codepassion.doubletriangle.feature.workout.CompletionProgressStore
 import io.codepassion.doubletriangle.feature.workout.ExerciseVisualCatalog
@@ -481,7 +480,11 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                             profile = imported
                         }
                     }
-                    WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = hasExpiredSubscription(context)
+                    // iOS presents the mandatory paywall for every
+                    // `subscription_required` sync response. Do not perform a
+                    // second status check: an account without access is not
+                    // necessarily labelled `expired` by the backend.
+                    WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = true
                     else -> Unit
                 }
             }
@@ -495,7 +498,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 if (event == Lifecycle.Event.ON_RESUME && context.getSharedPreferences("wildforce_account", 0).getString("token", null) != null) {
                     coroutineScope.launch {
                         when (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
-                            WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = hasExpiredSubscription(context)
+                            WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = true
                             is WorkoutRemoteSync.Outcome.Synchronized -> preferences.edit().putBoolean("remote_sync_pending", false).apply()
                             else -> Unit
                         }
@@ -520,7 +523,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                         is WorkoutRemoteSync.Outcome.Synchronized -> {
                             preferences.edit().putBoolean("remote_sync_pending", false).apply()
                         }
-                        WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = hasExpiredSubscription(context)
+                        WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = true
                         else -> Unit
                     }
                 }
@@ -545,7 +548,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 coroutineScope.launch {
                     when (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
                         is WorkoutRemoteSync.Outcome.Synchronized -> preferences.edit().putBoolean("remote_sync_pending", false).apply()
-                        WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = hasExpiredSubscription(context)
+                        WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = true
                         else -> Unit
                     }
                 }
@@ -751,12 +754,6 @@ private fun PlanPreviewWorkoutCard(workout: WorkoutDaySummary, gender: String) {
             }
         }
     }
-}
-
-/** Mirrors iOS: a failed sync only forces the paywall when access is expired. */
-private suspend fun hasExpiredSubscription(context: android.content.Context): Boolean {
-    val token = context.getSharedPreferences("wildforce_account", 0).getString("token", null) ?: return false
-    return subscriptionAccess(token).getOrNull()?.status == "expired"
 }
 
 @Composable
@@ -1007,6 +1004,7 @@ private fun WildforceApp(
                 onRecreatePlan = { onRegenerateProfile(profile) },
                 avatarPath = avatarPath,
                 avatarRevision = avatarRevision,
+                appLanguage = profile.appLanguage,
                 customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile, request, appContext) },
             )
         } else if (selected == RootDestination.Nutrition) {
@@ -1042,7 +1040,13 @@ private fun WildforceApp(
                 onChangeAvatar = { avatarPicker.launch("image/*") },
                 onThemeChanged = onThemeChanged,
                 onKeepScreenOnChanged = { keepScreenOnDuringWorkout = it },
-                onGenerateFuturePreview = { image, bodyProfile -> FutureBodyPreviewGenerator.generate(image, bodyProfile) },
+                onGenerateFuturePreview = { localSessionId, angle ->
+                    WorkoutRemoteSync.synchronize(appContext, profile, appPreferences)
+                    FutureBodyPreviewGenerator.generate(appContext, WorkoutRemoteSync.remoteBodyProgressSessionId(appContext, localSessionId), angle)
+                },
+                onLoadFuturePreview = { localSessionId, angle ->
+                    FutureBodyPreviewGenerator.load(appContext, WorkoutRemoteSync.remoteBodyProgressSessionId(appContext, localSessionId), angle)
+                },
             )
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(androidx.compose.ui.res.stringResource(R.string.coming_soon, androidx.compose.ui.res.stringResource(selected.labelRes)), color = WildforceThemeTokens.textSecondary)
