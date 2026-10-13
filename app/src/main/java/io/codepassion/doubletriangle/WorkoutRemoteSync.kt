@@ -991,7 +991,15 @@ internal object WorkoutRemoteSync {
                 val record = item.optJSONObject("record") ?: continue
                 if (resource in batchResources) result.getOrPut(resource, ::JSONArray).put(record)
             }
-            val cursor = response.optJSONObject("meta")?.optString("next_cursor").orEmpty()
+            // JSONObject.optString turns a JSON null into the literal string
+            // "null". Treat both representations as the end of pagination;
+            // otherwise Android posts cursor="null" after the final page and
+            // the backend rejects the whole sync as an invalid cursor.
+            val cursor = response.optJSONObject("meta")?.opt("next_cursor")
+                ?.takeUnless { it == JSONObject.NULL }
+                ?.toString()
+                ?.takeUnless { it.equals("null", ignoreCase = true) }
+                .orEmpty()
             request = if (cursor.isBlank()) JSONObject() else JSONObject().put("cursor", cursor)
         } while (request.has("cursor"))
         return RemoteSnapshot(result)
