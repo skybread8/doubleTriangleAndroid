@@ -59,6 +59,13 @@ internal object WorkoutRemoteSync {
     )
     private val synchronizationMutex = Mutex()
 
+    /** The server session ID is deterministic, so the forecast API can be used after a sync. */
+    fun remoteBodyProgressSessionId(context: Context, localSessionId: String): String {
+        val userId = context.getSharedPreferences(accountPrefs, Context.MODE_PRIVATE).getString("id", null)
+            ?: error("Inicia sesión para crear una previsión")
+        return stableId("$userId:body-progress:$localSessionId")
+    }
+
     sealed interface Outcome {
         /** A first-device import can replace the in-memory profile before the UI is shown. */
         data class Synchronized(val importedProfile: OnboardingProfile? = null) : Outcome
@@ -597,12 +604,12 @@ internal object WorkoutRemoteSync {
         }
         if (plans.isEmpty()) return
         // Match iOS User.currentWorkoutPlan exactly: active plans first, then
-        // newest updatedAt, createdAt, and finally UUID as a deterministic tie
+        // newest createdAt, updatedAt, and finally UUID as a deterministic tie
         // breaker. Do not infer the current plan from mesocycle numbers.
         val activeCandidates = plans.filter { it.status.equals("active", ignoreCase = true) }
         val active = (activeCandidates.ifEmpty { plans }).maxWithOrNull(
-            compareBy<RemotePlan> { it.updatedAt }
-                .thenBy { it.createdAt }
+            compareBy<RemotePlan> { it.createdAt }
+                .thenBy { it.updatedAt }
                 .thenBy { it.id }
         ) ?: plans.first()
         Log.d("WorkoutRemoteSync", "Selected plan id=${active.id}, status=${active.status}, mesocycle=${active.mesocycleNumber}, createdAt=${active.createdAt}, updatedAt=${active.updatedAt}")
