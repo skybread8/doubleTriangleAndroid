@@ -71,7 +71,8 @@ internal object WorkoutRemoteSync {
         data class Synchronized(val importedProfile: OnboardingProfile? = null) : Outcome
         data object NoAccount : Outcome
         data object SubscriptionRequired : Outcome
-        data class Failed(val message: String?) : Outcome
+        /** A pull can succeed before a later push fails; iOS still renders the imported data. */
+        data class Failed(val message: String?, val importedRemotePlan: Boolean = false) : Outcome
     }
 
     /** Records completed-session omissions until the corresponding plan graph has uploaded them. */
@@ -92,6 +93,7 @@ internal object WorkoutRemoteSync {
         val account = context.getSharedPreferences(accountPrefs, 0)
         val token = account.getString("token", null) ?: return@withContext Outcome.NoAccount
         val userId = account.getString("id", null) ?: return@withContext Outcome.NoAccount
+        var importedRemotePlan = false
         try {
             val hasPendingLocalChanges = preferences.getBoolean("remote_sync_pending", false)
             val shouldImportRemoteSnapshot = preferences.getBoolean("remote_sync_import_required", false) || preferences.getString("workout_plan_json", null).isNullOrBlank()
@@ -107,7 +109,7 @@ internal object WorkoutRemoteSync {
                 val remoteProfile = pullRemoteProfile(context, remote, profile)
                 pullRemoteAccountProgress(context, remote)
                 pullRemoteExerciseProfiles(context, remote)
-                pullWorkoutPlans(context, remote, preferences)
+                importedRemotePlan = pullWorkoutPlans(context, remote, preferences)
                 pullRemoteNutrition(context, token, remote)
                 pullRemoteBodyMetrics(context, remote.records("body-metric-entries"), (remoteProfile ?: profile).heightCm)
                 pullRemoteAppSettings(context, remote)
@@ -188,7 +190,7 @@ internal object WorkoutRemoteSync {
         } catch (error: Exception) {
             Log.w("WorkoutRemoteSync", "Synchronization failed", error)
             if (error is SubscriptionRequiredException) Outcome.SubscriptionRequired
-            else Outcome.Failed(error.message)
+            else Outcome.Failed(error.message, importedRemotePlan)
         }
         }
     }
@@ -597,10 +599,10 @@ internal object WorkoutRemoteSync {
      * records. Otherwise a freshly generated empty/default plan could win the
      * last-write-wins conflict and hide the user's iOS workouts.
      */
-    private fun pullWorkoutPlans(context: Context, remote: RemoteSnapshot, preferences: SharedPreferences) {
+    private fun pullWorkoutPlans(context: Context, remote: RemoteSnapshot, preferences: SharedPreferences): Boolean {
         val remotePlans = remote.records("workout-plans").liveRecords()
         Log.d("WorkoutRemoteSync", "Pulled workout-plans=${remotePlans.size}, workout-days=${remote.records("workout-days").liveRecords().size}")
-        if (remotePlans.isEmpty()) return
+        if (remotePlans.isEmpty()) return false
         val remoteDays = pullRemoteWorkoutDays(remote)
         importRemoteWorkoutHistory(context, remoteDays)
 
@@ -608,7 +610,7 @@ internal object WorkoutRemoteSync {
             val planId = plan.optString("id").takeIf(String::isNotBlank) ?: return@mapNotNull null
             remotePlanJson(plan, planId, remoteDays)
         }
-        if (plans.isEmpty()) return
+        if (plans.isEmpty()) return false
         // Match iOS User.currentWorkoutPlan exactly: active plans first, then
         // newest createdAt, updatedAt, and finally UUID as a deterministic tie
         // breaker. Do not infer the current plan from mesocycle numbers.
@@ -627,6 +629,7 @@ internal object WorkoutRemoteSync {
         preferences.edit().putString("workout_plan_json", active.rawJson)
             .putString(planKey, active.id)
             .putBoolean("remote_plan_imported", true).apply()
+        return true
     }
 
     /**
@@ -849,7 +852,12 @@ internal object WorkoutRemoteSync {
         val skippedExercises = skippedExerciseTimestamps(context)
         val uploadedSkippedExerciseKeys = mutableSetOf<String>()
         for (dayIndex in 0 until days.length()) {
-            val day = days.getJSONObject(dayIndex); val dayId = day.optString("remoteId").takeIf(::isUuid) ?: stableId("$planId:${day.optString("id", dayIndex.toString())}")
+            // Server-generated days use their UUID directly.  Retaining it is
+            // essential for iOS/Android parity: it is also the public workout
+            // card identifier used by the share route.
+            val day = days.getJSONObject(dayIndex); val dayId = day.optString("remoteId").takeIf(::isUuid)
+                ?: day.optString("id").takeIf(::isUuid)
+                ?: stableId("$planId:${day.optString("id", dayIndex.toString())}")
             val localWorkoutId = day.optString("id", dayIndex.toString())
             var executionIndex = 0
             dayRecords.put(record(dayId, now).put("workout_plan_id", planId).put("kind", "workout").put("title", day.optString("title", "Sesión ${dayIndex + 1}")).put("focus", backendWorkoutFocus(day.optString("focus"))).put("status", day.optString("status", "PLANNED").lowercase()).put("did_count_toward_streak", false).put("order_index", dayIndex).put("intended_weekday", day.optString("weekday").lowercase()).put("day_type", day.optString("dayType")).put("creation_source", "generated").put("estimated_duration_minutes", day.optInt("estimatedDurationMinutes", 50)))

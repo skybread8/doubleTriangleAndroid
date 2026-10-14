@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle
 
 import io.codepassion.wildforce.android.R
+import io.codepassion.wildforce.android.BuildConfig
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -477,18 +478,20 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             },
         )
         var subscriptionRequired by remember { mutableStateOf(false) }
+        fun applyPulledPlanIfAvailable() {
+            if (!preferences.getBoolean("remote_plan_imported", false)) return
+            preferences.edit().remove("remote_plan_imported").apply()
+            workoutPlanStore.currentPlanJson()?.let { remotePlan ->
+                runCatching { WorkoutPlanGenerator.parse(remotePlan, currentProfile.name, currentProfile.goal.title) }
+                    .onSuccess { generatedWorkoutState = it }
+            }
+        }
         LaunchedEffect(currentProfile.name, workoutPlanStore.currentPlanJson()) {
             if (preferences.getBoolean("remote_sync_pending", false) || hasRemoteSession) {
                 when (val result = WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
                     is WorkoutRemoteSync.Outcome.Synchronized -> {
                         preferences.edit().putBoolean("remote_sync_pending", false).apply()
-                        if (preferences.getBoolean("remote_plan_imported", false)) {
-                            preferences.edit().remove("remote_plan_imported").apply()
-                            workoutPlanStore.currentPlanJson()?.let { remotePlan ->
-                                runCatching { WorkoutPlanGenerator.parse(remotePlan, currentProfile.name, currentProfile.goal.title) }
-                                    .onSuccess { generatedWorkoutState = it }
-                            }
-                        }
+                        applyPulledPlanIfAvailable()
                         result.importedProfile?.let { imported ->
                             persistOnboardingProfile(imported)
                             profile = imported
@@ -499,6 +502,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     // second status check: an account without access is not
                     // necessarily labelled `expired` by the backend.
                     WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = true
+                    is WorkoutRemoteSync.Outcome.Failed -> if (result.importedRemotePlan) applyPulledPlanIfAvailable()
                     else -> Unit
                 }
             }
@@ -511,9 +515,13 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             val observer = LifecycleEventObserver { _, event ->
                 if (event == Lifecycle.Event.ON_RESUME && context.getSharedPreferences("wildforce_account", 0).getString("token", null) != null) {
                     coroutineScope.launch {
-                        when (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
+                        when (val result = WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
                             WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = true
-                            is WorkoutRemoteSync.Outcome.Synchronized -> preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                            is WorkoutRemoteSync.Outcome.Synchronized -> {
+                                preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                                applyPulledPlanIfAvailable()
+                            }
+                            is WorkoutRemoteSync.Outcome.Failed -> if (result.importedRemotePlan) applyPulledPlanIfAvailable()
                             else -> Unit
                         }
                     }
@@ -533,11 +541,13 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 // sync failure must not leave a verified purchaser blocked.
                 subscriptionRequired = false
                 coroutineScope.launch {
-                    when (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
+                    when (val result = WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
                         is WorkoutRemoteSync.Outcome.Synchronized -> {
                             preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                            applyPulledPlanIfAvailable()
                         }
                         WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = true
+                        is WorkoutRemoteSync.Outcome.Failed -> if (result.importedRemotePlan) applyPulledPlanIfAvailable()
                         else -> Unit
                     }
                 }
@@ -560,9 +570,13 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 WorkoutRemoteSync.recordWorkoutCompletion(context)
                 preferences.edit().putBoolean("remote_sync_pending", true).apply()
                 coroutineScope.launch {
-                    when (WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
-                        is WorkoutRemoteSync.Outcome.Synchronized -> preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                    when (val result = WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
+                        is WorkoutRemoteSync.Outcome.Synchronized -> {
+                            preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                            applyPulledPlanIfAvailable()
+                        }
                         WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = true
+                        is WorkoutRemoteSync.Outcome.Failed -> if (result.importedRemotePlan) applyPulledPlanIfAvailable()
                         else -> Unit
                     }
                 }
