@@ -260,7 +260,12 @@ internal object WorkoutRemoteSync {
         context.getSharedPreferences(accountProgressPrefs, Context.MODE_PRIVATE).edit()
             .putInt("current_streak", user.optInt("current_streak", 0).coerceAtLeast(0))
             .putInt("longest_streak", user.optInt("longest_streak", 0).coerceAtLeast(0))
-            .putString("last_completed_workout_at", user.optString("last_completed_workout_at").takeIf(String::isNotBlank))
+            // JSONObject#optString turns a JSON null into the literal text "null".
+            // iOS keeps this optional field as nil and sends JSON null back to the
+            // API; retain the same representation instead of later submitting an
+            // invalid date string that makes the server return 500.
+            .putString("last_completed_workout_at", user.optString("last_completed_workout_at")
+                .takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) })
             .putInt("xp", user.optInt("xp", 0).coerceAtLeast(0))
             .putInt("xp_level", user.optInt("xp_level", 1).coerceAtLeast(1))
             .apply()
@@ -282,7 +287,8 @@ internal object WorkoutRemoteSync {
         return AccountProgress(
             currentStreak = preferences.getInt("current_streak", 0).coerceAtLeast(0),
             longestStreak = preferences.getInt("longest_streak", 0).coerceAtLeast(0),
-            lastCompletedWorkoutAt = preferences.getString("last_completed_workout_at", null),
+            lastCompletedWorkoutAt = preferences.getString("last_completed_workout_at", null)
+                ?.takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) },
             xp = preferences.getInt("xp", 0).coerceAtLeast(0),
             xpLevel = preferences.getInt("xp_level", 1).coerceAtLeast(1),
         )
