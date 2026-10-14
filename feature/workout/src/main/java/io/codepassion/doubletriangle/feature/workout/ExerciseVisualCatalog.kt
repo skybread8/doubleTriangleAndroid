@@ -69,6 +69,7 @@ object ExerciseVisualCatalog {
         "tricepsPushdown" to ExerciseVisualMetadata(listOf(MuscleVisual.Triceps)),
         "pullUp" to ExerciseVisualMetadata(listOf(MuscleVisual.Back), listOf(MuscleVisual.Biceps, MuscleVisual.Shoulders)),
         "latPulldown" to ExerciseVisualMetadata(listOf(MuscleVisual.Back), listOf(MuscleVisual.Biceps)),
+        "cableLatPushdown" to ExerciseVisualMetadata(listOf(MuscleVisual.Back), listOf(MuscleVisual.Shoulders)),
         "seatedCableRow" to ExerciseVisualMetadata(listOf(MuscleVisual.Back), listOf(MuscleVisual.Biceps)),
         "bentOverRow" to ExerciseVisualMetadata(listOf(MuscleVisual.Back), listOf(MuscleVisual.Biceps, MuscleVisual.LowerBack)),
         "facePull" to ExerciseVisualMetadata(listOf(MuscleVisual.Shoulders, MuscleVisual.Back)),
@@ -78,6 +79,7 @@ object ExerciseVisualCatalog {
         "sidePlank" to ExerciseVisualMetadata(listOf(MuscleVisual.Obliques), listOf(MuscleVisual.Shoulders)),
         "deadBug" to ExerciseVisualMetadata(listOf(MuscleVisual.Abs)),
         "mountainClimber" to ExerciseVisualMetadata(listOf(MuscleVisual.Cardio), listOf(MuscleVisual.Abs, MuscleVisual.Shoulders)),
+        "lyingLegRaise" to ExerciseVisualMetadata(listOf(MuscleVisual.Abs)),
     )
 
     internal fun metadata(imageKey: String?): ExerciseVisualMetadata? = imageKey?.let { key ->
@@ -95,7 +97,7 @@ object ExerciseVisualCatalog {
     fun equipmentFor(imageKey: String?): List<String> = when (imageKey?.trim()) {
         "benchPress", "inclineBenchPress", "chestDip" -> listOf("Banco ajustable")
         "dumbbellInclineBenchPress" -> listOf("Banco ajustable", "Mancuernas")
-        "latPulldown", "seatedCableRow", "facePull", "tricepsPushdown" -> listOf("Máquina de poleas")
+        "latPulldown", "cableLatPushdown", "seatedCableRow", "facePull", "tricepsPushdown" -> listOf("Máquina de poleas")
         "barbellBackSquat", "deadlift", "romanianDeadlift", "bentOverRow" -> listOf("Barra y discos")
         "gobletSquat", "overheadPress", "lateralRaise", "bicepsCurl", "hammerCurl" -> listOf("Mancuernas")
         "pullUp" -> listOf("Barra de dominadas")
@@ -107,7 +109,7 @@ object ExerciseVisualCatalog {
     internal fun equipmentVisualsFor(imageKey: String?): List<EquipmentVisual> = when (imageKey?.trim()) {
         "benchPress", "inclineBenchPress", "chestDip" -> listOf(EquipmentVisual.AdjustableBench)
         "dumbbellInclineBenchPress" -> listOf(EquipmentVisual.AdjustableBench, EquipmentVisual.Dumbbells)
-        "latPulldown", "seatedCableRow", "facePull", "tricepsPushdown" -> listOf(EquipmentVisual.CableMachine)
+        "latPulldown", "cableLatPushdown", "seatedCableRow", "facePull", "tricepsPushdown" -> listOf(EquipmentVisual.CableMachine)
         "barbellBackSquat", "deadlift", "romanianDeadlift", "bentOverRow" -> listOf(EquipmentVisual.OlympicBarbell)
         "gobletSquat", "overheadPress", "lateralRaise", "bicepsCurl", "hammerCurl" -> listOf(EquipmentVisual.Dumbbells)
         "pullUp" -> listOf(EquipmentVisual.PullUpBar)

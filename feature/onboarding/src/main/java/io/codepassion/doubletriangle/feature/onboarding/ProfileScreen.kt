@@ -111,7 +111,8 @@ fun ProfileScreen(
     onChangeAvatar: () -> Unit = {},
     onThemeChanged: () -> Unit = {},
     onKeepScreenOnChanged: (Boolean) -> Unit = {},
-    onGenerateFuturePreview: suspend (android.graphics.Bitmap, OnboardingProfile) -> android.graphics.Bitmap = { _, _ -> error("La vista a futuro no está configurada") },
+    onGenerateFuturePreview: suspend (String, String) -> android.graphics.Bitmap = { _, _ -> error("La vista a futuro no está configurada") },
+    onLoadFuturePreview: suspend (String, String) -> android.graphics.Bitmap? = { _, _ -> null },
 ) {
     var draft by remember(initial) { mutableStateOf(initial) }
     var heightInput by remember(initial) { mutableStateOf(displayHeight(initial.heightCm, initial.metricSystem)) }
@@ -183,6 +184,7 @@ fun ProfileScreen(
             BodyProgressScreen(
                 profile = validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput),
                 generateFuturePreview = onGenerateFuturePreview,
+                loadFuturePreview = onLoadFuturePreview,
                 onClose = { showsBodyProgress = false },
             )
         }

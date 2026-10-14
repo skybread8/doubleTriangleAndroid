@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.horizontalScroll
@@ -106,6 +107,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
+import io.codepassion.doubletriangle.core.designsystem.PlanGenerationAnimation
 import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
@@ -699,11 +701,18 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit) {
                 Brush.verticalGradient(listOf(Color.Transparent, Color.Black, Color.Black)),
             ),
         )
-        // The photograph supplies the bokeh, while these larger, slow lights make
-        // the ambient motion immediately legible on Android displays.
-        FloatingAmbientOrbs(timeSeconds = dustTime)
-        // Exact counterpart of iOS's DustParticlesEffectView.
-        FloatingDustOverlay(timeSeconds = dustTime)
+        // Exact counterpart of iOS's DustParticlesEffectView. iOS does not draw
+        // large decorative orbs here; the cover photo supplies its soft bokeh.
+        // iOS keeps the moving dust in the upper image area; the lower black
+        // section remains clean for the logo, copy and actions.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(.58f)
+                .align(Alignment.TopCenter),
+        ) {
+            FloatingDustOverlay(timeSeconds = dustTime)
+        }
         Column(
             modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 50.dp, vertical = 40.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -738,51 +747,26 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit) {
 }
 
 @Composable
-private fun FloatingAmbientOrbs(timeSeconds: Float) {
-    Canvas(Modifier.fillMaxSize()) {
-        // Fixed anchors prevent the decoration jumping at recomposition. Their
-        // drift is intentionally slow enough to feel like floating light, but
-        // pronounced enough to be noticed without waiting for an entrance replay.
-        val orbs = listOf(
-            floatArrayOf(.08f, .20f, 16f, .38f, .42f, 0f),
-            floatArrayOf(.89f, .18f, 24f, .30f, .34f, 1.3f),
-            floatArrayOf(.14f, .48f, 20f, .42f, .30f, 2.2f),
-            floatArrayOf(.90f, .52f, 13f, .32f, .38f, 3.5f),
-            floatArrayOf(.07f, .74f, 28f, .28f, .32f, 4.1f),
-            floatArrayOf(.88f, .78f, 18f, .40f, .36f, 5.0f),
-        )
-        orbs.forEachIndexed { index, orb ->
-            val phase = timeSeconds * orb[4] + orb[5]
-            val center = androidx.compose.ui.geometry.Offset(
-                x = size.width * orb[0] + kotlin.math.sin(phase) * 16.dp.toPx(),
-                y = size.height * orb[1] + kotlin.math.cos(phase * .82f) * 22.dp.toPx(),
-            )
-            val radius = orb[2].dp.toPx()
-            val pulse = .72f + .28f * kotlin.math.sin(phase * 1.15f)
-            val tint = if (index % 3 == 0) WildforceThemeTokens.accentGold else Color.White
-            drawCircle(tint.copy(alpha = .09f * pulse), radius * 2.4f, center)
-            drawCircle(tint.copy(alpha = .17f * pulse), radius * 1.45f, center)
-            drawCircle(tint.copy(alpha = orb[3] * pulse), radius, center)
-        }
-    }
-}
-
-@Composable
 private fun FloatingDustOverlay(timeSeconds: Float) {
     Canvas(Modifier.fillMaxSize()) {
-        repeat(64) { seed ->
+        repeat(48) { seed ->
             val seedValue = seed.toFloat()
             val initialX = ((kotlin.math.sin(seedValue * 12.9898f) + 1f) / 2f) * size.width
             val initialY = ((kotlin.math.cos(seedValue * 78.233f) + 1f) / 2f) * size.height
-            val radius = 0.6f + kotlin.math.abs(kotlin.math.sin(seedValue * 3.7f)) * 1.8f
-            val baseAlpha = 0.10f + kotlin.math.abs(kotlin.math.cos(seedValue * 5.1f)) * 0.50f
+            // Keep the same soft dust language as iOS, but express the radius
+            // in dp. The old raw-pixel values were sub-pixel on this emulator,
+            // so the animation existed but was effectively invisible.
+            val radius = (1.4f + kotlin.math.abs(kotlin.math.sin(seedValue * 3.7f)) * 2.3f).dp.toPx()
+            val baseAlpha = 0.32f + kotlin.math.abs(kotlin.math.cos(seedValue * 5.1f)) * 0.36f
             val riseSpeed = 6f + kotlin.math.abs(kotlin.math.sin(seedValue * 2.9f)) * 14f
             val wrapHeight = size.height + 24.dp.toPx()
             val yRaw = initialY - (timeSeconds * riseSpeed % wrapHeight) - 12.dp.toPx()
             val y = if (yRaw < -12.dp.toPx()) yRaw + wrapHeight else yRaw
             // In iOS the wobble and twinkle coefficients are deliberately zero,
             // leaving a calm, slow dust-in-light treatment instead of a glitter.
-            drawCircle(Color.White.copy(alpha = baseAlpha * .65f), radius = radius, center = androidx.compose.ui.geometry.Offset(initialX, y))
+            val center = androidx.compose.ui.geometry.Offset(initialX, y)
+            drawCircle(Color.White.copy(alpha = baseAlpha * .08f), radius = radius * 1.9f, center = center)
+            drawCircle(Color.White.copy(alpha = baseAlpha * .78f), radius = radius, center = center)
         }
     }
 }
@@ -830,56 +814,7 @@ private fun PlanGenerationStep(
 /** Android equivalent of iOS CreatePlanAnimationView and its notification stack. */
 @Composable
 private fun PlanCreationAnimation() {
-    val steps = remember {
-        listOf(
-            "Analizando tus objetivos…", "Evaluando tu equipamiento…", "Optimizando la división semanal…",
-            "Calculando cargas objetivo…", "Revisando restricciones de movimiento…", "Personalizando ejercicios…",
-            "Equilibrando volumen e intensidad…", "Terminando tu plan personalizado…",
-        )
-    }
-    var step by remember { mutableStateOf(0) }
-    var completed by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            completed = false
-            delay(2_450)
-            completed = true
-            delay(650)
-            step = (step + 1) % steps.size
-        }
-    }
-    val transition = rememberInfiniteTransition(label = "plan-creation")
-    val ringRotation by transition.animateFloat(0f, 360f, infiniteRepeatable(tween(1_800, easing = LinearEasing)), label = "plan-creation-ring")
-    val pulse by transition.animateFloat(1f, .72f, infiniteRepeatable(tween(650), RepeatMode.Reverse), label = "plan-creation-pulse")
-    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(28.dp)) {
-        Box(Modifier.height(190.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
-            repeat(3) { index ->
-                val depth = index - 1
-                Box(
-                    Modifier.width(240.dp).height(78.dp)
-                        .offset(y = (depth * 44).dp)
-                        .graphicsLayer { scaleX = 1f - kotlin.math.abs(depth) * .08f; scaleY = scaleX; alpha = if (depth == 0) 1f else .68f }
-                        .clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.backgroundSecondary.copy(alpha = .92f)).padding(14.dp),
-                ) {
-                    Text("✦", color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.h5)
-                    Text("Tu plan se está preparando", modifier = Modifier.padding(start = 36.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
-                }
-            }
-            CircularProgressIndicator(
-                progress = 1f,
-                modifier = Modifier.size(62.dp).graphicsLayer { rotationZ = ringRotation },
-                color = WildforceThemeTokens.accentGold,
-                backgroundColor = Color.Transparent,
-                strokeWidth = 3.dp,
-            )
-        }
-        Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(if (completed) "✓" else "○", color = if (completed) Color(0xFF43A047) else WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.h5)
-            AnimatedContent(targetState = step, label = "plan-creation-step") { current ->
-                Text(steps[current], modifier = Modifier.padding(start = 10.dp).alpha(if (completed) 1f else pulse), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
-            }
-        }
-    }
+    PlanGenerationAnimation(icon = "⌁")
 }
 
 @Composable

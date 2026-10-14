@@ -273,8 +273,17 @@ internal object CustomExerciseCatalog {
                 substitutionCandidates = item.stringList("substitutionCandidates"),
                 primaryMuscles = item.stringList("primaryMuscles").toSet(),
             )
-        }.sortedBy { it.name }
+        }.let(::withLatestExercises).sortedBy { it.name }
     }.getOrDefault(spanishNames.map { ExerciseChoice(it.value, it.key) }.sortedBy { it.name })
+
+    /** Keep Android's picker compatible with the two exercises added to iOS's catalog. */
+    private fun withLatestExercises(catalog: List<ExerciseChoice>): List<ExerciseChoice> {
+        val additions = listOf(
+            ExerciseChoice("Jalón de dorsales con polea", "cableLatPushdown", listOf("latPulldown", "pullUp", "seatedCableRow"), setOf("back")),
+            ExerciseChoice("Elevación de piernas tumbado", "lyingLegRaise", listOf("deadBug", "bicycleCrunch", "hangingLegRaise"), setOf("abs")),
+        )
+        return catalog + additions.filterNot { added -> catalog.any { it.imageKey == added.imageKey } }
+    }
 
     private fun humanize(value: String): String = value.replace(Regex("([a-z])([A-Z])"), "$1 $2").replaceFirstChar { it.uppercase() }
 }

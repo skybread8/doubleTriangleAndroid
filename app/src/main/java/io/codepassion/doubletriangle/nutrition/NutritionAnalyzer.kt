@@ -47,10 +47,22 @@ internal data class NutritionSearchFood(
     val carbs: Int,
     val fat: Int,
     val servingGrams: Double?,
+    val portions: List<NutritionSearchPortion> = emptyList(),
+)
+
+/** A complete catalog portion returned by Wildforce/FatSecret. */
+internal data class NutritionSearchPortion(
+    val id: String,
+    val name: String,
+    val amountGrams: Double?,
+    val calories: Int,
+    val protein: Int,
+    val carbs: Int,
+    val fat: Int,
 )
 
 internal object NutritionAnalyzer {
-    // iOS uses GPT-4o for meal text/photo analysis; the plan generator uses OPENAI_MODEL (gpt-5.6-luna).
+    // The legacy local provider remains only for label OCR and temporary offline fallbacks.
     private const val MEAL_ANALYSIS_MODEL = "gpt-4o"
     /**
      * Text descriptions are analyzed by the authenticated Wildforce service,
@@ -116,6 +128,7 @@ internal object NutritionAnalyzer {
         val mime = resolver.getType(uri)?.takeIf { it.startsWith("image/") } ?: "image/jpeg"
         val bytes = resolver.openInputStream(uri)?.use { it.readBytes() } ?: error("No se pudo leer la imagen")
         check(bytes.size <= 18_000_000) { "La imagen es demasiado grande" }
+        if (!isLabel) return analyzeMealPhoto(context, bytes, mime, correction)
         val instruction = imageInstruction(isLabel, correction)
         return request(
             listOf(
@@ -128,11 +141,62 @@ internal object NutritionAnalyzer {
     fun image(context: Context, bitmap: Bitmap, isLabel: Boolean, correction: String? = null): NutritionAnalysis {
         val output = ByteArrayOutputStream()
         check(bitmap.compress(Bitmap.CompressFormat.JPEG, 86, output)) { "No se pudo preparar la captura" }
+        if (!isLabel) return analyzeMealPhoto(context, output.toByteArray(), "image/jpeg", correction)
         val instruction = imageInstruction(isLabel, correction)
         return request(listOf(
             JSONObject().put("type", "text").put("text", instruction),
             JSONObject().put("type", "image_url").put("image_url", JSONObject().put("url", "data:image/jpeg;base64,${Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP)}")),
         ))
+    }
+
+    /** Mirrors iOS: the service validates that this is food and keeps AI keys off the device. */
+    private fun analyzeMealPhoto(context: Context, image: ByteArray, mime: String, notes: String?): NutritionAnalysis {
+        check(image.size <= 5 * 1024 * 1024) { "La imagen debe ocupar como máximo 5 MB" }
+        val token = context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE).getString("token", null)
+            ?: error("Inicia sesión para analizar una comida")
+        val boundary = "Wildforce-${java.util.UUID.randomUUID()}"
+        val connection = URL(WildforceApiEnvironment.apiUrl("nutrition/macros/from-photo")).openConnection() as HttpURLConnection
+        connection.requestMethod = "POST"; connection.doOutput = true; connection.connectTimeout = 30_000; connection.readTimeout = 120_000
+        connection.setRequestProperty("Authorization", "Bearer $token")
+        connection.setRequestProperty("Idempotency-Key", java.util.UUID.randomUUID().toString())
+        connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
+        try {
+            DataOutputStream(connection.outputStream).use { output ->
+                output.writeBytes("--$boundary\r\nContent-Disposition: form-data; name=\"image\"; filename=\"meal.jpg\"\r\nContent-Type: $mime\r\n\r\n")
+                output.write(image)
+                output.writeBytes("\r\n")
+                notes?.trim()?.takeIf(String::isNotBlank)?.let { value ->
+                    output.writeBytes("--$boundary\r\nContent-Disposition: form-data; name=\"notes\"\r\n\r\n$value\r\n")
+                }
+                output.writeBytes("--$boundary--\r\n")
+            }
+            val body = (if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream)
+                ?.bufferedReader()?.use { it.readText() }.orEmpty()
+            check(connection.responseCode in 200..299) {
+                JSONObject(body).optString("message").ifBlank { "No se pudo analizar la comida" }
+            }
+            return parseServerEstimate(JSONObject(body).optJSONObject("data") ?: JSONObject(body))
+        } finally { connection.disconnect() }
+    }
+
+    private fun parseServerEstimate(estimate: JSONObject): NutritionAnalysis {
+        val macros = estimate.optJSONObject("estimatedMacros") ?: estimate.optJSONObject("estimated_macros") ?: JSONObject()
+        val foods = estimate.optJSONArray("estimatedFoods") ?: estimate.optJSONArray("estimated_foods")
+        return NutritionAnalysis(
+            name = estimate.optString("title").ifBlank { "Comida analizada" },
+            calories = macros.optDouble("calories").toInt().coerceIn(0, 8_000),
+            protein = macros.optDouble("protein").toInt().coerceIn(0, 500),
+            carbs = macros.optDouble("carbs").toInt().coerceIn(0, 1_000),
+            fat = macros.optDouble("fat").toInt().coerceIn(0, 500),
+            notes = estimate.optString("analysisNotes", estimate.optString("analysis_notes")),
+            foods = foods?.let { values -> buildList {
+                for (index in 0 until values.length()) {
+                    val food = values.optJSONObject(index) ?: continue
+                    val itemMacros = food.optJSONObject("estimatedMacros") ?: food.optJSONObject("estimated_macros") ?: JSONObject()
+                    add(NutritionAnalysisFood(food.optString("name"), food.optInt("amountGrams", food.optInt("amount_grams")), itemMacros.optDouble("calories").toInt(), itemMacros.optDouble("protein").toInt(), itemMacros.optDouble("carbs").toInt(), itemMacros.optDouble("fat").toInt()))
+                }
+            } }.orEmpty(),
+        )
     }
 
     fun barcode(code: String): NutritionAnalysis {
@@ -167,36 +231,51 @@ internal object NutritionAnalyzer {
         }
     }
 
-    /**
-     * Android uses the same provider-shaped food search as iOS instead of a
-     * fixed demo catalog. Open Food Facts is public and also backs barcode
-     * lookup, so it provides a useful no-key fallback when USDA is unavailable.
-     */
-    fun searchFoods(query: String): List<NutritionSearchFood> {
+    /** Searches the authenticated, localized backend catalog, matching iOS. */
+    fun searchFoods(context: Context, query: String): List<NutritionSearchFood> {
         val terms = query.trim()
         require(terms.length >= 2) { "Escribe al menos dos caracteres" }
+        val token = context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE).getString("token", null)
+            ?: error("Inicia sesión para buscar alimentos")
         val encoded = URLEncoder.encode(terms, Charsets.UTF_8.name())
-        val connection = URL("https://world.openfoodfacts.org/cgi/search.pl?search_terms=$encoded&search_simple=1&action=process&json=1&page_size=20").openConnection() as HttpURLConnection
-        connection.connectTimeout = 12_000
-        connection.readTimeout = 15_000
-        connection.setRequestProperty("User-Agent", "Wildforce-Android/0.1")
+        val connection = URL(WildforceApiEnvironment.apiUrl("nutrition/food/search?query=$encoded&max_results=20")).openConnection() as HttpURLConnection
+        connection.connectTimeout = 20_000
+        connection.readTimeout = 30_000
+        connection.setRequestProperty("Authorization", "Bearer $token")
+        connection.setRequestProperty("Accept", "application/json")
         try {
-            val body = connection.inputStream.bufferedReader().use { it.readText() }
-            val products = JSONObject(body).optJSONArray("products") ?: return emptyList()
+            val body = (if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream)
+                ?.bufferedReader()?.use { it.readText() }.orEmpty()
+            check(connection.responseCode in 200..299) { JSONObject(body).optString("message", "No se pudo buscar el alimento") }
+            val products = JSONObject(body).optJSONObject("data")?.optJSONArray("results") ?: return emptyList()
             return buildList {
                 for (index in 0 until products.length()) {
                     val product = products.optJSONObject(index) ?: continue
-                    val name = product.optString("product_name_es").ifBlank { product.optString("product_name") }.trim()
+                    val name = product.optString("name").trim()
                     if (name.isBlank()) continue
-                    val nutrients = product.optJSONObject("nutriments") ?: JSONObject()
-                    val grams = product.optDouble("serving_quantity", Double.NaN).takeUnless(Double::isNaN)?.takeIf { it > 0 }
-                    val ratio = (grams ?: 100.0) / 100.0
-                    fun macro(key: String, limit: Int) = (nutrients.optDouble("${key}_100g") * ratio).toInt().coerceIn(0, limit)
+                    val portions = buildList {
+                        val rawPortions = product.optJSONArray("portions") ?: return@buildList
+                        for (portionIndex in 0 until rawPortions.length()) {
+                            val portion = rawPortions.optJSONObject(portionIndex) ?: continue
+                            val grams = portion.optDouble("amountGrams", Double.NaN).takeUnless(Double::isNaN)?.takeIf { it > 0 }
+                            val macros = portion.optJSONObject("macros") ?: JSONObject()
+                            fun macro(key: String, limit: Int) = macros.optDouble(key).toInt().coerceIn(0, limit)
+                            add(NutritionSearchPortion(
+                                id = portion.optString("id"),
+                                name = portion.optString("name").ifBlank { grams?.let { "${it.toInt()} g" } ?: "Ración" },
+                                amountGrams = grams,
+                                calories = macro("calories", 8_000),
+                                protein = macro("protein", 500),
+                                carbs = macro("carbs", 1_000),
+                                fat = macro("fat", 500),
+                            ))
+                        }
+                    }
+                    val portion = portions.firstOrNull { it.amountGrams == 100.0 } ?: portions.firstOrNull() ?: continue
                     add(NutritionSearchFood(
-                        name = name,
-                        brand = product.optString("brands").trim(),
-                        calories = (nutrients.optDouble("energy-kcal_100g") * ratio).toInt().coerceIn(0, 8_000),
-                        protein = macro("proteins", 500), carbs = macro("carbohydrates", 1_000), fat = macro("fat", 500), servingGrams = grams,
+                        name = name, brand = product.optString("brand").trim(),
+                        calories = portion.calories, protein = portion.protein, carbs = portion.carbs, fat = portion.fat,
+                        servingGrams = portion.amountGrams, portions = portions,
                     ))
                 }
             }.distinctBy { it.name.lowercase() to it.brand.lowercase() }

@@ -247,6 +247,8 @@ private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: (
 
 @Composable
 private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, stats: Map<Int, ExerciseSessionStats>, completedExercises: Int, useImperial: Boolean, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+    val context = LocalContext.current
+    val shareId = remember(workout.id) { completedWorkoutShareId(context, workout.id) }
     val locale = LocalLocale.current.platformLocale
     var visibleRows by remember { mutableStateOf(0) }
     LaunchedEffect(Unit) {
@@ -282,6 +284,16 @@ private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, 
             CompletionStat("TIEMPO", formatCompletionClock(durationSeconds), Modifier.fillMaxWidth())
         }
     }
+    if (shareId != null) OutlinedButton(
+        onClick = {
+            val baseUrl = io.codepassion.doubletriangle.core.model.WildforceApiEnvironment.apiBaseUrl.removeSuffix("/api")
+            context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, "$baseUrl/workout-days/$shareId/share")
+            }, "Compartir entrenamiento"))
+        },
+        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+    ) { Text("COMPARTIR ENTRENAMIENTO") }
 }
 
 @Composable

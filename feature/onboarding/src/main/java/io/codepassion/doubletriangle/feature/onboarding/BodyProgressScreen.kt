@@ -59,7 +59,12 @@ import java.time.Year
 
 /** Full-screen check-in flow: paired capture, gallery, comparison and future preview. */
 @Composable
-internal fun BodyProgressScreen(profile: OnboardingProfile, generateFuturePreview: suspend (Bitmap, OnboardingProfile) -> Bitmap, onClose: () -> Unit) {
+internal fun BodyProgressScreen(
+    profile: OnboardingProfile,
+    generateFuturePreview: suspend (String, String) -> Bitmap,
+    loadFuturePreview: suspend (String, String) -> Bitmap?,
+    onClose: () -> Unit,
+) {
     val context = LocalContext.current
     var sessions by remember { mutableStateOf(BodyProgressStore.load(context)) }
     var screen by remember { mutableStateOf<Screen>(Screen.Gallery) }
@@ -90,7 +95,7 @@ internal fun BodyProgressScreen(profile: OnboardingProfile, generateFuturePrevie
                 BodyProgressStore.delete(context, session); sessions = BodyProgressStore.load(context)
             }
             Screen.Capture -> Capture(sessions, { screen = Screen.Gallery }) { sessions = BodyProgressStore.load(context); screen = Screen.Gallery }
-            is Screen.Compare -> Compare(sessions, destination.id, profile, { screen = Screen.Gallery }, generateFuturePreview)
+            is Screen.Compare -> Compare(sessions, destination.id, profile, { screen = Screen.Gallery }, generateFuturePreview, loadFuturePreview)
         }
     }
 }
@@ -307,12 +312,24 @@ private enum class Overlay(val label: String) { Guide("Guía"), Reference("Refer
     drawRoundRect(guideColor, Offset(centerX - torsoWidth / 2f, torsoTop), Size(torsoWidth, guideHeight * .48f), CornerRadius(22.dp.toPx(), 22.dp.toPx()), style = Stroke(width = 2.dp.toPx()))
 }
 
-@Composable private fun Compare(sessions: List<BodyProgressSession>, initialId: String, profile: OnboardingProfile, close: () -> Unit, generateFuture: suspend (Bitmap, OnboardingProfile) -> Bitmap) {
+@Composable private fun Compare(
+    sessions: List<BodyProgressSession>,
+    initialId: String,
+    profile: OnboardingProfile,
+    close: () -> Unit,
+    generateFuture: suspend (String, String) -> Bitmap,
+    loadFuture: suspend (String, String) -> Bitmap?,
+) {
     val context = LocalContext.current; val scope = rememberCoroutineScope()
     var selectedId by remember { mutableStateOf(initialId) }; var angle by remember { mutableStateOf(Angle.Front) }; var comparisonMode by remember { mutableStateOf(ComparisonMode.Reveal) }; var revealReference by remember { mutableStateOf(false) }
     val current = sessions.firstOrNull { it.id == selectedId } ?: sessions.last(); val before = sessions.minByOrNull { it.date } ?: current
-    val prefs = remember { context.getSharedPreferences("wildforce_body_progress", 0) }; var consent by remember { mutableStateOf(prefs.getLong("future_preview_ai_consent_v1", 0) > 0) }; var dialog by remember { mutableStateOf(false) }; var loading by remember { mutableStateOf(false) }; var future by remember(current.id) { mutableStateOf(current.futurePath?.let(BitmapFactory::decodeFile)) }; var failure by remember { mutableStateOf<String?>(null) }
+    val prefs = remember { context.getSharedPreferences("wildforce_body_progress", 0) }; var consent by remember { mutableStateOf(prefs.getLong("future_preview_ai_consent_v1", 0) > 0) }; var dialog by remember { mutableStateOf(false) }; var loading by remember { mutableStateOf(false) }; var future by remember(current.id, angle) { mutableStateOf<Bitmap?>(null) }; var failure by remember { mutableStateOf<String?>(null) }
     fun path(session: BodyProgressSession) = if (angle == Angle.Front) session.frontPath else session.profilePath
+    LaunchedEffect(current.id, angle) {
+        loading = true
+        future = runCatching { loadFuture(current.id, angle.apiValue) }.getOrNull()
+        loading = false
+    }
     Column(Modifier.fillMaxSize().background(WildforceThemeTokens.background).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         TopBar("Comparar progreso", close)
         Toggle(listOf(Angle.Front, Angle.Profile), angle, { it.label }) { angle = it }
@@ -349,14 +366,14 @@ private enum class Overlay(val label: String) { Guide("Guía"), Reference("Refer
             }
         }
         if (profile.birthYear <= Year.now().value - 18) {
-            Button(onClick = { if (consent) { loading = true; failure = null; scope.launch { runCatching { generateFuture(BitmapFactory.decodeFile(current.frontPath), profile) }.onSuccess { future = it; BodyProgressStore.saveFuture(context, current, it) }.onFailure { failure = it.message ?: "No se pudo crear la previsión" }; loading = false } } else dialog = true }, enabled = !loading, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.accentGold), modifier = Modifier.fillMaxWidth()) { if (loading) CircularProgressIndicator(Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp) else Text(if (future == null) "Ver previsión a 6 meses" else "Regenerar previsión", color = Color.White) }
+            Button(onClick = { if (consent) { loading = true; failure = null; scope.launch { runCatching { generateFuture(current.id, angle.apiValue) }.onSuccess { future = it; BodyProgressStore.saveFuture(context, current, it) }.onFailure { failure = it.message ?: "No se pudo crear la previsión" }; loading = false } } else dialog = true }, enabled = !loading, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.accentGold), modifier = Modifier.fillMaxWidth()) { if (loading) CircularProgressIndicator(Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp) else Text(if (future == null) "Ver previsión a 6 meses" else "Regenerar previsión", color = Color.White) }
             future?.let { Image(it.asImageBitmap(), "Previsión a 6 meses", Modifier.fillMaxWidth().height(250.dp).clip(RoundedCornerShape(14.dp)), contentScale = ContentScale.Crop) }; failure?.let { Text(it, color = Color.Red, style = MaterialTheme.typography.caption) }
             if (consent) Text("Retirar consentimiento", Modifier.clickable { prefs.edit().remove("future_preview_ai_consent_v1").apply(); consent = false }, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
     }
     if (dialog) AlertDialog(onDismissRequest = { dialog = false }, title = { Text("Vista a futuro con IA") }, text = { Text("Enviaremos una copia de tu foto frontal y datos básicos de entrenamiento a la API de OpenAI para crear una previsión de 6 meses. El contenido no se usa para entrenar modelos; puede conservarse para monitorización de abuso durante hasta 30 días. Confirmas que tienes 18 años o más y aceptas este tratamiento.") }, confirmButton = { Button(onClick = { prefs.edit().putLong("future_preview_ai_consent_v1", System.currentTimeMillis()).apply(); consent = true; dialog = false }) { Text("Acepto") } }, dismissButton = { Button(onClick = { dialog = false }) { Text("Cancelar") } })
 }
-private enum class Angle(val label: String) { Front("Frontal"), Profile("Perfil") }
+private enum class Angle(val label: String, val apiValue: String) { Front("Frontal", "front"), Profile("Perfil", "profile") }
 private enum class ComparisonMode(val label: String) { Reveal("Mantener pulsado"), SideBySide("Lado a lado") }
 
 @Composable private fun <T> Toggle(items: List<T>, selected: T, label: (T) -> String, select: (T) -> Unit) = Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) { items.forEach { item ->

@@ -103,6 +103,7 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
+import io.codepassion.doubletriangle.core.designsystem.PlanGenerationAnimation
 import io.codepassion.doubletriangle.feature.onboarding.BodyCompositionPhase
 import io.codepassion.doubletriangle.feature.onboarding.Equipment
 import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
@@ -239,6 +240,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             HealthPermission.getWritePermission(WeightRecord::class),
             HealthPermission.getWritePermission(androidx.health.connect.client.records.ExerciseSessionRecord::class),
             HealthPermission.getWritePermission(androidx.health.connect.client.records.NutritionRecord::class),
+            HealthPermission.getReadPermission(androidx.health.connect.client.records.NutritionRecord::class),
         )
     }
     val coroutineScope = rememberCoroutineScope()
@@ -1082,9 +1084,16 @@ private fun WildforceApp(
     }
     if (isGeneratingProfilePlan) {
         Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.58f)).clickable { }, contentAlignment = Alignment.Center) {
-            Column(Modifier.liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(26.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator(color = WildforceThemeTokens.accentGold)
-                Text(androidx.compose.ui.res.stringResource(R.string.creating_next_plan), Modifier.padding(top = 14.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
+            Column(
+                Modifier.fillMaxWidth(.94f).liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(vertical = 28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    androidx.compose.ui.res.stringResource(R.string.creating_next_plan),
+                    color = WildforceThemeTokens.textPrimary,
+                    fontWeight = FontWeight.Bold,
+                )
+                PlanGenerationAnimation(icon = "⌁", modifier = Modifier.padding(top = 26.dp))
             }
         }
     }

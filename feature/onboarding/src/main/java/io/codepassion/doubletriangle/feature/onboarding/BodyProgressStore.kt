@@ -53,6 +53,11 @@ internal object BodyProgressStore {
         writeScaled(profile, profileFile)
         val session = BodyProgressSession(id, LocalDate.now().toString(), frontFile.absolutePath, profileFile.absolutePath)
         persist(context, (load(context) + session).takeLast(60))
+        // The forecast is generated from the server-owned private upload. Mark
+        // this capture as a local mutation so the next sync pushes it rather
+        // than importing an older remote snapshot over it.
+        context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
+            .edit().putBoolean("remote_sync_pending", true).apply()
         return session
     }
 

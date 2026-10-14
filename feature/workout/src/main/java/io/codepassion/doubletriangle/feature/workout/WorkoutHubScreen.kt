@@ -160,6 +160,7 @@ import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
+import io.codepassion.doubletriangle.core.designsystem.PlanGenerationAnimation
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
@@ -381,21 +382,10 @@ fun WorkoutHubScreen(
 /** Native counterpart of iOS CreatePlanAnimationView for custom-workout AI generation. */
 @Composable
 private fun PlanGenerationOverlay() {
-    val transition = rememberInfiniteTransition(label = "custom-workout-generation")
-    val rotation by transition.animateFloat(0f, 360f, infiniteRepeatable(tween(1_800, easing = LinearEasing)), label = "custom-workout-ring")
-    val pulse by transition.animateFloat(1f, .55f, infiniteRepeatable(tween(650), RepeatMode.Reverse), label = "custom-workout-copy")
-    Column(
-        Modifier.clip(RoundedCornerShape(24.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(horizontal = 32.dp, vertical = 28.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) {
-        Box(Modifier.size(68.dp), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(progress = 1f, modifier = Modifier.fillMaxSize().graphicsLayer { rotationZ = rotation }, color = WildforceThemeTokens.accentGold, strokeWidth = 4.dp)
-            Icon(Icons.Filled.AutoAwesome, null, tint = WildforceThemeTokens.accentGold, modifier = Modifier.size(26.dp))
-        }
-        Text("GENERANDO ENTRENAMIENTO CON IA…", color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold, modifier = Modifier.alpha(pulse))
-        Text("Personalizando ejercicios y volumen", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
-    }
+    PlanGenerationAnimation(
+        icon = "⌁",
+        modifier = Modifier.clip(RoundedCornerShape(24.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(vertical = 28.dp),
+    )
 }
 
 @Composable
