@@ -33,10 +33,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.CircularProgressIndicator
@@ -53,6 +59,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.MeetingRoom
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -122,7 +129,6 @@ import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingPlanPreview
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
 import io.codepassion.doubletriangle.feature.onboarding.saveAuthenticatedAccount
-import io.codepassion.doubletriangle.feature.onboarding.synchronizeAccountProfile
 import io.codepassion.doubletriangle.feature.onboarding.ProfileScreen
 import io.codepassion.doubletriangle.feature.onboarding.SubscriptionPaywall
 import io.codepassion.doubletriangle.feature.workout.ActiveWorkoutScreen
@@ -139,6 +145,8 @@ import io.codepassion.doubletriangle.nutrition.NutritionScreen
 import java.time.Instant
 import java.io.File
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -177,7 +185,66 @@ class MainActivity : ComponentActivity() {
 
 private enum class RootDestination(@param:androidx.annotation.StringRes val labelRes: Int, val icon: ImageVector) {
     Workout(R.string.destination_workout, Icons.Filled.FitnessCenter), Nutrition(R.string.destination_nutrition, Icons.Filled.Restaurant),
-    Analytics(R.string.destination_analytics, Icons.Filled.BarChart), Profile(R.string.destination_profile, Icons.Filled.AccountCircle),
+    Analytics(R.string.destination_analytics, Icons.Filled.BarChart), Gym(R.string.destination_gym, Icons.Filled.MeetingRoom), Profile(R.string.destination_profile, Icons.Filled.AccountCircle),
+}
+
+/**
+ * Mirrors iOS's InitialSyncView: a newly authenticated account stays outside
+ * the app until its first pull-then-push synchronization completes.
+ */
+private sealed interface InitialSyncState {
+    data object Synchronizing : InitialSyncState
+    data class Failed(val message: String) : InitialSyncState
+}
+
+@Composable
+private fun InitialSyncScreen(
+    isSynchronizing: Boolean,
+    message: String?,
+    onRetry: () -> Unit,
+) {
+    Box(
+        modifier = Modifier.fillMaxSize().liquidGlassBackground(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            if (isSynchronizing) {
+                CircularProgressIndicator(color = WildforceThemeTokens.accent)
+                Text("Sincronizando tus datos…", fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "Solo tardará un momento.",
+                    color = WildforceThemeTokens.textSecondary,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+            } else {
+                Text("☁", fontSize = 48.sp)
+                Text(
+                    "No hemos podido sincronizar tus datos",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+                Text(
+                    message ?: "Comprueba tu conexión e inténtalo de nuevo.",
+                    color = WildforceThemeTokens.textSecondary,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+                Button(
+                    onClick = onRetry,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = WildforceThemeTokens.accent,
+                        contentColor = WildforceThemeTokens.primaryButtonText,
+                    ),
+                ) {
+                    Text("REINTENTAR")
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -244,6 +311,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
         )
     }
     val coroutineScope = rememberCoroutineScope()
+    var scheduledRemoteSync by remember { mutableStateOf<Job?>(null) }
     var pendingHealthResult by remember { mutableStateOf<((Boolean, Int?, Double?) -> Unit)?>(null) }
     val healthPermissionLauncher = rememberLauncherForActivityResult(
         PermissionController.createRequestPermissionResultContract(),
@@ -325,6 +393,9 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
     var pendingGeneratedPlan by remember { mutableStateOf<Pair<String, WorkoutHubState>?>(null) }
     var isGenerating by remember { mutableStateOf(false) }
     var generationError by remember { mutableStateOf<String?>(null) }
+    var initialSyncState by remember { mutableStateOf<InitialSyncState?>(null) }
+    var initialSyncFallback by remember { mutableStateOf<OnboardingProfile?>(null) }
+    var isInitialSyncPaywallPresented by remember { mutableStateOf(false) }
 
     fun persistOnboardingProfile(value: OnboardingProfile) {
         AppLocale.apply(value.appLanguage)
@@ -358,9 +429,65 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             .apply()
     }
 
+    fun synchronizeInitialAccount() {
+        val fallback = initialSyncFallback ?: return
+        if (initialSyncState == InitialSyncState.Synchronizing) return
+        initialSyncState = InitialSyncState.Synchronizing
+        coroutineScope.launch {
+            // Just like iOS InitialSyncView, a partial pull is not enough to
+            // enter the app: the initial pull-and-push must finish as one sync.
+            when (val outcome = WorkoutRemoteSync.synchronize(context, fallback, preferences)) {
+                is WorkoutRemoteSync.Outcome.Synchronized -> {
+                    val resolvedProfile = outcome.importedProfile ?: fallback
+                    persistOnboardingProfile(resolvedProfile)
+                    workoutPlanStore.currentPlanJson()?.let { rawPlan ->
+                        runCatching {
+                            WorkoutPlanGenerator.parse(rawPlan, resolvedProfile.name, resolvedProfile.goal.title)
+                        }.onSuccess { importedPlan -> generatedWorkoutState = importedPlan }
+                    }
+                    profile = resolvedProfile
+                    initialSyncState = null
+                }
+
+                WorkoutRemoteSync.Outcome.SubscriptionRequired -> {
+                    initialSyncState = InitialSyncState.Failed("Necesitas una suscripción activa para sincronizar tus datos.")
+                    isInitialSyncPaywallPresented = true
+                }
+
+                WorkoutRemoteSync.Outcome.NoAccount -> {
+                    initialSyncState = InitialSyncState.Failed("Tu sesión ya no es válida. Vuelve a iniciar sesión.")
+                }
+
+                is WorkoutRemoteSync.Outcome.Failed -> {
+                    initialSyncState = InitialSyncState.Failed(
+                        outcome.message?.takeIf(String::isNotBlank)
+                            ?: "Comprueba tu conexión e inténtalo de nuevo.",
+                    )
+                }
+            }
+        }
+    }
+
     val currentProfile = profile
     if (currentProfile == null) {
-        OnboardingScreen(
+        val activeInitialSync = initialSyncState
+        if (activeInitialSync != null) {
+            InitialSyncScreen(
+                isSynchronizing = activeInitialSync == InitialSyncState.Synchronizing,
+                message = (activeInitialSync as? InitialSyncState.Failed)?.message,
+                onRetry = ::synchronizeInitialAccount,
+            )
+            if (isInitialSyncPaywallPresented) {
+                SubscriptionPaywall(
+                    accountId = context.getSharedPreferences("wildforce_account", 0).getString("id", null),
+                    mandatory = true,
+                    onPurchaseCompleted = {
+                        isInitialSyncPaywallPresented = false
+                        synchronizeInitialAccount()
+                    },
+                )
+            }
+        } else OnboardingScreen(
             onRequestHealthConnect = requestHealthConnect,
             isGenerating = isGenerating,
             generationError = generationError,
@@ -385,6 +512,25 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     initialPlanProfile = null
                 }
             },
+            onContinueWithoutPlan = {
+                // iOS lets onboarding finish when AI generation fails. Keep the
+                // registered profile and explicitly leave the workout hub empty;
+                // never substitute a sample plan for an authenticated account.
+                val completedProfile = initialPlanProfile ?: return@OnboardingScreen
+                workoutPlanStore.clearCurrentPlan()
+                persistOnboardingProfile(completedProfile)
+                generatedWorkoutState = WorkoutHubState(
+                    user = UserSummary(completedProfile.name, completedProfile.goal.title, 0),
+                    trainingDays = emptySet(),
+                    completedDays = emptySet(),
+                    planName = "",
+                    phase = "",
+                    workouts = emptyList(),
+                )
+                profile = completedProfile
+                initialPlanPreview = null
+                initialPlanProfile = null
+            },
             onLanguageSelected = { language ->
                 context.getSharedPreferences("wildforce_profile_details", 0).edit().putString("language", language).apply()
                 AppLocale.apply(language)
@@ -392,35 +538,27 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             onLoggedIn = { response ->
                 saveAuthenticatedAccount(context, response)
                 preferences.edit()
-                    .putBoolean("remote_sync_pending", true)
                     .putBoolean("remote_sync_import_required", !response.isNewAccount)
                     .apply()
-                // A login from the cover must enter the same remote-first path as
-                // iOS.  Keep a valid local fallback so an intermittent network
-                // failure never strands a user on the welcome screen.
-                val fallback = OnboardingProfile(name = response.name.ifBlank { "Wildforce" }, goal = FitnessGoal.BuildMuscle)
-                coroutineScope.launch {
-                    synchronizeAccountProfile(response, fallback)
-                        .onSuccess { remote ->
-                            persistOnboardingProfile(remote)
-                            profile = remote
-                        }
-                        .onFailure {
-                            persistOnboardingProfile(fallback)
-                            profile = fallback
-                        }
-                }
+                initialSyncFallback = OnboardingProfile(
+                    name = response.name.ifBlank { "Wildforce" },
+                    goal = FitnessGoal.BuildMuscle,
+                )
+                synchronizeInitialAccount()
             },
             onRegistered = { response ->
                 // The plan is generated immediately after registration. Mark the
                 // first sync as pending so it is uploaded once the local profile
                 // and plan exist, rather than creating an incomplete remote user.
                 saveAuthenticatedAccount(context, response)
-                preferences.edit().putBoolean("remote_sync_pending", true).apply()
+                WorkoutRemoteSync.markNewAccountResourcesDirty(context)
             },
         ) { completedProfile, useAi ->
             generationError = null
             if (useAi) {
+                // Retain the completed profile before the async request so the
+                // user can continue when generation is unavailable.
+                initialPlanProfile = completedProfile
                 isGenerating = true
                 coroutineScope.launch {
                     runCatching { WorkoutPlanGenerator.generate(completedProfile, context) }
@@ -488,6 +626,30 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     .onSuccess { generatedWorkoutState = it }
             }
         }
+        // iOS debounces every SwiftData save before synchronizing. Android's
+        // JSON stores do not emit database-save notifications, so centralize
+        // the equivalent scheduling at each root-level persistence boundary.
+        fun scheduleRemoteSync(profileToSync: OnboardingProfile) {
+            scheduledRemoteSync?.cancel()
+            scheduledRemoteSync = coroutineScope.launch {
+                delay(2_000)
+                when (val result = WorkoutRemoteSync.synchronize(context, profileToSync, preferences)) {
+                    is WorkoutRemoteSync.Outcome.Synchronized -> {
+                        preferences.edit().putBoolean("remote_sync_pending", false).apply()
+                        applyPulledPlanIfAvailable()
+                    }
+                    WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = true
+                    is WorkoutRemoteSync.Outcome.Failed -> {
+                        if (result.importedRemotePlan) applyPulledPlanIfAvailable()
+                        result.importedProfile?.let { imported ->
+                            persistOnboardingProfile(imported)
+                            profile = imported
+                        }
+                    }
+                    WorkoutRemoteSync.Outcome.NoAccount -> Unit
+                }
+            }
+        }
         LaunchedEffect(currentProfile.name, workoutPlanStore.currentPlanJson()) {
             if (preferences.getBoolean("remote_sync_pending", false) || hasRemoteSession) {
                 when (val result = WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
@@ -504,7 +666,13 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     // second status check: an account without access is not
                     // necessarily labelled `expired` by the backend.
                     WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = true
-                    is WorkoutRemoteSync.Outcome.Failed -> if (result.importedRemotePlan) applyPulledPlanIfAvailable()
+                    is WorkoutRemoteSync.Outcome.Failed -> {
+                        if (result.importedRemotePlan) applyPulledPlanIfAvailable()
+                        result.importedProfile?.let { imported ->
+                            persistOnboardingProfile(imported)
+                            profile = imported
+                        }
+                    }
                     else -> Unit
                 }
             }
@@ -523,7 +691,13 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                                 preferences.edit().putBoolean("remote_sync_pending", false).apply()
                                 applyPulledPlanIfAvailable()
                             }
-                            is WorkoutRemoteSync.Outcome.Failed -> if (result.importedRemotePlan) applyPulledPlanIfAvailable()
+                            is WorkoutRemoteSync.Outcome.Failed -> {
+                                if (result.importedRemotePlan) applyPulledPlanIfAvailable()
+                                result.importedProfile?.let { imported ->
+                                    persistOnboardingProfile(imported)
+                                    profile = imported
+                                }
+                            }
                             else -> Unit
                         }
                     }
@@ -549,7 +723,13 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                             applyPulledPlanIfAvailable()
                         }
                         WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = true
-                        is WorkoutRemoteSync.Outcome.Failed -> if (result.importedRemotePlan) applyPulledPlanIfAvailable()
+                        is WorkoutRemoteSync.Outcome.Failed -> {
+                            if (result.importedRemotePlan) applyPulledPlanIfAvailable()
+                            result.importedProfile?.let { imported ->
+                                persistOnboardingProfile(imported)
+                                profile = imported
+                            }
+                        }
                         else -> Unit
                     }
                 }
@@ -570,7 +750,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 runCatching { TrainingSessionHistoryStore.record(preferences, duration, sets, volume, completedWorkout?.focus) }
                 runCatching { WorkoutQuickAccessWidget.refresh(context) }
                 WorkoutRemoteSync.recordWorkoutCompletion(context)
-                preferences.edit().putBoolean("remote_sync_pending", true).apply()
+                WorkoutRemoteSync.markResourcesDirty(context, "users", "workout-days", "planned-exercises", "exercise-results")
                 coroutineScope.launch {
                     when (val result = WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
                         is WorkoutRemoteSync.Outcome.Synchronized -> {
@@ -578,7 +758,13 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                             applyPulledPlanIfAvailable()
                         }
                         WorkoutRemoteSync.Outcome.SubscriptionRequired -> subscriptionRequired = true
-                        is WorkoutRemoteSync.Outcome.Failed -> if (result.importedRemotePlan) applyPulledPlanIfAvailable()
+                        is WorkoutRemoteSync.Outcome.Failed -> {
+                            if (result.importedRemotePlan) applyPulledPlanIfAvailable()
+                            result.importedProfile?.let { imported ->
+                                persistOnboardingProfile(imported)
+                                profile = imported
+                            }
+                        }
                         else -> Unit
                     }
                 }
@@ -594,6 +780,15 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 profile = null
             },
             onProfileUpdated = { updated ->
+                // Android initially stored the profile snapshot separately from
+                // the plan. Plans created by older builds (and plans imported
+                // from iOS) therefore have no snapshot to compare against,
+                // which made profile edits silently keep a stale plan. Capture
+                // the profile *before* this edit once, then the usual signature
+                // comparison presents the same recreate-plan banner as iOS.
+                if (workoutPlanStore.currentPlanJson() != null && !workoutPlanStore.hasProfileSignature()) {
+                    workoutPlanStore.saveProfileSignature(currentProfile.workoutPlanProfileSignature())
+                }
                 AppLocale.apply(updated.appLanguage)
                 preferences.edit()
                     .putInt("profile_schema_version", PROFILE_SCHEMA_VERSION)
@@ -619,9 +814,10 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     .putString("planner_notes", updated.workoutPlannerNotes)
                     .putStringSet("training_locations", encodeTrainingLocations(updated.trainingLocations))
                     .putString("app_language", updated.appLanguage)
-                    .putBoolean("remote_sync_pending", true)
+                    .apply { WorkoutRemoteSync.markResourcesDirty(context, "users", "training-preferences", "training-locations", "user-app-settings") }
                 .apply()
                 profile = updated
+                scheduleRemoteSync(updated)
                 if (updated.isHealthConnectEnabled) {
                     coroutineScope.launch {
                         runCatching { HealthConnectWeightSync.publishManualWeight(context, updated.weightKg) }
@@ -650,12 +846,14 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             onPlanWorkoutUpdated = { updatedState ->
                 generatedWorkoutState = updatedState
                 workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(updatedState))
-                preferences.edit().putBoolean("remote_sync_pending", true).apply()
+                WorkoutRemoteSync.markResourcesDirty(context, "workout-plans", "workout-days", "workout-blocks", "planned-exercises", "exercise-results")
                 WorkoutQuickAccessWidget.refresh(context)
+                scheduleRemoteSync(currentProfile)
             },
             isGeneratingProfilePlan = isGenerating,
             profileGenerationError = generationError,
             onRequestHealthConnect = requestHealthConnect,
+            onRemoteSyncRequested = { scheduleRemoteSync(currentProfile) },
             onThemeChanged = onThemeChanged,
         )
         pendingGeneratedPlan?.let { (json, state) ->
@@ -671,11 +869,55 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     workoutPlanStore.replaceCurrentPlan(json)
                     workoutPlanStore.saveProfileSignature(currentProfile.workoutPlanProfileSignature())
                     WorkoutQuickAccessWidget.refresh(context)
-                    preferences.edit().remove("completed_workouts").remove("skipped_workouts").putBoolean("remote_sync_pending", true).apply()
+                    preferences.edit().remove("completed_workouts").remove("skipped_workouts").apply()
+                    WorkoutRemoteSync.markResourcesDirty(context, "workout-plans", "workout-days", "workout-blocks", "planned-exercises", "exercise-results")
                     generatedWorkoutState = state
                     pendingGeneratedPlan = null
+                    scheduleRemoteSync(currentProfile)
                 },
             )
+        }
+    }
+}
+
+/** Matches iOS's fixed 450 pt, non-dismissible workout-plan generation sheet. */
+@Composable
+private fun WorkoutPlanGenerationSheet() {
+    var entered by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { entered = true }
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+        ),
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+            AnimatedVisibility(
+                visible = entered,
+                enter = fadeIn(tween(220)) + slideInVertically(tween(360)) { height -> height },
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth().height(450.dp),
+                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                    color = WildforceThemeTokens.background,
+                ) {
+                    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            Modifier.padding(top = 10.dp, bottom = 12.dp)
+                                .size(width = 34.dp, height = 4.dp)
+                                .background(WildforceThemeTokens.textSecondary.copy(alpha = .28f), CircleShape),
+                        )
+                        Text(
+                            androidx.compose.ui.res.stringResource(R.string.creating_next_plan),
+                            color = WildforceThemeTokens.textPrimary,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        PlanGenerationAnimation(icon = "⌁", modifier = Modifier.width(320.dp).height(380.dp))
+                    }
+                }
+            }
         }
     }
 }
@@ -800,6 +1042,7 @@ private fun WildforceApp(
     isGeneratingProfilePlan: Boolean = false,
     profileGenerationError: String? = null,
     onRequestHealthConnect: (((Boolean, Int?, Double?) -> Unit) -> Unit) = { _ -> },
+    onRemoteSyncRequested: () -> Unit = {},
     onThemeChanged: () -> Unit = {},
 ) {
     // This must follow the applied app theme, not just the device setting:
@@ -835,6 +1078,8 @@ private fun WildforceApp(
             avatarPath = destination.absolutePath
             avatarRevision++
             appPreferences.edit().putString("avatar_path", avatarPath).apply()
+            WorkoutRemoteSync.markResourcesDirty(appContext, "users")
+            onRemoteSyncRequested()
         }
     }
     LaunchedEffect(workoutState.planName, workoutState.workouts) {
@@ -900,7 +1145,7 @@ private fun WildforceApp(
                 displayedWorkoutState = updatedState
                 if (!updated.id.startsWith("custom-")) {
                     workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(updatedState))
-                    appPreferences.edit().putBoolean("remote_sync_pending", true).apply()
+                    WorkoutRemoteSync.markResourcesDirty(appContext, "workout-days", "workout-blocks", "planned-exercises", "exercise-results")
                 }
                 activeWorkout = updated
             },
@@ -936,7 +1181,8 @@ private fun WildforceApp(
             activeWorkout = workout
         }, onSkip = {
             val skipped = appPreferences.getStringSet("skipped_workouts", emptySet()).orEmpty() + workout.id
-            appPreferences.edit().putStringSet("skipped_workouts", skipped).putBoolean("remote_sync_pending", true).apply()
+            appPreferences.edit().putStringSet("skipped_workouts", skipped).apply()
+            WorkoutRemoteSync.markResourcesDirty(appContext, "workout-days", "planned-exercises", "exercise-results")
             val skippedState = displayedWorkoutState.copy(
                 workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Skipped) else it },
             )
@@ -952,7 +1198,8 @@ private fun WildforceApp(
             }
         }, onUnskip = {
             val skipped = appPreferences.getStringSet("skipped_workouts", emptySet()).orEmpty() - workout.id
-            appPreferences.edit().putStringSet("skipped_workouts", skipped).putBoolean("remote_sync_pending", true).apply()
+            appPreferences.edit().putStringSet("skipped_workouts", skipped).apply()
+            WorkoutRemoteSync.markResourcesDirty(appContext, "workout-days", "planned-exercises", "exercise-results")
             val unskippedState = displayedWorkoutState.copy(
                 workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Planned) else it },
             )
@@ -1050,6 +1297,8 @@ private fun WildforceApp(
                 gender = profile.gender.storedValue,
                 useImperial = profile.metricSystem == MetricSystem.Imperial,
             )
+        } else if (selected == RootDestination.Gym) {
+            BookingScreen(overlayPadding)
         } else if (selected == RootDestination.Profile) {
             ProfileScreen(
                 initial = profile,
@@ -1068,6 +1317,7 @@ private fun WildforceApp(
                 onSave = onProfileUpdated,
                 onRegenerate = onRegenerateProfile,
                 onChangeAvatar = { avatarPicker.launch("image/*") },
+                onRemoteSyncRequested = onRemoteSyncRequested,
                 onThemeChanged = onThemeChanged,
                 onKeepScreenOnChanged = { keepScreenOnDuringWorkout = it },
                 onGenerateFuturePreview = { localSessionId, angle ->
@@ -1083,19 +1333,7 @@ private fun WildforceApp(
         }
     }
     if (isGeneratingProfilePlan) {
-        Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.58f)).clickable { }, contentAlignment = Alignment.Center) {
-            Column(
-                Modifier.fillMaxWidth(.94f).liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(vertical = 28.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    androidx.compose.ui.res.stringResource(R.string.creating_next_plan),
-                    color = WildforceThemeTokens.textPrimary,
-                    fontWeight = FontWeight.Bold,
-                )
-                PlanGenerationAnimation(icon = "⌁", modifier = Modifier.padding(top = 26.dp))
-            }
-        }
+        WorkoutPlanGenerationSheet()
     }
     if (showExitAppDialog) {
         val hostActivity = LocalActivity.current

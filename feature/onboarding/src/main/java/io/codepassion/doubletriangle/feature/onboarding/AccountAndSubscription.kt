@@ -58,6 +58,7 @@ import com.google.android.gms.common.api.ApiException
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
+import io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker
 import io.codepassion.doubletriangle.core.model.WildforceApiEnvironment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -91,6 +92,18 @@ private class WildforceAccountStore(context: Context) {
 /** Current account snapshot for profile row summaries. Credentials remain private to this file. */
 fun currentWildforceAccount(context: Context): WildforceAccount? = WildforceAccountStore(context).account()
 
+/** Names of the coaches assigned to the signed-in account for the profile root. */
+suspend fun currentWildforceCoaches(context: Context): List<String> = withContext(Dispatchers.IO) {
+    runCatching {
+        val token = WildforceAccountStore(context).token() ?: return@runCatching emptyList()
+        val response = authenticatedRequest("account/coaches", token, null)
+        response.optJSONArray("data")?.let { data ->
+            List(data.length()) { index -> data.optJSONObject(index)?.optString("name").orEmpty() }
+                .filter(String::isNotBlank)
+        }.orEmpty()
+    }.getOrDefault(emptyList())
+}
+
 /** Auth result shared by the onboarding entry point and the profile account area. */
 data class AuthResponse(val id: String, val name: String, val email: String, val token: String, val isNewAccount: Boolean)
 private data class LinkedAccount(val provider: String, val email: String?)
@@ -105,7 +118,15 @@ data class SubscriptionAccess(
 
 /** Stores a successful login in the one account store used by sync and billing. */
 fun saveAuthenticatedAccount(context: Context, response: AuthResponse) {
-    WildforceAccountStore(context).save(response)
+    val store = WildforceAccountStore(context)
+    val previousAccountID = store.account()?.id
+    // Pull cursors and materialized records are user-owned. Reusing them for
+    // another account would make Android believe iOS rows were already pulled.
+    if (previousAccountID != null && previousAccountID != response.id) {
+        context.getSharedPreferences("wildforce_sync_state", Context.MODE_PRIVATE).edit().clear().apply()
+        context.getSharedPreferences("wildforce_remote_sync", Context.MODE_PRIVATE).edit().clear().apply()
+    }
+    store.save(response)
 }
 
 private suspend fun authenticate(context: Context, path: String, profile: OnboardingProfile?, email: String, password: String): Result<AuthResponse> = withContext(Dispatchers.IO) {
@@ -268,6 +289,7 @@ fun AccountSection(
                     store.clear()
                     context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
                         .edit().remove("remote_sync_pending").apply()
+                    RemoteSyncChangeTracker.clearAll(context)
                     account = null
                     onAccountChanged()
                 }
@@ -285,13 +307,24 @@ fun AccountSection(
     }
     when (dialog) {
         AccountDialog.Login, AccountDialog.Register -> AuthenticationSheet(dialog == AccountDialog.Register, profile, onDismiss = { dialog = null }, onSwitch = { dialog = if (dialog == AccountDialog.Login) AccountDialog.Register else AccountDialog.Login }) { response ->
-            store.save(response)
+            // Profile/account login must use the same account-bound sync reset
+            // as the onboarding login. Otherwise a user switch can reuse the
+            // previous user's pull watermarks and materialized projections.
+            saveAuthenticatedAccount(context, response)
             context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE).edit()
-                .putBoolean("remote_sync_pending", true)
                 // An existing account is authoritative during its first Android
                 // sync, so its iOS plan is restored before Android uploads.
                 .putBoolean("remote_sync_import_required", !response.isNewAccount)
                 .apply()
+            if (response.isNewAccount) {
+                RemoteSyncChangeTracker.mark(
+                    context,
+                    "users", "user-app-settings", "training-preferences", "training-locations",
+                    "body-metric-entries", "body-progress-photo-sessions", "nutrition-profiles",
+                    "workout-plans", "workout-days", "workout-blocks", "planned-exercises", "exercise-results",
+                    "nutrition-plans", "nutrition-days", "nutrition-meals", "nutrition-log-media", "nutrition-log-entries", "nutrition-log-items",
+                )
+            }
             account = store.account()
             onAccountChanged()
             dialog = null
@@ -302,6 +335,26 @@ fun AccountSection(
             onDismiss = { dialog = null },
         )
         null -> Unit
+    }
+}
+
+/** Root-profile counterpart of iOS's destructive logout section. */
+@Composable
+fun AccountLogoutAction(onAccountChanged: () -> Unit = {}) {
+    val context = LocalContext.current
+    val store = remember { WildforceAccountStore(context) }
+    var account by remember { mutableStateOf(store.account()) }
+    if (account == null) return
+
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        ProfileRow("Cerrar sesión", "exit_to_app", destructive = true) {
+            store.clear()
+            context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
+                .edit().remove("remote_sync_pending").apply()
+            RemoteSyncChangeTracker.clearAll(context)
+            account = null
+            onAccountChanged()
+        }
     }
 }
 
@@ -418,10 +471,12 @@ suspend fun synchronizeAccountProfile(response: AuthResponse, local: OnboardingP
             val user = remote.optJSONArray("data")?.optJSONObject(0)
             if (user != null) return@runCatching local.copy(
                 name = user.optString("name", local.name).ifBlank { local.name },
-                heightCm = user.optInt("height_cm", local.heightCm).takeIf { it in 120..230 } ?: local.heightCm,
-                weightKg = user.optDouble("weight_kg", local.weightKg).takeIf { it in 35.0..250.0 } ?: local.weightKg,
+                heightCm = user.optInt("height", user.optInt("height_cm", local.heightCm)).takeIf { it in 120..230 } ?: local.heightCm,
+                weightKg = user.optDouble("weight", user.optDouble("weight_kg", local.weightKg)).takeIf { it in 35.0..250.0 } ?: local.weightKg,
                 birthYear = user.optString("birth_date", "").take(4).toIntOrNull()?.coerceIn(1920, java.time.Year.now().value) ?: local.birthYear,
                 birthMonth = user.optString("birth_date", "").drop(5).take(2).toIntOrNull()?.coerceIn(1, 12) ?: local.birthMonth,
+                gender = Gender.fromStoredValue(user.optString("gender", local.gender.storedValue)),
+                metricSystem = MetricSystem.fromStoredValue(user.optString("metric_system", local.metricSystem.storedValue)),
                 appLanguage = user.optString("language", local.appLanguage).ifBlank { local.appLanguage },
             )
         }
@@ -431,8 +486,8 @@ suspend fun synchronizeAccountProfile(response: AuthResponse, local: OnboardingP
             .put("created_at", now)
             .put("updated_at", now)
             .put("name", local.name)
-            .put("height_cm", local.heightCm)
-            .put("weight_kg", local.weightKg)
+            .put("height", local.heightCm)
+            .put("weight", local.weightKg)
             .put("birth_date", "%04d-%02d-01".format(local.birthYear, local.birthMonth))
             .put("gender", local.gender.storedValue)
             .put("language", local.appLanguage)

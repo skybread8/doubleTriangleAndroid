@@ -88,6 +88,7 @@ import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
+import io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker
 import io.codepassion.doubletriangle.feature.workout.WildforceWatchLocalBridge
 
 /** Editable fitness profile. These are the same inputs consumed by the iOS planner. */
@@ -109,16 +110,22 @@ fun ProfileScreen(
     onSave: (OnboardingProfile) -> Unit,
     onRegenerate: (OnboardingProfile) -> Unit = {},
     onChangeAvatar: () -> Unit = {},
+    onRemoteSyncRequested: () -> Unit = {},
     onThemeChanged: () -> Unit = {},
     onKeepScreenOnChanged: (Boolean) -> Unit = {},
     onGenerateFuturePreview: suspend (String, String) -> android.graphics.Bitmap = { _, _ -> error("La vista a futuro no está configurada") },
     onLoadFuturePreview: suspend (String, String) -> android.graphics.Bitmap? = { _, _ -> null },
 ) {
     var draft by remember(initial) { mutableStateOf(initial) }
+    // Opening Profile is a read operation. Do not turn the freshly imported
+    // iOS profile into an Android edit before the user changes a field.
+    var profilePersistencePrimed by remember(initial) { mutableStateOf(false) }
     var heightInput by remember(initial) { mutableStateOf(displayHeight(initial.heightCm, initial.metricSystem)) }
     var weightInput by remember(initial) { mutableStateOf(displayWeight(initial.weightKg, initial.metricSystem)) }
     var durationInput by remember(initial) { mutableStateOf(initial.preferredWorkoutDurationMinutes.toString()) }
     var birthYearInput by remember(initial) { mutableStateOf(initial.birthYear.toString()) }
+    var nameEditorVisible by remember { mutableStateOf(false) }
+    var nameInput by remember(initial) { mutableStateOf(initial.name) }
     var picker by remember { mutableStateOf<Picker?>(null) }
     var showsTrainingLocations by remember { mutableStateOf(false) }
     var healthConnectMessage by remember { mutableStateOf<String?>(null) }
@@ -145,6 +152,8 @@ fun ProfileScreen(
     var selectedSection by remember { mutableStateOf<ProfileSection?>(null) }
     var sectionEntered by remember { mutableStateOf(false) }
     var accountRevision by remember { mutableStateOf(0) }
+    val currentAccount = remember(accountRevision) { currentWildforceAccount(profileContext) }
+    var coaches by remember(accountRevision) { mutableStateOf(emptyList<String>()) }
     var showsBodyProgress by remember { mutableStateOf(false) }
     var showsBodyMetrics by remember { mutableStateOf(false) }
     val authenticateProgressPhotoSetting = rememberDeviceAuthenticator(
@@ -185,7 +194,7 @@ fun ProfileScreen(
                 profile = validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput),
                 generateFuturePreview = onGenerateFuturePreview,
                 loadFuturePreview = onLoadFuturePreview,
-                onClose = { showsBodyProgress = false },
+                onClose = { showsBodyProgress = false; onRemoteSyncRequested() },
             )
         }
         return
@@ -198,16 +207,27 @@ fun ProfileScreen(
     // must enter the same remote-sync path so neither device silently wins.
     fun saveNutritionProfile(value: NutritionProfilePreferences) {
         ProfileDetailPreferencesStore.saveNutrition(profileContext, value)
-        profileContext.getSharedPreferences("wildforce_profile", 0)
-            .edit().putBoolean("remote_sync_pending", true).apply()
+        RemoteSyncChangeTracker.mark(
+            profileContext,
+            "nutrition-profiles", "nutrition-plans", "nutrition-days", "nutrition-meals",
+            "nutrition-log-media", "nutrition-log-entries", "nutrition-log-items",
+        )
+        onRemoteSyncRequested()
     }
     LaunchedEffect(Unit) { entered = true }
+    LaunchedEffect(currentAccount, accountRevision) {
+        coaches = if (currentAccount == null) emptyList() else currentWildforceCoaches(profileContext)
+    }
     LaunchedEffect(selectedSection) {
         sectionEntered = false
         if (selectedSection != null) sectionEntered = true
     }
     LaunchedEffect(draft, heightInput, weightInput, durationInput, birthYearInput) {
-        saveProfile(validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput))
+        if (profilePersistencePrimed) {
+            saveProfile(validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput))
+        } else {
+            profilePersistencePrimed = true
+        }
     }
     LazyColumn(
         modifier = Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 16.dp),
@@ -226,9 +246,42 @@ fun ProfileScreen(
                 }
             }
         }
-        if (selectedSection == null) { item { ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, avatarPath, avatarRevision, onChangeAvatar, entered) } } }
+        if (selectedSection == null) { item { ProfileEntrance(entered, 0) { ProfileHero(draft, currentStreak, completedWorkouts, longestStreak, avatarPath, avatarRevision, onChangeAvatar, entered, onEditName = { nameInput = draft.name; nameEditorVisible = true }) } } }
         if (selectedSection == null) { item { ProfileEntrance(entered, 35) { ProfileExperience(experienceXp, experienceLevel, experienceProgress) } } }
+        // iOS exposes the account creation CTA on the root profile when the
+        // user is signed out, while keeping the full Account destination in
+        // the profile list. This makes the first-run path discoverable without
+        // changing the existing account flow.
+        if (selectedSection == null && currentAccount == null) { item {
+            ProfileEntrance(entered, 300) {
+                AccountSection(
+                    profile = draft,
+                    destination = AccountProfileDestination.Account,
+                    onProfileSynchronized = { remoteProfile -> draft = remoteProfile; saveProfile(remoteProfile) },
+                    onAccountChanged = { accountRevision++ },
+                )
+            }
+        } }
         if (selectedSection == null) { item { ProfileEntrance(entered, 75) { ProfileCategoryTree(draft, nutritionProfile, appLanguage, accountRevision) { selectedSection = it } } } }
+        if (selectedSection == null && coaches.isNotEmpty()) { item {
+            ProfileEntrance(entered, 325) {
+                Section("Tus entrenadores") {
+                    coaches.forEach { coach ->
+                        Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.size(44.dp).clip(CircleShape).background(WildforceThemeTokens.textSecondary.copy(alpha = .12f)), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Filled.Person, contentDescription = null, tint = WildforceThemeTokens.textSecondary)
+                            }
+                            Text(coach, Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
+                        }
+                    }
+                }
+            }
+        } }
+        if (selectedSection == null && currentAccount != null) { item {
+            ProfileEntrance(entered, 350) {
+                AccountLogoutAction(onAccountChanged = { accountRevision++ })
+            }
+        } }
         // `achievementsSection` is intentionally disabled in the canonical iOS
         // profile view.  Do not render a placeholder rail here: it changes the
         // hierarchy and pushes the four profile destinations below the fold.
@@ -237,7 +290,10 @@ fun ProfileScreen(
                 ChoiceButton("Fecha de nacimiento", "${monthName(draft.birthMonth)} $birthYearInput", icon = Icons.Filled.Person) { picker = Picker.BirthMonth }
                 NumberField("Año de nacimiento", birthYearInput, { birthYearInput = it.filter(Char::isDigit).take(4) }, Modifier.fillMaxWidth())
                 NumberField(if (draft.metricSystem == MetricSystem.Imperial) "Altura (in)" else "Altura (cm)", heightInput, { heightInput = it.filter(Char::isDigit).take(3) }, Modifier.fillMaxWidth())
-                ChoiceButton("Métricas corporales", bodyMetrics.lastOrNull()?.let { displayWeight(it.weightKg, draft.metricSystem) + if (draft.metricSystem == MetricSystem.Imperial) " lb" else " kg" } ?: "Sin registros", icon = Icons.Filled.FitnessCenter) { showsBodyMetrics = true }
+                // The profile weight is the canonical current value, just like iOS.
+                // The body-metrics collection is history and can legitimately lag
+                // behind when the profile is edited from another entry point.
+                ChoiceButton("Métricas corporales", displayWeight(draft.weightKg, draft.metricSystem).let { "$it ${if (draft.metricSystem == MetricSystem.Imperial) "lb" else "kg"}" }, icon = Icons.Filled.FitnessCenter) { showsBodyMetrics = true }
                 ChoiceButton("Fotos de progreso corporal", BodyProgressStore.load(profileContext).size.let { if (it == 0) "Sin fotos todavía" else "$it check-ins" }, icon = Icons.Filled.PhotoCamera) { showsBodyProgress = !showsBodyProgress }
             }
         } } }
@@ -274,7 +330,7 @@ fun ProfileScreen(
                 TogglePreference("Omitir calentamientos", "Oculta los bloques de activación y ajusta la duración objetivo.", draft.skipsWarmups, Icons.Filled.FitnessCenter) { draft = draft.copy(skipsWarmups = !draft.skipsWarmups) }
                 TogglePreference("Omitir enfriamientos", "Oculta los bloques finales y mantiene el plan dentro de la duración objetivo.", draft.skipsCooldowns, Icons.Filled.FitnessCenter) { draft = draft.copy(skipsCooldowns = !draft.skipsCooldowns) }
                 TogglePreference("Omitir periodos de descanso", "Salta directamente a la siguiente serie o ejercicio durante el entrenamiento.", draft.skipsRestPeriods, Icons.Filled.FitnessCenter) { draft = draft.copy(skipsRestPeriods = !draft.skipsRestPeriods) }
-                OutlinedTextField(draft.workoutPlannerNotes, { draft = draft.copy(workoutPlannerNotes = it.take(500)) }, Modifier.fillMaxWidth(), label = { Text("Notas para el planificador") }, minLines = 2, maxLines = 4)
+                OutlinedTextField(draft.workoutPlannerNotes.takeUnless { it.equals("null", ignoreCase = true) } ?: "", { draft = draft.copy(workoutPlannerNotes = it.take(500)) }, Modifier.fillMaxWidth(), label = { Text("Notas para el planificador") }, placeholder = { Text("Ninguna") }, minLines = 2, maxLines = 4)
             } } } }
         if (selectedSection == ProfileSection.Fitness) { item { ProfileEntrance(sectionEntered, 205) { Section("Entorno") {
                 ChoiceButton("Tipo de gimnasio", draft.gymType.title) { picker = Picker.Gym }
@@ -314,7 +370,7 @@ fun ProfileScreen(
                 ChoiceButton("Alergias o intolerancias", nutritionProfile.allergiesAndIntolerances.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.Allergies }
             } } } }
         if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 295) { Section("Notas") {
-                ChoiceButton("Notas", nutritionProfile.notes.ifBlank { "Ninguna" }, icon = Icons.Filled.Settings) { nutritionTextEditor = NutritionTextField.Notes }
+                ChoiceButton("Notas", nutritionProfile.notes.takeUnless { it.equals("null", ignoreCase = true) }?.ifBlank { "Ninguna" } ?: "Ninguna", icon = Icons.Filled.Settings) { nutritionTextEditor = NutritionTextField.Notes }
             } } } }
         if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 245) { Section("Preferencias") {
                 ChoiceButton("Idioma", appLanguage, icon = Icons.Filled.Settings) { settingsPicker = SettingsPicker.Language }
@@ -346,11 +402,15 @@ fun ProfileScreen(
                 TogglePreference("Mantener pantalla encendida durante el entrenamiento", "Evita que la pantalla se bloquee mientras hay un entrenamiento activo abierto.", keepScreenOn, Icons.Filled.Settings) {
                     keepScreenOn = !keepScreenOn
                     detailPreferences.edit().putBoolean("keep_screen_on", keepScreenOn).apply()
+                    RemoteSyncChangeTracker.mark(profileContext, "user-app-settings")
+                    onRemoteSyncRequested()
                     onKeepScreenOnChanged(keepScreenOn)
                 }
                 TogglePreference("Modo concentración total", "Reduce las distracciones durante los entrenamientos mediante los ajustes de concentración de Android.", fullFocusEnabled, Icons.Filled.Settings) {
                     fullFocusEnabled = !fullFocusEnabled
                     detailPreferences.edit().putBoolean("full_focus", fullFocusEnabled).apply()
+                    RemoteSyncChangeTracker.mark(profileContext, "user-app-settings")
+                    onRemoteSyncRequested()
                     if (fullFocusEnabled) runCatching { profileContext.startActivity(android.content.Intent("android.settings.ZEN_MODE_SETTINGS")) }
                 }
                 if (android.os.Build.VERSION.SDK_INT >= 36) {
@@ -370,10 +430,15 @@ fun ProfileScreen(
                 TogglePreference("Notificaciones de entrenamiento", "Muestra la sesión activa en el panel y la pantalla bloqueada.", notificationsEnabled, Icons.Filled.Settings) {
                     notificationsEnabled = !notificationsEnabled
                     notificationPreferences.edit().putBoolean("enabled", notificationsEnabled).apply()
+                    RemoteSyncChangeTracker.mark(profileContext, "user-app-settings")
+                    onRemoteSyncRequested()
                 }
                 TogglePreference("Reloj Amazfit", "Sincroniza el entrenamiento activo con Wildforce en tu Amazfit. Solo se activa durante el workout.", amazfitWatchEnabled, Icons.Filled.Settings) {
                     amazfitWatchEnabled = !amazfitWatchEnabled
                     WildforceWatchLocalBridge.setEnabled(profileContext, amazfitWatchEnabled)
+                    detailPreferences.edit().putBoolean("amazfit_watch_enabled", amazfitWatchEnabled).apply()
+                    RemoteSyncChangeTracker.mark(profileContext, "user-app-settings")
+                    onRemoteSyncRequested()
                 }
                 TogglePreference("Avisos al comenzar el descanso", "Emite un aviso cuando empieza el temporizador de descanso.", restAlertsEnabled, Icons.Filled.Settings) {
                     restAlertsEnabled = !restAlertsEnabled
@@ -490,6 +555,32 @@ fun ProfileScreen(
             title = { Text("No se pudo cambiar la protección") },
             text = { Text(message) },
             confirmButton = { Button(onClick = { progressPhotoLockError = null }) { Text("Entendido") } },
+        )
+    }
+    if (nameEditorVisible) {
+        androidx.compose.material.AlertDialog(
+            onDismissRequest = { nameEditorVisible = false },
+            title = { Text("Editar nombre", fontFamily = Exo2FontFamily) },
+            text = {
+                OutlinedTextField(
+                    value = nameInput,
+                    onValueChange = { nameInput = it.take(80) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Nombre") },
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    val value = nameInput.trim()
+                    if (value.isNotEmpty()) {
+                        draft = draft.copy(name = value)
+                        saveProfile(draft)
+                    }
+                    nameEditorVisible = false
+                }) { Text("GUARDAR") }
+            },
+            dismissButton = { androidx.compose.material.TextButton(onClick = { nameEditorVisible = false }) { Text("CANCELAR") } },
         )
     }
 }
@@ -845,7 +936,7 @@ private fun navyBodyFat(gender: Gender, heightCm: Double, measurements: BodyComp
 }
 
 @Composable
-private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, completedWorkouts: Int, longestStreak: Int, avatarPath: String?, avatarRevision: Int, onChangeAvatar: () -> Unit, entered: Boolean) {
+private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, completedWorkouts: Int, longestStreak: Int, avatarPath: String?, avatarRevision: Int, onChangeAvatar: () -> Unit, entered: Boolean, onEditName: () -> Unit) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val avatarSize = if (maxWidth < 380.dp) 88.dp else 110.dp
         val gap = if (maxWidth < 380.dp) 12.dp else 20.dp
@@ -878,7 +969,7 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
             Column(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 ProfileEntrance(entered, 120) {
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = AntonFontFamily, fontSize = 28.sp, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = AntonFontFamily, fontSize = 28.sp, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.clickable(onClick = onEditName))
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             Icon(Icons.Filled.FitnessCenter, contentDescription = null, modifier = Modifier.size(15.dp), tint = WildforceThemeTokens.textSecondary)
                             Text("${profile.goal.title} • ${profile.trainingLevel.title}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -965,7 +1056,7 @@ private enum class NutritionTextField(val title: String, val prompt: String, val
         Dislikes -> profile.dislikes.joinToString(", ")
         ExcludedFoods -> profile.excludedFoods.joinToString(", ")
         Allergies -> profile.allergiesAndIntolerances.joinToString(", ")
-        Notes -> profile.notes
+        Notes -> profile.notes.takeUnless { it.equals("null", ignoreCase = true) } ?: ""
     }
 
     fun apply(profile: NutritionProfilePreferences, value: String): NutritionProfilePreferences = when (this) {
@@ -1214,10 +1305,24 @@ private fun displayWeight(weightKg: Double, system: MetricSystem): String = when
 }
 
 private fun validatedProfile(draft: OnboardingProfile, height: String, weight: String, duration: String, birthYear: String = draft.birthYear.toString()): OnboardingProfile = draft.copy(
-    heightCm = height.toIntOrNull()?.let { entered -> if (draft.metricSystem == MetricSystem.Imperial) (entered * 2.54).roundToInt() else entered }?.coerceIn(120, 230) ?: draft.heightCm,
-    weightKg = weight.replace(',', '.').toDoubleOrNull()?.let { entered -> if (draft.metricSystem == MetricSystem.Imperial) entered / PoundsPerKilogram else entered }?.coerceIn(35.0, 250.0) ?: draft.weightKg,
-    preferredWorkoutDurationMinutes = duration.toIntOrNull()?.coerceIn(15, 180) ?: draft.preferredWorkoutDurationMinutes,
-    birthYear = birthYear.toIntOrNull()?.coerceIn(1920, Year.now().value) ?: draft.birthYear,
+    // These fields are persisted while the user types. Do not coerce a partial
+    // value to a boundary: deleting a digit from 1995 previously saved 1920,
+    // and deleting from weight/height could likewise save their minimums.
+    // Until the input is a complete value in range, retain the stored value.
+    heightCm = height.toIntOrNull()
+        ?.let { entered -> if (draft.metricSystem == MetricSystem.Imperial) (entered * 2.54).roundToInt() else entered }
+        ?.takeIf { it in 120..230 }
+        ?: draft.heightCm,
+    weightKg = weight.replace(',', '.').toDoubleOrNull()
+        ?.let { entered -> if (draft.metricSystem == MetricSystem.Imperial) entered / PoundsPerKilogram else entered }
+        ?.takeIf { it in 35.0..250.0 }
+        ?: draft.weightKg,
+    preferredWorkoutDurationMinutes = duration.toIntOrNull()
+        ?.takeIf { it in 15..180 }
+        ?: draft.preferredWorkoutDurationMinutes,
+    birthYear = birthYear.toIntOrNull()
+        ?.takeIf { it in 1920..Year.now().value }
+        ?: draft.birthYear,
 )
 
 private fun monthName(month: Int): String = Month.of(month.coerceIn(1, 12)).getDisplayName(TextStyle.FULL, Locale.forLanguageTag("es-ES")).replaceFirstChar { it.titlecase(Locale.forLanguageTag("es-ES")) }

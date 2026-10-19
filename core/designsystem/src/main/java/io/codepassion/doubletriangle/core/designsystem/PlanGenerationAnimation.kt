@@ -102,7 +102,13 @@ fun PlanGenerationAnimation(
                 style = MaterialTheme.typography.h5,
                 modifier = Modifier.alpha(if (isStepComplete) 1f else copyOpacity),
             )
-            AnimatedContent(targetState = currentStep, label = "plan-generation-step") { index ->
+            // Give the changing copy all remaining space. Otherwise an alert
+            // dialog uses each sentence's intrinsic width and visibly resizes.
+            AnimatedContent(
+                targetState = currentStep,
+                modifier = Modifier.weight(1f),
+                label = "plan-generation-step",
+            ) { index ->
                 Text(
                     safeSteps[index],
                     modifier = Modifier.padding(start = 10.dp).alpha(if (isStepComplete) 1f else copyOpacity),

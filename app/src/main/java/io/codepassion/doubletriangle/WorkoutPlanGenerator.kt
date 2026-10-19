@@ -29,12 +29,10 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.time.DayOfWeek
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
-import kotlin.math.roundToLong
 
 object WorkoutPlanGenerator {
     suspend fun generate(profile: OnboardingProfile, context: Context? = null): Pair<String, WorkoutHubState> = withContext(Dispatchers.IO) {
@@ -64,35 +62,13 @@ object WorkoutPlanGenerator {
     private suspend fun generateRemotePlan(profile: OnboardingProfile, context: Context): Pair<String, WorkoutHubState> {
         val token = context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE).getString("token", null)
             ?: error("Inicia sesión para generar el plan.")
-        val idempotencyKey = UUID.randomUUID().toString()
-        while (true) {
-            val connection = (URL(WildforceApiEnvironment.apiUrl("workout-plans/generate")).openConnection() as HttpURLConnection).apply {
-                requestMethod = "POST"
-                connectTimeout = 30_000
-                readTimeout = 180_000
-                setRequestProperty("Accept", "application/json")
-                setRequestProperty("Authorization", "Bearer $token")
-                setRequestProperty("Idempotency-Key", idempotencyKey)
-            }
-            try {
-                val status = connection.responseCode
-                val response = (if (status in 200..299) connection.inputStream else connection.errorStream)
-                    ?.bufferedReader()?.use { it.readText() }.orEmpty()
-                val retryAfter = connection.getHeaderField("Retry-After")?.toDoubleOrNull()
-                if (status == 429 && retryAfter != null && retryAfter >= 0) {
-                    delay((retryAfter * 1_000).roundToLong())
-                    continue
-                }
-                check(status in 200..299) {
-                    JSONObject(response).optString("message").ifBlank { "El servidor devolvió HTTP $status" }
-                }
-                val remotePlan = JSONObject(response).getJSONObject("data")
-                val parsed = parse(remotePlanToLocalJson(remotePlan), profile.name, profile.goal.title)
-                return serialize(parsed) to parsed
-            } finally {
-                connection.disconnect()
-            }
-        }
+        val remotePlan = AsyncOperationClient.execute(
+            startPath = "workout/plans/generate",
+            token = token,
+            idempotencyKey = UUID.randomUUID().toString(),
+        ) { it }
+        val parsed = parse(remotePlanToLocalJson(remotePlan), profile.name, profile.goal.title)
+        return serialize(parsed) to parsed
     }
 
     private fun remotePlanToLocalJson(plan: JSONObject): String = JSONObject().apply {
@@ -174,7 +150,7 @@ object WorkoutPlanGenerator {
             .put("includeWarmup", request.includeWarmup)
             .put("includeCooldown", request.includeCooldown)
             .put("durationMinutes", request.durationMinutes.coerceIn(10, 180))
-        val connection = (URL(WildforceApiEnvironment.apiUrl("workout-days/generate")).openConnection() as HttpURLConnection).apply {
+        val connection = (URL(WildforceApiEnvironment.apiUrl("workout/days/generate")).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             doOutput = true
             connectTimeout = 30_000

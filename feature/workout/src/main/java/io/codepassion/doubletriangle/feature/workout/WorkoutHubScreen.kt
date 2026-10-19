@@ -384,7 +384,7 @@ fun WorkoutHubScreen(
 private fun PlanGenerationOverlay() {
     PlanGenerationAnimation(
         icon = "⌁",
-        modifier = Modifier.clip(RoundedCornerShape(24.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(vertical = 28.dp),
+        modifier = Modifier.width(320.dp).height(436.dp).clip(RoundedCornerShape(24.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(vertical = 28.dp),
     )
 }
 

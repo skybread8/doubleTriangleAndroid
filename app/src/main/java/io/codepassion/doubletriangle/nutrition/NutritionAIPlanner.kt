@@ -7,18 +7,14 @@ import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
-import io.codepassion.doubletriangle.core.model.WildforceApiEnvironment
+import io.codepassion.doubletriangle.AsyncOperationClient
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.UUID
-import kotlin.math.roundToLong
 
 internal object NutritionAIPlanner {
     suspend fun generate(context: Context): List<NutritionDayPlan> = withContext(Dispatchers.IO) {
@@ -29,36 +25,16 @@ internal object NutritionAIPlanner {
         val requestBody = JSONObject().apply {
             if (dailyEnergy.length() > 0) put("daily_energy", dailyEnergy)
         }.toString()
-        while (true) {
-            val connection = URL(WildforceApiEnvironment.apiUrl("nutrition-plans/generate")).openConnection() as HttpURLConnection
-            try {
-                connection.requestMethod = "POST"
-                connection.doOutput = true
-                connection.connectTimeout = 30_000
-                connection.readTimeout = 180_000
-                connection.setRequestProperty("Accept", "application/json")
-                connection.setRequestProperty("Content-Type", "application/json")
-                connection.setRequestProperty("Authorization", "Bearer $token")
-                connection.setRequestProperty("Idempotency-Key", idempotencyKey)
-                connection.outputStream.use { it.write(requestBody.toByteArray()) }
-                val status = connection.responseCode
-                val response = (if (status in 200..299) connection.inputStream else connection.errorStream)?.bufferedReader()?.use { it.readText() }.orEmpty()
-                val retryAfter = connection.getHeaderField("Retry-After")?.toDoubleOrNull()
-                if (status == 429 && retryAfter != null && retryAfter >= 0) {
-                    delay((retryAfter * 1_000).roundToLong())
-                    continue
-                }
-                check(status in 200..299) {
-                    JSONObject(response).optString("message").ifBlank { "El servidor devolvió HTTP $status" }
-                }
-                val plan = JSONObject(response).getJSONObject("data")
-                val generated = remoteDays(plan.optJSONArray("days") ?: JSONArray())
-                NutritionStore.rememberRemotePlanId(context, plan.optString("id"))
-                check(generated.isNotEmpty()) { "El generador no devolvió ningún día del plan." }
-                return@withContext generated
-            } finally { connection.disconnect() }
-        }
-        error("La generación nutricional terminó sin respuesta.")
+        val plan = AsyncOperationClient.execute(
+            startPath = "nutrition/plans/generate",
+            token = token,
+            idempotencyKey = idempotencyKey,
+            requestBody = requestBody,
+        ) { it }
+        val generated = remoteDays(plan.optJSONArray("days") ?: JSONArray())
+        NutritionStore.rememberRemotePlanId(context, plan.optString("id"))
+        check(generated.isNotEmpty()) { "El generador no devolvió ningún día del plan." }
+        generated
     }
 
     /**
@@ -106,7 +82,10 @@ internal object NutritionAIPlanner {
     private fun remoteDays(days: JSONArray): List<NutritionDayPlan> = buildList {
         for (index in 0 until days.length()) {
             val day = days.optJSONObject(index) ?: continue
-            val date = runCatching { LocalDate.parse(day.optString("date")) }.getOrNull() ?: continue
+            // The sync endpoint serializes dates as ISO-8601 instants (for
+            // example, "2026-10-05T00:00:00.000000Z"). iOS decodes these as
+            // Date values, so Android must retain the date component too.
+            val date = parseRemoteNutritionDate(day.optString("date")) ?: continue
             val meals = day.optJSONArray("meals")?.let { values -> buildList {
                 for (mealIndex in 0 until values.length()) {
                     val meal = values.optJSONObject(mealIndex) ?: continue
@@ -126,7 +105,9 @@ internal object NutritionAIPlanner {
             for (index in 0 until array.length()) {
                 val food = array.optJSONObject(index) ?: continue
                 val name = food.optString("name").trim()
-                if (name.isNotBlank()) add(name to food.optInt("grams").coerceAtLeast(0))
+                if (name.isNotBlank()) {
+                    add(name to food.optInt("amountGrams", food.optInt("grams")).coerceAtLeast(0))
+                }
             }
         }
     } ?: emptyList()
@@ -135,6 +116,10 @@ internal object NutritionAIPlanner {
     private fun nutritionDayType(value: String): NutritionDayType = when (value.trim().lowercase()) { "training" -> NutritionDayType.Training; "recovery" -> NutritionDayType.Recovery; else -> NutritionDayType.Rest }
     private fun energyDemand(value: String): EnergyDemand = when (value.trim().lowercase()) { "high" -> EnergyDemand.High; "medium" -> EnergyDemand.Medium; else -> EnergyDemand.Low }
 }
+
+/** Mirrors iOS's ISO-8601 date decoding for nutrition sync payloads. */
+internal fun parseRemoteNutritionDate(value: String): LocalDate? =
+    runCatching { LocalDate.parse(value.trim().substringBefore('T')) }.getOrNull()
 
 private fun JSONArray?.toFoods(): List<Pair<String, Double>> {
     if (this == null) return emptyList()

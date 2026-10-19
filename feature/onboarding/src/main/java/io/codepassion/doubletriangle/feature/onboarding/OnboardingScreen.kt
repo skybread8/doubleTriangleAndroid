@@ -53,6 +53,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AccessibilityNew
@@ -326,6 +327,7 @@ fun OnboardingScreen(
     generationError: String? = null,
     generatedPlanPreview: OnboardingPlanPreview? = null,
     onStartTraining: () -> Unit = {},
+    onContinueWithoutPlan: () -> Unit = {},
     onLanguageSelected: (String) -> Unit = {},
     onLoggedIn: (AuthResponse) -> Unit = {},
     onRegistered: (AuthResponse) -> Unit = {},
@@ -599,6 +601,7 @@ fun OnboardingScreen(
                 generationAttempt = generationAttempt,
                 onGenerate = { generationAttempt++ },
                 onStartTraining = onStartTraining,
+                onContinueWithoutPlan = onContinueWithoutPlan,
                 onInitialGeneration = { completeProfile(true) },
             )
         }
@@ -780,6 +783,7 @@ private fun PlanGenerationStep(
     generationAttempt: Int,
     onGenerate: () -> Unit,
     onStartTraining: () -> Unit,
+    onContinueWithoutPlan: () -> Unit,
     onInitialGeneration: () -> Unit,
 ) {
     LaunchedEffect(generationAttempt) { onInitialGeneration() }
@@ -795,6 +799,10 @@ private fun PlanGenerationStep(
                 Text(generationError, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = .10f)).padding(16.dp), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
                 Spacer(Modifier.height(20.dp))
                 PrimaryAction("Reintentar", !isGenerating, onGenerate)
+                TextButton(
+                    onClick = onContinueWithoutPlan,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                ) { Text("Continuar sin un plan") }
             }
             preview != null -> {
                 PlanWeekSummary(preview)

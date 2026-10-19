@@ -27,6 +27,14 @@ internal class WorkoutPlanStateStore(
         preferences.edit().putString(PROFILE_SIGNATURE_KEY, signature).apply()
     }
 
+    /**
+     * Older local and imported plans predate the profile snapshot.  Callers can
+     * use this to establish that snapshot from the profile that was active
+     * before its first edit, so the edit is evaluated just like an iOS plan
+     * carrying `profileSettingsHash`.
+     */
+    fun hasProfileSignature(): Boolean = !preferences.getString(PROFILE_SIGNATURE_KEY, null).isNullOrBlank()
+
     fun requiresRegeneration(currentProfileSignature: String): Boolean {
         val savedSignature = preferences.getString(PROFILE_SIGNATURE_KEY, null)
         return currentPlanJson() != null && savedSignature != null && savedSignature != currentProfileSignature

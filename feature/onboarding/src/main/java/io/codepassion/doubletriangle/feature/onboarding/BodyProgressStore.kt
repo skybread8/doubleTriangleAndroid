@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import androidx.core.content.FileProvider
+import io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -56,8 +57,7 @@ internal object BodyProgressStore {
         // The forecast is generated from the server-owned private upload. Mark
         // this capture as a local mutation so the next sync pushes it rather
         // than importing an older remote snapshot over it.
-        context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
-            .edit().putBoolean("remote_sync_pending", true).apply()
+        RemoteSyncChangeTracker.mark(context, "body-progress-photo-sessions")
         return session
     }
 
@@ -66,6 +66,10 @@ internal object BodyProgressStore {
         File(session.profilePath).delete()
         session.futurePath?.let(::File)?.delete()
         persist(context, load(context).filterNot { it.id == session.id })
+        // iOS keeps a tombstone in SwiftData. Android's projection creates the
+        // equivalent tombstone from the last pushed record, but only when this
+        // resource is scheduled for outbound synchronization.
+        RemoteSyncChangeTracker.mark(context, "body-progress-photo-sessions")
     }
 
     fun bitmapFrom(context: Context, uri: Uri): Bitmap? = runCatching {

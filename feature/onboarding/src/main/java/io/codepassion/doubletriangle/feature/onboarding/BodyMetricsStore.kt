@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle.feature.onboarding
 
 import android.content.Context
+import io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -11,7 +12,8 @@ import org.json.JSONObject
 internal data class BodyMetricEntry(
     val date: String,
     val heightCm: Double,
-    val weightKg: Double,
+    /** iOS records every metric independently, so a circumference-only day is valid. */
+    val weightKg: Double? = null,
     val leanBodyMassKg: Double? = null,
     val waistCm: Double? = null,
     val neckCm: Double? = null,
@@ -48,7 +50,7 @@ internal object BodyMetricsStore {
                 put(JSONObject()
                     .put("date", entry.date)
                     .put("heightCm", entry.heightCm)
-                    .put("weightKg", entry.weightKg)
+                    .put("weightKg", entry.weightKg ?: JSONObject.NULL)
                     .put("leanBodyMassKg", entry.leanBodyMassKg ?: JSONObject.NULL)
                     .put("waistCm", entry.waistCm ?: JSONObject.NULL)
                     .put("neckCm", entry.neckCm ?: JSONObject.NULL)
@@ -57,6 +59,7 @@ internal object BodyMetricsStore {
             }
         }
         context.getSharedPreferences(PREFS, 0).edit().putString(KEY, array.toString()).apply()
+        RemoteSyncChangeTracker.mark(context, "body-metric-entries")
     }
 
     fun load(context: Context): List<BodyMetricEntry> = runCatching {
@@ -66,9 +69,10 @@ internal object BodyMetricsStore {
             for (index in 0 until array.length()) {
                 val item = array.optJSONObject(index) ?: continue
                 val height = item.optDouble("heightCm", Double.NaN)
-                val weight = item.optDouble("weightKg", Double.NaN)
+                val weight = item.takeUnless { it.isNull("weightKg") }
+                    ?.optDouble("weightKg", Double.NaN)?.takeIf { it.isFinite() && it in 20.0..400.0 }
                 val date = item.optString("date").takeIf(String::isNotBlank)
-                if (date != null && height.isFinite() && height in 80.0..260.0 && weight.isFinite() && weight in 20.0..400.0) {
+                if (date != null && height.isFinite() && height in 80.0..260.0) {
                     add(BodyMetricEntry(
                         date = date,
                         heightCm = height,

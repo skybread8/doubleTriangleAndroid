@@ -21,6 +21,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -52,6 +53,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
@@ -59,6 +62,7 @@ import io.codepassion.doubletriangle.core.designsystem.PlanGenerationAnimation
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.WorkoutRemoteSync
+import io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -71,6 +75,12 @@ import kotlinx.coroutines.delay
 
 /** iOS AccentColor2 — the primary nutrition emphasis. */
 internal val NutritionCoral = Color(0xFFD4AF37)
+// iOS uses the primary black action color for controls; gold is reserved for
+// nutrition progress/accent data, never for action buttons.
+private val NutritionActionColor = Color(0xFF2B2B29)
+// iOS NutritionEnergyBalanceCard uses AccentColor3 for both burned series.
+// Keep this separate from the nutrition accent used by the rest of the hub.
+private val EnergyBalanceBarColor = Color(0xFFF44545)
 /** SwiftUI's system orange, used by the nutrition day gradients. */
 internal val NutritionOrange = Color(0xFFFF9500)
 /** iOS AccentColor3 — contrast only, never the default nutrition tint. */
@@ -158,7 +168,11 @@ fun NutritionScreen(
     fun queueRemoteSync() {
         val syncProfile = profile ?: return
         val syncPreferences = context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
-        syncPreferences.edit().putBoolean("remote_sync_pending", true).apply()
+        RemoteSyncChangeTracker.mark(
+            context,
+            "nutrition-profiles", "nutrition-plans", "nutrition-days", "nutrition-meals",
+            "nutrition-log-media", "nutrition-log-entries", "nutrition-log-items",
+        )
         scope.launch {
             if (WorkoutRemoteSync.synchronize(context, syncProfile, syncPreferences) is WorkoutRemoteSync.Outcome.Synchronized) {
                 syncPreferences.edit().putBoolean("remote_sync_pending", false).apply()
@@ -221,6 +235,7 @@ fun NutritionScreen(
             onDiscardPlannedMeal = { meal ->
                 NutritionStore.dismissPlannedMeal(context, activeDetailDay.date, meal)
                 dayMealStateVersion++
+                queueRemoteSync()
             },
             isSuggestionHidden = { meal ->
                 // Reading this version makes discarding or fulfilling a suggestion redraw this day.
@@ -313,7 +328,7 @@ fun NutritionScreen(
         onDismiss = { showFulfill = false },
         onSelect = { suggestion ->
             val updated = NutritionStore.load(context, selectedDate) + suggestion.copy(id = System.currentTimeMillis(), loggedDate = selectedDate, source = "fulfill_missing_macros")
-            NutritionStore.save(context, selectedDate, updated); reload(); showFulfill = false
+            NutritionStore.save(context, selectedDate, updated); reload(); showFulfill = false; queueRemoteSync()
         },
     )
     generatedPlanPreview?.let { preview ->
@@ -329,7 +344,7 @@ fun NutritionScreen(
             },
         )
     }
-    if (generatingPlan) AlertDialog(onDismissRequest = {}, title = { Text("DISEÑANDO TU SEMANA", fontFamily = AntonFontFamily) }, text = { NutritionPlanGenerationAnimation() }, confirmButton = {})
+    if (generatingPlan) NutritionPlanGenerationSheet()
     generationError?.let { message -> AlertDialog(onDismissRequest = { generationError = null }, title = { Text("NO SE PUDO GENERAR EL PLAN", fontFamily = AntonFontFamily) }, text = { Text(message, color = WildforceThemeTokens.textSecondary) }, confirmButton = { TextButton(onClick = { generationError = null; showMoreActions = true }) { Text("REINTENTAR", color = NutritionCoral) } }, dismissButton = { TextButton(onClick = { generationError = null }) { Text("CERRAR") } }) }
 }
 
@@ -352,6 +367,9 @@ private fun PlannedMeal.toLogDraft(date: LocalDate) = MealLog(
 private fun NutritionPlanGenerationAnimation() {
     PlanGenerationAnimation(
         icon = "♧",
+        // SwiftUI presents this in a fixed-height sheet. Fixing Android's
+        // animation canvas prevents AlertDialog from remeasuring for each line.
+        modifier = Modifier.width(320.dp).height(380.dp),
         steps = listOf(
             "Analizando tus objetivos nutricionales…",
             "Evaluando tus preferencias alimentarias…",
@@ -364,6 +382,48 @@ private fun NutritionPlanGenerationAnimation() {
             "Ya casi está…",
         ),
     )
+}
+
+/** Matches iOS's fixed 450 pt, non-dismissible plan-generation sheet. */
+@Composable
+private fun NutritionPlanGenerationSheet() {
+    var entered by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { entered = true }
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+        ),
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+            AnimatedVisibility(
+                visible = entered,
+                enter = fadeIn(tween(220)) + slideInVertically(tween(360)) { height -> height },
+            ) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth().height(450.dp),
+                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                    color = WildforceThemeTokens.background,
+                ) {
+                    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            Modifier.padding(top = 10.dp, bottom = 12.dp)
+                                .size(width = 34.dp, height = 4.dp)
+                                .background(WildforceThemeTokens.textSecondary.copy(alpha = .28f), CircleShape),
+                        )
+                        Text(
+                            "DISEÑANDO TU SEMANA",
+                            fontFamily = AntonFontFamily,
+                            color = WildforceThemeTokens.textPrimary,
+                        )
+                        NutritionPlanGenerationAnimation()
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -683,9 +743,9 @@ private fun IntakeActions(date: LocalDate, today: LocalDate, onToday: () -> Unit
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(if (date == today) "Ingesta de hoy" else "Ingesta del ${date.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale("es")))}", fontFamily = Exo2FontFamily, fontSize = 18.sp, color = WildforceThemeTokens.textPrimary)
         Spacer(Modifier.weight(1f))
-        if (date != today) TextButton(onClick = onToday) { Text("Hoy", color = NutritionCoral) }
+        if (date != today) TextButton(onClick = onToday) { Text("Hoy", color = NutritionActionColor) }
         else {
-            IconButton(onClick = onLog, Modifier.semantics { contentDescription = "Registrar ingesta" }) { Icon(Icons.Filled.AddCircle, "Registrar ingesta", tint = NutritionCoral, modifier = Modifier.size(30.dp)) }
+            IconButton(onClick = onLog, Modifier.semantics { contentDescription = "Registrar ingesta" }) { Icon(Icons.Filled.AddCircle, "Registrar ingesta", tint = NutritionActionColor, modifier = Modifier.size(30.dp)) }
             IconButton(onClick = onIdeas) { Icon(Icons.Filled.MoreHoriz, "Más opciones", tint = WildforceThemeTokens.textSecondary) }
         }
     }
@@ -698,7 +758,7 @@ private fun DailyProgressCard(date: LocalDate, current: NutritionTargets, target
     // 650 ms cadence here instead of Compose's default spring.
     val animatedProgress by animateFloatAsState(progress, animationSpec = tween(650), label = "calorie progress")
     val animatedCalories by animateIntAsState(current.calories, animationSpec = tween(650), label = "calorie-value")
-    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).clickable(onClick = onClick).padding(20.dp)) {
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).clickable(onClick = onClick).padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Row(verticalAlignment = Alignment.Bottom) {
@@ -712,7 +772,7 @@ private fun DailyProgressCard(date: LocalDate, current: NutritionTargets, target
             }
             ProgressRing(animatedProgress)
         }
-        Row(Modifier.padding(top = 22.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             MacroProgress("Proteína", current.protein, target.protein, ProteinColor, NutritionMacroIcon.Protein, Modifier.weight(1f))
             MacroProgress("Carbos", current.carbs, target.carbs, CarbsColor, NutritionMacroIcon.Carbs, Modifier.weight(1f))
             MacroProgress("Grasa", current.fat, target.fat, FatColor, NutritionMacroIcon.Fat, Modifier.weight(1f))
@@ -769,7 +829,7 @@ private fun WeeklyBalanceCard(plan: List<NutritionDayPlan>, selected: LocalDate,
     // today's bar and the displayed average, matching the iOS live update.
     val history = dates.map { date -> NutritionStore.load(context, date).sumOf { it.calories } }
     var inspectedDate by remember(today) { mutableStateOf<LocalDate?>(null) }
-    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp)).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("Balance energético", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
@@ -789,17 +849,25 @@ private fun WeeklyBalanceCard(plan: List<NutritionDayPlan>, selected: LocalDate,
             BalanceMetric("Balance", displayedBurned?.let { "${if (displayedEaten - it > 0) "+" else ""}${displayedEaten - it} kcal" } ?: "—", if ((displayedBurned ?: displayedEaten) > displayedEaten) NutritionGreen else NutritionOrange)
         }
         val chartBurnedValues = dates.mapNotNull { energyHistory[it]?.totalCalories ?: energyHistory[it]?.activeCalories }.map { it.toInt() }
-        val maximum = (history + chartBurnedValues).maxOrNull()?.coerceAtLeast(1) ?: 1
+        // Keep a stable, meaningful domain even when today's only entry is a
+        // small food. Swift Charts gets its scale from the full balance data;
+        // Android also anchors it to the plan's daily calorie target so a
+        // 105 kcal banana cannot become the apparent chart maximum.
+        val planScale = plan.map { it.targets.calories }.average().toInt().coerceAtLeast(1)
+        val maximum = (history + chartBurnedValues + planScale).maxOrNull()?.coerceAtLeast(1) ?: 1
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
           Column(
-              Modifier.width(34.dp).height(170.dp),
+              // iOS's 170pt chart includes the x-axis labels. Android keeps
+              // the labels in a separate row, so the plot itself is 145dp;
+              // together they occupy the same total height.
+              Modifier.width(34.dp).height(145.dp),
               verticalArrangement = Arrangement.SpaceBetween,
           ) {
               Text("${maximum}", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
               Text("${maximum / 2}", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
               Text("0", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
           }
-          Box(Modifier.weight(1f).height(170.dp)) {
+          Box(Modifier.weight(1f).height(145.dp)) {
           Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom) {
             dates.forEachIndexed { index, date ->
                 val eaten = history[index]
@@ -807,16 +875,34 @@ private fun WeeklyBalanceCard(plan: List<NutritionDayPlan>, selected: LocalDate,
                 val burned = (point?.totalCalories ?: point?.activeCalories ?: 0.0).toInt()
                 val active = point?.activeCalories?.toInt()?.coerceAtMost(burned) ?: 0
                 val animatedBurnedHeight by animateDpAsState(
-                    targetValue = (154 * burned / maximum).dp,
+                    targetValue = (130 * burned / maximum).dp,
                     animationSpec = tween(420),
                     label = "energy-balance-bar-$date",
                 )
                 Box(Modifier.weight(1f).fillMaxHeight().clickable { inspectedDate = if (inspectedDate == date) null else date }, contentAlignment = Alignment.BottomCenter) {
                     if (burned > 0) Column(Modifier.fillMaxWidth(.62f).height(animatedBurnedHeight), verticalArrangement = Arrangement.Bottom) {
-                        // iOS uses the same neutral accent for standard and active burn;
-                        // the alpha difference is what separates the two stacked bars.
-                        Box(Modifier.fillMaxWidth().weight((burned - active).coerceAtLeast(1).toFloat()).background(WildforceThemeTokens.accent.copy(alpha = .5f), RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)))
-                        if (active > 0) Box(Modifier.fillMaxWidth().weight(active.toFloat()).background(WildforceThemeTokens.accent, RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)))
+                        // Swift Charts draws standard first, then leaves a 40 kcal
+                        // separation before the active bar. The red AccentColor3
+                        // is intentionally shared by both series; opacity carries
+                        // the distinction exactly as on iOS.
+                        val standard = if (point?.totalCalories != null) (burned - active).coerceAtLeast(0) else 0
+                        if (standard > 0) Box(
+                            Modifier.fillMaxWidth().weight(standard.toFloat()).background(
+                                Brush.verticalGradient(
+                                    listOf(EnergyBalanceBarColor.copy(alpha = .58f), EnergyBalanceBarColor.copy(alpha = .42f)),
+                                ),
+                                RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
+                            ),
+                        )
+                        if (active > 0) {
+                            Spacer(Modifier.height(4.dp))
+                            Box(
+                                Modifier.fillMaxWidth().weight(active.toFloat()).background(
+                                    Brush.verticalGradient(listOf(EnergyBalanceBarColor, EnergyBalanceBarColor.copy(alpha = .82f))),
+                                    RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
+                                ),
+                            )
+                        }
                     }
                     if (inspectedDate == date) Box(Modifier.fillMaxWidth().fillMaxHeight().border(1.dp, NutritionCoral, RoundedCornerShape(6.dp)))
                 }
@@ -826,6 +912,12 @@ private fun WeeklyBalanceCard(plan: List<NutritionDayPlan>, selected: LocalDate,
           val eatenPointColor = WildforceThemeTokens.backgroundSecondary
           val chartGridColor = WildforceThemeTokens.textSecondary.copy(alpha = .15f)
           Canvas(Modifier.fillMaxSize()) {
+              // Canvas coordinates are pixels, whereas the bars above use the
+              // full 170.dp plot height. Use the actual pixel height here;
+              // using a hard-coded 154px made small meals (e.g. a banana)
+              // collapse against the baseline on xxhdpi devices.
+              val lineWidth = 2.dp.toPx()
+              val pointRadius = 4.dp.toPx()
               // Match Swift Charts' subtle horizontal grid marks.
               (0..3).forEach { mark ->
                   val y = size.height * mark / 3f
@@ -834,15 +926,15 @@ private fun WeeklyBalanceCard(plan: List<NutritionDayPlan>, selected: LocalDate,
               val points = history.mapIndexedNotNull { index, eaten ->
                   if (eaten <= 0) null else Offset(
                       x = if (dates.lastIndex == 0) size.width / 2f else size.width * index / dates.lastIndex,
-                      y = size.height - (154f * eaten / maximum),
+                      y = size.height - (size.height * eaten / maximum),
                   )
               }
               points.zipWithNext().forEach { (from, to) ->
-                  drawLine(eatenLineColor, from, to, strokeWidth = 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f)))
+                  drawLine(eatenLineColor, from, to, strokeWidth = lineWidth, pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 4.dp.toPx())))
               }
               points.forEach { point ->
-                  drawCircle(eatenPointColor, radius = 5f, center = point)
-                  drawCircle(eatenLineColor, radius = 5f, center = point, style = Stroke(width = 2f))
+                  drawCircle(eatenPointColor, radius = pointRadius, center = point)
+                  drawCircle(eatenLineColor, radius = pointRadius, center = point, style = Stroke(width = lineWidth))
               }
           }
           }
@@ -852,7 +944,7 @@ private fun WeeklyBalanceCard(plan: List<NutritionDayPlan>, selected: LocalDate,
                 Text(date.format(DateTimeFormatter.ofPattern("d MMM", Locale("es"))), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) { BalanceLegend(WildforceThemeTokens.accent.copy(alpha = .5f), "Estándar"); BalanceLegend(WildforceThemeTokens.accent, "Activa"); BalanceLegend(WildforceThemeTokens.textPrimary, "Ingerida") }
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) { BalanceLegend(EnergyBalanceBarColor.copy(alpha = .5f), "Estándar"); BalanceLegend(EnergyBalanceBarColor, "Activa"); BalanceLegend(WildforceThemeTokens.textPrimary, "Ingerida") }
     }
 }
 
@@ -872,7 +964,7 @@ private fun PlanHeader(
     val notes = plan.mapNotNull { it.notes.takeIf(String::isNotBlank) }.firstOrNull()
     var menuOpen by remember { mutableStateOf(false) }
     var showNotes by remember { mutableStateOf(false) }
-    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(20.dp), verticalArrangement = Arrangement.spacedBy(15.dp)) {
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(16.dp), verticalArrangement = Arrangement.spacedBy(15.dp)) {
         Row(verticalAlignment = Alignment.Top) {
             Column(Modifier.weight(1f)) { Text("PLAN ACTUAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); Text("Plan nutricional semanal", fontSize = 25.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 2) }
             Column(Modifier.width(76.dp), horizontalAlignment = Alignment.End) { Text(average.toString(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1); Text("kcal/día", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1) }

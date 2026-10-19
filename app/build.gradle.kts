@@ -19,8 +19,8 @@ android {
         applicationId = "io.codepassion.wildforce.android"
         minSdk = 28
         targetSdk = 37
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = 4
+        versionName = "0.1.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         buildConfigField("String", "OPENAI_API_KEY", buildConfigString(localProperties.getProperty("OPENAI_API_KEY", "")))

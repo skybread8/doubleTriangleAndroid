@@ -73,7 +73,7 @@ internal object NutritionAnalyzer {
         val token = context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE)
             .getString("token", null)
             ?: error("Inicia sesión para analizar una comida")
-        val connection = URL(WildforceApiEnvironment.apiUrl("nutrition-macros/generate")).openConnection() as HttpURLConnection
+        val connection = URL(WildforceApiEnvironment.apiUrl("nutrition/macros/from-text")).openConnection() as HttpURLConnection
         connection.requestMethod = "POST"
         connection.doOutput = true
         connection.connectTimeout = 20_000

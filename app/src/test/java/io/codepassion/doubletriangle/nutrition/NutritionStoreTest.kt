@@ -19,6 +19,13 @@ class NutritionStoreTest {
     }
 
     @Test
+    fun `remote nutrition dates accept the ISO instants returned by the sync API`() {
+        assertEquals(LocalDate.of(2026, 10, 5), parseRemoteNutritionDate("2026-10-05T00:00:00.000000Z"))
+        assertEquals(LocalDate.of(2026, 10, 5), parseRemoteNutritionDate("2026-10-05"))
+        assertTrue(parseRemoteNutritionDate("not-a-date") == null)
+    }
+
+    @Test
     fun `energy balance window is chronological and anchored to today`() {
         val today = LocalDate.of(2026, 10, 9)
         val window = nutritionEnergyWindow(today, 15)

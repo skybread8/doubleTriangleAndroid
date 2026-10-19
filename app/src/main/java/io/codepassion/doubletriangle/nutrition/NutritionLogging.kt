@@ -56,6 +56,7 @@ import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
+import io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -103,6 +104,15 @@ internal fun NutritionLogFlow(
     var showPhotoSourcePicker by remember { mutableStateOf(false) }
     var photoSourceMethod by remember { mutableStateOf(LogMethod.Photo) }
     var cameraError by remember { mutableStateOf<String?>(null) }
+    // A fast double tap on the final button must not create two meal logs.
+    // iOS dismisses the sheet immediately after the first commit.
+    var saveCommitted by remember(initialEntry?.id, selectedDate) { mutableStateOf(false) }
+    val saveOnce: (MealLog) -> Unit = { entry ->
+        if (!saveCommitted) {
+            saveCommitted = true
+            onSave(entry)
+        }
+    }
     var scannedBarcode by remember { mutableStateOf("") }
     val barcodeScanner = remember(context) {
         val options = GmsBarcodeScannerOptions.Builder()
@@ -237,10 +247,10 @@ internal fun NutritionLogFlow(
                     mealType = mealType,
                     date = selectedDate,
                     onBack = { method = null },
-        onSave = onSave,
+                onSave = saveOnce,
                 )
             } else if (method == LogMethod.Search) {
-                FoodSearch(mealType, selectedDate, onBack = { method = null }, onSave = onSave)
+                FoodSearch(mealType, selectedDate, onBack = { method = null }, onSave = saveOnce)
             } else if (method == LogMethod.Photo && (photoUri != null || photoBitmap != null)) {
                 PhotoAnalysisReview(
                     date = selectedDate,
@@ -248,7 +258,7 @@ internal fun NutritionLogFlow(
                     photoUri = photoUri,
                     photoBitmap = photoBitmap,
                     onBack = { method = null; photoUri = null; photoBitmap = null },
-                    onSave = onSave,
+                    onSave = saveOnce,
                 )
             } else {
                 MealEditor(
@@ -257,7 +267,7 @@ internal fun NutritionLogFlow(
                     draft.copy(name = initialTitle ?: draft.name)
                 },
                     onBack = { method = null; photoUri = null },
-                    onSave = onSave,
+                    onSave = saveOnce,
                     photoLabel = photoUri?.lastPathSegment ?: if (photoBitmap != null) "Captura de cámara" else null,
                     photoUri = photoUri,
                     photoBitmap = photoBitmap,
@@ -441,6 +451,7 @@ private fun RecentPicker(
                         IconButton(onClick = {
                             val updated = entry.copy(isBookmarked = !entry.isBookmarked)
                             NutritionStore.save(context, entry.loggedDate, NutritionStore.load(context, entry.loggedDate).map { if (it.id == entry.id) updated else it })
+                            RemoteSyncChangeTracker.mark(context, "nutrition-log-entries")
                             recentEntries = recentEntries.map { if (it.id == entry.id) updated else it }
                         }, modifier = Modifier.size(36.dp)) {
                             Icon(if (entry.isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, if (entry.isBookmarked) "Quitar de guardadas" else "Guardar", tint = if (entry.isBookmarked) NutritionCoral else WildforceThemeTokens.textSecondary, modifier = Modifier.size(18.dp))

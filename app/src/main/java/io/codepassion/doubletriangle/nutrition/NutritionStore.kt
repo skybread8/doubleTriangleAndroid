@@ -165,7 +165,7 @@ internal object NutritionStore {
             for (index in 0 until days.length()) {
                 val day = days.optJSONObject(index) ?: continue
                 if (!day.isNull("deleted_at")) continue
-                val date = runCatching { LocalDate.parse(day.optString("date").take(10)) }.getOrNull() ?: continue
+                val date = parseRemoteNutritionDate(day.optString("date")) ?: continue
                 val meals = day.optJSONArray("meals")?.let { entries -> buildList {
                     for (mealIndex in 0 until entries.length()) {
                         val meal = entries.optJSONObject(mealIndex) ?: continue
@@ -173,7 +173,9 @@ internal object NutritionStore {
                         val foods = meal.optJSONArray("example_foods")?.let { foodsJson -> buildList {
                             for (foodIndex in 0 until foodsJson.length()) {
                                 val food = foodsJson.optJSONObject(foodIndex) ?: continue
-                                food.optString("name").trim().takeIf(String::isNotBlank)?.let { add(it to food.optInt("grams").coerceAtLeast(0)) }
+                                food.optString("name").trim().takeIf(String::isNotBlank)?.let {
+                                    add(it to food.optInt("amountGrams", food.optInt("grams")).coerceAtLeast(0))
+                                }
                             }
                         } }.orEmpty()
                         add(PlannedMeal(
@@ -219,14 +221,26 @@ internal object NutritionStore {
      * a compact local representation, so entries and their items are folded
      * into one MealLog while retaining a deterministic local id for later syncs.
      */
-    fun importRemoteLogs(context: Context, remoteEntries: JSONArray, remoteItems: JSONArray) {
-        val itemsByEntry = mutableMapOf<String, MutableList<MealItem>>()
+    fun importRemoteLogs(
+        context: Context,
+        remoteEntries: JSONArray,
+        remoteItems: JSONArray,
+        plannedMealKeys: Map<String, String> = emptyMap(),
+    ) {
+        // Pull pages are incremental: keep item changes by their iOS
+        // orderIndex so a one-item edit never drops the other foods locally.
+        val itemChangesByEntry = mutableMapOf<String, MutableMap<Int, MealItem?>>()
         for (index in 0 until remoteItems.length()) {
             val item = remoteItems.optJSONObject(index) ?: continue
-            if (!item.isNull("deleted_at")) continue
             val entryId = item.optString("nutrition_log_entry_id")
             if (entryId.isBlank()) continue
-            itemsByEntry.getOrPut(entryId) { mutableListOf() } += MealItem(
+            val orderIndex = item.optInt("order_index", index).coerceAtLeast(0)
+            val changes = itemChangesByEntry.getOrPut(entryId) { mutableMapOf() }
+            if (!item.isNull("deleted_at")) {
+                changes[orderIndex] = null
+                continue
+            }
+            changes[orderIndex] = MealItem(
                 name = item.optString("name").trim().ifBlank { "Alimento" },
                 calories = item.optDouble("calories").toInt().coerceIn(0, 8000),
                 protein = item.optDouble("protein_grams").toInt().coerceIn(0, 500),
@@ -240,30 +254,53 @@ internal object NutritionStore {
             )
         }
 
-        val restored = buildList {
-            for (index in 0 until remoteEntries.length()) {
-                val entry = remoteEntries.optJSONObject(index) ?: continue
-                if (!entry.isNull("deleted_at")) continue
-                val remoteId = entry.optString("id")
-                val loggedDate = runCatching { LocalDate.parse(entry.optString("logged_at").take(10)) }.getOrNull() ?: continue
-                val items = itemsByEntry[remoteId].orEmpty()
-                add(MealLog(
-                    id = stableRemoteLogId(remoteId, index),
-                    name = entry.optString("title").trim().ifBlank { "Comida" },
-                    calories = items.sumOf { it.calories }.coerceIn(0, 8000),
-                    protein = items.sumOf { it.protein }.coerceIn(0, 500),
-                    carbs = items.sumOf { it.carbs }.coerceIn(0, 1000),
-                    fat = items.sumOf { it.fat }.coerceIn(0, 500),
-                    type = mealTypeFromRemote(entry.optString("meal_type")),
-                    loggedDate = loggedDate,
-                    notes = entry.optString("notes"),
-                    source = "sync",
-                    isBookmarked = entry.optBoolean("is_favorite", false),
-                    items = items,
-                ))
+        val merged = all(context).associateBy { it.id }.toMutableMap()
+        var changed = false
+        for (index in 0 until remoteEntries.length()) {
+            val entry = remoteEntries.optJSONObject(index) ?: continue
+            val remoteId = entry.optString("id")
+            if (remoteId.isBlank()) continue
+            val localId = stableRemoteLogId(remoteId, index)
+            if (!entry.isNull("deleted_at")) {
+                changed = merged.remove(localId) != null || changed
+                continue
             }
+            val loggedDate = runCatching { LocalDate.parse(entry.optString("logged_at").take(10)) }.getOrNull() ?: continue
+            // Pull responses are incremental. When an entry changes without its
+            // items in the same page, retain the already imported item graph.
+            val existing = merged[localId]
+            val items = existing?.items.orEmpty().toMutableList()
+            itemChangesByEntry[remoteId]?.toSortedMap()?.forEach { (itemIndex, changedItem) ->
+                if (changedItem == null) {
+                    if (itemIndex in items.indices) items.removeAt(itemIndex)
+                } else if (itemIndex in items.indices) {
+                    items[itemIndex] = changedItem
+                } else {
+                    // New logs carry their complete ordered item list. A sparse
+                    // later page can only append after the known local items.
+                    items.add(changedItem)
+                }
+            }
+            merged[localId] = MealLog(
+                id = localId,
+                name = entry.optString("title").trim().ifBlank { "Comida" },
+                calories = if (items.isEmpty()) existing?.calories ?: 0 else items.sumOf { it.calories }.coerceIn(0, 8000),
+                protein = if (items.isEmpty()) existing?.protein ?: 0 else items.sumOf { it.protein }.coerceIn(0, 500),
+                carbs = if (items.isEmpty()) existing?.carbs ?: 0 else items.sumOf { it.carbs }.coerceIn(0, 1000),
+                fat = if (items.isEmpty()) existing?.fat ?: 0 else items.sumOf { it.fat }.coerceIn(0, 500),
+                type = mealTypeFromRemote(entry.optString("meal_type")),
+                loggedDate = loggedDate,
+                notes = entry.optString("notes"),
+                source = "sync",
+                isBookmarked = entry.optBoolean("is_favorite", false),
+                items = items,
+                photoPath = existing?.photoPath,
+                plannedMealKey = plannedMealKeys[entry.optString("nutrition_meal_id")],
+                bookmarkName = existing?.bookmarkName.orEmpty(),
+            )
+            changed = true
         }
-        if (restored.isNotEmpty()) write(context, restored)
+        if (changed) write(context, merged.values.toList())
     }
 
     fun clearGeneratedPlan(context: Context) {
@@ -348,7 +385,24 @@ internal object NutritionStore {
         NutritionStatusWidget.refresh(context)
     }
 
-    fun load(context: Context, date: LocalDate = LocalDate.now()): List<MealLog> = all(context).filter { it.loggedDate == date }.sortedBy { it.id }
+    fun load(context: Context, date: LocalDate = LocalDate.now()): List<MealLog> {
+        val everyEntry = all(context)
+        val forDate = everyEntry.filter { it.loggedDate == date }.sortedBy { it.id }
+        // A locally-created meal can come back from the remote pull with a
+        // deterministic sync id. Prefer the local entry so one banana (or any
+        // identical food) is not counted twice after synchronization.
+        val deduped = forDate.filterNot { candidate ->
+            candidate.source == "sync" && forDate.any { local ->
+                local.source != "sync" && local.name.trim().equals(candidate.name.trim(), ignoreCase = true) &&
+                    local.calories == candidate.calories && local.protein == candidate.protein &&
+                    local.carbs == candidate.carbs && local.fat == candidate.fat && local.notes.trim() == candidate.notes.trim()
+            }
+        }
+        if (deduped.size != forDate.size) {
+            write(context, everyEntry.filterNot { it.loggedDate == date } + deduped)
+        }
+        return deduped
+    }
 
     fun recent(context: Context, limit: Int = 12): List<MealLog> = all(context).sortedByDescending { it.id }
         .distinctBy { listOf(it.name.lowercase(), it.calories, it.protein, it.carbs, it.fat) }.take(limit)
