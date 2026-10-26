@@ -9,7 +9,8 @@ enum class WorkoutMode(val label: String) {
     Custom("Entrenamiento personalizado"),
 }
 
-enum class WorkoutStatus { Planned, Completed, Skipped }
+/** Mirrors iOS WorkoutDayStatus raw values, including a cross-device active day. */
+enum class WorkoutStatus { Draft, Planned, InProgress, Skipped, Completed }
 
 /** A skipped session is not performed, but it does finish its slot in the plan. */
 val WorkoutStatus.isPlanFinalized: Boolean
@@ -101,6 +102,7 @@ data class ExerciseSummary(
     val targetDurationSeconds: Int? = null,
     val targetDurationMinutes: Int? = null,
     val targetDistanceKm: Double? = null,
+    val targetPaceSecondsPerKm: Int? = null,
     val isPerSideLoad: Boolean = false,
     val trackingMode: ExerciseTrackingMode = when {
         targetDistanceKm != null -> ExerciseTrackingMode.DurationAndDistance
@@ -108,7 +110,17 @@ data class ExerciseSummary(
         else -> ExerciseTrackingMode.Repetitions
     },
     val repRange: RepRange? = null,
+    /**
+     * Backend UUID for a coach-owned exercise. Catalog exercises keep this null;
+     * the pair mirrors iOS's mutually-exclusive exercise / coachExerciseId
+     * reference and lets a downloaded plan survive a later coach-library sync.
+     */
+    val coachExerciseId: String? = null,
 )
+
+/** iOS only renders the set-style row when a configuration was actually supplied. */
+fun ExerciseSummary.hasNonDefaultSetStyle(): Boolean =
+    setStyle != ExerciseSetStyle.Straight || setStyleParameters != SetStyleParameters()
 
 fun ExerciseSetStyle.appliesToSet(setNumber: Int, totalSets: Int, appliesToFinalSetOnly: Boolean = false): Boolean =
     !appliesToFinalSetOnly || setNumber >= totalSets
@@ -164,6 +176,20 @@ data class WorkoutDaySummary(
     val status: WorkoutStatus,
     val exercises: List<ExerciseSummary> = emptyList(),
     val blocks: List<WorkoutBlockSummary> = emptyList(),
+    /** Mirrors iOS WorkoutDay.kind; templates must not be uploaded as sessions. */
+    val kind: String = "workout",
+    /** Mirrors iOS WorkoutDay.creationSource for cross-device round-trips. */
+    val creationSource: String = "generated",
+    val scheduledFor: String? = null,
+    val startedAt: String? = null,
+    val completedAt: String? = null,
+    val didCountTowardStreak: Boolean = false,
+    val notes: String? = null,
+    val activeDurationSeconds: Int? = null,
+    val activeCaloriesBurned: Double? = null,
+    val averageHeartRate: Double? = null,
+    val maximumHeartRate: Double? = null,
+    val totalVolumeKg: Double? = null,
 )
 
 fun WorkoutDaySummary.displayBlocks(): List<WorkoutBlockSummary> =
@@ -186,7 +212,19 @@ data class WorkoutHubState(
     val mesocyclePhase: MesocyclePhase? = null,
     val phaseWeek: Int = 1,
     val positionInCycle: Int = 1,
+    val planStatus: String = "active",
+    val planGoal: String? = null,
+    val bodyCompositionPhase: String? = null,
+    val planNotes: String? = null,
+    val planStartsOn: String? = null,
+    val profileSettingsHash: String? = null,
 )
+
+/** Mirrors iOS CompleteWorkoutDay: a plan is completed when every saved slot is finalized. */
+fun WorkoutHubState.withPlanCompletionStatus(): WorkoutHubState {
+    if (workouts.isEmpty() || !workouts.all { it.status.isPlanFinalized }) return this
+    return copy(planStatus = "completed")
+}
 
 fun WorkoutHubState.workoutsFor(dayOfWeek: DayOfWeek?): List<WorkoutDaySummary> =
     dayOfWeek?.let { selected -> workouts.filter { it.scheduledDay == selected } } ?: workouts

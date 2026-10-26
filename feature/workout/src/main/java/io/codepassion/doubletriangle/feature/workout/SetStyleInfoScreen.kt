@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -16,13 +17,31 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Equalizer
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.PauseCircleOutline
+import androidx.compose.material.icons.filled.Terrain
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
@@ -40,19 +59,55 @@ private data class SetStyleCopy(
 /** The same plan-specific legend shown by iOS, not just abbreviated chips. */
 internal data class SetStyleDetail(val label: String, val explanation: String)
 
+internal fun setStyleIcon(style: ExerciseSetStyle): ImageVector = when (style) {
+    ExerciseSetStyle.Warmup -> Icons.Filled.LocalFireDepartment
+    ExerciseSetStyle.Straight -> Icons.Filled.Equalizer
+    ExerciseSetStyle.TopSetBackoff -> Icons.Filled.Terrain
+    ExerciseSetStyle.AscendingPyramid -> Icons.Filled.TrendingUp
+    ExerciseSetStyle.DropSet -> Icons.Filled.TrendingDown
+    ExerciseSetStyle.RestPause -> Icons.Filled.PauseCircleOutline
+    ExerciseSetStyle.Intervals -> Icons.Filled.Timer
+    ExerciseSetStyle.Tempo -> Icons.Filled.MusicNote
+}
+
+/**
+ * Keeps the straight-set glyph aligned with iOS, whose SF Symbol is `equal`
+ * (two horizontal strokes), rather than Material's three-bar Equalizer icon.
+ */
+@Composable
+internal fun SetStyleGlyph(style: ExerciseSetStyle, modifier: Modifier = Modifier, tint: Color) {
+    if (style == ExerciseSetStyle.Straight) {
+        Text(
+            "=",
+            modifier = modifier,
+            color = tint,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+        )
+    } else {
+        Icon(setStyleIcon(style), contentDescription = null, modifier = modifier, tint = tint)
+    }
+}
+
 @Composable
 internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, parameters: SetStyleParameters, onBack: () -> Unit) {
     val copy = style.copyText(parameters)
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 18.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("‹ VOLVER", Modifier.weight(1f).clickable(onClick = onBack).padding(vertical = 10.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+            Row(Modifier.weight(1f).heightIn(min = 48.dp).semantics { contentDescription = "Volver" }.clickable(onClick = onBack).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
+                Text("VOLVER", color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+            }
             Text("TIPO DE SERIE", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
         }
         Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(style.glyph, Modifier.size(52.dp).background(WildforceThemeTokens.accentGold.copy(alpha = 0.14f), RoundedCornerShape(14.dp)).padding(top = 11.dp), textAlign = TextAlign.Center, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+            SetStyleGlyph(style, Modifier.size(52.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.14f), RoundedCornerShape(14.dp)).padding(14.dp), WildforceThemeTokens.textPrimary)
             Column(Modifier.padding(start = 14.dp)) {
                 Text(style.label.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-                Text(style.scopeLabel(totalSets, parameters.appliesToFinalSetOnly), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
+                style.scopeLabel(totalSets, parameters.appliesToFinalSetOnly)?.let {
+                    Text(it, color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
+                }
             }
         }
         val planDetails = styleParameterDetails(style, parameters)
@@ -65,8 +120,18 @@ internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, paramet
                             .background(WildforceThemeTokens.textPrimary.copy(alpha = 0.04f), RoundedCornerShape(14.dp))
                             .padding(12.dp),
                     ) {
-                        Text(detail.label, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
-                        Text(detail.explanation, Modifier.padding(top = 3.dp), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
+                        Row(verticalAlignment = Alignment.Top) {
+                            Icon(
+                                Icons.Filled.Info,
+                                contentDescription = null,
+                                modifier = Modifier.size(28.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.12f), RoundedCornerShape(8.dp)).padding(6.dp),
+                                tint = WildforceThemeTokens.accent,
+                            )
+                            Column(Modifier.padding(start = 12.dp)) {
+                                Text(detail.label, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                                Text(detail.explanation, Modifier.padding(top = 3.dp), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
+                            }
+                        }
                     }
                 }
             }
@@ -74,23 +139,65 @@ internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, paramet
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             InfoSection("QUÉ SIGNIFICA", copy.meaning)
             InfoSection("CÓMO FUNCIONA", copy.operation)
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                repeat(totalSets.coerceAtLeast(1)) { index ->
-                    val setNumber = index + 1
-                    Column(Modifier.liquidGlass(RoundedCornerShape(14.dp)).padding(horizontal = 14.dp, vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(setNumber.toString(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                        Text(setStyleInstruction(style, setNumber, totalSets, parameters.appliesToFinalSetOnly), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
+            SetStyleMiniDiagram(style, totalSets, parameters)
             Text("BENEFICIOS", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 12.dp, bottom = 8.dp))
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                copy.benefits.forEach { benefit ->
-                    Text(benefit, Modifier.background(WildforceThemeTokens.accentGold.copy(alpha = 0.12f), RoundedCornerShape(20.dp)).padding(horizontal = 12.dp, vertical = 8.dp), color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                copy.benefits.chunked(2).forEach { rowBenefits ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        rowBenefits.forEach { benefit ->
+                            Row(
+                                Modifier.weight(1f).background(WildforceThemeTokens.textPrimary.copy(alpha = 0.10f), RoundedCornerShape(20.dp)).padding(horizontal = 12.dp, vertical = 10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = WildforceThemeTokens.accent, modifier = Modifier.size(15.dp))
+                                Text(benefit, color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, maxLines = 1)
+                            }
+                        }
+                        if (rowBenefits.size == 1) Spacer(Modifier.weight(1f))
+                    }
                 }
             }
             InfoSection("POR QUÉ ES ÚTIL", copy.usefulness)
             Spacer(Modifier.padding(bottom = 12.dp))
+        }
+    }
+}
+
+@Composable
+private fun SetStyleMiniDiagram(style: ExerciseSetStyle, totalSets: Int, parameters: SetStyleParameters) {
+    val items = when (style) {
+        ExerciseSetStyle.Warmup -> listOf("LIGERA", "SUBE", "LISTA")
+        ExerciseSetStyle.Straight -> List(totalSets.coerceAtLeast(1).coerceAtMost(6)) { "S${it + 1}" }
+        ExerciseSetStyle.TopSetBackoff -> listOf("TOP SET") + List(parameters.backoffSetCount.coerceAtLeast(1).coerceAtMost(4)) { "BACKOFF" }
+        ExerciseSetStyle.AscendingPyramid -> List(totalSets.coerceAtLeast(1).coerceAtMost(6)) { "${it + 1}" }
+        ExerciseSetStyle.DropSet -> listOf("SERIE", "-${parameters.dropWeightPercent}%", "-${parameters.dropWeightPercent}%")
+        ExerciseSetStyle.RestPause -> listOf("DURO", "${parameters.intraSetRestSeconds}s", "MINI", "${parameters.intraSetRestSeconds}s", "MINI")
+        ExerciseSetStyle.Intervals -> listOf("TRABAJO", "${parameters.intraSetRestSeconds}s", "TRABAJO", "${parameters.intraSetRestSeconds}s")
+        ExerciseSetStyle.Tempo -> parameters.tempo.split('-').filter { it.isNotBlank() }.ifEmpty { listOf("BAJA", "PAUSA", "SUBE") }.map { "${it}s" }
+    }
+    Row(
+        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        items.forEachIndexed { index, label ->
+            val isPause = label.endsWith("s") && style in setOf(ExerciseSetStyle.RestPause, ExerciseSetStyle.Intervals, ExerciseSetStyle.Tempo)
+            Text(
+                label,
+                Modifier
+                    .background(
+                        if (isPause) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary,
+                        RoundedCornerShape(20.dp),
+                    )
+                    .padding(horizontal = 10.dp, vertical = 10.dp),
+                color = if (isPause) WildforceThemeTokens.textSecondary else WildforceThemeTokens.backgroundSecondary,
+                style = MaterialTheme.typography.caption,
+                fontWeight = FontWeight.Bold,
+            )
+            if (index < items.lastIndex && style in setOf(ExerciseSetStyle.DropSet, ExerciseSetStyle.RestPause, ExerciseSetStyle.Intervals)) {
+                Icon(Icons.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.textSecondary)
+            }
         }
     }
 }
@@ -103,14 +210,14 @@ private fun InfoSection(title: String, body: String) {
     }
 }
 
-internal fun setStyleScopeLabel(style: ExerciseSetStyle, totalSets: Int, appliesToFinalSetOnly: Boolean): String = when {
-    totalSets <= 1 -> "Se aplica en esta serie"
+internal fun setStyleScopeLabel(style: ExerciseSetStyle, totalSets: Int, appliesToFinalSetOnly: Boolean): String? = when {
+    totalSets <= 1 -> null
     style == ExerciseSetStyle.TopSetBackoff -> "Top set primero"
     appliesToFinalSetOnly -> "Solo en la última serie"
     else -> "Se aplica en todas las series"
 }
 
-private fun ExerciseSetStyle.scopeLabel(totalSets: Int, appliesToFinalSetOnly: Boolean): String =
+private fun ExerciseSetStyle.scopeLabel(totalSets: Int, appliesToFinalSetOnly: Boolean): String? =
     setStyleScopeLabel(this, totalSets, appliesToFinalSetOnly)
 
 internal fun styleParameterDetails(style: ExerciseSetStyle, parameters: SetStyleParameters): List<SetStyleDetail> = buildList {

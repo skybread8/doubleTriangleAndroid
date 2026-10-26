@@ -119,7 +119,7 @@ private enum class FaqCategory(val title: String, val questions: List<FaqEntry>)
             FaqEntry("¿Qué integración de salud usa Android?", "Wildforce se conecta con Health Connect. Tú eliges los permisos para altura, peso, calorías, nutrición y entrenamientos, y puedes revocarlos desde Ajustes."),
             FaqEntry("¿Para qué sirven las notificaciones?", "Mantienen visible el entreno y el descanso activos y permiten recibir recordatorios. Si no ves la sesión activa, comprueba el permiso de notificaciones de Wildforce."),
             FaqEntry("¿Hay widget de Wildforce para Android?", "Hay un acceso rápido al entreno desde la pantalla de inicio. Mantén pulsado un espacio vacío, abre el selector de widgets y busca Wildforce cuando esté habilitado en tu versión."),
-            FaqEntry("¿Funciona con Wear OS?", "La integración con Wear OS está planificada, pero todavía no está disponible. Puedes registrar y seguir los entrenos desde tu móvil Android."),
+            FaqEntry("¿Funciona con Wear OS?", "La app Wear OS permite ver el estado del entrenamiento, completar series y controlar los descansos mediante Bluetooth. Health Services y la validación con un reloj real siguen en progreso."),
             FaqEntry("¿Puedo usar Wildforce en iPhone?", "Sí. En iPhone, Wildforce se integra con Apple Health y Apple Watch para entrenos activos, descansos e información de repeticiones en ejercicios compatibles."),
         ),
     ),

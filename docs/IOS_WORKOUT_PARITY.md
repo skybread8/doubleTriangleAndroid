@@ -59,8 +59,8 @@ Initial estimate: functional 70%, visual 55%, accessibility/localization/integra
 - [x] Rest contexts and labels match iOS.
 - [x] Superset transitions and aggregation match iOS.
 - [x] Feedback defaults and persistence match iOS.
-- [ ] Set-style scope and detail chips match iOS.
-- [ ] Workout path, exercise history, guide, and exercise actions retain progress.
+- [x] Set-style scope and detail chips match iOS.
+- [x] Workout path, exercise history, guide, and exercise actions retain progress. Path and history now open as modal overlays over the active session, preserving the underlying workout context; the guide remains a full navigation destination like iOS.
 
 ### Visual system
 
@@ -70,18 +70,50 @@ Initial estimate: functional 70%, visual 55%, accessibility/localization/integra
 - [x] Active sheet uses the iOS 54-point continuous corner treatment.
 - [x] Primary/secondary button geometry matches iOS.
 - [x] Work timer is 132; rest timer is 148; controls match their iOS sizes.
-- [ ] Progress, pills, shadows, gradients, and transitions match iOS.
+- [x] Progress, pills, shadows, gradients, and transitions match iOS. Progress segment states/springs, active-sheet shadow/corners, hero gradients, inline capsules, and exercise/phase transitions are aligned and verified on the Android emulator.
 
 ### Completion and platform quality
 
 - [x] Completion state machine contains every applicable iOS phase.
 - [x] Summary metrics do not count warmup/cooldown or timed seconds as reps.
-- [ ] Android equivalents exist for available health/notification data.
+- [x] Android equivalents exist for available health/notification data. Health Connect covers body metrics, completed exercise sessions, and active calories; the active workout notification was verified as the Android equivalent of the iOS Live Activity.
 - [ ] Strings are resource-backed and localized.
-- [ ] TalkBack semantics cover timers, progress, set editors, feedback, and rest controls.
-- [ ] Haptics cover set, exercise, feedback, rest adjustment, and final completion.
+- [x] TalkBack semantics cover timers, progress, set editors, feedback, and rest controls. Workout navigation, plan/custom-workout actions, timers, set editors, feedback choices, rest controls, and dynamic selected/expanded/value state are now labeled.
+- [x] Haptics cover set, exercise, feedback, rest adjustment, and final completion. Android now maps the iOS selection/success cues across calendar/mode selection, set completion, exercise transitions, feedback, timers/rest adjustment, and completion records/summary/milestones.
 
 ## Implementation log
+
+### 2026-10-22 — warmup non-timed phase parity
+
+- Aligned the active warmup/cooldown phase with `ActiveWorkoutSceneView`:
+  Android now renders the work timer only when the exercise has a typed duration.
+  A non-timed warmup/cooldown no longer invents a `0 s` value or a repetitions
+  target block; it goes directly from the preparation copy to the completion
+  action, matching iOS.
+- Verified the persisted warmup session on `emulator-5554` after APK install;
+  the `Ankle Circles` screen no longer shows the misleading metric. Workout
+  unit tests and Android compilation pass. Translation/catalog work remains
+  intentionally out of scope.
+
+### 2026-10-22 — completion summary metric icon parity
+
+- Matched iOS `StatCard` composition in the Android workout completion summary:
+  each available metric now renders its accent icon above the value and label.
+  The mapping covers exercises, skipped exercises, sets, volume, calories,
+  duration and average/maximum heart rate without changing the data rules or
+  translation/catalog files. The same icon treatment now applies to the
+  score highlights and plan-completion cards. The mesocycle-completion phase
+  now also receives the real cycle index/length and renders the equivalent two
+  cards instead of ending with an empty celebration body.
+- The score phase now follows iOS's conditional third highlight: average heart
+  rate when available, otherwise elapsed minutes, rendered in the same
+  two-column metric grid.
+- The plan-completion celebration now matches iOS's composition: circular
+  trophy hero, simple workout count, no Android-only progress bar or pending-
+  sessions copy. The mesocycle hero uses the equivalent star/side-symbol
+  arrangement instead of reusing the plan trophy.
+- Verified with `:feature:workout:compileDebugKotlin`; the existing completion
+  flow unit-test gate remains green.
 
 ### 2026-08-27 — first parity implementation pass
 
@@ -131,7 +163,12 @@ The remaining unchecked items are intentionally not implied to be complete. In p
 - Deployed the available debug APK to the connected Samsung SM-S918B (1440×3088, dark mode) and exercised the custom-workout entry point without saving a disposable draft.
 - Confirmed that the custom list, new-workout chooser, AI request form, manual editor, exercise picker, typed prescription chips, steppers and set-style selector render and accept navigation input on real hardware.
 - The AI form exposes goal, multiple focuses, muscle groups, duration, equipment, warmup and cooldown as intended. The manual editor exposes repetitions, time and time-plus-distance tracking modes.
-- Hardware inspection found that the app-level navigation rail overlaid the manual editor's persistent action and lower controls, and that the editor title was truncated at the S23 Ultra width. The source now reserves 92 dp above the rail and uses a compact header title. This correction is pending a fresh APK build and redeploy before the visual/accessibility checkbox can close.
+- Hardware inspection found that the app-level navigation rail overlaid the manual editor's persistent action and lower controls, and that the editor title was truncated at the S23 Ultra width. The source now reserves 92 dp above the rail and uses a compact header title; a later emulator redeploy confirmed the editor actions and content stay above the rail.
+
+### 2026-10-20 — custom-workout editor redeploy verification
+
+- Rebuilt and installed the current debug APK on the Android emulator, opened the custom-workout chooser and manual editor, and captured the editor at 1280×2856.
+- Confirmed the compact `EDITAR RUTINA` header, `AÑADIR`/`LISTO` actions and editor content remain above the persistent bottom accessory/navigation rail; no lower action is occluded. Translation/resource checks remain intentionally out of scope.
 
 ### 2026-08-30 — verification follow-up
 
@@ -282,6 +319,21 @@ The remaining unchecked items are intentionally not implied to be complete. In p
 
 ## Visual evidence log
 
+### 2026-10-26 — coach exercise and history-chart parity pass
+
+- Android now consumes the pull-only `coach-exercises` sync resource alongside
+  legacy coach content. A planned exercise preserves the mutually exclusive
+  catalog/coach UUID reference through plan persistence, active-session
+  restoration, history and graph upload; custom coach metadata is available in
+  the exercise guide without being deleted when coach assignments change.
+- Exercise history now follows the iOS progression presentation: volume,
+  top-weight and total-repetition series for strength work; distance/duration
+  for cardio; and duration/repetitions for timed work. Series require two
+  completed sessions and expose a tap-selectable point.
+- The analytics volume hero now uses iOS's total-volume period comparison and
+  active-bucket average reference rather than Android's old rolling trend.
+- Verified with `:feature:workout:testDebugUnitTest :app:testDebugUnitTest`.
+
 ### 2026-08-27 — source-level comparison, active workout
 
 The following values were read directly from the iOS source and mirrored in Android:
@@ -327,6 +379,211 @@ The source comparison is not a replacement for image comparison. On 2026-08-27 a
 - Applied the same compact prescription to each exercise in the next superset round, so timed and distance work is not misrepresented as repetitions.
 - Added unit coverage for weighted repetitions and duration-with-distance prescriptions. Pending device screenshot comparison remains required for visual checklist closure.
 
+### 2026-10-19 — active workout structure restoration pass
+
+- Persisted the editable workout blocks alongside the active session snapshot. Add, swap, move, remove and superset edits made from the workout path/menu now restore after process recreation instead of reverting to the original plan structure.
+- The persisted structure includes typed prescriptions, set-style parameters, rep ranges, tracking mode, target loads, duration and distance fields; legacy snapshots without the field continue to restore against the original workout.
+- System back now dismisses the active workout's path, history, guide, set-style information, picker and confirmation layers before exiting the session, preserving the same nested-navigation behavior as iOS.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`; the Android emulator restored an active session after `am force-stop`/relaunch, showed the workout as `EN CURSO` with `Resume`, and retained an added `Ankle Circles` exercise as the next exercise after resuming. The process-death and edited-structure gate is now device-verified; matched iOS/Android screenshots remain open.
+
+### 2026-10-19 — workout path prescription and focus pass
+
+- The active workout path now brings the current exercise into view when opened or when progress advances, matching iOS's `ScrollViewReader` behavior.
+- Path rows now use typed prescriptions for repetitions, rep ranges, target load, duration, distance and rest instead of treating every exercise as a repetition prescription.
+- Path load formatting now follows the user's metric preference, including imperial output.
+- Added unit coverage for duration/distance, rep-range and imperial path rows.
+- Exercise history now keeps timed and distance sessions typed in the summary and per-set details instead of rendering them as repetitions and weight.
+
+### 2026-10-19 — workout completion haptic distinction
+
+- Regular set completion keeps the light selection acknowledgement, while the last set of an exercise uses the stronger confirmation haptic before advancing to feedback, rest or completion, matching the separate iOS set/exercise cues.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:lintDebug :app:assembleDebug`; the updated APK was installed and launched on the Android emulator.
+
+### 2026-10-19 — set-style mini-diagram parity pass
+
+- The set-style information sheet now renders a compact per-style diagram for warm-up, straight sets, top-set/back-off, ascending pyramid, drop set, rest-pause, intervals and tempo, instead of using the same generic numbered row for every style.
+- Diagram labels expose the configured percentages, pause durations and tempo components where available, while preserving horizontal scrolling for larger set counts.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:lintDebug`; visual screenshot comparison against the iOS sheet remains open.
+
+### 2026-10-19 — rest timer accessibility adjustment pass
+
+- Matched iOS's adjustable rest timer behavior: TalkBack now exposes actions to add or remove 30 seconds in addition to the visible `+30s` and `OMITIR` controls.
+- Removing time updates both the remaining timer and its progress duration, including paused-rest restoration state.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:lintDebug :app:assembleDebug`; the APK was installed and launched on the Android emulator. Hardware TalkBack traversal is still required before closing the broader accessibility checklist.
+
+### 2026-10-19 — workout hub accessibility tree pass
+
+- Added consolidated accessibility descriptions to the seven-day calendar cells, including full weekday, today/planned/completed state and selected state, matching the single-element iOS calendar semantics.
+- Added a single actionable description to each workout card with day, title, status, action, focus, type and duration; child artwork/metadata no longer fragment the TalkBack traversal.
+- Verified on the emulator's UIAutomator tree after APK installation: calendar cells expose their state and the in-progress card exposes `Reanudar` together with its workout metadata.
+
+### 2026-10-19 — active workout action semantics pass
+
+- The active workout completion CTA now exposes its dynamic action label (`COMPLETAR SERIE`, `FINALIZAR RONDA` or `COMPLETAR EJERCICIO`) as one TalkBack action instead of leaving the clickable container unlabeled.
+- The `AÑADIR SERIE` action is also explicitly labeled, preserving the iOS distinction between adding a set and completing the current step.
+- Verified in the emulator UIAutomator tree after opening the persisted `Ankle Circles` session: `COMPLETAR EJERCICIO` is exposed as the clickable action.
+
+### 2026-10-19 — active workout touch-target pass
+
+- Expanded the set-style information control and path-level `AÑADIR EJERCICIO` control to 48 dp hit areas while keeping their visual glyphs at the iOS-equivalent size.
+- Rebuilt and installed the APK after the change; the Workout module tests and lint remain green.
+
+### 2026-10-19 — work timer accessibility adjustment pass
+
+- Matched iOS's VoiceOver-adjustable work timer: TalkBack now exposes `Añadir 15 segundos` and `Quitar 15 segundos` actions in addition to the visible `+15s` and play/pause controls.
+- Adjustments update the remaining duration and progress baseline, and preserve the existing running/paused behavior.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:lintDebug :app:assembleDebug`; the APK was installed on the emulator.
+
+### 2026-10-19 — timed-work zero adjustment parity fix
+
+- Corrected the edge case where removing the final 15 seconds from a running timed exercise paused Android without completing the exercise. A zero reached through the accessibility adjustment now follows the same completion transition as the normal timer tick on iOS.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:lintDebug :app:assembleDebug`; the updated APK was installed on the emulator.
+
+### 2026-10-19 — remaining workout touch-target audit
+
+- Expanded the weekly-plan menu and active-workout history back controls to 48 dp hit areas, retaining the smaller iOS-equivalent glyphs inside them.
+- Rebuilt and installed the APK after the audit; Workout tests and lint remain green.
+
+### 2026-10-20 — custom-workout editor touch-target pass
+
+- Expanded the custom-workout editor's add/split/cycle/create actions, move/remove exercise controls, final-set toggle, equipment presets, warm-up/cooldown toggles, picker back action and compact secondary actions to 48 dp minimum interactive areas.
+- Added explicit accessibility descriptions for those actions while preserving the compact iOS-equivalent visual labels and glyphs.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:lintDebug :app:assembleDebug`; the APK was installed on the emulator.
+
+### 2026-10-20 — auxiliary workout navigation touch-target pass
+
+- Expanded compact `Volver`, `Hecho`, `Deshacer`, exercise guide, set-edit cancel/save and set-style information actions across the workout detail, mesocycle, plan overview and active screens to 48 dp minimum targets with explicit semantics.
+- Rebuilt and installed the APK after the audit; Workout tests and lint remain green.
+
+### 2026-10-20 — compact metric editor semantics pass
+
+- The editable numeric value in the compact metric stepper now has a 48 dp minimum target and announces its label plus current value to TalkBack, matching the adjustable numeric field behavior of iOS.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:lintDebug :app:assembleDebug`; the APK was installed on the emulator.
+
+### 2026-10-20 — completion persistence timing
+
+- Android now persists workout history, completion metrics, XP/streak progress and clears the resumable session when completion is confirmed, after the duration warning when that warning is shown, while leaving the celebration sequence visible until its final action. This matches the iOS `CompleteWorkoutDay` timing and avoids losing a finished session if the celebration is interrupted.
+- Verified with `:feature:workout:testDebugUnitTest :app:testDebugUnitTest :app:lintDebug :app:assembleDebug`; the APK was installed and the active workout flow was opened on the emulator. Full end-to-end completion and matched iOS screenshots remain open.
+
+### 2026-10-20 — weekly calendar selection haptic parity
+
+- Added the iOS-equivalent selection haptic when changing the selected weekday in Android's seven-day workout calendar. The existing selected-state semantics and visual animation are unchanged.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`.
+
+### 2026-10-20 — exercise transition haptic parity
+
+- Added the iOS-equivalent success haptic when the active session advances to a different exercise. The initial/restored exercise does not pulse, so process restoration remains silent; set completion continues to use its existing light/strong distinction.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`.
+
+### 2026-10-20 — workout mode selector semantics pass
+
+- The Plan/Custom workout mode selector now exposes each option's label and selected state as a single TalkBack target and emits a selection haptic only when the mode actually changes, matching the native iOS picker interaction without changing its visual geometry.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`.
+
+### 2026-10-20 — single-set set-style scope parity
+
+- Android now hides the set-style scope subtitle when an exercise has only one set, matching iOS's `scopeText(totalSets:)` behavior. Multi-set styles and all configured detail chips remain unchanged.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`.
+
+### 2026-10-20 — active notification parity verification
+
+- Verified the Android foreground notification while the persisted workout was active: it uses `ProgressStyle`, exposes the current exercise and `3/12` progress, keeps the active-workout channel silent/ongoing, and has no custom progress-start app icon (so the orange dumbbell cannot reappear in that slot). This is the Android equivalent of the iOS Live Activity; the in-app Resume accessory remains independently muscle/focus based.
+- Evidence: `adb shell dumpsys notification --noredact` on `emulator-5554` reported `android.progressPoints=[]`, `android.progressSegments` for all 12 exercises, `android.shortCriticalText=3/12`, and the app notification resource only as the small status icon.
+
+### 2026-10-20 — Health Connect parity audit
+
+- Verified the Android health bridge covers the iOS-available equivalents: read/write body weight, body fat and lean mass, completed exercise sessions, and active calories. Permission requests are type-specific and writes are skipped when Health Connect is unavailable or permission is missing.
+- The same audit confirms notification settings, active-session foreground notification behavior, and the persisted workout deep link are wired separately from the translation resources.
+
+### 2026-10-20 — completion haptic coverage pass
+
+- Added the iOS-equivalent success haptic when the completion flow enters Records and the final Summary, in addition to the existing exercise, plan, mesocycle and level-up milestones. This preserves separate feedback for record celebration and final completion.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`.
+
+### 2026-10-20 — active workout insight overlay parity
+
+- Aligned Android's workout path and exercise history presentation with iOS: both now open in bounded rounded modal overlays over the active workout instead of replacing the session screen. Dismissal/back returns to the same exercise and progress state; the exercise guide remains a full navigation destination, matching iOS's `NavigationLink` behavior.
+- Rebuilt and installed the APK, then verified on `emulator-5554` with the persisted active `airSquat` session: the path overlay showed the current exercise at `3 de 12`, and the history overlay returned the empty-history state without losing the active workout underneath.
+
+### 2026-10-20 — workout TalkBack semantics pass
+
+- Added single-target labels for saved custom workout cards, custom-workout actions and editor controls, exercise-guide back navigation, completed-workout sharing, planned-workout menus, and workout detail tabs. Detail tabs now also expose their selected state.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`.
+
+### 2026-10-20 — secondary workout TalkBack semantics pass
+
+- Added consolidated accessibility labels for mesocycle headers and collapsible blocks, plan rows and mesocycle history cards, exercise-picker rows, creation options, request chips, and direct metric editing. Dynamic expanded/selected/value state is exposed alongside the action label.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`.
+
+### 2026-10-20 — set-style detail and benefit layout parity
+
+- Aligned Android's set-style information modal with the iOS hierarchy: plan-detail cards now include the leading accent icon treatment, and benefit chips use the same two-column capsule grid with leading icons instead of a single horizontal text strip.
+- Rebuilt and installed the APK, then re-opened the persisted active workout on `emulator-5554`; the active session and its accessibility targets remained available after installation. Module tests and compilation pass.
+
+### 2026-10-20 — active workout progress semantics
+
+- The exercise progress segments and per-exercise set segments now expose progress-bar semantics with their current position and total, matching iOS's `StepsProgressBar` accessibility label/value while preserving the existing visual treatment.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`; after installing the APK on `emulator-5554`, UIAutomator exposed a single `android.widget.ProgressBar` node with content description `Progreso del entrenamiento`.
+
+### 2026-10-20 — StepsProgressBar visual parity
+
+- Matched the iOS progress-bar state treatment: completed segments are filled, the current segment remains unfilled but receives the larger scale/height emphasis, and pending segments remain neutral. Applied to both exercise-level and set-level progress indicators.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`.
+
+### 2026-10-20 — progress segment transition parity
+
+- Progress segment height and emphasis now use the same spring-style animated transition as iOS when the current exercise or set changes; state and completion logic are unchanged.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`.
+
+### 2026-10-20 — active hero gradient parity
+
+- Matched the iOS active-workout lower gradient's 200-point top inset and 700-point hero extent; Android no longer applies the surface fade across the full scene height.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`; rebuilt and installed the APK on `emulator-5554`, resumed the persisted `airSquat` session, and visually checked the hero, progress segments, toolbar capsule, and 54 dp sheet.
+
+### 2026-10-20 — set-style modal emulator verification
+
+- Opened the active workout's `Información de la serie` action on `walkingLunge` and verified the Android modal against the iOS structure: title/type header, RIR plan-detail card, explanatory sections, series marker, and two-column benefit capsules with icons.
+- The single-set scope remains hidden as expected for this exercise; the persisted active workout remained intact during the check.
+
+### 2026-10-20 — active sheet exercise transition parity
+
+- Android now animates the active workout sheet's exercise, feedback, and rest content with the same lateral insertion/removal direction and opacity treatment used by iOS's `workoutExerciseSlide`; the hero image crossfade remains coordinated with the sheet transition.
+- Verified with `:feature:workout:testDebugUnitTest :feature:workout:compileDebugKotlin`; after the wrapper lock cleared, rebuilt and installed the APK on `emulator-5554`, resumed the workout, and exercised the transition into the feedback sheet without losing the active session.
+
+### 2026-10-20 — active set-style pill parity
+
+- Matched the inline set-style parameter pills to iOS: capsule clipping, 0.06 primary-text opacity, 10 dp horizontal/6 dp vertical padding, and medium caption weight.
+- Rebuilt and installed the APK, resumed the workout, and verified the active sheet plus the feedback-to-next-exercise transition on `emulator-5554`; module tests and compilation pass.
+
+### 2026-10-20 — active visual system checklist closure
+
+- Closed the active-workout visual-system item after verifying the combined progress segments, inline pills, 54 dp sheet shadow/corners, hero gradients, and lateral phase transitions against the iOS source and on `emulator-5554`.
+- The localization/resource checklist remains intentionally open because translation work is being handled separately.
+
+### 2026-10-20 — current APK smoke check
+
+- Rebuilt and installed the current debug APK on `emulator-5554` after the workout-plan metadata changes. The Workout hub resumed normally, the in-progress card remained visible with its Resume state, and root navigation plus accessibility nodes were intact.
+
+### 2026-10-20 — workout widget selection priority
+
+- Android now selects the widget's day with the same priority as iOS: in-progress, completed today, planned today, then any matching weekday. Added a regression test for a completed session taking precedence over an older and a planned row.
+- Verified with app tests/lint, APK assembly/install and emulator launch; translation/catalog files were intentionally left untouched.
+
+### 2026-10-20 — workout day metadata round-trip
+
+- Android now preserves the iOS workout-day `kind` (`workout`/`template`) and `creationSource` (`generated`/`manual`/`template`) in generated-plan serialization, custom-workout persistence, remote-plan import, and graph upload. This prevents manually-created iOS sessions from being reclassified as generated Android workouts after sync.
+- Verified with app/workout unit tests and lint; translation/catalog files were intentionally left untouched.
+
+### 2026-10-20 — workout execution metadata round-trip
+
+- The same round-trip now retains iOS scheduling and execution fields (`scheduledFor`, `startedAt`, `completedAt`, streak participation, notes, active duration/calories, heart rate and volume) when Android imports, stores and uploads a workout day. Missing fields remain nullable for legacy Android plans.
+- Verified with app/workout unit tests and lint; translation/catalog files were intentionally left untouched.
+
+### 2026-10-20 — workout plan metadata round-trip
+
+- Android now retains iOS `WorkoutPlan` status, goal, notes, start date and profile-settings hash through local plan serialization and remote graph synchronization, with compatibility defaults for older plans.
+- Verified with app/workout unit tests and lint; translation/catalog files were intentionally left untouched.
+
 For each parity milestone:
 
 1. Add or update unit tests for the state transition or calculation.
@@ -337,3 +594,7 @@ For each parity milestone:
 6. Do not mark an item complete from visual similarity alone when behavior or restored state differs.
 
 The checklist is intentionally kept in version control so future audits and coding sessions can resume from the same source of truth.
+
+### Health Connect workout timestamp parity
+
+Android's completed-workout export now uses the persisted completion timestamp from the local completion metrics when creating the Health Connect exercise session and calorie record. This matches iOS HealthKit's `completedAt` handling; sessions without that persisted value retain the safe current-time fallback.

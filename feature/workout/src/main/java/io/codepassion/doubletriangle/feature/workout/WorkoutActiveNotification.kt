@@ -124,6 +124,7 @@ internal object WorkoutActiveNotification {
     ): android.app.Notification {
         val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
             flags = android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("io.codepassion.doubletriangle.OPEN_ACTIVE_WORKOUT", true)
         }
         val contentIntent = launchIntent?.let {
             android.app.PendingIntent.getActivity(context, notificationId, it, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
@@ -153,7 +154,6 @@ internal object WorkoutActiveNotification {
         val skipIntent = actionIntent(context, ACTION_SKIP_CURRENT, 4103)
         val addRestIntent = actionIntent(context, ACTION_ADD_REST, 4104)
         val notificationArtwork = resolvedArtwork ?: exerciseArtwork(title)
-        val appIconResourceId = context.applicationInfo.icon
         // Keep the completion alert promoted too, so Android 16 can show its
         // short critical text in the Live Update capsule.
         val useLiveUpdate = Build.VERSION.SDK_INT >= 36
@@ -171,6 +171,7 @@ internal object WorkoutActiveNotification {
             .setAutoCancel(false)
             .setColor(workoutProgressCurrent)
 
+        @Suppress("NewApi")
         if (useLiveUpdate) {
             // Android 16 only promotes an ongoing notification to the compact
             // Live Update surface when it requests promotion and uses
@@ -186,7 +187,9 @@ internal object WorkoutActiveNotification {
 
             val liveStyle = android.app.Notification.ProgressStyle()
                 .setStyledByProgress(true)
-                .setProgressStartIcon(Icon.createWithResource(context, appIconResourceId))
+                // iOS leaves this leading slot empty when the exercise has no
+                // catalogued muscle icon. Android must not inject the orange
+                // launcher artwork as a platform-only brand marker.
                 .setProgressTrackerIcon(Icon.createWithBitmap(workoutProgressTrackerDot()))
 
             // Without a custom tracker icon, ProgressStyle uses its native

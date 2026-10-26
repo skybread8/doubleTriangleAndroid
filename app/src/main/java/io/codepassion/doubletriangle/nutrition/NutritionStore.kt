@@ -4,6 +4,7 @@ import android.content.Context
 import io.codepassion.doubletriangle.NutritionStatusWidget
 import io.codepassion.doubletriangle.WildforceNotificationScheduler
 import io.codepassion.doubletriangle.feature.onboarding.BodyCompositionPhase
+import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import org.json.JSONArray
@@ -14,7 +15,12 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 internal enum class MealType(val title: String) {
-    Breakfast("Desayuno"), Lunch("Comida"), Dinner("Cena"), Snack("Snack");
+    Breakfast("Desayuno"),
+    Lunch("Comida"),
+    Dinner("Cena"),
+    Snack("Snack"),
+    PreWorkout("Pre-entreno"),
+    PostWorkout("Post-entreno");
     companion object {
         fun detect(): MealType = when (java.time.LocalTime.now().hour) {
             in 5..10 -> Breakfast; in 11..15 -> Lunch; in 18..22 -> Dinner; else -> Snack
@@ -56,6 +62,8 @@ internal data class MealLog(
     val plannedMealKey: String? = null,
     /** Optional user-facing name assigned when bookmarking a meal. */
     val bookmarkName: String = "",
+    /** Remote product/meal image counterpart of iOS NutritionLogMedia.remoteURL. */
+    val mediaUrl: String? = null,
 )
 
 internal enum class NutritionDayType(val title: String) { Training("Entrenamiento"), Rest("Descanso"), Recovery("Recuperación") }
@@ -81,6 +89,23 @@ internal data class NutritionDayPlan(
     val meals: List<PlannedMeal>,
 )
 
+/** Plan-level fields kept with the generated week, matching iOS NutritionPlan. */
+internal data class NutritionPlanMetadata(
+    val id: String? = null,
+    val startsOn: LocalDate? = null,
+    val goal: FitnessGoal? = null,
+    val bodyCompositionPhase: BodyCompositionPhase? = null,
+    val dailyCalorieAverage: Double? = null,
+    val notes: String? = null,
+)
+
+/** Treat JSON null sent by older/remote plan payloads as an absent title, not user-visible text. */
+internal fun NutritionDayPlan.safeWorkoutTitle(): String =
+    workoutTitle.trim().takeUnless { it.equals("null", ignoreCase = true) }.orEmpty()
+
+internal fun JSONObject.cleanString(key: String, fallback: String = ""): String =
+    optString(key, fallback).takeUnless { it.equals("null", ignoreCase = true) } ?: fallback
+
 internal data class NutritionPreferences(
     val dietaryStyle: String = "Omnívora",
     val mealsPerDay: Int = 4,
@@ -104,11 +129,9 @@ internal object NutritionStore {
     private const val PROFILE_KEY = "nutrition_profile"
     private const val PLAN_VERSION_KEY = "nutrition_plan_version"
     private const val GENERATED_PLAN_KEY = "nutrition_generated_plan"
+    private const val PLAN_METADATA_KEY = "nutrition_plan_metadata"
     private const val REMOTE_PLAN_ID_KEY = "nutrition_remote_plan_id"
     private const val DISMISSED_PLANNED_MEALS_KEY = "nutrition_dismissed_planned_meals"
-
-    private fun JSONObject.cleanString(key: String, fallback: String = ""): String =
-        optString(key, fallback).takeUnless { it.equals("null", ignoreCase = true) } ?: fallback
 
     fun plannedMealKey(date: LocalDate, meal: PlannedMeal): String =
         "${date}|${meal.type.name}|${meal.title.trim().lowercase()}"
@@ -136,15 +159,48 @@ internal object NutritionStore {
         buildList {
             for (index in 0 until days.length()) {
                 val day = days.getJSONObject(index)
-                val meals = day.optJSONArray("meals")?.let { array -> buildList { for (mealIndex in 0 until array.length()) { val meal = array.getJSONObject(mealIndex); add(PlannedMeal(meal.optString("title"), runCatching { MealType.valueOf(meal.optString("type")) }.getOrDefault(MealType.Snack), (meal.optJSONObject("targets") ?: JSONObject()).toTargets(NutritionTargets()), meal.optString("guidance"), meal.optJSONArray("foods")?.stringPairs().orEmpty())) } } }.orEmpty()
-                add(NutritionDayPlan(LocalDate.parse(day.getString("date")), runCatching { NutritionDayType.valueOf(day.getString("type")) }.getOrDefault(NutritionDayType.Rest), runCatching { EnergyDemand.valueOf(day.getString("demand")) }.getOrDefault(EnergyDemand.Medium), (day.optJSONObject("targets") ?: JSONObject()).toTargets(NutritionTargets()), day.optString("workoutTitle"), day.optString("notes"), day.optString("pre").takeIf(String::isNotBlank), day.optString("post").takeIf(String::isNotBlank), meals))
+                val meals = day.optJSONArray("meals")?.let { array -> buildList { for (mealIndex in 0 until array.length()) { val meal = array.getJSONObject(mealIndex); add(PlannedMeal(meal.cleanString("title", "Comida"), runCatching { MealType.valueOf(meal.optString("type")) }.getOrDefault(MealType.Snack), (meal.optJSONObject("targets") ?: JSONObject()).toTargets(NutritionTargets()), meal.cleanString("guidance"), meal.optJSONArray("foods")?.stringPairs().orEmpty())) } } }.orEmpty()
+                add(NutritionDayPlan(LocalDate.parse(day.getString("date")), runCatching { NutritionDayType.valueOf(day.getString("type")) }.getOrDefault(NutritionDayType.Rest), runCatching { EnergyDemand.valueOf(day.getString("demand")) }.getOrDefault(EnergyDemand.Medium), (day.optJSONObject("targets") ?: JSONObject()).toTargets(NutritionTargets()), day.cleanString("workoutTitle"), day.cleanString("notes"), day.cleanString("pre").takeIf(String::isNotBlank), day.cleanString("post").takeIf(String::isNotBlank), meals))
             }
         }.takeIf { it.isNotEmpty() }
     }.getOrNull()
 
-    fun saveGeneratedPlan(context: Context, plan: List<NutritionDayPlan>) {
-        val days = JSONArray().apply { plan.forEach { day -> put(JSONObject().put("date", day.date.toString()).put("type", day.type.name).put("demand", day.energyDemand.name).put("targets", day.targets.toJson()).put("workoutTitle", day.workoutTitle).put("notes", day.notes).put("pre", day.preWorkoutGuidance).put("post", day.postWorkoutGuidance).put("meals", JSONArray().apply { day.meals.forEach { meal -> put(JSONObject().put("title", meal.title).put("type", meal.type.name).put("targets", meal.targets.toJson()).put("guidance", meal.guidance).put("foods", JSONArray().apply { meal.foods.forEach { (name, grams) -> put(JSONObject().put("name", name).put("grams", grams)) } })) } })) } }
-        context.getSharedPreferences(PREFS, 0).edit().putString(GENERATED_PLAN_KEY, days.toString()).apply()
+    fun loadPlanMetadata(context: Context): NutritionPlanMetadata? = runCatching {
+        val json = context.getSharedPreferences(PREFS, 0).getString(PLAN_METADATA_KEY, null)
+            ?.let(::JSONObject) ?: return null
+        NutritionPlanMetadata(
+            id = json.cleanString("id").takeIf(String::isNotBlank),
+            startsOn = parseRemoteNutritionDate(json.cleanString("startsOn")),
+            goal = fitnessGoalFromStoredValue(json.cleanString("goal")),
+            bodyCompositionPhase = bodyCompositionPhaseFromStoredValue(json.cleanString("bodyCompositionPhase")),
+            dailyCalorieAverage = json.optDouble("dailyCalorieAverage", Double.NaN).takeUnless(Double::isNaN),
+            notes = json.cleanString("notes").takeIf(String::isNotBlank),
+        )
+    }.getOrNull()
+
+    fun metadataForPlan(profile: OnboardingProfile?, plan: List<NutritionDayPlan>): NutritionPlanMetadata =
+        NutritionPlanMetadata(
+            startsOn = plan.minOfOrNull { it.date },
+            goal = profile?.goal,
+            bodyCompositionPhase = profile?.bodyCompositionPhase,
+            dailyCalorieAverage = plan.take(7).map { it.targets.calories }.average().takeIf { it.isFinite() },
+        )
+
+    fun saveGeneratedPlan(context: Context, plan: List<NutritionDayPlan>, metadata: NutritionPlanMetadata? = null) {
+        val days = JSONArray().apply { plan.forEach { day -> put(JSONObject().put("date", day.date.toString()).put("type", day.type.name).put("demand", day.energyDemand.name).put("targets", day.targets.toJson()).put("workoutTitle", day.safeWorkoutTitle()).put("notes", day.notes).put("pre", day.preWorkoutGuidance).put("post", day.postWorkoutGuidance).put("meals", JSONArray().apply { day.meals.forEach { meal -> put(JSONObject().put("title", meal.title).put("type", meal.type.name).put("targets", meal.targets.toJson()).put("guidance", meal.guidance).put("foods", JSONArray().apply { meal.foods.forEach { (name, grams) -> put(JSONObject().put("name", name).put("grams", grams)) } })) } })) } }
+        val effectiveMetadata = metadata ?: loadPlanMetadata(context) ?: metadataForPlan(null, plan)
+        val metadataJson = JSONObject().apply {
+            put("id", effectiveMetadata.id)
+            put("startsOn", effectiveMetadata.startsOn?.toString())
+            put("goal", effectiveMetadata.goal?.storedValue)
+            put("bodyCompositionPhase", effectiveMetadata.bodyCompositionPhase?.storedValue)
+            put("dailyCalorieAverage", effectiveMetadata.dailyCalorieAverage)
+            put("notes", effectiveMetadata.notes)
+        }
+        context.getSharedPreferences(PREFS, 0).edit()
+            .putString(GENERATED_PLAN_KEY, days.toString())
+            .putString(PLAN_METADATA_KEY, metadataJson.toString())
+            .apply()
         NutritionStatusWidget.refresh(context)
     }
 
@@ -179,7 +235,7 @@ internal object NutritionStore {
                             }
                         } }.orEmpty()
                         add(PlannedMeal(
-                            title = meal.optString("title", "Comida"),
+                            title = meal.cleanString("title", "Comida"),
                             type = mealTypeFromRemote(meal.optString("meal_type")),
                             targets = NutritionTargets(meal.optDouble("target_calories").toInt(), meal.optDouble("target_protein_grams").toInt(), meal.optDouble("target_carbs_grams").toInt(), meal.optDouble("target_fat_grams").toInt()),
                             guidance = meal.optString("guidance"), foods = foods,
@@ -191,13 +247,28 @@ internal object NutritionStore {
                     type = nutritionDayTypeFromRemote(day.optString("day_type")),
                     energyDemand = energyDemandFromRemote(day.optString("energy_demand")),
                     targets = NutritionTargets(day.optDouble("target_calories").toInt(), day.optDouble("target_protein_grams").toInt(), day.optDouble("target_carbs_grams").toInt(), day.optDouble("target_fat_grams").toInt()),
-                    workoutTitle = day.optString("planned_workout_title"), notes = day.optString("notes"),
-                    preWorkoutGuidance = day.optString("pre_workout_guidance").takeIf(String::isNotBlank),
-                    postWorkoutGuidance = day.optString("post_workout_guidance").takeIf(String::isNotBlank), meals = meals,
+                    workoutTitle = day.cleanString("planned_workout_title"), notes = day.cleanString("notes"),
+                    preWorkoutGuidance = day.cleanString("pre_workout_guidance").takeIf(String::isNotBlank),
+                    postWorkoutGuidance = day.cleanString("post_workout_guidance").takeIf(String::isNotBlank), meals = meals,
                 ))
             }
         }
-        if (plan.isNotEmpty()) saveGeneratedPlan(context, plan)
+        if (plan.isNotEmpty()) {
+            saveGeneratedPlan(
+                context,
+                plan,
+                NutritionPlanMetadata(
+                    id = remote.cleanString("id").takeIf(String::isNotBlank),
+                    startsOn = parseRemoteNutritionDate(remote.cleanString("starts_on")) ?: plan.minOfOrNull { it.date },
+                    goal = fitnessGoalFromStoredValue(remote.cleanString("goal")),
+                    bodyCompositionPhase = bodyCompositionPhaseFromStoredValue(remote.cleanString("body_composition_phase")),
+                    dailyCalorieAverage = remote.optDouble("daily_calorie_average", Double.NaN)
+                        .takeUnless(Double::isNaN)
+                        ?: plan.take(7).map { it.targets.calories }.average(),
+                    notes = remote.cleanString("notes").takeIf(String::isNotBlank),
+                ),
+            )
+        }
     }
 
     /** Restores dietary preferences before Android's next push, matching iOS's initial snapshot. */
@@ -297,6 +368,7 @@ internal object NutritionStore {
                 photoPath = existing?.photoPath,
                 plannedMealKey = plannedMealKeys[entry.optString("nutrition_meal_id")],
                 bookmarkName = existing?.bookmarkName.orEmpty(),
+                mediaUrl = existing?.mediaUrl,
             )
             changed = true
         }
@@ -304,7 +376,10 @@ internal object NutritionStore {
     }
 
     fun clearGeneratedPlan(context: Context) {
-        context.getSharedPreferences(PREFS, 0).edit().remove(GENERATED_PLAN_KEY).apply()
+        context.getSharedPreferences(PREFS, 0).edit()
+            .remove(GENERATED_PLAN_KEY)
+            .remove(PLAN_METADATA_KEY)
+            .apply()
         NutritionStatusWidget.refresh(context)
     }
 
@@ -459,7 +534,7 @@ internal object NutritionStore {
                     val fallbackDate = Instant.ofEpochMilli(id).atZone(ZoneId.systemDefault()).toLocalDate()
                     val date = runCatching { LocalDate.parse(item.optString("date")) }.getOrDefault(fallbackDate)
                     val items = item.optJSONArray("items")?.let { array -> buildList { for (itemIndex in 0 until array.length()) { val food = array.getJSONObject(itemIndex); add(MealItem(food.cleanString("name"), food.optInt("calories"), food.optInt("protein"), food.optInt("carbs"), food.optInt("fat"), food.cleanString("brand"), food.optDouble("quantity", 1.0), food.cleanString("unit"), food.optDouble("grams", Double.NaN).takeUnless(Double::isNaN), food.cleanString("notes"))) } } }.orEmpty()
-                    add(MealLog(id, item.cleanString("name").trim().ifBlank { "Comida" }, item.optInt("calories").coerceIn(0, 8000), item.optInt("protein").coerceIn(0, 500), item.optInt("carbs").coerceIn(0, 1000), item.optInt("fat").coerceIn(0, 500), runCatching { MealType.valueOf(item.cleanString("type")) }.getOrDefault(MealType.Snack), date, item.cleanString("notes"), item.cleanString("source", "manual"), item.optBoolean("bookmarked", false), items, item.cleanString("photoPath").takeIf(String::isNotBlank), item.cleanString("plannedMealKey").takeIf(String::isNotBlank), item.cleanString("bookmarkName")))
+                    add(MealLog(id, item.cleanString("name").trim().ifBlank { "Comida" }, item.optInt("calories").coerceIn(0, 8000), item.optInt("protein").coerceIn(0, 500), item.optInt("carbs").coerceIn(0, 1000), item.optInt("fat").coerceIn(0, 500), runCatching { MealType.valueOf(item.cleanString("type")) }.getOrDefault(MealType.Snack), date, item.cleanString("notes"), item.cleanString("source", "manual"), item.optBoolean("bookmarked", false), items, item.cleanString("photoPath").takeIf(String::isNotBlank), item.cleanString("plannedMealKey").takeIf(String::isNotBlank), item.cleanString("bookmarkName"), item.cleanString("mediaUrl").takeIf(String::isNotBlank)))
                 }
             }
         }.getOrDefault(emptyList())
@@ -469,7 +544,7 @@ internal object NutritionStore {
         val array = JSONArray().apply {
             entries.sortedBy { it.id }.forEach { meal ->
                 val itemArray = JSONArray().apply { meal.items.forEach { food -> put(JSONObject().put("name", food.name).put("calories", food.calories).put("protein", food.protein).put("carbs", food.carbs).put("fat", food.fat).put("brand", food.brand).put("quantity", food.quantity).put("unit", food.unit).put("grams", food.grams).put("notes", food.notes)) } }
-                put(JSONObject().put("id", meal.id).put("date", meal.loggedDate.toString()).put("name", meal.name).put("calories", meal.calories).put("protein", meal.protein).put("carbs", meal.carbs).put("fat", meal.fat).put("type", meal.type.name).put("notes", meal.notes).put("source", meal.source).put("bookmarked", meal.isBookmarked).put("bookmarkName", meal.bookmarkName).put("items", itemArray).put("photoPath", meal.photoPath ?: JSONObject.NULL).put("plannedMealKey", meal.plannedMealKey ?: JSONObject.NULL))
+                put(JSONObject().put("id", meal.id).put("date", meal.loggedDate.toString()).put("name", meal.name).put("calories", meal.calories).put("protein", meal.protein).put("carbs", meal.carbs).put("fat", meal.fat).put("type", meal.type.name).put("notes", meal.notes).put("source", meal.source).put("bookmarked", meal.isBookmarked).put("bookmarkName", meal.bookmarkName).put("items", itemArray).put("photoPath", meal.photoPath ?: JSONObject.NULL).put("plannedMealKey", meal.plannedMealKey ?: JSONObject.NULL).put("mediaUrl", meal.mediaUrl ?: JSONObject.NULL))
             }
         }
         context.getSharedPreferences(PREFS, 0).edit().putString(ENTRIES_KEY, array.toString()).remove(LEGACY_KEY).apply()
@@ -505,6 +580,8 @@ internal object NutritionStore {
             MealType.Lunch -> if (version % 2 == 0) listOf(if (preferences.dietaryStyle.contains("Veget", true) || preferences.dietaryStyle.contains("Veg", true)) "Tempeh" to 160 else "Pavo" to 160, "Quinoa" to 180, "Verduras" to 200) else listOf(if (preferences.dietaryStyle.contains("Veget", true) || preferences.dietaryStyle.contains("Veg", true)) "Tofu" to 160 else "Pollo" to 160, "Arroz" to 180, "Verduras" to 200)
             MealType.Dinner -> if (version % 2 == 0) listOf(if (preferences.dietaryStyle.contains("Vegana", true)) "Seitán" to 150 else "Merluza" to 150, "Boniato" to 250, "Ensalada" to 180) else listOf(if (preferences.dietaryStyle.contains("Vegana", true)) "Tofu" to 150 else "Salmón" to 150, "Patata" to 250, "Ensalada" to 180)
             MealType.Snack -> listOf("Yogur" to 180, "Fruta" to 120)
+            MealType.PreWorkout -> listOf("Plátano" to 120, "Yogur griego" to 150)
+            MealType.PostWorkout -> listOf("Batido de proteína" to 300, "Fruta" to 120)
         }
         val filteredFoods = foods.filterNot { (name, _) ->
             (preferences.excludedFoods + preferences.allergiesAndIntolerances + preferences.dislikes).any { blocked -> name.contains(blocked, true) || blocked.contains(name, true) }
@@ -556,8 +633,34 @@ internal fun budgetSensitivitySyncValue(value: String): String = when (budgetSen
 }
 
 private fun mealTypeFromRemote(value: String) = when (value.lowercase()) {
-    "breakfast" -> MealType.Breakfast; "lunch" -> MealType.Lunch; "dinner" -> MealType.Dinner; else -> MealType.Snack
+    "breakfast" -> MealType.Breakfast
+    "lunch" -> MealType.Lunch
+    "dinner" -> MealType.Dinner
+    "preworkout", "pre_workout", "pre-workout", "pre workout" -> MealType.PreWorkout
+    "postworkout", "post_workout", "post-workout", "post workout" -> MealType.PostWorkout
+    else -> MealType.Snack
 }
+
+internal fun fitnessGoalFromStoredValue(value: String): FitnessGoal? {
+    val normalized = value.trim()
+    if (normalized.isBlank()) return null
+    return FitnessGoal.entries.firstOrNull {
+        it.storedValue.equals(normalized, ignoreCase = true) ||
+            it.name.equals(normalized, ignoreCase = true) ||
+            it.title.equals(normalized, ignoreCase = true)
+    }
+}
+
+internal fun bodyCompositionPhaseFromStoredValue(value: String): BodyCompositionPhase? {
+    val normalized = value.trim()
+    if (normalized.isBlank()) return null
+    return BodyCompositionPhase.entries.firstOrNull {
+        it.storedValue.equals(normalized, ignoreCase = true) ||
+            it.name.equals(normalized, ignoreCase = true) ||
+            it.title.equals(normalized, ignoreCase = true)
+    }
+}
+
 private fun nutritionDayTypeFromRemote(value: String) = when (value.lowercase()) {
     "training" -> NutritionDayType.Training; "recovery" -> NutritionDayType.Recovery; else -> NutritionDayType.Rest
 }

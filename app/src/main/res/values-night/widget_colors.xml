@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_nutrition_background">#151616</color>
+    <color name="widget_text_primary">#FEFFFF</color>
+    <color name="widget_text_secondary">#A7A6AE</color>
+    <color name="widget_nutrition_accent">#D4AF37</color>
+    <color name="widget_macro_protein">#6DDEDF</color>
+    <color name="widget_macro_carbs">#30D158</color>
+    <color name="widget_macro_fat">#FFD60A</color>
+</resources>

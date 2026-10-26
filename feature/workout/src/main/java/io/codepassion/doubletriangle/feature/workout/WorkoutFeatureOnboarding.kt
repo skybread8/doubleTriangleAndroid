@@ -30,10 +30,16 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.CenterFocusStrong
+import androidx.compose.material.icons.filled.FormatListNumbered
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.SportsGymnastics
+import androidx.compose.material.icons.filled.Straighten
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.automirrored.filled.CompareArrows
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -99,7 +105,7 @@ internal fun WorkoutFeatureOnboardingDialog(item: WorkoutFeatureOnboarding, gend
 }
 
 @Composable
-private fun OnboardingScaffold(total: Int, step: Int, eyebrow: String, title: String, description: String, icon: @Composable () -> Unit, body: @Composable () -> Unit, onBack: (() -> Unit)?, onNext: () -> Unit, onSkip: () -> Unit) {
+private fun OnboardingScaffold(total: Int, step: Int, eyebrow: String, title: String, description: String, icon: @Composable () -> Unit, body: @Composable (Int) -> Unit, onBack: (() -> Unit)?, onNext: () -> Unit, onSkip: () -> Unit) {
     Column(Modifier.fillMaxSize().padding(top = 20.dp)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("Paso ${step + 1} de $total", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.body2, fontWeight = FontWeight.SemiBold)
@@ -112,7 +118,7 @@ private fun OnboardingScaffold(total: Int, step: Int, eyebrow: String, title: St
         Column(Modifier.weight(1f).padding(horizontal = 24.dp, vertical = 28.dp)) {
             Row(verticalAlignment = Alignment.Top) {
                 icon(); Spacer(Modifier.width(12.dp))
-                Column { Text(eyebrow.uppercase(), color = WildforceThemeTokens.accentGold, fontSize = 12.sp, fontWeight = FontWeight.Bold); Text(title, color = WildforceThemeTokens.textPrimary, fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, fontSize = 24.sp) }
+                Column { Text(eyebrow.uppercase(), color = WildforceThemeTokens.accent, fontSize = 12.sp, fontWeight = FontWeight.Bold); Text(title, color = WildforceThemeTokens.textPrimary, fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, fontSize = 24.sp) }
             }
             Text(description, Modifier.padding(top = 16.dp), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.body1)
             // iOS moves each onboarding page in from below when the step changes.
@@ -125,7 +131,16 @@ private fun OnboardingScaffold(total: Int, step: Int, eyebrow: String, title: St
                         (fadeOut(tween(160)) + slideOutVertically(tween(180)) { -it / 12 })
                 },
                 label = "workout-feature-onboarding-step",
-            ) { body() }
+            ) { targetStep ->
+                // AnimatedContent lays out its content as one animated child.
+                // The exercise step emits several siblings (pills, muscle
+                // strip, labels and tutorial image); keep them in a normal
+                // vertical container so they are measured and placed in
+                // sequence instead of being stacked on top of each other.
+                Column(Modifier.fillMaxWidth()) {
+                    body(targetStep)
+                }
+            }
         }
         Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 24.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (onBack != null) TextButton(onClick = onBack, modifier = Modifier.height(48.dp)) { Text("VOLVER", color = WildforceThemeTokens.textSecondary) }
@@ -144,25 +159,42 @@ private fun ExerciseOnboarding(exercise: ExerciseSummary, gender: String, onDism
     val visual = remember(exercise.imageKey) { ExerciseVisualCatalog.metadata(exercise.imageKey) }
     val tracking = when (exercise.trackingMode.name) { "DurationAndDistance" -> "tiempo, distancia y ritmo"; "Duration" -> "esfuerzos cronometrados"; else -> "series y repeticiones" }
     val (eyebrow, title, description) = when (step) {
-        0 -> Triple("Ejercicio nuevo", exercise.name, guide?.description?.takeIf { it.isNotBlank() } ?: "Conoce el objetivo antes de empezar.")
+        0 -> Triple("Ejercicio nuevo", exerciseDisplayName(exercise.imageKey, exercise.name), guide?.description?.takeIf { it.isNotBlank() } ?: "Conoce el objetivo antes de empezar.")
         1 -> Triple("Cómo lo registrarás", "Regístralo correctamente", "Este ejercicio se sigue mediante $tracking.")
         else -> Triple("Técnica", "Céntrate en las claves", "Muévete con control y prioriza el rango de movimiento limpio.")
     }
-    OnboardingScaffold(3, step, eyebrow, title, description, { HeroIcon { Icon(if (step == 1) Icons.Filled.Tune else Icons.Filled.FitnessCenter, null, tint = WildforceThemeTokens.primaryButtonText) } }, {
+    val heroIcon = when (step) {
+        1 -> Icons.Filled.Tune // iOS `slider.horizontal.3`
+        2 -> Icons.Filled.CenterFocusStrong // iOS `scope`
+        else -> Icons.Filled.SportsGymnastics // iOS exercise-category symbol fallback
+    }
+    OnboardingScaffold(3, step, eyebrow, title, description, { HeroIcon { Icon(heroIcon, null, tint = WildforceThemeTokens.primaryButtonText) } }, { _ ->
         when (step) {
             0 -> {
                 Row(Modifier.padding(top = 22.dp).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) { listOf(exercise.trackingMode.name, "${exercise.sets} series", if (exercise.blockType == WorkoutBlockType.Superset) "Superserie" else "Bilateral").forEach { Pill(it) } }
                 val muscles = visual?.primary.orEmpty() + visual?.secondary.orEmpty()
                 if (muscles.isNotEmpty()) { Text("MÚSCULOS", Modifier.padding(top = 24.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold); Row(Modifier.padding(top = 10.dp).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) { muscles.take(4).forEach { muscle -> Column(horizontalAlignment = Alignment.CenterHorizontally) { androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(muscle.drawable), muscle.label, Modifier.size(58.dp)); Text(muscle.label, color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption) } } } }
-                RemoteTrainingImage(exerciseTutorialImageUrl(exercise.imageKey), "Tutorial de ${exercise.name}", Modifier.fillMaxWidth().height(190.dp).padding(top = 22.dp).clip(RoundedCornerShape(22.dp)), contentScale = androidx.compose.ui.layout.ContentScale.Fit)
+                RemoteTrainingImage(exerciseTutorialImageUrl(exercise.imageKey), "Tutorial de ${exerciseDisplayName(exercise.imageKey, exercise.name)}", Modifier.fillMaxWidth().height(190.dp).padding(top = 22.dp).clip(RoundedCornerShape(22.dp)), contentScale = androidx.compose.ui.layout.ContentScale.Fit)
             }
-            1 -> Row(Modifier.padding(top = 42.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { InfoCard("SEGUIMIENTO", tracking); InfoCard("OBJETIVO", exercise.reps); InfoCard("CARGA", if (exercise.targetWeightKg != null) "Peso" else "Peso corporal") }
-            else -> Column(Modifier.padding(top = 28.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) { ExerciseVisualCatalog.equipmentFor(exercise.imageKey).forEach { Pill(it) }; (guide?.instructions?.take(3).orEmpty() + guide?.tips?.take(1).orEmpty()).ifEmpty { listOf("Mantén una postura estable.", "Completa el recorrido sin rebotes.") }.forEachIndexed { index, cue -> Row { Text(if (index < 3) "${index + 1}" else "💡", color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold); Text(cue, Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary) } } }
+            1 -> {
+                val isUnilateral = ExerciseVisualCatalog.isUnilateral(exercise.imageKey)
+                Column(Modifier.padding(top = 42.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        InfoCard(Icons.Filled.Tune, "SEGUIMIENTO", tracking, Modifier.weight(1f))
+                        InfoCard(Icons.Filled.CenterFocusStrong, "OBJETIVO", exercise.reps, Modifier.weight(1f))
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        InfoCard(if (isUnilateral) Icons.Filled.SwapHoriz else Icons.AutoMirrored.Filled.CompareArrows, "LADOS", if (isUnilateral) "Ambos lados" else "Esfuerzo compartido", Modifier.weight(1f))
+                        InfoCard(if (exercise.targetWeightKg != null) Icons.Filled.MonitorWeight else Icons.Filled.Straighten, "CARGA", if (exercise.targetWeightKg != null) "Peso" else "Peso corporal", Modifier.weight(1f))
+                    }
+                }
+            }
+            else -> Column(Modifier.padding(top = 28.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) { ExerciseVisualCatalog.equipmentFor(exercise.imageKey).forEach { Pill(it) }; (guide?.instructions?.take(3).orEmpty() + guide?.tips?.take(1).orEmpty()).ifEmpty { listOf("Mantén una postura estable.", "Completa el recorrido sin rebotes.") }.forEachIndexed { index, cue -> Row(verticalAlignment = Alignment.CenterVertically) { if (index < 3) Icon(Icons.Filled.FormatListNumbered, contentDescription = null, tint = WildforceThemeTokens.accent) else Icon(Icons.Filled.Lightbulb, contentDescription = null, tint = Color(0xFFFFCC00)); Text(cue, Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary) } } }
         }
     }, if (step > 0) {{ step-- }} else null, { if (step == 2) onDismiss() else step++ }, onDismiss)
 }
 
-@Composable private fun InfoCard(title: String, value: String) = Column(Modifier.width(104.dp).clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.background).padding(10.dp)) { Text(title, color = WildforceThemeTokens.textSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold); Text(value, Modifier.padding(top = 5.dp), color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.body2, fontWeight = FontWeight.SemiBold) }
+@Composable private fun InfoCard(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, value: String, modifier: Modifier = Modifier) = Column(modifier.clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.background).padding(10.dp)) { Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.accent); Text(title, Modifier.padding(top = 12.dp), color = WildforceThemeTokens.textSecondary, fontSize = 10.sp, fontWeight = FontWeight.Bold); Text(value, Modifier.padding(top = 5.dp), color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.body2, fontWeight = FontWeight.SemiBold) }
 @Composable private fun Pill(value: String) = Text(value, Modifier.clip(RoundedCornerShape(99.dp)).background(WildforceThemeTokens.background).padding(horizontal = 12.dp, vertical = 8.dp), color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold)
 
 @Composable
@@ -171,17 +203,17 @@ private fun SetStyleOnboarding(exercise: ExerciseSummary, onDismiss: () -> Unit)
     val style = exercise.setStyle
     val intro = mapOf(ExerciseSetStyle.Warmup to "Esta serie te prepara para el trabajo duro.", ExerciseSetStyle.TopSetBackoff to "Harás una serie más intensa y después trabajo de descarga.", ExerciseSetStyle.AscendingPyramid to "Las series aumentan la carga progresivamente.", ExerciseSetStyle.DropSet to "Tras bajar rápido el peso, prolongarás el esfuerzo.", ExerciseSetStyle.RestPause to "Una serie dura se divide en mini-esfuerzos con descansos breves.", ExerciseSetStyle.Intervals to "Alternarás trabajo y recuperación planificados.", ExerciseSetStyle.Tempo to "La velocidad y el control importan tanto como las repeticiones.").getOrDefault(style, "Seguirás un patrón de trabajo constante y repetible.")
     val body = if (step == 1) "Sigue el patrón indicado y registra la serie como siempre." else "Ayuda a repetir, comparar y progresar tu rendimiento."
-    OnboardingScaffold(3, step, "Nueva indicación", style.label, if (step == 0) intro else body, { HeroIcon { Text(style.glyph, color = WildforceThemeTokens.primaryButtonText, fontSize = 24.sp, fontWeight = FontWeight.Bold) } }, {
-        if (step > 0) Column(Modifier.padding(top = 34.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) { Text(if (step == 1) "Cómo hacerlo" else "Por qué se usa", color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold); Text("${exercise.sets} series · ${exercise.reps}", Modifier.padding(top = 16.dp), color = WildforceThemeTokens.textSecondary); Row(Modifier.padding(top = 18.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) { repeat(exercise.sets.coerceAtMost(6)) { index -> Box(Modifier.size(34.dp).clip(RoundedCornerShape(10.dp)).background(if (index == 0) WildforceThemeTokens.accentGold else WildforceThemeTokens.textPrimary.copy(alpha = .12f))) } } }
+    OnboardingScaffold(3, step, "Nueva indicación", style.label, if (step == 0) intro else body, { HeroIcon { Icon(setStyleIcon(style), contentDescription = null, modifier = Modifier.size(28.dp), tint = WildforceThemeTokens.primaryButtonText) } }, { _ ->
+        if (step > 0) Column(Modifier.padding(top = 34.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) { Text(if (step == 1) "Cómo hacerlo" else "Por qué se usa", color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold); Text("${exercise.sets} series · ${exercise.reps}", Modifier.padding(top = 16.dp), color = WildforceThemeTokens.textSecondary); Row(Modifier.padding(top = 18.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) { repeat(exercise.sets.coerceAtMost(6)) { index -> Box(Modifier.size(34.dp).clip(RoundedCornerShape(10.dp)).background(if (index == 0) WildforceThemeTokens.accent else WildforceThemeTokens.textPrimary.copy(alpha = .12f))) } } }
     }, if (step > 0) {{ step-- }} else null, { if (step == 2) onDismiss() else step++ }, onDismiss)
 }
 
 @Composable
 private fun SupersetOnboarding(item: WorkoutFeatureOnboarding.Superset, gender: String, onDismiss: () -> Unit) {
     var step by remember { mutableIntStateOf(0) }
-    val names = item.exercises.take(2).joinToString(" y ") { it.name }
-    OnboardingScaffold(2, step, if (step == 0) "Nuevo flujo" else "Cómo funciona", if (step == 0) "Superserie" else "Pasa de un ejercicio a otro", if (step == 0) "Este bloque une $names en un flujo de ${item.rounds} rondas." else "Completa los ejercicios en orden antes de reiniciar la ronda.", { HeroIcon { Icon(Icons.Filled.Repeat, null, tint = WildforceThemeTokens.primaryButtonText) } }, {
-        if (step == 0) Column(Modifier.padding(top = 28.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) { item.exercises.take(2).forEachIndexed { index, exercise -> Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.textPrimary.copy(alpha = .08f)).padding(10.dp), verticalAlignment = Alignment.CenterVertically) { RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exercise.name, Modifier.size(width = 56.dp, height = 68.dp).clip(RoundedCornerShape(10.dp))); Column(Modifier.padding(start = 12.dp)) { Text("A${index + 1}", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption); Text(exercise.name, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold) } } }; Pill("Repite durante ${item.rounds} rondas"); Pill(if ((item.restSeconds ?: 0) > 0) "Descansa ${item.restSeconds} s tras cada ronda" else "Descansa tras cada ronda") } else Column(Modifier.padding(top = 44.dp), verticalArrangement = Arrangement.spacedBy(30.dp)) { Tip("Mantén el ritmo", "Pasa al siguiente ejercicio sin perder la concentración."); Tip("Piensa en rondas", "Cada recorrido completo del bloque cuenta como una ronda."); Tip("Descansa al final", if ((item.restSeconds ?: 0) > 0) "Después de ambos ejercicios descansa ${item.restSeconds} segundos." else "Descansa después de completar la ronda.") }
+    val names = item.exercises.take(2).joinToString(" y ") { exerciseDisplayName(it.imageKey, it.name) }
+    OnboardingScaffold(2, step, if (step == 0) "Nuevo flujo" else "Cómo funciona", if (step == 0) "Superserie" else "Pasa de un ejercicio a otro", if (step == 0) "Este bloque une $names en un flujo de ${item.rounds} rondas." else "Completa los ejercicios en orden antes de reiniciar la ronda.", { HeroIcon { Icon(Icons.Filled.Repeat, null, tint = WildforceThemeTokens.primaryButtonText) } }, { _ ->
+        if (step == 0) Column(Modifier.padding(top = 28.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) { item.exercises.take(2).forEachIndexed { index, exercise -> val displayName = exerciseDisplayName(exercise.imageKey, exercise.name); Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.textPrimary.copy(alpha = .08f)).padding(10.dp), verticalAlignment = Alignment.CenterVertically) { RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), displayName, Modifier.size(width = 56.dp, height = 68.dp).clip(RoundedCornerShape(10.dp))); Column(Modifier.padding(start = 12.dp)) { Text("A${index + 1}", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption); Text(displayName, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold) } } }; Pill("Repite durante ${item.rounds} rondas"); Pill(if ((item.restSeconds ?: 0) > 0) "Descansa ${item.restSeconds} s tras cada ronda" else "Descansa tras cada ronda") } else Column(Modifier.padding(top = 44.dp), verticalArrangement = Arrangement.spacedBy(30.dp)) { Tip("Mantén el ritmo", "Pasa al siguiente ejercicio sin perder la concentración."); Tip("Piensa en rondas", "Cada recorrido completo del bloque cuenta como una ronda."); Tip("Descansa al final", if ((item.restSeconds ?: 0) > 0) "Después de ambos ejercicios descansa ${item.restSeconds} segundos." else "Descansa después de completar la ronda.") }
     }, if (step > 0) {{ step-- }} else null, { if (step == 1) onDismiss() else step++ }, onDismiss)
 }
 @Composable private fun Tip(title: String, detail: String) = Column { Text(title, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold); Text(detail, Modifier.padding(top = 4.dp), color = WildforceThemeTokens.textSecondary) }

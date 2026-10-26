@@ -10,10 +10,10 @@ import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Mass
-import java.time.LocalTime
+import java.time.LocalDate
 import java.time.ZoneId
 
-/** Publishes the app's logged meals using stable client IDs, so edits replace the previous record. */
+/** Publishes the same daily macro totals that iOS writes to HealthKit. */
 internal object HealthConnectNutritionSync {
     private const val PREFS = "wildforce_nutrition_health"
     private const val PENDING_KEY = "nutrition_sync_pending"
@@ -27,20 +27,20 @@ internal object HealthConnectNutritionSync {
             if (HealthPermission.getWritePermission(NutritionRecord::class) !in granted) return@runCatching false
             val canReadNutrition = HealthPermission.getReadPermission(NutritionRecord::class) in granted
             val zone = ZoneId.systemDefault()
-            val records = entries.map { entry ->
-                val start = entry.loggedDate.atTime(timeFor(entry.type)).atZone(zone).toInstant()
+            val records = aggregateNutritionByDay(entries).map { day ->
+                val start = day.date.atStartOfDay(zone).toInstant()
                 NutritionRecord(
                     startTime = start,
                     startZoneOffset = zone.rules.getOffset(start),
-                    endTime = start.plusSeconds(60),
-                    endZoneOffset = zone.rules.getOffset(start),
-                    metadata = Metadata.manualEntry("wildforce-nutrition-${entry.id}"),
-                    name = entry.name.take(100),
-                    energy = Energy.kilocalories(entry.calories.toDouble().coerceAtLeast(0.0)),
-                    protein = Mass.grams(entry.protein.toDouble().coerceAtLeast(0.0)),
-                    totalCarbohydrate = Mass.grams(entry.carbs.toDouble().coerceAtLeast(0.0)),
-                    totalFat = Mass.grams(entry.fat.toDouble().coerceAtLeast(0.0)),
-                    mealType = entry.type.toHealthConnectMealType(),
+                    endTime = day.date.plusDays(1).atStartOfDay(zone).toInstant().minusSeconds(1),
+                    endZoneOffset = zone.rules.getOffset(day.date.plusDays(1).atStartOfDay(zone).toInstant().minusSeconds(1)),
+                    metadata = Metadata.manualEntry("wildforce-nutrition-${day.date}"),
+                    name = "Wildforce",
+                    energy = Energy.kilocalories(day.calories.toDouble().coerceAtLeast(0.0)),
+                    protein = Mass.grams(day.protein.toDouble().coerceAtLeast(0.0)),
+                    totalCarbohydrate = Mass.grams(day.carbs.toDouble().coerceAtLeast(0.0)),
+                    totalFat = Mass.grams(day.fat.toDouble().coerceAtLeast(0.0)),
+                    mealType = HealthMealType.MEAL_TYPE_UNKNOWN,
                 )
             }
             // Replace records previously written by this app before inserting
@@ -83,18 +83,26 @@ internal object HealthConnectNutritionSync {
 
     fun hasPendingSync(context: Context): Boolean =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(PENDING_KEY, false)
-
-    private fun timeFor(type: io.codepassion.doubletriangle.nutrition.MealType): LocalTime = when (type) {
-        io.codepassion.doubletriangle.nutrition.MealType.Breakfast -> LocalTime.of(8, 0)
-        io.codepassion.doubletriangle.nutrition.MealType.Lunch -> LocalTime.of(13, 0)
-        io.codepassion.doubletriangle.nutrition.MealType.Dinner -> LocalTime.of(20, 0)
-        else -> LocalTime.of(16, 0)
-    }
-
-    private fun io.codepassion.doubletriangle.nutrition.MealType.toHealthConnectMealType(): Int = when (this) {
-        io.codepassion.doubletriangle.nutrition.MealType.Breakfast -> HealthMealType.MEAL_TYPE_BREAKFAST
-        io.codepassion.doubletriangle.nutrition.MealType.Lunch -> HealthMealType.MEAL_TYPE_LUNCH
-        io.codepassion.doubletriangle.nutrition.MealType.Dinner -> HealthMealType.MEAL_TYPE_DINNER
-        io.codepassion.doubletriangle.nutrition.MealType.Snack -> HealthMealType.MEAL_TYPE_SNACK
-    }
 }
+
+internal data class NutritionSyncDay(
+    val date: LocalDate,
+    val calories: Int,
+    val protein: Int,
+    val carbs: Int,
+    val fat: Int,
+)
+
+/** The iOS HealthKit bridge publishes one aggregate sample for each calendar day. */
+internal fun aggregateNutritionByDay(entries: List<MealLog>): List<NutritionSyncDay> =
+    entries.groupBy { it.loggedDate }
+        .map { (date, dayEntries) ->
+            NutritionSyncDay(
+                date = date,
+                calories = dayEntries.sumOf { it.calories },
+                protein = dayEntries.sumOf { it.protein },
+                carbs = dayEntries.sumOf { it.carbs },
+                fat = dayEntries.sumOf { it.fat },
+            )
+        }
+        .sortedBy { it.date }

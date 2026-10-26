@@ -46,6 +46,9 @@ dependencies {
     implementation(project(":feature:workout"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.core:core-ktx:1.18.0")
+    // The code scanner's ML Kit graph declares an older AppCompat baseline;
+    // keep the library graph on the same version used by the app module.
+    implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material:material")
     implementation("androidx.compose.material:material-icons-extended")
@@ -54,6 +57,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.10.0")
     implementation("com.android.billingclient:billing-ktx:8.2.1")
     implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
+    // Same foreground-person segmentation used by iOS BodyProgressCompareView
+    // for its white, gradient and blurred background treatments.
+    implementation("com.google.mlkit:segmentation-selfie:16.0.0-beta6")
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation("junit:junit:4.13.2")
 }

@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.Handler
 import android.os.Looper
+import io.codepassion.doubletriangle.core.model.executionExercises
 
 internal class WorkoutForegroundService : Service() {
     private val handler = Handler(Looper.getMainLooper())
@@ -38,6 +39,12 @@ internal class WorkoutForegroundService : Service() {
                 return
             }
             val appForeground = getSharedPreferences("wildforce_notification_settings", 0).getBoolean("app_foreground", false)
+            val notificationsEnabled = WorkoutNotificationPreferences.enabled(this@WorkoutForegroundService)
+            val restAlertsEnabled = WorkoutNotificationPreferences.restAlertsEnabled(this@WorkoutForegroundService)
+            // A foreground-service notification is mandatory while a workout
+            // runs. The preference below controls extra progress/rest updates;
+            // cancelling the required foreground notification would terminate
+            // the Android equivalent of iOS's ongoing Live Activity.
 
             // The foreground service is the authoritative owner of notification
             // actions. Lifecycle flags can be stale while the app backgrounds.
@@ -54,6 +61,10 @@ internal class WorkoutForegroundService : Service() {
             val now = System.currentTimeMillis()
             val storedRest = snapshot.restRemaining
             val currentExerciseIndex = snapshot.exerciseIndex
+            val currentExerciseName = snapshot.editableBlocks
+                ?.flatMap { it.executionExercises() }
+                ?.getOrNull(currentExerciseIndex)
+                ?.let { exerciseDisplayName(it.imageKey, it.name) }
 
             if (storedRest != null && storedRest > 0 && !restPausedByAction) {
                 restWasActive = true
@@ -77,7 +88,7 @@ internal class WorkoutForegroundService : Service() {
                             restContext = null,
                         ),
                     )
-                    if (!appForeground) {
+                    if (!appForeground && notificationsEnabled && restAlertsEnabled) {
                         WorkoutActiveNotification.showRestCompletedInPlace(
                             this@WorkoutForegroundService,
                             currentTitle,
@@ -86,11 +97,12 @@ internal class WorkoutForegroundService : Service() {
                         )
                         restCompletionShownAtMillis = now
                     }
-                } else if (!appForeground && remaining != lastNotifiedRemaining) {
+                } else if (!appForeground && notificationsEnabled && restAlertsEnabled && remaining != lastNotifiedRemaining) {
                     lastNotifiedRemaining = remaining
                     WorkoutActiveNotification.show(
                         context = this@WorkoutForegroundService,
                         title = currentTitle,
+                        detail = currentExerciseName?.let { "$it · descanso" } ?: "Descanso",
                         progress = remaining,
                         progressMax = snapshot.restInitialSeconds,
                         type = WorkoutNotificationType.REST,
@@ -114,13 +126,15 @@ internal class WorkoutForegroundService : Service() {
                         lastObservedRest = null
                         lastNotifiedRemaining = 0
                         WorkoutSessionStore.save(this@WorkoutForegroundService, id, snapshot.copy(restRemaining = null, restBetweenExercises = false))
-                        WorkoutActiveNotification.showRestCompletedInPlace(this@WorkoutForegroundService, currentTitle, currentExerciseIndex, totalExercises)
-                    } else if (lastNotifiedRemaining != -1) {
+                        if (notificationsEnabled && restAlertsEnabled) {
+                            WorkoutActiveNotification.showRestCompletedInPlace(this@WorkoutForegroundService, currentTitle, currentExerciseIndex, totalExercises)
+                        }
+                    } else if (notificationsEnabled && lastNotifiedRemaining != -1) {
                         lastNotifiedRemaining = -1
                         WorkoutActiveNotification.show(
                             context = this@WorkoutForegroundService,
                             title = currentTitle,
-                            detail = "A por la siguiente serie",
+                            detail = currentExerciseName ?: "A por la siguiente serie",
                             progress = currentExerciseIndex,
                             progressMax = totalExercises,
                             type = WorkoutNotificationType.PROGRESS,

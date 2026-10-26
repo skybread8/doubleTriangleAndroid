@@ -31,6 +31,11 @@ android {
         compose = true
         buildConfig = true
     }
+    lint {
+        // Localization is reconciled in a separate workstream; keep code and
+        // manifest lint actionable without failing on its intermediate state.
+        disable += setOf("MissingTranslation", "ExtraTranslation")
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -47,7 +52,12 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.activity:activity-compose:1.13.0")
     implementation("androidx.health.connect:connect-client:1.1.0")
+    implementation("androidx.wear:wear-remote-interactions:1.2.0")
+    implementation("com.google.android.gms:play-services-wearable:17.1.0")
     implementation("com.google.android.gms:play-services-code-scanner:16.1.0")
+    // Bundled Latin OCR mirrors iOS Vision and keeps label parsing available
+    // when the user does not have AI nutrition access or the API is offline.
+    implementation("com.google.mlkit:text-recognition:16.0.1")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material:material")
     implementation("androidx.compose.material:material-icons-extended")

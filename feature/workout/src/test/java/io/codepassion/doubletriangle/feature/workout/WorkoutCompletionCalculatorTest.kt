@@ -9,10 +9,18 @@ import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import java.time.DayOfWeek
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WorkoutCompletionCalculatorTest {
+    @Test
+    fun `next plan generation follows the ios ai coach gate`() {
+        assertEquals(true, shouldOfferNextPlan(isPlanCompleted = true, canGenerateNextPlan = true))
+        assertEquals(false, shouldOfferNextPlan(isPlanCompleted = true, canGenerateNextPlan = false))
+        assertEquals(false, shouldOfferNextPlan(isPlanCompleted = false, canGenerateNextPlan = true))
+    }
+
     @Test
     fun `completion progress splits workout plan and mesocycle xp like ios`() {
         val progress = CompletionProgressStore.calculate(
@@ -71,12 +79,51 @@ class WorkoutCompletionCalculatorTest {
     }
 
     @Test fun effortScaleRecognizesAllFiveFeedbackLevels() {
-        val stats = mapOf(0 to ExerciseSessionStats(3, 24, 50.0, 1_200.0), 1 to ExerciseSessionStats(3, 24, 0.0, 0.0))
+        val stats = mapOf(0 to ExerciseSessionStats(3, 24, 50.0, 1_200.0), 1 to ExerciseSessionStats(3, 27, 0.0, 0.0))
         val veryEasy = WorkoutCompletionCalculator.score(workout, stats, mapOf(0 to "MUY FÁCIL", 1 to "MUY FÁCIL"))
         val right = WorkoutCompletionCalculator.score(workout, stats, mapOf(0 to "JUSTO", 1 to "JUSTO"))
         val veryHard = WorkoutCompletionCalculator.score(workout, stats, mapOf(0 to "MUY DIFÍCIL", 1 to "MUY DIFÍCIL"))
         assertTrue(veryEasy < right)
         assertTrue(right > veryHard)
+    }
+
+    @Test fun heartRateEffortUsesTheIosFifteenPercentWeightWhenAvailable() {
+        val stats = mapOf(0 to ExerciseSessionStats(3, 24, 50.0, 1_200.0), 1 to ExerciseSessionStats(3, 27, 0.0, 0.0))
+        val withoutHeartRate = WorkoutCompletionCalculator.score(workout, stats, mapOf(0 to "JUSTO", 1 to "JUSTO"))
+        val withHighHeartRate = WorkoutCompletionCalculator.score(workout.copy(averageHeartRate = 190.0), stats, mapOf(0 to "JUSTO", 1 to "JUSTO"))
+
+        assertEquals(100.0, withoutHeartRate, 0.01)
+        assertEquals(97.3, withHighHeartRate, 0.01)
+    }
+
+    @Test fun heartRateEffortUsesTheUsersAgeForEstimatedMaximum() {
+        val stats = mapOf(0 to ExerciseSessionStats(3, 24, 50.0, 1_200.0), 1 to ExerciseSessionStats(3, 27, 0.0, 0.0))
+        val workoutWithHeartRate = workout.copy(averageHeartRate = 170.0)
+        val younger = WorkoutCompletionCalculator.score(workoutWithHeartRate, stats, emptyMap(), userAgeYears = 20)
+        val older = WorkoutCompletionCalculator.score(workoutWithHeartRate, stats, emptyMap(), userAgeYears = 60)
+
+        assertTrue(older < younger)
+    }
+
+    @Test fun prescriptionMidpointRoundsLikeIos() {
+        val ranged = workout.copy(
+            exercises = listOf(
+                workout.exercises.first().copy(sets = 1, reps = "8-9"),
+            ),
+        )
+
+        val exact = WorkoutCompletionCalculator.score(
+            ranged,
+            mapOf(0 to ExerciseSessionStats(sets = 1, totalReps = 9, maxWeightKg = 0.0, volumeKg = 0.0)),
+            emptyMap(),
+        )
+        val truncated = WorkoutCompletionCalculator.score(
+            ranged,
+            mapOf(0 to ExerciseSessionStats(sets = 1, totalReps = 8, maxWeightKg = 0.0, volumeKg = 0.0)),
+            emptyMap(),
+        )
+
+        assertTrue(exact > truncated)
     }
 
     @Test fun warmupAndCooldownDoNotLowerTheIosWorkoutScore() {
@@ -115,6 +162,7 @@ class WorkoutCompletionCalculatorTest {
         assertEquals("Tras el esfuerzo principal, baja el peso y continúa 3 veces casi sin descanso.", styleParameterDetails(ExerciseSetStyle.DropSet, parameters).first().explanation)
         assertEquals("Solo en la última serie", setStyleScopeLabel(ExerciseSetStyle.DropSet, 3, appliesToFinalSetOnly = true))
         assertEquals("Top set primero", setStyleScopeLabel(ExerciseSetStyle.TopSetBackoff, 4, appliesToFinalSetOnly = false))
+        assertNull(setStyleScopeLabel(ExerciseSetStyle.DropSet, 1, appliesToFinalSetOnly = true))
     }
 
     @Test fun durationParserSeparatesTimedWorkFromRepetitions() {

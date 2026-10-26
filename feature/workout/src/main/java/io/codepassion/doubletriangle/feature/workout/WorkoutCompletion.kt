@@ -3,6 +3,7 @@ package io.codepassion.doubletriangle.feature.workout
 import android.content.Context
 import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
+import kotlin.math.roundToInt
 import java.time.LocalDate
 
 internal data class CompletionProgress(
@@ -39,7 +40,7 @@ internal object WorkoutCompletionCalculator {
     const val PLAN_XP = 50
     const val MESOCYCLE_XP = 100
 
-    fun score(workout: WorkoutDaySummary, stats: Map<Int, ExerciseSessionStats>, feedback: Map<Int, String>): Double {
+    fun score(workout: WorkoutDaySummary, stats: Map<Int, ExerciseSessionStats>, feedback: Map<Int, String>, userAgeYears: Int = 30): Double {
         val scoredExercises = workout.exercises.withIndex().filter { it.value.blockType !in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown) }
         if (scoredExercises.isEmpty()) return 0.0
         val completion = scoredExercises.count { (stats[it.index]?.sets ?: 0) > 0 }.toDouble() / scoredExercises.size
@@ -74,9 +75,34 @@ internal object WorkoutCompletionCalculator {
                 else -> 0.85
             }
         }
-        val weighted = 0.30 * completion + 0.35 * adherence + if (effortValues.isNotEmpty()) 0.20 * effortValues.average() else 0.0
-        val availableWeight = 0.30 + 0.35 + if (effortValues.isNotEmpty()) 0.20 else 0.0
+        val heartRateEffort = heartRateEffortScore(workout, userAgeYears)
+        val weighted = 0.30 * completion + 0.35 * adherence +
+            (if (effortValues.isNotEmpty()) 0.20 * effortValues.average() else 0.0) +
+            (if (heartRateEffort != null) 0.15 * heartRateEffort else 0.0)
+        val availableWeight = 0.30 + 0.35 +
+            (if (effortValues.isNotEmpty()) 0.20 else 0.0) +
+            (if (heartRateEffort != null) 0.15 else 0.0)
         return ((weighted / availableWeight).coerceIn(0.0, 1.0) * 1_000).toInt() / 10.0
+    }
+
+    /** Matches iOS WorkoutScore.heartRateEffortScore when a watch/Health source supplied an average. */
+    private fun heartRateEffortScore(workout: WorkoutDaySummary, userAgeYears: Int): Double? {
+        val average = workout.averageHeartRate?.takeIf { it > 0 } ?: return null
+        val estimatedMax = maxOf(150.0, 208.0 - (0.7 * userAgeYears.coerceIn(0, 120)))
+        val ratio = average / estimatedMax
+        return when {
+            ratio < 0.50 -> 0.65
+            ratio < 0.60 -> interpolate(ratio, 0.50, 0.60, 0.65, 0.78)
+            ratio < 0.72 -> interpolate(ratio, 0.60, 0.72, 0.78, 0.94)
+            ratio < 0.85 -> interpolate(ratio, 0.72, 0.85, 0.94, 1.0)
+            ratio < 0.93 -> interpolate(ratio, 0.85, 0.93, 1.0, 0.88)
+            else -> 0.82
+        }
+    }
+
+    private fun interpolate(value: Double, inputStart: Double, inputEnd: Double, outputStart: Double, outputEnd: Double): Double {
+        val progress = ((value - inputStart) / (inputEnd - inputStart)).coerceIn(0.0, 1.0)
+        return outputStart + (outputEnd - outputStart) * progress
     }
 
     fun records(context: Context, workout: WorkoutDaySummary, stats: Map<Int, ExerciseSessionStats>): List<ExerciseRecordEvent> = buildList {
@@ -94,10 +120,10 @@ internal object WorkoutCompletionCalculator {
             val previousWeight = previous.maxOfOrNull { it.maxWeightKg } ?: 0.0
             val previousVolume = previous.maxOfOrNull { it.volumeKg } ?: 0.0
             if (current.maxWeightKg > 0 && current.maxWeightKg > previousWeight) {
-                add(ExerciseRecordEvent(exercise.name, if (previousWeight > 0) "MEJOR PESO" else "PRIMER REGISTRO DE PESO", previousWeight, current.maxWeightKg, "kg"))
+                add(ExerciseRecordEvent(exerciseDisplayName(exercise.imageKey, exercise.name), if (previousWeight > 0) "MEJOR PESO" else "PRIMER REGISTRO DE PESO", previousWeight, current.maxWeightKg, "kg"))
             }
             if (current.volumeKg > 0 && current.volumeKg > previousVolume) {
-                add(ExerciseRecordEvent(exercise.name, if (previousVolume > 0) "MEJOR VOLUMEN" else "PRIMER REGISTRO DE VOLUMEN", previousVolume, current.volumeKg, "kg"))
+                add(ExerciseRecordEvent(exerciseDisplayName(exercise.imageKey, exercise.name), if (previousVolume > 0) "MEJOR VOLUMEN" else "PRIMER REGISTRO DE VOLUMEN", previousVolume, current.volumeKg, "kg"))
             }
         }
     }
@@ -119,7 +145,7 @@ internal object WorkoutCompletionCalculator {
     private fun targetReps(value: String): Int {
         val values = Regex("\\d+").findAll(value).mapNotNull { it.value.toIntOrNull() }.toList()
         return when {
-            values.size >= 2 && value.contains('-') -> ((values[0] + values[1]) / 2.0).toInt()
+            values.size >= 2 && value.contains('-') -> ((values[0] + values[1]) / 2.0).roundToInt()
             values.isNotEmpty() -> values[0]
             else -> 1
         }

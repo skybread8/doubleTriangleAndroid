@@ -47,6 +47,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -83,6 +86,9 @@ internal enum class LogMethod(val title: String, val description: String) {
     Manual("Entrada manual", "Introduce alimento, cantidad y macros"),
 }
 
+/** AI-backed nutrition methods are the same two providers gated by iOS. */
+internal fun LogMethod.requiresAiNutritionAccess(): Boolean = this == LogMethod.Describe || this == LogMethod.Photo
+
 @Composable
 internal fun NutritionLogFlow(
     selectedDate: LocalDate,
@@ -91,12 +97,15 @@ internal fun NutritionLogFlow(
     initialMethod: LogMethod? = null,
     initialTitle: String? = null,
     recent: List<MealLog>,
+    aiNutritionAccess: Boolean = true,
+    onPremiumOffer: () -> Unit = {},
     onDismiss: () -> Unit,
     onSave: (MealLog) -> Unit,
 ) {
     val context = LocalContext.current
     var mealType by remember { mutableStateOf(initialType) }
     var method by remember { mutableStateOf<LogMethod?>(initialMethod ?: if (initialEntry != null) LogMethod.Manual else null) }
+    var mealTypeMenuExpanded by remember { mutableStateOf(false) }
     var photoUri by remember { mutableStateOf<Uri?>(null) }
     var photoBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var pendingCameraPhoto by remember { mutableStateOf<File?>(null) }
@@ -203,9 +212,40 @@ internal fun NutritionLogFlow(
                         }
                     }
                     item {
-                        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            MealType.entries.forEach { type ->
-                                Text(type.title, Modifier.background(if (mealType == type) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = .09f), CircleShape).clickable { mealType = type }.padding(horizontal = 13.dp, vertical = 8.dp), color = if (mealType == type) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold)
+                        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.End) {
+                            // iOS uses Picker(.menu) here; keep meal type compact and
+                            // out of the primary provider grid instead of rendering
+                            // Android-only horizontal chips.
+                            Row(
+                                Modifier
+                                    .heightIn(min = 48.dp)
+                                    .clickable { mealTypeMenuExpanded = !mealTypeMenuExpanded }
+                                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text("Tipo de comida", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
+                                    Text(mealType.title, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
+                                }
+                                Icon(if (mealTypeMenuExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, contentDescription = "Seleccionar tipo de comida", tint = WildforceThemeTokens.textSecondary)
+                            }
+                            if (mealTypeMenuExpanded) {
+                                Surface(
+                                    modifier = Modifier
+                                        .widthIn(min = 220.dp)
+                                        .padding(top = 4.dp),
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = WildforceThemeTokens.surfaceElevated,
+                                    elevation = 8.dp,
+                                ) {
+                                    Column(Modifier.padding(vertical = 4.dp)) {
+                                    MealType.entries.forEach { type ->
+                                        DropdownMenuItem(onClick = { mealType = type; mealTypeMenuExpanded = false }) {
+                                            Text(type.title, color = WildforceThemeTokens.textPrimary, fontWeight = if (mealType == type) FontWeight.SemiBold else FontWeight.Normal)
+                                        }
+                                    }
+                                    }
+                                }
                             }
                         }
                     }
@@ -218,9 +258,9 @@ internal fun NutritionLogFlow(
                                     .addOnFailureListener { method = LogMethod.Barcode }
                             }
                             // iOS: text.bubble
-                            PrimaryMethod(LogMethod.Describe, Icons.Filled.ChatBubbleOutline, Modifier.weight(1f)) { method = LogMethod.Describe }
+                            PrimaryMethod(LogMethod.Describe, Icons.Filled.ChatBubbleOutline, Modifier.weight(1f), locked = !aiNutritionAccess) { if (aiNutritionAccess) method = LogMethod.Describe else onPremiumOffer() }
                             // iOS: camera.viewfinder
-                            PrimaryMethod(LogMethod.Photo, Icons.Filled.CameraAlt, Modifier.weight(1f)) { choosePhoto(LogMethod.Photo) }
+                            PrimaryMethod(LogMethod.Photo, Icons.Filled.CameraAlt, Modifier.weight(1f), locked = !aiNutritionAccess) { if (aiNutritionAccess) choosePhoto(LogMethod.Photo) else onPremiumOffer() }
                         }
                     }
                     cameraError?.let { message ->
@@ -305,9 +345,23 @@ internal fun NutritionLogFlow(
 }
 
 @Composable
-private fun PrimaryMethod(method: LogMethod, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier, onClick: () -> Unit) {
+private fun PrimaryMethod(method: LogMethod, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier, locked: Boolean = false, onClick: () -> Unit) {
     Column(modifier.height(108.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = .08f), RoundedCornerShape(14.dp)).then(methodPressModifier(onClick)).padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Icon(icon, null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(28.dp))
+        // iOS keeps the provider's SF Symbol visible and overlays a small lock
+        // in the top-right corner when the method is premium. Replacing the
+        // symbol with a large lock made the Android chooser semantically and
+        // visually different from NutritionMethodButton.
+        Box(Modifier.fillMaxWidth().height(36.dp)) {
+            Icon(icon, null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.align(Alignment.Center).size(28.dp))
+            if (locked) {
+                Icon(
+                    Icons.Filled.Lock,
+                    contentDescription = "Premium",
+                    tint = WildforceThemeTokens.textSecondary,
+                    modifier = Modifier.align(Alignment.TopEnd).size(14.dp),
+                )
+            }
+        }
         Text(method.title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
     }
 }
@@ -439,7 +493,7 @@ private fun RecentPicker(
             val selected = entry.id in selectedIds
             Row(
                 Modifier.fillMaxWidth()
-                    .background(if (selected) NutritionCoral.copy(alpha = .14f) else WildforceThemeTokens.textSecondary.copy(alpha = .08f), RoundedCornerShape(16.dp))
+                    .background(if (selected) WildforceThemeTokens.accent.copy(alpha = .12f) else WildforceThemeTokens.textSecondary.copy(alpha = .08f), RoundedCornerShape(16.dp))
                     .clickable { selectedIds = if (selected) selectedIds - entry.id else selectedIds + entry.id }
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -454,7 +508,7 @@ private fun RecentPicker(
                             RemoteSyncChangeTracker.mark(context, "nutrition-log-entries")
                             recentEntries = recentEntries.map { if (it.id == entry.id) updated else it }
                         }, modifier = Modifier.size(36.dp)) {
-                            Icon(if (entry.isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, if (entry.isBookmarked) "Quitar de guardadas" else "Guardar", tint = if (entry.isBookmarked) NutritionCoral else WildforceThemeTokens.textSecondary, modifier = Modifier.size(18.dp))
+                            Icon(if (entry.isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, if (entry.isBookmarked) "Quitar de guardadas" else "Guardar", tint = if (entry.isBookmarked) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary, modifier = Modifier.size(18.dp))
                         }
                     }
                     Text("${entry.type.title} · ${entry.calories} kcal", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
@@ -840,6 +894,10 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
     // One repeatable list is used for every additional food. Keeping a separate
     // "second food" branch rendered the same add affordance twice on Android.
     var extraItems by remember(initial) { mutableStateOf(initial.items.drop(1)) }
+    // iOS opens the manual provider with an empty review draft. The first food
+    // is created only after the user taps Add food, while restored/provider
+    // results still keep their first item here.
+    var hasManualFirstItem by remember(initial) { mutableStateOf(initial.items.isNotEmpty()) }
     var manualEditingItem by remember { mutableStateOf<Pair<Int, MealItem>?>(null) }
     var removingExtraItemIndex by remember(initial) { mutableStateOf<Int?>(null) }
     var analyzing by remember { mutableStateOf(false) }
@@ -861,6 +919,31 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
     fun decimalText(value: Double): String = if (value % 1.0 == 0.0) value.toInt().toString() else "%.1f".format(Locale.US, value)
 
     fun firstManualItem(): MealItem = MealItem(name.trim(), (calories.decimalOrNull() ?: 0.0).roundToInt(), (protein.decimalOrNull() ?: 0.0).roundToInt(), (carbs.decimalOrNull() ?: 0.0).roundToInt(), (fat.decimalOrNull() ?: 0.0).roundToInt(), itemBrand.trim(), itemQuantity.decimalOrNull() ?: 1.0, itemUnit.trim(), totalPortionGrams, itemNotes.trim())
+
+    fun applyFirstManualItem(food: MealItem) {
+        name = food.name
+        calories = food.calories.toString()
+        protein = food.protein.toString()
+        carbs = food.carbs.toString()
+        fat = food.fat.toString()
+        itemBrand = food.brand
+        itemNotes = food.notes
+        itemQuantity = food.quantity.toString()
+        itemUnit = food.unit
+        itemGrams = food.grams?.toString().orEmpty()
+    }
+
+    fun addManualItem() {
+        val blank = MealItem("", 0, 0, 0, 0)
+        if (!hasManualFirstItem) {
+            hasManualFirstItem = true
+            manualEditingItem = 0 to blank
+        } else {
+            val manualIndex = extraItems.size + 1
+            extraItems = extraItems + blank
+            manualEditingItem = manualIndex to blank
+        }
+    }
 
     fun setMacrosPer100g(enabled: Boolean) {
         if (enabled == macrosPer100g || (enabled && !canUsePer100g)) return
@@ -891,6 +974,32 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                 carbs = result.carbs.toString()
                 fat = result.fat.toString()
                 notes = result.notes
+                if (describeMode && result.foods.isNotEmpty()) {
+                    val analyzedFoods = result.foods.filter { it.name.isNotBlank() }
+                    val firstFood = analyzedFoods.firstOrNull()
+                    if (firstFood != null) {
+                        name = firstFood.name
+                        calories = firstFood.calories.toString()
+                        protein = firstFood.protein.toString()
+                        carbs = firstFood.carbs.toString()
+                        fat = firstFood.fat.toString()
+                        itemQuantity = "1"
+                        itemUnit = "g"
+                        itemGrams = firstFood.grams.takeIf { it > 0.0 }?.let(::decimalText).orEmpty()
+                        extraItems = analyzedFoods.drop(1).map { food ->
+                            MealItem(
+                                name = food.name,
+                                calories = food.calories,
+                                protein = food.protein,
+                                carbs = food.carbs,
+                                fat = food.fat,
+                                quantity = 1.0,
+                                unit = "g",
+                                grams = food.grams.takeIf { it > 0.0 },
+                            )
+                        }
+                    }
+                }
                 if (barcodeMode) {
                     brands = result.brand
                     barcodeImageUrl = result.imageUrl
@@ -912,7 +1021,9 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
     }
     LaunchedEffect(initial) { reviewAppeared = true }
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-        item { ReviewAppearance(reviewAppeared, 0) { SheetHeader(title, onBack, if (isManualReview) ({ val blank = MealItem("", 0, 0, 0, 0); val manualIndex = extraItems.size + 1; extraItems = extraItems + blank; manualEditingItem = manualIndex to blank }) else null) } }
+        // iOS keeps the only add affordance inside the review section; the
+        // navigation header has no extra plus action.
+        item { ReviewAppearance(reviewAppeared, 0) { SheetHeader(title, onBack) } }
         if (isManualReview) item {
             // iOS opens manual logging in the review hierarchy: meal summary
             // first, then the editable food rows. Keep that hierarchy visible
@@ -929,27 +1040,29 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                     placeholder = { Text("Ej.: Pollo y arroz") },
                     singleLine = true,
                 )
-                val summaryFoods = listOf(firstManualItem()) + extraItems.filter { it.name.isNotBlank() }
+                val summaryFoods = buildList {
+                    if (hasManualFirstItem) add(firstManualItem())
+                    addAll(extraItems.filter { it.name.isNotBlank() })
+                }
                 PhotoMacroSummary(NutritionTargets(
                     summaryFoods.sumOf { it.calories },
                     summaryFoods.sumOf { it.protein },
                     summaryFoods.sumOf { it.carbs },
                     summaryFoods.sumOf { it.fat },
                 ))
-                OutlinedTextField(
-                    notes,
-                    { notes = it.take(240) },
-                    Modifier.fillMaxWidth(),
-                    label = { Text("Notas (opcional)") },
-                    minLines = 2,
-                )
             }
         }
         if (isManualReview) item {
-            val foods = listOf(firstManualItem()) + extraItems
+            val foods = buildList {
+                if (hasManualFirstItem) add(0 to firstManualItem())
+                extraItems.forEachIndexed { index, food ->
+                    add((if (hasManualFirstItem) index + 1 else index) to food)
+                }
+            }
             Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp)).padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Alimentos", style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                foods.forEachIndexed { index, food ->
+                foods.forEachIndexed { rowIndex, item ->
+                    val (index, food) = item
                     Row(Modifier.fillMaxWidth().clickable { manualEditingItem = index to food }.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
                             Text(food.name.ifBlank { "Alimento sin nombre" }, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
@@ -959,9 +1072,9 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                         Text("${food.calories} kcal", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
                         Icon(Icons.Filled.ChevronRight, "Editar alimento", tint = WildforceThemeTokens.textSecondary)
                     }
-                    if (index < foods.lastIndex) Divider(color = WildforceThemeTokens.textSecondary.copy(alpha = .16f))
+                    if (rowIndex < foods.lastIndex) Divider(color = WildforceThemeTokens.textSecondary.copy(alpha = .16f))
                 }
-                TextButton(onClick = { val blank = MealItem("", 0, 0, 0, 0); val manualIndex = extraItems.size + 1; extraItems = extraItems + blank; manualEditingItem = manualIndex to blank }) {
+                TextButton(onClick = { addManualItem() }) {
                     Icon(Icons.Filled.Add, null, tint = WildforceThemeTokens.textPrimary)
                     Text("Añadir alimento", Modifier.padding(start = 6.dp), color = WildforceThemeTokens.textPrimary)
                 }
@@ -1063,7 +1176,7 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
             // iOS uses PrimaryButton here: solid textPrimary background,
             // primaryButtonText label, no outlined/accent treatment.
             Button(
-                onClick = { scope.launch { runAnalysis { NutritionAnalyzer.describe(context, name) } } },
+                onClick = { scope.launch { runAnalysis { NutritionAnalyzer.describe(context, name, mealTitle) } } },
                 enabled = name.isNotBlank() && !analyzing,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
@@ -1075,7 +1188,8 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
         }
         if (analyzing) item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) { CircularProgressIndicator(Modifier.size(22.dp), color = NutritionCoral, strokeWidth = 2.dp); Text(if (labelMode) "Leyendo etiqueta…" else "Analizando nutrición…", Modifier.padding(start = 10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }
         analysisError?.let { message -> item { Text(message, color = MaterialTheme.colors.error, style = MaterialTheme.typography.caption, modifier = Modifier.background(MaterialTheme.colors.error.copy(alpha = .08f), RoundedCornerShape(10.dp)).padding(10.dp)) } }
-        if (!describeMode || descriptionAnalyzed) item { Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(7.dp)) { MealType.entries.forEach { item -> FilterChip(item.title, item == type) { type = item } } } }
+        // iOS chooses the meal type in the parent logging sheet and does not
+        // repeat that picker inside NutritionLogReviewView.
         if (labelMode) item {
             val consumed = consumedLabelGrams.decimalOrNull()?.coerceIn(1.0, 5_000.0) ?: 100.0
             val factor = consumed / 100.0
@@ -1119,8 +1233,18 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
         if (barcodeMode && (!hasBarcodeProduct || listOf(calories, protein, carbs, fat).all { (it.decimalOrNull() ?: 0.0) == 0.0 })) {
             item { Text("Si el producto no existe en Open Food Facts, puedes añadirlo con fotos del frontal y de la tabla nutricional.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
             item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { contributionSourceTarget = "front" }, modifier = Modifier.weight(1f)) { Text(if (contributionFront == null) "Foto frontal" else "Frontal ✓") }
-                OutlinedButton(onClick = { contributionSourceTarget = "nutrition" }, modifier = Modifier.weight(1f)) { Text(if (contributionNutrition == null) "Foto nutrición" else "Nutrición ✓") }
+                OutlinedButton(onClick = { contributionSourceTarget = "front" }, modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(if (contributionFront == null) "Foto frontal" else "Frontal")
+                        if (contributionFront != null) Icon(Icons.Filled.CheckCircle, contentDescription = "Foto frontal añadida", modifier = Modifier.size(16.dp), tint = NutritionCoral)
+                    }
+                }
+                OutlinedButton(onClick = { contributionSourceTarget = "nutrition" }, modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(if (contributionNutrition == null) "Foto nutrición" else "Nutrición")
+                        if (contributionNutrition != null) Icon(Icons.Filled.CheckCircle, contentDescription = "Foto de nutrición añadida", modifier = Modifier.size(16.dp), tint = NutritionCoral)
+                    }
+                }
             } }
             item {
                 val canContribute = barcode.length in 8..14 && name.isNotBlank() && brands.isNotBlank() && (calories.decimalOrNull() ?: 0.0) > 0 && contributionFront != null && contributionNutrition != null && !analyzing
@@ -1187,7 +1311,9 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                 Text("Añadir otro alimento", Modifier.padding(start = 6.dp), color = NutritionCoral)
             }
         }
-        if (!isManualReview && (!describeMode || descriptionAnalyzed)) item { ReviewAppearance(reviewAppeared, 210) { OutlinedTextField(notes, { notes = it.take(240) }, Modifier.fillMaxWidth(), label = { Text("Notas (opcional)") }, minLines = 2) } }
+        // Meal-level notes are persisted when supplied by an analysis or an
+        // existing entry, but iOS does not expose an editable notes field in
+        // NutritionLogReviewView.
         if (!describeMode || descriptionAnalyzed) item {
             ReviewAppearance(reviewAppeared, 260) { Button(
                 onClick = {
@@ -1212,12 +1338,14 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                         notes = itemNotes.trim(),
                     )
                     val itemList = buildList {
-                        add(first)
+                        if (!isManualReview || hasManualFirstItem) add(first)
                         addAll(extraItems.filter { it.name.isNotBlank() })
                     }
-                    onSave(initial.copy(name = mealTitle.trim().ifBlank { name.trim() }, calories = itemList.sumOf { it.calories }, protein = itemList.sumOf { it.protein }, carbs = itemList.sumOf { it.carbs }, fat = itemList.sumOf { it.fat }, type = type, notes = notes.trim(), items = itemList))
+                    onSave(initial.copy(name = mealTitle.trim().ifBlank { itemList.firstOrNull()?.name.orEmpty() }, calories = itemList.sumOf { it.calories }, protein = itemList.sumOf { it.protein }, carbs = itemList.sumOf { it.carbs }, fat = itemList.sumOf { it.fat }, type = type, notes = notes.trim(), items = itemList, mediaUrl = barcodeImageUrl.trim().takeIf { it.isNotBlank() } ?: initial.mediaUrl))
                 },
-                enabled = name.isNotBlank(),
+                enabled = if (isManualReview) {
+                    (hasManualFirstItem && name.isNotBlank()) || extraItems.any { it.name.isNotBlank() }
+                } else name.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText),
                 shape = RoundedCornerShape(8.dp),
@@ -1236,11 +1364,21 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
 
     manualEditingItem?.let { (index, food) ->
         ManualFoodEditorDialog(food, onDismiss = { manualEditingItem = null }, onDelete = {
-            if (index == 0) { name = ""; calories = ""; protein = ""; carbs = ""; fat = ""; itemBrand = ""; itemNotes = ""; itemQuantity = "1"; itemUnit = ""; itemGrams = "" }
+            if (index == 0) {
+                val promoted = extraItems.firstOrNull()
+                if (promoted != null) {
+                    applyFirstManualItem(promoted)
+                    extraItems = extraItems.drop(1)
+                    hasManualFirstItem = true
+                } else {
+                    name = ""; calories = ""; protein = ""; carbs = ""; fat = ""; itemBrand = ""; itemNotes = ""; itemQuantity = "1"; itemUnit = ""; itemGrams = ""
+                    hasManualFirstItem = false
+                }
+            }
             else extraItems = extraItems.filterIndexed { i, _ -> i != index - 1 }
             manualEditingItem = null
         }, onSave = { updated ->
-            if (index == 0) { name = updated.name; calories = updated.calories.toString(); protein = updated.protein.toString(); carbs = updated.carbs.toString(); fat = updated.fat.toString(); itemBrand = updated.brand; itemNotes = updated.notes; itemQuantity = updated.quantity.toString(); itemUnit = updated.unit; itemGrams = updated.grams?.toString().orEmpty() }
+            if (index == 0) { applyFirstManualItem(updated); hasManualFirstItem = true }
             else extraItems = extraItems.mapIndexed { i, current -> if (i == index - 1) updated else current }
             manualEditingItem = null
         })
@@ -1328,8 +1466,8 @@ private fun ReviewAppearance(visible: Boolean, delayMillis: Int, content: @Compo
 }
 
 @Composable private fun SheetHeader(title: String, onBack: () -> Unit, onAction: (() -> Unit)? = null) {
-    val displayTitle = if (title == title.uppercase(Locale.getDefault())) {
-        title.lowercase(Locale.getDefault()).replaceFirstChar { it.uppercase() }
+    val displayTitle = if (title == title.uppercase(Locale.US)) {
+        title.lowercase(Locale.US).replaceFirstChar { it.uppercase() }
     } else title.replaceFirstChar { it.uppercase() }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Atrás", modifier = Modifier.size(22.dp)) }
@@ -1337,8 +1475,42 @@ private fun ReviewAppearance(visible: Boolean, delayMillis: Int, content: @Compo
         if (onAction != null) IconButton(onClick = onAction) { Icon(Icons.Filled.Add, "Añadir alimento", tint = WildforceThemeTokens.textPrimary) }
     }
 }
-@Composable private fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit) { Text(text, Modifier.background(if (selected) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = .1f), CircleShape).clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 8.dp), color = if (selected) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption) }
-@Composable private fun RecentFilterChip(text: String, selected: Boolean, onClick: () -> Unit) { Text(text, Modifier.background(if (selected) WildforceThemeTokens.textPrimary else Color.Transparent, CircleShape).clickable(onClick = onClick).border(1.dp, if (selected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary.copy(alpha = .35f), CircleShape).padding(horizontal = 12.dp, vertical = 8.dp), color = if (selected) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption) }
+@Composable
+private fun FilterChip(text: String, selected: Boolean, onClick: () -> Unit) {
+    Text(
+        text,
+        Modifier
+            .heightIn(min = 48.dp)
+            .background(if (selected) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = .1f), CircleShape)
+            .clickable(onClick = onClick)
+            .semantics {
+                contentDescription = text
+                this.selected = selected
+            }
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        color = if (selected) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.textPrimary,
+        style = MaterialTheme.typography.caption,
+    )
+}
+
+@Composable
+private fun RecentFilterChip(text: String, selected: Boolean, onClick: () -> Unit) {
+    Text(
+        text,
+        Modifier
+            .heightIn(min = 48.dp)
+            .background(if (selected) WildforceThemeTokens.textPrimary else Color.Transparent, CircleShape)
+            .clickable(onClick = onClick)
+            .semantics {
+                contentDescription = text
+                this.selected = selected
+            }
+            .border(1.dp, if (selected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary.copy(alpha = .35f), CircleShape)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        color = if (selected) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.textPrimary,
+        style = MaterialTheme.typography.caption,
+    )
+}
 @Composable internal fun NumberField(label: String, value: String, onValueChange: (String) -> Unit, modifier: Modifier = Modifier, allowDecimal: Boolean = false) { OutlinedTextField(value, onValueChange, modifier, label = { Text(label) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = if (allowDecimal) KeyboardType.Decimal else KeyboardType.Number)) }
 @Composable internal fun EmptyState(title: String, body: String, icon: ImageVector = Icons.Filled.Eco) { Column(Modifier.fillMaxWidth().padding(vertical = 30.dp), horizontalAlignment = Alignment.CenterHorizontally) { Icon(icon, null, tint = NutritionCoral, modifier = Modifier.size(42.dp)); Text(title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 10.dp)); Text(body, style = MaterialTheme.typography.caption, textAlign = TextAlign.Center, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(top = 5.dp)) } }
 private fun digits(value: String) = value.filter(Char::isDigit).take(4)
@@ -1355,7 +1527,7 @@ private fun decimalValue(value: String): String {
 /** Stores a bounded JPEG copy, matching iOS's local NutritionLogMedia behavior. */
 private fun saveNutritionPhoto(context: android.content.Context, uri: Uri?, bitmap: Bitmap?): String? = runCatching {
     val source = bitmap ?: uri?.let { selected -> context.contentResolver.openInputStream(selected)?.use(BitmapFactory::decodeStream) } ?: return null
-    val maxDimension = 2_048
+    val maxDimension = 1_024
     val largestDimension = maxOf(source.width, source.height)
     val bounded = if (largestDimension > maxDimension) {
         val scale = maxDimension.toFloat() / largestDimension
@@ -1363,9 +1535,9 @@ private fun saveNutritionPhoto(context: android.content.Context, uri: Uri?, bitm
     } else source
     val directory = File(context.filesDir, "NutritionLogMedia").apply { mkdirs() }
     val file = File(directory, "${UUID.randomUUID()}.jpg")
-    listOf(82, 65, 50, 35).forEach { quality ->
+    listOf(70, 55, 40, 30).forEach { quality ->
         FileOutputStream(file).use { output -> check(bounded.compress(Bitmap.CompressFormat.JPEG, quality, output)) }
-        if (file.length() <= 5L * 1024L * 1024L) return@runCatching file.absolutePath
+        if (file.length() <= 500L * 1024L) return@runCatching file.absolutePath
     }
     file.delete()
     null

@@ -35,7 +35,21 @@ object CustomWorkoutStore {
                         id = item.getString("id"), order = item.optInt("order", index + 1), title = item.getString("title"),
                         focus = item.optString("focus", "Full body"), dayType = "Personalizado",
                         scheduledDay = runCatching { DayOfWeek.valueOf(item.getString("scheduledDay")) }.getOrDefault(DayOfWeek.MONDAY),
-                        estimatedMinutes = item.optInt("estimatedMinutes", estimateMinutes(exercises)), status = WorkoutStatus.Planned, exercises = exercises, blocks = blocks,
+                        estimatedMinutes = item.optInt("estimatedMinutes", estimateMinutes(exercises)),
+                        status = runCatching { WorkoutStatus.valueOf(item.optString("status")) }.getOrDefault(WorkoutStatus.Planned),
+                        exercises = exercises, blocks = blocks,
+                        kind = item.optString("kind", "workout").ifBlank { "workout" },
+                        creationSource = item.optString("creationSource", "manual").ifBlank { "manual" },
+                        scheduledFor = item.optString("scheduledFor").takeIf(String::isNotBlank),
+                        startedAt = item.optString("startedAt").takeIf(String::isNotBlank),
+                        completedAt = item.optString("completedAt").takeIf(String::isNotBlank),
+                        didCountTowardStreak = item.optBoolean("didCountTowardStreak", false),
+                        notes = item.optString("notes").takeIf(String::isNotBlank),
+                        activeDurationSeconds = item.optInt("activeDurationSeconds").takeIf { item.has("activeDurationSeconds") && !item.isNull("activeDurationSeconds") },
+                        activeCaloriesBurned = item.optDouble("activeCaloriesBurned").takeIf { item.has("activeCaloriesBurned") && !item.isNull("activeCaloriesBurned") },
+                        averageHeartRate = item.optDouble("averageHeartRate").takeIf { item.has("averageHeartRate") && !item.isNull("averageHeartRate") },
+                        maximumHeartRate = item.optDouble("maximumHeartRate").takeIf { item.has("maximumHeartRate") && !item.isNull("maximumHeartRate") },
+                        totalVolumeKg = item.optDouble("totalVolumeKg").takeIf { item.has("totalVolumeKg") && !item.isNull("totalVolumeKg") },
                     ),
                 )
             }
@@ -51,15 +65,39 @@ object CustomWorkoutStore {
     fun delete(context: Context, workoutId: String) = write(context, load(context).filterNot { it.id == workoutId })
 
     fun duplicate(context: Context, source: WorkoutDaySummary): WorkoutDaySummary {
-        val copy = source.copy(id = "custom-${UUID.randomUUID()}", title = "${source.title} (copia)", order = load(context).size + 1, status = WorkoutStatus.Planned)
+        // iOS opens a duplicated independent workout in the manual editor as
+        // a draft and only makes it planned when the user confirms it.
+        val copy = source.copy(
+            id = "custom-${UUID.randomUUID()}",
+            title = "${source.title} (copia)",
+            order = load(context).size + 1,
+            status = WorkoutStatus.Draft,
+            creationSource = "manual",
+            startedAt = null,
+            completedAt = null,
+            didCountTowardStreak = false,
+            activeDurationSeconds = null,
+            activeCaloriesBurned = null,
+            averageHeartRate = null,
+            maximumHeartRate = null,
+            totalVolumeKg = null,
+        )
         save(context, copy)
         return copy
     }
 
     fun empty(day: DayOfWeek): WorkoutDaySummary = WorkoutDaySummary(
         id = "custom-${UUID.randomUUID()}", order = 1, title = "Entrenamiento personalizado", focus = "Full body", dayType = "Personalizado",
-        scheduledDay = day, estimatedMinutes = 0, status = WorkoutStatus.Planned,
+        scheduledDay = day, estimatedMinutes = 0, status = WorkoutStatus.Draft, creationSource = "manual",
     )
+
+    /** Mirrors WorkoutDay.shouldRetainManualDraftOnClose on iOS. */
+    fun shouldRetainManualDraft(workout: WorkoutDaySummary): Boolean {
+        if (workout.status != WorkoutStatus.Draft) return true
+        if (workout.blocks.any { it.exercises.isNotEmpty() } || workout.exercises.isNotEmpty()) return true
+        if (workout.title.trim() !in setOf("Custom Workout", "Entrenamiento personalizado")) return true
+        return !workout.focus.equals("Full body", ignoreCase = true)
+    }
 
     fun automatic(day: DayOfWeek, request: CustomWorkoutRequest = CustomWorkoutRequest("Full body", 45, "Peso corporal")): WorkoutDaySummary {
         val main = listOf(
@@ -113,7 +151,15 @@ object CustomWorkoutStore {
                 }
                 put(
                     JSONObject().put("id", workout.id).put("order", workout.order).put("title", workout.title).put("focus", workout.focus)
-                        .put("scheduledDay", workout.scheduledDay.name).put("estimatedMinutes", workout.estimatedMinutes).put("exercises", exercises).put("blocks", blocks),
+                        .put("scheduledDay", workout.scheduledDay.name).put("estimatedMinutes", workout.estimatedMinutes)
+                        .put("status", workout.status.name)
+                        .put("kind", workout.kind).put("creationSource", workout.creationSource)
+                        .put("scheduledFor", workout.scheduledFor).put("startedAt", workout.startedAt).put("completedAt", workout.completedAt)
+                        .put("didCountTowardStreak", workout.didCountTowardStreak).put("notes", workout.notes)
+                        .put("activeDurationSeconds", workout.activeDurationSeconds).put("activeCaloriesBurned", workout.activeCaloriesBurned)
+                        .put("averageHeartRate", workout.averageHeartRate).put("maximumHeartRate", workout.maximumHeartRate)
+                        .put("totalVolumeKg", workout.totalVolumeKg)
+                        .put("exercises", exercises).put("blocks", blocks),
                 )
             }
         }
@@ -157,6 +203,7 @@ object CustomWorkoutStore {
                     targetDurationSeconds = exercise.optIntOrNull("targetDurationSeconds"),
                     targetDurationMinutes = exercise.optIntOrNull("targetDurationMinutes"),
                     targetDistanceKm = exercise.optDoubleOrNull("targetDistanceKm"),
+                    targetPaceSecondsPerKm = exercise.optIntOrNull("targetPaceSecondsPerKm"),
                     isPerSideLoad = exercise.optBoolean("isPerSideLoad", false),
                     trackingMode = runCatching { ExerciseTrackingMode.valueOf(exercise.optString("trackingMode")) }.getOrElse {
                         when {
@@ -166,6 +213,7 @@ object CustomWorkoutStore {
                         }
                     },
                     repRange = exercise.optIntOrNull("repsMin")?.let { minimum -> RepRange(minimum, (exercise.optIntOrNull("repsMax") ?: minimum).coerceAtLeast(minimum)) },
+                    coachExerciseId = exercise.optString("coachExerciseId").takeIf(String::isNotBlank),
                 ),
             )
         }
@@ -177,7 +225,7 @@ object CustomWorkoutStore {
             .put("backoffSetCount", exercise.setStyleParameters.backoffSetCount).put("backoffWeightPercent", exercise.setStyleParameters.backoffWeightPercent)
             .put("intraSetRestSeconds", exercise.setStyleParameters.intraSetRestSeconds).put("tempo", exercise.setStyleParameters.tempo)
             .put("targetRir", exercise.setStyleParameters.targetRir).put("appliesToFinalSetOnly", exercise.setStyleParameters.appliesToFinalSetOnly)
-        return JSONObject().put("name", exercise.name).put("imageKey", exercise.imageKey ?: "").put("sets", exercise.sets)
+        return JSONObject().put("name", exercise.name).put("imageKey", exercise.imageKey ?: "").put("coachExerciseId", exercise.coachExerciseId ?: JSONObject.NULL).put("sets", exercise.sets)
             .put("reps", exercise.reps).put("restSeconds", exercise.restSeconds).put("setStyle", exercise.setStyle.name)
             .put("setStyleParameters", parameters)
             .put("targetWeightKg", exercise.targetWeightKg)
@@ -186,6 +234,7 @@ object CustomWorkoutStore {
             .put("targetDurationSeconds", exercise.targetDurationSeconds)
             .put("targetDurationMinutes", exercise.targetDurationMinutes)
             .put("targetDistanceKm", exercise.targetDistanceKm)
+            .put("targetPaceSecondsPerKm", exercise.targetPaceSecondsPerKm)
             .put("isPerSideLoad", exercise.isPerSideLoad)
             .put("trackingMode", exercise.trackingMode.name)
             .put("repsMin", exercise.repRange?.minimum)
@@ -212,6 +261,23 @@ internal data class ExerciseChoice(
     val imageKey: String,
     val substitutionCandidates: List<String> = emptyList(),
     val primaryMuscles: Set<String> = emptySet(),
+    /** UUID is present only for an exercise from the coach-owned library. */
+    val coachExerciseId: String? = null,
+    val imageUrl: String? = null,
+    val trackingMode: ExerciseTrackingMode = ExerciseTrackingMode.Repetitions,
+    val isPerSideLoad: Boolean = false,
+)
+
+/** Builds the editable workout value without losing the backend's custom-exercise identity. */
+internal fun ExerciseChoice.toExerciseSummary(): ExerciseSummary = ExerciseSummary(
+    name = name,
+    imageKey = imageKey,
+    sets = 3,
+    reps = "10",
+    restSeconds = 90,
+    trackingMode = trackingMode,
+    isPerSideLoad = isPerSideLoad,
+    coachExerciseId = coachExerciseId,
 )
 
 /** Mirrors `SwapExerciseView` on iOS: candidates first, then exercises with a

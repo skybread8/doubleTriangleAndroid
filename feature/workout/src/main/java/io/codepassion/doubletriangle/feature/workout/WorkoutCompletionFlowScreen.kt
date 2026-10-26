@@ -41,9 +41,30 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.SportsGymnastics
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Scale
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 
@@ -58,6 +79,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -91,6 +113,15 @@ private enum class CompletionPhase {
     PlanGenerator,
 }
 
+private data class CompletionMetric(
+    val title: String,
+    val value: String,
+    val icon: ImageVector,
+)
+
+internal fun shouldOfferNextPlan(isPlanCompleted: Boolean, canGenerateNextPlan: Boolean): Boolean =
+    isPlanCompleted && canGenerateNextPlan
+
 @Composable
 internal fun WorkoutCompletionFlowScreen(
     workout: WorkoutDaySummary,
@@ -103,10 +134,15 @@ internal fun WorkoutCompletionFlowScreen(
     isMesocycleCompleted: Boolean = false,
     planName: String = "",
     completedPlanWorkouts: Int = 0,
-    totalPlanWorkouts: Int = 0,
     totalPlanExercises: Int = 0,
+    mesocycleIndex: Int = 0,
+    cycleLength: Int = 0,
+    skippedExerciseIndices: Set<Int> = emptySet(),
     useImperial: Boolean = false,
+    userAgeYears: Int = 30,
+    canGenerateNextPlan: Boolean = true,
     onCancelWorkout: () -> Unit,
+    onCompletionConfirmed: () -> Unit,
     onDone: () -> Unit,
     onGenerateNextPlan: () -> Unit = {},
 ) {
@@ -118,12 +154,30 @@ internal fun WorkoutCompletionFlowScreen(
             if (durationSeconds < workout.estimatedMinutes * 60 / 4) CompletionPhase.DurationWarning else firstRegularPhase,
         )
     }
+    var completionConfirmed by remember(workout.id) { mutableStateOf(false) }
+    fun confirmCompletion() {
+        if (!completionConfirmed) {
+            completionConfirmed = true
+            onCompletionConfirmed()
+        }
+    }
+    LaunchedEffect(workout.id) {
+        if (durationSeconds >= workout.estimatedMinutes * 60 / 4) confirmCompletion()
+    }
     LaunchedEffect(phase) {
-        if (phase in setOf(CompletionPhase.WorkoutLevelUp, CompletionPhase.PlanComplete, CompletionPhase.MesocycleComplete, CompletionPhase.PlanLevelUp, CompletionPhase.MesocycleLevelUp)) {
+        if (phase in setOf(
+                CompletionPhase.Records,
+                CompletionPhase.Summary,
+                CompletionPhase.WorkoutLevelUp,
+                CompletionPhase.PlanComplete,
+                CompletionPhase.MesocycleComplete,
+                CompletionPhase.PlanLevelUp,
+                CompletionPhase.MesocycleLevelUp,
+            )) {
             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
         }
     }
-    val score = remember(workout.id, stats, feedback) { WorkoutCompletionCalculator.score(workout, stats, feedback) }
+    val score = remember(workout.id, stats, feedback, userAgeYears) { WorkoutCompletionCalculator.score(workout, stats, feedback, userAgeYears) }
     val mainExercises = remember(workout) { workout.pathBlocks().mainExercises() }
     val completedSets = stats.mapValues { it.value.sets }
     val completedMainExercises = mainExercises.count { it.isCompleted(workout, completedSets) }
@@ -131,14 +185,14 @@ internal fun WorkoutCompletionFlowScreen(
         when {
             shouldShowNotificationEducation(context) -> phase = CompletionPhase.NotificationRequest
             progress.streakAfter > 0 && progress.streakAfter % 2 == 0 && !hasRatedApp(context) -> phase = CompletionPhase.RateApp
-            isPlanCompleted -> phase = CompletionPhase.PlanGenerator
+            shouldOfferNextPlan(isPlanCompleted, canGenerateNextPlan) -> phase = CompletionPhase.PlanGenerator
             else -> onDone()
         }
     }
     fun continueAfterNotificationEducation() {
         phase = if (progress.streakAfter > 0 && progress.streakAfter % 2 == 0 && !hasRatedApp(context)) {
             CompletionPhase.RateApp
-        } else if (isPlanCompleted) {
+        } else if (shouldOfferNextPlan(isPlanCompleted, canGenerateNextPlan)) {
             CompletionPhase.PlanGenerator
         } else {
             onDone()
@@ -163,19 +217,26 @@ internal fun WorkoutCompletionFlowScreen(
     // completion experience does not snap from one celebration to the next.
     Crossfade(targetState = phase, animationSpec = tween(durationMillis = 420), label = "completion-phase") { currentPhase ->
         when (currentPhase) {
-            CompletionPhase.DurationWarning -> DurationWarning(onCancelWorkout) { phase = firstRegularPhase }
+            CompletionPhase.DurationWarning -> DurationWarning(onCancelWorkout) { confirmCompletion(); phase = firstRegularPhase }
             CompletionPhase.Records -> RecordsCelebration(records) { phase = CompletionPhase.Summary }
-            CompletionPhase.Summary -> CompletionSummary(workout, durationSeconds, stats, completedMainExercises, useImperial) { phase = CompletionPhase.Score }
-            CompletionPhase.Score -> ScoreCelebration(score, completedMainExercises, mainExercises.size, dominantFeedback(feedback)) { phase = if (progress.streakIncreased) CompletionPhase.Streak else CompletionPhase.WorkoutXp }
+            CompletionPhase.Summary -> CompletionSummary(workout, durationSeconds, stats, completedMainExercises, skippedExerciseIndices, useImperial) { phase = CompletionPhase.Score }
+            CompletionPhase.Score -> ScoreCelebration(
+                score = score,
+                completedExercises = completedMainExercises,
+                totalExercises = mainExercises.size,
+                effort = dominantFeedback(feedback),
+                averageHeartRate = workout.averageHeartRate,
+                durationSeconds = durationSeconds,
+            ) { phase = if (progress.streakIncreased) CompletionPhase.Streak else CompletionPhase.WorkoutXp }
             CompletionPhase.Streak -> StreakCelebration(progress.streakAfter) { phase = CompletionPhase.WorkoutXp }
             CompletionPhase.WorkoutXp -> XpCelebration(progress.xpBefore, progress.xpAfterWorkout, progress.levelBefore, "ENTRENAMIENTO COMPLETADO") {
                 if (progress.levelAfterWorkout > progress.levelBefore) phase = CompletionPhase.WorkoutLevelUp else continueAfterWorkout()
             }
             CompletionPhase.WorkoutLevelUp -> LevelUpCelebration(progress.levelAfterWorkout) { continueAfterWorkout() }
-            CompletionPhase.PlanComplete -> PlanCompletedCelebration(planName.ifBlank { workout.title }, completedPlanWorkouts, totalPlanWorkouts, totalPlanExercises) {
+            CompletionPhase.PlanComplete -> PlanCompletedCelebration(planName.ifBlank { workout.title }, completedPlanWorkouts, totalPlanExercises) {
                 phase = if (isMesocycleCompleted) CompletionPhase.MesocycleComplete else CompletionPhase.PlanXp
             }
-            CompletionPhase.MesocycleComplete -> MesocycleCompletedCelebration { phase = CompletionPhase.PlanXp }
+            CompletionPhase.MesocycleComplete -> MesocycleCompletedCelebration(mesocycleIndex, cycleLength) { phase = CompletionPhase.PlanXp }
             CompletionPhase.PlanXp -> XpCelebration(progress.xpAfterWorkout, progress.xpAfterPlan, progress.levelAfterWorkout, "PLAN COMPLETADO") { continueAfterPlanXp() }
             CompletionPhase.PlanLevelUp -> LevelUpCelebration(progress.levelAfterPlan) {
                 if (isMesocycleCompleted) phase = CompletionPhase.MesocycleXp else finishOrGenerate()
@@ -184,7 +245,7 @@ internal fun WorkoutCompletionFlowScreen(
             CompletionPhase.MesocycleLevelUp -> LevelUpCelebration(progress.levelAfter) { finishOrGenerate() }
             CompletionPhase.NotificationRequest -> NotificationEducationCelebration(context) { continueAfterNotificationEducation() }
             CompletionPhase.RateApp -> RateAppCelebration(context) {
-                if (isPlanCompleted) phase = CompletionPhase.PlanGenerator else onDone()
+                if (shouldOfferNextPlan(isPlanCompleted, canGenerateNextPlan)) phase = CompletionPhase.PlanGenerator else onDone()
             }
             CompletionPhase.PlanGenerator -> PlanGeneratorCelebration(onDone, onGenerateNextPlan)
         }
@@ -198,7 +259,7 @@ private fun DurationWarning(onCancel: () -> Unit, onContinue: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text("⚠", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
+        Icon(Icons.Filled.WarningAmber, contentDescription = null, modifier = Modifier.size(64.dp), tint = WildforceThemeTokens.accentGold)
         Text("LA DURACIÓN NO PARECE CORRECTA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
         Text("Has terminado mucho antes de lo previsto. ¿Quieres cancelar el entrenamiento?", Modifier.padding(top = 10.dp, bottom = 28.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
         Button(onClick = onCancel, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFC62828), contentColor = Color.White)) {
@@ -223,7 +284,7 @@ private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: (
             visibleRecords = index + 1
         }
     }
-            Text("🏅", style = MaterialTheme.typography.h2)
+            Icon(Icons.Filled.EmojiEvents, contentDescription = null, modifier = Modifier.size(64.dp), tint = WildforceThemeTokens.accent)
             Text(if (records.size == 1) "NUEVO RÉCORD" else "NUEVOS RÉCORDS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
             Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(top = 18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 records.forEachIndexed { index, record ->
@@ -233,7 +294,7 @@ private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: (
                     ) {
                         Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).padding(16.dp)) {
                             Text(record.exerciseName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                            Text(record.label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accentGold)
+                            Text(record.label, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accent)
                             Text(String.format(locale, "%.1f %s", record.newValue, record.unit), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
                             Text(String.format(locale, "Antes %.1f · +%.1f %s", record.previousValue, record.newValue - record.previousValue, record.unit), color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                         }
@@ -246,42 +307,65 @@ private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: (
 }
 
 @Composable
-private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, stats: Map<Int, ExerciseSessionStats>, completedExercises: Int, useImperial: Boolean, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+private fun CompletionSummary(
+    workout: WorkoutDaySummary,
+    durationSeconds: Int,
+    stats: Map<Int, ExerciseSessionStats>,
+    completedExercises: Int,
+    skippedExerciseIndices: Set<Int>,
+    useImperial: Boolean,
+    onContinue: () -> Unit,
+) = CelebrationFrame(onContinue = onContinue) {
     val context = LocalContext.current
     val shareId = remember(workout.id) { completedWorkoutShareId(context, workout.id) }
     val locale = LocalLocale.current.platformLocale
-    var visibleRows by remember { mutableStateOf(0) }
-    LaunchedEffect(Unit) {
-        delay(180)
-        visibleRows = 1
-        delay(180)
-        visibleRows = 2
-        delay(180)
-        visibleRows = 3
-    }
-    Text("✓", Modifier.size(76.dp).background(WildforceThemeTokens.accentGold.copy(alpha = 0.12f), CircleShape).padding(12.dp), style = MaterialTheme.typography.h3, color = WildforceThemeTokens.accentGold, textAlign = TextAlign.Center)
+    Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.size(76.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.12f), CircleShape).padding(12.dp), tint = WildforceThemeTokens.accent)
     Text("¡GRAN TRABAJO!", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text("Has completado ${workout.title}.", color = WildforceThemeTokens.textSecondary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, textAlign = TextAlign.Center)
     val mainIndices = workout.pathBlocks().mainExercises().flatMap { it.executionIndices }.toSet()
     val mainStats = stats.filterKeys { it in mainIndices }.values
     val sets = mainStats.sumOf { it.sets }
     val volume = mainStats.sumOf { it.volumeKg }
-    val repetitions = mainStats.sumOf { it.totalReps }
+    val totalExercises = mainIndices.size.coerceAtLeast(completedExercises)
+    val skipped = skippedExerciseIndices.count { it in mainIndices }
+    // iOS builds this grid from available data: repetitions are not a summary
+    // card, while skipped exercises, calories and heart-rate cards are added
+    // only when the corresponding completion data exists.
+    val metrics = buildList {
+        add(CompletionMetric("EJERCICIOS", "$completedExercises/$totalExercises", Icons.Filled.SportsGymnastics))
+        if (skipped > 0) add(CompletionMetric("OMITIDOS", skipped.toString(), Icons.Filled.FastForward))
+        if (sets > 0) add(CompletionMetric("SERIES", sets.toString(), Icons.Filled.Layers))
+        if (volume > 0) add(CompletionMetric("VOLUMEN", String.format(locale, "%.0f %s", if (useImperial) volume * KG_TO_LB else volume, if (useImperial) "lb" else "kg"), Icons.Filled.Scale))
+        workout.activeCaloriesBurned?.takeIf { it > 0 }?.let { calories ->
+            add(CompletionMetric("KCAL", String.format(locale, "%.0f", calories), Icons.Filled.LocalFireDepartment))
+        }
+        if (durationSeconds > 0) add(CompletionMetric("MINUTOS", (durationSeconds / 60).toString(), Icons.Filled.Timer))
+        workout.averageHeartRate?.takeIf { it > 0 }?.let { average ->
+            add(CompletionMetric("FC MEDIA", String.format(locale, "%.0f", average), Icons.Filled.Favorite))
+        }
+        workout.maximumHeartRate?.takeIf { it > 0 }?.let { maximum ->
+            add(CompletionMetric("FC MÁX.", String.format(locale, "%.0f", maximum), Icons.Filled.BarChart))
+        }
+    }
+    val metricRows = metrics.chunked(2)
+    var visibleRows by remember(metricRows) { mutableStateOf(0) }
+    LaunchedEffect(metricRows) {
+        visibleRows = 0
+        metricRows.indices.forEach { rowIndex ->
+            delay(180)
+            visibleRows = rowIndex + 1
+        }
+    }
     Column(Modifier.fillMaxWidth().padding(top = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        AnimatedVisibility(visibleRows >= 1, enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 }) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                CompletionStat("EJERCICIOS", completedExercises.toString(), Modifier.weight(1f))
-                CompletionStat("SERIES", sets.toString(), Modifier.weight(1f))
+        metricRows.forEachIndexed { rowIndex, row ->
+            AnimatedVisibility(visibleRows > rowIndex, enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 }) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    row.forEach { metric ->
+                        CompletionStat(metric.title, metric.value, Modifier.weight(1f), metric.icon)
+                    }
+                    if (row.size == 1) Spacer(Modifier.weight(1f))
+                }
             }
-        }
-        AnimatedVisibility(visibleRows >= 2, enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 }) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                CompletionStat("REPETICIONES", repetitions.toString(), Modifier.weight(1f))
-                CompletionStat("VOLUMEN", String.format(locale, "%.0f %s", if (useImperial) volume * KG_TO_LB else volume, if (useImperial) "lb" else "kg"), Modifier.weight(1f))
-            }
-        }
-        AnimatedVisibility(visibleRows >= 3, enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 8 }) {
-            CompletionStat("TIEMPO", formatCompletionClock(durationSeconds), Modifier.fillMaxWidth())
         }
     }
     if (shareId != null) OutlinedButton(
@@ -297,7 +381,15 @@ private fun CompletionSummary(workout: WorkoutDaySummary, durationSeconds: Int, 
 }
 
 @Composable
-private fun ScoreCelebration(score: Double, completedExercises: Int, totalExercises: Int, effort: String, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+private fun ScoreCelebration(
+    score: Double,
+    completedExercises: Int,
+    totalExercises: Int,
+    effort: String,
+    averageHeartRate: Double?,
+    durationSeconds: Int,
+    onContinue: () -> Unit,
+) = CelebrationFrame(onContinue = onContinue) {
     var revealScore by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { revealScore = true }
     val animated by animateFloatAsState(if (revealScore) score.toFloat() / 100f else 0f, animationSpec = tween(1_000, delayMillis = 160))
@@ -315,9 +407,24 @@ private fun ScoreCelebration(score: Double, completedExercises: Int, totalExerci
         CircularProgressIndicator(animated, Modifier.fillMaxSize(), WildforceThemeTokens.textPrimary, strokeWidth = 18.dp)
         Text("$displayedScore%", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h2, color = WildforceThemeTokens.textPrimary)
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        CompletionStat("EJERCICIOS", "$completedExercises/$totalExercises", Modifier.weight(1f))
-        CompletionStat("ESFUERZO", effort, Modifier.weight(1f))
+    val highlights = buildList {
+        add(CompletionMetric("EJERCICIOS", "$completedExercises/$totalExercises", Icons.Filled.SportsGymnastics))
+        add(CompletionMetric("ESFUERZO", effort, Icons.Filled.DirectionsRun))
+        averageHeartRate?.takeIf { it > 0 }?.let { average ->
+            add(CompletionMetric("FC MEDIA", String.format(LocalLocale.current.platformLocale, "%.0f", average), Icons.Filled.Favorite))
+        } ?: run {
+            if (durationSeconds > 0) add(CompletionMetric("MINUTOS", (durationSeconds / 60).toString(), Icons.Filled.Timer))
+        }
+    }
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        highlights.chunked(2).forEach { row ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                row.forEach { metric ->
+                    CompletionStat(metric.title, metric.value, Modifier.weight(1f), metric.icon)
+                }
+                if (row.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
     }
 }
 
@@ -329,7 +436,7 @@ private fun StreakCelebration(streak: Int, onContinue: () -> Unit) = Celebration
     Spacer(Modifier.weight(1f))
     val transition = rememberInfiniteTransition(label = "streak-flame")
     val flameScale by transition.animateFloat(1f, 1.10f, infiniteRepeatable(tween(100), RepeatMode.Reverse), label = "streak-flame-scale")
-    Text("🔥", modifier = Modifier.graphicsLayer { scaleX = flameScale; scaleY = flameScale }, style = MaterialTheme.typography.h1)
+    Icon(Icons.Filled.LocalFireDepartment, contentDescription = null, modifier = Modifier.size(76.dp).graphicsLayer { scaleX = flameScale; scaleY = flameScale }, tint = Color(0xFFF07818))
     Text(displayedStreak.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
     Text(if (streak == 1) "DÍA DE RACHA" else "DÍAS DE RACHA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color(0xFFF07818))
     val streakMessage = when {
@@ -346,7 +453,7 @@ private fun XpCelebration(xpBefore: Int, xpAfter: Int, levelBefore: Int, gainedL
     var revealXp by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { revealXp = true }
     Spacer(Modifier.weight(1f))
-    Text("⚡", style = MaterialTheme.typography.h1)
+    Icon(Icons.Filled.Bolt, contentDescription = null, modifier = Modifier.size(76.dp), tint = Color(0xFFFFC107))
     Text("XP TOTAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     Text(gainedLabel, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
     val displayedXp by animateIntAsState(if (revealXp) xpAfter else xpBefore, animationSpec = tween(850, delayMillis = 140))
@@ -361,7 +468,7 @@ private fun XpCelebration(xpBefore: Int, xpAfter: Int, levelBefore: Int, gainedL
     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
         Text("$xpBefore XP", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Spacer(Modifier.weight(1f))
-        Text("+${xpAfter - xpBefore} XP", color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+        Text("+${xpAfter - xpBefore} XP", color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
     }
     Spacer(Modifier.weight(1f))
 }
@@ -372,38 +479,51 @@ private fun LevelUpCelebration(level: Int, onContinue: () -> Unit) = Celebration
     LaunchedEffect(Unit) { revealLevel = true }
     val displayedLevel by animateIntAsState(if (revealLevel) level else (level - 1).coerceAtLeast(1), animationSpec = tween(750, delayMillis = 150))
     Spacer(Modifier.weight(1f))
-    val transition = rememberInfiniteTransition(label = "level-star")
-    val starScale by transition.animateFloat(1f, 1.10f, infiniteRepeatable(tween(1_400), RepeatMode.Reverse), label = "level-star-pulse")
-    val starRotation by transition.animateFloat(0f, 360f, infiniteRepeatable(tween(10_000, easing = LinearEasing)), label = "level-star-rotation")
-    Text("★", modifier = Modifier.graphicsLayer { scaleX = starScale; scaleY = starScale; rotationZ = starRotation }, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
-    Text("NUEVO NIVEL", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-    Text(displayedLevel.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
-    Text("Tu constancia sigue dando resultados.", color = WildforceThemeTokens.textSecondary)
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("LEVEL", fontFamily = AntonFontFamily, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Text(displayedLevel.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
+    }
+    Text("LEVEL UP!", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text("Has alcanzado el nivel $level", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
 
 @Composable
-private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, totalWorkouts: Int, totalExercises: Int, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, totalExercises: Int, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
     Spacer(Modifier.weight(1f))
-    Text("🏆", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
+    Box(
+        Modifier.size(120.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.1f), CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(Icons.Filled.EmojiEvents, contentDescription = null, modifier = Modifier.size(60.dp), tint = WildforceThemeTokens.accent)
+    }
     Text("PLAN COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text(planName, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Row(Modifier.fillMaxWidth().padding(top = 24.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        CompletionStat("SESIONES", "$completedWorkouts/$totalWorkouts", Modifier.weight(1f))
-        CompletionStat("EJERCICIOS", totalExercises.toString(), Modifier.weight(1f))
+        CompletionStat("ENTRENAMIENTOS", completedWorkouts.toString(), Modifier.weight(1f), Icons.Filled.CalendarMonth)
+        CompletionStat("EJERCICIOS", totalExercises.toString(), Modifier.weight(1f), Icons.Filled.SportsGymnastics)
     }
-    val completionRatio = if (totalWorkouts > 0) (completedWorkouts.toFloat() / totalWorkouts).coerceIn(0f, 1f) else 1f
-    val animatedRatio by animateFloatAsState(completionRatio, animationSpec = tween(800, delayMillis = 180))
-    RoundedCompletionProgress(animatedRatio, Modifier.fillMaxWidth().padding(top = 18.dp).height(10.dp))
-    Text("Ya no quedan sesiones pendientes en este plan.", Modifier.padding(top = 18.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
 
 @Composable
-private fun MesocycleCompletedCelebration(onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
+private fun MesocycleCompletedCelebration(mesocycleIndex: Int, cycleLength: Int, onContinue: () -> Unit) = CelebrationFrame(onContinue = onContinue) {
     Spacer(Modifier.weight(1f))
-    Text("◆", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
+    Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(54.dp), tint = WildforceThemeTokens.textPrimary)
+        Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.size(38.dp), tint = Color.Yellow)
+        Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(54.dp), tint = WildforceThemeTokens.textPrimary)
+    }
     Text("MESOCICLO COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text(
+        if (mesocycleIndex > 0) "Mesociclo $mesocycleIndex completado" else "Mesociclo completado",
+        color = WildforceThemeTokens.textSecondary,
+        textAlign = TextAlign.Center,
+    )
+    Row(Modifier.fillMaxWidth().padding(top = 24.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        CompletionStat("MESOCICLO", if (mesocycleIndex > 0) mesocycleIndex.toString() else "—", Modifier.weight(1f), Icons.Filled.Repeat)
+        CompletionStat("PLANES", if (cycleLength > 0) cycleLength.toString() else "—", Modifier.weight(1f), Icons.Filled.CalendarMonth)
+    }
     Text("Has completado todas las semanas del ciclo. Tu progresión está lista para el siguiente bloque.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
@@ -416,7 +536,7 @@ private fun PlanGeneratorCelebration(onDone: () -> Unit, onGenerateNextPlan: () 
     onSecondary = onDone,
 ) {
     Spacer(Modifier.weight(1f))
-    Text("＋", style = MaterialTheme.typography.h1, color = WildforceThemeTokens.accentGold)
+    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(76.dp), tint = WildforceThemeTokens.accent)
     Text("SIGUIENTE PLAN", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text("Genera la siguiente semana manteniendo tu progresión, historial y feedback.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
@@ -440,7 +560,6 @@ private fun NotificationEducationCelebration(context: Context, onContinue: () ->
 ) {
     Spacer(Modifier.weight(1f))
     NotificationStackMockup()
-    Text("🔔", style = MaterialTheme.typography.h1)
     Text("MANTÉN LA CONSTANCIA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text("Activa recordatorios antes de tus entrenamientos y avisos cuando termine un descanso.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
@@ -464,7 +583,7 @@ private fun NotificationStackMockup() {
                     }
                     .clip(RoundedCornerShape(16.dp)).background(WildforceThemeTokens.backgroundSecondary.copy(alpha = .94f)).padding(12.dp),
             ) {
-                Text("🔔", style = MaterialTheme.typography.body1)
+                Icon(Icons.Filled.Notifications, contentDescription = null, modifier = Modifier.size(24.dp), tint = WildforceThemeTokens.accent)
                 Column(Modifier.padding(start = 30.dp)) {
                     Text("Hora de entrenar", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption)
                     Text("Tu yo futuro te lo agradecerá.", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption, maxLines = 1)
@@ -478,7 +597,7 @@ private fun NotificationStackMockup() {
 private fun ConfettiOverlay(intensity: Float) {
     val transition = rememberInfiniteTransition(label = "completion-confetti")
     val time by transition.animateFloat(0f, 1f, infiniteRepeatable(tween(4_400, easing = LinearEasing)), label = "completion-confetti-time")
-    val colors = listOf(WildforceThemeTokens.accentGold, Color(0xFFFF9800), Color(0xFFFFEB3B), Color(0xFF43A047), Color(0xFFE53935))
+    val colors = listOf(WildforceThemeTokens.accent, Color(0xFFFF9800), Color(0xFFFFEB3B), Color(0xFF43A047), Color(0xFFE53935))
     Canvas(Modifier.fillMaxSize()) {
         repeat((18 * intensity).toInt()) { index ->
             val seed = (index + 1).toFloat()
@@ -513,7 +632,7 @@ private fun RateAppCelebration(context: Context, onContinue: () -> Unit) = Celeb
     onSecondary = onContinue,
 ) {
     Spacer(Modifier.weight(1f))
-    Text("♥", style = MaterialTheme.typography.h1, color = Color(0xFFE53935))
+    Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color(0xFFE53935))
     Text("¿TE GUSTA TU PROGRESO?", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text("Si disfrutas Double Triangle, dedica un momento a valorarla en Google Play.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
@@ -524,7 +643,7 @@ private fun CelebrationFrame(buttonLabel: String = "CONTINUAR", onContinue: () -
     var entered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { entered = true }
     Column(
-        Modifier.fillMaxSize().liquidGlassBackground().background(Brush.radialGradient(listOf(WildforceThemeTokens.accentGold.copy(alpha = 0.10f), Color.Transparent))).padding(24.dp),
+        Modifier.fillMaxSize().liquidGlassBackground().background(Brush.radialGradient(listOf(WildforceThemeTokens.accent.copy(alpha = 0.10f), Color.Transparent))).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // The iOS finish flow reveals the celebration content progressively.
@@ -542,7 +661,7 @@ private fun CelebrationFrame(buttonLabel: String = "CONTINUAR", onContinue: () -
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             secondaryLabel?.let { label ->
                 OutlinedButton(onClick = onSecondary, modifier = Modifier.fillMaxWidth().height(48.dp), shape = RoundedCornerShape(16.dp)) {
-                    Text(label, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accentGold)
+                    Text(label, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accent)
                 }
             }
             Button(onClick = onContinue, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) {
@@ -553,8 +672,11 @@ private fun CelebrationFrame(buttonLabel: String = "CONTINUAR", onContinue: () -
 }
 
 @Composable
-private fun CompletionStat(title: String, value: String, modifier: Modifier) {
-    Column(modifier.liquidGlass(RoundedCornerShape(15.dp)).padding(13.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+private fun CompletionStat(title: String, value: String, modifier: Modifier, icon: ImageVector? = null) {
+    Column(modifier.liquidGlass(RoundedCornerShape(15.dp)).padding(13.dp), horizontalAlignment = Alignment.Start) {
+        icon?.let {
+            Icon(it, contentDescription = null, modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.accent)
+        }
         Text(value, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
         Text(title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
@@ -563,13 +685,11 @@ private fun CompletionStat(title: String, value: String, modifier: Modifier) {
 @Composable
 private fun RoundedCompletionProgress(progress: Float, modifier: Modifier) {
     Box(modifier.clip(RoundedCornerShape(50)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.16f))) {
-        Box(Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).fillMaxHeight().clip(RoundedCornerShape(50)).background(WildforceThemeTokens.accentGold))
+        Box(Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).fillMaxHeight().clip(RoundedCornerShape(50)).background(WildforceThemeTokens.accent))
     }
 }
 
 private fun dominantFeedback(feedback: Map<Int, String>): String = feedback.values.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: "SIN DATOS"
-private fun formatCompletionClock(seconds: Int): String = if (seconds >= 3600) "%d:%02d:%02d".format(seconds / 3600, seconds / 60 % 60, seconds % 60) else "%d:%02d".format(seconds / 60, seconds % 60)
-
 private fun shouldShowNotificationEducation(context: Context): Boolean =
     !WorkoutNotificationPreferences.completionEducationSeen(context) &&
         Build.VERSION.SDK_INT >= 33 &&

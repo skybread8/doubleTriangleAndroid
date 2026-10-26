@@ -21,8 +21,10 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.ParcelUuid
 import android.util.Log
+import org.json.JSONArray
 import org.json.JSONObject
 import java.nio.charset.StandardCharsets
+import java.util.Base64
 import java.util.UUID
 
 /**
@@ -48,6 +50,14 @@ internal object WildforceWatchBridge {
         val restRemaining: Int?,
         val restInitialSeconds: Int,
         val elapsedSeconds: Int,
+        val isSummary: Boolean = false,
+        val pendingFeedback: Boolean = false,
+        val selectedFeedback: String = "JUSTO",
+        val durationMinutes: Int? = null,
+        val distanceKm: Double? = null,
+        val pathExercises: List<String> = emptyList(),
+        val setStyleLabel: String = "",
+        val setStyleDetails: List<String> = emptyList(),
     ) {
         /**
          * One ATT-sized frame. Zepp's central can deliver a partial value for
@@ -56,8 +66,34 @@ internal object WildforceWatchBridge {
          */
         fun toWire(): String = listOf(
             exerciseIndex, exerciseCount, setNumber, targetSets, reps,
-            (weightKg * 2).toInt(), restRemaining ?: -1,
+            (weightKg * 2).toInt(), restRemaining ?: -1, if (isSummary) 1 else 0,
+            if (pendingFeedback) 1 else 0, feedbackCode(selectedFeedback),
+            durationMinutes ?: -1, distanceKm?.let { (it * 10).toInt() } ?: -1,
         ).joinToString("|")
+
+        private fun feedbackCode(value: String): Int = when (value) {
+            "MUY FÁCIL" -> 0
+            "FÁCIL" -> 1
+            "JUSTO" -> 2
+            "DIFÍCIL" -> 3
+            "MUY DIFÍCIL" -> 4
+            else -> 2
+        }
+
+        /** Human-readable labels live in a separate characteristic so the
+         * compact numeric Zepp frame remains backward compatible. */
+        fun toMetadataWire(): String {
+            val fields = mutableListOf(workoutTitle, exerciseName)
+            // Keep the original two-field frame for older callers and only
+            // append the optional Watch pages when the phone has metadata to
+            // publish. This preserves the established BLE contract while
+            // allowing the iOS-equivalent path/style pages to opt in.
+            if (pathExercises.isNotEmpty() || setStyleLabel.isNotBlank() || setStyleDetails.isNotEmpty()) {
+                fields += JSONArray().apply { pathExercises.forEach(::put) }.toString()
+                fields += JSONObject().put("label", setStyleLabel).put("details", JSONArray().apply { setStyleDetails.forEach(::put) }).toString()
+            }
+            return fields.joinToString("|") { Base64.getEncoder().withoutPadding().encodeToString(it.toByteArray(StandardCharsets.UTF_8)) }
+        }
     }
 
     data class Command(
@@ -65,6 +101,10 @@ internal object WildforceWatchBridge {
         val reps: Int? = null,
         val weightKg: Double? = null,
         val seconds: Int? = null,
+        val feedback: String? = null,
+        val durationMinutes: Int? = null,
+        val distanceKm: Double? = null,
+        val motion: WatchMotionSnapshotData? = null,
     )
 
     @Volatile var state: State? = null
@@ -112,6 +152,11 @@ internal class WildforceWatchBleService : Service() {
         BluetoothGattCharacteristic.PROPERTY_WRITE,
         BluetoothGattCharacteristic.PERMISSION_WRITE,
     )
+    private val metadataCharacteristic = BluetoothGattCharacteristic(
+        METADATA_UUID,
+        BluetoothGattCharacteristic.PROPERTY_READ,
+        BluetoothGattCharacteristic.PERMISSION_READ,
+    )
 
     private val callback = object : BluetoothGattServerCallback() {
         override fun onServiceAdded(status: Int, service: BluetoothGattService) {
@@ -123,14 +168,19 @@ internal class WildforceWatchBleService : Service() {
             Log.d(LOG_TAG, "connection address=${device.address} status=$status state=$newState")
         }
 
+        @Suppress("MissingPermission")
         override fun onCharacteristicReadRequest(device: android.bluetooth.BluetoothDevice, requestId: Int, offset: Int, characteristic: BluetoothGattCharacteristic) {
             Log.d(LOG_TAG, "read uuid=${characteristic.uuid} offset=$offset")
-            if (characteristic.uuid != STATE_UUID) return
-            val payload = (WildforceWatchBridge.state?.toWire() ?: "-").toByteArray(StandardCharsets.UTF_8)
+            val payload = when (characteristic.uuid) {
+                STATE_UUID -> (WildforceWatchBridge.state?.toWire() ?: "-").toByteArray(StandardCharsets.UTF_8)
+                METADATA_UUID -> (WildforceWatchBridge.state?.toMetadataWire() ?: "|").toByteArray(StandardCharsets.UTF_8)
+                else -> return
+            }
             val response = if (offset in 0..payload.size) payload.copyOfRange(offset, payload.size) else byteArrayOf()
             gattServer?.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, response)
         }
 
+        @Suppress("MissingPermission")
         override fun onCharacteristicWriteRequest(
             device: android.bluetooth.BluetoothDevice,
             requestId: Int,
@@ -181,6 +231,7 @@ internal class WildforceWatchBleService : Service() {
         val added = server.addService(BluetoothGattService(SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY).apply {
             addCharacteristic(stateCharacteristic)
             addCharacteristic(commandCharacteristic)
+            addCharacteristic(metadataCharacteristic)
         })
         gattServer = server
         if (!added) {
@@ -201,6 +252,7 @@ internal class WildforceWatchBleService : Service() {
         )
     }
 
+    @Suppress("MissingPermission")
     override fun onDestroy() {
         runCatching { advertiser?.stopAdvertising(advertiseCallback) }
         runCatching { gattServer?.close() }
@@ -214,16 +266,47 @@ internal class WildforceWatchBleService : Service() {
         val wire = String(bytes, StandardCharsets.UTF_8)
         when {
             wire == "c" -> WildforceWatchBridge.Command(operation = "complete_set")
+            wire == "s" -> WildforceWatchBridge.Command(operation = "skip_rest")
+            wire == "a" -> WildforceWatchBridge.Command(operation = "add_rest", seconds = 30)
             wire.startsWith("r|") -> WildforceWatchBridge.Command(operation = "set_reps", reps = wire.substringAfter('|').toInt())
             wire.startsWith("w|") -> WildforceWatchBridge.Command(operation = "set_weight", weightKg = wire.substringAfter('|').toInt() / 2.0)
+            wire.startsWith("f|") -> WildforceWatchBridge.Command(operation = "set_feedback", feedback = wire.substringAfter('|'))
+            wire == "fc" -> WildforceWatchBridge.Command(operation = "complete_feedback")
+            wire.startsWith("d|") -> WildforceWatchBridge.Command(operation = "set_duration", durationMinutes = wire.substringAfter('|').toInt())
+            wire.startsWith("x|") -> WildforceWatchBridge.Command(operation = "set_distance", distanceKm = wire.substringAfter('|').toInt() / 10.0)
+            wire.startsWith("m|") -> parseMotionCommand(wire)
             else -> null
         }
     }.getOrNull()
+
+    private fun parseMotionCommand(wire: String): WildforceWatchBridge.Command? {
+        val fields = wire.split('|', limit = 5)
+        if (fields.size < 4) return null
+        val reps = fields.getOrNull(4).orEmpty().split(';').mapNotNull { encoded ->
+            val values = encoded.split(',')
+            if (values.size != 3) return@mapNotNull null
+            WatchMotionRepData(
+                durationMillis = values[0].toIntOrNull() ?: return@mapNotNull null,
+                rangeOfMotionPermille = values[1].toIntOrNull() ?: return@mapNotNull null,
+                velocityCode = values[2].toIntOrNull() ?: return@mapNotNull null,
+            )
+        }
+        return WildforceWatchBridge.Command(
+            operation = "motion",
+            motion = WatchMotionSnapshotData(
+                statusCode = fields[1].toIntOrNull() ?: return null,
+                autoDetectedRepCount = fields[2].toIntOrNull() ?: return null,
+                confidencePermille = fields[3].toIntOrNull()?.takeIf { it >= 0 },
+                reps = reps,
+            ),
+        )
+    }
 
     private companion object {
         const val LOG_TAG = "WildforceBle"
         val SERVICE_UUID: UUID = UUID.fromString("25e3a160-6c4d-4d73-9b4c-7b5bfeacf001")
         val STATE_UUID: UUID = UUID.fromString("25e3a161-6c4d-4d73-9b4c-7b5bfeacf001")
         val COMMAND_UUID: UUID = UUID.fromString("25e3a162-6c4d-4d73-9b4c-7b5bfeacf001")
+        val METADATA_UUID: UUID = UUID.fromString("25e3a163-6c4d-4d73-9b4c-7b5bfeacf001")
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,7 +25,11 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.Composable
@@ -37,7 +42,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
@@ -46,30 +54,40 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.MesocyclePhase
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 private data class MesocycleTimelineEntry(
     val state: WorkoutHubState?, val position: Int, val phase: MesocyclePhase, val phaseWeek: Int,
-    val isCurrent: Boolean, val isPast: Boolean, val isProjected: Boolean,
+    val isCurrent: Boolean, val isPast: Boolean, val isProjected: Boolean, val isCompleted: Boolean, val startsOn: String?,
 )
 
 private data class MesocycleTimelineGroup(val index: Int, val cycleLength: Int, val entries: List<MesocycleTimelineEntry>)
 
 /** Android counterpart of iOS WorkoutMesocycleDetailView. */
 @Composable
-internal fun WorkoutMesocycleDetailScreen(state: WorkoutHubState, planHistory: List<WorkoutHubState>, contentPadding: PaddingValues, onBack: () -> Unit) {
+internal fun WorkoutMesocycleDetailScreen(state: WorkoutHubState, planHistory: List<WorkoutHubState>, contentPadding: PaddingValues, appLanguage: String = "Español", onBack: () -> Unit) {
     var expandedHistory by remember { mutableStateOf(setOf<Int>()) }
     val currentGroup = remember(state, planHistory) { currentMesocycleGroup(state, planHistory) }
     val previousGroups = remember(state, planHistory) { previousMesocycleGroups(state, planHistory) }
     val currentEntry = currentGroup.entries.firstOrNull { it.isCurrent }
 
-    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(contentPadding)) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .liquidGlassBackground()
+            .padding(contentPadding)
+            // The timeline keeps its own trailing scroll space while the
+            // page background remains visible beneath the floating controls.
+    ) {
         // iOS presents this as a sheet with a trailing Done action.
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Spacer(Modifier.weight(1f))
-            Text("HECHO", Modifier.clickable(onClick = onBack).padding(8.dp), color = WildforceThemeTokens.accentGold, fontWeight = FontWeight.Bold)
+            Text("HECHO", Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Hecho" }.clickable(onClick = onBack).padding(horizontal = 8.dp), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
         }
         LazyColumn(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 160.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-            item { MesocycleSummaryCard(state, currentGroup, currentEntry) }
+            item { MesocycleSummaryCard(state, currentGroup, currentEntry, appLanguage) }
             item { DetailSectionHeader("Mesociclo actual", "Tu posición actual dentro del ciclo activo.") }
             item { MesocycleGroupCard(currentGroup, currentGroup.entries.any { it.isProjected }) }
             if (previousGroups.isNotEmpty()) {
@@ -88,7 +106,7 @@ internal fun WorkoutMesocycleDetailScreen(state: WorkoutHubState, planHistory: L
 }
 
 @Composable
-private fun MesocycleSummaryCard(state: WorkoutHubState, group: MesocycleTimelineGroup, currentEntry: MesocycleTimelineEntry?) {
+private fun MesocycleSummaryCard(state: WorkoutHubState, group: MesocycleTimelineGroup, currentEntry: MesocycleTimelineEntry?, appLanguage: String) {
     val currentWeek = currentEntry?.position ?: state.positionInCycle.coerceIn(1, group.cycleLength)
     val phase = currentEntry?.phase ?: state.mesocyclePhase ?: phaseForMesocycleWeek(currentWeek, group.cycleLength)
     val phaseWeek = currentEntry?.phaseWeek ?: state.phaseWeek
@@ -99,13 +117,44 @@ private fun MesocycleSummaryCard(state: WorkoutHubState, group: MesocycleTimelin
         MesocyclePillProgress(currentWeek, group.cycleLength)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             // The Android state only carries the goal display name; iOS resolves its specific goal symbol.
-            ContextPill(state.user.goal, "▲")
-            ContextPill("Activo", Icons.Filled.CheckCircle)
+            val goal = state.planGoal ?: state.user.goal
+            ContextPill(localizedWorkoutLabel(goal, appLanguage), goalIcon(goal))
+            state.bodyCompositionPhase
+                ?.takeIf(String::isNotBlank)
+                ?.let { rawPhase ->
+                    ContextPill(
+                        localizedWorkoutLabel(bodyCompositionPhaseLabel(rawPhase), appLanguage),
+                        bodyCompositionPhaseIcon(rawPhase),
+                    )
+                }
+            ContextPill(localizedWorkoutLabel(state.planStatus, appLanguage), Icons.Filled.CheckCircle)
         }
         Spacer(Modifier.height(4.dp))
         DetailMetric("Esta semana", state.planName)
         DetailMetric("Cronología", "${phase.label} · semana $phaseWeek", phaseIcon(phase))
+        formatMesocycleSummaryStartDate(state.planStartsOn, appLanguage)?.let { startsOn ->
+            DetailMetric(localizedWorkoutLabel("Start date", appLanguage), startsOn, Icons.Filled.CalendarToday)
+        }
     }
+}
+
+private fun bodyCompositionPhaseLabel(rawValue: String): String = when (
+    rawValue.trim().lowercase(Locale.ROOT).replace("_", "").replace("-", "").replace(" ", "")
+) {
+    "automatic", "automático", "automatico" -> "Automatic"
+    "bulk", "volumen" -> "Bulk"
+    "cut", "definición", "definicion" -> "Cut"
+    "maintain", "mantenimiento" -> "Maintain"
+    else -> rawValue.trim()
+}
+
+private fun bodyCompositionPhaseIcon(rawValue: String): ImageVector = when (
+    rawValue.trim().lowercase(Locale.ROOT)
+) {
+    "bulk", "volumen" -> Icons.Filled.ArrowUpward
+    "cut", "definición", "definicion" -> Icons.Filled.ArrowDownward
+    "maintain", "mantenimiento" -> Icons.Filled.Equalizer
+    else -> Icons.Filled.AutoAwesome
 }
 
 /** Matches iOS's compact capsule progress bar, including its taller current week. */
@@ -129,7 +178,7 @@ private fun DetailMetric(title: String, value: String, icon: ImageVector? = null
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(title, Modifier.weight(1f), style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.Medium, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
         icon?.let { Icon(it, null, Modifier.padding(end = 6.dp).size(16.dp), WildforceThemeTokens.textSecondary) }
-        Text(value, Modifier.widthIn(max = 160.dp), style = MaterialTheme.typography.subtitle2, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(value, Modifier.widthIn(max = 204.dp), style = MaterialTheme.typography.subtitle2, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.End, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -141,7 +190,7 @@ private fun DetailSectionHeader(title: String, subtitle: String) = Column(vertic
 
 @Composable
 private fun CollapsibleMesocycleGroupCard(group: MesocycleTimelineGroup, expanded: Boolean, onToggle: () -> Unit) {
-    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).clickable(onClick = onToggle).padding(16.dp)) {
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).semantics { contentDescription = "Mesociclo ${group.index}, ${if (expanded) "desplegado" else "plegado"}" }.clickable(onClick = onToggle).padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             MesocycleGroupHeader(group, false, Modifier.weight(1f))
             Icon(if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, null, tint = WildforceThemeTokens.textSecondary)
@@ -163,7 +212,7 @@ private fun MesocycleGroupHeader(group: MesocycleTimelineGroup, showProjectedBad
         Text("Mesociclo ${group.index}", fontFamily = Exo2FontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
         Text("${group.cycleLength} semanas", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
-    if (showProjectedBadge) ContextPill("Proyectado", "•")
+    if (showProjectedBadge) ContextPill("Proyectado", Icons.Filled.AutoAwesome)
 }
 
 @Composable
@@ -182,15 +231,16 @@ private fun MesocycleEntryRow(entry: MesocycleTimelineEntry) {
             entry.isProjected -> WildforceThemeTokens.textSecondary.copy(alpha = .14f)
             else -> WildforceThemeTokens.textSecondary.copy(alpha = .44f)
         }), contentAlignment = Alignment.Center) {
-            Text(if (entry.isPast) "✓" else entry.position.toString(), fontWeight = FontWeight.Bold, color = Color.White)
+            if (entry.isCompleted) Icon(Icons.Filled.CheckCircle, contentDescription = "Completado", modifier = Modifier.size(18.dp), tint = Color.White)
+            else Text(entry.position.toString(), fontWeight = FontWeight.Bold, color = Color.White)
         }
         Column(Modifier.weight(1f).padding(start = 14.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(if (entry.isProjected) "Próximamente" else entry.state?.planName.orEmpty(), style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(if (entry.isProjected) "Próximamente" else entry.state?.planName.orEmpty(), style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Text("${entry.phase.label} · semana ${entry.phaseWeek}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
-            if (!entry.isProjected && entry.state != null) {
+            formatMesocycleStartDate(entry.startsOn)?.let { startsOn ->
                 Row(Modifier.padding(top = 5.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.CalendarToday, null, Modifier.size(14.dp), WildforceThemeTokens.textSecondary)
-                    Text("Semana ${entry.position}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    Text(startsOn, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 }
             }
         }
@@ -208,7 +258,17 @@ private fun currentMesocycleGroup(current: WorkoutHubState, history: List<Workou
     return MesocycleTimelineGroup(current.mesocycleIndex, cycleLength, (1..cycleLength).map { position ->
         val plan = saved[position]
         val phase = plan?.mesocyclePhase ?: phaseForMesocycleWeek(position, cycleLength)
-        MesocycleTimelineEntry(plan, position, phase, plan?.phaseWeek ?: phaseWeek(position, phase, cycleLength), position == currentPosition, position < currentPosition, plan == null && position > currentPosition)
+        MesocycleTimelineEntry(
+            state = plan,
+            position = position,
+            phase = phase,
+            phaseWeek = plan?.phaseWeek ?: phaseWeek(position, phase, cycleLength),
+            isCurrent = position == currentPosition,
+            isPast = position < currentPosition,
+            isProjected = plan == null && position > currentPosition,
+            isCompleted = position < currentPosition && isCompletedPlanStatus(plan?.planStatus),
+            startsOn = plan?.planStartsOn,
+        )
     })
 }
 
@@ -218,9 +278,47 @@ private fun previousMesocycleGroups(current: WorkoutHubState, history: List<Work
         MesocycleTimelineGroup(index, cycleLength, plans.sortedBy { it.positionInCycle }.map { plan ->
             val position = plan.positionInCycle.coerceIn(1, cycleLength)
             val phase = plan.mesocyclePhase ?: phaseForMesocycleWeek(position, cycleLength)
-            MesocycleTimelineEntry(plan, position, phase, plan.phaseWeek, false, true, false)
+            MesocycleTimelineEntry(
+                state = plan,
+                position = position,
+                phase = phase,
+                phaseWeek = plan.phaseWeek,
+                isCurrent = false,
+                isPast = true,
+                isProjected = false,
+                isCompleted = isCompletedPlanStatus(plan.planStatus),
+                startsOn = plan.planStartsOn,
+            )
         })
     }
+
+internal fun isCompletedPlanStatus(status: String?): Boolean = status.equals("completed", ignoreCase = true)
+
+internal fun formatMesocycleStartDate(value: String?): String? {
+    val raw = value?.trim()?.substringBefore('T')?.substringBefore(' ')
+    val date = raw?.takeIf { it.isNotBlank() }?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return null
+    return date.format(DateTimeFormatter.ofPattern("MMM d", Locale.getDefault()))
+}
+
+private fun formatMesocycleSummaryStartDate(value: String?, appLanguage: String): String? {
+    val raw = value?.trim()?.substringBefore('T')?.substringBefore(' ')
+    val date = raw?.takeIf { it.isNotBlank() }?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return null
+    val locale = Locale.forLanguageTag(
+        when (appLanguage) {
+            "English" -> "en"
+            "Català" -> "ca"
+            "Français" -> "fr"
+            "Italiano" -> "it"
+            "Português" -> "pt"
+            "Deutsch" -> "de"
+            "中文（简体）" -> "zh-Hans"
+            "Nederlands" -> "nl"
+            "日本語" -> "ja"
+            else -> "es"
+        },
+    )
+    return date.format(DateTimeFormatter.ofPattern("EEE, d MMM", locale))
+}
 
 private fun phaseWeek(week: Int, phase: MesocyclePhase, totalWeeks: Int): Int = when (phase) {
     MesocyclePhase.Accumulation -> week

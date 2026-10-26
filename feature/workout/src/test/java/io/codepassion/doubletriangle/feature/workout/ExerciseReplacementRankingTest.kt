@@ -15,6 +15,34 @@ class ExerciseReplacementRankingTest {
     )
 
     @Test
+    fun `catalogues bicycle crunch muscles like iOS`() {
+        assertEquals(listOf("Abdominales"), ExerciseVisualCatalog.primaryMuscleLabels("bicycleCrunch"))
+        assertEquals(listOf("Oblicuos"), ExerciseVisualCatalog.metadata("bicycleCrunch")?.secondary?.map { it.label })
+    }
+
+    @Test
+    fun `catalogues canonical iOS exercise identifiers`() {
+        assertEquals(listOf("Pecho"), ExerciseVisualCatalog.primaryMuscleLabels("barbellBenchPress"))
+        assertEquals(listOf("Espalda"), ExerciseVisualCatalog.primaryMuscleLabels("barbellBentOverRow"))
+        assertEquals(listOf("Hombros"), ExerciseVisualCatalog.primaryMuscleLabels("barbellOverheadPress"))
+        assertEquals(listOf("Isquiotibiales", "Glúteos"), ExerciseVisualCatalog.primaryMuscleLabels("barbellRomanianDeadlift"))
+        assertEquals(listOf("Pecho"), ExerciseVisualCatalog.primaryMuscleLabels("dumbbellChestFly"))
+        assertEquals(listOf("Isquiotibiales"), ExerciseVisualCatalog.primaryMuscleLabels("lyingLegCurl"))
+    }
+
+    @Test
+    fun `catalogues unilateral metadata like iOS`() {
+        assertEquals(true, ExerciseVisualCatalog.isUnilateral("walkingLunge"))
+        assertEquals(true, ExerciseVisualCatalog.isUnilateral("sidePlank"))
+        assertEquals(false, ExerciseVisualCatalog.isUnilateral("bicycleCrunch"))
+    }
+
+    @Test
+    fun `does not show weight controls for bicycle crunch`() {
+        assertFalse(exerciseTracksWeight(ExerciseSummary("Bicycle Crunch", "bicycleCrunch", 3, "12", 60)))
+    }
+
+    @Test
     fun `uses iOS candidate order and removes the original exercise`() {
         val replacing = ExerciseSummary("Sentadilla con barra", "barbellBackSquat", 3, "8", 90)
 

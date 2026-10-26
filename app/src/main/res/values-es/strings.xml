@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Wildforce</string>
+    <string name="widget_workout_description">Consulta el entrenamiento de hoy y tu racha.</string>
+    <string name="widget_nutrition_description">Controla las calorías y macronutrientes de hoy.</string>
+    <string name="preview_new_plan">PREVISUALIZAR NUEVO PLAN</string>
+    <string name="plan_progress">Plan %1$d · Mesociclo %2$d · Semana %3$d/%4$d</string>
+    <string name="plan_preview_workout">• %1$s: %2$s · %3$d ejercicios · %4$d min</string>
+    <string name="use_this_plan">USAR ESTE PLAN</string>
+    <string name="cancel">CANCELAR</string>
+    <string name="coming_soon">%1$s\nPróximamente</string>
+    <string name="creating_next_plan">CREANDO TU SIGUIENTE PLAN</string>
+    <string name="exit_app_title">¿SALIR DE LA APLICACIÓN?</string>
+    <string name="exit_app_message">¿Seguro que quieres salir de Wildforce?</string>
+    <string name="exit">SALIR</string>
+    <string name="workout_reminder_body">Tu entrenamiento «%1$s» empieza en 30 minutos.</string>
+</resources>

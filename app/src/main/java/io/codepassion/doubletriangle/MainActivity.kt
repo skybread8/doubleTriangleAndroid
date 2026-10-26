@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
@@ -30,39 +28,51 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Scaffold
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.core.tween
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.TextButton
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.SportsGymnastics
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.MeetingRoom
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.ArrowCircleDown
+import androidx.compose.material.icons.filled.ArrowCircleUp
+import androidx.compose.material.icons.filled.AccessibilityNew
+import androidx.compose.material.icons.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Hotel
+import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.CenterFocusStrong
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.Composable
@@ -75,13 +85,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -92,6 +110,8 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.WeightRecord
+import androidx.health.connect.client.records.BodyFatRecord
+import androidx.health.connect.client.records.LeanBodyMassRecord
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.Lifecycle
@@ -100,18 +120,23 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.core.view.WindowCompat
 import android.graphics.Color as AndroidColor
+import java.util.Locale
 import io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository
+import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.UserSummary
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutHubState
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import io.codepassion.doubletriangle.core.model.isPlanFinalized
+import io.codepassion.doubletriangle.core.model.withPlanCompletionStatus
 import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
 import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.designsystem.PlanGenerationAnimation
 import io.codepassion.doubletriangle.feature.onboarding.BodyCompositionPhase
+import io.codepassion.doubletriangle.feature.onboarding.BodyMetricsStore
+import io.codepassion.doubletriangle.feature.onboarding.ImportedBodyMetric
 import io.codepassion.doubletriangle.feature.onboarding.Equipment
 import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
 import io.codepassion.doubletriangle.feature.onboarding.Gender
@@ -129,15 +154,22 @@ import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingPlanPreview
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingScreen
 import io.codepassion.doubletriangle.feature.onboarding.saveAuthenticatedAccount
+import io.codepassion.doubletriangle.feature.onboarding.SubscriptionAccessStore
+import io.codepassion.doubletriangle.feature.onboarding.subscriptionAccess
+import io.codepassion.doubletriangle.feature.onboarding.clearLocalAccountData
 import io.codepassion.doubletriangle.feature.onboarding.ProfileScreen
 import io.codepassion.doubletriangle.feature.onboarding.SubscriptionPaywall
+import io.codepassion.doubletriangle.feature.onboarding.SubscriptionTier
 import io.codepassion.doubletriangle.feature.workout.ActiveWorkoutScreen
 import io.codepassion.doubletriangle.feature.workout.CompletionProgressStore
+import io.codepassion.doubletriangle.feature.workout.ExerciseGuideScreen
 import io.codepassion.doubletriangle.feature.workout.ExerciseVisualCatalog
+import io.codepassion.doubletriangle.feature.workout.exerciseDisplayName
 import io.codepassion.doubletriangle.feature.workout.WorkoutDetailScreen
 import io.codepassion.doubletriangle.feature.workout.CustomWorkoutStore
 import io.codepassion.doubletriangle.feature.workout.WorkoutHubScreen
 import io.codepassion.doubletriangle.feature.workout.WorkoutAnalyticsStore
+import io.codepassion.doubletriangle.feature.workout.WorkoutCompletionMetricsStore
 import io.codepassion.doubletriangle.feature.workout.WorkoutSessionStore
 import io.codepassion.doubletriangle.feature.workout.RemoteTrainingImage
 import io.codepassion.doubletriangle.feature.workout.exerciseImageUrl
@@ -148,9 +180,125 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 
+/** Reads the complete dated body-metric history for the manual Profile sync. */
+private suspend fun readHealthConnectBodyMetricHistory(
+    context: android.content.Context,
+    granted: Set<String>,
+): List<ImportedBodyMetric> {
+    val client = HealthConnectClient.getOrCreate(context)
+    val timeRange = TimeRangeFilter.before(Instant.now())
+    val zone = java.time.ZoneId.systemDefault()
+    val byDate = sortedMapOf<java.time.LocalDate, ImportedBodyMetric>()
+
+    fun update(date: java.time.LocalDate, change: (ImportedBodyMetric) -> ImportedBodyMetric) {
+        val key = date.toString()
+        byDate[date] = change(byDate[date] ?: ImportedBodyMetric(key))
+    }
+
+    val heights = if (HealthPermission.getReadPermission(HeightRecord::class) in granted) {
+        runCatching {
+            client.readRecords(
+                ReadRecordsRequest(HeightRecord::class, timeRangeFilter = timeRange, ascendingOrder = true),
+            ).records
+        }.getOrDefault(emptyList())
+    } else emptyList()
+    heights.forEach { record ->
+        update(record.time.atZone(zone).toLocalDate()) { it.copy(heightCm = record.height.inMeters * 100.0) }
+    }
+
+    val weights = if (HealthPermission.getReadPermission(WeightRecord::class) in granted) {
+        runCatching {
+            client.readRecords(
+                ReadRecordsRequest(WeightRecord::class, timeRangeFilter = timeRange, ascendingOrder = true),
+            ).records
+        }.getOrDefault(emptyList())
+    } else emptyList()
+    weights.forEach { record ->
+        update(record.time.atZone(zone).toLocalDate()) { it.copy(weightKg = record.weight.inKilograms) }
+    }
+
+    val bodyFat = if (HealthPermission.getReadPermission(BodyFatRecord::class) in granted) {
+        runCatching {
+            client.readRecords(
+                ReadRecordsRequest(BodyFatRecord::class, timeRangeFilter = timeRange, ascendingOrder = true),
+            ).records
+        }.getOrDefault(emptyList())
+    } else emptyList()
+    bodyFat.forEach { record ->
+        update(record.time.atZone(zone).toLocalDate()) { it.copy(bodyFatPercentage = record.percentage.value) }
+    }
+
+    val leanMass = if (HealthPermission.getReadPermission(LeanBodyMassRecord::class) in granted) {
+        runCatching {
+            client.readRecords(
+                ReadRecordsRequest(LeanBodyMassRecord::class, timeRangeFilter = timeRange, ascendingOrder = true),
+            ).records
+        }.getOrDefault(emptyList())
+    } else emptyList()
+    leanMass.forEach { record ->
+        update(record.time.atZone(zone).toLocalDate()) { it.copy(leanBodyMassKg = record.mass.inKilograms) }
+    }
+
+    return byDate.values.toList()
+}
+
+/** Android counterpart of iOS FullFocusModeManager's workout shield lifecycle. */
+private object AndroidFullFocusModeManager {
+    private const val DETAIL_PREFERENCES = "wildforce_profile_details"
+    private const val RUNTIME_PREFERENCES = "wildforce_full_focus_runtime"
+    private const val PREVIOUS_FILTER = "previous_interruption_filter"
+    private const val APPLIED = "interruption_filter_applied"
+
+    fun reconcile(context: android.content.Context, hasActiveWorkout: Boolean) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
+
+        val detailPreferences = context.getSharedPreferences(DETAIL_PREFERENCES, android.content.Context.MODE_PRIVATE)
+        val runtimePreferences = context.getSharedPreferences(RUNTIME_PREFERENCES, android.content.Context.MODE_PRIVATE)
+        val notificationManager = context.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        val wasApplied = runtimePreferences.getBoolean(APPLIED, false)
+
+        if (!hasActiveWorkout || !detailPreferences.getBoolean("full_focus", false)) {
+            if (wasApplied) {
+                val previousFilter = runtimePreferences.getInt(PREVIOUS_FILTER, android.app.NotificationManager.INTERRUPTION_FILTER_ALL)
+                runCatching { notificationManager.setInterruptionFilter(previousFilter) }
+                runtimePreferences.edit().remove(PREVIOUS_FILTER).putBoolean(APPLIED, false).apply()
+            }
+            return
+        }
+
+        // Android requires explicit Notification Policy access before an app can
+        // apply Zen Mode. If it is missing, the profile setting remains enabled
+        // and the user can grant it from the settings action beside the toggle.
+        if (!notificationManager.isNotificationPolicyAccessGranted || wasApplied) return
+
+        runtimePreferences.edit()
+            .putInt(PREVIOUS_FILTER, notificationManager.currentInterruptionFilter)
+            .putBoolean(APPLIED, true)
+            .apply()
+        runCatching {
+            notificationManager.setInterruptionFilter(android.app.NotificationManager.INTERRUPTION_FILTER_NONE)
+        }.onFailure {
+            runtimePreferences.edit().remove(PREVIOUS_FILTER).putBoolean(APPLIED, false).apply()
+        }
+    }
+}
+
 class MainActivity : ComponentActivity() {
+    private val requestedRootDestination = androidx.compose.runtime.mutableStateOf<RootDestination?>(null)
+    private val openNutritionLogging = androidx.compose.runtime.mutableStateOf(false)
+    private val openActiveWorkout = androidx.compose.runtime.mutableStateOf(false)
+    private val openWorkoutDetail = androidx.compose.runtime.mutableStateOf(false)
+    private val openBodyMetrics = androidx.compose.runtime.mutableStateOf(false)
+    private val openFeedback = androidx.compose.runtime.mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedRootDestination.value = intent.requestedRootDestination()
+        openNutritionLogging.value = intent.opensNutritionLogging()
+        openActiveWorkout.value = intent.opensActiveWorkout()
+        openWorkoutDetail.value = intent.opensWorkoutDetail()
+        openBodyMetrics.value = intent.opensBodyMetrics()
+        openFeedback.value = intent.opensFeedback()
         val profileLanguage = getSharedPreferences("wildforce_profile", 0).getString("app_language", null)
         val onboardingLanguage = getSharedPreferences("wildforce_profile_details", 0).getString("language", "Español")
         AppLocale.apply(profileLanguage ?: onboardingLanguage)
@@ -168,6 +316,7 @@ class MainActivity : ComponentActivity() {
                 7205,
             )
         }
+        AppQuickActions.refresh(this)
         setContent {
             val systemDarkTheme = isSystemInDarkTheme()
             val savedTheme = remember { getSharedPreferences("wildforce_profile_details", 0).getString("theme", "Sistema") ?: "Sistema" }
@@ -176,16 +325,103 @@ class MainActivity : ComponentActivity() {
                 // navigation-bar inset; applying safeDrawing at the root as
                 // well created an extra bottom gap on devices such as S23 Ultra.
                 Box(Modifier.fillMaxSize().statusBarsPadding()) {
-                    WildforceRoot(onThemeChanged = { recreate() })
+                    WildforceRoot(
+                        requestedDestination = requestedRootDestination.value,
+                        openNutritionLogging = openNutritionLogging.value,
+                        openActiveWorkout = openActiveWorkout.value,
+                        openWorkoutDetail = openWorkoutDetail.value,
+                        openBodyMetrics = openBodyMetrics.value,
+                        openFeedback = openFeedback.value,
+                        onNutritionLoggingOpened = { openNutritionLogging.value = false },
+                        onActiveWorkoutOpened = { openActiveWorkout.value = false },
+                        onWorkoutDetailOpened = { openWorkoutDetail.value = false },
+                        onBodyMetricsOpened = { openBodyMetrics.value = false },
+                        onFeedbackOpened = { openFeedback.value = false },
+                        onThemeChanged = { recreate() },
+                    )
                 }
             }
         }
     }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        requestedRootDestination.value = intent.requestedRootDestination()
+        openNutritionLogging.value = intent.opensNutritionLogging()
+        openActiveWorkout.value = intent.opensActiveWorkout()
+        openWorkoutDetail.value = intent.opensWorkoutDetail()
+        openBodyMetrics.value = intent.opensBodyMetrics()
+        openFeedback.value = intent.opensFeedback()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        AppQuickActions.refresh(this)
+    }
 }
 
-private enum class RootDestination(@param:androidx.annotation.StringRes val labelRes: Int, val icon: ImageVector) {
-    Workout(R.string.destination_workout, Icons.Filled.FitnessCenter), Nutrition(R.string.destination_nutrition, Icons.Filled.Restaurant),
-    Analytics(R.string.destination_analytics, Icons.Filled.BarChart), Gym(R.string.destination_gym, Icons.Filled.MeetingRoom), Profile(R.string.destination_profile, Icons.Filled.AccountCircle),
+private const val EXTRA_OPEN_NUTRITION = "io.codepassion.doubletriangle.OPEN_NUTRITION"
+private const val EXTRA_OPEN_NUTRITION_LOGGING = "io.codepassion.doubletriangle.OPEN_NUTRITION_LOGGING"
+private const val EXTRA_OPEN_ACTIVE_WORKOUT = "io.codepassion.doubletriangle.OPEN_ACTIVE_WORKOUT"
+
+internal fun android.content.Intent.requestedRootDestination(): RootDestination? =
+    when {
+        getBooleanExtra(EXTRA_OPEN_NUTRITION, false) || opensNutritionLogging() -> RootDestination.Nutrition
+        opensWorkoutDetail() || opensActiveWorkout() || opensFeedback() -> RootDestination.Workout
+        opensBodyMetrics() -> RootDestination.Profile
+        else -> null
+    }
+
+internal fun android.content.Intent.opensNutritionLogging(): Boolean =
+    getBooleanExtra(EXTRA_OPEN_NUTRITION_LOGGING, false) || data?.isWildforceRoute("log-meal") == true
+
+internal fun android.content.Intent.opensActiveWorkout(): Boolean =
+    getBooleanExtra(EXTRA_OPEN_ACTIVE_WORKOUT, false) || data?.isWildforceRoute("workout") == true
+
+internal fun android.content.Intent.opensWorkoutDetail(): Boolean =
+    data?.isWildforceRoute("start-workout") == true
+
+internal fun android.content.Intent.opensBodyMetrics(): Boolean =
+    data?.isWildforceRoute("body-metrics") == true
+
+internal fun android.content.Intent.opensFeedback(): Boolean =
+    data?.isWildforceRoute("leaving-feedback") == true
+
+internal fun android.net.Uri.isWildforceRoute(host: String): Boolean =
+    appEntryRoute(scheme, this.host) == appEntryRoute("wildforce", host)
+
+internal enum class AppEntryRoute { StartWorkout, LogMeal, BodyMetrics, LeavingFeedback }
+
+internal fun appEntryRoute(scheme: String?, host: String?): AppEntryRoute? =
+    if (scheme != "wildforce") null else when (host) {
+        "start-workout" -> AppEntryRoute.StartWorkout
+        "log-meal" -> AppEntryRoute.LogMeal
+        "body-metrics" -> AppEntryRoute.BodyMetrics
+        "leaving-feedback" -> AppEntryRoute.LeavingFeedback
+        else -> null
+    }
+
+internal fun appEntryRootDestination(scheme: String?, host: String?): RootDestination? = when (appEntryRoute(scheme, host)) {
+    AppEntryRoute.StartWorkout, AppEntryRoute.LeavingFeedback -> RootDestination.Workout
+    AppEntryRoute.LogMeal -> RootDestination.Nutrition
+    AppEntryRoute.BodyMetrics -> RootDestination.Profile
+    null -> null
+}
+
+internal enum class RootDestination(
+    @param:androidx.annotation.StringRes val labelRes: Int,
+    val icon: ImageVector,
+    val usesCarrotIcon: Boolean = false,
+) {
+    // iOS uses figure.strengthtraining.traditional here; SportsGymnastics is
+    // the closest filled Material equivalent and avoids the crossed-dumbbell
+    // FitnessCenter glyph in the root dock.
+    Workout(R.string.ios_catalog_7b3abf24fddda1de, Icons.Filled.SportsGymnastics),
+    // iOS uses `carrot.fill`; the Material set has no carrot glyph, so the
+    // root dock renders the same silhouette with CarrotFillIcon below.
+    Nutrition(R.string.ios_catalog_7ab78b7058dd1c09, Icons.Filled.Restaurant, usesCarrotIcon = true),
+    Analytics(R.string.ios_catalog_94c116ee118a7299, Icons.Filled.BarChart), Gym(R.string.ios_catalog_fbeb6d88367ec305, Icons.Filled.Apartment), Profile(R.string.ios_catalog_d696a35bdd1883da, Icons.Filled.AccountCircle),
 }
 
 /**
@@ -204,24 +440,47 @@ private fun InitialSyncScreen(
     onRetry: () -> Unit,
 ) {
     Box(
-        modifier = Modifier.fillMaxSize().liquidGlassBackground(),
+        // iOS InitialSyncView uses the plain shared background, rather than
+        // the liquid-glass treatment used by Android's main destinations.
+        modifier = Modifier.fillMaxSize().background(WildforceThemeTokens.background),
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+            // LoadingState on iOS has 16 pt horizontal padding and a 60 pt
+            // top inset, which puts its centered content slightly lower.
+            modifier = if (isSynchronizing) {
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 60.dp)
+            } else {
+                Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+            },
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = if (isSynchronizing) {
+                Arrangement.spacedBy(20.dp, Alignment.CenterVertically)
+            } else {
+                Arrangement.spacedBy(14.dp)
+            },
         ) {
             if (isSynchronizing) {
-                CircularProgressIndicator(color = WildforceThemeTokens.accent)
-                Text("Sincronizando tus datos…", fontSize = 24.sp, fontWeight = FontWeight.SemiBold)
+                CircularProgressIndicator(
+                    modifier = Modifier.size(30.dp),
+                    color = WildforceThemeTokens.accent,
+                )
                 Text(
-                    "Solo tardará un momento.",
+                    text = androidx.compose.ui.res.stringResource(R.string.ios_catalog_6a38b69e9fc567c1),
+                    style = androidx.compose.material.MaterialTheme.typography.subtitle1,
+                    color = WildforceThemeTokens.textPrimary,
+                )
+                Text(
+                    text = androidx.compose.ui.res.stringResource(R.string.ios_catalog_5e05fbfeb6e4b7d6),
+                    fontSize = 15.sp,
                     color = WildforceThemeTokens.textSecondary,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 )
             } else {
-                Text("☁", fontSize = 48.sp)
+                Icon(Icons.Filled.CloudOff, contentDescription = null, modifier = Modifier.size(48.dp), tint = WildforceThemeTokens.accent)
                 Text(
                     "No hemos podido sincronizar tus datos",
                     fontSize = 24.sp,
@@ -248,16 +507,18 @@ private fun InitialSyncScreen(
 }
 
 @Composable
-private fun RootBottomNavigation(selected: RootDestination, onSelected: (RootDestination) -> Unit, modifier: Modifier = Modifier) {
+private fun RootBottomNavigation(destinations: List<RootDestination>, selected: RootDestination, onSelected: (RootDestination) -> Unit, modifier: Modifier = Modifier) {
+    val shape = RoundedCornerShape(31.dp)
     BottomNavigation(
         modifier = modifier.navigationBarsPadding()
             .padding(horizontal = 24.dp, vertical = 6.dp)
             .height(62.dp)
-            .shadow(10.dp, RoundedCornerShape(31.dp), clip = false)
-            .clip(RoundedCornerShape(31.dp))
+            // This is the historical Android/iOS-matching dock: a floating
+            // material bubble, not a full-width white rectangle.
+            .shadow(10.dp, shape, clip = false)
+            .clip(shape)
             .background(
-                // Use the same translucent system material as the "Resume"
-                // accessory so the root navigation stays visually consistent.
+                // Keep the exact translucent surface used by commit 7126e99.
                 if (androidx.compose.material.MaterialTheme.colors.isLight) Color.White.copy(alpha = 0.88f)
                 else Color.Black.copy(alpha = 0.68f),
             )
@@ -265,23 +526,50 @@ private fun RootBottomNavigation(selected: RootDestination, onSelected: (RootDes
                 1.dp,
                 if (androidx.compose.material.MaterialTheme.colors.isLight) Color.White.copy(alpha = 0.64f)
                 else Color.White.copy(alpha = 0.24f),
-                RoundedCornerShape(31.dp),
+                shape,
             ),
         backgroundColor = Color.Transparent,
         elevation = 0.dp,
     ) {
-        RootDestination.values().forEach { destination ->
+        destinations.forEach { destination ->
             val label = androidx.compose.ui.res.stringResource(destination.labelRes)
             BottomNavigationItem(
-                selected = selected == destination, onClick = { onSelected(destination) },
+                selected = selected == destination,
+                onClick = { onSelected(destination) },
                 icon = {
                     Box(
-                        Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(24.dp))
-                            .background(if (selected == destination) WildforceThemeTokens.textPrimary.copy(alpha = 0.10f) else Color.Transparent)
+                        Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(
+                                if (selected == destination) {
+                                    WildforceThemeTokens.textPrimary.copy(alpha = 0.10f)
+                                } else {
+                                    Color.Transparent
+                                },
+                            )
                             .padding(horizontal = 8.dp, vertical = 8.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(destination.icon, contentDescription = label, modifier = Modifier.size(28.dp), tint = if (androidx.compose.material.MaterialTheme.colors.isLight) Color(0xFF252525) else Color.White)
+                        val tint = if (androidx.compose.material.MaterialTheme.colors.isLight) Color(0xFF252525) else Color.White
+                        if (destination.usesCarrotIcon) {
+                            CarrotFillIcon(
+                                tint = tint,
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .semantics {
+                                        contentDescription = if (selected == destination) "$label, seleccionada" else label
+                                    },
+                            )
+                        } else {
+                            Icon(
+                                destination.icon,
+                                contentDescription = if (selected == destination) "$label, seleccionada" else label,
+                                modifier = Modifier.size(28.dp),
+                                tint = tint,
+                            )
+                        }
                     }
                 },
                 label = null,
@@ -293,8 +581,48 @@ private fun RootBottomNavigation(selected: RootDestination, onSelected: (RootDes
     }
 }
 
+/** Visual counterpart of iOS's `carrot.fill` symbol for the root dock. */
 @Composable
-fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
+private fun CarrotFillIcon(tint: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val w = size.width
+        val h = size.height
+        val leaves = androidx.compose.ui.graphics.Path().apply {
+            moveTo(w * .50f, h * .34f)
+            cubicTo(w * .39f, h * .28f, w * .31f, h * .16f, w * .33f, h * .08f)
+            cubicTo(w * .42f, h * .10f, w * .48f, h * .17f, w * .50f, h * .24f)
+            cubicTo(w * .52f, h * .16f, w * .59f, h * .09f, w * .68f, h * .08f)
+            cubicTo(w * .69f, h * .18f, w * .61f, h * .29f, w * .50f, h * .34f)
+            close()
+        }
+        drawPath(leaves, tint)
+
+        val carrot = androidx.compose.ui.graphics.Path().apply {
+            moveTo(w * .32f, h * .28f)
+            cubicTo(w * .41f, h * .34f, w * .59f, h * .34f, w * .68f, h * .28f)
+            cubicTo(w * .69f, h * .48f, w * .61f, h * .73f, w * .50f, h * .92f)
+            cubicTo(w * .39f, h * .73f, w * .31f, h * .48f, w * .32f, h * .28f)
+            close()
+        }
+        drawPath(carrot, tint)
+    }
+}
+
+@Composable
+private fun WildforceRoot(
+    requestedDestination: RootDestination? = null,
+    openNutritionLogging: Boolean = false,
+    onNutritionLoggingOpened: () -> Unit = {},
+    onActiveWorkoutOpened: () -> Unit = {},
+    onWorkoutDetailOpened: () -> Unit = {},
+    onBodyMetricsOpened: () -> Unit = {},
+    onFeedbackOpened: () -> Unit = {},
+    openActiveWorkout: Boolean = false,
+    openWorkoutDetail: Boolean = false,
+    openBodyMetrics: Boolean = false,
+    openFeedback: Boolean = false,
+    onThemeChanged: () -> Unit = {},
+) {
     val context = LocalContext.current
     val preferences = remember { context.getSharedPreferences("wildforce_profile", 0) }
     val workoutPlanStore = remember(preferences) { WorkoutPlanStateStore(preferences) }
@@ -302,49 +630,101 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
         setOf(
             HealthPermission.getReadPermission(HeightRecord::class),
             HealthPermission.getReadPermission(WeightRecord::class),
+            HealthPermission.getReadPermission(androidx.health.connect.client.records.BodyFatRecord::class),
+            HealthPermission.getReadPermission(androidx.health.connect.client.records.LeanBodyMassRecord::class),
             HealthPermission.getReadPermission(androidx.health.connect.client.records.ActiveCaloriesBurnedRecord::class),
             HealthPermission.getReadPermission(androidx.health.connect.client.records.TotalCaloriesBurnedRecord::class),
             HealthPermission.getWritePermission(WeightRecord::class),
+            HealthPermission.getWritePermission(androidx.health.connect.client.records.BodyFatRecord::class),
+            HealthPermission.getWritePermission(androidx.health.connect.client.records.LeanBodyMassRecord::class),
             HealthPermission.getWritePermission(androidx.health.connect.client.records.ExerciseSessionRecord::class),
+            HealthPermission.getWritePermission(androidx.health.connect.client.records.ActiveCaloriesBurnedRecord::class),
             HealthPermission.getWritePermission(androidx.health.connect.client.records.NutritionRecord::class),
             HealthPermission.getReadPermission(androidx.health.connect.client.records.NutritionRecord::class),
         )
     }
     val coroutineScope = rememberCoroutineScope()
     var scheduledRemoteSync by remember { mutableStateOf<Job?>(null) }
-    var pendingHealthResult by remember { mutableStateOf<((Boolean, Int?, Double?) -> Unit)?>(null) }
+    var pendingHealthResult by remember { mutableStateOf<((Boolean, Int?, Double?, Double?, Double?) -> Unit)?>(null) }
+    var pendingHealthHistoryResult by remember { mutableStateOf<((Boolean, List<ImportedBodyMetric>) -> Unit)?>(null) }
     val healthPermissionLauncher = rememberLauncherForActivityResult(
         PermissionController.createRequestPermissionResultContract(),
     ) { granted ->
-        if (granted.containsAll(healthPermissions)) {
+        // HealthKit can authorize each type independently. Health Connect has
+        // the same user-facing behavior, so a denied optional read/write type
+        // must not discard the body metrics that were granted.
+        if (granted.any { it in healthPermissions }) {
             coroutineScope.launch {
                 val client = HealthConnectClient.getOrCreate(context)
-                val imported = runCatching {
-                    val timeRange = TimeRangeFilter.before(Instant.now())
-                    val height = client.readRecords(ReadRecordsRequest(HeightRecord::class, timeRangeFilter = timeRange, ascendingOrder = false, pageSize = 1))
-                        .records.firstOrNull()?.height?.inMeters?.times(100)?.toInt()
-                    val weight = client.readRecords(ReadRecordsRequest(WeightRecord::class, timeRangeFilter = timeRange, ascendingOrder = false, pageSize = 1))
-                        .records.firstOrNull()?.weight?.inKilograms
-                    height to weight
-                }
-                imported.onSuccess { (height, weight) ->
-                    pendingHealthResult?.invoke(true, height, weight)
+                val timeRange = TimeRangeFilter.before(Instant.now())
+                val height = if (HealthPermission.getReadPermission(HeightRecord::class) in granted) {
+                    runCatching {
+                        client.readRecords(ReadRecordsRequest(HeightRecord::class, timeRangeFilter = timeRange, ascendingOrder = false, pageSize = 1))
+                            .records.firstOrNull()?.height?.inMeters?.times(100)?.toInt()
+                    }.getOrNull()
+                } else null
+                val weight = if (HealthPermission.getReadPermission(WeightRecord::class) in granted) {
+                    runCatching {
+                        client.readRecords(ReadRecordsRequest(WeightRecord::class, timeRangeFilter = timeRange, ascendingOrder = false, pageSize = 1))
+                            .records.firstOrNull()?.weight?.inKilograms
+                    }.getOrNull()
+                } else null
+                val bodyFat = if (HealthPermission.getReadPermission(androidx.health.connect.client.records.BodyFatRecord::class) in granted) {
+                    runCatching {
+                        client.readRecords(ReadRecordsRequest(androidx.health.connect.client.records.BodyFatRecord::class, timeRangeFilter = timeRange, ascendingOrder = false, pageSize = 1))
+                            .records.firstOrNull()?.percentage?.value
+                    }.getOrNull()
+                } else null
+                val leanMass = if (HealthPermission.getReadPermission(androidx.health.connect.client.records.LeanBodyMassRecord::class) in granted) {
+                    runCatching {
+                        client.readRecords(ReadRecordsRequest(androidx.health.connect.client.records.LeanBodyMassRecord::class, timeRangeFilter = timeRange, ascendingOrder = false, pageSize = 1))
+                            .records.firstOrNull()?.mass?.inKilograms
+                    }.getOrNull()
+                } else null
+                val imported = Result.success(arrayOf(height?.toDouble(), weight, bodyFat, leanMass))
+                imported.onSuccess { values ->
+                    pendingHealthResult?.invoke(true, values[0]?.toInt(), values[1], values[3], values[2])
                     pendingHealthResult = null
                 }.onFailure {
-                    pendingHealthResult?.invoke(false, null, null)
+                    pendingHealthResult?.invoke(false, null, null, null, null)
                     pendingHealthResult = null
                 }
             }
         } else {
-            pendingHealthResult?.invoke(false, null, null)
+            pendingHealthResult?.invoke(false, null, null, null, null)
             pendingHealthResult = null
         }
     }
-    val requestHealthConnect: (((Boolean, Int?, Double?) -> Unit) -> Unit) = { result ->
+    val healthHistoryPermissionLauncher = rememberLauncherForActivityResult(
+        PermissionController.createRequestPermissionResultContract(),
+    ) { granted ->
+        val pending = pendingHealthHistoryResult
+        pendingHealthHistoryResult = null
+        if (pending != null) {
+            if (granted.any { it in healthPermissions }) {
+                coroutineScope.launch {
+                    val imports = runCatching {
+                        val actualGranted = HealthConnectClient.getOrCreate(context).permissionController.getGrantedPermissions()
+                        readHealthConnectBodyMetricHistory(context, actualGranted)
+                    }.getOrNull()
+                    pending.invoke(imports != null, imports.orEmpty())
+                }
+            } else {
+                pending(false, emptyList())
+            }
+        }
+    }
+    val requestHealthConnect: (((Boolean, Int?, Double?, Double?, Double?) -> Unit) -> Unit) = { result ->
         if (HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE) {
             pendingHealthResult = result
             healthPermissionLauncher.launch(healthPermissions)
-        } else result(false, null, null)
+        } else result(false, null, null, null, null)
+    }
+    val requestHealthConnectHistory: (((Boolean, List<ImportedBodyMetric>) -> Unit) -> Unit) = { result ->
+        if (HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE) {
+            pendingHealthHistoryResult = result
+            healthHistoryPermissionLauncher.launch(healthPermissions)
+        } else result(false, emptyList())
     }
     var profile by remember {
         mutableStateOf(
@@ -371,6 +751,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     isHealthConnectEnabled = preferences.getBoolean("health_connect", false),
                     birthMonth = preferences.getInt("birth_month", 1).coerceIn(1, 12),
                     birthYear = preferences.getInt("birth_year", 1995).coerceIn(1920, java.time.Year.now().value),
+                    birthDay = preferences.getInt("birth_day", 1).coerceIn(1, 31),
                     gender = Gender.fromStoredValue(preferences.getString("gender", "").orEmpty()),
                     metricSystem = MetricSystem.fromStoredValue(preferences.getString("metric_system", "").orEmpty()),
                     heightCm = preferences.getInt("height_cm", 175).coerceIn(120, 230),
@@ -382,12 +763,17 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     workoutPlannerNotes = preferences.getString("planner_notes", "").orEmpty(),
                     trainingLocations = decodeTrainingLocations(preferences.getStringSet("training_locations", emptySet()).orEmpty()),
                     appLanguage = preferences.getString("app_language", "Español") ?: "Español",
+                    gymJoinCode = preferences.getString("gym_join_code", null),
+                    gymJoinName = preferences.getString("gym_join_name", null),
                 )
             },
         )
     }
 
     var generatedWorkoutState by remember { mutableStateOf<WorkoutHubState?>(null) }
+    var healthMetricsImported by remember { mutableStateOf(false) }
+    var importedLeanBodyMassKg by remember { mutableStateOf<Double?>(null) }
+    var importedBodyFatPercentage by remember { mutableStateOf<Double?>(null) }
     var initialPlanPreview by remember { mutableStateOf<Pair<String, WorkoutHubState>?>(null) }
     var initialPlanProfile by remember { mutableStateOf<OnboardingProfile?>(null) }
     var pendingGeneratedPlan by remember { mutableStateOf<Pair<String, WorkoutHubState>?>(null) }
@@ -396,6 +782,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
     var initialSyncState by remember { mutableStateOf<InitialSyncState?>(null) }
     var initialSyncFallback by remember { mutableStateOf<OnboardingProfile?>(null) }
     var isInitialSyncPaywallPresented by remember { mutableStateOf(false) }
+    var isInitialSyncGymJoinPresented by remember { mutableStateOf(false) }
 
     fun persistOnboardingProfile(value: OnboardingProfile) {
         AppLocale.apply(value.appLanguage)
@@ -416,6 +803,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             .putBoolean("health_connect", value.isHealthConnectEnabled)
             .putInt("birth_month", value.birthMonth)
             .putInt("birth_year", value.birthYear)
+            .putInt("birth_day", value.birthDay)
             .putString("gender", value.gender.storedValue)
             .putString("metric_system", value.metricSystem.storedValue)
             .putInt("height_cm", value.heightCm)
@@ -426,7 +814,17 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             .putString("planner_notes", value.workoutPlannerNotes)
             .putStringSet("training_locations", encodeTrainingLocations(value.trainingLocations))
             .putString("app_language", value.appLanguage)
+            .putString("gym_join_code", value.gymJoinCode)
+            .putString("gym_join_name", value.gymJoinName)
             .apply()
+        if (healthMetricsImported) {
+            BodyMetricsStore.recordImported(
+                context,
+                value,
+                leanBodyMassKg = importedLeanBodyMassKg,
+                bodyFatPercentage = importedBodyFatPercentage,
+            )
+        }
     }
 
     fun synchronizeInitialAccount() {
@@ -442,7 +840,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     persistOnboardingProfile(resolvedProfile)
                     workoutPlanStore.currentPlanJson()?.let { rawPlan ->
                         runCatching {
-                            WorkoutPlanGenerator.parse(rawPlan, resolvedProfile.name, resolvedProfile.goal.title)
+                            WorkoutPlanGenerator.parse(rawPlan, resolvedProfile.name, resolvedProfile.goal.title, resolvedProfile.bodyCompositionPhase?.storedValue)
                         }.onSuccess { importedPlan -> generatedWorkoutState = importedPlan }
                     }
                     profile = resolvedProfile
@@ -481,14 +879,36 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 SubscriptionPaywall(
                     accountId = context.getSharedPreferences("wildforce_account", 0).getString("id", null),
                     mandatory = true,
+                    onJoinGymRequested = { isInitialSyncGymJoinPresented = true },
                     onPurchaseCompleted = {
                         isInitialSyncPaywallPresented = false
                         synchronizeInitialAccount()
                     },
                 )
             }
+            if (isInitialSyncGymJoinPresented) {
+                AuthenticatedJoinGymDialog(
+                    onDismiss = { isInitialSyncGymJoinPresented = false },
+                    onJoined = {
+                        isInitialSyncGymJoinPresented = false
+                        isInitialSyncPaywallPresented = false
+                        coroutineScope.launch {
+                            context.getSharedPreferences("wildforce_account", 0).getString("token", null)?.let { token ->
+                                subscriptionAccess(token).onSuccess { SubscriptionAccessStore.update(context, it) }
+                            }
+                            synchronizeInitialAccount()
+                        }
+                    },
+                )
+            }
         } else OnboardingScreen(
             onRequestHealthConnect = requestHealthConnect,
+            onHealthMetricsImported = { granted, leanBodyMass, bodyFat ->
+                healthMetricsImported = granted
+                importedLeanBodyMassKg = leanBodyMass
+                importedBodyFatPercentage = bodyFat
+            },
+            onCheckGymJoinCode = { code -> BookingApi(context).checkJoinCode(code) },
             isGenerating = isGenerating,
             generationError = generationError,
             generatedPlanPreview = initialPlanPreview?.second?.let { state ->
@@ -506,6 +926,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     workoutPlanStore.saveCurrentPlan(generated.first)
                     workoutPlanStore.saveProfileSignature(generatedProfile.workoutPlanProfileSignature())
                     WorkoutQuickAccessWidget.refresh(context)
+                    AppQuickActions.refresh(context)
                     generatedWorkoutState = generated.second
                     profile = generatedProfile
                     initialPlanPreview = null
@@ -546,10 +967,10 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 )
                 synchronizeInitialAccount()
             },
-            onRegistered = { response ->
-                // The plan is generated immediately after registration. Mark the
-                // first sync as pending so it is uploaded once the local profile
-                // and plan exist, rather than creating an incomplete remote user.
+            onRegistered = { response, _ ->
+                // Mark the first sync as pending so it is uploaded once the local
+                // profile and (when applicable) plan exist, rather than creating
+                // an incomplete remote user.
                 saveAuthenticatedAccount(context, response)
                 WorkoutRemoteSync.markNewAccountResourcesDirty(context)
             },
@@ -572,14 +993,36 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             } else {
                 workoutPlanStore.clearCurrentPlan()
                 generatedWorkoutState = PreviewWorkoutRepository.load(completedProfile.name, completedProfile.goal.title)
-                profile = completedProfile
+                val gymJoinCode = completedProfile.gymJoinCode
+                if (gymJoinCode != null) {
+                    // iOS completes the post-registration gym join before it
+                    // creates the local user and starts the initial sync. Keep
+                    // the same ordering; a failed join remains non-fatal so
+                    // the user can retry from Profile later.
+                    coroutineScope.launch {
+                        runCatching { BookingApi(context).joinGym(gymJoinCode) }
+                        profile = completedProfile
+                    }
+                } else {
+                    profile = completedProfile
+                }
             }
         }
     } else {
         val hasRemoteSession = context.getSharedPreferences("wildforce_account", 0).getString("token", null) != null
-        val baseState = generatedWorkoutState ?: workoutPlanStore.currentPlanJson()?.let { json ->
-            runCatching { WorkoutPlanGenerator.parse(json, currentProfile.name, currentProfile.goal.title) }.getOrNull()
-        } ?: if (hasRemoteSession) {
+        val storedPlanJson = workoutPlanStore.currentPlanJson()
+        // iOS reads the persisted SwiftData plan before rendering WorkoutHub.
+        // Parse the compact local JSON in the same composition so a cold start
+        // never flashes the generate-plan hero while an existing plan is still
+        // being reconstructed in a background effect.
+        val persistedWorkoutState = remember(storedPlanJson, currentProfile.name, currentProfile.goal.title, currentProfile.bodyCompositionPhase) {
+            storedPlanJson?.let { rawPlan ->
+                runCatching {
+                    WorkoutPlanGenerator.parse(rawPlan, currentProfile.name, currentProfile.goal.title, currentProfile.bodyCompositionPhase?.storedValue)
+                }.getOrNull()
+            }
+        }
+        val baseState = generatedWorkoutState ?: persistedWorkoutState ?: if (hasRemoteSession) {
             // iOS never substitutes a sample plan for an authenticated account
             // whose initial sync is still pending, unavailable, or blocked by
             // subscription access. Keep the hub empty behind its loading/error
@@ -622,7 +1065,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
             if (!preferences.getBoolean("remote_plan_imported", false)) return
             preferences.edit().remove("remote_plan_imported").apply()
             workoutPlanStore.currentPlanJson()?.let { remotePlan ->
-                runCatching { WorkoutPlanGenerator.parse(remotePlan, currentProfile.name, currentProfile.goal.title) }
+                runCatching { WorkoutPlanGenerator.parse(remotePlan, currentProfile.name, currentProfile.goal.title, currentProfile.bodyCompositionPhase?.storedValue) }
                     .onSuccess { generatedWorkoutState = it }
             }
         }
@@ -709,6 +1152,18 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
         WildforceApp(
             profile = currentProfile,
             workoutState = restoredState,
+            requestedDestination = requestedDestination,
+            openNutritionLogging = openNutritionLogging,
+            onNutritionLoggingOpened = onNutritionLoggingOpened,
+            onActiveWorkoutOpened = onActiveWorkoutOpened,
+            onWorkoutDetailOpened = onWorkoutDetailOpened,
+            onBodyMetricsOpened = onBodyMetricsOpened,
+            onFeedbackOpened = onFeedbackOpened,
+            openActiveWorkout = openActiveWorkout,
+            openWorkoutDetail = openWorkoutDetail,
+            openBodyMetrics = openBodyMetrics,
+            openFeedback = openFeedback,
+            onSyncHealthConnect = requestHealthConnectHistory,
             subscriptionRequired = subscriptionRequired,
             onSubscriptionPurchaseCompleted = {
                 // StoreKit dismisses iOS's mandatory paywall as soon as the
@@ -717,6 +1172,9 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 // sync failure must not leave a verified purchaser blocked.
                 subscriptionRequired = false
                 coroutineScope.launch {
+                    context.getSharedPreferences("wildforce_account", 0).getString("token", null)?.let { token ->
+                        subscriptionAccess(token).onSuccess { SubscriptionAccessStore.update(context, it) }
+                    }
                     when (val result = WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
                         is WorkoutRemoteSync.Outcome.Synchronized -> {
                             preferences.edit().putBoolean("remote_sync_pending", false).apply()
@@ -734,6 +1192,11 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     }
                 }
             },
+            onAccountChanged = {
+                WildforceNotificationScheduler.cancelAll(context)
+                clearLocalAccountData(context)
+                profile = null
+            },
             onWorkoutCompleted = { id, duration, sets, volume ->
                 val previouslyCompleted = preferences.getStringSet("completed_workouts", emptySet()).orEmpty()
                 val completed = previouslyCompleted + id
@@ -747,8 +1210,10 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 // effect (history migration or widget provider) fails on any
                 // Android version, manufacturer or launcher.
                 val completedWorkout = restoredState.workouts.firstOrNull { it.id == id }
+                    ?: CustomWorkoutStore.load(context).firstOrNull { it.id == id }
                 runCatching { TrainingSessionHistoryStore.record(preferences, duration, sets, volume, completedWorkout?.focus) }
                 runCatching { WorkoutQuickAccessWidget.refresh(context) }
+                runCatching { AppQuickActions.refresh(context) }
                 WorkoutRemoteSync.recordWorkoutCompletion(context)
                 WorkoutRemoteSync.markResourcesDirty(context, "users", "workout-days", "planned-exercises", "exercise-results")
                 coroutineScope.launch {
@@ -771,7 +1236,18 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 if (currentProfile.isHealthConnectEnabled) {
                     val workoutTitle = completedWorkout?.title ?: "Entrenamiento"
                     coroutineScope.launch {
-                        runCatching { HealthConnectWeightSync.publishCompletedWorkout(context, workoutTitle, duration) }
+                        runCatching {
+                            val metrics = WorkoutCompletionMetricsStore.load(context, id)
+                            HealthConnectWeightSync.publishCompletedWorkout(
+                                context = context,
+                                workoutId = id,
+                                title = workoutTitle,
+                                focus = completedWorkout?.focus,
+                                durationSeconds = duration,
+                                activeCalories = metrics?.activeCaloriesBurned ?: 0.0,
+                                completedAtMillis = metrics?.completedAtMillis,
+                            )
+                        }
                     }
                 }
             },
@@ -805,7 +1281,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     .putStringSet("equipment", updated.availableEquipment.mapTo(mutableSetOf()) { it.storedValue })
                     .putStringSet("restrictions", updated.movementRestrictions.mapTo(mutableSetOf()) { it.storedValue })
                     .putBoolean("health_connect", updated.isHealthConnectEnabled)
-                    .putInt("birth_month", updated.birthMonth).putInt("birth_year", updated.birthYear)
+                    .putInt("birth_month", updated.birthMonth).putInt("birth_year", updated.birthYear).putInt("birth_day", updated.birthDay)
                     .putString("gender", updated.gender.storedValue).putString("metric_system", updated.metricSystem.storedValue)
                     .putInt("height_cm", updated.heightCm).putLong("weight_kg", java.lang.Double.doubleToRawLongBits(updated.weightKg))
                     .putBoolean("skips_warmups", updated.skipsWarmups)
@@ -814,6 +1290,8 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     .putString("planner_notes", updated.workoutPlannerNotes)
                     .putStringSet("training_locations", encodeTrainingLocations(updated.trainingLocations))
                     .putString("app_language", updated.appLanguage)
+                    .putString("gym_join_code", updated.gymJoinCode)
+                    .putString("gym_join_name", updated.gymJoinName)
                     .apply { WorkoutRemoteSync.markResourcesDirty(context, "users", "training-preferences", "training-locations", "user-app-settings") }
                 .apply()
                 profile = updated
@@ -848,6 +1326,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                 workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(updatedState))
                 WorkoutRemoteSync.markResourcesDirty(context, "workout-plans", "workout-days", "workout-blocks", "planned-exercises", "exercise-results")
                 WorkoutQuickAccessWidget.refresh(context)
+                AppQuickActions.refresh(context)
                 scheduleRemoteSync(currentProfile)
             },
             isGeneratingProfilePlan = isGenerating,
@@ -869,6 +1348,7 @@ fun WildforceRoot(onThemeChanged: () -> Unit = {}) {
                     workoutPlanStore.replaceCurrentPlan(json)
                     workoutPlanStore.saveProfileSignature(currentProfile.workoutPlanProfileSignature())
                     WorkoutQuickAccessWidget.refresh(context)
+                    AppQuickActions.refresh(context)
                     preferences.edit().remove("completed_workouts").remove("skipped_workouts").apply()
                     WorkoutRemoteSync.markResourcesDirty(context, "workout-plans", "workout-days", "workout-blocks", "planned-exercises", "exercise-results")
                     generatedWorkoutState = state
@@ -1021,7 +1501,7 @@ private fun PlanPreviewWorkoutCard(workout: WorkoutDaySummary, gender: String) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.Timer, null, modifier = Modifier.size(14.dp), tint = Color.White.copy(alpha = .84f))
                 Text("${workout.estimatedMinutes} min", style = androidx.compose.material.MaterialTheme.typography.caption, color = Color.White.copy(alpha = .84f))
-                Icon(Icons.Filled.FitnessCenter, null, modifier = Modifier.size(14.dp), tint = Color.White.copy(alpha = .84f))
+                Icon(Icons.Filled.CenterFocusStrong, null, modifier = Modifier.size(14.dp), tint = Color.White.copy(alpha = .84f))
                 Text(workout.focus, style = androidx.compose.material.MaterialTheme.typography.caption, color = Color.White.copy(alpha = .84f), maxLines = 1)
             }
         }
@@ -1032,16 +1512,29 @@ private fun PlanPreviewWorkoutCard(workout: WorkoutDaySummary, gender: String) {
 private fun WildforceApp(
     profile: OnboardingProfile,
     workoutState: WorkoutHubState,
+    requestedDestination: RootDestination? = null,
+    openNutritionLogging: Boolean = false,
+    onNutritionLoggingOpened: () -> Unit = {},
+    onActiveWorkoutOpened: () -> Unit = {},
+    onWorkoutDetailOpened: () -> Unit = {},
+    onBodyMetricsOpened: () -> Unit = {},
+    onFeedbackOpened: () -> Unit = {},
+    openActiveWorkout: Boolean = false,
+    openWorkoutDetail: Boolean = false,
+    openBodyMetrics: Boolean = false,
+    openFeedback: Boolean = false,
     onWorkoutCompleted: (String, Int, Int, Double) -> Unit,
     subscriptionRequired: Boolean = false,
     onSubscriptionPurchaseCompleted: () -> Unit = {},
+    onAccountChanged: () -> Unit = {},
     onResetOnboarding: () -> Unit = {},
     onProfileUpdated: (OnboardingProfile) -> Unit = {},
     onRegenerateProfile: (OnboardingProfile) -> Unit = {},
     onPlanWorkoutUpdated: (WorkoutHubState) -> Unit = {},
     isGeneratingProfilePlan: Boolean = false,
     profileGenerationError: String? = null,
-    onRequestHealthConnect: (((Boolean, Int?, Double?) -> Unit) -> Unit) = { _ -> },
+    onRequestHealthConnect: (((Boolean, Int?, Double?, Double?, Double?) -> Unit) -> Unit) = { _ -> },
+    onSyncHealthConnect: (((Boolean, List<ImportedBodyMetric>) -> Unit) -> Unit) = { result -> result(false, emptyList()) },
     onRemoteSyncRequested: () -> Unit = {},
     onThemeChanged: () -> Unit = {},
 ) {
@@ -1060,6 +1553,10 @@ private fun WildforceApp(
         }
     }
     val appContext = LocalContext.current.applicationContext
+    var wearAvailable by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        WearRemoteLauncher.checkAvailability(appContext) { available -> wearAvailable = available }
+    }
     val appPreferences = remember { appContext.getSharedPreferences("wildforce_profile", 0) }
     val profileDetailPreferences = remember { appContext.getSharedPreferences("wildforce_profile_details", 0) }
     var keepScreenOnDuringWorkout by remember { mutableStateOf(profileDetailPreferences.getBoolean("keep_screen_on", true)) }
@@ -1087,16 +1584,101 @@ private fun WildforceApp(
         WildforceNotificationScheduler.scheduleNutritionReminder(appContext)
     }
     val trainingProgress = CompletionProgressStore.progress(appContext)
-    var selected by remember { mutableStateOf(RootDestination.Workout) }
+    val coroutineScope = rememberCoroutineScope()
+    var selected by remember { mutableStateOf(requestedDestination ?: RootDestination.Workout) }
+    var bodyProgressOpen by remember { mutableStateOf(false) }
+    var bookingGyms by remember { mutableStateOf<List<BookingGym>?>(null) }
+    var showJoinGymDialog by remember { mutableStateOf(false) }
+    var isAiCoachOfferPresented by remember { mutableStateOf(false) }
+    fun refreshSubscriptionAccess() {
+        val token = appContext.getSharedPreferences("wildforce_account", 0).getString("token", null) ?: return
+        coroutineScope.launch { subscriptionAccess(token).onSuccess { SubscriptionAccessStore.update(appContext, it) } }
+    }
+    suspend fun reloadBookingGyms() {
+        runCatching { BookingApi(appContext).gyms() }.onSuccess { gyms ->
+            bookingGyms = gyms
+            appPreferences.edit().putBoolean("booking_gyms_available", gyms.isNotEmpty()).apply()
+        }
+    }
+    LaunchedEffect(Unit) { reloadBookingGyms() }
+    val hasAuthenticatedAccount = appContext.getSharedPreferences("wildforce_account", 0)
+        .getString("token", null)
+        ?.isNotBlank() == true
+    val hasBookableGyms = hasAuthenticatedAccount &&
+        (bookingGyms?.isNotEmpty() ?: appPreferences.getBoolean("booking_gyms_available", false))
+    val cachedAccess = SubscriptionAccessStore.load(appContext)
+    val isMemberMode = cachedAccess?.isMemberMode == true
+    // The hero is visible through showsAiCoach (including the locked Premium
+    // state); the actual generation/redo action requires the AI-coach feature.
+    // Unknown access keeps the pre-server full-app behavior.
+    val canGenerateNextPlan = cachedAccess?.features?.aiCoach ?: true
+    val rootDestinations = remember(hasBookableGyms) {
+        RootDestination.values().filter { it != RootDestination.Gym || hasBookableGyms }
+    }
+    LaunchedEffect(hasBookableGyms, requestedDestination) {
+        if (!hasBookableGyms && selected == RootDestination.Gym) {
+            selected = RootDestination.Workout
+        } else if (hasBookableGyms && isMemberMode && requestedDestination == null && selected == RootDestination.Workout) {
+            // iOS members land on their Gym tab as soon as the cached booking
+            // gyms are available. Explicit app-entry routes still win.
+            selected = RootDestination.Gym
+        }
+    }
+    LaunchedEffect(requestedDestination) {
+        requestedDestination?.let { selected = it }
+    }
+    LaunchedEffect(selected) {
+        if (selected != RootDestination.Profile) bodyProgressOpen = false
+    }
     var displayedWorkoutState by remember(workoutState) { mutableStateOf(workoutState) }
     var workoutDetail by remember { mutableStateOf<WorkoutDaySummary?>(null) }
     var activeWorkout by remember { mutableStateOf<WorkoutDaySummary?>(null) }
+    var activeExerciseGuide by remember { mutableStateOf<ExerciseSummary?>(null) }
+    fun markWorkoutStarted(source: WorkoutDaySummary): WorkoutDaySummary {
+        val started = source.copy(
+            status = WorkoutStatus.InProgress,
+            startedAt = source.startedAt ?: Instant.now().toString(),
+        )
+        val updatedState = displayedWorkoutState.copy(
+            workouts = displayedWorkoutState.workouts.map { existing ->
+                if (existing.id == started.id) started else existing
+            },
+        )
+        displayedWorkoutState = updatedState
+        if (!started.id.startsWith("custom-")) {
+            workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(updatedState))
+            onPlanWorkoutUpdated(updatedState)
+        }
+        // iOS reloads the home-screen workout widget as soon as a session
+        // starts, so the active exercise and progress are visible immediately.
+        runCatching { WorkoutQuickAccessWidget.refresh(appContext) }
+        runCatching { AppQuickActions.refresh(appContext) }
+        return started
+    }
+    LaunchedEffect(activeWorkout?.id) {
+        AndroidFullFocusModeManager.reconcile(appContext, activeWorkout != null)
+    }
     var showExitAppDialog by remember { mutableStateOf(false) }
-    if (subscriptionRequired) {
+    SideEffect {
+        activity?.let { host ->
+            // The active workout draws a darkened exercise photo behind the
+            // status bar, matching iOS's full-screen NavigationStack scene.
+            // Keep light status-bar icons there; regular app surfaces follow
+            // the selected light/dark theme.
+            WindowCompat.getInsetsController(host.window, view).isAppearanceLightStatusBars =
+                !darkTheme && activeWorkout == null
+        }
+    }
+    // iOS's member mode keeps the Gym surface available but gates the rest of
+    // the root tabs behind the mandatory subscription screen. A successful
+    // sync is not an escape hatch here: booking-only access is a valid server
+    // mode, not a synchronization failure.
+    if (subscriptionRequired || (isMemberMode && selected != RootDestination.Gym)) {
         val accountPreferences = remember(appContext) { appContext.getSharedPreferences("wildforce_account", 0) }
         SubscriptionPaywall(
             accountId = accountPreferences.getString("id", null),
             mandatory = true,
+            onJoinGymRequested = { showJoinGymDialog = true },
             onPurchaseCompleted = onSubscriptionPurchaseCompleted,
         )
     }
@@ -1106,18 +1688,21 @@ private fun WildforceApp(
             else window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
-    BackHandler(enabled = activeWorkout == null) {
+    BackHandler(enabled = activeWorkout == null && activeExerciseGuide == null) {
         when {
             workoutDetail != null -> workoutDetail = null
             selected != RootDestination.Workout -> selected = RootDestination.Workout
             else -> showExitAppDialog = true
         }
     }
+    BackHandler(enabled = activeExerciseGuide != null) { activeExerciseGuide = null }
     activeWorkout?.let { workout ->
-        ActiveWorkoutScreen(
+        Box(Modifier.fillMaxSize()) {
+            ActiveWorkoutScreen(
             initialWorkout = workout,
             gender = profile.gender.storedValue,
             userBmr = workoutBmr(profile),
+            userAgeYears = profileAgeYears(profile),
             useImperial = profile.metricSystem == MetricSystem.Imperial,
             skipRestPeriods = profile.skipsRestPeriods,
             currentStreak = displayedWorkoutState.user.currentStreak,
@@ -1131,8 +1716,10 @@ private fun WildforceApp(
                 },
             planName = displayedWorkoutState.planName,
             completedPlanWorkouts = displayedWorkoutState.workouts.count { it.status == WorkoutStatus.Completed } + 1,
-            totalPlanWorkouts = displayedWorkoutState.workouts.size,
             totalPlanExercises = displayedWorkoutState.workouts.sumOf { it.exercises.size },
+            mesocycleIndex = displayedWorkoutState.mesocycleIndex,
+            cycleLength = displayedWorkoutState.cycleLength,
+            canGenerateNextPlan = canGenerateNextPlan,
             onGenerateNextPlan = {
                 appPreferences.edit().putBoolean("generate_next_plan", true).apply()
                 onRegenerateProfile(profile)
@@ -1148,10 +1735,19 @@ private fun WildforceApp(
                     WorkoutRemoteSync.markResourcesDirty(appContext, "workout-days", "workout-blocks", "planned-exercises", "exercise-results")
                 }
                 activeWorkout = updated
+                // ActiveWorkoutStore reloads iOS's widget after each exercise
+                // advance; keep Android's home-screen widget in step with the
+                // persisted active exercise as well.
+                runCatching { WorkoutQuickAccessWidget.refresh(appContext) }
+                runCatching { AppQuickActions.refresh(appContext) }
             },
+            onShowExerciseGuide = { activeExerciseGuide = it },
             onExit = { activeWorkout = null },
             onFinish = { duration, sets, volume, streak, completedOn, skippedExerciseIndices ->
                 WorkoutRemoteSync.recordSkippedExercises(appContext, workout.id, skippedExerciseIndices)
+                val completionMetrics = WorkoutCompletionMetricsStore.load(appContext, workout.id)
+                val completionTimestamp = completionMetrics?.completedAtMillis?.let { Instant.ofEpochMilli(it).toString() }
+                    ?: Instant.now().toString()
                 val completedDates = appPreferences
                     .getStringSet("completed_workout_local_dates", emptySet())
                     .orEmpty()
@@ -1159,35 +1755,73 @@ private fun WildforceApp(
                     .toMutableSet()
                     .apply { add("${workout.id}|$completedOn") }
                 appPreferences.edit().putStringSet("completed_workout_local_dates", completedDates).apply()
+                val completedWorkouts = displayedWorkoutState.workouts.map {
+                    if (it.id == workout.id) it.copy(
+                        status = WorkoutStatus.Completed,
+                        completedAt = completionTimestamp,
+                        didCountTowardStreak = true,
+                        activeDurationSeconds = completionMetrics?.activeDurationSeconds ?: duration,
+                        activeCaloriesBurned = completionMetrics?.activeCaloriesBurned,
+                        totalVolumeKg = completionMetrics?.totalVolumeKg ?: volume,
+                    ) else it
+                }
                 val completedState = displayedWorkoutState.copy(
                     user = displayedWorkoutState.user.copy(currentStreak = streak),
                     completedDays = if (displayedWorkoutState.workouts.any { it.id == workout.id }) displayedWorkoutState.completedDays + completedOn.dayOfWeek else displayedWorkoutState.completedDays,
-                    workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Completed) else it },
-                )
+                    workouts = completedWorkouts,
+                ).withPlanCompletionStatus()
                 displayedWorkoutState = completedState
-                if (!workout.id.startsWith("custom-")) workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(completedState))
+                if (workout.id.startsWith("custom-")) {
+                    CustomWorkoutStore.save(
+                        appContext,
+                        workout.copy(
+                            status = WorkoutStatus.Completed,
+                            completedAt = completionTimestamp,
+                            didCountTowardStreak = true,
+                            activeDurationSeconds = completionMetrics?.activeDurationSeconds ?: duration,
+                            activeCaloriesBurned = completionMetrics?.activeCaloriesBurned,
+                            totalVolumeKg = completionMetrics?.totalVolumeKg ?: volume,
+                        ),
+                    )
+                } else {
+                    workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(completedState))
+                }
                 onWorkoutCompleted(workout.id, duration, sets, volume)
                 WildforceNotificationScheduler.scheduleNextWorkout(appContext, completedState)
                 activeWorkout = null
                 workoutDetail = null
             },
-        )
+            )
+            activeExerciseGuide?.let { exercise ->
+                Box(Modifier.fillMaxSize().zIndex(1f)) {
+                    ExerciseGuideScreen(exercise, profile.gender.storedValue) {
+                        activeExerciseGuide = null
+                    }
+                }
+            }
+        }
         return
     }
     workoutDetail?.let { workout ->
+        val cachedAccess = SubscriptionAccessStore.load(appContext)
+        val showsAiCoach = cachedAccess?.let { it.features.aiCoach || !it.hasCoach } ?: true
         Box(Modifier.fillMaxSize()) {
-        WorkoutDetailScreen(workout, profile.gender.storedValue, useImperial = profile.metricSystem == MetricSystem.Imperial, onBack = { workoutDetail = null }, onStart = {
+        WorkoutDetailScreen(workout, profile.gender.storedValue, useImperial = profile.metricSystem == MetricSystem.Imperial, showWearStartOption = wearAvailable, appLanguage = profile.appLanguage, mesocyclePhase = displayedWorkoutState.mesocyclePhase, onBack = { workoutDetail = null }, onStart = { startOnWear ->
             WildforceNotificationScheduler.recordWorkoutStarted(appContext)
-            activeWorkout = workout
+            if (startOnWear) WearRemoteLauncher.startWorkout(appContext)
+            activeWorkout = markWorkoutStarted(workout)
         }, onSkip = {
             val skipped = appPreferences.getStringSet("skipped_workouts", emptySet()).orEmpty() + workout.id
             appPreferences.edit().putStringSet("skipped_workouts", skipped).apply()
             WorkoutRemoteSync.markResourcesDirty(appContext, "workout-days", "planned-exercises", "exercise-results")
+            val skippedWorkouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Skipped) else it }
             val skippedState = displayedWorkoutState.copy(
-                workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Skipped) else it },
-            )
+                workouts = skippedWorkouts,
+            ).withPlanCompletionStatus()
             displayedWorkoutState = skippedState
             if (!workout.id.startsWith("custom-")) workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(skippedState))
+            runCatching { WorkoutQuickAccessWidget.refresh(appContext) }
+            runCatching { AppQuickActions.refresh(appContext) }
             WildforceNotificationScheduler.scheduleNextWorkout(appContext, skippedState)
             workoutDetail = null
             // iOS treats skipped days as finished plan slots.  If this was the
@@ -1205,6 +1839,8 @@ private fun WildforceApp(
             )
             displayedWorkoutState = unskippedState
             if (!workout.id.startsWith("custom-")) workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(unskippedState))
+            runCatching { WorkoutQuickAccessWidget.refresh(appContext) }
+            runCatching { AppQuickActions.refresh(appContext) }
             WildforceNotificationScheduler.scheduleNextWorkout(appContext, unskippedState)
         }, onWorkoutUpdated = { updated ->
             if (updated.id.startsWith("custom-")) {
@@ -1216,11 +1852,14 @@ private fun WildforceApp(
             displayedWorkoutState = updatedState
             if (!updated.id.startsWith("custom-")) workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(updatedState))
             workoutDetail = updated
+            runCatching { WorkoutQuickAccessWidget.refresh(appContext) }
+            runCatching { AppQuickActions.refresh(appContext) }
             onPlanWorkoutUpdated(updatedState)
-        }, defaultAdaptEquipment = profile.effectiveTrainingLocations().firstOrNull { it.isDefault }?.equipment?.joinToString(", ") { it.title }.orEmpty().ifBlank { profile.availableEquipment.joinToString(", ") { it.title } }, adaptEquipmentPresets = profile.effectiveTrainingLocations().map { location -> location.name to location.equipment.joinToString(", ") { it.title } }, adaptAiGenerator = { request ->
+        }, adaptEquipmentPresets = profile.effectiveTrainingLocations().map { location -> location.name to location.equipment.joinToString(", ") { it.title } }, adaptEquipmentPresetIds = appContext.getSharedPreferences("wildforce_remote_sync", 0).getString("training_location_ids", "[]")?.let { raw -> org.json.JSONArray(raw) }?.let { ids -> profile.effectiveTrainingLocations().indices.map { ids.optString(it) } }.orEmpty(), adaptAiGenerator = if (showsAiCoach) ({ request ->
             WorkoutPlanGenerator.adaptWorkout(profile, workout, request, appContext)
-        })
+        }) else null, canUseAiCoach = canGenerateNextPlan, onShowAiCoachOffer = { isAiCoachOfferPresented = true })
             RootBottomNavigation(
+                destinations = rootDestinations,
                 selected = selected,
                 onSelected = {
                     workoutDetail = null
@@ -1233,33 +1872,55 @@ private fun WildforceApp(
     }
     val archivedWorkoutStates = remember(displayedWorkoutState.mesocycleNumber, displayedWorkoutState.planName) {
         workoutPlanStore.archivedPlans().mapNotNull { archived ->
-            runCatching { WorkoutPlanGenerator.parse(archived.rawJson, profile.name, profile.goal.title) }.getOrNull()
+            runCatching { WorkoutPlanGenerator.parse(archived.rawJson, profile.name, profile.goal.title, profile.bodyCompositionPhase?.storedValue) }.getOrNull()
         }
     }
-    // A saved session is Android's equivalent of iOS's `.inProgress` workout
-    // state. It remains available after leaving the active-session screen.
-    val resumableWorkout = displayedWorkoutState.workouts.firstOrNull { workout ->
-        workout.status == WorkoutStatus.Planned &&
-            WorkoutSessionStore.hasActiveSession(appContext, workout.id)
+    // Keep the persisted iOS `.inProgress` state and Android's local session
+    // fallback both discoverable by the compact Resume accessory. iOS also
+    // searches independent/custom workouts, which Android stores separately
+    // from the current generated plan.
+    val resumableWorkout = (displayedWorkoutState.workouts + CustomWorkoutStore.load(appContext))
+        .distinctBy { it.id }
+        .firstOrNull { workout ->
+            workout.status == WorkoutStatus.InProgress ||
+                (workout.status == WorkoutStatus.Planned && WorkoutSessionStore.hasActiveSession(appContext, workout.id))
+        }
+    LaunchedEffect(openActiveWorkout, openWorkoutDetail, resumableWorkout?.id, displayedWorkoutState.workouts) {
+        if (openActiveWorkout || openWorkoutDetail && resumableWorkout != null) {
+            resumableWorkout?.let { activeWorkout = markWorkoutStarted(it) }
+            if (openActiveWorkout) onActiveWorkoutOpened() else onWorkoutDetailOpened()
+        } else if (openWorkoutDetail) {
+            val today = java.time.DayOfWeek.from(java.time.LocalDate.now())
+            displayedWorkoutState.workouts.firstOrNull { workout ->
+                (workout.status == WorkoutStatus.Planned || workout.status == WorkoutStatus.InProgress) && workout.scheduledDay == today
+            }?.let { workoutDetail = it }
+            onWorkoutDetailOpened()
+        }
     }
+    // Preserve the 7126e99 layout contract: Scaffold reserves the exact space
+    // used by Resume and the dock, while each screen continues beneath them.
     Scaffold(
         modifier = Modifier.liquidGlassBackground(),
-        backgroundColor = androidx.compose.ui.graphics.Color.Transparent,
+        backgroundColor = Color.Transparent,
         bottomBar = {
-            Column {
-                resumableWorkout?.let { workout ->
-                    ActiveWorkoutAccessory(
-                        workout = workout,
-                        exerciseIndex = WorkoutSessionStore.activeExerciseIndex(appContext, workout.id),
-                        onResume = { activeWorkout = workout },
+            if (!bodyProgressOpen) {
+                Column {
+                    resumableWorkout?.let { workout ->
+                        ActiveWorkoutAccessory(
+                            workout = workout,
+                            exerciseIndex = WorkoutSessionStore.activeExerciseIndex(appContext, workout.id),
+                            onResume = { activeWorkout = markWorkoutStarted(workout) },
+                        )
+                    }
+                    RootBottomNavigation(
+                        destinations = rootDestinations,
+                        selected = selected,
+                        onSelected = { selected = it },
                     )
                 }
-                RootBottomNavigation(selected = selected, onSelected = { selected = it })
             }
         },
     ) { padding ->
-        // Keep the screen canvas behind the bottom controls. Scrollable screens
-        // provide their own final content inset, as ProfileScreen does.
         val overlayPadding = PaddingValues(
             start = padding.calculateStartPadding(LayoutDirection.Ltr),
             top = padding.calculateTopPadding(),
@@ -1267,6 +1928,8 @@ private fun WildforceApp(
             bottom = 0.dp,
         )
         if (selected == RootDestination.Workout) {
+            val cachedAccess = SubscriptionAccessStore.load(appContext)
+            val showsAiCoach = cachedAccess?.let { it.features.aiCoach || !it.hasCoach } ?: true
             WorkoutHubScreen(
                 contentPadding = overlayPadding,
                 state = displayedWorkoutState,
@@ -1275,6 +1938,14 @@ private fun WildforceApp(
                 gender = profile.gender.storedValue,
                 defaultCustomEquipment = profile.availableEquipment.joinToString(", ") { it.title },
                 customEquipmentPresets = profile.effectiveTrainingLocations().map { location -> location.name to location.equipment.joinToString(", ") { it.title } },
+                allowAutomaticCreation = showsAiCoach,
+                canRegeneratePlan = canGenerateNextPlan,
+                canGenerateNextPlan = canGenerateNextPlan,
+                onGenerateNextPlan = {
+                    appPreferences.edit().putBoolean("generate_next_plan", true).apply()
+                    onRegenerateProfile(profile)
+                },
+                onShowAiCoachOffer = { isAiCoachOfferPresented = true },
                 generationError = profileGenerationError,
                 onRetryGeneration = { onRegenerateProfile(profile) },
                 requiresPlanRegeneration = workoutPlanStore.requiresRegeneration(profile.workoutPlanProfileSignature()),
@@ -1282,10 +1953,45 @@ private fun WildforceApp(
                 avatarPath = avatarPath,
                 avatarRevision = avatarRevision,
                 appLanguage = profile.appLanguage,
+                openFeedback = openFeedback,
+                onFeedbackOpened = onFeedbackOpened,
                 customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile, request, appContext) },
             )
+            if (isAiCoachOfferPresented) {
+                SubscriptionPaywall(
+                    accountId = appContext.getSharedPreferences("wildforce_account", 0).getString("id", null),
+                    mandatory = false,
+                    tiers = listOf(SubscriptionTier.Premium),
+                    onDismiss = { isAiCoachOfferPresented = false },
+                    onPurchaseCompleted = {
+                        isAiCoachOfferPresented = false
+                        onSubscriptionPurchaseCompleted()
+                    },
+                )
+            }
         } else if (selected == RootDestination.Nutrition) {
-            NutritionScreen(overlayPadding, profile)
+            NutritionScreen(
+                contentPadding = overlayPadding,
+                profile = profile,
+                openLogging = openNutritionLogging,
+                onLoggingOpened = onNutritionLoggingOpened,
+                onRequestHealthConnect = { result ->
+                    onRequestHealthConnect { granted, heightCm, weightKg, leanBodyMassKg, bodyFatPercentage ->
+                        if (granted) {
+                            BodyMetricsStore.recordImported(
+                                context = appContext,
+                                profile = profile,
+                                heightCm = heightCm?.toDouble(),
+                                weightKg = weightKg,
+                                leanBodyMassKg = leanBodyMassKg,
+                                bodyFatPercentage = bodyFatPercentage,
+                            )
+                            onProfileUpdated(profile.copy(isHealthConnectEnabled = true))
+                        }
+                        result(granted, heightCm, weightKg, leanBodyMassKg, bodyFatPercentage)
+                    }
+                },
+            )
         } else if (selected == RootDestination.Analytics) {
             val analyticsExercises = displayedWorkoutState.workouts.flatMap { it.exercises }
             AnalyticsScreen(
@@ -1302,6 +2008,21 @@ private fun WildforceApp(
         } else if (selected == RootDestination.Profile) {
             ProfileScreen(
                 initial = profile,
+                openBodyMetrics = openBodyMetrics,
+                onBodyMetricsOpened = onBodyMetricsOpened,
+                onBodyMetricSaved = { kind, value ->
+                    if (profile.isHealthConnectEnabled) {
+                        coroutineScope.launch {
+                            runCatching {
+                                if (kind == "Weight") {
+                                    HealthConnectWeightSync.publishManualWeight(appContext, value)
+                                } else {
+                                    HealthConnectWeightSync.publishBodyMetric(appContext, kind, value)
+                                }
+                            }
+                        }
+                    }
+                },
                 contentPadding = overlayPadding,
                 isRegenerating = isGeneratingProfilePlan,
                 generationError = profileGenerationError,
@@ -1314,18 +2035,35 @@ private fun WildforceApp(
                 avatarPath = avatarPath,
                 avatarRevision = avatarRevision,
                 onRequestHealthConnect = onRequestHealthConnect,
+                onSyncHealthConnect = onSyncHealthConnect,
                 onSave = onProfileUpdated,
                 onRegenerate = onRegenerateProfile,
                 onChangeAvatar = { avatarPicker.launch("image/*") },
                 onRemoteSyncRequested = onRemoteSyncRequested,
+                onBodyProgressVisibilityChanged = { bodyProgressOpen = it },
                 onThemeChanged = onThemeChanged,
+                onJoinGymRequested = { showJoinGymDialog = true },
                 onKeepScreenOnChanged = { keepScreenOnDuringWorkout = it },
+                onNotificationPreferencesChanged = {
+                    WildforceNotificationScheduler.scheduleNextWorkout(appContext, workoutState)
+                    WildforceNotificationScheduler.scheduleNutritionReminder(appContext)
+                },
+                onAccountChanged = {
+                    onAccountChanged()
+                    workoutDetail = null
+                    activeWorkout = null
+                    selected = RootDestination.Workout
+                },
                 onGenerateFuturePreview = { localSessionId, angle ->
                     WorkoutRemoteSync.synchronize(appContext, profile, appPreferences)
                     FutureBodyPreviewGenerator.generate(appContext, WorkoutRemoteSync.remoteBodyProgressSessionId(appContext, localSessionId), angle)
                 },
                 onLoadFuturePreview = { localSessionId, angle ->
                     FutureBodyPreviewGenerator.load(appContext, WorkoutRemoteSync.remoteBodyProgressSessionId(appContext, localSessionId), angle)
+                },
+                onAnalyzeBodyComposition = { localSessionId ->
+                    WorkoutRemoteSync.synchronize(appContext, profile, appPreferences)
+                    BodyCompositionAnalysisGenerator.analyze(appContext, WorkoutRemoteSync.remoteBodyProgressSessionId(appContext, localSessionId))
                 },
             )
         } else Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -1334,6 +2072,17 @@ private fun WildforceApp(
     }
     if (isGeneratingProfilePlan) {
         WorkoutPlanGenerationSheet()
+    }
+    if (showJoinGymDialog) {
+        AuthenticatedJoinGymDialog(
+            onDismiss = { showJoinGymDialog = false },
+            onJoined = {
+                showJoinGymDialog = false
+                refreshSubscriptionAccess()
+                onRemoteSyncRequested()
+                coroutineScope.launch { reloadBookingGyms() }
+            },
+        )
     }
     if (showExitAppDialog) {
         val hostActivity = LocalActivity.current
@@ -1355,6 +2104,14 @@ private fun WildforceApp(
 }
 
 /** Same Mifflin–St Jeor basal calculation used by the iOS completion fallback. */
+private fun profileAgeYears(profile: OnboardingProfile): Int {
+    val today = java.time.LocalDate.now()
+    val year = profile.birthYear.coerceIn(1900, today.year)
+    val month = profile.birthMonth.coerceIn(1, 12)
+    val day = profile.birthDay.coerceIn(1, java.time.YearMonth.of(year, month).lengthOfMonth())
+    return java.time.Period.between(java.time.LocalDate.of(year, month, day), today).years.coerceIn(0, 120)
+}
+
 private fun workoutBmr(profile: OnboardingProfile): Double {
     val now = java.time.LocalDate.now()
     val age = (now.year - profile.birthYear - if (now.monthValue < profile.birthMonth) 1 else 0).coerceAtLeast(0)
@@ -1376,8 +2133,8 @@ private fun ActiveWorkoutAccessory(
             .padding(horizontal = 24.dp)
             .height(49.dp),
         shape = RoundedCornerShape(20.dp),
-        // iOS renders the bottom accessory on its own system material. Keep
-        // the Android counterpart readable over scrolling content as well.
+        // Keep the Resume accessory on the exact translucent material used by
+        // the historical 7126e99 root navigation surface.
         color = if (androidx.compose.material.MaterialTheme.colors.isLight) {
             Color.White.copy(alpha = 0.88f)
         } else {
@@ -1388,6 +2145,17 @@ private fun ActiveWorkoutAccessory(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .semantics {
+                    role = Role.Button
+                    contentDescription = buildString {
+                        append("Reanudar ")
+                        append(workout.title)
+                        currentExercise?.let {
+                            append(", ")
+                            append(exerciseDisplayName(it.imageKey, it.name))
+                        }
+                    }
+                }
                 .clickable(onClick = onResume)
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -1398,15 +2166,21 @@ private fun ActiveWorkoutAccessory(
                 // target muscle, rather than the exercise's training photo.
                 Image(
                     painter = painterResource(primaryMuscleDrawable),
-                    contentDescription = currentExercise?.name,
+                    contentDescription = currentExercise?.let { exerciseDisplayName(it.imageKey, it.name) },
                     modifier = Modifier.size(28.dp),
+                    // iOS uses Color.accentColor for the muscle icon in the
+                    // resume accessory; the warm orange emphasis is reserved
+                    // for workout actions, not this navigation surface.
+                    // Use SrcIn explicitly so the source bitmap can never
+                    // leak its own warm/orange pixels into this accessory.
+                    colorFilter = ColorFilter.tint(WildforceThemeTokens.accent, BlendMode.SrcIn),
                 )
             } else {
                 Icon(
-                    imageVector = Icons.Filled.FitnessCenter,
+                    imageVector = workoutAccessoryFocusIcon(workout.focus),
                     contentDescription = null,
                     modifier = Modifier.size(28.dp),
-                    tint = WildforceThemeTokens.accentGold,
+                    tint = WildforceThemeTokens.accent,
                 )
             }
             Column(Modifier.padding(start = 12.dp).weight(1f)) {
@@ -1418,7 +2192,7 @@ private fun ActiveWorkoutAccessory(
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = currentExercise?.name ?: workout.focus,
+                    text = currentExercise?.let { exerciseDisplayName(it.imageKey, it.name) } ?: workout.focus,
                     style = androidx.compose.material.MaterialTheme.typography.caption,
                     color = WildforceThemeTokens.textSecondary,
                     maxLines = 1,
@@ -1442,6 +2216,19 @@ private fun ActiveWorkoutAccessory(
     }
 }
 
+/** Matches iOS's focus icon fallback when the current exercise has no muscle icon. */
+private fun workoutAccessoryFocusIcon(focus: String): ImageVector = when (focus.lowercase(Locale.ROOT)) {
+    "fullbody", "full body", "cuerpo completo", "upperbody", "upper body", "tren superior", "lowerbody", "lower body", "tren inferior" -> Icons.Filled.AccessibilityNew
+    "empuje", "push" -> Icons.Filled.ArrowCircleUp
+    "tirón", "tiron", "pull" -> Icons.Filled.ArrowCircleDown
+    "piernas", "legs" -> Icons.Filled.DirectionsWalk
+    "core" -> Icons.Filled.CenterFocusStrong
+    "movilidad", "mobility" -> Icons.Filled.SelfImprovement
+    "recuperación", "recuperacion", "recovery" -> Icons.Filled.Hotel
+    "cardio" -> Icons.Filled.Favorite
+    else -> Icons.Filled.AccessibilityNew
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun AppPreview() = WildforceTheme {
@@ -1460,16 +2247,24 @@ private fun encodeTrainingLocations(locations: List<TrainingLocationProfile>): M
         location.name.replace(trainingLocationSeparator, " "),
         if (location.isDefault) "1" else "0",
         location.equipment.joinToString(",") { it.storedValue },
+        location.displayAddress.orEmpty().replace(trainingLocationSeparator, " "),
+        location.latitude?.toString().orEmpty(),
+        location.longitude?.toString().orEmpty(),
+        location.photoPath.orEmpty().replace(trainingLocationSeparator, " "),
     ).joinToString(trainingLocationSeparator)
 }
 
 private fun decodeTrainingLocations(encoded: Set<String>): List<TrainingLocationProfile> = encoded.mapNotNull { value ->
-    val fields = value.split(trainingLocationSeparator, limit = 3)
+    val fields = value.split(trainingLocationSeparator, limit = 7)
     val name = fields.getOrNull(0)?.trim().orEmpty()
     if (name.isBlank()) null else TrainingLocationProfile(
         name = name,
         isDefault = fields.getOrNull(1) == "1",
         equipment = Equipment.fromStoredValues(fields.getOrNull(2)?.split(',')?.filter(String::isNotBlank)?.toSet()).ifEmpty { setOf(Equipment.Bodyweight) },
+        displayAddress = fields.getOrNull(3)?.trim()?.takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) },
+        latitude = fields.getOrNull(4)?.replace(',', '.')?.toDoubleOrNull()?.takeIf { it in -90.0..90.0 },
+        longitude = fields.getOrNull(5)?.replace(',', '.')?.toDoubleOrNull()?.takeIf { it in -180.0..180.0 },
+        photoPath = fields.getOrNull(6)?.trim()?.takeIf(String::isNotBlank),
     )
 }.let { locations ->
     if (locations.isEmpty() || locations.any { it.isDefault }) locations else locations.mapIndexed { index, location -> location.copy(isDefault = index == 0) }

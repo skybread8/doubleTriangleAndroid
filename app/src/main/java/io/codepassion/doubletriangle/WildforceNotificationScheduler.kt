@@ -204,6 +204,8 @@ internal object WildforceNotificationScheduler {
         MealType.Lunch -> LocalTime.of(17, 0)
         MealType.Dinner -> LocalTime.of(21, 0)
         MealType.Snack -> error("Snack has no logging checkpoint")
+        MealType.PreWorkout -> error("Pre-workout has no standalone logging checkpoint")
+        MealType.PostWorkout -> error("Post-workout has no standalone logging checkpoint")
     }
 
     private fun nutritionReminderBody(names: List<String>): String = when (names.size) {

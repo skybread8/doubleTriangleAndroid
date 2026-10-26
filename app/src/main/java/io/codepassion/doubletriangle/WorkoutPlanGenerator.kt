@@ -35,6 +35,18 @@ import org.json.JSONObject
 import java.util.UUID
 
 object WorkoutPlanGenerator {
+    private fun JSONObject.nullableString(name: String): String? {
+        return normalizeNullableString(opt(name))
+    }
+
+    internal fun normalizeNullableString(raw: Any?): String? {
+        return raw
+            ?.takeUnless { it == JSONObject.NULL }
+            ?.toString()
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() && !it.equals("null", ignoreCase = true) }
+    }
+
     suspend fun generate(profile: OnboardingProfile, context: Context? = null): Pair<String, WorkoutHubState> = withContext(Dispatchers.IO) {
         generateRemotePlan(profile, requireNotNull(context) { "Inicia sesión para generar el plan." })
     }
@@ -67,12 +79,23 @@ object WorkoutPlanGenerator {
             token = token,
             idempotencyKey = UUID.randomUUID().toString(),
         ) { it }
-        val parsed = parse(remotePlanToLocalJson(remotePlan), profile.name, profile.goal.title)
+        val parsed = parse(
+            remotePlanToLocalJson(remotePlan),
+            profile.name,
+            profile.goal.title,
+            bodyCompositionPhase = profile.bodyCompositionPhase?.storedValue,
+        )
         return serialize(parsed) to parsed
     }
 
     private fun remotePlanToLocalJson(plan: JSONObject): String = JSONObject().apply {
         put("planName", plan.optString("name", "Plan Wildforce"))
+        put("planStatus", plan.optString("status", "active"))
+        put("planGoal", plan.nullableString("goal"))
+        put("bodyCompositionPhase", plan.nullableString("body_composition_phase") ?: plan.nullableString("bodyCompositionPhase"))
+        put("planNotes", plan.nullableString("notes"))
+        put("planStartsOn", plan.nullableString("starts_on"))
+        put("profileSettingsHash", plan.nullableString("profile_settings_hash"))
         put("phase", plan.optString("phase", "Plan de tu cuenta"))
         put("mesocycleNumber", plan.optInt("mesocycle_number", 1))
         put("mesocycleIndex", plan.optInt("mesocycle_number", 1))
@@ -94,6 +117,18 @@ object WorkoutPlanGenerator {
         .put("focus", day.optString("focus"))
         .put("dayType", day.optString("day_type", "strength"))
         .put("status", day.optString("status", "planned").uppercase())
+        .put("kind", day.optString("kind", "workout"))
+        .put("creationSource", day.optString("creation_source", "generated"))
+        .put("scheduledFor", day.nullableString("scheduled_for"))
+        .put("startedAt", day.nullableString("started_at"))
+        .put("completedAt", day.nullableString("completed_at"))
+        .put("didCountTowardStreak", day.optBoolean("did_count_toward_streak", false))
+        .put("notes", day.nullableString("notes"))
+        .put("activeDurationSeconds", day.optInt("active_duration_seconds").takeIf { day.has("active_duration_seconds") && !day.isNull("active_duration_seconds") })
+        .put("activeCaloriesBurned", day.optDouble("active_calories_burned").takeIf { day.has("active_calories_burned") && !day.isNull("active_calories_burned") })
+        .put("averageHeartRate", day.optDouble("average_heart_rate").takeIf { day.has("average_heart_rate") && !day.isNull("average_heart_rate") })
+        .put("maximumHeartRate", day.optDouble("maximum_heart_rate").takeIf { day.has("maximum_heart_rate") && !day.isNull("maximum_heart_rate") })
+        .put("totalVolumeKg", day.optDouble("total_volume_kg").takeIf { day.has("total_volume_kg") && !day.isNull("total_volume_kg") })
         .put("weekday", day.optString("intended_weekday", "MONDAY").uppercase())
         .put("estimatedDurationMinutes", day.optInt("estimated_duration_minutes", 50))
         .put("blocks", JSONArray().apply {
@@ -200,6 +235,33 @@ object WorkoutPlanGenerator {
     }
 
     suspend fun adaptWorkout(profile: OnboardingProfile, workout: WorkoutDaySummary, request: CustomWorkoutRequest, context: Context? = null): WorkoutDaySummary = withContext(Dispatchers.IO) {
+        request.trainingLocationId?.takeIf { it.isNotBlank() }?.let { locationId ->
+            val token = context?.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE)?.getString("token", null)
+                ?: error("Inicia sesión para adaptar el entrenamiento")
+            val connection = (URL(WildforceApiEnvironment.apiUrl("workout/days/${workout.id}/adapt-location")).openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                connectTimeout = 30_000
+                readTimeout = 180_000
+                doOutput = true
+                setRequestProperty("Authorization", "Bearer $token")
+                setRequestProperty("Content-Type", "application/json")
+                setRequestProperty("Idempotency-Key", UUID.randomUUID().toString())
+            }
+            try {
+                connection.outputStream.bufferedWriter().use { it.write(JSONObject().put("training_location_id", locationId).toString()) }
+                val response = (if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream)
+                    ?.bufferedReader()?.use { it.readText() }.orEmpty()
+                check(connection.responseCode in 200..299) {
+                    runCatching { JSONObject(response).optJSONObject("error")?.optString("message") }
+                        .getOrNull()?.takeIf(String::isNotBlank) ?: "No se pudo adaptar el entrenamiento"
+                }
+                val data = JSONObject(response).optJSONObject("data") ?: JSONObject(response)
+                return@withContext parse(JSONObject().put("workouts", JSONArray().put(data)).toString(), profile.name, profile.goal.title)
+                    .workouts.first().copy(id = workout.id, order = workout.order, status = workout.status, scheduledDay = workout.scheduledDay)
+            } finally {
+                connection.disconnect()
+            }
+        }
         val (_, state) = generateWithInstruction(
             profile.copy(workoutDays = setOf(WorkoutWeekday.Monday)),
             "Adapta UNA ÚNICA sesión existente para MONDAY. Equipamiento disponible en esta ubicación: ${request.equipment.ifBlank { "peso corporal" }}. Conserva el foco (${workout.focus}), tipo (${workout.dayType}), duración aproximada (${workout.estimatedMinutes} min), intención, patrones de movimiento y dificultad de la sesión original; sustituye solo lo que el nuevo equipamiento o la seguridad requieran. No inventes equipamiento. Sesión original:\n${workoutPromptSummary(workout)}\nDevuelve un único objeto dentro de `workouts`.",
@@ -249,7 +311,7 @@ object WorkoutPlanGenerator {
         }
     }
 
-    fun parse(json: String, userName: String, goal: String): WorkoutHubState {
+    fun parse(json: String, userName: String, goal: String, bodyCompositionPhase: String? = null): WorkoutHubState {
         val root = JSONObject(json)
         val daysJson = root.getJSONArray("workouts")
         val workouts = buildList {
@@ -268,7 +330,24 @@ object WorkoutPlanGenerator {
                 // former `ai-1`, `ai-2` IDs for a newly generated week, or a
                 // paused workout from the old plan can be restored into it.
                 val id = resolveWorkoutId(day.optString("id"))
-                add(WorkoutDaySummary(id, index + 1, day.optString("title").trim().ifBlank { "Sesión ${index + 1}" }, day.optString("focus").trim().ifBlank { "Fitness general" }, day.optString("dayType").trim().lowercase().ifBlank { "strength" }, weekday, estimatedMinutes.coerceIn(15, 180), parseWorkoutStatus(day.optString("status")), exercises, blocks))
+                add(WorkoutDaySummary(
+                    id, index + 1, day.optString("title").trim().ifBlank { "Sesión ${index + 1}" },
+                    day.optString("focus").trim().ifBlank { "Fitness general" },
+                    day.optString("dayType").trim().lowercase().ifBlank { "strength" }, weekday,
+                    estimatedMinutes.coerceIn(15, 180), parseWorkoutStatus(day.optString("status")), exercises, blocks,
+                    kind = day.optString("kind", "workout").trim().ifBlank { "workout" },
+                    creationSource = day.optString("creationSource", "generated").trim().ifBlank { "generated" },
+                    scheduledFor = day.nullableString("scheduledFor"),
+                    startedAt = day.nullableString("startedAt"),
+                    completedAt = day.nullableString("completedAt"),
+                    didCountTowardStreak = day.optBoolean("didCountTowardStreak", false),
+                    notes = day.nullableString("notes"),
+                    activeDurationSeconds = day.optInt("activeDurationSeconds").takeIf { day.has("activeDurationSeconds") && !day.isNull("activeDurationSeconds") },
+                    activeCaloriesBurned = day.optDouble("activeCaloriesBurned").takeIf { day.has("activeCaloriesBurned") && !day.isNull("activeCaloriesBurned") },
+                    averageHeartRate = day.optDouble("averageHeartRate").takeIf { day.has("averageHeartRate") && !day.isNull("averageHeartRate") },
+                    maximumHeartRate = day.optDouble("maximumHeartRate").takeIf { day.has("maximumHeartRate") && !day.isNull("maximumHeartRate") },
+                    totalVolumeKg = day.optDouble("totalVolumeKg").takeIf { day.has("totalVolumeKg") && !day.isNull("totalVolumeKg") },
+                ))
             }
         }
         check(workouts.isNotEmpty()) { "La IA devolvió un plan vacío" }
@@ -296,6 +375,12 @@ object WorkoutPlanGenerator {
             mesocyclePhase = parsedPhase,
             phaseWeek = root.optInt("phaseWeek", derivedPhase?.weekInPhase ?: 1).coerceAtLeast(1),
             positionInCycle = root.optInt("positionInCycle", derivedPhase?.positionInCycle ?: weekIndex).coerceIn(1, cycleLength),
+            planStatus = root.optString("planStatus", "active").ifBlank { "active" },
+            planGoal = root.nullableString("planGoal"),
+            bodyCompositionPhase = root.nullableString("bodyCompositionPhase") ?: bodyCompositionPhase,
+            planNotes = root.nullableString("planNotes"),
+            planStartsOn = root.nullableString("planStartsOn"),
+            profileSettingsHash = root.nullableString("profileSettingsHash"),
         )
     }
 
@@ -360,6 +445,7 @@ object WorkoutPlanGenerator {
                     exercises.put(JSONObject()
                         .put("name", exercise.name)
                         .put("imageKey", exercise.imageKey)
+                        .put("coachExerciseId", exercise.coachExerciseId)
                         .put("sets", exercise.sets)
                         .put("reps", exercise.reps)
                         .put("restSeconds", exercise.restSeconds)
@@ -370,6 +456,7 @@ object WorkoutPlanGenerator {
                         .put("targetDurationSeconds", exercise.targetDurationSeconds)
                         .put("targetDurationMinutes", exercise.targetDurationMinutes)
                         .put("targetDistanceKm", exercise.targetDistanceKm)
+                        .put("targetPaceSecondsPerKm", exercise.targetPaceSecondsPerKm)
                         .put("isPerSideLoad", exercise.isPerSideLoad)
                         .put("trackingMode", exercise.trackingMode.name)
                         .put("repsMin", exercise.repRange?.minimum)
@@ -388,13 +475,31 @@ object WorkoutPlanGenerator {
                 .put("title", workout.title)
                 .put("focus", workout.focus)
                 .put("dayType", workout.dayType)
-                .put("status", workout.status.name)
+                .put("status", workout.status.wireValue)
+                .put("kind", workout.kind)
+                .put("creationSource", workout.creationSource)
                 .put("weekday", workout.scheduledDay.name)
                 .put("estimatedDurationMinutes", workout.estimatedMinutes)
+                .put("scheduledFor", workout.scheduledFor)
+                .put("startedAt", workout.startedAt)
+                .put("completedAt", workout.completedAt)
+                .put("didCountTowardStreak", workout.didCountTowardStreak)
+                .put("notes", workout.notes)
+                .put("activeDurationSeconds", workout.activeDurationSeconds)
+                .put("activeCaloriesBurned", workout.activeCaloriesBurned)
+                .put("averageHeartRate", workout.averageHeartRate)
+                .put("maximumHeartRate", workout.maximumHeartRate)
+                .put("totalVolumeKg", workout.totalVolumeKg)
                 .put("blocks", blocks))
         }
         return JSONObject()
             .put("planName", state.planName)
+            .put("planStatus", state.planStatus)
+            .put("planGoal", state.planGoal)
+            .put("bodyCompositionPhase", state.bodyCompositionPhase)
+            .put("planNotes", state.planNotes)
+            .put("planStartsOn", state.planStartsOn)
+            .put("profileSettingsHash", state.profileSettingsHash)
             .put("phase", state.phase)
             .put("mesocycleIndex", state.mesocycleIndex)
             .put("mesocycleNumber", state.mesocycleNumber)
@@ -434,6 +539,7 @@ Perfil obligatorio del usuario:
 - Omitir calentamiento: ${if (profile.skipsWarmups) "sí" else "no"}; omitir vuelta a la calma: ${if (profile.skipsCooldowns) "sí" else "no"}; omitir descansos: ${if (profile.skipsRestPeriods) "sí" else "no"}; notas del planificador: ${profile.workoutPlannerNotes.ifBlank { "ninguna" }}
 ${historyContext ?: "Historial de entrenamientos recientes: todavía no hay sesiones completadas."}
 Reglas estrictas: crea exactamente un workout por cada día disponible y no inventes días. Cada sesión debe respetar el presupuesto total de duración incluyendo calentamiento, trabajo principal y vuelta a la calma. Si se omite calentamiento o vuelta a la calma, devuelve cero ejercicios y cero bloques de ese tipo: nunca uses bloques vacíos, ocultos o de relleno. No uses ejercicios incompatibles con el equipamiento, las ubicaciones o las restricciones; prioriza sustituciones seguras y cercanas. Usa siempre bloques y prescripciones concretas, conserva el foco personalizado de cada día y distribuye el volumen de forma recuperable. Las molestias y restricciones tienen prioridad sobre el objetivo de volumen.
+Prescripciones de cardio: cuando tenga sentido, incluye `targetDistanceKm` y `targetPaceSecondsPerKm` en segundos por kilómetro; no conviertas el ritmo en repeticiones ni lo descartes al guardar el plan.
 Metadatos de progresión: incluye también mesocycleNumber, mesocycleIndex, cycleLength, weekIndex, mesocyclePhase, phaseWeek y positionInCycle en la raíz del JSON. mesocycleNumber aumenta en cada plan semanal; mesocycleIndex agrupa los planes dentro del ciclo. mesocyclePhase debe ser accumulation, intensification o deload. Mantén cycleLength según el nivel y usa weekIndex para indicar la semana actual; si no hay contexto previo, empieza en mesocycleNumber=1, mesocycleIndex=1, weekIndex=1, phaseWeek=1 y positionInCycle=1.
 Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación prioriza volumen y técnica; en intensificación prioriza carga y menor volumen; en descarga reduce volumen y fatiga manteniendo patrones y técnica.
 """
@@ -469,8 +575,26 @@ Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación
         else -> WorkoutBlockType.Standard
     }
 
-    internal fun parseWorkoutStatus(value: String): WorkoutStatus =
-        runCatching { WorkoutStatus.valueOf(value) }.getOrDefault(WorkoutStatus.Planned)
+    /** Accepts both Android's legacy enum names and iOS/backend camel-case raw values. */
+    internal fun parseWorkoutStatus(value: String): WorkoutStatus = when (
+        value.trim().replace("_", "").replace("-", "").lowercase()
+    ) {
+        "draft" -> WorkoutStatus.Draft
+        "planned" -> WorkoutStatus.Planned
+        "inprogress" -> WorkoutStatus.InProgress
+        "skipped" -> WorkoutStatus.Skipped
+        "completed", "finished" -> WorkoutStatus.Completed
+        else -> WorkoutStatus.Planned
+    }
+
+    private val WorkoutStatus.wireValue: String
+        get() = when (this) {
+            WorkoutStatus.Draft -> "draft"
+            WorkoutStatus.Planned -> "planned"
+            WorkoutStatus.InProgress -> "inProgress"
+            WorkoutStatus.Skipped -> "skipped"
+            WorkoutStatus.Completed -> "completed"
+        }
 
     private fun parseBlocks(json: JSONArray): List<WorkoutBlockSummary> = buildList {
         for (index in 0 until json.length()) {
@@ -481,7 +605,7 @@ Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación
                     type = type,
                     rounds = block.optInt("rounds", 1).coerceIn(1, 10),
                     restAfterBlockSeconds = block.optInt("restAfterBlockSeconds").takeIf { it > 0 }?.coerceIn(15, 600),
-                    notes = block.optString("notes").trim().takeIf(String::isNotBlank),
+                    notes = block.nullableString("notes"),
                     exercises = parseExercises(block.getJSONArray("exercises")).map {
                         if (type == WorkoutBlockType.Superset) it.copy(sets = 1) else it
                     },
@@ -511,6 +635,7 @@ Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación
         val durationSeconds = exercise.optInt("targetDurationSeconds", 0).takeIf { it > 0 }
         val durationMinutes = exercise.optInt("targetDurationMinutes", 0).takeIf { it > 0 }
         val distanceKm = exercise.optDouble("targetDistanceKm", Double.NaN).takeUnless(Double::isNaN)
+        val paceSecondsPerKm = exercise.optInt("targetPaceSecondsPerKm", 0).takeIf { it > 0 }
         val repsMin = exercise.optInt("repsMin", 0).takeIf { it > 0 }
         val repsMax = exercise.optInt("repsMax", repsMin ?: 0).takeIf { it > 0 }
         val trackingMode = runCatching { ExerciseTrackingMode.valueOf(exercise.optString("trackingMode")) }.getOrNull()
@@ -534,6 +659,7 @@ Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación
                 }
             },
             restSeconds = exercise.optInt("restSeconds", 60).coerceIn(0, 600),
+            coachExerciseId = exercise.optString("coachExerciseId").trim().ifBlank { null },
             setStyle = parseSetStyle(exercise.optString("setStyle")),
             setStyleParameters = parameters,
             targetWeightKg = exercise.optDouble("targetWeightKg", Double.NaN).takeUnless { it.isNaN() }
@@ -549,6 +675,7 @@ Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación
             targetDurationSeconds = durationSeconds,
             targetDurationMinutes = durationMinutes,
             targetDistanceKm = distanceKm,
+            targetPaceSecondsPerKm = paceSecondsPerKm,
             isPerSideLoad = exercise.optBoolean("isPerSideLoad"),
             trackingMode = trackingMode,
             repRange = repsMin?.let { minimum -> RepRange(minimum, (repsMax ?: minimum).coerceAtLeast(minimum)) },

@@ -13,6 +13,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -96,11 +98,9 @@ fun PlanGenerationAnimation(
             modifier = Modifier.fillMaxWidth().height(80.dp).padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = if (isStepComplete) "✓" else "○",
-                color = if (isStepComplete) androidx.compose.ui.graphics.Color(0xFF34A853) else WildforceThemeTokens.textSecondary.copy(alpha = .5f),
-                style = MaterialTheme.typography.h5,
-                modifier = Modifier.alpha(if (isStepComplete) 1f else copyOpacity),
+            GenerationStepMark(
+                complete = isStepComplete,
+                modifier = Modifier.size(24.dp).alpha(if (isStepComplete) 1f else copyOpacity),
             )
             // Give the changing copy all remaining space. Otherwise an alert
             // dialog uses each sentence's intrinsic width and visibly resizes.
@@ -131,23 +131,25 @@ private fun NotificationPlaceholderStack(tick: Int, icon: String) {
                     .togetherWith(slideOutVertically(animationSpec = tween(550)) { fullHeight -> -fullHeight } + fadeOut(tween(550)))
             },
             label = "plan-generation-notification-stack",
-        ) {
+        ) { notificationTick ->
             // Identical to NotificationStackAnimationView on iOS: three cards,
             // 80 pt apart; the centre one is full-size and its neighbours dimmed.
-            listOf(0, 1, 2).forEach { position ->
-                PlanNotificationPlaceholder(
-                    icon = icon,
-                    modifier = Modifier
-                        .fillMaxWidth(.8f)
-                        .height(90.dp)
-                        .graphicsLayer {
-                            val scale = if (position == 1) 1f else .9f
-                            scaleX = scale
-                            scaleY = scale
-                            alpha = if (position == 1) 1f else .7f
-                        }
-                        .offset(y = ((position - 1) * 80).dp),
-                )
+            key(notificationTick) {
+                listOf(0, 1, 2).forEach { position ->
+                    PlanNotificationPlaceholder(
+                        icon = icon,
+                        modifier = Modifier
+                            .fillMaxWidth(.8f)
+                            .height(90.dp)
+                            .graphicsLayer {
+                                val scale = if (position == 1) 1f else .9f
+                                scaleX = scale
+                                scaleY = scale
+                                alpha = if (position == 1) 1f else .7f
+                            }
+                            .offset(y = ((position - 1) * 80).dp),
+                    )
+                }
             }
         }
     }
@@ -168,7 +170,7 @@ private fun PlanNotificationPlaceholder(icon: String, modifier: Modifier) {
                     .background(WildforceThemeTokens.textSecondary.copy(alpha = .2f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(icon, color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.subtitle1)
+                PlanPlaceholderMark(Modifier.size(22.dp))
             }
             Column(Modifier.padding(start = 12.dp)) {
                 PlaceholderBar(140.dp, 14.dp, WildforceThemeTokens.textPrimary.copy(alpha = .3f))
@@ -178,6 +180,31 @@ private fun PlanNotificationPlaceholder(icon: String, modifier: Modifier) {
             Spacer(Modifier.weight(1f))
             PlaceholderBar(40.dp, 12.dp, WildforceThemeTokens.textSecondary.copy(alpha = .3f))
         }
+    }
+}
+
+@Composable
+private fun GenerationStepMark(complete: Boolean, modifier: Modifier = Modifier) {
+    val color = if (complete) androidx.compose.ui.graphics.Color(0xFF34A853) else WildforceThemeTokens.textSecondary.copy(alpha = .5f)
+    Canvas(modifier) {
+        if (complete) {
+            drawCircle(color)
+            drawLine(androidx.compose.ui.graphics.Color.White, androidx.compose.ui.geometry.Offset(size.width * .27f, size.height * .52f), androidx.compose.ui.geometry.Offset(size.width * .45f, size.height * .70f), strokeWidth = size.minDimension * .11f)
+            drawLine(androidx.compose.ui.graphics.Color.White, androidx.compose.ui.geometry.Offset(size.width * .45f, size.height * .70f), androidx.compose.ui.geometry.Offset(size.width * .76f, size.height * .32f), strokeWidth = size.minDimension * .11f)
+        } else {
+            drawCircle(color, style = androidx.compose.ui.graphics.drawscope.Stroke(width = size.minDimension * .11f))
+        }
+    }
+}
+
+@Composable
+private fun PlanPlaceholderMark(modifier: Modifier = Modifier) {
+    val color = WildforceThemeTokens.textSecondary
+    Canvas(modifier) {
+        drawLine(color, androidx.compose.ui.geometry.Offset(size.width * .5f, 0f), androidx.compose.ui.geometry.Offset(size.width * .5f, size.height), strokeWidth = size.minDimension * .12f)
+        drawLine(color, androidx.compose.ui.geometry.Offset(0f, size.height * .5f), androidx.compose.ui.geometry.Offset(size.width, size.height * .5f), strokeWidth = size.minDimension * .12f)
+        drawLine(color, androidx.compose.ui.geometry.Offset(size.width * .15f, size.height * .15f), androidx.compose.ui.geometry.Offset(size.width * .85f, size.height * .85f), strokeWidth = size.minDimension * .09f)
+        drawLine(color, androidx.compose.ui.geometry.Offset(size.width * .85f, size.height * .15f), androidx.compose.ui.geometry.Offset(size.width * .15f, size.height * .85f), strokeWidth = size.minDimension * .09f)
     }
 }
 

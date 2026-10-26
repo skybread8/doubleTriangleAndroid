@@ -5,6 +5,7 @@ import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class WorkoutPlanGeneratorTest {
@@ -45,9 +46,29 @@ class WorkoutPlanGeneratorTest {
 
     @Test
     fun `parses persisted workout statuses and defaults legacy plans to planned`() {
+        assertEquals(WorkoutStatus.Draft, WorkoutPlanGenerator.parseWorkoutStatus("draft"))
         assertEquals(WorkoutStatus.Completed, WorkoutPlanGenerator.parseWorkoutStatus("Completed"))
+        assertEquals(WorkoutStatus.InProgress, WorkoutPlanGenerator.parseWorkoutStatus("inProgress"))
+        assertEquals(WorkoutStatus.InProgress, WorkoutPlanGenerator.parseWorkoutStatus("in_progress"))
         assertEquals(WorkoutStatus.Skipped, WorkoutPlanGenerator.parseWorkoutStatus("Skipped"))
         assertEquals(WorkoutStatus.Planned, WorkoutPlanGenerator.parseWorkoutStatus("unknown"))
         assertEquals(WorkoutStatus.Planned, WorkoutPlanGenerator.parseWorkoutStatus(""))
+    }
+
+    @Test
+    fun `keeps iOS workout metadata in the Android model`() {
+        val workout = io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository.load().workouts.first()
+            .copy(kind = "template", creationSource = "manual")
+
+        assertEquals("template", workout.kind)
+        assertEquals("manual", workout.creationSource)
+    }
+
+    @Test
+    fun `normalizes literal null plan metadata`() {
+        assertNull(WorkoutPlanGenerator.normalizeNullableString("null"))
+        assertNull(WorkoutPlanGenerator.normalizeNullableString(" NULL "))
+        assertNull(WorkoutPlanGenerator.normalizeNullableString("  "))
+        assertEquals("plan notes", WorkoutPlanGenerator.normalizeNullableString(" plan notes "))
     }
 }

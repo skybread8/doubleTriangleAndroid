@@ -23,6 +23,18 @@ class OnboardingCustomFocusesTest {
     }
 
     @Test
+    fun joinedGymNameBecomesTheDefaultTrainingLocation() {
+        val profile = OnboardingProfile(
+            name = "Alex",
+            goal = FitnessGoal.GeneralFitness,
+            lifestyle = LifestyleLevel.ModeratelyActive,
+            gymJoinName = "Wildforce Central",
+        )
+
+        assertEquals("Wildforce Central", profile.effectiveTrainingLocations().single().name)
+    }
+
+    @Test
     fun automaticSplitPrefillsTwoDaysWithUpperLower() {
         val result = normalizedCustomFocuses(
             current = emptyMap(),

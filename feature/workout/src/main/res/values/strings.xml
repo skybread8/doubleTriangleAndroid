@@ -46,9 +46,9 @@
     <string name="workout_work_timer_description">Temporizador de ejercicio, %1$s restante</string>
     <string name="workout_remaining">RESTANTE</string>
     <string name="workout_section">SECCIÓN · %1$s  ›</string>
-    <string name="workout_superset">⛓  SUPERSERIE</string>
+    <string name="workout_superset">SUPERSERIE</string>
     <string name="workout_split_superset">SEPARAR</string>
-    <string name="workout_create_superset_next">⛓  CREAR SUPERSERIE CON EL SIGUIENTE</string>
+    <string name="workout_create_superset_next">CREAR SUPERSERIE CON EL SIGUIENTE</string>
     <string name="workout_move_exercise_up">Mover ejercicio arriba</string>
     <string name="workout_move_exercise_down">Mover ejercicio abajo</string>
     <string name="workout_remove_exercise">Eliminar ejercicio</string>

@@ -1,10 +1,5 @@
 <resources>
     <string name="app_name">Wildforce</string>
-    <string name="destination_workout">Entrenamiento</string>
-    <string name="destination_nutrition">Nutrición</string>
-    <string name="destination_analytics">Analíticas</string>
-    <string name="destination_gym">Gimnasio</string>
-    <string name="destination_profile">Perfil</string>
     <string name="widget_workout_description">Consulta el entrenamiento de hoy y tu racha.</string>
     <string name="widget_nutrition_description">Controla las calorías y macronutrientes de hoy.</string>
     <string name="preview_new_plan">PREVISUALIZAR NUEVO PLAN</string>

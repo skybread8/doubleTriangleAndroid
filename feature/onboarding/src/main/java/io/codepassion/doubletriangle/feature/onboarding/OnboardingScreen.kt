@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
@@ -57,6 +58,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AccessibilityNew
+import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -67,15 +69,21 @@ import androidx.compose.material.icons.filled.Chair
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.DirectionsWalk
+import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Female
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.HorizontalRule
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Male
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.SportsGymnastics
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Tune
@@ -86,11 +94,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -112,7 +122,11 @@ import io.codepassion.doubletriangle.core.designsystem.PlanGenerationAnimation
 import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.designsystem.liquidGlass
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
@@ -143,7 +157,13 @@ data class OnboardingProfile(
     val workoutPlannerNotes: String = "",
     val trainingLocations: List<TrainingLocationProfile> = emptyList(),
     val appLanguage: String = "Español",
+    val gymJoinCode: String? = null,
+    val gymJoinName: String? = null,
+    /** Day is optional for backwards-compatible profiles that only stored month/year. */
+    val birthDay: Int = 1,
 )
+
+data class GymJoinCodeInfo(val code: String, val gymName: String)
 
 data class OnboardingPlanPreview(
     val name: String,
@@ -227,10 +247,20 @@ data class TrainingLocationProfile(
     val name: String,
     val equipment: Set<Equipment>,
     val isDefault: Boolean = false,
+    val displayAddress: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val photoPath: String? = null,
 )
 
 fun OnboardingProfile.effectiveTrainingLocations(): List<TrainingLocationProfile> = trainingLocations.ifEmpty {
-    listOf(TrainingLocationProfile("Mi gimnasio", availableEquipment.ifEmpty { setOf(Equipment.Bodyweight) }, true))
+    listOf(
+        TrainingLocationProfile(
+            gymJoinName?.takeIf(String::isNotBlank) ?: "Mi gimnasio",
+            availableEquipment.ifEmpty { setOf(Equipment.Bodyweight) },
+            true,
+        ),
+    )
 }
 enum class GymType(val storedValue:String,val title:String,val glyph:String){
 BigGym("bigGym","Gimnasio grande","▦"),SmallGym("smallGym","Gimnasio pequeño","▤"),HomeGym("homeGym","Gimnasio en casa","⌂"),SomeAccessories("someAccessories","Algunos accesorios","◆"),BodyweightOnly("bodyweightOnly","Solo peso corporal","◎");
@@ -322,7 +352,8 @@ enum class FitnessGoal(val storedValue: String, val title: String, val descripti
 
 @Composable
 fun OnboardingScreen(
-    onRequestHealthConnect: ((((Boolean, Int?, Double?) -> Unit) -> Unit)) = { result -> result(false, null, null) },
+    onRequestHealthConnect: ((((Boolean, Int?, Double?, Double?, Double?) -> Unit) -> Unit)) = { result -> result(false, null, null, null, null) },
+    onHealthMetricsImported: (Boolean, Double?, Double?) -> Unit = { _, _, _ -> },
     isGenerating: Boolean = false,
     generationError: String? = null,
     generatedPlanPreview: OnboardingPlanPreview? = null,
@@ -330,9 +361,11 @@ fun OnboardingScreen(
     onContinueWithoutPlan: () -> Unit = {},
     onLanguageSelected: (String) -> Unit = {},
     onLoggedIn: (AuthResponse) -> Unit = {},
-    onRegistered: (AuthResponse) -> Unit = {},
+    onRegistered: (AuthResponse, OnboardingProfile) -> Unit = { _, _ -> },
+    onCheckGymJoinCode: suspend (String) -> GymJoinCodeInfo? = { null },
     onCompleted: (OnboardingProfile, Boolean) -> Unit,
 ) {
+    val context = LocalContext.current
     var step by remember { mutableStateOf(0) }
     var name by remember { mutableStateOf("") }
     var goal by remember { mutableStateOf<FitnessGoal?>(null) }
@@ -354,6 +387,19 @@ fun OnboardingScreen(
     var generationAttempt by remember { mutableStateOf(0) }
     var appLanguage by remember { mutableStateOf("Español") }
     var isLanguagePickerVisible by remember { mutableStateOf(false) }
+    var isGymCodePickerVisible by remember { mutableStateOf(false) }
+    var gymCodeInput by remember { mutableStateOf("") }
+    var gymCodeError by remember { mutableStateOf<String?>(null) }
+    var gymJoinCode by remember { mutableStateOf<String?>(null) }
+    var gymJoinName by remember { mutableStateOf<String?>(null) }
+    val gymCodeScope = rememberCoroutineScope()
+    val gymCodeScanner = remember(context) {
+        val options = GmsBarcodeScannerOptions.Builder()
+            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+            .enableAutoZoom()
+            .build()
+        GmsBarcodeScanning.getClient(context, options)
+    }
     var isLoginVisible by remember { mutableStateOf(false) }
     var authenticationRegisters by remember { mutableStateOf(false) }
     var registrationCompletesOnboarding by remember { mutableStateOf(false) }
@@ -371,11 +417,12 @@ fun OnboardingScreen(
         else -> Locale.forLanguageTag("es")
     }
     val monthNames=(1..12).map { month -> Month.of(month).getDisplayName(TextStyle.FULL, onboardingLocale).replaceFirstChar { it.titlecase(onboardingLocale) } }
-    var birthMonth by remember{mutableStateOf(1)};var birthYear by remember{mutableStateOf(1995)};var gender by remember{mutableStateOf<Gender?>(null)};var metricSystem by remember{mutableStateOf(MetricSystem.Metric)};var heightCm by remember{mutableStateOf(175)};var weightKg by remember{mutableStateOf(70.0)}
+    var birthDay by remember{mutableStateOf(1)};var birthMonth by remember{mutableStateOf(1)};var birthYear by remember{mutableStateOf(1995)};var gender by remember{mutableStateOf<Gender?>(null)};var metricSystem by remember{mutableStateOf(MetricSystem.Metric)};var heightCm by remember{mutableStateOf(175)};var weightKg by remember{mutableStateOf(70.0)}
     fun showsBodyComposition() = goal?.supportsBodyComposition == true && trainingLevel.supportsBodyComposition
     fun visibleSteps() = (1..16).filter { current ->
         when (current) {
             8 -> showsBodyComposition()
+            9, 10 -> gymJoinCode == null
             15 -> !importedHeight
             16 -> !importedWeight
             else -> true
@@ -389,7 +436,7 @@ fun OnboardingScreen(
         val selectedLifestyle = lifestyle
         if (selectedGoal != null && selectedLifestyle != null) {
             val selectedBodyPhase = bodyPhase.takeIf { selectedGoal.supportsBodyComposition && trainingLevel.supportsBodyComposition }
-            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses.filterKeys { it in workoutDays }, gymType ?: GymType.SmallGym, equipment, restrictions, healthConnectEnabled == true, birthMonth, birthYear, gender ?: Gender.Male, metricSystem, heightCm, weightKg, appLanguage = appLanguage), useAi)
+            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses.filterKeys { it in workoutDays }, gymType ?: GymType.SmallGym, equipment, restrictions, healthConnectEnabled == true, birthMonth, birthYear, gender ?: Gender.Male, metricSystem, heightCm, weightKg, appLanguage = appLanguage, gymJoinCode = gymJoinCode, gymJoinName = gymJoinName, birthDay = birthDay), useAi)
         }
     }
 
@@ -414,7 +461,7 @@ fun OnboardingScreen(
                 authenticationRegisters = false
                 registrationCompletesOnboarding = false
                 isLoginVisible = true
-            })
+            }, onJoinGym = { isGymCodePickerVisible = true })
             1 -> FormStep(
                 progress = progressFor(1),
                 title = "Bienvenido",
@@ -447,7 +494,7 @@ fun OnboardingScreen(
                 onContinue = { step = 4 },
             ) {
                 LifestyleLevel.entries.forEach { item ->
-                    ChoiceOption(item.title, item.description, item.glyph, lifestyle == item) { lifestyle = item }
+                    ChoiceOption(item.title, item.description, item.glyph, lifestyle == item, { lifestyle = item }, onboardingLifestyleIcon(item))
                     Spacer(Modifier.height(10.dp))
                 }
             }
@@ -460,9 +507,9 @@ fun OnboardingScreen(
                 onContinue = { step = 5 },
             ) {
                 WorkoutWeekday.entries.forEach { day ->
-                    ChoiceOption(day.title, null, day.localizedInitial(appLanguage), day in workoutDays) {
+                    ChoiceOption(day.title, null, day.localizedInitial(appLanguage), day in workoutDays, onClick = {
                         workoutDays = if (day in workoutDays && workoutDays.size > 1) workoutDays - day else workoutDays + day
-                    }
+                    })
                     Spacer(Modifier.height(10.dp))
                 }
             }
@@ -493,7 +540,7 @@ fun OnboardingScreen(
                 onContinue = { step = 7 },
             ) {
                 TrainingLevel.entries.forEach { level ->
-                    ChoiceOption(level.title, level.description, level.glyph, trainingLevel == level) { trainingLevel = level }
+                    ChoiceOption(level.title, level.description, level.glyph, trainingLevel == level, { trainingLevel = level }, onboardingTrainingLevelIcon(level))
                     Spacer(Modifier.height(10.dp))
                 }
             }
@@ -503,11 +550,11 @@ fun OnboardingScreen(
                 onBack={step=6},onContinue={step=nextVisibleStep(7)},
             ){
                 trainingSplit.warning(workoutDays.size)?.let{Text(it,Modifier.fillMaxWidth().background(Color(0xFFFFB020).copy(alpha=.14f),RoundedCornerShape(12.dp)).padding(12.dp));Spacer(Modifier.height(12.dp))}
-                TrainingSplitPreference.entries.forEach{split->ChoiceOption(split.title,split.description,split.glyph,trainingSplit==split){
+                TrainingSplitPreference.entries.forEach{split->ChoiceOption(split.title,split.description,split.glyph,trainingSplit==split, {
                     val previousSplit = trainingSplit
                     trainingSplit=split
                     if(split==TrainingSplitPreference.Custom)customFocuses=normalizedCustomFocuses(customFocuses, workoutDays, previousSplit)
-                };Spacer(Modifier.height(10.dp))}
+                }, onboardingTrainingSplitIcon(split));Spacer(Modifier.height(10.dp))}
                 if(trainingSplit==TrainingSplitPreference.Custom){
                     Text("Foco semanal",fontWeight=FontWeight.Bold,color=WildforceThemeTokens.textPrimary)
                     workoutDays.sortedBy{it.ordinal}.forEach{day->
@@ -518,17 +565,17 @@ fun OnboardingScreen(
                     }
                 }
             }
-            8 -> FormStep(progress=progressFor(8),title="Fase corporal",subtitle="Elige cómo debe influir tu objetivo corporal en el plan.",canContinue=true,onBack={step=7},onContinue={step=9}){
-                BodyCompositionPhase.entries.forEach{phase->ChoiceOption(phase.title,phase.description,phase.glyph,bodyPhase==phase){bodyPhase=phase};Spacer(Modifier.height(10.dp))}
+            8 -> FormStep(progress=progressFor(8),title="Fase corporal",subtitle="Elige cómo debe influir tu objetivo corporal en el plan.",canContinue=true,onBack={step=previousVisibleStep(8)},onContinue={step=nextVisibleStep(8)}){
+                BodyCompositionPhase.entries.forEach{phase->ChoiceOption(phase.title,phase.description,phase.glyph,bodyPhase==phase,{bodyPhase=phase}, onboardingBodyPhaseIcon(phase));Spacer(Modifier.height(10.dp))}
             }
-            9 -> FormStep(progress=progressFor(9),title="Gimnasio",subtitle="¿En qué entorno vas a entrenar?",canContinue=gymType!=null,onBack={step=previousVisibleStep(9)},onContinue={step=10}){
-                GymType.entries.forEach{gym->ChoiceOption(gym.title,null,gym.glyph,gymType==gym){gymType=gym;equipment=gym.defaultEquipment};Spacer(Modifier.height(10.dp))}
+            9 -> FormStep(progress=progressFor(9),title="Gimnasio",subtitle="¿En qué entorno vas a entrenar?",canContinue=gymType!=null,onBack={step=previousVisibleStep(9)},onContinue={step=nextVisibleStep(9)}){
+                GymType.entries.forEach{gym->ChoiceOption(gym.title,null,gym.glyph,gymType==gym,{gymType=gym;equipment=gym.defaultEquipment}, onboardingGymTypeIcon(gym));Spacer(Modifier.height(10.dp))}
             }
-            10 -> FormStep(progress=progressFor(10),title="Equipamiento",subtitle="Ajusta el material al que realmente tienes acceso.",canContinue=true,onBack={step=9},onContinue={step=11}){
+            10 -> FormStep(progress=progressFor(10),title="Equipamiento",subtitle="Ajusta el material al que realmente tienes acceso.",canContinue=true,onBack={step=previousVisibleStep(10)},onContinue={step=nextVisibleStep(10)}){
                 OutlinedTextField(value=equipmentSearch,onValueChange={equipmentSearch=it},modifier=Modifier.fillMaxWidth(),placeholder={Text("Buscar equipamiento")},singleLine=true,shape=RoundedCornerShape(14.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text("${equipment.size} seleccionados",Modifier.padding(vertical=12.dp),color=WildforceThemeTokens.textSecondary)
-                    Text("Deseleccionar todo", Modifier.clickable { equipment = emptySet() }.padding(8.dp), color = WildforceThemeTokens.textSecondary)
+                    Text("Deseleccionar todo", Modifier.heightIn(min = 48.dp).clickable { equipment = emptySet() }.padding(horizontal = 8.dp, vertical = 8.dp), color = WildforceThemeTokens.textSecondary)
                 }
                 Equipment.entries.filter{it.title.contains(equipmentSearch.trim(),ignoreCase=true)}.groupBy { it.category }.forEach { (category, categoryItems) ->
                     Text(category, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 12.dp, bottom = 8.dp))
@@ -546,19 +593,20 @@ fun OnboardingScreen(
                     }
                 }
             }
-            11 -> FormStep(progress=progressFor(11),title="Restricciones",subtitle="Indica cualquier lesión o limitación que debamos tener en cuenta.",canContinue=true,onBack={step=10},onContinue={step=12}){
-                ChoiceOption("No tengo restricciones","Podrás cambiarlo más adelante.","✓",!hasRestrictions){hasRestrictions=false;restrictions=emptySet()}
+            11 -> FormStep(progress=progressFor(11),title="Restricciones",subtitle="Indica cualquier lesión o limitación que debamos tener en cuenta.",canContinue=true,onBack={step=previousVisibleStep(11)},onContinue={step=12}){
+                ChoiceOption("No tengo restricciones","Podrás cambiarlo más adelante.","✓",!hasRestrictions, onClick = {hasRestrictions=false;restrictions=emptySet()})
                 Spacer(Modifier.height(10.dp))
-                ChoiceOption("Sí, tengo restricciones",null,"!",hasRestrictions){hasRestrictions=true}
+                ChoiceOption("Sí, tengo restricciones",null,"!",hasRestrictions, onClick = {hasRestrictions=true})
                 if(hasRestrictions){
                     Spacer(Modifier.height(18.dp))
-                    MovementRestriction.entries.forEach{item->ChoiceOption(item.title,null,"•",item in restrictions){restrictions=if(item in restrictions)restrictions-item else restrictions+item};Spacer(Modifier.height(8.dp))}
+                    MovementRestriction.entries.forEach{item->ChoiceOption(item.title,null,"•",item in restrictions, onClick = {restrictions=if(item in restrictions)restrictions-item else restrictions+item});Spacer(Modifier.height(8.dp))}
                 }
             }
             12 -> FormStep(progress=progressFor(12),title="",subtitle="",canContinue=true,onBack={step=11},onContinue={step=nextVisibleStep(12)},showBottomAction=false){
                 HealthConnectStep(
                     onConnect = {
-                        onRequestHealthConnect { granted, height, weight ->
+                    onRequestHealthConnect { granted, height, weight, leanBodyMass, bodyFat ->
+                        onHealthMetricsImported(granted, leanBodyMass, bodyFat)
                             healthConnectEnabled = granted
                             height?.let { heightCm = it; importedHeight = true }
                             weight?.let { weightKg = it; importedWeight = true }
@@ -571,13 +619,14 @@ fun OnboardingScreen(
                     },
                 )
             }
-            13 -> FormStep(progress=progressFor(13),title="Fecha de nacimiento",subtitle="Esto nos ayuda a adaptar volumen, intensidad y recuperación.",canContinue=true,onBack={step=12},onContinue={step=14}){
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    WheelPicker("Mes", (1..12).toList(), birthMonth, { monthNames[it - 1] }, Modifier.weight(1f)) { birthMonth = it }
+            13 -> FormStep(progress=progressFor(13),title="Fecha de nacimiento",subtitle="Esto nos ayuda a adaptar volumen, intensidad y recuperación.",canContinue=true,onBack={step=previousVisibleStep(13)},onContinue={step=nextVisibleStep(13)}){
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    WheelPicker("Día", (1..31).toList(), birthDay, { it.toString() }, Modifier.weight(.7f)) { birthDay = it }
+                    WheelPicker("Mes", (1..12).toList(), birthMonth, { monthNames[it - 1] }, Modifier.weight(1.4f)) { birthMonth = it }
                     WheelPicker("Año", (1920..currentYear).toList().reversed(), birthYear, { it.toString() }, Modifier.weight(1f)) { birthYear = it }
                 }
             }
-            14 -> FormStep(progress=progressFor(14),title="¿Cuál es tu sexo?",subtitle="Se utiliza para ajustar los cálculos físicos del plan.",canContinue=gender!=null,onBack={step=13},onContinue={step=nextVisibleStep(14)}){Gender.entries.forEach{item->ChoiceOption(item.title,null,item.glyph,gender==item){gender=item};Spacer(Modifier.height(10.dp))}}
+            14 -> FormStep(progress=progressFor(14),title="¿Cuál es tu sexo?",subtitle="Se utiliza para ajustar los cálculos físicos del plan.",canContinue=gender!=null,onBack={step=previousVisibleStep(14)},onContinue={step=nextVisibleStep(14)}){Gender.entries.forEach{item->ChoiceOption(item.title,null,item.glyph,gender==item, onClick = {gender=item});Spacer(Modifier.height(10.dp))}}
             15 -> FormStep(progress=progressFor(15),title="Altura",subtitle="Esto nos ayuda a calcular tus necesidades con precisión.",canContinue=true,onBack={step=previousVisibleStep(15)},onContinue={step=nextVisibleStep(15)}){
                 MetricSystemSegmentedControl(metricSystem) { metricSystem = it }
                 Spacer(Modifier.height(20.dp))
@@ -609,7 +658,7 @@ fun OnboardingScreen(
     if (step < 18) {
         Text(
             "◎  $appLanguage",
-            modifier = Modifier.align(Alignment.TopEnd).padding(16.dp).clickable { isLanguagePickerVisible = true }.padding(horizontal = 12.dp, vertical = 9.dp),
+            modifier = Modifier.align(Alignment.TopEnd).padding(16.dp).heightIn(min = 48.dp).clickable { isLanguagePickerVisible = true }.padding(horizontal = 12.dp, vertical = 9.dp),
             color = if (step == 0) Color.White else WildforceThemeTokens.textPrimary,
             style = MaterialTheme.typography.caption,
         )
@@ -619,42 +668,109 @@ fun OnboardingScreen(
         AlertDialog(
             onDismissRequest = { isLanguagePickerVisible = false },
             title = { Text("Idioma") },
-            text = { Column { languages.forEach { language -> Text(language, Modifier.fillMaxWidth().clickable { appLanguage = language; onLanguageSelected(language); isLanguagePickerVisible = false }.padding(vertical = 12.dp), color = if (language == appLanguage) WildforceThemeTokens.accentGold else WildforceThemeTokens.textPrimary) } } },
+            text = { Column { languages.forEach { language -> Text(language, Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { appLanguage = language; onLanguageSelected(language); isLanguagePickerVisible = false }.padding(vertical = 12.dp), color = if (language == appLanguage) WildforceThemeTokens.accent else WildforceThemeTokens.textPrimary) } } },
             confirmButton = {},
         )
     }
+    if (isGymCodePickerVisible) {
+        var checking by remember { mutableStateOf(false) }
+        AlertDialog(
+            onDismissRequest = { if (!checking) isGymCodePickerVisible = false },
+            title = { Text("Tengo un código de gimnasio") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("Introduce el código que te ha dado tu gimnasio.")
+                    OutlinedTextField(
+                        value = gymCodeInput,
+                        onValueChange = { gymCodeInput = it.uppercase().filter(Char::isLetterOrDigit).take(16); gymCodeError = null },
+                        label = { Text("Código de gimnasio") },
+                        singleLine = true,
+                        enabled = !checking,
+                        trailingIcon = {
+                            Box(
+                                Modifier.size(48.dp).clickable(enabled = !checking) {
+                                    gymCodeScanner.startScan()
+                                        .addOnSuccessListener { barcode ->
+                                            barcode.rawValue?.let { value ->
+                                                gymCodeInput = value.uppercase().filter(Char::isLetterOrDigit).take(16)
+                                                gymCodeError = null
+                                            }
+                                        }
+                                },
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(Icons.Filled.QrCodeScanner, contentDescription = "Escanear código QR", modifier = Modifier.size(24.dp))
+                            }
+                        },
+                    )
+                    gymCodeError?.let { Text(it, color = Color(0xFFE26D5A)) }
+                }
+            },
+            confirmButton = {
+                TextButton(enabled = gymCodeInput.isNotBlank() && !checking, onClick = {
+                    checking = true
+                    gymCodeScope.launch {
+                        val result = runCatching { onCheckGymJoinCode(gymCodeInput) }.getOrNull()
+                        if (result != null) {
+                            gymJoinCode = result.code
+                            gymJoinName = result.gymName
+                            // A gym membership supplies the training location and
+                            // equipment in iOS, so the gym questions are skipped
+                            // without falling back to the small-gym defaults.
+                            gymType = GymType.BigGym
+                            equipment = GymType.BigGym.defaultEquipment
+                            gymCodeError = null
+                            isGymCodePickerVisible = false
+                            step = 1
+                        } else gymCodeError = "No se pudo validar el código."
+                        checking = false
+                    }
+                }) { Text(if (checking) "VALIDANDO…" else "CONTINUAR") }
+            },
+            dismissButton = { TextButton(enabled = !checking, onClick = { isGymCodePickerVisible = false }) { Text("CANCELAR") } },
+        )
+    }
     if (isLoginVisible) {
+        val authenticationProfile = OnboardingProfile(
+            name = name.trim(),
+            goal = goal ?: FitnessGoal.GeneralFitness,
+            lifestyle = lifestyle ?: LifestyleLevel.ModeratelyActive,
+            workoutDays = workoutDays,
+            preferredWorkoutDurationMinutes = duration,
+            trainingLevel = trainingLevel,
+            trainingSplitPreference = trainingSplit,
+            bodyCompositionPhase = bodyPhase.takeIf { showsBodyComposition() },
+            customWorkoutFocuses = customFocuses.filterKeys { it in workoutDays },
+            gymType = gymType ?: GymType.SmallGym,
+            availableEquipment = equipment,
+            movementRestrictions = restrictions,
+            isHealthConnectEnabled = healthConnectEnabled == true,
+            birthMonth = birthMonth,
+            birthYear = birthYear,
+            gender = gender ?: Gender.Male,
+            metricSystem = metricSystem,
+            heightCm = heightCm,
+            weightKg = weightKg,
+            appLanguage = appLanguage,
+            gymJoinCode = gymJoinCode,
+            gymJoinName = gymJoinName,
+        )
         AuthenticationSheet(
             register = authenticationRegisters,
-            profile = OnboardingProfile(
-                name = name.trim(),
-                goal = goal ?: FitnessGoal.GeneralFitness,
-                lifestyle = lifestyle ?: LifestyleLevel.ModeratelyActive,
-                workoutDays = workoutDays,
-                preferredWorkoutDurationMinutes = duration,
-                trainingLevel = trainingLevel,
-                trainingSplitPreference = trainingSplit,
-                bodyCompositionPhase = bodyPhase.takeIf { showsBodyComposition() },
-                customWorkoutFocuses = customFocuses.filterKeys { it in workoutDays },
-                gymType = gymType ?: GymType.SmallGym,
-                availableEquipment = equipment,
-                movementRestrictions = restrictions,
-                isHealthConnectEnabled = healthConnectEnabled == true,
-                birthMonth = birthMonth,
-                birthYear = birthYear,
-                gender = gender ?: Gender.Male,
-                metricSystem = metricSystem,
-                heightCm = heightCm,
-                weightKg = weightKg,
-                appLanguage = appLanguage,
-            ),
+            profile = authenticationProfile,
             onDismiss = { isLoginVisible = false },
             onSwitch = { authenticationRegisters = !authenticationRegisters },
             onAuthenticated = { response ->
                 isLoginVisible = false
                 if (authenticationRegisters && registrationCompletesOnboarding) {
-                    onRegistered(response)
-                    step = 18
+                    onRegistered(response, authenticationProfile)
+                    if (authenticationProfile.gymJoinCode != null) {
+                        // iOS members enter the app after registration and
+                        // membership join; they do not enter the AI-plan step.
+                        onCompleted(authenticationProfile, false)
+                    } else {
+                        step = 18
+                    }
                 } else {
                     onLoggedIn(response)
                 }
@@ -665,7 +781,7 @@ fun OnboardingScreen(
 }
 
 @Composable
-private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit) {
+private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit, onJoinGym: () -> Unit) {
     var appeared by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { appeared = true }
     // The iOS cover reveals each element separately instead of fading the whole
@@ -740,11 +856,12 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit) {
             }
             Text(
                 "Ya tengo una cuenta",
-                modifier = Modifier.padding(top = 18.dp).clickable(onClick = onLogin).padding(8.dp),
+                modifier = Modifier.padding(top = 18.dp).heightIn(min = 48.dp).clickable(onClick = onLogin).padding(8.dp),
                 color = Color.White.copy(alpha = 0.80f),
                 style = MaterialTheme.typography.caption,
                 fontWeight = FontWeight.SemiBold,
             )
+            Text("Tengo un código de gimnasio", Modifier.padding(top = 10.dp).heightIn(min = 48.dp).clickable(onClick = onJoinGym).padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -877,7 +994,7 @@ private fun FormStep(
                 color = WildforceThemeTokens.accent,
             )
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(44.dp).clickable(onClick = onBack), contentAlignment = Alignment.CenterStart) {
+                Box(Modifier.size(48.dp).clickable(onClick = onBack), contentAlignment = Alignment.CenterStart) {
                     Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(22.dp))
                 }
             }
@@ -927,7 +1044,7 @@ private fun HealthConnectStep(onConnect: () -> Unit, onNotNow: () -> Unit) {
             Box(
                 Modifier.size(96.dp).graphicsLayer { translationX = healthOffset; rotationZ = healthRotation }.clip(RoundedCornerShape(22.dp)).background(Color(0xFFFF375F)),
                 contentAlignment = Alignment.Center,
-            ) { Text("♥", color = Color.White, style = MaterialTheme.typography.h3) }
+            ) { Icon(Icons.Filled.Favorite, contentDescription = null, tint = Color.White, modifier = Modifier.size(42.dp)) }
         }
         Text("Sincroniza con Health Connect", modifier = Modifier.alpha(contentAlpha), style = MaterialTheme.typography.h5, fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
         Text(
@@ -986,7 +1103,7 @@ private fun NameStepInput(name: String, onNameChange: (String) -> Unit) {
 
 @Composable
 private fun GoalOption(item: FitnessGoal, selected: Boolean, onClick: () -> Unit) =
-    ChoiceOption(item.title, item.description, item.glyph, selected, onClick)
+    ChoiceOption(item.title, item.description, item.glyph, selected, onClick, onboardingGoalIcon(item))
 
 @Composable
 private fun ChoiceOption(
@@ -995,9 +1112,10 @@ private fun ChoiceOption(
     glyph: String,
     selected: Boolean,
     onClick: () -> Unit,
+    iconOverride: ImageVector? = null,
 ) {
     val isWeekday = WorkoutWeekday.entries.any { it.title == title }
-    val icon = onboardingIcon(glyph)
+    val icon = iconOverride ?: onboardingIcon(glyph)
     val interactionSource = remember { MutableInteractionSource() }
     val pressed by interactionSource.collectIsPressedAsState()
     val pressScale by animateFloatAsState(
@@ -1064,6 +1182,56 @@ private fun onboardingIcon(glyph: String) = when (glyph) {
     "—" -> Icons.Filled.HorizontalRule
     "↑" -> Icons.Filled.TrendingUp
     else -> null
+}
+
+private fun onboardingGoalIcon(goal: FitnessGoal): ImageVector = when (goal) {
+    FitnessGoal.LoseWeight -> Icons.Filled.Sync
+    FitnessGoal.BuildMuscle -> Icons.Filled.SportsGymnastics
+    FitnessGoal.GainStrength -> Icons.Filled.Bolt
+    FitnessGoal.ImproveEndurance -> Icons.Filled.DirectionsRun
+    FitnessGoal.ImproveMobility -> Icons.Filled.AccessibilityNew
+    FitnessGoal.BodyRecomposition -> Icons.Filled.AccessibilityNew
+    FitnessGoal.GeneralFitness -> Icons.Filled.Favorite
+}
+
+private fun onboardingLifestyleIcon(level: LifestyleLevel): ImageVector = when (level) {
+    LifestyleLevel.Sedentary -> Icons.Filled.Chair
+    LifestyleLevel.LightlyActive -> Icons.Filled.AccessibilityNew
+    LifestyleLevel.ModeratelyActive -> Icons.Filled.DirectionsWalk
+    LifestyleLevel.VeryActive -> Icons.Filled.DirectionsRun
+}
+
+private fun onboardingTrainingLevelIcon(level: TrainingLevel): ImageVector = when (level) {
+    TrainingLevel.CompleteBeginner -> Icons.Filled.Eco
+    TrainingLevel.Beginner -> Icons.Filled.DirectionsWalk
+    TrainingLevel.Novice -> Icons.Filled.DirectionsWalk
+    TrainingLevel.Intermediate -> Icons.Filled.DirectionsRun
+    TrainingLevel.Advanced -> Icons.Filled.LocalFireDepartment
+    TrainingLevel.Elite -> Icons.Filled.Bolt
+}
+
+private fun onboardingTrainingSplitIcon(split: TrainingSplitPreference): ImageVector = when (split) {
+    TrainingSplitPreference.Automatic -> Icons.Filled.AutoAwesome
+    TrainingSplitPreference.FullBody -> Icons.Filled.SportsGymnastics
+    TrainingSplitPreference.UpperLower -> Icons.Filled.UnfoldMore
+    TrainingSplitPreference.PushPullLegs -> Icons.Filled.SportsGymnastics
+    TrainingSplitPreference.BodyPartSplit -> Icons.Filled.AccessibilityNew
+    TrainingSplitPreference.Custom -> Icons.Filled.Tune
+}
+
+private fun onboardingBodyPhaseIcon(phase: BodyCompositionPhase): ImageVector = when (phase) {
+    BodyCompositionPhase.Automatic -> Icons.Filled.AutoAwesome
+    BodyCompositionPhase.Bulk -> Icons.Filled.TrendingUp
+    BodyCompositionPhase.Cut -> Icons.Filled.TrendingDown
+    BodyCompositionPhase.Maintain -> Icons.Filled.HorizontalRule
+}
+
+private fun onboardingGymTypeIcon(type: GymType): ImageVector = when (type) {
+    GymType.BigGym -> Icons.Filled.Apartment
+    GymType.SmallGym -> Icons.Filled.Business
+    GymType.HomeGym -> Icons.Filled.Home
+    GymType.SomeAccessories -> Icons.Filled.FitnessCenter
+    GymType.BodyweightOnly -> Icons.Filled.AccessibilityNew
 }
 
 @Composable

@@ -18,6 +18,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -32,9 +33,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -69,10 +74,22 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.security.MessageDigest
+import java.time.YearMonth
+
+internal fun daysInBirthMonth(year: Int, month: Int): Int =
+    runCatching { YearMonth.of(year.coerceIn(1920, 9999), month.coerceIn(1, 12)).lengthOfMonth() }.getOrDefault(31)
 
 private const val AccountPreferences = "wildforce_account"
 private const val MonthlyProductId = "io.codepassion.wildforce.premium"
 private const val YearlyProductId = "io.codepassion.wildforce.premium.year"
+private const val NutritionMonthlyProductId = "io.codepassion.wildforce.nutrition"
+private const val NutritionYearlyProductId = "io.codepassion.wildforce.nutrition.year"
+
+/** The two consumer plans offered by both mobile apps. */
+enum class SubscriptionTier(val title: String, val monthlyProductId: String, val yearlyProductId: String) {
+    Premium("Premium", MonthlyProductId, YearlyProductId),
+    Nutrition("Nutrition", NutritionMonthlyProductId, NutritionYearlyProductId),
+}
 
 data class WildforceAccount(val id: String, val name: String, val email: String)
 
@@ -92,14 +109,48 @@ private class WildforceAccountStore(context: Context) {
 /** Current account snapshot for profile row summaries. Credentials remain private to this file. */
 fun currentWildforceAccount(context: Context): WildforceAccount? = WildforceAccountStore(context).account()
 
-/** Names of the coaches assigned to the signed-in account for the profile root. */
-suspend fun currentWildforceCoaches(context: Context): List<String> = withContext(Dispatchers.IO) {
+/** Coaches assigned to the signed-in account for the profile root. */
+data class WildforceCoach(val id: String, val name: String)
+
+suspend fun currentWildforceCoaches(context: Context): List<WildforceCoach> = withContext(Dispatchers.IO) {
     runCatching {
         val token = WildforceAccountStore(context).token() ?: return@runCatching emptyList()
         val response = authenticatedRequest("account/coaches", token, null)
         response.optJSONArray("data")?.let { data ->
-            List(data.length()) { index -> data.optJSONObject(index)?.optString("name").orEmpty() }
-                .filter(String::isNotBlank)
+            List(data.length()) { index ->
+                data.optJSONObject(index)?.let { coach ->
+                    WildforceCoach(
+                        id = coach.optString("id").orEmpty(),
+                        name = coach.optString("name").orEmpty(),
+                    )
+                }
+            }.filter { it != null && it.id.isNotBlank() && it.name.isNotBlank() }
+                .filterNotNull()
+        }.orEmpty()
+    }.getOrDefault(emptyList())
+}
+
+/** The compact membership projection shown by iOS on the profile root. */
+data class WildforceGymMembership(
+    val status: String,
+    val teamName: String,
+    val gymName: String?,
+)
+
+suspend fun currentWildforceGymMemberships(context: Context): List<WildforceGymMembership> = withContext(Dispatchers.IO) {
+    runCatching {
+        val token = WildforceAccountStore(context).token() ?: return@runCatching emptyList()
+        val response = authenticatedRequest("gym-memberships", token, null)
+        response.optJSONArray("data")?.let { data ->
+            List(data.length()) { index ->
+                data.optJSONObject(index)?.let { membership ->
+                    WildforceGymMembership(
+                        status = membership.optString("status").ifBlank { "active" },
+                        teamName = membership.optJSONObject("team")?.optString("name").orEmpty(),
+                        gymName = membership.optJSONObject("gym")?.optString("name")?.ifBlank { null },
+                    )
+                }
+            }.filterNotNull().filter { it.teamName.isNotBlank() }
         }.orEmpty()
     }.getOrDefault(emptyList())
 }
@@ -109,12 +160,107 @@ data class AuthResponse(val id: String, val name: String, val email: String, val
 private data class LinkedAccount(val provider: String, val email: String?)
 
 /** The access snapshot returned by the API, which remains the source of truth. */
+data class SubscriptionFeatures(
+    val app: Boolean,
+    val aiNutritionAnalysis: Boolean,
+    val aiCoach: Boolean,
+    val booking: Boolean,
+    val coachTools: Boolean,
+    val sync: Boolean,
+)
+
 data class SubscriptionAccess(
     val hasAccess: Boolean,
     val status: String?,
     val plan: String?,
+    val provider: String?,
+    val autoRenews: Boolean?,
     val renewsAt: String?,
-)
+    val cancelledAt: String?,
+    val features: SubscriptionFeatures,
+    val hasCoach: Boolean,
+) {
+    /** iOS only auto-selects the Gym tab for booking-only/member access. */
+    val isMemberMode: Boolean
+        get() = !features.app && features.booking
+}
+
+/** Persists the last server decision so feature gates remain useful offline, like iOS AppAccessStore. */
+object SubscriptionAccessStore {
+    private const val PREFS = "wildforce_subscription_access"
+
+    fun load(context: Context): SubscriptionAccess? {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (!prefs.contains("has_access")) return null
+        return SubscriptionAccess(
+            hasAccess = prefs.getBoolean("has_access", false),
+            status = prefs.getString("status", null),
+            plan = prefs.getString("plan", null),
+            provider = prefs.getString("provider", null),
+            autoRenews = prefs.takeIf { it.contains("auto_renews") }?.getBoolean("auto_renews", false),
+            renewsAt = prefs.getString("renews_at", null),
+            cancelledAt = prefs.getString("cancelled_at", null),
+            features = SubscriptionFeatures(
+                app = prefs.getBoolean("feature_app", false),
+                aiNutritionAnalysis = prefs.getBoolean("feature_ai_nutrition", false),
+                aiCoach = prefs.getBoolean("feature_ai_coach", false),
+                booking = prefs.getBoolean("feature_booking", false),
+                coachTools = prefs.getBoolean("feature_coach_tools", false),
+                sync = prefs.getBoolean("feature_sync", false),
+            ),
+            hasCoach = prefs.getBoolean("has_coach", true),
+        )
+    }
+
+    fun update(context: Context, access: SubscriptionAccess) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+            .putBoolean("has_access", access.hasAccess)
+            .putString("status", access.status)
+            .putString("plan", access.plan)
+            .putString("provider", access.provider)
+            .putString("renews_at", access.renewsAt)
+            .putString("cancelled_at", access.cancelledAt)
+            .putBoolean("feature_app", access.features.app)
+            .putBoolean("feature_ai_nutrition", access.features.aiNutritionAnalysis)
+            .putBoolean("feature_ai_coach", access.features.aiCoach)
+            .putBoolean("feature_booking", access.features.booking)
+            .putBoolean("feature_coach_tools", access.features.coachTools)
+            .putBoolean("feature_sync", access.features.sync)
+            .putBoolean("has_coach", access.hasCoach)
+            .also { editor ->
+                if (access.autoRenews == null) editor.remove("auto_renews") else editor.putBoolean("auto_renews", access.autoRenews)
+            }
+            .apply()
+    }
+
+    fun reset(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().clear().apply()
+    }
+}
+
+/** Clears account-owned projections and media, matching iOS Logout.perform. */
+fun clearLocalAccountData(context: Context) {
+    val detailPreferences = context.getSharedPreferences("wildforce_profile_details", Context.MODE_PRIVATE)
+    val language = detailPreferences.getString("language", null)
+    val theme = detailPreferences.getString("theme", null)
+    val keepScreenOn = detailPreferences.getBoolean("keep_screen_on", true)
+    listOf(
+        "wildforce_profile", "wildforce_profile_details", "wildforce_body_progress", "wildforce_body_metrics",
+        "wildforce_nutrition", "wildforce_nutrition_health", "wildforce_custom_workouts", "wildforce_active_workouts",
+        "wildforce_exercise_history", "wildforce_workout_completion_metrics", "wildforce_completion_progress",
+        "wildforce_completion_prompts", "wildforce_skipped_exercises", "wildforce_account_progress",
+        "wildforce_coach_exercise_media", "wildforce_remote_media", "wildforce_sync_state", "wildforce_remote_sync",
+        "wildforce_watch", "wildforce_watch_commands", "wildforce_subscription_access",
+    ).forEach { context.getSharedPreferences(it, Context.MODE_PRIVATE).edit().clear().apply() }
+    context.getSharedPreferences("wildforce_profile_details", Context.MODE_PRIVATE).edit().apply {
+        language?.let { putString("language", it) }
+        theme?.let { putString("theme", it) }
+        putBoolean("keep_screen_on", keepScreenOn)
+    }.apply()
+    listOf("body_progress_photos", "NutritionLogMedia").forEach { java.io.File(context.filesDir, it).deleteRecursively() }
+    listOf("profile-avatar.jpg", "profile-avatar.png", "profile-avatar.download").forEach { java.io.File(context.filesDir, it).delete() }
+    listOf("body_progress_camera", "nutrition_camera").forEach { java.io.File(context.cacheDir, it).deleteRecursively() }
+}
 
 /** Stores a successful login in the one account store used by sync and billing. */
 fun saveAuthenticatedAccount(context: Context, response: AuthResponse) {
@@ -185,7 +331,7 @@ internal fun initialRegistrationData(context: Context, profile: OnboardingProfil
             .put("name", profile.name)
             .put("height", profile.heightCm)
             .put("weight", profile.weightKg)
-            .put("birth_date", "%04d-%02d-01T00:00:00Z".format(profile.birthYear, profile.birthMonth))
+            .put("birth_date", "%04d-%02d-%02dT00:00:00Z".format(profile.birthYear, profile.birthMonth, profile.birthDay.coerceIn(1, daysInBirthMonth(profile.birthYear, profile.birthMonth))))
             .put("gender", profile.gender.storedValue)
             .put("language", backendLanguage(profile.appLanguage))
             .put("metric_system", profile.metricSystem.storedValue))
@@ -251,7 +397,28 @@ suspend fun subscriptionAccess(token: String): Result<SubscriptionAccess> = with
             hasAccess = data.optBoolean("has_access", false),
             status = data.optString("status").ifBlank { null },
             plan = data.optString("plan").ifBlank { null },
+            provider = data.optString("provider").ifBlank { null },
+            autoRenews = if (data.has("auto_renews") && !data.isNull("auto_renews")) data.optBoolean("auto_renews") else null,
             renewsAt = data.optString("renews_at").ifBlank { null },
+            cancelledAt = data.optString("cancelled_at").ifBlank { null },
+            features = data.optJSONObject("features")?.let { features ->
+                SubscriptionFeatures(
+                    app = features.optBoolean("app", false),
+                    aiNutritionAnalysis = features.optBoolean("ai_nutrition_analysis", false),
+                    aiCoach = features.optBoolean("ai_coach", false),
+                    booking = features.optBoolean("booking", false),
+                    coachTools = features.optBoolean("coach_tools", false),
+                    sync = features.optBoolean("sync", false),
+                )
+            } ?: SubscriptionFeatures(
+                app = data.optBoolean("has_access", false),
+                aiNutritionAnalysis = data.optBoolean("has_access", false),
+                aiCoach = data.optBoolean("has_access", false),
+                booking = data.optBoolean("has_access", false),
+                coachTools = false,
+                sync = data.optBoolean("has_access", false),
+            ),
+            hasCoach = data.optBoolean("has_coach", true),
         )
     }
 }
@@ -270,6 +437,7 @@ fun AccountSection(
     val scope = rememberCoroutineScope()
     var account by remember { mutableStateOf(store.account()) }
     var dialog by remember { mutableStateOf<AccountDialog?>(null) }
+    var logoutConfirmation by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         if (destination == AccountProfileDestination.Account && account == null) {
             ProfileAccountCard(title = "Cuenta") {
@@ -284,14 +452,7 @@ fun AccountSection(
                     Column(Modifier.padding(start = 12.dp).weight(1f)) { Text(account!!.name, color = WildforceThemeTokens.textPrimary); Text(account!!.email, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 }
                 ProfileRow("Cerrar sesión", "exit_to_app", destructive = true) {
-                    // Match iOS's account reset: retain local training data, but
-                    // remove credentials and any pending remote sync state.
-                    store.clear()
-                    context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
-                        .edit().remove("remote_sync_pending").apply()
-                    RemoteSyncChangeTracker.clearAll(context)
-                    account = null
-                    onAccountChanged()
+                    logoutConfirmation = true
                 }
             }
             GoogleLinkedAccountCard(token = store.token())
@@ -304,6 +465,30 @@ fun AccountSection(
                 onPaywall = { dialog = AccountDialog.Paywall },
             )
         }
+    }
+    if (logoutConfirmation) {
+        AlertDialog(
+            onDismissRequest = { logoutConfirmation = false },
+            title = { Text("¿Cerrar sesión?") },
+            text = { Text("Se cerrará esta cuenta en el dispositivo.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    logoutConfirmation = false
+                    // Keep local training data until the account reset policy is
+                    // explicitly confirmed; credentials and remote markers are
+                    // removed just like the iOS logout job.
+                    store.clear()
+                    clearLocalAccountData(context)
+                    SubscriptionAccessStore.reset(context)
+                    context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
+                        .edit().remove("remote_sync_pending").remove("booking_gyms_available").apply()
+                    RemoteSyncChangeTracker.clearAll(context)
+                    account = null
+                    onAccountChanged()
+                }) { Text("CERRAR SESIÓN", color = Color(0xFFC62828)) }
+            },
+            dismissButton = { TextButton(onClick = { logoutConfirmation = false }) { Text("CANCELAR") } },
+        )
     }
     when (dialog) {
         AccountDialog.Login, AccountDialog.Register -> AuthenticationSheet(dialog == AccountDialog.Register, profile, onDismiss = { dialog = null }, onSwitch = { dialog = if (dialog == AccountDialog.Login) AccountDialog.Register else AccountDialog.Login }) { response ->
@@ -333,6 +518,7 @@ fun AccountSection(
         AccountDialog.Paywall -> SubscriptionPaywall(
             accountId = account?.id,
             onDismiss = { dialog = null },
+            onPurchaseCompleted = { dialog = null },
         )
         null -> Unit
     }
@@ -344,17 +530,32 @@ fun AccountLogoutAction(onAccountChanged: () -> Unit = {}) {
     val context = LocalContext.current
     val store = remember { WildforceAccountStore(context) }
     var account by remember { mutableStateOf(store.account()) }
+    var logoutConfirmation by remember { mutableStateOf(false) }
     if (account == null) return
 
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        ProfileRow("Cerrar sesión", "exit_to_app", destructive = true) {
-            store.clear()
-            context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
-                .edit().remove("remote_sync_pending").apply()
-            RemoteSyncChangeTracker.clearAll(context)
-            account = null
-            onAccountChanged()
-        }
+        ProfileRow("Cerrar sesión", "exit_to_app", destructive = true) { logoutConfirmation = true }
+    }
+    if (logoutConfirmation) {
+        AlertDialog(
+            onDismissRequest = { logoutConfirmation = false },
+            title = { Text("¿Cerrar sesión?") },
+            text = { Text("Se cerrará esta cuenta en el dispositivo.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    logoutConfirmation = false
+                    store.clear()
+                    clearLocalAccountData(context)
+                    SubscriptionAccessStore.reset(context)
+                    context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
+                        .edit().remove("remote_sync_pending").remove("booking_gyms_available").apply()
+                    RemoteSyncChangeTracker.clearAll(context)
+                    account = null
+                    onAccountChanged()
+                }) { Text("CERRAR SESIÓN", color = Color(0xFFC62828)) }
+            },
+            dismissButton = { TextButton(onClick = { logoutConfirmation = false }) { Text("CANCELAR") } },
+        )
     }
 }
 
@@ -366,13 +567,14 @@ private fun SubscriptionDetailsCard(
     onRegister: () -> Unit,
     onPaywall: () -> Unit,
 ) {
-    var access by remember(token) { mutableStateOf<SubscriptionAccess?>(null) }
+    val context = LocalContext.current
+    var access by remember(token) { mutableStateOf(SubscriptionAccessStore.load(context)) }
     var loading by remember(token) { mutableStateOf(token != null) }
     var error by remember(token) { mutableStateOf<String?>(null) }
     LaunchedEffect(token) {
         if (token == null) return@LaunchedEffect
         subscriptionAccess(token)
-            .onSuccess { access = it }
+            .onSuccess { access = it; SubscriptionAccessStore.update(context, it) }
             .onFailure { error = it.message ?: "No se ha podido consultar la suscripción." }
         loading = false
     }
@@ -382,9 +584,11 @@ private fun SubscriptionDetailsCard(
             loading -> Text("Cargando…", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 10.dp))
             else -> {
                 access?.let { subscription ->
-                    SubscriptionDetailRow("Plan", subscription.plan?.replaceFirstChar { it.uppercase() } ?: "Sin suscripción")
-                    SubscriptionDetailRow("Estado", subscription.status?.replaceFirstChar { it.uppercase() } ?: if (subscription.hasAccess) "Activo" else "Sin acceso")
-                    subscription.renewsAt?.let { SubscriptionDetailRow(if (subscription.hasAccess) "Renueva" else "Finaliza", formatSubscriptionDate(it)) }
+                    SubscriptionDetailRow("Plan", subscriptionPlanName(subscription.plan))
+                    SubscriptionDetailRow("Estado", subscriptionStatusName(subscription.status, subscription.hasAccess))
+                    subscription.provider?.let { SubscriptionDetailRow("Proveedor", subscriptionProviderName(it)) }
+                    subscription.renewsAt?.let { SubscriptionDetailRow(if (subscription.autoRenews == true) "Renueva" else "Finaliza", formatSubscriptionDate(it)) }
+                    subscription.cancelledAt?.let { SubscriptionDetailRow("Cancelada", formatSubscriptionDate(it)) }
                 }
                 ProfileRow(if (access?.hasAccess == true) "Ver opciones de suscripción" else "Obtener Wildforce Premium", "crown.fill", onClick = onPaywall)
             }
@@ -406,22 +610,65 @@ private fun formatSubscriptionDate(value: String): String = runCatching {
         .format(java.time.format.DateTimeFormatter.ofPattern("d MMM uuuu", java.util.Locale("es", "ES")))
 }.getOrElse { value.substringBefore('T') }
 
+internal fun subscriptionPlanName(plan: String?): String = when (plan) {
+    null -> "Sin suscripción"
+    "trial" -> "Trial"
+    "demo" -> "Demo"
+    "member_monthly" -> "Member monthly"
+    "member_yearly" -> "Member yearly"
+    "coach_basic_monthly" -> "Coach Basic monthly"
+    "coach_basic_yearly" -> "Coach Basic yearly"
+    "coach_pro" -> "Coach Pro"
+    "coach_pro_monthly" -> "Coach Pro monthly"
+    "coach_pro_yearly" -> "Coach Pro yearly"
+    "coached_external" -> "Coached externally"
+    "nutrition" -> "Nutrition"
+    "premium" -> "Premium"
+    "gym_100" -> "Gym 100"
+    "gym_300" -> "Gym 300"
+    "gym_1000" -> "Gym 1000"
+    else -> plan.replace('_', ' ').replaceFirstChar { it.uppercase() }
+}
+
+private fun subscriptionStatusName(status: String?, hasAccess: Boolean): String = when (status) {
+    null -> if (hasAccess) "Activo" else "Sin acceso"
+    "grace_period" -> "Periodo de gracia"
+    else -> status.replace('_', ' ').replaceFirstChar { it.uppercase() }
+}
+
+private fun subscriptionProviderName(provider: String): String = when (provider) {
+    "app_store" -> "App Store"
+    "google_play" -> "Google Play"
+    "internal" -> "Wildforce"
+    "external" -> "Externo"
+    else -> provider.replace('_', ' ').replaceFirstChar { it.uppercase() }
+}
+
 @Composable
 private fun GoogleLinkedAccountCard(token: String?) {
     val scope = rememberCoroutineScope()
-    var linked by remember { mutableStateOf(false) }
+    var linkedProviders by remember { mutableStateOf<Set<String>>(emptySet()) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(token) {
-        if (token == null) return@LaunchedEffect
-        linkedAccounts(token).onSuccess { accounts -> linked = accounts.any { it.provider == "google" } }
-            .onFailure { error = it.message }
+        if (token == null) {
+            loading = false
+            return@LaunchedEffect
+        }
+        linkedAccounts(token).onSuccess { accounts ->
+            linkedProviders = accounts.map { it.provider.lowercase() }.toSet()
+        }.onFailure { error = it.message }
         loading = false
     }
-    if (!linked) {
-        ProfileAccountCard(title = "Cuentas vinculadas") {
-            if (loading) {
-                Text("Cargando…", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 10.dp))
+    ProfileAccountCard(title = "Cuentas vinculadas") {
+        if (loading) {
+            Text("Cargando…", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 10.dp))
+        } else {
+            // Keep the provider status visible after linking, like iOS's
+            // checkmark row. The previous implementation hid the whole card,
+            // making a linked Google account look as if it had disappeared.
+            if ("google" in linkedProviders) {
+                LinkedProviderStatusRow("Google")
             } else {
                 GoogleAuthenticationButton(
                     title = "CONECTAR GOOGLE",
@@ -429,15 +676,36 @@ private fun GoogleLinkedAccountCard(token: String?) {
                     onIdToken = { idToken ->
                         scope.launch {
                             linkGoogle(token ?: return@launch, idToken)
-                                .onSuccess { linked = true; error = null }
+                                .onSuccess { linkedProviders = linkedProviders + "google"; error = null }
                                 .onFailure { error = it.message ?: "No se ha podido vincular Google." }
                         }
                     },
                     onError = { error = it },
                 )
             }
-            error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
+            if ("apple" in linkedProviders) LinkedProviderStatusRow("Apple")
         }
+        error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
+    }
+}
+
+@Composable
+private fun LinkedProviderStatusRow(provider: String) {
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (provider == "Google") {
+            Image(
+                painter = painterResource(R.drawable.google_g),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+            )
+        } else {
+            Icon(Icons.Filled.Person, contentDescription = null, tint = WildforceThemeTokens.textPrimary)
+        }
+        Text(provider, Modifier.padding(start = 12.dp).weight(1f), color = WildforceThemeTokens.textPrimary)
+        Icon(Icons.Filled.CheckCircle, contentDescription = "$provider vinculada", tint = Color(0xFF26A269))
     }
 }
 
@@ -475,6 +743,7 @@ suspend fun synchronizeAccountProfile(response: AuthResponse, local: OnboardingP
                 weightKg = user.optDouble("weight", user.optDouble("weight_kg", local.weightKg)).takeIf { it in 35.0..250.0 } ?: local.weightKg,
                 birthYear = user.optString("birth_date", "").take(4).toIntOrNull()?.coerceIn(1920, java.time.Year.now().value) ?: local.birthYear,
                 birthMonth = user.optString("birth_date", "").drop(5).take(2).toIntOrNull()?.coerceIn(1, 12) ?: local.birthMonth,
+                birthDay = user.optString("birth_date", "").drop(8).take(2).toIntOrNull()?.coerceIn(1, 31) ?: local.birthDay,
                 gender = Gender.fromStoredValue(user.optString("gender", local.gender.storedValue)),
                 metricSystem = MetricSystem.fromStoredValue(user.optString("metric_system", local.metricSystem.storedValue)),
                 appLanguage = user.optString("language", local.appLanguage).ifBlank { local.appLanguage },
@@ -488,7 +757,7 @@ suspend fun synchronizeAccountProfile(response: AuthResponse, local: OnboardingP
             .put("name", local.name)
             .put("height", local.heightCm)
             .put("weight", local.weightKg)
-            .put("birth_date", "%04d-%02d-01".format(local.birthYear, local.birthMonth))
+            .put("birth_date", "%04d-%02d-%02d".format(local.birthYear, local.birthMonth, local.birthDay.coerceIn(1, daysInBirthMonth(local.birthYear, local.birthMonth))))
             .put("gender", local.gender.storedValue)
             .put("language", local.appLanguage)
             .put("metric_system", local.metricSystem.storedValue)
@@ -532,7 +801,7 @@ private fun ProfileRow(label: String, systemIcon: String, destructive: Boolean =
         }
         Icon(icon, null, tint = color)
         Text(label, Modifier.padding(start = 12.dp).weight(1f), color = color)
-        Text("›", color = WildforceThemeTokens.textSecondary, fontSize = 22.sp)
+        Icon(Icons.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.textSecondary)
     }
 }
 
@@ -700,7 +969,10 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
                                 if (register) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                                     PasswordRequirement.entries.forEach { requirement ->
                                         val satisfied = requirement.isSatisfiedBy(password)
-                                        Text("${if (satisfied) "✓" else "○"} ${requirement.shortLabel}", style = MaterialTheme.typography.caption, color = if (satisfied) Color(0xFF2E7D32) else WildforceThemeTokens.textSecondary)
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            Icon(if (satisfied) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked, contentDescription = null, modifier = Modifier.size(14.dp), tint = if (satisfied) Color(0xFF2E7D32) else WildforceThemeTokens.textSecondary)
+                                            Text(requirement.shortLabel, style = MaterialTheme.typography.caption, color = if (satisfied) Color(0xFF2E7D32) else WildforceThemeTokens.textSecondary)
+                                        }
                                     }
                                 }
                                 error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
@@ -724,11 +996,16 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
 fun SubscriptionPaywall(
     accountId: String?,
     mandatory: Boolean = false,
+    tiers: List<SubscriptionTier> = listOf(SubscriptionTier.Premium, SubscriptionTier.Nutrition),
+    onJoinGymRequested: (() -> Unit)? = null,
     onDismiss: () -> Unit = {},
     onPurchaseCompleted: () -> Unit = {},
 ) {
     val context = LocalContext.current; val activity = context as? Activity; val scope = rememberCoroutineScope()
-    var selected by remember { mutableStateOf(YearlyProductId) }; var products by remember { mutableStateOf<Map<String, ProductDetails>>(emptyMap()) }; var loading by remember { mutableStateOf(true) }; var purchasing by remember { mutableStateOf(false) }; var error by remember { mutableStateOf<String?>(null) }; var pendingPurchases by remember { mutableStateOf<List<Purchase>>(emptyList()) }
+    val offeredTiers = tiers.ifEmpty { listOf(SubscriptionTier.Premium) }
+    var selectedTier by remember(offeredTiers) { mutableStateOf(offeredTiers.first()) }
+    var selected by remember(selectedTier) { mutableStateOf(selectedTier.yearlyProductId) }
+    var products by remember { mutableStateOf<Map<String, ProductDetails>>(emptyMap()) }; var loading by remember { mutableStateOf(true) }; var purchasing by remember { mutableStateOf(false) }; var error by remember { mutableStateOf<String?>(null) }; var pendingPurchases by remember { mutableStateOf<List<Purchase>>(emptyList()) }
     var appeared by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { appeared = true }
     val paywallAlpha by animateFloatAsState(if (appeared) 1f else 0f, tween(220), label = "paywall-alpha")
@@ -746,12 +1023,28 @@ fun SubscriptionPaywall(
     DisposableEffect(billing) { billing.startConnection(object : BillingClientStateListener { override fun onBillingSetupFinished(result: BillingResult) { if (result.responseCode == BillingClient.BillingResponseCode.OK) scope.launch { products = queryProducts(billing); loading = false; val restored = billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build()); if (restored.billingResult.responseCode == BillingClient.BillingResponseCode.OK) pendingPurchases = restored.purchasesList.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED } else error = restored.billingResult.debugMessage } else { error = result.debugMessage; loading = false } }; override fun onBillingServiceDisconnected() = Unit }); onDispose { billing.endConnection() } }
     Dialog(onDismissRequest = { if (!mandatory) onDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnBackPress = !mandatory, dismissOnClickOutside = !mandatory)) { Surface(Modifier.fillMaxSize().graphicsLayer { alpha = paywallAlpha; scaleX = paywallScale; scaleY = paywallScale }, color = WildforceThemeTokens.background) { Column(Modifier.verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(28.dp)) {
         if (!mandatory) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { Text("Cerrar", Modifier.clickable(onClick = onDismiss).padding(8.dp), color = WildforceThemeTokens.accent) }
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) { Icon(Icons.Filled.Shield, null, Modifier.size(46.dp), tint = WildforceThemeTokens.accent); Text("Entrena con todo tu potencial", fontFamily = AntonFontFamily, fontSize = 30.sp); Text("Obtén la experiencia Wildforce completa, creada alrededor de tu progreso.", color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center) }
+        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) { Icon(Icons.Filled.Shield, null, Modifier.size(46.dp), tint = WildforceThemeTokens.accent); Text("Entrena con todo tu potencial", fontFamily = AntonFontFamily, fontSize = 30.sp); Text(if (selectedTier == SubscriptionTier.Premium) "Obtén la experiencia Wildforce completa, creada alrededor de tu progreso." else "Registra tus comidas con IA en segundos. Ideal si tu entrenador o gimnasio ya planifica tu entrenamiento.", color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center) }
+        if (offeredTiers.size > 1) {
+            TabRow(selectedTabIndex = offeredTiers.indexOf(selectedTier), backgroundColor = WildforceThemeTokens.backgroundSecondary, contentColor = WildforceThemeTokens.accent) {
+                offeredTiers.forEach { tier ->
+                    Tab(selected = tier == selectedTier, onClick = { selectedTier = tier; selected = tier.yearlyProductId }, text = { Text(tier.title) })
+                }
+            }
+        }
         Column(Modifier.fillMaxWidth().background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(20.dp)).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text("Lo que obtienes", fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
-            listOf("Entrenamiento personalizado" to "Planes que se adaptan a tus objetivos y progreso.", "Guía nutricional" to "Planificación de comidas y registro nutricional en un solo lugar.", "Información sobre tu progreso" to "Entiende tu entrenamiento y mantén la constancia.").forEach { (title, detail) -> Row { Icon(Icons.Filled.Star, null, Modifier.width(24.dp), tint = WildforceThemeTokens.accent); Column(Modifier.padding(start = 12.dp)) { Text(title, fontWeight = FontWeight.Bold); Text(detail, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } } }
+            (if (selectedTier == SubscriptionTier.Premium) listOf(
+                "Todo lo incluido en Nutrición" to "Registro de comidas e ideas con IA.",
+                "Entrenamiento personalizado" to "Planes que se adaptan a tus objetivos y progreso.",
+                "Información sobre tu progreso" to "Entiende tu entrenamiento y mantén la constancia.",
+            ) else listOf(
+                "Registro de comidas con IA" to "Registra comidas desde una foto, etiqueta o descripción.",
+                "Ideas de comidas" to "Ideas que encajan con los macros que te quedan.",
+                "Información sobre tu progreso" to "Entiende tu entrenamiento y mantén la constancia.",
+            )).forEach { (title, detail) -> Row { Icon(Icons.Filled.Star, null, Modifier.width(24.dp), tint = WildforceThemeTokens.accent); Column(Modifier.padding(start = 12.dp)) { Text(title, fontWeight = FontWeight.Bold); Text(detail, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } } }
+            if (selectedTier == SubscriptionTier.Nutrition && SubscriptionTier.Premium in offeredTiers) Text("Premium incluye todo lo de Nutrición, además de entrenamiento personalizado.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) { PlanCard("Mensual", MonthlyProductId, "6,99 €", "1,61 € por semana", selected, products) { selected = it }; PlanCard("Anual", YearlyProductId, "49,99 €", "0,96 € por semana", selected, products, true) { selected = it } }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) { PlanCard("Mensual", selectedTier.monthlyProductId, if (selectedTier == SubscriptionTier.Premium) "6,99 €" else "2,99 €", if (selectedTier == SubscriptionTier.Premium) "1,61 € por semana" else "0,69 € por semana", selected, products) { selected = it }; PlanCard("Anual", selectedTier.yearlyProductId, if (selectedTier == SubscriptionTier.Premium) "69,99 €" else "29,99 €", if (selectedTier == SubscriptionTier.Premium) "1,35 € por semana" else "0,58 € por semana", selected, products, isYearly = true, best = true) { selected = it } }
         error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
         Button(enabled = !loading && !purchasing && activity != null && !accountId.isNullOrBlank() && products[selected] != null, onClick = {
             val detail = products[selected] ?: return@Button
@@ -766,7 +1059,8 @@ fun SubscriptionPaywall(
             val result = billing.launchBillingFlow(activity!!, params.build())
             if (result.responseCode != BillingClient.BillingResponseCode.OK) { error = result.debugMessage; purchasing = false }
         }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText)) { if (loading || purchasing) CircularProgressIndicator(Modifier.size(20.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp) else Text("SUSCRIBIRME", modifier = Modifier.padding(vertical = 4.dp), letterSpacing = 1.2.sp) }
-        Text("La suscripción se renueva automáticamente salvo que se cancele al menos 24 horas antes del final del periodo actual.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        val selectedPrice = products[selected]?.subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice ?: if (selected == selectedTier.yearlyProductId) if (selectedTier == SubscriptionTier.Premium) "69,99 €" else "29,99 €" else if (selectedTier == SubscriptionTier.Premium) "6,99 €" else "2,99 €"
+        Text("Se cobra $selectedPrice por ${if (selected == selectedTier.yearlyProductId) "año" else "mes"}. La suscripción se renueva automáticamente salvo que se cancele al menos 24 horas antes del final del periodo actual.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         Text("Restaurar compras", Modifier.fillMaxWidth().clickable {
             scope.launch {
                 val result = billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build())
@@ -781,10 +1075,19 @@ fun SubscriptionPaywall(
                 }
             }
         }.padding(8.dp), color = WildforceThemeTokens.accent, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        if (onJoinGymRequested != null) {
+            Text(
+                "¿Tienes un código de gimnasio? Únete a tu gimnasio",
+                Modifier.fillMaxWidth().clickable(onClick = onJoinGymRequested).padding(8.dp),
+                color = WildforceThemeTokens.accent,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
     } } }
 }
 
-@Composable private fun RowScope.PlanCard(title: String, id: String, fallback: String, weekly: String, selected: String, products: Map<String, ProductDetails>, best: Boolean = false, onClick: (String) -> Unit) {
+@Composable private fun RowScope.PlanCard(title: String, id: String, fallback: String, weekly: String, selected: String, products: Map<String, ProductDetails>, isYearly: Boolean = false, best: Boolean = false, onClick: (String) -> Unit) {
     val isSelected = selected == id
     val selectionScale by animateFloatAsState(if (isSelected) 1.035f else 1f, spring(dampingRatio = .65f, stiffness = 560f), label = "subscription-plan-$id")
     val detail = products[id]
@@ -793,13 +1096,13 @@ fun SubscriptionPaywall(
         if (best) Text("MEJOR VALOR", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.primaryButtonText, modifier = Modifier.background(WildforceThemeTokens.accent, RoundedCornerShape(10.dp)).padding(horizontal = 6.dp, vertical = 2.dp))
         Spacer(Modifier.height(if (best) 10.dp else 30.dp))
         Text(title, fontWeight = FontWeight.Bold); Text(price, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-        Text("/ ${if (id == YearlyProductId) "año" else "mes"}", style = MaterialTheme.typography.caption)
+        Text("/ ${if (isYearly) "año" else "mes"}", style = MaterialTheme.typography.caption)
         Text(weekly, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
 }
 
 private suspend fun queryProducts(client: BillingClient): Map<String, ProductDetails> {
-    val result = client.queryProductDetails(QueryProductDetailsParams.newBuilder().setProductList(listOf(MonthlyProductId, YearlyProductId).map { QueryProductDetailsParams.Product.newBuilder().setProductId(it).setProductType(BillingClient.ProductType.SUBS).build() }).build())
+    val result = client.queryProductDetails(QueryProductDetailsParams.newBuilder().setProductList(SubscriptionTier.entries.flatMap { listOf(it.monthlyProductId, it.yearlyProductId) }.map { QueryProductDetailsParams.Product.newBuilder().setProductId(it).setProductType(BillingClient.ProductType.SUBS).build() }).build())
     return result.productDetailsList.orEmpty().associateBy { it.productId }
 }
 private suspend fun acknowledgePurchase(it: Purchase, client: BillingClient) {

@@ -12,6 +12,9 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        // This optional cache lets the offline development environment resolve
+        // the bundled OCR dependency. Normal checkouts fall through to Google.
+        maven { url = uri("$rootDir/.gradle-local-repo") }
         google()
         mavenCentral()
     }
@@ -23,3 +26,4 @@ include(":core:designsystem")
 include(":core:model")
 include(":feature:workout")
 include(":feature:onboarding")
+include(":wear")

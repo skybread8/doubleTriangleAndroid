@@ -89,14 +89,14 @@ internal object NutritionAIPlanner {
             val meals = day.optJSONArray("meals")?.let { values -> buildList {
                 for (mealIndex in 0 until values.length()) {
                     val meal = values.optJSONObject(mealIndex) ?: continue
-                    add(PlannedMeal(meal.optString("title", "Comida ${mealIndex + 1}"), mealType(meal.optString("meal_type")),
+                    add(PlannedMeal(meal.cleanString("title", "Comida ${mealIndex + 1}"), mealType(meal.optString("meal_type")),
                         NutritionTargets(meal.optDouble("target_calories").toInt(), meal.optDouble("target_protein_grams").toInt(), meal.optDouble("target_carbs_grams").toInt(), meal.optDouble("target_fat_grams").toInt()),
-                        meal.optString("guidance"), meal.optJSONArray("example_foods").toFoods()))
+                        meal.cleanString("guidance"), meal.optJSONArray("example_foods").toFoods()))
                 }
             } }.orEmpty()
             add(NutritionDayPlan(date, nutritionDayType(day.optString("day_type")), energyDemand(day.optString("energy_demand")),
                 NutritionTargets(day.optDouble("target_calories").toInt(), day.optDouble("target_protein_grams").toInt(), day.optDouble("target_carbs_grams").toInt(), day.optDouble("target_fat_grams").toInt()),
-                day.optString("planned_workout_title"), day.optString("notes"), day.optString("pre_workout_guidance").takeIf(String::isNotBlank), day.optString("post_workout_guidance").takeIf(String::isNotBlank), meals))
+                day.cleanString("planned_workout_title"), day.cleanString("notes"), day.cleanString("pre_workout_guidance").takeIf(String::isNotBlank), day.cleanString("post_workout_guidance").takeIf(String::isNotBlank), meals))
         }
     }
 
@@ -112,7 +112,14 @@ internal object NutritionAIPlanner {
         }
     } ?: emptyList()
 
-    private fun mealType(value: String): MealType = when (value.trim().lowercase()) { "breakfast", "desayuno" -> MealType.Breakfast; "lunch", "comida" -> MealType.Lunch; "dinner", "cena" -> MealType.Dinner; else -> MealType.Snack }
+    private fun mealType(value: String): MealType = when (value.trim().lowercase()) {
+        "breakfast", "desayuno" -> MealType.Breakfast
+        "lunch", "comida" -> MealType.Lunch
+        "dinner", "cena" -> MealType.Dinner
+        "preworkout", "pre_workout", "pre-workout", "pre workout", "pre-entreno" -> MealType.PreWorkout
+        "postworkout", "post_workout", "post-workout", "post workout", "post-entreno" -> MealType.PostWorkout
+        else -> MealType.Snack
+    }
     private fun nutritionDayType(value: String): NutritionDayType = when (value.trim().lowercase()) { "training" -> NutritionDayType.Training; "recovery" -> NutritionDayType.Recovery; else -> NutritionDayType.Rest }
     private fun energyDemand(value: String): EnergyDemand = when (value.trim().lowercase()) { "high" -> EnergyDemand.High; "medium" -> EnergyDemand.Medium; else -> EnergyDemand.Low }
 }

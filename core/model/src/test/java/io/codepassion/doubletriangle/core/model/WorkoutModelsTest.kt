@@ -18,9 +18,21 @@ class WorkoutModelsTest {
     }
 
     @Test fun skippedWorkoutFinalizesItsPlanSlotWithoutBeingCompleted() {
+        assertEquals(false, WorkoutStatus.Draft.isPlanFinalized)
         assertEquals(false, WorkoutStatus.Planned.isPlanFinalized)
+        assertEquals(false, WorkoutStatus.InProgress.isPlanFinalized)
         assertEquals(true, WorkoutStatus.Completed.isPlanFinalized)
         assertEquals(true, WorkoutStatus.Skipped.isPlanFinalized)
+    }
+
+    @Test fun planBecomesCompletedWhenAllSlotsAreFinalized() {
+        val completed = state.copy(workouts = state.workouts.map { it.copy(status = WorkoutStatus.Completed) })
+        val skipped = state.copy(workouts = state.workouts.mapIndexed { index, workout -> workout.copy(status = if (index == 0) WorkoutStatus.Skipped else WorkoutStatus.Completed) })
+        val pending = state.copy(workouts = state.workouts.drop(1))
+
+        assertEquals("completed", completed.withPlanCompletionStatus().planStatus)
+        assertEquals("completed", skipped.withPlanCompletionStatus().planStatus)
+        assertEquals(state.planStatus, pending.withPlanCompletionStatus().planStatus)
     }
 
     @Test fun intensiveStylesApplyOnlyToFinalSet() {
@@ -35,6 +47,8 @@ class WorkoutModelsTest {
         val exercise = ExerciseSummary("Press", sets = 3, reps = "8", restSeconds = 90)
         assertEquals(ExerciseSetStyle.Straight, exercise.setStyle)
         assertEquals(SetStyleParameters(), exercise.setStyleParameters)
+        assertEquals(false, exercise.hasNonDefaultSetStyle())
+        assertEquals(true, exercise.copy(setStyle = ExerciseSetStyle.DropSet).hasNonDefaultSetStyle())
     }
 
     @Test fun prescriptionsCarryAnExplicitTrackingModeAndRepRange() {

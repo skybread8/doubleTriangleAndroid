@@ -2,10 +2,100 @@ package io.codepassion.doubletriangle.feature.workout
 
 import android.content.Context
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
+import io.codepassion.doubletriangle.core.model.ExerciseTrackingMode
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Locale
+import kotlin.math.roundToInt
+
+internal data class ActiveExerciseRecords(
+    val pr: String?,
+    val lastBest: String?,
+)
+
+private val activeCardioExerciseKeys = setOf(
+    "walking", "outdoorRunning", "treadmillWalking", "treadmillRunning", "stationaryBike",
+    "elliptical", "rowing", "jumpRope", "stairClimber", "skiErgWork", "boxingBagWork",
+)
+private val activeHiitExerciseKeys = setOf(
+    "mountainClimber", "burpee", "jumpingJacks", "highKnees", "squatJump", "butterflySitUp",
+    "sprawl", "climber",
+)
+private val activeMobilityExerciseKeys = setOf(
+    "catCow", "hipFlexorStretch", "hamstringStretch", "thoracicRotation", "shoulderMobilityFlow",
+    "worldGreatestStretch", "pigeonPose", "cobraStretch", "childsPose", "inchworm", "armCircles",
+    "legSwings", "wristCircles", "ankleCircles", "deepSquatHold", "scapularCircles", "quadStretch",
+    "doorwayChestStretch", "scorpions", "threadTheNeedle", "neckCircles",
+)
+
+/** Mirrors iOS TrainingAnalytics.exerciseRecords for the active-workout header. */
+internal fun activeExerciseRecords(
+    exercise: ExerciseSummary,
+    history: List<ExerciseHistoryEntry>,
+    useImperial: Boolean,
+): ActiveExerciseRecords? {
+    if (history.isEmpty()) return null
+    val key = exercise.imageKey.orEmpty().trim()
+    val category = when {
+        key in activeCardioExerciseKeys || exercise.trackingMode == ExerciseTrackingMode.DurationAndDistance -> "cardio"
+        key in activeHiitExerciseKeys -> "hiit"
+        key in activeMobilityExerciseKeys -> "mobility"
+        else -> "strength"
+    }
+
+    fun preferredLoadOrReps(entries: List<ExerciseHistoryEntry>): String? {
+        val maxWeight = entries.map { it.maxWeightKg }.maxOrNull()?.takeIf { it > 0.0 }
+        if (maxWeight != null) return formatActiveRecordWeight(maxWeight, useImperial)
+        // iOS prefers the result's completedReps (the session total); set-level
+        // data is only a compatibility fallback for older Android records.
+        val maxReps = entries.mapNotNull { entry ->
+            entry.totalReps.takeIf { it > 0 } ?: entry.setDetails.sumOf(SetPerformance::reps).takeIf { it > 0 }
+        }.maxOrNull()
+        return maxReps?.let { "$it reps" }
+    }
+
+    fun value(entries: List<ExerciseHistoryEntry>): String? = when (category) {
+        "strength" -> preferredLoadOrReps(entries)
+        "cardio" -> entries.mapNotNull { entry ->
+            if (entry.durationSeconds > 0 && entry.distanceKm > 0.0) {
+                val secondsPerUnit = entry.durationSeconds.toDouble() / if (useImperial) entry.distanceKm * 0.621371192 else entry.distanceKm
+                formatActivePace(secondsPerUnit, useImperial)
+            } else null
+        }.minByOrNull { it.first }?.second
+        "hiit" -> entries.map { it.durationSeconds }.filter { it > 0 }.maxOrNull()?.let(::formatActiveSeconds)
+        else -> entries.map { it.durationSeconds }.filter { it > 0 }.maxOrNull()?.let { formatActiveMinutes(it) }
+    }
+
+    val pr = value(history)
+    val lastBest = value(history.firstOrNull()?.let(::listOf).orEmpty())
+    return ActiveExerciseRecords(pr = pr, lastBest = lastBest).takeIf { it.pr != null || it.lastBest != null }
+}
+
+private fun formatActiveRecordWeight(kilograms: Double, useImperial: Boolean): String =
+    if (useImperial) String.format(Locale.getDefault(), "%.1f lb", kilograms * 2.20462262)
+    else String.format(Locale.getDefault(), "%.1f kg", kilograms)
+
+private fun formatActiveSeconds(seconds: Int): String = when {
+    seconds < 60 -> "$seconds sec"
+    seconds % 60 == 0 -> "${seconds / 60} min"
+    else -> "%d:%02d".format(Locale.getDefault(), seconds / 60, seconds % 60)
+}
+
+private fun formatActiveMinutes(seconds: Int): String {
+    val minutes = (seconds / 60).coerceAtLeast(1)
+    if (minutes < 60) return "$minutes min"
+    val hours = minutes / 60
+    val remainingMinutes = minutes % 60
+    return if (remainingMinutes == 0) "$hours h" else "$hours h $remainingMinutes min"
+}
+
+private fun formatActivePace(secondsPerUnit: Double, useImperial: Boolean): Pair<Double, String> {
+    val rounded = secondsPerUnit.coerceAtLeast(0.0).roundToInt()
+    val unit = if (useImperial) "min/mi" else "min/km"
+    return rounded.toDouble() to "%d:%02d %s".format(Locale.getDefault(), rounded / 60, rounded % 60, unit)
+}
 
 internal data class ExerciseSessionStats(
     val sets: Int = 0,
@@ -84,14 +174,82 @@ data class RemoteExerciseHistoryEntry(
     val distanceKm: Double,
 )
 
-internal fun ExerciseSummary.historyKey(): String = imageKey?.takeIf(String::isNotBlank)?.lowercase() ?: name.lowercase()
+internal fun ExerciseSummary.historyKey(): String = coachExerciseId?.trim()?.lowercase()?.takeIf(String::isNotBlank)
+    ?.let { "coach:$it" }
+    ?: imageKey?.takeIf(String::isNotBlank)?.lowercase()
+    ?: name.lowercase()
+
+/** iOS-equivalent progression metrics shown before the session list. */
+internal enum class ExerciseHistoryChartMetric(val title: String) {
+    Volume("Volumen"), Weight("Peso"), Reps("Repeticiones"), Distance("Distancia"), Duration("Duración"),
+}
+
+internal data class ExerciseHistoryChartPoint(val timestampMillis: Long, val value: Double)
+internal data class ExerciseHistoryChartSeries(val metric: ExerciseHistoryChartMetric, val points: List<ExerciseHistoryChartPoint>)
+
+internal fun ExerciseHistoryChartMetric.displayValue(value: Double, useImperial: Boolean = false): String = when (this) {
+    ExerciseHistoryChartMetric.Volume, ExerciseHistoryChartMetric.Weight -> {
+        val displayed = if (useImperial) value * 2.20462262 else value
+        String.format(java.util.Locale.getDefault(), "%.1f %s", displayed, if (useImperial) "lb" else "kg")
+    }
+    ExerciseHistoryChartMetric.Reps -> "${value.toInt()} reps"
+    ExerciseHistoryChartMetric.Distance -> String.format(java.util.Locale.getDefault(), "%.2f %s", if (useImperial) value * .621371192 else value, if (useImperial) "mi" else "km")
+    ExerciseHistoryChartMetric.Duration -> {
+        val seconds = value.toInt()
+        if (seconds < 60) "$seconds s" else "${seconds / 60}:${(seconds % 60).toString().padStart(2, '0')}"
+    }
+}
+
+internal fun exerciseHistoryChartSeries(
+    exercise: ExerciseSummary,
+    history: List<ExerciseHistoryEntry>,
+): List<ExerciseHistoryChartSeries> {
+    val metrics = when (exercise.trackingMode) {
+        ExerciseTrackingMode.DurationAndDistance -> listOf(ExerciseHistoryChartMetric.Distance, ExerciseHistoryChartMetric.Duration)
+        ExerciseTrackingMode.Duration -> listOf(ExerciseHistoryChartMetric.Duration, ExerciseHistoryChartMetric.Reps)
+        ExerciseTrackingMode.Repetitions -> listOf(ExerciseHistoryChartMetric.Volume, ExerciseHistoryChartMetric.Weight, ExerciseHistoryChartMetric.Reps)
+    }
+    return metrics.mapNotNull { metric ->
+        val points = history.asReversed().mapNotNull { entry ->
+            val value = when (metric) {
+                ExerciseHistoryChartMetric.Volume -> entry.volumeKg.takeIf { it > 0.0 }
+                ExerciseHistoryChartMetric.Weight -> entry.maxWeightKg.takeIf { it > 0.0 }
+                ExerciseHistoryChartMetric.Reps -> (entry.totalReps.takeIf { it > 0 }
+                    ?: entry.setDetails.sumOf(SetPerformance::reps).takeIf { it > 0 })?.toDouble()
+                ExerciseHistoryChartMetric.Distance -> entry.distanceKm.takeIf { it > 0.0 }
+                ExerciseHistoryChartMetric.Duration -> entry.durationSeconds.takeIf { it > 0 }?.toDouble()
+            } ?: return@mapNotNull null
+            ExerciseHistoryChartPoint(entry.timestampMillis, value)
+        }
+        points.takeIf { it.size > 1 }?.let { ExerciseHistoryChartSeries(metric, it) }
+    }
+}
 
 object WorkoutHistoryStore {
     private const val PREFERENCES = "wildforce_exercise_history"
     private const val HISTORY_KEYS = "exercise_history_keys"
-    private const val MAX_ENTRIES = 24
+    // Keep the same local horizon as the completed-session analytics store so
+    // 12W and All can include the complete exercise history available on the
+    // device instead of silently stopping after eight-ish weeks.
+    private const val MAX_ENTRIES = 180
 
-    internal fun history(context: Context, exercise: ExerciseSummary): List<ExerciseHistoryEntry> = historyForKey(context, exercise.historyKey())
+    internal fun history(context: Context, exercise: ExerciseSummary): List<ExerciseHistoryEntry> =
+        historyForKey(context, exercise.historyKey()).sortedByDescending(ExerciseHistoryEntry::timestampMillis)
+
+    /**
+     * Returns every exercise key with local history, including exercises from
+     * archived plans that are no longer present in the current plan.
+     */
+    internal fun historyKeys(context: Context): Set<String> {
+        val preferences = context.getSharedPreferences(PREFERENCES, 0)
+        val stored = preferences.getStringSet(HISTORY_KEYS, emptySet()).orEmpty()
+        val discovered = preferences.all.mapNotNull { (key, value) ->
+            key.takeIf { it != HISTORY_KEYS && value is String && runCatching { JSONArray(value) }.isSuccess }
+        }.toSet()
+        val allKeys = stored + discovered
+        if (allKeys != stored) preferences.edit().putStringSet(HISTORY_KEYS, allKeys).apply()
+        return allKeys
+    }
 
     fun remoteEntries(context: Context): List<RemoteExerciseHistoryEntry> {
         val preferences = context.getSharedPreferences(PREFERENCES, 0)
@@ -305,8 +463,13 @@ object WorkoutHistoryStore {
 }
 
 object WorkoutAnalyticsStore {
-    fun summaries(context: Context, exercises: List<ExerciseSummary>): List<ExerciseAnalyticsSummary> =
-        exercises.distinctBy { it.historyKey() }.mapNotNull { exercise ->
+    fun summaries(context: Context, exercises: List<ExerciseSummary>): List<ExerciseAnalyticsSummary> {
+        val knownExercises = exercises.associateBy { it.historyKey() }
+        val allExercises = WorkoutHistoryStore.historyKeys(context).map { key ->
+            knownExercises[key] ?: storedExerciseSummary(context, key)
+        } + exercises
+
+        return allExercises.distinctBy { it.historyKey() }.mapNotNull { exercise ->
             val entries = WorkoutHistoryStore.history(context, exercise)
             if (entries.isEmpty()) null else ExerciseAnalyticsSummary(
                 exercise = exercise,
@@ -315,7 +478,25 @@ object WorkoutAnalyticsStore {
                 totalVolumeKg = entries.sumOf { it.volumeKg },
                 lastFeedback = entries.firstOrNull()?.feedback,
             )
-        }.sortedByDescending { it.totalVolumeKg }
+        }.sortedWith(compareByDescending<ExerciseAnalyticsSummary> { it.totalVolumeKg }.thenBy { it.exercise.name })
+    }
+
+    private fun storedExerciseSummary(context: Context, key: String): ExerciseSummary {
+        val entries = WorkoutHistoryStore.history(context, ExerciseSummary(key, key, 1, "1", 0))
+        val trackingMode = when {
+            entries.any { it.distanceKm > 0.0 } -> ExerciseTrackingMode.DurationAndDistance
+            entries.any { it.durationSeconds > 0 } -> ExerciseTrackingMode.Duration
+            else -> ExerciseTrackingMode.Repetitions
+        }
+        return ExerciseSummary(
+            name = exerciseDisplayName(key, key),
+            imageKey = key,
+            sets = 1,
+            reps = "1",
+            restSeconds = 0,
+            trackingMode = trackingMode,
+        )
+    }
 
     fun history(context: Context, exercise: ExerciseSummary): List<ExerciseAnalyticsPoint> =
         WorkoutHistoryStore.history(context, exercise).map {

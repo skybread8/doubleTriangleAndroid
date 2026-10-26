@@ -1,7 +1,13 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import android.content.Context
+import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
+import io.codepassion.doubletriangle.core.model.ExerciseTrackingMode
+import io.codepassion.doubletriangle.core.model.RepRange
+import io.codepassion.doubletriangle.core.model.SetStyleParameters
+import io.codepassion.doubletriangle.core.model.WorkoutBlockSummary
+import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import org.json.JSONObject
 
 internal data class WorkoutSessionSnapshot(
@@ -33,6 +39,8 @@ internal data class WorkoutSessionSnapshot(
     /** Exercises deliberately omitted from this active session. Kept separately
      * from completed sets so summaries never report them as performed. */
     val skippedExerciseIndices: Set<Int> = emptySet(),
+    /** The editable workout structure must survive process recreation too. */
+    val editableBlocks: List<WorkoutBlockSummary>? = null,
     val updatedAtMillis: Long = System.currentTimeMillis(),
 ) {
     /** Backward-compatible constructor for snapshots created before the
@@ -71,6 +79,7 @@ object WorkoutSessionStore {
     fun saveLegacy() = Unit
     private fun updatedAtFallback(): Long = System.currentTimeMillis()
     private const val PREFERENCES = "wildforce_active_workouts"
+
 
     internal fun load(context: Context, workoutId: String): WorkoutSessionSnapshot? = runCatching {
         val raw = context.getSharedPreferences(PREFERENCES, 0).getString(workoutId, null) ?: return null
@@ -114,6 +123,7 @@ object WorkoutSessionStore {
         val skipped = json.optJSONArray("skippedExerciseIndices")?.let { values ->
             buildSet { for (index in 0 until values.length()) add(values.optInt(index)) }
         }.orEmpty()
+        val editableBlocks = json.optJSONArray("editableBlocks")?.let(::decodeEditableBlocks)
         WorkoutSessionSnapshot(
             exerciseIndex = json.optInt("exerciseIndex", 0), completedByExercise = completed,
             reps = json.optInt("reps", 1), weightKg = json.optDouble("weightKg", 0.0),
@@ -137,6 +147,7 @@ object WorkoutSessionStore {
                 ?: if (json.optBoolean("restBetweenExercises")) WorkoutRestContext.BeforeNextBlock else savedRestRemaining?.let { WorkoutRestContext.BetweenSets },
             exerciseTimerFinishedWhileAway = exerciseTimerWasRunning && savedExerciseTime != null && savedExerciseTime <= elapsedWhileAway,
             skippedExerciseIndices = skipped,
+            editableBlocks = editableBlocks,
             updatedAtMillis = System.currentTimeMillis(),
         )
     }.getOrNull()
@@ -185,8 +196,124 @@ object WorkoutSessionStore {
             .put("completedDistanceKm", snapshot.completedDistanceKm)
             .put("restContext", snapshot.restContext?.name ?: JSONObject.NULL)
             .put("skippedExerciseIndices", org.json.JSONArray(snapshot.skippedExerciseIndices.sorted()))
+        if (snapshot.editableBlocks != null) json.put("editableBlocks", encodeEditableBlocks(snapshot.editableBlocks))
         context.getSharedPreferences(PREFERENCES, 0).edit().putString(workoutId, json.toString()).apply()
     }
+
+    private fun encodeEditableBlocks(blocks: List<WorkoutBlockSummary>): org.json.JSONArray = org.json.JSONArray().apply {
+        blocks.forEach { block ->
+            put(JSONObject().apply {
+                put("type", block.type.name)
+                put("rounds", block.rounds)
+                put("restAfterBlockSeconds", block.restAfterBlockSeconds ?: JSONObject.NULL)
+                put("notes", block.notes ?: JSONObject.NULL)
+                put("exercises", encodeExercises(block.exercises))
+            })
+        }
+    }
+
+    private fun encodeExercises(exercises: List<ExerciseSummary>): org.json.JSONArray = org.json.JSONArray().apply {
+        exercises.forEach { exercise ->
+            put(JSONObject().apply {
+                put("name", exercise.name)
+                put("imageKey", exercise.imageKey ?: JSONObject.NULL)
+                put("coachExerciseId", exercise.coachExerciseId ?: JSONObject.NULL)
+                put("sets", exercise.sets)
+                put("reps", exercise.reps)
+                put("restSeconds", exercise.restSeconds)
+                put("setStyle", exercise.setStyle.name)
+                put("setStyleParameters", encodeSetStyleParameters(exercise.setStyleParameters))
+                put("targetWeightKg", exercise.targetWeightKg ?: JSONObject.NULL)
+                put("targetRepsPerSet", exercise.targetRepsPerSet?.let(::encodeInts) ?: JSONObject.NULL)
+                put("targetWeightsKg", exercise.targetWeightsKg?.let(::encodeDoubles) ?: JSONObject.NULL)
+                put("targetDurationSeconds", exercise.targetDurationSeconds ?: JSONObject.NULL)
+                put("targetDurationMinutes", exercise.targetDurationMinutes ?: JSONObject.NULL)
+                put("targetDistanceKm", exercise.targetDistanceKm ?: JSONObject.NULL)
+                put("targetPaceSecondsPerKm", exercise.targetPaceSecondsPerKm ?: JSONObject.NULL)
+                put("isPerSideLoad", exercise.isPerSideLoad)
+                put("trackingMode", exercise.trackingMode.name)
+                put("repRange", exercise.repRange?.let(::encodeRepRange) ?: JSONObject.NULL)
+            })
+        }
+    }
+
+    private fun encodeSetStyleParameters(parameters: SetStyleParameters) = JSONObject().apply {
+        put("dropCount", parameters.dropCount)
+        put("dropWeightPercent", parameters.dropWeightPercent)
+        put("backoffSetCount", parameters.backoffSetCount)
+        put("backoffWeightPercent", parameters.backoffWeightPercent)
+        put("intraSetRestSeconds", parameters.intraSetRestSeconds)
+        put("tempo", parameters.tempo)
+        put("targetRir", parameters.targetRir)
+        put("appliesToFinalSetOnly", parameters.appliesToFinalSetOnly)
+    }
+
+    private fun encodeRepRange(range: RepRange) = JSONObject().put("minimum", range.minimum).put("maximum", range.maximum)
+    private fun encodeInts(values: List<Int>) = org.json.JSONArray().apply { values.forEach(::put) }
+    private fun encodeDoubles(values: List<Double>) = org.json.JSONArray().apply { values.forEach(::put) }
+
+    private fun decodeEditableBlocks(array: org.json.JSONArray): List<WorkoutBlockSummary> = buildList {
+        for (index in 0 until array.length()) {
+            val item = array.optJSONObject(index) ?: continue
+            val exercises = item.optJSONArray("exercises")?.let(::decodeExercises).orEmpty()
+            if (exercises.isEmpty()) continue
+            add(
+                WorkoutBlockSummary(
+                    type = runCatching { WorkoutBlockType.valueOf(item.optString("type")) }.getOrDefault(WorkoutBlockType.Standard),
+                    rounds = item.optInt("rounds", 1).coerceAtLeast(1),
+                    restAfterBlockSeconds = item.optInt("restAfterBlockSeconds", -1).takeIf { it >= 0 },
+                    notes = item.optString("notes").takeIf(String::isNotBlank),
+                    exercises = exercises,
+                ),
+            )
+        }
+    }
+
+    private fun decodeExercises(array: org.json.JSONArray): List<ExerciseSummary> = buildList {
+        for (index in 0 until array.length()) {
+            val item = array.optJSONObject(index) ?: continue
+            val targetReps = item.optJSONArray("targetRepsPerSet")?.let(::decodeInts)
+            val targetWeights = item.optJSONArray("targetWeightsKg")?.let(::decodeDoubles)
+            val repRange = item.optJSONObject("repRange")?.let { RepRange(it.optInt("minimum", 1), it.optInt("maximum", 1)) }
+            val parameters = item.optJSONObject("setStyleParameters")?.let { values ->
+                SetStyleParameters(
+                    dropCount = values.optInt("dropCount", 2),
+                    dropWeightPercent = values.optInt("dropWeightPercent", 20),
+                    backoffSetCount = values.optInt("backoffSetCount", 3),
+                    backoffWeightPercent = values.optInt("backoffWeightPercent", 15),
+                    intraSetRestSeconds = values.optInt("intraSetRestSeconds", 15),
+                    tempo = values.optString("tempo", "3-1-1-0"),
+                    targetRir = values.optInt("targetRir", 2),
+                    appliesToFinalSetOnly = values.optBoolean("appliesToFinalSetOnly"),
+                )
+            } ?: SetStyleParameters()
+            add(
+                ExerciseSummary(
+                    name = item.optString("name"),
+                    imageKey = item.optString("imageKey").takeIf(String::isNotBlank),
+                    sets = item.optInt("sets", 1).coerceAtLeast(1),
+                    reps = item.optString("reps", "10"),
+                    restSeconds = item.optInt("restSeconds", 0).coerceAtLeast(0),
+                    setStyle = runCatching { ExerciseSetStyle.valueOf(item.optString("setStyle")) }.getOrDefault(ExerciseSetStyle.Straight),
+                    setStyleParameters = parameters,
+                    targetWeightKg = item.optDouble("targetWeightKg").takeUnless { it.isNaN() },
+                    targetRepsPerSet = targetReps,
+                    targetWeightsKg = targetWeights,
+                    targetDurationSeconds = item.optInt("targetDurationSeconds", -1).takeIf { it >= 0 },
+                    targetDurationMinutes = item.optInt("targetDurationMinutes", -1).takeIf { it >= 0 },
+                    targetDistanceKm = item.optDouble("targetDistanceKm").takeUnless { it.isNaN() },
+                    targetPaceSecondsPerKm = item.optInt("targetPaceSecondsPerKm", -1).takeIf { it >= 0 },
+                    isPerSideLoad = item.optBoolean("isPerSideLoad"),
+                    trackingMode = runCatching { ExerciseTrackingMode.valueOf(item.optString("trackingMode")) }.getOrDefault(ExerciseTrackingMode.Repetitions),
+                    repRange = repRange,
+                    coachExerciseId = item.optString("coachExerciseId").takeIf(String::isNotBlank),
+                ),
+            )
+        }
+    }
+
+    private fun decodeInts(array: org.json.JSONArray): List<Int> = buildList { for (index in 0 until array.length()) add(array.optInt(index)) }
+    private fun decodeDoubles(array: org.json.JSONArray): List<Double> = buildList { for (index in 0 until array.length()) add(array.optDouble(index)) }
 
     fun clear(context: Context, workoutId: String) {
         context.getSharedPreferences(PREFERENCES, 0).edit().remove(workoutId).apply()

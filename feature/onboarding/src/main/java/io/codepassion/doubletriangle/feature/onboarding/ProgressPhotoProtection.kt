@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -180,20 +181,30 @@ private fun LockedProgressPhotos(
     verticalArrangement = Arrangement.spacedBy(20.dp),
 ) {
     Box(Modifier.fillMaxWidth().padding(top = 12.dp), contentAlignment = Alignment.CenterStart) {
-        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver", Modifier.size(22.dp).clickable(onClick = onClose), WildforceThemeTokens.textPrimary)
+        Box(Modifier.size(48.dp).clickable(onClick = onClose), contentAlignment = Alignment.Center) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver", Modifier.size(22.dp), WildforceThemeTokens.textPrimary)
+        }
     }
     Spacer(Modifier.height(36.dp))
-    Box(Modifier.size(122.dp).clip(RoundedCornerShape(34.dp)).background(WildforceThemeTokens.accentGold.copy(alpha = .16f)), contentAlignment = Alignment.Center) {
-        Icon(Icons.Filled.Lock, null, Modifier.size(46.dp), WildforceThemeTokens.accentGold)
+    Box(Modifier.size(122.dp).clip(RoundedCornerShape(34.dp)).background(WildforceThemeTokens.accent.copy(alpha = .16f)), contentAlignment = Alignment.Center) {
+        Icon(Icons.Filled.Lock, null, Modifier.size(46.dp), WildforceThemeTokens.accent)
     }
     Text("Las fotos de progreso están bloqueadas", style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
     Text("Usa la biometría o el código de tu dispositivo para ver tus check-ins y comparaciones guardados.", style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     error?.let { Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center) }
-    Button(onClick = onUnlock, enabled = !authenticating, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.accentGold), modifier = Modifier.fillMaxWidth()) {
+    Button(onClick = onUnlock, enabled = !authenticating, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary), modifier = Modifier.fillMaxWidth()) {
         if (authenticating) CircularProgressIndicator(Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
-        else Text("Desbloquear fotos de progreso", color = Color.White)
+        else Text("Desbloquear fotos de progreso", color = WildforceThemeTokens.primaryButtonText)
     }
-    Text("Volver", Modifier.clickable(enabled = !authenticating, onClick = onClose).padding(12.dp), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+    Text(
+        "Volver",
+        Modifier
+            .heightIn(min = 48.dp)
+            .clickable(enabled = !authenticating, onClick = onClose)
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+        color = WildforceThemeTokens.textSecondary,
+        style = MaterialTheme.typography.caption,
+    )
     Spacer(Modifier.weight(1f))
 }
 

@@ -1,22 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#171713"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:background="#171713">
 
-    <TextView
-        android:id="@+id/widget_streak"
+    <ImageView
+        android:id="@+id/widget_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:id="@+id/widget_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99171713"
+        android:padding="16dp">
+
+    <LinearLayout
+        android:id="@+id/widget_streak_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end"
+        android:layout_gravity="top|end"
         android:background="#333329"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         android:paddingHorizontal="8dp"
-        android:paddingVertical="4dp"
+        android:paddingVertical="4dp">
+
+        <FrameLayout
+            android:layout_width="18dp"
+            android:layout_height="18dp">
+
+            <ImageView
+                android:id="@+id/widget_streak_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:contentDescription="Racha"
+                android:src="@drawable/ic_macro_calories" />
+
+            <ImageView
+                android:id="@+id/widget_streak_warning"
+                android:layout_width="9dp"
+                android:layout_height="9dp"
+                android:layout_gravity="bottom|end"
+                android:contentDescription="Entrenamiento pendiente"
+                android:src="@drawable/ic_widget_warning"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/widget_streak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/widget_body"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom|start"
+        android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/widget_day_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:textColor="#FFFFFF"
-        android:textSize="12sp" />
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/widget_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:textColor="#FF9D33"
+        android:textSize="10sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/widget_title"
@@ -30,13 +98,14 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/widget_status"
-        android:layout_width="wrap_content"
+        android:id="@+id/widget_meta"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textColor="#FF9D33"
-        android:textSize="10sp"
-        android:textStyle="bold" />
+        android:layout_marginTop="3dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="#E6E6E0"
+        android:textSize="11sp" />
 
     <TextView
         android:id="@+id/widget_detail"
@@ -55,12 +124,29 @@
         android:layout_marginTop="10dp"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/widget_progress_label"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#D6D6D0"
-            android:textSize="10sp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/widget_progress_label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#D6D6D0"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/widget_progress_exercise"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#BDBDB7"
+                android:textSize="10sp" />
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/widget_progress"
@@ -71,4 +157,6 @@
             android:max="100"
             android:progressTint="#FF9D33" />
     </LinearLayout>
-</LinearLayout>
+    </LinearLayout>
+    </FrameLayout>
+</FrameLayout>

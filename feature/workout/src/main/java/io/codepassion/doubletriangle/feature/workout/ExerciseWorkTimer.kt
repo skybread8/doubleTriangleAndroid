@@ -31,6 +31,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
@@ -44,7 +46,7 @@ import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 
 @Composable
-internal fun ExerciseWorkTimer(seconds: Int, initialSeconds: Int, running: Boolean, onToggle: () -> Unit, onAddTime: () -> Unit) {
+internal fun ExerciseWorkTimer(seconds: Int, initialSeconds: Int, running: Boolean, onToggle: () -> Unit, onAddTime: () -> Unit, onRemoveTime: () -> Unit) {
     val progress by animateFloatAsState((seconds.toFloat() / initialSeconds.coerceAtLeast(1)).coerceIn(0f, 1f), animationSpec = tween(1_000, easing = LinearEasing))
     val timerDescription = stringResource(R.string.workout_work_timer_description, formatWorkDuration(seconds))
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
@@ -54,6 +56,16 @@ internal fun ExerciseWorkTimer(seconds: Int, initialSeconds: Int, running: Boole
                 contentDescription = timerDescription
                 stateDescription = if (running) "En marcha" else "Pausado"
                 progressBarRangeInfo = androidx.compose.ui.semantics.ProgressBarRangeInfo(progress, 0f..1f)
+                customActions = listOf(
+                    CustomAccessibilityAction("Añadir 15 segundos") {
+                        onAddTime()
+                        true
+                    },
+                    CustomAccessibilityAction("Quitar 15 segundos") {
+                        onRemoveTime()
+                        true
+                    },
+                )
             },
             contentAlignment = Alignment.Center,
         ) {

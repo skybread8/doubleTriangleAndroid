@@ -39,7 +39,15 @@ object WildforceWatchLocalBridge {
             .put("elapsedSeconds", elapsedSeconds).toString()
     }
 
-    data class Command(val operation: String, val reps: Int? = null, val weightKg: Double? = null)
+    data class Command(
+        val operation: String,
+        val reps: Int? = null,
+        val weightKg: Double? = null,
+        val feedback: String? = null,
+        val durationMinutes: Int? = null,
+        val distanceKm: Double? = null,
+        val motion: WatchMotionSnapshotData? = null,
+    )
     @Volatile var state: State? = null
     @Volatile var commandListener: ((Command) -> Unit)? = null
 

@@ -12,7 +12,7 @@ This milestone contains:
 - Workout hub reference screen with local preview data.
 - Unit-tested workout filtering logic.
 
-Network, database, Health Connect, widgets, and Wear OS integrations are intentionally deferred until their corresponding vertical slice.
+Network, database, Health Connect, widgets, and Wear OS integrations are implemented incrementally in their corresponding vertical slices; see `docs/PARITY.md` for the current verification status.
 
 The build uses Gradle 9.5, Android Gradle Plugin 9.3, Kotlin/Compose Compiler 2.3.21, the August 2026 Compose BOM, and Android API 37.
 

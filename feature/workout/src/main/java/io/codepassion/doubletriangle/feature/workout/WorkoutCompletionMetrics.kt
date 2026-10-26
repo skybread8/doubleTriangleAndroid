@@ -6,27 +6,39 @@ import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import org.json.JSONObject
 
 /** Persisted on device so completed cards do not depend on a wearable connection. */
-internal data class WorkoutCompletionMetrics(
+data class WorkoutCompletionMetrics(
     val completedAtMillis: Long,
     val activeDurationSeconds: Int,
     val activeCaloriesBurned: Double,
     val totalVolumeKg: Double,
 )
 
-internal object WorkoutCompletionMetricsStore {
+object WorkoutCompletionMetricsStore {
     private const val preferencesName = "wildforce_workout_completion_metrics"
 
     fun load(context: Context, workoutId: String): WorkoutCompletionMetrics? = runCatching {
         val raw = context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
             .getString(workoutId, null) ?: return null
+        parse(raw)
+    }.getOrNull()
+
+    /** Returns locally estimated workout calories even when Health Connect is unavailable. */
+    fun loadAll(context: Context): List<WorkoutCompletionMetrics> = context
+        .getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
+        .all
+        .values
+        .mapNotNull { it as? String }
+        .mapNotNull { raw -> runCatching { parse(raw) }.getOrNull() }
+
+    private fun parse(raw: String): WorkoutCompletionMetrics {
         val json = JSONObject(raw)
-        WorkoutCompletionMetrics(
+        return WorkoutCompletionMetrics(
             completedAtMillis = json.getLong("completedAtMillis"),
             activeDurationSeconds = json.getInt("activeDurationSeconds"),
             activeCaloriesBurned = json.getDouble("activeCaloriesBurned"),
             totalVolumeKg = json.getDouble("totalVolumeKg"),
         )
-    }.getOrNull()
+    }
 
     fun save(context: Context, workoutId: String, metrics: WorkoutCompletionMetrics) {
         val json = JSONObject()
