@@ -186,7 +186,7 @@ internal fun NutritionDayDetail(
                         Text("Combustible para el entrenamiento", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                         if (workoutTitle.isNotBlank()) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Filled.SportsGymnastics, null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(18.dp))
+                                Icon(Icons.Filled.FitnessCenter, null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(18.dp))
                                 Text(workoutTitle, Modifier.padding(start = 8.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                             }
                         }
@@ -328,13 +328,13 @@ private fun LoggedMealDayCard(entry: MealLog) {
             else Box(Modifier.size(42.dp).background(NutritionGreen.copy(alpha = .15f), RoundedCornerShape(11.dp)), contentAlignment = Alignment.Center) { Icon(Icons.Filled.Check, "Registrada", tint = NutritionGreen) }
             Column(Modifier.weight(1f).padding(start = 10.dp)) {
                 Text(entry.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                Text("REGISTRADA · ${entry.calories} kcal", style = MaterialTheme.typography.caption, color = NutritionGreen)
+                Text("REGISTRADA · ${entry.loggedCalories().roundToInt()} kcal", style = MaterialTheme.typography.caption, color = NutritionGreen)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            MealMacro(NutritionMacroIcon.Protein, "${entry.protein}g", ProteinColor)
-            MealMacro(NutritionMacroIcon.Carbs, "${entry.carbs}g", CarbsColor)
-            MealMacro(NutritionMacroIcon.Fat, "${entry.fat}g", FatColor)
+            MealMacro(NutritionMacroIcon.Protein, "${entry.loggedProtein().roundToInt()}g", ProteinColor)
+            MealMacro(NutritionMacroIcon.Carbs, "${entry.loggedCarbs().roundToInt()}g", CarbsColor)
+            MealMacro(NutritionMacroIcon.Fat, "${entry.loggedFat().roundToInt()}g", FatColor)
         }
         if (entry.items.size > 1) Text(entry.items.joinToString(" · ") { it.name }, maxLines = 1, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
@@ -373,7 +373,7 @@ internal fun NutritionEntriesScreen(
                 if (group.isNotEmpty()) {
                     item { Text(type.title.uppercase(), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary) }
                     items(group, key = { it.id }) { entry ->
-                        EntryCard(entry, onBookmark = { name -> onChanged(entries.map { if (it.id == entry.id) it.copy(isBookmarked = name != null, bookmarkName = name.orEmpty()) else it }) }, onDelete = { deleting = entry }, onEdit = { onEdit(entry) })
+                        EntryCard(entry, onBookmark = { name -> onChanged(entries.map { if (it.id == entry.id) applyNutritionBookmark(it, name) else it }) }, onDelete = { deleting = entry }, onEdit = { onEdit(entry) })
                     }
                 }
             }
@@ -426,7 +426,7 @@ private fun EntryCard(entry: MealLog, onBookmark: (String?) -> Unit, onDelete: (
                 exit = shrinkVertically(animationSpec = tween(180)) + fadeOut(tween(120)),
             ) {
                 Column {
-                    entry.items.forEach { food -> Text("• ${food.name} · ${food.calories} kcal", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                    entry.items.forEach { food -> Text("• ${food.name} · ${food.calories.roundToInt()} kcal", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 }
             }
         }

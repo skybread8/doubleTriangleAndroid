@@ -55,7 +55,7 @@ import androidx.compose.material.icons.filled.DirectionsRun
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.SportsGymnastics
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocalFireDepartment
@@ -322,17 +322,18 @@ private fun CompletionSummary(
     Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.size(76.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.12f), CircleShape).padding(12.dp), tint = WildforceThemeTokens.accent)
     Text("¡GRAN TRABAJO!", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text("Has completado ${workout.title}.", color = WildforceThemeTokens.textSecondary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-    val mainIndices = workout.pathBlocks().mainExercises().flatMap { it.executionIndices }.toSet()
+    val mainExercises = workout.pathBlocks().mainExercises()
+    val mainIndices = mainExercises.flatMap { it.executionIndices }.toSet()
     val mainStats = stats.filterKeys { it in mainIndices }.values
     val sets = mainStats.sumOf { it.sets }
     val volume = mainStats.sumOf { it.volumeKg }
-    val totalExercises = mainIndices.size.coerceAtLeast(completedExercises)
-    val skipped = skippedExerciseIndices.count { it in mainIndices }
+    val totalExercises = mainExercises.size.coerceAtLeast(completedExercises)
+    val skipped = mainExercises.skippedExerciseCount(skippedExerciseIndices)
     // iOS builds this grid from available data: repetitions are not a summary
     // card, while skipped exercises, calories and heart-rate cards are added
     // only when the corresponding completion data exists.
     val metrics = buildList {
-        add(CompletionMetric("EJERCICIOS", "$completedExercises/$totalExercises", Icons.Filled.SportsGymnastics))
+        add(CompletionMetric("EJERCICIOS", "$completedExercises/$totalExercises", Icons.Filled.FitnessCenter))
         if (skipped > 0) add(CompletionMetric("OMITIDOS", skipped.toString(), Icons.Filled.FastForward))
         if (sets > 0) add(CompletionMetric("SERIES", sets.toString(), Icons.Filled.Layers))
         if (volume > 0) add(CompletionMetric("VOLUMEN", String.format(locale, "%.0f %s", if (useImperial) volume * KG_TO_LB else volume, if (useImperial) "lb" else "kg"), Icons.Filled.Scale))
@@ -408,7 +409,7 @@ private fun ScoreCelebration(
         Text("$displayedScore%", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h2, color = WildforceThemeTokens.textPrimary)
     }
     val highlights = buildList {
-        add(CompletionMetric("EJERCICIOS", "$completedExercises/$totalExercises", Icons.Filled.SportsGymnastics))
+        add(CompletionMetric("EJERCICIOS", "$completedExercises/$totalExercises", Icons.Filled.FitnessCenter))
         add(CompletionMetric("ESFUERZO", effort, Icons.Filled.DirectionsRun))
         averageHeartRate?.takeIf { it > 0 }?.let { average ->
             add(CompletionMetric("FC MEDIA", String.format(LocalLocale.current.platformLocale, "%.0f", average), Icons.Filled.Favorite))
@@ -501,7 +502,7 @@ private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, t
     Text(planName, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Row(Modifier.fillMaxWidth().padding(top = 24.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         CompletionStat("ENTRENAMIENTOS", completedWorkouts.toString(), Modifier.weight(1f), Icons.Filled.CalendarMonth)
-        CompletionStat("EJERCICIOS", totalExercises.toString(), Modifier.weight(1f), Icons.Filled.SportsGymnastics)
+        CompletionStat("EJERCICIOS", totalExercises.toString(), Modifier.weight(1f), Icons.Filled.FitnessCenter)
     }
     Spacer(Modifier.weight(1f))
 }

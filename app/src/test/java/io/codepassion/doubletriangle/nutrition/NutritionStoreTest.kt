@@ -8,9 +8,85 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
+import java.time.Instant
+import java.time.ZoneId
 
 class NutritionStoreTest {
     private val monday = LocalDate.of(2026, 8, 24)
+
+    @Test
+    fun `recent search matches accents and only titles or food names`() {
+        val meal = MealLog(1, "Merienda", 200, 10, 20, 5, loggedDate = monday, notes = "special note",
+            items = listOf(MealItem("Plátano", 100, 1, 20, 0)))
+        assertTrue(matchesRecentMealSearch(meal, "platano"))
+        assertTrue(matchesRecentMealSearch(meal, "MERIENDA"))
+        assertTrue(!matchesRecentMealSearch(meal, "special note"))
+    }
+
+    @Test
+    fun `bookmark names update the meal title and removal keeps it`() {
+        val meal = MealLog(1, "Breakfast", 400, 20, 40, 10, loggedDate = monday)
+        val bookmarked = applyNutritionBookmark(meal, "  Favorite  ")
+        assertEquals("Favorite", bookmarked.name)
+        assertTrue(bookmarked.isBookmarked)
+        assertEquals("Favorite", applyNutritionBookmark(bookmarked, null).name)
+        assertEquals("Breakfast", applyNutritionBookmark(meal, "   ").name)
+    }
+
+    @Test
+    fun `matching foods remain separate and sort by recorded time not identity`() {
+        val earlier = MealLog(900, "Banana", 100, 1, 25, 0, loggedDate = monday,
+            loggedAt = Instant.parse("2026-08-24T08:00:00Z"), createdAt = Instant.parse("2026-08-24T10:00:00Z"))
+        val later = earlier.copy(id = 1, loggedAt = Instant.parse("2026-08-24T12:00:00Z"), createdAt = Instant.parse("2026-08-24T11:00:00Z"))
+        assertEquals(listOf(earlier, later), orderNutritionMealsForDay(listOf(later, earlier)))
+        assertEquals(listOf(later, earlier), orderRecentNutritionMeals(listOf(earlier, later)))
+    }
+
+    @Test
+    fun `remote echo keeps the existing local meal identity`() {
+        val remoteId = "b6cc2a81-a5bc-4e43-aec4-cd3d483c3c32"
+        val localId = 1_792_000_000_000L
+        assertEquals(localId, localNutritionLogId(remoteId, mapOf(remoteId to localId)))
+        assertTrue(localNutritionLogId(remoteId, emptyMap()) != localId)
+    }
+
+    @Test
+    fun `new remote identities do not reuse a 32 bit hash collision`() {
+        assertEquals("Aa".hashCode(), "BB".hashCode())
+        assertTrue(localNutritionLogId("Aa", emptyMap()) != localNutritionLogId("BB", emptyMap()))
+        assertEquals(123L, localNutritionLogId("Aa", mapOf("Aa" to 123L)))
+    }
+
+    @Test
+    fun `remote log dates use local timezone and preserve original timestamp`() {
+        val zone = ZoneId.of("Europe/Madrid")
+        val timestamp = "2026-08-23T22:30:00Z"
+        assertEquals(monday, nutritionLogDate(timestamp, zone))
+        assertEquals(timestamp, nutritionLogTimestamp(monday, timestamp, 1L, zone))
+        val created = Instant.parse("2026-08-24T08:30:00Z")
+        assertEquals(created.toString(), nutritionLogTimestamp(monday, null, created.toEpochMilli(), zone))
+        assertEquals(monday, nutritionLogDate(nutritionLogTimestamp(monday, null, 1L, zone), zone))
+        assertEquals(monday, nutritionLogDate("2026-08-24", zone))
+    }
+
+    @Test
+    fun `remote meal items ignore deleted rows even when their order is reused`() {
+        val deleted = MealItem("Old", 100, 1, 2, 3)
+        val first = MealItem("First", 200, 2, 3, 4)
+        val second = MealItem("Second", 300, 3, 4, 5)
+        val rows = listOf(RemoteNutritionItem(1, second, false), RemoteNutritionItem(0, first, false), RemoteNutritionItem(0, deleted, true))
+        assertEquals(listOf(first, second), activeRemoteNutritionItems(rows))
+        assertTrue(activeRemoteNutritionItems(listOf(RemoteNutritionItem(0, deleted, true))).isEmpty())
+    }
+
+    @Test
+    fun `saving a replacement or edit retains the planned meal link`() {
+        val draft = MealLog(1, "Lunch", 400, 20, 40, 10, loggedDate = monday)
+        val original = draft.copy(plannedMealKey = "planned-lunch")
+        assertEquals("planned-lunch", normalizeSavedMeal(draft, monday, "planned-lunch", null).plannedMealKey)
+        assertEquals("planned-lunch", normalizeSavedMeal(draft, monday, null, original).plannedMealKey)
+        assertEquals(null, normalizeSavedMeal(draft, monday, null, null).plannedMealKey)
+    }
 
     @Test
     fun `nutrition decimal parser accepts both locale separators`() {

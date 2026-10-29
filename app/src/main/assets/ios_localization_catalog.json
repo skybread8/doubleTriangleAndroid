@@ -1,7 +1,7 @@
 {
   "sourceCatalog": "doubleTriangle/Packages/WildforceShared/Sources/WildforceShared/Resources/Localizable.xcstrings",
   "sourceLanguage": "en",
-  "generatedAt": "2026-10-19T20:32:21.2649712Z",
+  "generatedAt": "2026-10-28T00:55:10.3712346Z",
   "entries": [
     {
       "iosKey": "-%@ in this period",
@@ -40,12 +40,40 @@
       "androidResource": "ios_catalog_3be591bb4fb5ace5"
     },
     {
+      "iosKey": "@ %@",
+      "androidResource": "ios_catalog_7485b31ddbf4c106"
+    },
+    {
       "iosKey": "%.0f rpm",
       "androidResource": "ios_catalog_ae163deb9bb60d22"
     },
     {
+      "iosKey": "%.0fs",
+      "androidResource": "ios_catalog_2e74cc2ad4a19849"
+    },
+    {
+      "iosKey": "%.1fs",
+      "androidResource": "ios_catalog_1ae406c43e660be6"
+    },
+    {
+      "iosKey": "%@",
+      "androidResource": "ios_catalog_ee17b0047b7589b9"
+    },
+    {
       "iosKey": "%@ (Over target)",
       "androidResource": "ios_catalog_05bf24e9f738aa51"
+    },
+    {
+      "iosKey": "%@ / %@",
+      "androidResource": "ios_catalog_f7fe73b265eec57e"
+    },
+    {
+      "iosKey": "%@ %@",
+      "androidResource": "ios_catalog_d0a0503307366bf2"
+    },
+    {
+      "iosKey": "%@ %@ of %@",
+      "androidResource": "ios_catalog_7f1c8b03db4f731c"
     },
     {
       "iosKey": "%@ %@ x %@ g = %@ g total",
@@ -64,6 +92,10 @@
       "androidResource": "ios_catalog_819ba8e4a8923f14"
     },
     {
+      "iosKey": "%@ cm",
+      "androidResource": "ios_catalog_d9705eb8cd7e86a3"
+    },
+    {
       "iosKey": "%@ energy demand",
       "androidResource": "ios_catalog_5c97414f18a9fc5e"
     },
@@ -72,8 +104,16 @@
       "androidResource": "ios_catalog_8a1549adc3f86b17"
     },
     {
+      "iosKey": "%@ g",
+      "androidResource": "ios_catalog_ee48ba14f26b0374"
+    },
+    {
       "iosKey": "%@ history",
       "androidResource": "ios_catalog_0cae601b8d60f573"
+    },
+    {
+      "iosKey": "%@ in",
+      "androidResource": "ios_catalog_ea49c1ec7c7947ed"
     },
     {
       "iosKey": "%@ intake",
@@ -84,8 +124,28 @@
       "androidResource": "ios_catalog_2913d7bcfef89f13"
     },
     {
+      "iosKey": "%@ kg",
+      "androidResource": "ios_catalog_012d7eb84d87cf05"
+    },
+    {
+      "iosKey": "%@ km",
+      "androidResource": "ios_catalog_1c5c11a61b043124"
+    },
+    {
+      "iosKey": "%@ lb",
+      "androidResource": "ios_catalog_0209df670b10dafb"
+    },
+    {
       "iosKey": "%@ meals",
       "androidResource": "ios_catalog_6ad62b224caefc06"
+    },
+    {
+      "iosKey": "%@ mi",
+      "androidResource": "ios_catalog_fc54e842d4064d10"
+    },
+    {
+      "iosKey": "%@ min",
+      "androidResource": "ios_catalog_3b8711ffac0a515a"
     },
     {
       "iosKey": "%@ per week",
@@ -100,12 +160,20 @@
       "androidResource": "ios_catalog_9efeb0c8ed80ac4b"
     },
     {
+      "iosKey": "%@ scored noticeably lower than your top-trained muscle groups this period.",
+      "androidResource": "ios_catalog_e6befcefc3c3bb28"
+    },
+    {
       "iosKey": "%@ stimulus: %d of %d sets",
       "androidResource": "ios_catalog_7fdeefd26f07428a"
     },
     {
       "iosKey": "%@ work is underrepresented",
       "androidResource": "ios_catalog_6b0921701cf57a0c"
+    },
+    {
+      "iosKey": "%@, %@",
+      "androidResource": "ios_catalog_29b70cff605762a5"
     },
     {
       "iosKey": "%@, %@ training level",
@@ -136,6 +204,18 @@
       "androidResource": "ios_catalog_94d2a3a016b96980"
     },
     {
+      "iosKey": "%@: %@",
+      "androidResource": "ios_catalog_201b2f6972383c51"
+    },
+    {
+      "iosKey": "%@: %d",
+      "androidResource": "ios_catalog_48a9e3751be20a0d"
+    },
+    {
+      "iosKey": "%@. %@",
+      "androidResource": "ios_catalog_e7cf76b321ed3f73"
+    },
+    {
       "iosKey": "%@. %d calories. %d grams protein, %d grams carbs, %d grams fat. Tap to log.",
       "androidResource": "ios_catalog_1b6dee4cbf216d16"
     },
@@ -146,6 +226,14 @@
     {
       "iosKey": "%@. No activity",
       "androidResource": "ios_catalog_7eae7e519960de59"
+    },
+    {
+      "iosKey": "%@%%",
+      "androidResource": "ios_catalog_4d67a6c454fa9f6a"
+    },
+    {
+      "iosKey": "%d / %d XP",
+      "androidResource": "ios_catalog_1f2377c6bfa1a0a5"
     },
     {
       "iosKey": "%d auto-detected",
@@ -164,8 +252,16 @@
       "androidResource": "ios_catalog_b94af0078cbb0aab"
     },
     {
+      "iosKey": "%d characters remaining",
+      "androidResource": "ios_catalog_df3587413a2578f6"
+    },
+    {
       "iosKey": "%d check-ins",
       "androidResource": "ios_catalog_2d754c93fb8412ec"
+    },
+    {
+      "iosKey": "%d cm",
+      "androidResource": "ios_catalog_143d9379554a6ea1"
     },
     {
       "iosKey": "%d completions",
@@ -174,6 +270,10 @@
     {
       "iosKey": "%d days ahead",
       "androidResource": "ios_catalog_67726e95b366657f"
+    },
+    {
+      "iosKey": "%d exercises",
+      "androidResource": "ios_catalog_83cba3a86ad9e16c"
     },
     {
       "iosKey": "%d ft %d in",
@@ -190,6 +290,10 @@
     {
       "iosKey": "%d grams protein",
       "androidResource": "ios_catalog_8d18ddee38251ef6"
+    },
+    {
+      "iosKey": "%d h",
+      "androidResource": "ios_catalog_ec925b5304abb43b"
     },
     {
       "iosKey": "%d h %d min",
@@ -216,6 +320,10 @@
       "androidResource": "ios_catalog_c74996c825d97f01"
     },
     {
+      "iosKey": "%d min",
+      "androidResource": "ios_catalog_9f6b1f6f2c879396"
+    },
+    {
       "iosKey": "%d minutes remaining",
       "androidResource": "ios_catalog_0409005095371c82"
     },
@@ -224,12 +332,24 @@
       "androidResource": "ios_catalog_d7a7116730c21118"
     },
     {
+      "iosKey": "%d of %d",
+      "androidResource": "ios_catalog_3081063455c4f57a"
+    },
+    {
+      "iosKey": "%d of %d calories logged",
+      "androidResource": "ios_catalog_08e16a14832b7174"
+    },
+    {
       "iosKey": "%d of %d grams",
       "androidResource": "ios_catalog_401baeb69f400e15"
     },
     {
       "iosKey": "%d of %d sessions",
       "androidResource": "ios_catalog_a6bf8042ce929f9f"
+    },
+    {
+      "iosKey": "%d of %d sessions centered on %@ this period.",
+      "androidResource": "ios_catalog_bde93e2cb448ed60"
     },
     {
       "iosKey": "%d of %d sessions completed",
@@ -244,8 +364,16 @@
       "androidResource": "ios_catalog_885c42f8b9f562c6"
     },
     {
+      "iosKey": "%d reps",
+      "androidResource": "ios_catalog_8b4cc755c1317e15"
+    },
+    {
       "iosKey": "%d rounds",
       "androidResource": "ios_catalog_0085ab7652427ae1"
+    },
+    {
+      "iosKey": "%d sec",
+      "androidResource": "ios_catalog_0f066b1cfa3175f1"
     },
     {
       "iosKey": "%d sec rest",
@@ -284,8 +412,20 @@
       "androidResource": "ios_catalog_b8f0708e818fe2e4"
     },
     {
+      "iosKey": "%d-%d reps",
+      "androidResource": "ios_catalog_823c61ffe6c2a04f"
+    },
+    {
       "iosKey": "%d-week cycle",
       "androidResource": "ios_catalog_eba06959c535e5ee"
+    },
+    {
+      "iosKey": "%d:%02d",
+      "androidResource": "ios_catalog_22aa5926e2099fcd"
+    },
+    {
+      "iosKey": "%d%%",
+      "androidResource": "ios_catalog_71fafb7498ddf411"
     },
     {
       "iosKey": "%d%% below best",
@@ -294,6 +434,10 @@
     {
       "iosKey": "%d%% slowdown across reps",
       "androidResource": "ios_catalog_75f9ccf5fdd65e2e"
+    },
+    {
+      "iosKey": "%ds",
+      "androidResource": "ios_catalog_1d0eee5be05e00a0"
     },
     {
       "iosKey": "=+%@ in this period",
@@ -322,6 +466,10 @@
     {
       "iosKey": "1 check-in",
       "androidResource": "ios_catalog_635e5aed7f6fcbcb"
+    },
+    {
+      "iosKey": "1 selected",
+      "androidResource": "ios_catalog_0e222355f5230d3a"
     },
     {
       "iosKey": "10 seconds",
@@ -366,6 +514,10 @@
     {
       "iosKey": "A 'down-and-up' movement similar to a burpee but without the push-up and jump, focused on speed and metabolic conditioning.",
       "androidResource": "ios_catalog_2069d256ef0e12b1"
+    },
+    {
+      "iosKey": "A %@ movement for %@ with %@ as the main focus.",
+      "androidResource": "ios_catalog_10938a557249ff85"
     },
     {
       "iosKey": "A behind-the-body cable curl that lengthens the biceps at the start of the rep and emphasizes the stretch position.",
@@ -438,6 +590,14 @@
     {
       "iosKey": "A dynamic stretch that improves hip mobility and prepares the legs for training.",
       "androidResource": "ios_catalog_d82b8cd1c70d1295"
+    },
+    {
+      "iosKey": "A few small habits and tools make each progress photo easier to compare over time.",
+      "androidResource": "ios_catalog_e717c5bc0f42a3d4"
+    },
+    {
+      "iosKey": "A few small habits make your gallery much more useful.",
+      "androidResource": "ios_catalog_fd7f006032564cc6"
     },
     {
       "iosKey": "A floor-based core exercise that trains the abs to control the pelvis while the legs move through hip flexion.",
@@ -540,6 +700,14 @@
       "androidResource": "ios_catalog_5c20ad6c738dfa92"
     },
     {
+      "iosKey": "A new journey begins today.",
+      "androidResource": "ios_catalog_dce7960c5aed573f"
+    },
+    {
+      "iosKey": "A planned workout exists locally on the watch, but nothing is marked in progress.",
+      "androidResource": "ios_catalog_b7f07905aa6ead47"
+    },
+    {
       "iosKey": "A popular cable exercise for isolating and building the back of the arms.",
       "androidResource": "ios_catalog_1cec6d60835d55e2"
     },
@@ -640,6 +808,22 @@
       "androidResource": "ios_catalog_f95d79cd8c5c1119"
     },
     {
+      "iosKey": "Adapt this session",
+      "androidResource": "ios_catalog_c352c42a454ac70c"
+    },
+    {
+      "iosKey": "Adapt this session to the equipment available at another training location.",
+      "androidResource": "ios_catalog_bc7f3b369eaab04e"
+    },
+    {
+      "iosKey": "Adapt to another location",
+      "androidResource": "ios_catalog_fd7a5a2eb3528460"
+    },
+    {
+      "iosKey": "Adapt to another training location",
+      "androidResource": "ios_catalog_fb2eca4731fb44c8"
+    },
+    {
       "iosKey": "Add",
       "androidResource": "ios_catalog_9fd728c66c9a256b"
     },
@@ -656,12 +840,28 @@
       "androidResource": "ios_catalog_55c4f8768f321f7f"
     },
     {
+      "iosKey": "Add a few movements to prepare the session.",
+      "androidResource": "ios_catalog_e3239b39e94a53f5"
+    },
+    {
+      "iosKey": "Add a training location in your profile before adapting this workout.",
+      "androidResource": "ios_catalog_2ee1a8dcea646f14"
+    },
+    {
+      "iosKey": "Add an easy finish or mobility work.",
+      "androidResource": "ios_catalog_bf3bcc286e250208"
+    },
+    {
       "iosKey": "Add any useful context for future meal planning",
       "androidResource": "ios_catalog_e8d5771942a5dc01"
     },
     {
       "iosKey": "Add any useful context for your workout plans",
       "androidResource": "ios_catalog_5f2aee9caed0a347"
+    },
+    {
+      "iosKey": "Add Cooldown Exercise",
+      "androidResource": "ios_catalog_eb245e6bcc12ee0b"
     },
     {
       "iosKey": "Add Exercise",
@@ -680,8 +880,16 @@
       "androidResource": "ios_catalog_6b7af0d167303de1"
     },
     {
+      "iosKey": "Add ingredient",
+      "androidResource": "ios_catalog_ec65ad235fa2f23f"
+    },
+    {
       "iosKey": "Add location",
       "androidResource": "ios_catalog_db07192b3f0df913"
+    },
+    {
+      "iosKey": "Add Main Exercise",
+      "androidResource": "ios_catalog_68efd78432ea32fa"
     },
     {
       "iosKey": "Add notes...",
@@ -716,12 +924,28 @@
       "androidResource": "ios_catalog_329618bac0f3848e"
     },
     {
+      "iosKey": "Add Warmup Exercise",
+      "androidResource": "ios_catalog_281ab25241fb23f4"
+    },
+    {
+      "iosKey": "Add your actual distance when you finish.",
+      "androidResource": "ios_catalog_69049ef2755b4a9b"
+    },
+    {
+      "iosKey": "Add your main work here.",
+      "androidResource": "ios_catalog_0fc2dae0a7226852"
+    },
+    {
       "iosKey": "Additional Info (Optional)",
       "androidResource": "ios_catalog_92f3505f8b22dc62"
     },
     {
       "iosKey": "Additional notes...",
       "androidResource": "ios_catalog_dab84826de2c307a"
+    },
+    {
+      "iosKey": "Address",
+      "androidResource": "ios_catalog_56ef8f20955f2564"
     },
     {
       "iosKey": "Adds 15 seconds to the timer",
@@ -776,6 +1000,14 @@
       "androidResource": "ios_catalog_9f088dbebd6c3c70"
     },
     {
+      "iosKey": "After both exercises, take %d seconds before repeating the block.",
+      "androidResource": "ios_catalog_e230d49c91d592db"
+    },
+    {
+      "iosKey": "After both exercises, take the planned block rest before repeating.",
+      "androidResource": "ios_catalog_8e8692d5fea0ad03"
+    },
+    {
       "iosKey": "After the desired duration, reverse the direction to backward circles.",
       "androidResource": "ios_catalog_c24d5c7168f09fea"
     },
@@ -802,6 +1034,10 @@
     {
       "iosKey": "AI meal logging and meal ideas included.",
       "androidResource": "ios_catalog_ac4a60b684f778fc"
+    },
+    {
+      "iosKey": "AI processing",
+      "androidResource": "ios_catalog_d8dd270c0e7c8103"
     },
     {
       "iosKey": "AI Prompt Debug",
@@ -936,6 +1172,14 @@
       "androidResource": "ios_catalog_214220096c8c0751"
     },
     {
+      "iosKey": "Analysing current check-in photos…",
+      "androidResource": "ios_catalog_d16917bf2b3a17a2"
+    },
+    {
+      "iosKey": "Analysing your check-in",
+      "androidResource": "ios_catalog_4585bbf8f05e9075"
+    },
+    {
       "iosKey": "Analytics",
       "androidResource": "ios_catalog_94c116ee118a7299"
     },
@@ -964,6 +1208,10 @@
       "androidResource": "ios_catalog_89c7e66a54fe9331"
     },
     {
+      "iosKey": "Analyzing your ingredients...",
+      "androidResource": "ios_catalog_e02c2a37d84c7e25"
+    },
+    {
       "iosKey": "Analyzing your meal...",
       "androidResource": "ios_catalog_c5e00c629e92f9db"
     },
@@ -988,6 +1236,10 @@
       "androidResource": "ios_catalog_2b505597daa736f1"
     },
     {
+      "iosKey": "Anything else?",
+      "androidResource": "ios_catalog_554e6ec0bec97ecc"
+    },
+    {
       "iosKey": "Anything to avoid?",
       "androidResource": "ios_catalog_c31d8b7383b918da"
     },
@@ -1006,6 +1258,10 @@
     {
       "iosKey": "Archived",
       "androidResource": "ios_catalog_bdb86505f8062d15"
+    },
+    {
+      "iosKey": "Are you leaving?",
+      "androidResource": "ios_catalog_49fd36734ad52d2a"
     },
     {
       "iosKey": "Are you sure you want to cancel this workout? All progress will be deleted.",
@@ -1042,6 +1298,10 @@
     {
       "iosKey": "Ascending pyramids let you ease into heavy work instead of jumping straight to it. They can help with confidence, technical rhythm, and strength-focused training where ramping up matters.",
       "androidResource": "ios_catalog_d2f8b0423cc82116"
+    },
+    {
+      "iosKey": "Ask for ideas using everything you have available.",
+      "androidResource": "ios_catalog_cbe29e9a74a15773"
     },
     {
       "iosKey": "Athletic",
@@ -1094,6 +1354,10 @@
     {
       "iosKey": "Authentication is not available right now.",
       "androidResource": "ios_catalog_fa1dee3c08706b73"
+    },
+    {
+      "iosKey": "Auto",
+      "androidResource": "ios_catalog_0286249762f7c943"
     },
     {
       "iosKey": "Auto reps",
@@ -1312,6 +1576,10 @@
       "androidResource": "ios_catalog_7fac11a145a47402"
     },
     {
+      "iosKey": "Backoff Weight",
+      "androidResource": "ios_catalog_4a61e0246eb7d9f4"
+    },
+    {
       "iosKey": "Balancing volume and intensity...",
       "androidResource": "ios_catalog_cb89701eab9b562c"
     },
@@ -1456,6 +1724,10 @@
       "androidResource": "ios_catalog_e9fafcccbe4b4a7a"
     },
     {
+      "iosKey": "Bilateral",
+      "androidResource": "ios_catalog_dc247fc01cfbdfee"
+    },
+    {
       "iosKey": "Bird Dog",
       "androidResource": "ios_catalog_088faa05b0b95d31"
     },
@@ -1466,6 +1738,10 @@
     {
       "iosKey": "Birth month and year",
       "androidResource": "ios_catalog_3d6359c5f3d09160"
+    },
+    {
+      "iosKey": "Block distracting app categories while a workout is active.",
+      "androidResource": "ios_catalog_94bd8611ea093bce"
     },
     {
       "iosKey": "Block distractions while you train",
@@ -1482,6 +1758,10 @@
     {
       "iosKey": "BMR",
       "androidResource": "ios_catalog_9768405ae6c5282c"
+    },
+    {
+      "iosKey": "BMR adjusted for your (__(trainingPreferences.lifestyle.englishName)) lifestyle.",
+      "androidResource": "ios_catalog_d305e06960ff996f"
     },
     {
       "iosKey": "BMR adjusted for your \\\\(__(user.resolvedLifestyle.englishName)) lifestyle.",
@@ -1534,6 +1814,10 @@
     {
       "iosKey": "Bodyweight",
       "androidResource": "ios_catalog_581d1b4da4c0073f"
+    },
+    {
+      "iosKey": "Bodyweight / time",
+      "androidResource": "ios_catalog_856252d2352f5c63"
     },
     {
       "iosKey": "Bodyweight only",
@@ -1662,6 +1946,10 @@
     {
       "iosKey": "Build a day-by-day nutrition plan aligned with your training, goals, and food preferences.",
       "androidResource": "ios_catalog_99827cb2d3772870"
+    },
+    {
+      "iosKey": "Build a workout by hand, exercise by exercise.",
+      "androidResource": "ios_catalog_fcd99e4c138940e2"
     },
     {
       "iosKey": "Build conditioning",
@@ -2016,6 +2304,14 @@
       "androidResource": "ios_catalog_9ec32019872f29b5"
     },
     {
+      "iosKey": "Choose a suggestion to pin it on the map.",
+      "androidResource": "ios_catalog_e701c62031e8775e"
+    },
+    {
+      "iosKey": "Choose at least one category to finish setup.",
+      "androidResource": "ios_catalog_52d7468de1bf9f1e"
+    },
+    {
       "iosKey": "Choose blocked categories",
       "androidResource": "ios_catalog_257b61473fe5e732"
     },
@@ -2030,6 +2326,10 @@
     {
       "iosKey": "Choose meals-per-day and a dietary style—get simple suggestions if you want.",
       "androidResource": "ios_catalog_e01291b4cb1a7389"
+    },
+    {
+      "iosKey": "Choose the app categories you want blocked during workouts.",
+      "androidResource": "ios_catalog_60dc3db91e43d6b1"
     },
     {
       "iosKey": "Choose the focus for each selected training day. The planner will create one workout per selected day and match each day's focus.",
@@ -2060,6 +2360,10 @@
       "androidResource": "ios_catalog_52ee25e9b16c276b"
     },
     {
+      "iosKey": "Clear Superset",
+      "androidResource": "ios_catalog_2ab8c64e846fb4b1"
+    },
+    {
       "iosKey": "Clear text",
       "androidResource": "ios_catalog_b0470df90ef4eb9c"
     },
@@ -2082,6 +2386,10 @@
     {
       "iosKey": "Close this sheet and tap 'See future' to retry the generation.",
       "androidResource": "ios_catalog_85c8376add6cc5e3"
+    },
+    {
+      "iosKey": "cm",
+      "androidResource": "ios_catalog_b5039c325d7107d6"
     },
     {
       "iosKey": "Coach notes",
@@ -2174,6 +2482,10 @@
     {
       "iosKey": "Complete your main effort, then quickly lower the weight and keep going with little or no rest. The idea is to extend the set beyond the point where the original load would force you to stop.",
       "androidResource": "ios_catalog_bf28fe00d929df63"
+    },
+    {
+      "iosKey": "Complete your set",
+      "androidResource": "ios_catalog_6dba9340e3c49dbe"
     },
     {
       "iosKey": "Completed",
@@ -2428,6 +2740,10 @@
       "androidResource": "ios_catalog_49c8f361aa5b5685"
     },
     {
+      "iosKey": "Couldn’t link an account",
+      "androidResource": "ios_catalog_62c5681a5e72b5e4"
+    },
+    {
       "iosKey": "Couldn’t link Apple",
       "androidResource": "ios_catalog_0b03de9f700ac581"
     },
@@ -2468,6 +2784,10 @@
       "androidResource": "ios_catalog_c574a9284fbd4a61"
     },
     {
+      "iosKey": "Create a superset",
+      "androidResource": "ios_catalog_c3cf2d506acb10cf"
+    },
+    {
       "iosKey": "Create account",
       "androidResource": "ios_catalog_798ca2ce18bf2038"
     },
@@ -2478,6 +2798,10 @@
     {
       "iosKey": "Create an account to continue",
       "androidResource": "ios_catalog_9f02aca0729fe7b7"
+    },
+    {
+      "iosKey": "Create an account to keep your progress available on every device.",
+      "androidResource": "ios_catalog_dfa9972fb0889b28"
     },
     {
       "iosKey": "Create an account to subscribe",
@@ -2596,6 +2920,10 @@
       "androidResource": "ios_catalog_b46dd90e6479d5df"
     },
     {
+      "iosKey": "Custom Workout Menu",
+      "androidResource": "ios_catalog_9ffbf42f90afd168"
+    },
+    {
       "iosKey": "Custom workouts",
       "androidResource": "ios_catalog_89bcddf2b2f86127"
     },
@@ -2618,6 +2946,10 @@
     {
       "iosKey": "Dark",
       "androidResource": "ios_catalog_60acc53f13a5d1bf"
+    },
+    {
+      "iosKey": "Date",
+      "androidResource": "ios_catalog_99c40ab405926cb5"
     },
     {
       "iosKey": "Day",
@@ -2704,8 +3036,16 @@
       "androidResource": "ios_catalog_14a19827a479dbaf"
     },
     {
+      "iosKey": "Describe ingredients",
+      "androidResource": "ios_catalog_cbad4574a4ef3967"
+    },
+    {
       "iosKey": "Describe meal",
       "androidResource": "ios_catalog_ea333fbd35af86eb"
+    },
+    {
+      "iosKey": "Describe the ingredients you have. You can type or dictate them naturally.",
+      "androidResource": "ios_catalog_c31dbb35880d7f56"
     },
     {
       "iosKey": "Describe your meal in your own words. AI will estimate the ingredients and portions.",
@@ -2750,6 +3090,10 @@
     {
       "iosKey": "Discard changes?",
       "androidResource": "ios_catalog_85bcf41666a53691"
+    },
+    {
+      "iosKey": "Disclaimer",
+      "androidResource": "ios_catalog_129c678fce59acee"
     },
     {
       "iosKey": "Dislikes",
@@ -2916,6 +3260,10 @@
       "androidResource": "ios_catalog_2f53b899da6b7532"
     },
     {
+      "iosKey": "Double-tap to edit this set",
+      "androidResource": "ios_catalog_49a337ed26b0f3b3"
+    },
+    {
       "iosKey": "Double-tap to enter value manually",
       "androidResource": "ios_catalog_5424c62f91fb07d0"
     },
@@ -2926,6 +3274,10 @@
     {
       "iosKey": "Double-tap to filter workouts for this day",
       "androidResource": "ios_catalog_5778ef59a5ead8d6"
+    },
+    {
+      "iosKey": "Double-tap to open numeric keypad",
+      "androidResource": "ios_catalog_8b8432b0154e5683"
     },
     {
       "iosKey": "Double-tap to view nutrition for this date",
@@ -3000,6 +3352,10 @@
       "androidResource": "ios_catalog_5bdb16c003b93ca7"
     },
     {
+      "iosKey": "Drop Count",
+      "androidResource": "ios_catalog_414f2a4c5ad88c73"
+    },
+    {
       "iosKey": "Drop into a squat and place your hands on the floor.",
       "androidResource": "ios_catalog_44529ce76c25db14"
     },
@@ -3060,6 +3416,10 @@
       "androidResource": "ios_catalog_355142c404d6ddbc"
     },
     {
+      "iosKey": "Duplicate",
+      "androidResource": "ios_catalog_02cdaabfca805d6a"
+    },
+    {
       "iosKey": "Duration",
       "androidResource": "ios_catalog_4fc52a3c4c558b51"
     },
@@ -3112,6 +3472,10 @@
       "androidResource": "ios_catalog_b728d3755c11b2a3"
     },
     {
+      "iosKey": "e.g. I have eggs, spinach, feta, tomatoes, and some leftover chicken.",
+      "androidResource": "ios_catalog_955c2721057103b6"
+    },
+    {
       "iosKey": "e.g. mushrooms, olives, liver",
       "androidResource": "ios_catalog_4f878dc2d090c2bd"
     },
@@ -3124,6 +3488,10 @@
       "androidResource": "ios_catalog_8ac75e93a7632582"
     },
     {
+      "iosKey": "e.g. There was avocado under the eggs, and the chicken portion was about 200 g",
+      "androidResource": "ios_catalog_ca88b3374f4d1c12"
+    },
+    {
       "iosKey": "Each check-in saves one profile and one front photo.",
       "androidResource": "ios_catalog_b16463275e265082"
     },
@@ -3132,8 +3500,20 @@
       "androidResource": "ios_catalog_67030b73c71b7358"
     },
     {
+      "iosKey": "Each pass through the block counts as one full round.",
+      "androidResource": "ios_catalog_bc1b9c9d6d336b2a"
+    },
+    {
       "iosKey": "Each point is one logged %@ entry.",
       "androidResource": "ios_catalog_baebd99dc9cf8610"
+    },
+    {
+      "iosKey": "Each point is the monthly average of logged %@ entries.",
+      "androidResource": "ios_catalog_c14d4444d02f33c2"
+    },
+    {
+      "iosKey": "Each point is the weekly average of logged %@ entries.",
+      "androidResource": "ios_catalog_939695583d277a6d"
     },
     {
       "iosKey": "Earlier results for this exercise will appear here.",
@@ -3172,8 +3552,20 @@
       "androidResource": "ios_catalog_464c4ffd019e1e96"
     },
     {
+      "iosKey": "Edit blocked categories",
+      "androidResource": "ios_catalog_e6a8afe4c4b66ccc"
+    },
+    {
       "iosKey": "Edit categories",
       "androidResource": "ios_catalog_a3e7a9ea173eddfb"
+    },
+    {
+      "iosKey": "Edit each set's reps and weight directly above.",
+      "androidResource": "ios_catalog_306e124f78a32af9"
+    },
+    {
+      "iosKey": "Edit Exercise",
+      "androidResource": "ios_catalog_9137e949349b175e"
     },
     {
       "iosKey": "Edit Food",
@@ -3192,6 +3584,10 @@
       "androidResource": "ios_catalog_308b88fcc3dffe50"
     },
     {
+      "iosKey": "Edit sets",
+      "androidResource": "ios_catalog_e39ec997e4d61217"
+    },
+    {
       "iosKey": "Edit the scanned values per 100 g. Totals update using the consumed amount above.",
       "androidResource": "ios_catalog_9aa5b37768fb98de"
     },
@@ -3202,6 +3598,10 @@
     {
       "iosKey": "Effort",
       "androidResource": "ios_catalog_4387e5d3966fc436"
+    },
+    {
+      "iosKey": "Elapsed",
+      "androidResource": "ios_catalog_a194a68a45d32cab"
     },
     {
       "iosKey": "Elbow Pain",
@@ -3226,6 +3626,10 @@
     {
       "iosKey": "Elliptical",
       "androidResource": "ios_catalog_8a97e84889f234d8"
+    },
+    {
+      "iosKey": "Email",
+      "androidResource": "ios_catalog_969ccbd3cf6300ec"
     },
     {
       "iosKey": "Enable Apple Health in your profile to import body metrics automatically.",
@@ -3266,6 +3670,10 @@
     {
       "iosKey": "End",
       "androidResource": "ios_catalog_f4db1e48476f6075"
+    },
+    {
+      "iosKey": "Ends",
+      "androidResource": "ios_catalog_e98982c9f2ba3332"
     },
     {
       "iosKey": "Energy",
@@ -3388,6 +3796,10 @@
       "androidResource": "ios_catalog_9ea4dcbe3601fa4f"
     },
     {
+      "iosKey": "Enter your email and password to continue.",
+      "androidResource": "ios_catalog_3e4d5ab900ee9e40"
+    },
+    {
       "iosKey": "Environment",
       "androidResource": "ios_catalog_9e471951a1b4106e"
     },
@@ -3408,12 +3820,20 @@
       "androidResource": "ios_catalog_62fa9ae34a780823"
     },
     {
+      "iosKey": "Estimate body composition from this check-in",
+      "androidResource": "ios_catalog_51f637c50661715a"
+    },
+    {
       "iosKey": "Estimate it from a body composition reading such as a smart scale or DEXA scan, then track it with the same method over time.",
       "androidResource": "ios_catalog_d95254953565959e"
     },
     {
       "iosKey": "Estimate the meal from a photo, adjust details, and save.",
       "androidResource": "ios_catalog_cb51ef74116e5c66"
+    },
+    {
+      "iosKey": "Estimate unavailable",
+      "androidResource": "ios_catalog_7b031241e9502f51"
     },
     {
       "iosKey": "Estimated 1RM",
@@ -3424,8 +3844,20 @@
       "androidResource": "ios_catalog_c8262caee4724be9"
     },
     {
+      "iosKey": "Estimated body-fat range",
+      "androidResource": "ios_catalog_e1b833d23cc8a639"
+    },
+    {
+      "iosKey": "Estimated Duration",
+      "androidResource": "ios_catalog_ae0bdf0462d9e1c5"
+    },
+    {
       "iosKey": "Estimated Duration: %d minutes",
       "androidResource": "ios_catalog_7175d18d85f8269a"
+    },
+    {
+      "iosKey": "Estimated using the U.S. Navy formula from waist(user.gender == .female ?",
+      "androidResource": "ios_catalog_52ca0155c678c161"
     },
     {
       "iosKey": "Estimated using the U.S. Navy formula from waist\\\\(user.gender == .female ?",
@@ -3492,6 +3924,10 @@
       "androidResource": "ios_catalog_e61386e90916c2b0"
     },
     {
+      "iosKey": "Exercise not synced yet",
+      "androidResource": "ios_catalog_761d805b2d9e42d3"
+    },
+    {
       "iosKey": "Exercise Profile",
       "androidResource": "ios_catalog_aa7b79d3950195e7"
     },
@@ -3510,6 +3946,10 @@
     {
       "iosKey": "Exercises in this period",
       "androidResource": "ios_catalog_4563e40aaaa33d87"
+    },
+    {
+      "iosKey": "Exercises must be consecutive.",
+      "androidResource": "ios_catalog_cbb5460a46f12a30"
     },
     {
       "iosKey": "Exhale and lean forward, resting your torso between your thighs.",
@@ -3594,6 +4034,10 @@
     {
       "iosKey": "Extends the effort quickly to create a strong hypertrophy stimulus.",
       "androidResource": "ios_catalog_719e125e779bbb71"
+    },
+    {
+      "iosKey": "Extra ingredients needed",
+      "androidResource": "ios_catalog_cb89925d092d16ec"
     },
     {
       "iosKey": "Extracting calories and macros from the image.",
@@ -3712,6 +4156,10 @@
       "androidResource": "ios_catalog_cf1fcb1ed20adbae"
     },
     {
+      "iosKey": "Finish setup before Full focus mode can turn on.",
+      "androidResource": "ios_catalog_1964d08d367c2301"
+    },
+    {
       "iosKey": "Finish strong",
       "androidResource": "ios_catalog_3811f98cc85e1aec"
     },
@@ -3742,6 +4190,14 @@
     {
       "iosKey": "Fitness profile",
       "androidResource": "ios_catalog_73d2f1771daac4ad"
+    },
+    {
+      "iosKey": "Fix it",
+      "androidResource": "ios_catalog_8c6c8d92dfc9629d"
+    },
+    {
+      "iosKey": "Fix photo estimate",
+      "androidResource": "ios_catalog_086e755369294484"
     },
     {
       "iosKey": "Flat Bench",
@@ -4044,6 +4500,10 @@
       "androidResource": "ios_catalog_9a9269cb981f88d0"
     },
     {
+      "iosKey": "For %@ g consumed",
+      "androidResource": "ios_catalog_57aaf1e257639283"
+    },
+    {
       "iosKey": "For added challenge, hold a weight or medicine ball.",
       "androidResource": "ios_catalog_b7f53298e3a22b46"
     },
@@ -4108,6 +4568,10 @@
       "androidResource": "ios_catalog_a617590202898821"
     },
     {
+      "iosKey": "Front and profile photos from this session will be used together when possible.",
+      "androidResource": "ios_catalog_7e8cc3b3ee0ac06f"
+    },
+    {
       "iosKey": "Front photo",
       "androidResource": "ios_catalog_c97467d29c6f9ad2"
     },
@@ -4126,6 +4590,10 @@
     {
       "iosKey": "Full Body",
       "androidResource": "ios_catalog_a54b18ef18c61ad3"
+    },
+    {
+      "iosKey": "Full focus mode",
+      "androidResource": "ios_catalog_b089927edef6a296"
     },
     {
       "iosKey": "Full focus mode blocks the app categories you choose while an iPhone workout is active.",
@@ -4180,6 +4648,10 @@
       "androidResource": "ios_catalog_16bdd17a094baf54"
     },
     {
+      "iosKey": "Generate another",
+      "androidResource": "ios_catalog_556f4bba96daab7a"
+    },
+    {
       "iosKey": "Generate New week plan",
       "androidResource": "ios_catalog_38ec30d5f3c1ef21"
     },
@@ -4190,6 +4662,10 @@
     {
       "iosKey": "Generate Plan",
       "androidResource": "ios_catalog_898b391f5d35497e"
+    },
+    {
+      "iosKey": "Generating meal ideas...",
+      "androidResource": "ios_catalog_680943af8759a9eb"
     },
     {
       "iosKey": "Generating your workout plan…",
@@ -4240,6 +4716,14 @@
       "androidResource": "ios_catalog_8a1e2c14210dbdc7"
     },
     {
+      "iosKey": "Get meal ideas",
+      "androidResource": "ios_catalog_cef7a8d8fed95bc7"
+    },
+    {
+      "iosKey": "Get more ideas",
+      "androidResource": "ios_catalog_d5813c5541c4fce3"
+    },
+    {
       "iosKey": "Get ready",
       "androidResource": "ios_catalog_0b5f4af0f352bfd9"
     },
@@ -4254,6 +4738,10 @@
     {
       "iosKey": "Get the complete Wildforce experience, built around your progress.",
       "androidResource": "ios_catalog_ed316d49f8295b53"
+    },
+    {
+      "iosKey": "Get Wildforce Premium",
+      "androidResource": "ios_catalog_f1015de277252aa7"
     },
     {
       "iosKey": "Ghost",
@@ -4804,6 +5292,10 @@
       "androidResource": "ios_catalog_69cc0d8645fa4deb"
     },
     {
+      "iosKey": "How it runs",
+      "androidResource": "ios_catalog_934baec253f2d53d"
+    },
+    {
       "iosKey": "How it works",
       "androidResource": "ios_catalog_9c870aa6e5e93270"
     },
@@ -4848,12 +5340,20 @@
       "androidResource": "ios_catalog_ab8887224cf732d6"
     },
     {
+      "iosKey": "I'm lucky",
+      "androidResource": "ios_catalog_a1dc35c62c135501"
+    },
+    {
       "iosKey": "I've an account",
       "androidResource": "ios_catalog_0279297dc911036c"
     },
     {
       "iosKey": "Ideas that fit the macros you have left.",
       "androidResource": "ios_catalog_2dcd67dbab45619c"
+    },
+    {
+      "iosKey": "Identifying ingredients from your photo before suggesting ideas.",
+      "androidResource": "ios_catalog_439318098a017e2b"
     },
     {
       "iosKey": "If bodyweight is too difficult, use an assisted dip machine or bands.",
@@ -4952,6 +5452,10 @@
       "androidResource": "ios_catalog_500a5540fe4ec51a"
     },
     {
+      "iosKey": "in",
+      "androidResource": "ios_catalog_582967534d0f909d"
+    },
+    {
       "iosKey": "In Progress",
       "androidResource": "ios_catalog_b4cc4b07c300103a"
     },
@@ -4986,6 +5490,10 @@
     {
       "iosKey": "Info",
       "androidResource": "ios_catalog_170322a32f3c35b2"
+    },
+    {
+      "iosKey": "Ingredient",
+      "androidResource": "ios_catalog_c4c5ed008b8696b9"
     },
     {
       "iosKey": "Ingredient name",
@@ -5242,6 +5750,10 @@
     {
       "iosKey": "Keep the movement small and controlled rather than swinging the leg.",
       "androidResource": "ios_catalog_17c672e3f48983ee"
+    },
+    {
+      "iosKey": "Keep the rhythm",
+      "androidResource": "ios_catalog_feac2a98e0e39268"
     },
     {
       "iosKey": "Keep the same distance and framing",
@@ -5676,6 +6188,14 @@
       "androidResource": "ios_catalog_6031e55a63ff50f0"
     },
     {
+      "iosKey": "kg",
+      "androidResource": "ios_catalog_131ed734290d30f3"
+    },
+    {
+      "iosKey": "km",
+      "androidResource": "ios_catalog_1f34503f65b4a355"
+    },
+    {
       "iosKey": "Knee Pain",
       "androidResource": "ios_catalog_7b93b3c86c9e6859"
     },
@@ -5782,6 +6302,10 @@
     {
       "iosKey": "Launch the companion watch workout when you start on iPhone.",
       "androidResource": "ios_catalog_b4f25f32b9bd807e"
+    },
+    {
+      "iosKey": "lb",
+      "androidResource": "ios_catalog_fd26db45a8b53034"
     },
     {
       "iosKey": "Lead with your elbows, not your wrists.",
@@ -6008,8 +6532,16 @@
       "androidResource": "ios_catalog_0b1dd0f785dee18a"
     },
     {
+      "iosKey": "Linked accounts",
+      "androidResource": "ios_catalog_feda46a46abb0f71"
+    },
+    {
       "iosKey": "Listening to your body is a sign of strength.",
       "androidResource": "ios_catalog_bcbc0c66fe998dc0"
+    },
+    {
+      "iosKey": "Live progress",
+      "androidResource": "ios_catalog_1134f194a9ca711c"
     },
     {
       "iosKey": "Live Sync",
@@ -6022,6 +6554,10 @@
     {
       "iosKey": "Load weight plates onto the other end and straddle the bar, facing away from the anchor.",
       "androidResource": "ios_catalog_cca0419de70229d9"
+    },
+    {
+      "iosKey": "Loading exercise…",
+      "androidResource": "ios_catalog_ae23de204b9af860"
     },
     {
       "iosKey": "Location",
@@ -6048,12 +6584,24 @@
       "androidResource": "ios_catalog_21e49eb2b299c9f7"
     },
     {
+      "iosKey": "Log %@",
+      "androidResource": "ios_catalog_d4c438ea85885236"
+    },
+    {
       "iosKey": "Log as suggested",
       "androidResource": "ios_catalog_2938f474bc553c88"
     },
     {
+      "iosKey": "Log body metrics",
+      "androidResource": "ios_catalog_220bc10d523d99d7"
+    },
+    {
       "iosKey": "Log each effort as a set and keep the reps consistent with the target.",
       "androidResource": "ios_catalog_7be60af4d5b2d944"
+    },
+    {
+      "iosKey": "Log in",
+      "androidResource": "ios_catalog_c189840cf7e2d6f6"
     },
     {
       "iosKey": "Log meals from a photo, a label or a description.",
@@ -6064,6 +6612,10 @@
       "androidResource": "ios_catalog_a792ac2ed5679ded"
     },
     {
+      "iosKey": "Log nutrition meal",
+      "androidResource": "ios_catalog_cca4d7008ce97dc9"
+    },
+    {
       "iosKey": "Log out",
       "androidResource": "ios_catalog_49616145514e9abf"
     },
@@ -6072,8 +6624,16 @@
       "androidResource": "ios_catalog_88474d9dd1be650a"
     },
     {
+      "iosKey": "Log something else",
+      "androidResource": "ios_catalog_6e0c578743087d0b"
+    },
+    {
       "iosKey": "Log sometihng else",
       "androidResource": "ios_catalog_fbfcf65f2a0e0136"
+    },
+    {
+      "iosKey": "Log this meal",
+      "androidResource": "ios_catalog_798f0c48efd32130"
     },
     {
       "iosKey": "Log today’s intake",
@@ -6388,6 +6948,18 @@
       "androidResource": "ios_catalog_d4d64c04584c4c5e"
     },
     {
+      "iosKey": "Macro target",
+      "androidResource": "ios_catalog_e619021c60d4754c"
+    },
+    {
+      "iosKey": "Macro target (optional)",
+      "androidResource": "ios_catalog_e663b0ba7235cdd9"
+    },
+    {
+      "iosKey": "Main",
+      "androidResource": "ios_catalog_eb814be3ca3b78c0"
+    },
+    {
       "iosKey": "Main exercises",
       "androidResource": "ios_catalog_523a8e5501686321"
     },
@@ -6632,8 +7204,16 @@
       "androidResource": "ios_catalog_a9c3424980eef350"
     },
     {
+      "iosKey": "Map preview",
+      "androidResource": "ios_catalog_f91fd6462ede423e"
+    },
+    {
       "iosKey": "Mark Complete",
       "androidResource": "ios_catalog_7b63c1db87da06bc"
+    },
+    {
+      "iosKey": "Mark Ready",
+      "androidResource": "ios_catalog_f8df848acdbac119"
     },
     {
       "iosKey": "Match both sides",
@@ -6668,8 +7248,16 @@
       "androidResource": "ios_catalog_c3940d7d61c8703b"
     },
     {
+      "iosKey": "Meal idea",
+      "androidResource": "ios_catalog_51e5c9a60f39e6fb"
+    },
+    {
       "iosKey": "Meal ideas",
       "androidResource": "ios_catalog_a28738584a1832f6"
+    },
+    {
+      "iosKey": "Meal ideas from ingredients",
+      "androidResource": "ios_catalog_87cd7572f9dc7a2c"
     },
     {
       "iosKey": "Meal name",
@@ -6710,6 +7298,10 @@
     {
       "iosKey": "Medium",
       "androidResource": "ios_catalog_8e588cd187741f1c"
+    },
+    {
+      "iosKey": "Menu",
+      "androidResource": "ios_catalog_99af6606ff9d6cd5"
     },
     {
       "iosKey": "Mesocycle",
@@ -6756,8 +7348,16 @@
       "androidResource": "ios_catalog_4a5ee73e58a6ff17"
     },
     {
+      "iosKey": "mi",
+      "androidResource": "ios_catalog_eee1c1ade6525d24"
+    },
+    {
       "iosKey": "min",
       "androidResource": "ios_catalog_1f6fa6f69d185e60"
+    },
+    {
+      "iosKey": "Min %@",
+      "androidResource": "ios_catalog_aa3948d91f4e1a1a"
     },
     {
       "iosKey": "min/km",
@@ -6870,6 +7470,10 @@
     {
       "iosKey": "Move Down",
       "androidResource": "ios_catalog_b58330ac25057a44"
+    },
+    {
+      "iosKey": "Move exercise to exercise",
+      "androidResource": "ios_catalog_5fbc026ff0a9abea"
     },
     {
       "iosKey": "Move slowly and avoid swinging your legs so your abs, not momentum, control the movement.",
@@ -7024,6 +7628,10 @@
       "androidResource": "ios_catalog_a2bfd8df2fe2f33a"
     },
     {
+      "iosKey": "New workout flow",
+      "androidResource": "ios_catalog_c5bf60c5a4bcddf9"
+    },
+    {
       "iosKey": "New Workout Plan",
       "androidResource": "ios_catalog_79ea4cfa27a00724"
     },
@@ -7126,6 +7734,10 @@
     {
       "iosKey": "No in-progress workout was found in watch storage.",
       "androidResource": "ios_catalog_98090d59e7488c4d"
+    },
+    {
+      "iosKey": "No instructions",
+      "androidResource": "ios_catalog_24486a0cb6dd0842"
     },
     {
       "iosKey": "No items",
@@ -7276,6 +7888,10 @@
       "androidResource": "ios_catalog_4895f73177ab5d67"
     },
     {
+      "iosKey": "Notes",
+      "androidResource": "ios_catalog_8a7525b1492fb848"
+    },
+    {
       "iosKey": "Notes (optional)",
       "androidResource": "ios_catalog_6239b93e96e9a8ee"
     },
@@ -7316,6 +7932,10 @@
       "androidResource": "ios_catalog_2a3305895bdbbf98"
     },
     {
+      "iosKey": "Nutrition per 100 g",
+      "androidResource": "ios_catalog_2bd05b0339c59709"
+    },
+    {
       "iosKey": "Nutrition per 100g",
       "androidResource": "ios_catalog_4a4029f2616ffdb9"
     },
@@ -7348,12 +7968,28 @@
       "androidResource": "ios_catalog_96b9b6be29fae75b"
     },
     {
+      "iosKey": "On",
+      "androidResource": "ios_catalog_130011756125313c"
+    },
+    {
       "iosKey": "One shared effort",
       "androidResource": "ios_catalog_219c49dff76307a0"
     },
     {
+      "iosKey": "One-off workout from your goal, focus, equipment, and duration.",
+      "androidResource": "ios_catalog_0e70c76a6595b7c5"
+    },
+    {
       "iosKey": "Only reach as far as is comfortable; your foot doesn't have to touch your hand.",
       "androidResource": "ios_catalog_2beb784196fb066d"
+    },
+    {
+      "iosKey": "Only the front photo is available, so the estimate will rely on that single angle.",
+      "androidResource": "ios_catalog_55a374d35be65317"
+    },
+    {
+      "iosKey": "Only the profile photo is available, so the estimate will rely on that single angle.",
+      "androidResource": "ios_catalog_f8b383fa873c9668"
     },
     {
       "iosKey": "Open Settings",
@@ -7382,6 +8018,14 @@
     {
       "iosKey": "Optional location photo",
       "androidResource": "ios_catalog_027d3fc05c64d70d"
+    },
+    {
+      "iosKey": "Optional note",
+      "androidResource": "ios_catalog_970c43c080218f8b"
+    },
+    {
+      "iosKey": "Optional. Use this to nudge ideas toward your target.",
+      "androidResource": "ios_catalog_685c2871aa371b6f"
     },
     {
       "iosKey": "Or",
@@ -7450,6 +8094,10 @@
     {
       "iosKey": "Particularly useful before exercises like push-ups or bench press.",
       "androidResource": "ios_catalog_7ea074f9e9a5e4ed"
+    },
+    {
+      "iosKey": "Password",
+      "androidResource": "ios_catalog_e7cf3ef4f17c3999"
     },
     {
       "iosKey": "Pause",
@@ -7528,6 +8176,14 @@
       "androidResource": "ios_catalog_004d0203abbf9460"
     },
     {
+      "iosKey": "Per-set targets",
+      "androidResource": "ios_catalog_eb55e9eb8d8b2121"
+    },
+    {
+      "iosKey": "Per-set targets default from the selected style, but you can override them above.",
+      "androidResource": "ios_catalog_5ddb2b466eb528ac"
+    },
+    {
       "iosKey": "Per-side load",
       "androidResource": "ios_catalog_bb2b165e4157c381"
     },
@@ -7594,6 +8250,14 @@
     {
       "iosKey": "Phase: %@",
       "androidResource": "ios_catalog_b9fb4ba433de0875"
+    },
+    {
+      "iosKey": "Photo",
+      "androidResource": "ios_catalog_d84eebada93efee1"
+    },
+    {
+      "iosKey": "Photo input",
+      "androidResource": "ios_catalog_5eedc2c2892e4b1a"
     },
     {
       "iosKey": "Photos (Required)",
@@ -7704,6 +8368,10 @@
       "androidResource": "ios_catalog_fb6f7c93e6bf3dfa"
     },
     {
+      "iosKey": "Planned foods: %@",
+      "androidResource": "ios_catalog_2deacd33ade06ff3"
+    },
+    {
       "iosKey": "Planned Meal",
       "androidResource": "ios_catalog_1b26abec8a08c360"
     },
@@ -7798,6 +8466,10 @@
     {
       "iosKey": "Post-workout",
       "androidResource": "ios_catalog_5a30de45ba5ce98c"
+    },
+    {
+      "iosKey": "PR: %@",
+      "androidResource": "ios_catalog_253b9cdda57c7919"
     },
     {
       "iosKey": "Practice form",
@@ -8328,6 +9000,10 @@
       "androidResource": "ios_catalog_469ff92b7a9e0f9f"
     },
     {
+      "iosKey": "Recommendations",
+      "androidResource": "ios_catalog_0738ee00b61bc3af"
+    },
+    {
       "iosKey": "Recommended Substitutes",
       "androidResource": "ios_catalog_880c0c4114bc2995"
     },
@@ -8358,6 +9034,10 @@
     {
       "iosKey": "Reference",
       "androidResource": "ios_catalog_71bf90935fc231d2"
+    },
+    {
+      "iosKey": "Regenerate",
+      "androidResource": "ios_catalog_1651031bf58d8eea"
     },
     {
       "iosKey": "Regenerate Plan",
@@ -8420,6 +9100,10 @@
       "androidResource": "ios_catalog_ed399f795285ad92"
     },
     {
+      "iosKey": "Remove ingredient %@",
+      "androidResource": "ios_catalog_25626f0bde3de078"
+    },
+    {
       "iosKey": "Remove photo",
       "androidResource": "ios_catalog_f46512ab2099fb0c"
     },
@@ -8440,6 +9124,10 @@
       "androidResource": "ios_catalog_ca27e538f3b183aa"
     },
     {
+      "iosKey": "Rep %d",
+      "androidResource": "ios_catalog_ec2e98f8cbe0b477"
+    },
+    {
       "iosKey": "Rep consistency",
       "androidResource": "ios_catalog_b81a2c2fac9f15e1"
     },
@@ -8450,6 +9138,10 @@
     {
       "iosKey": "Rep tracking",
       "androidResource": "ios_catalog_830d17dfcb4bb19e"
+    },
+    {
+      "iosKey": "Repeat for %d rounds",
+      "androidResource": "ios_catalog_faee1b2a6114c060"
     },
     {
       "iosKey": "Repeat in a rhythmic fashion.",
@@ -8466,6 +9158,10 @@
     {
       "iosKey": "Repeat the same clean working pattern across each set.",
       "androidResource": "ios_catalog_d1b45ad8dd914074"
+    },
+    {
+      "iosKey": "Replace workout day",
+      "androidResource": "ios_catalog_c52c77127549846f"
     },
     {
       "iosKey": "Reps",
@@ -8508,6 +9204,10 @@
       "androidResource": "ios_catalog_daee7606b339f3c3"
     },
     {
+      "iosKey": "Reset account sync",
+      "androidResource": "ios_catalog_ec3df9ffb0178f98"
+    },
+    {
       "iosKey": "Resistance Bands",
       "androidResource": "ios_catalog_dfd296817070ed56"
     },
@@ -8520,8 +9220,16 @@
       "androidResource": "ios_catalog_87517d126611c0cf"
     },
     {
+      "iosKey": "Rest %d sec after each round",
+      "androidResource": "ios_catalog_7d88429947d707f4"
+    },
+    {
       "iosKey": "Rest %ds",
       "androidResource": "ios_catalog_021994b0ef8c7731"
+    },
+    {
+      "iosKey": "Rest after each round",
+      "androidResource": "ios_catalog_1a5f8fd228bdc836"
     },
     {
       "iosKey": "Rest Before Next Block",
@@ -8648,6 +9356,10 @@
       "androidResource": "ios_catalog_c520d28db69b28cc"
     },
     {
+      "iosKey": "Review ingredients",
+      "androidResource": "ios_catalog_6baa04425cf2e3db"
+    },
+    {
       "iosKey": "Review the gallery, then compare your first and newer check-ins.",
       "androidResource": "ios_catalog_efb4b243fb2c760c"
     },
@@ -8662,6 +9374,10 @@
     {
       "iosKey": "Ring Dip",
       "androidResource": "ios_catalog_f89f3e02cc5f6b03"
+    },
+    {
+      "iosKey": "RIR %d",
+      "androidResource": "ios_catalog_73589e393c39333f"
     },
     {
       "iosKey": "RIR %d means finish the set feeling like you could still do about %d more %@ with good form.",
@@ -8828,8 +9544,20 @@
       "androidResource": "ios_catalog_cfff11954968df77"
     },
     {
+      "iosKey": "Scope",
+      "androidResource": "ios_catalog_b073f6c68ef87211"
+    },
+    {
       "iosKey": "Scorpions",
       "androidResource": "ios_catalog_3fef6974cdbe75cc"
+    },
+    {
+      "iosKey": "Screen Time permission is required before Full focus mode can turn on.",
+      "androidResource": "ios_catalog_93173809e467df37"
+    },
+    {
+      "iosKey": "Screen Time permission was revoked. Run setup again to re-enable it.",
+      "androidResource": "ios_catalog_24f8267628f5f084"
     },
     {
       "iosKey": "Search address or place",
@@ -8854,6 +9582,10 @@
     {
       "iosKey": "Search for a gym, hotel, or address and pick a result to save the exact map position.",
       "androidResource": "ios_catalog_9c4666936dd3c9fd"
+    },
+    {
+      "iosKey": "Search for a gym, hotel, or address and save the exact map position.",
+      "androidResource": "ios_catalog_d2682c9babc6c246"
     },
     {
       "iosKey": "Search meals or foods",
@@ -8888,6 +9620,10 @@
       "androidResource": "ios_catalog_a1185e36deb6a1c6"
     },
     {
+      "iosKey": "Section",
+      "androidResource": "ios_catalog_dfca5da56b8cdb62"
+    },
+    {
       "iosKey": "Secure your feet in the decline bench and lie back.",
       "androidResource": "ios_catalog_9c56e0660b630798"
     },
@@ -8904,6 +9640,14 @@
       "androidResource": "ios_catalog_654fcbee2f3f3e90"
     },
     {
+      "iosKey": "Select 2 or more consecutive standard exercises.",
+      "androidResource": "ios_catalog_97391176d113bfa9"
+    },
+    {
+      "iosKey": "Select Exercises",
+      "androidResource": "ios_catalog_9720be5ac52895b7"
+    },
+    {
       "iosKey": "Select Photo",
       "androidResource": "ios_catalog_3e77227f0a0b2dd9"
     },
@@ -8914,6 +9658,10 @@
     {
       "iosKey": "Select Social and Games first, then add any other distracting categories.",
       "androidResource": "ios_catalog_528e6a972878f0d8"
+    },
+    {
+      "iosKey": "Select the equipment that is available at this location.",
+      "androidResource": "ios_catalog_72556ecbf2fc0482"
     },
     {
       "iosKey": "Select when you train and what you have access to.",
@@ -8928,6 +9676,10 @@
       "androidResource": "ios_catalog_1fede448bded1084"
     },
     {
+      "iosKey": "Selected app categories are blocked during active workouts.",
+      "androidResource": "ios_catalog_5ff057bbf643a274"
+    },
+    {
       "iosKey": "Selected categories",
       "androidResource": "ios_catalog_1135bd532ac945bc"
     },
@@ -8938,6 +9690,10 @@
     {
       "iosKey": "Selected in iOS: 1 category.",
       "androidResource": "ios_catalog_80a595d16a072441"
+    },
+    {
+      "iosKey": "Selected location",
+      "androidResource": "ios_catalog_82f9787d72a9e255"
     },
     {
       "iosKey": "Send Feedback",
@@ -8964,8 +9720,40 @@
       "androidResource": "ios_catalog_82e9d9905d132788"
     },
     {
+      "iosKey": "Sessions",
+      "androidResource": "ios_catalog_6fa3cbf451b2a1d5"
+    },
+    {
+      "iosKey": "Set",
+      "androidResource": "ios_catalog_b6f6f3ad07b3c05f"
+    },
+    {
+      "iosKey": "Set %d",
+      "androidResource": "ios_catalog_9047e6a50002b0b2"
+    },
+    {
       "iosKey": "Set %d · Current",
       "androidResource": "ios_catalog_f822e605019d4704"
+    },
+    {
+      "iosKey": "Set %d reps",
+      "androidResource": "ios_catalog_a7eb95ae61010638"
+    },
+    {
+      "iosKey": "Set %d weight",
+      "androidResource": "ios_catalog_61117ecb72da6b08"
+    },
+    {
+      "iosKey": "Set %d:",
+      "androidResource": "ios_catalog_34d7c69d301c8c15"
+    },
+    {
+      "iosKey": "Set 1 %@",
+      "androidResource": "ios_catalog_46a9ab101b5a53cf"
+    },
+    {
+      "iosKey": "Set 1: %@",
+      "androidResource": "ios_catalog_80177b22fa2042b5"
     },
     {
       "iosKey": "Set an adjustable bench to a 30-45 degree incline.",
@@ -8986,6 +9774,10 @@
     {
       "iosKey": "Set shutter timer",
       "androidResource": "ios_catalog_1f48fbac0181bdd1"
+    },
+    {
+      "iosKey": "Set Style",
+      "androidResource": "ios_catalog_92804afed402509e"
     },
     {
       "iosKey": "Set the adjustable bench to an incline and center it under the Smith machine bar.",
@@ -9046,6 +9838,10 @@
     {
       "iosKey": "Setup needed",
       "androidResource": "ios_catalog_3b19dc573d484352"
+    },
+    {
+      "iosKey": "Setup required",
+      "androidResource": "ios_catalog_1a367c79441e13b7"
     },
     {
       "iosKey": "Share workout",
@@ -9130,6 +9926,14 @@
     {
       "iosKey": "Sign in to continue your training.",
       "androidResource": "ios_catalog_d9a3262551b8ecd5"
+    },
+    {
+      "iosKey": "Sign in with email",
+      "androidResource": "ios_catalog_e6f13c85f15b8244"
+    },
+    {
+      "iosKey": "Sign in with Google",
+      "androidResource": "ios_catalog_1dbcee6824432178"
     },
     {
       "iosKey": "Sign it with email",
@@ -9462,6 +10266,10 @@
     {
       "iosKey": "Snack",
       "androidResource": "ios_catalog_5aabb52b4aef08ed"
+    },
+    {
+      "iosKey": "Snap your ingredients and we’ll identify them for you.",
+      "androidResource": "ios_catalog_0637e4535ffc98b0"
     },
     {
       "iosKey": "Solid session",
@@ -9804,6 +10612,10 @@
       "androidResource": "ios_catalog_8169693101a4536c"
     },
     {
+      "iosKey": "Start estimate",
+      "androidResource": "ios_catalog_94ef1252103748f0"
+    },
+    {
       "iosKey": "Start in a high plank position with your hands slightly wider than shoulder-width.",
       "androidResource": "ios_catalog_d0bc766df8eb7353"
     },
@@ -9860,6 +10672,10 @@
       "androidResource": "ios_catalog_198de781f196adf4"
     },
     {
+      "iosKey": "Start typing an address to search for it.",
+      "androidResource": "ios_catalog_d5e3713cb7b9e6fe"
+    },
+    {
       "iosKey": "Start with a short warmup walk or light jog.",
       "androidResource": "ios_catalog_36608cf57d0c819d"
     },
@@ -9914,6 +10730,10 @@
     {
       "iosKey": "Stay light on your feet and move around the bag.",
       "androidResource": "ios_catalog_8c03c9eb771655f4"
+    },
+    {
+      "iosKey": "Stay moving",
+      "androidResource": "ios_catalog_24d815bcb0df189e"
     },
     {
       "iosKey": "Step %d of %d",
@@ -10064,6 +10884,10 @@
       "androidResource": "ios_catalog_4999c6c6c7badf45"
     },
     {
+      "iosKey": "Subscription unavailable",
+      "androidResource": "ios_catalog_bc3442fff4d2147c"
+    },
+    {
       "iosKey": "Suggested · %@",
       "androidResource": "ios_catalog_bfe38c9e5af80d53"
     },
@@ -10082,6 +10906,14 @@
     {
       "iosKey": "Superset · Round %d of %d",
       "androidResource": "ios_catalog_0191d9148a06856c"
+    },
+    {
+      "iosKey": "Superset Mode",
+      "androidResource": "ios_catalog_522d3d9f165f3d8c"
+    },
+    {
+      "iosKey": "Supersets are meant to feel smooth, not rushed.",
+      "androidResource": "ios_catalog_939de08563994350"
     },
     {
       "iosKey": "Support yourself on the rings with arms fully extended.",
@@ -10144,6 +10976,10 @@
       "androidResource": "ios_catalog_ab407f86d13f75a8"
     },
     {
+      "iosKey": "Switches to another gym",
+      "androidResource": "ios_catalog_525a026432127eb9"
+    },
+    {
       "iosKey": "Sync with Apple Health",
       "androidResource": "ios_catalog_f3a6a4999ced85bf"
     },
@@ -10182,6 +11018,10 @@
     {
       "iosKey": "Take photos around the same time of day",
       "androidResource": "ios_catalog_72ca7bbaf9a550f6"
+    },
+    {
+      "iosKey": "Take the main rest after the round",
+      "androidResource": "ios_catalog_c1b7491b07370e34"
     },
     {
       "iosKey": "Take your first progress photos",
@@ -10256,6 +11096,10 @@
       "androidResource": "ios_catalog_ddb78b96ba7104c1"
     },
     {
+      "iosKey": "Tell us anything the photo estimate missed or got wrong, including ingredients, portions, or preparation.",
+      "androidResource": "ios_catalog_37c9ed66a823804f"
+    },
+    {
       "iosKey": "Tempo",
       "androidResource": "ios_catalog_214b5b846cf3925f"
     },
@@ -10272,8 +11116,20 @@
       "androidResource": "ios_catalog_93b8edb6b1370db1"
     },
     {
+      "iosKey": "Thank you",
+      "androidResource": "ios_catalog_268bc1833e83306f"
+    },
+    {
       "iosKey": "Thank You!",
       "androidResource": "ios_catalog_cdd2fb2d19c934d9"
+    },
+    {
+      "iosKey": "The analysis was cancelled before it finished.",
+      "androidResource": "ios_catalog_eb943d29ed220ae7"
+    },
+    {
+      "iosKey": "The app tracks the block round by round, so the flow feels tighter and more intentional.",
+      "androidResource": "ios_catalog_30dd3d996d0d3f5d"
     },
     {
       "iosKey": "The bar should feel like it's resting on your deltoids, not your collarbone.",
@@ -10392,8 +11248,20 @@
       "androidResource": "ios_catalog_a65db9f6519a221a"
     },
     {
+      "iosKey": "Think in rounds",
+      "androidResource": "ios_catalog_e15008da0b928048"
+    },
+    {
       "iosKey": "Thinking...",
       "androidResource": "ios_catalog_b4739a4f08650db2"
+    },
+    {
+      "iosKey": "This block pairs %@ into one flow for %d rounds.",
+      "androidResource": "ios_catalog_dca6cc233fe88123"
+    },
+    {
+      "iosKey": "This block pairs exercises together so you can move through them as one connected round.",
+      "androidResource": "ios_catalog_8c982d81ef9f01b4"
     },
     {
       "iosKey": "This controls whether your future plan should include meal ideas alongside macro targets.",
@@ -10478,6 +11346,10 @@
     {
       "iosKey": "This is a backoff set. Reduce the load from your top set and keep the reps crisp.",
       "androidResource": "ios_catalog_ffc1ce7d37fea340"
+    },
+    {
+      "iosKey": "This is a non-medical estimate based on photos and app context. Accuracy may vary with pose, clothing, lighting, camera angle, and image quality.",
+      "androidResource": "ios_catalog_3a9c47b05a7f60af"
     },
     {
       "iosKey": "This is a realistic projection based on your training and nutrition plan. Select 'Compare' to see it alongside your current check-in.",
@@ -10576,6 +11448,10 @@
       "androidResource": "ios_catalog_51b34b4ad6d39768"
     },
     {
+      "iosKey": "This V1 estimate is limited to a body-fat range and brief qualitative observations.",
+      "androidResource": "ios_catalog_61ef6ee8b8876a84"
+    },
+    {
       "iosKey": "This week",
       "androidResource": "ios_catalog_8c4eef5ab2532515"
     },
@@ -10656,6 +11532,10 @@
       "androidResource": "ios_catalog_acf3e1cc9962aa76"
     },
     {
+      "iosKey": "Tip: %@",
+      "androidResource": "ios_catalog_74f056bbd94418c8"
+    },
+    {
       "iosKey": "Tips",
       "androidResource": "ios_catalog_3838a4d8cb8c5ccc"
     },
@@ -10676,6 +11556,10 @@
       "androidResource": "ios_catalog_e42a6cd22702b350"
     },
     {
+      "iosKey": "Today's target",
+      "androidResource": "ios_catalog_36cd386b640c9593"
+    },
+    {
       "iosKey": "Today’s",
       "androidResource": "ios_catalog_82dd9a32b600d5d0"
     },
@@ -10690,6 +11574,10 @@
     {
       "iosKey": "Toggle voice capture",
       "androidResource": "ios_catalog_8954c86456fd10f0"
+    },
+    {
+      "iosKey": "Tomorrow",
+      "androidResource": "ios_catalog_456a73bbcefb1def"
     },
     {
       "iosKey": "Tools to help",
@@ -10828,6 +11716,10 @@
       "androidResource": "ios_catalog_f2f9606b50e83717"
     },
     {
+      "iosKey": "Training location",
+      "androidResource": "ios_catalog_b3552e14342c5aa6"
+    },
+    {
       "iosKey": "Training locations",
       "androidResource": "ios_catalog_312724f9c33deace"
     },
@@ -10846,6 +11738,10 @@
     {
       "iosKey": "Training time",
       "androidResource": "ios_catalog_ee93a0b48c855600"
+    },
+    {
+      "iosKey": "Transition to the next exercise without losing setup focus.",
+      "androidResource": "ios_catalog_8f6f91df3a9f3f68"
     },
     {
       "iosKey": "Trap Bar",
@@ -10912,6 +11808,10 @@
       "androidResource": "ios_catalog_b7a09583d68b36aa"
     },
     {
+      "iosKey": "Turning your available ingredients into suggestions.",
+      "androidResource": "ios_catalog_defa48c3c52445e2"
+    },
+    {
       "iosKey": "Tutorial animation for %@",
       "androidResource": "ios_catalog_ac6ebc2fad900679"
     },
@@ -10928,6 +11828,10 @@
       "androidResource": "ios_catalog_5020c823d0596e45"
     },
     {
+      "iosKey": "Type what you have on hand and get ideas from that list.",
+      "androidResource": "ios_catalog_591cf5e8ced2571a"
+    },
+    {
       "iosKey": "Typical Distance",
       "androidResource": "ios_catalog_b6d1d29e067ef30a"
     },
@@ -10940,12 +11844,20 @@
       "androidResource": "ios_catalog_b0d6bf2d4328f1d6"
     },
     {
+      "iosKey": "Unable to prepare the avatar image.",
+      "androidResource": "ios_catalog_e1ef01e068ac0b61"
+    },
+    {
       "iosKey": "Unavailable",
       "androidResource": "ios_catalog_ca184496974204a0"
     },
     {
       "iosKey": "Understand your training and stay consistent.",
       "androidResource": "ios_catalog_922d9e6d35a163ed"
+    },
+    {
+      "iosKey": "Unilateral",
+      "androidResource": "ios_catalog_a0ea2d77053cc9b1"
     },
     {
       "iosKey": "Unit",
@@ -11224,6 +12136,10 @@
       "androidResource": "ios_catalog_517086650efd1ece"
     },
     {
+      "iosKey": "Used ingredients",
+      "androidResource": "ios_catalog_cb55ca557227aecc"
+    },
+    {
       "iosKey": "User Default",
       "androidResource": "ios_catalog_646b1d350eaf5ddb"
     },
@@ -11258,6 +12174,10 @@
     {
       "iosKey": "Using manual entry for this set.",
       "androidResource": "ios_catalog_063ae3e3f090840d"
+    },
+    {
+      "iosKey": "Value",
+      "androidResource": "ios_catalog_8e37953d23daca5f"
     },
     {
       "iosKey": "Values per 100g",
@@ -11316,12 +12236,20 @@
       "androidResource": "ios_catalog_a9d0604e9024d51e"
     },
     {
+      "iosKey": "View notes",
+      "androidResource": "ios_catalog_49179afac787f8e9"
+    },
+    {
       "iosKey": "View progress photo tips",
       "androidResource": "ios_catalog_94832cea906542cd"
     },
     {
       "iosKey": "View subscription options",
       "androidResource": "ios_catalog_e1f2620b9b2b86bd"
+    },
+    {
+      "iosKey": "Visible insights",
+      "androidResource": "ios_catalog_991bbb43d57a7196"
     },
     {
       "iosKey": "Voice activation",
@@ -11342,6 +12270,10 @@
     {
       "iosKey": "Volume (lb)",
       "androidResource": "ios_catalog_f7ca9bde252b4bc7"
+    },
+    {
+      "iosKey": "Volume %@",
+      "androidResource": "ios_catalog_0e779e48630da252"
     },
     {
       "iosKey": "Volume over time",
@@ -11392,6 +12324,10 @@
       "androidResource": "ios_catalog_f04db7566f02190d"
     },
     {
+      "iosKey": "Warmup styling is applied without extra configuration.",
+      "androidResource": "ios_catalog_4e23e5c9e0d7bd06"
+    },
+    {
       "iosKey": "Watch Auto Tracking",
       "androidResource": "ios_catalog_965ab94149a18fcb"
     },
@@ -11416,6 +12352,14 @@
       "androidResource": "ios_catalog_a1231312bef0d65f"
     },
     {
+      "iosKey": "We couldn't finish the estimate right now. Please try again.",
+      "androidResource": "ios_catalog_61c117341bc968fb"
+    },
+    {
+      "iosKey": "We couldn't read this check-in clearly enough to estimate body composition right now.",
+      "androidResource": "ios_catalog_440269c7bd2ae675"
+    },
+    {
       "iosKey": "We couldn't sign you in. Check your details and try again.",
       "androidResource": "ios_catalog_09fa5dfbd4b96718"
     },
@@ -11428,12 +12372,24 @@
       "androidResource": "ios_catalog_ee34a6fc62d330d5"
     },
     {
+      "iosKey": "We'll analyse your current check-in photos with AI and return a non-medical body-fat estimate plus a few coaching notes. Accuracy can vary with pose, clothing, lighting, and image quality.",
+      "androidResource": "ios_catalog_2958538cbe4913b2"
+    },
+    {
+      "iosKey": "We'll use any usable photo attached to this check-in.",
+      "androidResource": "ios_catalog_0143cc2e468aadc0"
+    },
+    {
       "iosKey": "We'll use this to keep suggestions aligned with your food preferences.",
       "androidResource": "ios_catalog_3b67e9e7dedac6d7"
     },
     {
       "iosKey": "We're analysing your check-in and training profile to generate a realistic 6-month preview.",
       "androidResource": "ios_catalog_1381ceca256fd79a"
+    },
+    {
+      "iosKey": "We’re reviewing your current front and profile photos when available, then building a narrow body-fat estimate.",
+      "androidResource": "ios_catalog_8dd2ee61c001e347"
     },
     {
       "iosKey": "Wear similar clothing or fitted shorts",
@@ -11462,6 +12418,10 @@
     {
       "iosKey": "Week %d of %d • %@",
       "androidResource": "ios_catalog_2f96944f71c90405"
+    },
+    {
+      "iosKey": "Week of %@",
+      "androidResource": "ios_catalog_bf9a94c39a658d4f"
     },
     {
       "iosKey": "Weekday",
@@ -11496,6 +12456,22 @@
       "androidResource": "ios_catalog_f9b1454a7558500b"
     },
     {
+      "iosKey": "Weight per side",
+      "androidResource": "ios_catalog_d4e8f6c19788af37"
+    },
+    {
+      "iosKey": "Weight per side (kg)",
+      "androidResource": "ios_catalog_bcffe8acf471cbd9"
+    },
+    {
+      "iosKey": "Weight per side (lb)",
+      "androidResource": "ios_catalog_72b74117f3f7da42"
+    },
+    {
+      "iosKey": "Weight Reduction",
+      "androidResource": "ios_catalog_5b1a6e73be389e04"
+    },
+    {
       "iosKey": "Weight supported",
       "androidResource": "ios_catalog_02fa64819dbd29bf"
     },
@@ -11522,6 +12498,14 @@
     {
       "iosKey": "What kind of environment will you be training in?",
       "androidResource": "ios_catalog_6335afc7fb2421e1"
+    },
+    {
+      "iosKey": "What should we correct?",
+      "androidResource": "ios_catalog_f5a0f0597b9fcc91"
+    },
+    {
+      "iosKey": "What to expect",
+      "androidResource": "ios_catalog_7ef84dcd839c5fcf"
     },
     {
       "iosKey": "What you get",
@@ -11560,6 +12544,10 @@
       "androidResource": "ios_catalog_3495e757855a5c67"
     },
     {
+      "iosKey": "Why are you leaving?",
+      "androidResource": "ios_catalog_b3a1a6634465e998"
+    },
+    {
       "iosKey": "Why it's used",
       "androidResource": "ios_catalog_5d142df8ac1dfced"
     },
@@ -11582,6 +12570,10 @@
     {
       "iosKey": "Wildforce only stores category selections for Full focus mode.",
       "androidResource": "ios_catalog_bf0fb25a9e277f0e"
+    },
+    {
+      "iosKey": "Wildforce Premium",
+      "androidResource": "ios_catalog_45d92c2135f42fa1"
     },
     {
       "iosKey": "Work",
@@ -11648,6 +12640,10 @@
       "androidResource": "ios_catalog_3bdeb7cf72c1e2ce"
     },
     {
+      "iosKey": "Workout Title",
+      "androidResource": "ios_catalog_8087937f3cb92597"
+    },
+    {
       "iosKey": "Workouts",
       "androidResource": "ios_catalog_f6de4281c89a0ba2"
     },
@@ -11692,6 +12688,10 @@
       "androidResource": "ios_catalog_5e042514e4440685"
     },
     {
+      "iosKey": "Yesterday",
+      "androidResource": "ios_catalog_566181254b293aa6"
+    },
+    {
       "iosKey": "You already have another reservation at this time.",
       "androidResource": "ios_catalog_ce695f21b0ce0d3d"
     },
@@ -11724,6 +12724,14 @@
       "androidResource": "ios_catalog_c5de34cd51208afa"
     },
     {
+      "iosKey": "You completed %d of %d planned sessions in this period.",
+      "androidResource": "ios_catalog_6138f34d89824151"
+    },
+    {
+      "iosKey": "You completed %d workouts and logged %@ in this period.",
+      "androidResource": "ios_catalog_42fdd1ef8bf74ec2"
+    },
+    {
       "iosKey": "You got it done. Keep stacking sessions and the score will follow.",
       "androidResource": "ios_catalog_6bc02f2d572a18f9"
     },
@@ -11746,6 +12754,10 @@
     {
       "iosKey": "You kept the plan moving",
       "androidResource": "ios_catalog_ec921d75ed282035"
+    },
+    {
+      "iosKey": "You logged %@ this period versus %@ in the previous one.",
+      "androidResource": "ios_catalog_4604c47a4c4a4b37"
     },
     {
       "iosKey": "You matched the workout beautifully and kept the effort high.",
@@ -11790,6 +12802,10 @@
     {
       "iosKey": "You were close to the prescription and brought strong effort today.",
       "androidResource": "ios_catalog_49dbf638ef976bb3"
+    },
+    {
+      "iosKey": "You will complete each exercise in order before the round resets.",
+      "androidResource": "ios_catalog_8a364c1b9e4d0cc7"
     },
     {
       "iosKey": "You will log this exercise by minutes, so steady control matters more than rushing.",
@@ -11840,12 +12856,20 @@
       "androidResource": "ios_catalog_86aa941b191ef3d4"
     },
     {
+      "iosKey": "Your coach hasn't added instructions for this exercise.",
+      "androidResource": "ios_catalog_6c4ef08d83a2df27"
+    },
+    {
       "iosKey": "Your coach will share your nutrition plan here.",
       "androidResource": "ios_catalog_644e1d5a5017fcbb"
     },
     {
       "iosKey": "Your coach will share your workout plan here.",
       "androidResource": "ios_catalog_16c8183968434ee4"
+    },
+    {
+      "iosKey": "Your coach's exercise will appear after the next sync.",
+      "androidResource": "ios_catalog_29a92e8eaec6b5ec"
     },
     {
       "iosKey": "Your coaches",
@@ -11862,6 +12886,10 @@
     {
       "iosKey": "Your feedback has been sent successfully. We appreciate your input!",
       "androidResource": "ios_catalog_62670ac87e1232b5"
+    },
+    {
+      "iosKey": "Your feedback helps us understand what to improve next.",
+      "androidResource": "ios_catalog_f3ddf0df4507355c"
     },
     {
       "iosKey": "Your future self will thank you.",
@@ -11920,8 +12948,20 @@
       "androidResource": "ios_catalog_ad56da3cd6cd4633"
     },
     {
+      "iosKey": "Your results",
+      "androidResource": "ios_catalog_4e2376da7763be38"
+    },
+    {
+      "iosKey": "Your saved category selection is no longer valid. Run setup again.",
+      "androidResource": "ios_catalog_d570707d2badb3ae"
+    },
+    {
       "iosKey": "Your saved nutrition entries for this day will appear here.",
       "androidResource": "ios_catalog_a51b4f0864c8adc5"
+    },
+    {
+      "iosKey": "Your selected check-in photos are sent to AI for analysis.",
+      "androidResource": "ios_catalog_5ef2b1eb7ef2be13"
     },
     {
       "iosKey": "Your training profile has changed since this plan was created. Recreate it for better results.",

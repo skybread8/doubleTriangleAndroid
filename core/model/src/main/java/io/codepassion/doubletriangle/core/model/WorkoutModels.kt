@@ -116,6 +116,9 @@ data class ExerciseSummary(
      * reference and lets a downloaded plan survive a later coach-library sync.
      */
     val coachExerciseId: String? = null,
+    val skippedAt: String? = null,
+    /** Stable server identity of this planned occurrence, distinct from the exercise catalog ID. */
+    val plannedExerciseId: String? = null,
 )
 
 /** iOS only renders the set-style row when a configuration was actually supplied. */
@@ -212,6 +215,7 @@ data class WorkoutHubState(
     val mesocyclePhase: MesocyclePhase? = null,
     val phaseWeek: Int = 1,
     val positionInCycle: Int = 1,
+    val planId: String? = null,
     val planStatus: String = "active",
     val planGoal: String? = null,
     val bodyCompositionPhase: String? = null,
@@ -219,6 +223,9 @@ data class WorkoutHubState(
     val planStartsOn: String? = null,
     val profileSettingsHash: String? = null,
 )
+
+fun WorkoutHubState.confirmGeneratedPlan(): WorkoutHubState =
+    if (planStatus == "draft") copy(planStatus = "active") else this
 
 /** Mirrors iOS CompleteWorkoutDay: a plan is completed when every saved slot is finalized. */
 fun WorkoutHubState.withPlanCompletionStatus(): WorkoutHubState {

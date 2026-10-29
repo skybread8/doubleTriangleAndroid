@@ -1,0 +1,1892 @@
+{
+  "walking": {
+    "description": "Eine natürliche, gelenkschonende Art, die Herz-Kreislauf-Gesundheit zu verbessern und Kalorien zu verbrennen.",
+    "instructions": [
+      "Halte eine aufrechte Haltung mit erhobenem Kopf und entspannten Schultern.",
+      "Schwingen Sie die Arme bei jedem Schritt natürlich und leicht mit.",
+      "Tritt nach vorn, setze zuerst die Ferse auf und rolle über den Fuß bis zu den Zehen.",
+      "Halte ein gleichmäßiges, angenehmes Tempo, das dir leichtes Atmen erlaubt."
+    ],
+    "tips": [
+      "Trage stützendes Schuhwerk, um deine Gelenke zu schützen.",
+      "Spanne deine Körpermitte leicht an, um deinen unteren Rücken zu stützen.",
+      "Konzentriere dich auf einen flüssigen, rhythmischen Schritt."
+    ]
+  },
+  "outdoorRunning": {
+    "description": "Ein klassisches hochintensives Cardio-Workout, das die Ausdauer verbessert und viele Kalorien verbrennt.",
+    "instructions": [
+      "Halte den Kopf oben und schaue etwa 10–20 Fuß vor dich.",
+      "Halte den Oberkörper entspannt und die Ellenbogen im 90°-Winkel gebeugt.",
+      "Lande sanft auf dem Mittelfuß und stoße mit den Zehen ab.",
+      "Spanne deine Körpermitte an und vermeide, dich zu weit nach vorne oder hinten zu lehnen."
+    ],
+    "tips": [
+      "Beginne mit einem kurzen Aufwärmspaziergang oder leichtem Jogging.",
+      "Erhöhe Distanz oder Intensität schrittweise, um Verletzungen zu vermeiden.",
+      "Bleibe gut hydriert und trage passende Laufschuhe."
+    ]
+  },
+  "treadmillWalking": {
+    "description": "Gehen auf dem Laufband ermöglicht eine präzise Kontrolle von Tempo und Steigung in einer kontrollierten Umgebung.",
+    "instructions": [
+      "Steige auf das Laufband und befestige die Sicherheitsklammer an deiner Kleidung.",
+      "Beginne mit langsamer Geschwindigkeit, um dich an die Bewegung zu gewöhnen.",
+      "Behalte eine aufrechte Haltung und vermeide es, dich an den Seitengriffen festzuhalten, um Balance und Kalorienverbrauch zu verbessern.",
+      "Passen Sie Geschwindigkeit und Steigung nach Bedarf an, um Ihrem Fitnesslevel gerecht zu werden."
+    ],
+    "tips": [
+      "Richte den Blick nach vorn, um das Gleichgewicht zu halten.",
+      "Nutze die Neigungsfunktion, um das Gehen im Freien zu simulieren und die Intensität zu erhöhen.",
+      "Verringern Sie am Ende Ihrer Einheit langsam die Geschwindigkeit, um den Cool-down durchzuführen."
+    ]
+  },
+  "treadmillRunning": {
+    "description": "Laufen auf dem Laufband bietet eine gleichmäßige Oberfläche und die Möglichkeit, Metriken einfach zu verfolgen.",
+    "instructions": [
+      "Befestigen Sie den Sicherheitsclip und beginnen Sie mit einem langsamen Gehen zum Aufwärmen.",
+      "Erhöhen Sie die Geschwindigkeit schrittweise bis zu Ihrem gewünschten Lauftempo.",
+      "Konzentriere dich darauf, weich auf dem Mittelfuß zu landen und einen gleichmäßigen Rhythmus beizubehalten.",
+      "Spanne deine Körpermitte an und bewege die Arme kontrolliert."
+    ],
+    "tips": [
+      "Variiere dein Training mit Intervallen höherer Geschwindigkeit oder Steigung.",
+      "Stelle eine Wasserflasche in Reichweite, um hydratisiert zu bleiben.",
+      "Kühle dich mit ein paar Minuten Gehen ab, bevor du vom Laufband steigst."
+    ]
+  },
+  "stationaryBike": {
+    "description": "Eine gelenkschonende Cardio-Option, die den Unterkörper trainiert und dabei die Gelenke schont.",
+    "instructions": [
+      "Stelle die Sitzhöhe so ein, dass das Knie am unteren Pedalpunkt leicht gebeugt ist.",
+      "Sitz aufrecht oder lehne dich leicht nach vorn, halte den Rücken gerade und die Körpermitte angespannt.",
+      "Trete in einer gleichmäßigen, kreisförmigen Bewegung, drücke nach unten und ziehe nach oben.",
+      "Stelle den Widerstandsgrad ein, um dein Herz-Kreislauf-System herauszufordern."
+    ],
+    "tips": [
+      "Stelle sicher, dass deine Füße sicher in den Pedalen oder Riemen sind.",
+      "Behalte eine konstante Trittfrequenz (RPM) für bessere Effizienz.",
+      "Stütze dich nicht zu sehr auf den Lenker."
+    ]
+  },
+  "elliptical": {
+    "description": "Bietet ein ganzkörperliches, gelenkschonendes Training, das die Laufbewegung nachahmt, ohne die Stoßbelastung.",
+    "instructions": [
+      "Steige auf die Pedale und greife die Griffe.",
+      "Bewege deine Beine in einer gleichmäßigen, elliptischen Bewegung, entweder vorwärts oder rückwärts.",
+      "Spanne deine Körpermitte an und halte den Rücken gerade.",
+      "Verwende die Griffe, um den Oberkörper einzubeziehen und den gesamten Kalorienverbrauch zu erhöhen."
+    ],
+    "tips": [
+      "Konzentriere dich darauf, mit dem ganzen Fuß zu drücken, nicht nur mit den Zehen.",
+      "Varriere Widerstand und Neigung, um verschiedene Muskelgruppen anzusprechen.",
+      "Halte die Schultern entspannt und vermeide es, die Griffe zu fest zu greifen."
+    ]
+  },
+  "rowing": {
+    "description": "Ein kraftvolles Ganzkörpertraining, das kardiovaskuläre Konditionierung mit Kraftaufbau kombiniert.",
+    "instructions": [
+      "Setz dich auf den Sitz und befestige deine Füße in den Riemen.",
+      "Fang: Lehne dich leicht nach vorn, Arme gestreckt und Knie gebeugt.",
+      "Die Drive-Phase: Drücke mit den Beinen, lehne dich dann leicht zurück und ziehe den Griff zu den unteren Rippen.",
+      "Der Abschluss: Beine sind gestreckt, der Griff befindet sich an der Brust und du lehnst dich leicht zurück.",
+      "Die Erholung: Strecke die Arme, lehne dich nach vorn und beuge dann die Knie, um zur Fangposition zurückzukehren."
+    ],
+    "tips": [
+      "Spanne die Rumpfmuskulatur an und halte den Rücken während der Bewegung flach.",
+      "Die Kraft sollte zu 60 % aus den Beinen, zu 20 % aus dem Rumpf und zu 20 % aus den Armen kommen.",
+      "Konzentriere dich auf eine flüssige, rhythmische Bewegung und vermeide Ruckeln am Griff."
+    ]
+  },
+  "jumpRope": {
+    "description": "Ein hochintensives, tragbares Cardio-Workout, das Koordination und Agilität verbessert.",
+    "instructions": [
+      "Halte die Griffe mit entspanntem Griff, die Ellbogen eng an den Seiten.",
+      "Spring nur ein paar Zentimeter vom Boden hoch, gerade so, dass das Seil darunter durchpasst.",
+      "Lande sanft auf dem Fußballen.",
+      "Nutze die Handgelenke, um das Seil zu drehen, nicht die gesamten Arme."
+    ],
+    "tips": [
+      "Spanne deine Körpermitte an und halte die Schultern entspannt.",
+      "Beginne mit kürzeren Intervallen und erhöhe die Dauer schrittweise.",
+      "Halte einen gleichmäßigen Rhythmus für bessere Effizienz."
+    ]
+  },
+  "stairClimber": {
+    "description": "Eine effektive Methode, die Unterkörperkraft und die kardiovaskuläre Ausdauer zu steigern, indem das Treppensteigen nachgeahmt wird.",
+    "instructions": [
+      "Steige auf das Gerät und wähle deine gewünschte Geschwindigkeit oder ein Programm.",
+      "Behalte eine aufrechte Haltung und vermeide es, dich stark an den Handläufen abzustützen.",
+      "Setze den ganzen Fuß auf und drücke durch die Fersen, um die Gesäßmuskeln zu aktivieren.",
+      "Spanne deine Körpermitte an und führe die Bewegungen kontrolliert aus."
+    ],
+    "tips": [
+      "Varriere die Schritthöhe und die Geschwindigkeit, um unterschiedliche Muskeln zu beanspruchen.",
+      "Konzentriere dich auf ein gleichmäßiges, nachhaltiges Tempo.",
+      "Vermeide das Überspringen von Stufen, außer wenn es speziell für fortgeschrittenes Training programmiert ist."
+    ]
+  },
+  "skiErgWork": {
+    "description": "Ein kraftvolles Ganzkörpertraining, das Skilanglauf simuliert und Ausdauer sowie Oberkörperkraft aufbaut.",
+    "instructions": [
+      "Stelle die Füße schulterbreit auseinander und halte die Griffe über deinem Kopf.",
+      "Zieh die Griffe nach unten in Richtung deiner Hüften, während du dich gleichzeitig aus der Hüfte nach vorne neigst und die Knie beugst.",
+      "Beende den Zug mit den Armen, die über die Oberschenkel hinaus ausgestreckt sind.",
+      "Strecke Hüfte und Knie, während du die Griffe zur Ausgangsposition zurückführst."
+    ],
+    "tips": [
+      "Erzeuge Kraft mit Rumpf und Beinen, nicht nur mit den Armen.",
+      "Halte den Rücken flach und die Rumpfmuskulatur während der gesamten Bewegung angespannt.",
+      "Konzentriere dich auf einen flüssigen, kontinuierlichen Rhythmus."
+    ]
+  },
+  "airSquat": {
+    "description": "Eine grundlegende Körpergewichtsübung, die Kraft und Mobilität des Unterkörpers verbessert.",
+    "instructions": [
+      "Stelle die Füße schulterbreit auseinander, die Zehen leicht nach außen gedreht.",
+      "Spanne deine Körpermitte an und halte die Brust oben, während du beginnst, dich in die Hüften zurückzusetzen.",
+      "Senke deinen Körper, bis deine Oberschenkel mindestens parallel zum Boden sind.",
+      "Drücke durch die Fersen, um zur Ausgangsposition zurückzukehren."
+    ],
+    "tips": [
+      "Halte dein Gewicht auf den Fersen, nicht auf den Zehen.",
+      "Achte darauf, dass deine Knie in einer Linie mit den Zehen bleiben und nicht nach innen einknicken.",
+      "Behalte eine neutrale Wirbelsäule während der gesamten Bewegung bei."
+    ]
+  },
+  "gobletSquat": {
+    "description": "Das Halten eines Gewichts auf Brusthöhe während der Kniebeuge verbessert die Technik und die Rumpfstabilität.",
+    "instructions": [
+      "Halte eine Kurzhantel oder Kettlebell mit beiden Händen vor der Brust.",
+      "Stelle die Füße etwas weiter als schulterbreit auseinander.",
+      "Senke deine Hüften nach hinten und unten, halte die Brust aufrecht und das Gewicht nah am Körper.",
+      "Drücke dich über die Fersen zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Halte deine Ellenbogen am unteren Punkt der Kniebeuge nach unten gerichtet und innen an den Knien.",
+      "Atme ein, während du dich absenkst, und atme aus, während du dich wieder hochdrückst.",
+      "Halte die Wirbelsäule neutral und vermeide, den Rücken zu runden."
+    ]
+  },
+  "barbellBackSquat": {
+    "description": "Der Goldstandard zum Aufbau von Ganzkörperkraft und Beinmasse mit einer Langhantel.",
+    "instructions": [
+      "Positionieren Sie die Langhantel quer über Ihrem oberen Rücken, sie ruht auf den Trapezmuskeln.",
+      "Stelle die Füße schulterbreit auseinander, die Zehen leicht nach außen gedreht.",
+      "Spanne deine Rumpfmuskulatur an und senke die Hüfte, bis deine Oberschenkel mindestens parallel zum Boden sind.",
+      "Drücke durch die Fersen, um wieder in eine aufrechte Position zu kommen."
+    ],
+    "tips": [
+      "Halte die Brust oben und blicke während der gesamten Ausführung leicht nach vorn.",
+      "Vermeide, dass deine Knie nach innen einknicken.",
+      "Benutze ein Squat-Rack und einen Spotter zur Sicherheit, wenn du schwer hebst."
+    ]
+  },
+  "barbellFrontSquat": {
+    "description": "Wenn die Langhantel vorne auf den Schultern liegt, werden die Quadrizeps und der obere Rücken intensiver beansprucht.",
+    "instructions": [
+      "Lege die Langhantel vorne über die Schultern, wobei du entweder den 'clean'-Griff oder den 'cross-arm'-Griff verwendest.",
+      "Halte deine Ellbogen während der gesamten Bewegung hoch, um die Stange zu stabilisieren.",
+      "Gehe in die Hocke, indem du die Hüften nach hinten schiebst und die Knie beugst.",
+      "Drücke dich zurück in die Ausgangsposition und halte dabei den Oberkörper aufrecht."
+    ],
+    "tips": [
+      "Die Stange sollte sich so anfühlen, als ruhe sie auf deinen Deltamuskeln, nicht auf dem Schlüsselbein.",
+      "Spanne den Rumpf an, um deine aufrechte Haltung zu unterstützen.",
+      "Konzentriere dich darauf, die Fersen auf dem Boden zu behalten."
+    ]
+  },
+  "smithMachineSquat": {
+    "description": "Kniebeugen in der Smith-Maschine bieten zusätzliche Stabilität, sodass du dich auf Beinkraft und Positionierung konzentrieren kannst.",
+    "instructions": [
+      "Positionieren Sie sich unter der Stange mit den Füßen leicht nach vorne und schulterbreit auseinander.",
+      "Entriegle die Stange und senke deine Hüften, bis deine Oberschenkel parallel zum Boden sind.",
+      "Drücke durch die Fersen, um zur Ausgangsposition zurückzukehren.",
+      "Verriegle die Stange sicher, nachdem du deine Wiederholungen abgeschlossen hast."
+    ],
+    "tips": [
+      "Halte die Brust oben und spanne den Rumpf während der gesamten Bewegung an.",
+      "Experimentiere mit der Fußstellung, um verschiedene Bereiche deiner Beine anzusprechen.",
+      "Der feste Bewegungsweg der Smith-Maschine reduziert die Anforderungen an das Gleichgewicht."
+    ]
+  },
+  "dumbbellSquat": {
+    "description": "Kurzhanteln an den Seiten zu halten, während du in die Knie gehst, ist eine einfache Möglichkeit, dem klassischen Kniebeugenmuster Widerstand hinzuzufügen.",
+    "instructions": [
+      "Stelle die Füße schulterbreit auseinander und halte in jeder Hand eine Kurzhantel an deinen Seiten.",
+      "Senke deine Hüften nach hinten und unten, als würdest du dich auf einen Stuhl setzen, und halte dabei die Brust oben.",
+      "Senke dich, bis deine Oberschenkel parallel zum Boden sind.",
+      "Drücke dich über die Fersen nach oben, um in die aufrechte Position zurückzukehren."
+    ],
+    "tips": [
+      "Halte die Gewichte ruhig an den Seiten; lass sie nicht schwingen.",
+      "Halte die Wirbelsäule neutral und vermeide, die Schultern zu runden.",
+      "Ideal für alle, die sich bei Kniebeugen mit Langhantel unwohl fühlen."
+    ]
+  },
+  "legPress": {
+    "description": "Eine maschinenbasierte Pressübung, die schwere Belastung der unteren Körperhälfte bei minimaler Rückenbelastung ermöglicht.",
+    "instructions": [
+      "Setz dich in die Maschine und lehne Rücken und Kopf flach an die gepolsterte Rückenstütze.",
+      "Platziere die Füße etwa schulterbreit auf der Plattform.",
+      "Löse die Sicherungsstangen und senke die Plattform zur Brust, indem du die Knie beugst.",
+      "Schiebe die Plattform zurück in die Ausgangsposition, ohne die Knie oben zu blockieren."
+    ],
+    "tips": [
+      "Vermeide, dass dein unterer Rücken sich vom Sitz abhebt.",
+      "Halte deine Füße jederzeit flach auf der Plattform.",
+      "Kontrolliere das Gewicht sowohl während des Absenkens als auch des Drückens."
+    ]
+  },
+  "walkingLunge": {
+    "description": "Eine funktionelle Übung, die einbeinige Kraft, Gleichgewicht und Koordination fördert.",
+    "instructions": [
+      "Mache mit einem Bein einen Schritt nach vorne und senke die Hüften, bis beide Knie etwa 90 Grad gebeugt sind.",
+      "Stelle sicher, dass dein vorderes Knie direkt über dem Knöchel ist.",
+      "Drücke durch die vordere Ferse, um aufzustehen und mit dem anderen Bein einen Schritt nach vorn zu machen.",
+      "Wechsle weiterhin die Beine ab, während du nach vorne gehst."
+    ],
+    "tips": [
+      "Halte den Oberkörper aufrecht und die Rumpfmuskulatur angespannt.",
+      "Lass dein hinteres Knie nicht mit Aufprall den Boden berühren.",
+      "Halte dein Gleichgewicht, indem du einen Punkt vor dir fixierst."
+    ]
+  },
+  "reverseLunge": {
+    "description": "Tritt zurück in einen Ausfallschritt, um Gesäßmuskeln und hintere Oberschenkel zu trainieren und die Belastung auf die Knie zu verringern.",
+    "instructions": [
+      "Stelle die Füße hüftbreit auseinander.",
+      "Tritt mit einem Fuß zurück und senke deine Hüften, bis beide Knie in einem 90‑Grad‑Winkel gebeugt sind.",
+      "Achte darauf, dass dein vorderes Knie über dem Knöchel ausgerichtet ist.",
+      "Drücke dich mit dem hinteren Fuß ab, um zur Ausgangsposition zurückzukehren."
+    ],
+    "tips": [
+      "Verlagere dein Gewicht hauptsächlich auf den vorderen Fuß.",
+      "Halte während der gesamten Bewegung eine aufrechte Haltung.",
+      "Kontrolliere den Abstieg, um zu vermeiden, dass dein hinteres Knie den Boden anschlägt."
+    ]
+  },
+  "bulgarianSplitSquat": {
+    "description": "Platziere deinen hinteren Fuß erhöht, um die vordere Beinmuskulatur (Quadrizeps und Gesäß) intensiv zu beanspruchen und zu dehnen.",
+    "instructions": [
+      "Stelle dich ein paar Schritte vor eine Bank und lege den Fußrücken eines Beins auf die Bank hinter dir.",
+      "Senke deine Hüften, bis dein vorderer Oberschenkel fast parallel zum Boden ist.",
+      "Achte darauf, dass dein vorderes Knie mit dem Fuß ausgerichtet bleibt und nicht über die Zehen hinausragt.",
+      "Drücke durch die vordere Ferse, um wieder in eine aufrechte Position zu kommen."
+    ],
+    "tips": [
+      "Konzentriere dich darauf, deinen Oberkörper aufrecht oder mit leichtem Vorneigen zu halten.",
+      "Diese Übung erfordert viel Gleichgewicht; beginne mit dem Körpergewicht, bevor du Kurzhanteln hinzufügst.",
+      "Passe deinen Abstand zur Bank an, um die bequemste und effektivste Position zu finden."
+    ]
+  },
+  "stepUp": {
+    "description": "Steige auf eine erhöhte Oberfläche, um kraftvolle Gesäßmuskeln aufzubauen und die funktionelle Beinkraft zu verbessern.",
+    "instructions": [
+      "Stelle einen Fuß auf eine stabile Bank oder eine stabile Box.",
+      "Drücke durch die Ferse, um deinen Körper auf die Plattform zu heben.",
+      "Steige zuerst mit dem anderen Fuß ab, dann mit dem Ausgangsfuß.",
+      "Wechsel die Beine ab oder führe alle Wiederholungen auf einer Seite aus, bevor du wechselst."
+    ],
+    "tips": [
+      "Spanne deine Körpermitte an und halte die Brust aufrecht.",
+      "Versuche nicht, dich mit dem hinteren Fuß vom Boden abzudrücken; lass das erhöhte Bein die Arbeit machen.",
+      "Kontrolliere deinen Abstieg, um deine Gelenke zu schützen."
+    ]
+  },
+  "legExtension": {
+    "description": "Eine Isolationsübung, die gezielt die Quadrizepsmuskulatur anspricht und aufbaut.",
+    "instructions": [
+      "Setze dich in die Beinstreckmaschine und lehne deinen Rücken an das Polster.",
+      "Platziere deine Schienbeine hinter dem gepolsterten Hebel.",
+      "Strecke die Beine vollständig durch und konzentriere dich auf die Kontraktion deiner Quadrizeps.",
+      "Senke das Gewicht langsam zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Vermeide, Schwung zu nutzen, um das Gewicht zu heben.",
+      "Verriegle deine Knie oben nicht mit Gewalt.",
+      "Stelle sicher, dass der gepolsterte Hebel knapp über deinen Knöcheln positioniert ist."
+    ]
+  },
+  "lyingLegCurl": {
+    "description": "Zielt darauf ab, die Beinbeuger zu isolieren, um Kraft und Kniegelenkstabilität zu verbessern.",
+    "instructions": [
+      "Lege dich mit dem Gesicht nach unten auf die Beinbeuger-Maschine, die Beine vollständig ausgestreckt.",
+      "Positionieren Sie den gepolsterten Hebel direkt oberhalb Ihrer Fersen.",
+      "Ziehe deine Beine so weit wie möglich nach oben und spanne dabei die hinteren Oberschenkel oben an.",
+      "Führe das Gewicht kontrolliert zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Halte die Hüften während der gesamten Bewegung an die Bank gedrückt.",
+      "Konzentriere dich auf eine langsame und kontrollierte exzentrische (absenkende) Phase.",
+      "Vermeide, das Gewicht zu schwingen."
+    ]
+  },
+  "seatedLegCurl": {
+    "description": "Isoliert die Hamstrings in sitzender Position für maximale Kontraktion und Muskelaufbau.",
+    "instructions": [
+      "Setz dich in die Maschine und stell das Schoßpolster so ein, dass es fest an deinen Oberschenkeln anliegt.",
+      "Lege deine Beine über den gepolsterten Hebel, sodass er hinter deinen Knöcheln sitzt.",
+      "Start with your knees nearly straight, then curl your lower legs down and back as far as possible.",
+      "Führe den Hebel langsam zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Halte den Oberkörper stabil und vermeide es, die Arme zum Ziehen zu benutzen.",
+      "Spanne deine hinteren Oberschenkelmuskeln am unteren Ende der Bewegung an.",
+      "Halte deine Füße während der gesamten Serie gebeugt."
+    ]
+  },
+  "calfRaise": {
+    "description": "Kräftigt und formt die Wadenmuskulatur, indem Sie die Fersen vom Boden abheben.",
+    "instructions": [
+      "Stellen Sie sich mit den Fußballen auf die Kante einer Stufe oder Plattform.",
+      "Senke deine Fersen unter die Ebene der Stufe, um die Waden zu dehnen.",
+      "Drücke über den Fußballen, um die Fersen so hoch wie möglich anzuheben.",
+      "Senke dich langsam wieder in die Ausgangsposition der Dehnung zurück."
+    ],
+    "tips": [
+      "Halte dich bei Bedarf an einer Wand oder einem Geländer zur Balance fest.",
+      "Pausiere eine Sekunde oben, um die Kontraktion zu maximieren.",
+      "Kann einbeinig ausgeführt werden, um die Schwierigkeit zu erhöhen."
+    ]
+  },
+  "hipThrust": {
+    "description": "Wird allgemein als die beste Übung für maximalen Aufbau und Kraft der Gesäßmuskulatur angesehen.",
+    "instructions": [
+      "Setz dich auf den Boden, lehne den oberen Rücken an eine Bank und lege eine Langhantel quer über die Hüften.",
+      "Stellen Sie Ihre Füße fest auf den Boden, etwa schulterbreit auseinander.",
+      "Drücke durch die Fersen, um die Hüften Richtung Decke zu heben, bis dein Körper eine gerade Linie von Schultern bis zu den Knien bildet.",
+      "Spanne deine Gesäßmuskeln oben an, dann senke die Hüfte kontrolliert Richtung Boden."
+    ],
+    "tips": [
+      "Verwende eine Polsterung oder ein Handtuch auf der Langhantel für mehr Komfort.",
+      "Halte dein Kinn eingezogen und deine Rumpfmuskulatur angespannt, um den unteren Rücken zu schützen.",
+      "Überstrecke deinen unteren Rücken nicht am oberen Ende der Bewegung."
+    ]
+  },
+  "gluteBridge": {
+    "description": "Eine Bodenübung mit dem eigenen Körpergewicht, die die Gesäßmuskulatur aktiviert und die Hüftstreckung verbessert.",
+    "instructions": [
+      "Leg dich auf den Rücken, die Knie gebeugt und die Füße flach auf dem Boden.",
+      "Halte deine Arme seitlich mit den Handflächen nach unten.",
+      "Heb deine Hüften vom Boden, indem du die Gesäßmuskeln anspannst und durch die Fersen drückst.",
+      "Halte die Position für eine Sekunde oben, dann senke dich wieder ab."
+    ],
+    "tips": [
+      "Achte darauf, dass dein Rumpf angespannt ist, damit dein unterer Rücken sich nicht übermäßig durchbiegt.",
+      "Konzentriere dich darauf, die Gesäßmuskeln zu nutzen und nicht den unteren Rücken oder die hinteren Oberschenkelmuskeln.",
+      "Für eine zusätzliche Herausforderung führe die Brücke mit einem ausgestreckten Bein aus."
+    ]
+  },
+  "deadlift": {
+    "description": "Ein grundlegendes Hebe-Element für Ganzkörperkraft, das die gesamte hintere Muskelkette anspricht.",
+    "instructions": [
+      "Positioniere die Mitte deines Fußes unter der Langhantel.",
+      "Beuge dich an der Hüfte und beuge die Knie, greife die Stange knapp außerhalb der Beine.",
+      "Halte den Rücken flach und die Brust aufrecht, während du dich über die Fersen hochdrückst.",
+      "Halte die Stange während der gesamten Bewegung dicht am Körper und stelle dich vollständig aufrecht hin."
+    ],
+    "tips": [
+      "Wölbe deinen Rücken nicht; halte die Wirbelsäule neutral.",
+      "Atme ein und spanne deinen Rumpf an, bevor du das Gewicht ziehst.",
+      "Senke die Stange, indem du zuerst aus der Hüfte nach vorn kippst, und beuge die Knie erst, wenn die Stange an ihnen vorbeigleitet."
+    ]
+  },
+  "barbellRomanianDeadlift": {
+    "description": "Eine Deadlift-Variante, die die Dehnung und Kontraktion der hinteren Oberschenkelmuskulatur (Hamstrings) betont.",
+    "instructions": [
+      "Stellen Sie die Füße hüftbreit auseinander und halten Sie eine Langhantel vor Ihren Oberschenkeln.",
+      "Beuge dich an der Hüfte und senke die Stange Richtung Boden, wobei die Beine größtenteils gestreckt bleiben (leichte Kniebeugung).",
+      "Senke die Stange, bis du eine Dehnung in den hinteren Oberschenkelmuskeln spürst, und halte deinen Rücken dabei gerade.",
+      "Schiebe deine Hüften nach vorne, um in die Ausgangsposition zurückzukehren."
+    ],
+    "tips": [
+      "Halte die Stange jederzeit sehr dicht an deinen Beinen.",
+      "Konzentriere dich darauf, die Hüften so weit wie möglich nach hinten zu schieben.",
+      "Vermeide, die Schultern oder den unteren Rücken zu runden."
+    ]
+  },
+  "dumbbellRomanianDeadlift": {
+    "description": "Eine auf die hinteren Oberschenkel fokussierte Hüftbeuge mit Kurzhanteln, die einen natürlicheren Bewegungsumfang erlaubt.",
+    "instructions": [
+      "Stelle die Füße hüftbreit auseinander und halte in jeder Hand eine Kurzhantel vor deinen Oberschenkeln.",
+      "Beuge dich an der Hüfte und senke die Gewichte Richtung Füße, halte den Rücken flach.",
+      "Senke, bis du eine deutliche Dehnung in den hinteren Oberschenkelmuskeln (Hamstrings) spürst.",
+      "Spanne Gesäß und hintere Oberschenkel an, um in den Stand zurückzukehren."
+    ],
+    "tips": [
+      "Halte die Kurzhanteln während der gesamten Bewegung dicht an deinen Beinen.",
+      "Konzentriere dich darauf, die Hüften nach hinten zu schieben, statt nach dem Boden zu greifen.",
+      "Halte die Knie leicht gebeugt."
+    ]
+  },
+  "machineGluteKickback": {
+    "description": "Eine gezielte Maschinenübung, die die Gesäßmuskulatur durch eine Kickback-Bewegung isoliert.",
+    "instructions": [
+      "Positionieren Sie sich in der Maschine und stellen Sie einen Fuß auf die Plattform.",
+      "Drücke die Plattform nach hinten und oben, indem du die Hüfte streckst.",
+      "Spanne deine Gesäßmuskulatur am oberen Ende der Bewegung an.",
+      "Kehre langsam in die Ausgangsposition zurück und wiederhole."
+    ],
+    "tips": [
+      "Halte eine stabile Körpermitte und vermeide ein Hohlkreuz.",
+      "Führe die Bewegung kontrolliert aus und konzentriere dich auf die Kontraktion der Gesäßmuskulatur.",
+      "Schwinge dein Bein nicht; benutze deine Muskulatur, um das Gewicht zu bewegen."
+    ]
+  },
+  "cableGluteKickback": {
+    "description": "Verwendet Kabelwiderstand, um die Gesäßmuskulatur durch eine kontrollierte Kickback‑Bewegung zu isolieren und dabei konstante Spannung über den gesamten Bewegungsumfang zu bieten.",
+    "instructions": [
+      "Befestigen Sie eine Fußmanschette an der Kabelmaschine in der niedrigsten Einstellung und befestigen Sie sie um einen Knöchel.",
+      "Stellen Sie sich der Maschine gegenüber und halten Sie den Rahmen zur Stabilität fest.",
+      "Halte deinen Rumpf angespannt und das Standbein leicht gebeugt, strecke das am Riemen befestigte Bein durch Hüftstreckung nach hinten und oben.",
+      "Spanne deine Gesäßmuskulatur am oberen Ende der Bewegung an und kehre dann langsam in die Ausgangsposition zurück."
+    ],
+    "tips": [
+      "Halte den Oberkörper aufrecht und vermeide es, die Hüften zu drehen.",
+      "Führe die Hüftstreckung vollständig durch, um die Gesäßmuskulatur maximal zu aktivieren.",
+      "Kontrolliere das Gewicht beim Zurückführen, anstatt das Kabel dein Bein nach vorn ziehen zu lassen."
+    ]
+  },
+  "machineHipAbduction": {
+    "description": "Zielt auf die äußeren Hüften und den Gluteus medius ab, um die Hüftstabilität und Optik zu verbessern.",
+    "instructions": [
+      "Setz dich in die Maschine, sodass die Außenseiten deiner Oberschenkel an den Polstern anliegen.",
+      "Drücke deine Beine gegen den Widerstand nach außen.",
+      "Pausiere eine Sekunde am Punkt der maximalen Kontraktion.",
+      "Führe die Beine langsam wieder zusammen."
+    ],
+    "tips": [
+      "Halte den Rücken flach an der Sitzfläche.",
+      "Verwende ein kontrolliertes Tempo sowohl in der Öffnungs- als auch in der Schließphase.",
+      "Passe die Startposition an einen für dich komfortablen Bewegungsumfang an."
+    ]
+  },
+  "machineHipAdduction": {
+    "description": "Kräftigt die inneren Oberschenkelmuskeln (Adduktoren) zur Verbesserung der Stabilität der Beine.",
+    "instructions": [
+      "Setz dich in die Maschine, sodass deine Innenschenkel an den Polstern anliegen.",
+      "Presse deine Beine gegen den Widerstand zusammen.",
+      "Pausiere eine Sekunde am Punkt der maximalen Kontraktion.",
+      "Lass deine Beine langsam in die Ausgangsposition zurückkehren."
+    ],
+    "tips": [
+      "Halte deinen Oberkörper während des gesamten Satzes stabil.",
+      "Konzentriere dich darauf, die inneren Oberschenkelmuskeln zu nutzen, nicht die Füße.",
+      "Lass die Gewichte am Ende der Wiederholung nicht zusammenkrachen."
+    ]
+  },
+  "cableHipAbduction": {
+    "description": "Nutzt Kabelzug und Knöchelriemen, um seitliche Hüfte und Gluteus medius jeweils einseitig zu isolieren.",
+    "instructions": [
+      "Befestigen Sie eine Fußmanschette an der unteren Rolle des Kabelzugs und befestigen Sie sie am äußeren Bein.",
+      "Stellen Sie sich seitlich zur Maschine und halten Sie den Rahmen zur Stabilisierung.",
+      "Führe das arbeitende Bein seitlich gegen das Kabel, während dein Oberkörper größtenteils ruhig bleibt.",
+      "Kurz halten, dann kontrolliert in die Ausgangsposition zurückkehren."
+    ],
+    "tips": [
+      "Führe die Bewegung klein und kontrolliert aus, statt das Bein zu schwingen.",
+      "Spanne deinen Rumpf an, damit die Hüfte die Arbeit macht und nicht dein Oberkörper.",
+      "Drehe die Fußspitzen leicht nach vorne, um den Gluteus medius gezielter anzusprechen."
+    ]
+  },
+  "cableHipAdduction": {
+    "description": "Verwendet Kabelzug und Knöchelriemen, um die inneren Oberschenkelmuskeln (Adduktoren) einseitig zu stärken.",
+    "instructions": [
+      "Befestigen Sie eine Fußmanschette an der unteren Rolle des Kabelzugs und befestigen Sie sie am inneren Bein.",
+      "Stellen Sie sich seitlich zur Maschine, mit dem arbeitenden Bein am weitesten vom Gewichtsstapel entfernt, und halten Sie den Rahmen zur Stabilisierung.",
+      "Führen Sie das arbeitende Bein gegen den Widerstand vor den Körper.",
+      "Kurz halten, dann kontrolliert in die Ausgangsposition zurückkehren."
+    ],
+    "tips": [
+      "Halte den Oberkörper aufrecht und vermeide es, die Hüften zu drehen.",
+      "Bewege dich langsam, sodass die innere Oberschenkelmuskulatur die Bewegung in beide Richtungen kontrolliert.",
+      "Verwende eine leichte bis moderate Belastung und konzentriere dich auf das Anspannen am Ende des Bewegungsbereichs."
+    ]
+  },
+  "boxJump": {
+    "description": "Eine explosive Bewegung, die die Kraft der unteren Körperhälfte aufbaut und die kardiovaskuläre Fitness verbessert.",
+    "instructions": [
+      "Stelle dich mit Blick auf eine stabile Box und stelle die Füße hüftbreit auseinander.",
+      "Beuge dich an der Hüfte, schwinge die Arme nach hinten und springe dann explosiv auf die Kiste.",
+      "Lande sanft in einer halben Kniebeuge, beide Füße vollständig auf der Box.",
+      "Stehen Sie vollständig auf, steigen Sie dann einen Fuß nach dem anderen zurück herunter."
+    ],
+    "tips": [
+      "Konzentriere dich auf eine leise Landung, um sicherzustellen, dass du den Aufprall absorbierst.",
+      "Wähle eine Kastenhöhe, die eine saubere Landungstechnik ermöglicht.",
+      "Spring nicht rückwärts herunter; absteigen ist schonender für deine Gelenke."
+    ]
+  },
+  "pushUp": {
+    "description": "Eine klassische Körpergewichtsübung, die Brust-, Schulter- und Trizepskraft aufbaut.",
+    "instructions": [
+      "Beginne in einer hohen Plank-Position mit den Händen etwas weiter als schulterbreit.",
+      "Halte den Körper in einer geraden Linie von Kopf bis Fersen.",
+      "Senke deine Brust Richtung Boden und halte die Ellbogen in einem 45-Grad-Winkel.",
+      "Drücke dich über die Handflächen zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Lass deinen unteren Rücken nicht durchhängen; halte deine Körpermitte angespannt.",
+      "Achte auf einen vollen Bewegungsumfang für eine bessere Muskelansprache.",
+      "Atme ein, während du dich absenkst, und aus, während du dich wieder hochdrückst."
+    ]
+  },
+  "declinePushUp": {
+    "description": "Führe Liegestütze mit erhöhten Füßen auf einer Bank aus, um den Fokus stärker auf die obere Brust und die Schultern zu legen.",
+    "instructions": [
+      "Platziere die Füße auf einer flachen Bank und die Hände auf dem Boden etwas weiter als schulterbreit.",
+      "Halte eine gerade Linie von Kopf bis Ferse und spanne die Körpermitte an.",
+      "Senke deine Brust Richtung Boden, indem du die Ellbogen beugst.",
+      "Drücke dich durch Strecken der Arme zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Halte deine Ellbogen in einem 45‑Grad‑Winkel zum Körper.",
+      "Lass deine Hüften nicht durchhängen; halte Gesäß und Rumpf angespannt.",
+      "Je höher die Bank, desto schwieriger wird die Übung."
+    ]
+  },
+  "barbellBenchPress": {
+    "description": "Die grundlegende Oberkörperübung zur Entwicklung maximaler Brust- und Armmuskulaturkraft.",
+    "instructions": [
+      "Leg dich flach auf die Bank und stelle die Füße fest auf den Boden.",
+      "Greifen Sie die Langhantel etwas weiter als schulterbreit.",
+      "Senke die Stange kontrolliert bis zur Mitte deiner Brust.",
+      "Drücke die Stange wieder nach oben, bis deine Arme vollständig gestreckt sind."
+    ],
+    "tips": [
+      "Halte deine Schulterblätter während der gesamten Bewegung zurückgezogen (zusammengepresst).",
+      "Behalte ein leichtes Hohlkreuz, aber halte das Gesäß auf der Bank.",
+      "Arbeite mit einem Spotter, besonders beim Heben schwerer Gewichte."
+    ]
+  },
+  "dumbbellBenchPress": {
+    "description": "Das Drücken von Kurzhanteln auf einer Flachbank ermöglicht einen größeren Bewegungsumfang und verbessert die Schultergesundheit.",
+    "instructions": [
+      "Leg dich flach auf eine Bank und halte in jeder Hand eine Kurzhantel auf Brusthöhe.",
+      "Drücke die Gewichte nach oben, bis deine Arme über der Brust vollständig gestreckt sind.",
+      "Senke die Kurzhanteln kontrolliert, bis sie auf Brusthöhe sind.",
+      "Halte eine stabile Körpermitte und die Füße flach auf dem Boden."
+    ],
+    "tips": [
+      "Konzentriere dich darauf, die Kurzhanteln oben zusammenzuführen, ohne dass sie sich berühren.",
+      "Halte deine Ellbogen in einem 45‑Grad‑Winkel zum Oberkörper.",
+      "Kurzhanteln erfordern mehr Stabilisierung als eine Langhantel."
+    ]
+  },
+  "smithMachineBenchPress": {
+    "description": "Die Smith-Maschine bietet beim Bankdrücken eine geführte Bewegungsbahn, wodurch sie für das Training allein sicherer ist und eine intensivere Muskelbeanspruchung erlaubt.",
+    "instructions": [
+      "Leg dich auf die Bank und positioniere dich so, dass die Stange mit der Mitte deiner Brust übereinstimmt.",
+      "Entriegele die Stange und senke sie langsam zur Brust.",
+      "Drücken Sie die Stange wieder nach oben, bis Ihre Arme vollständig ausgestreckt sind.",
+      "Verriegle die Stange sicher, wenn du fertig bist."
+    ],
+    "tips": [
+      "Stelle sicher, dass die Bank perfekt unter der Stange zentriert ist.",
+      "Konzentriere dich während der gesamten Bewegung auf die Kontraktion deiner Brust.",
+      "Eine gute Option für Isolationsübungen und Dropsätze."
+    ]
+  },
+  "dumbbellInclineBenchPress": {
+    "description": "Das Drücken der Kurzhanteln auf einer Schrägbank betont die obere Brustmuskulatur und erlaubt jedem Arm, sich unabhängig zu bewegen.",
+    "instructions": [
+      "Stelle eine verstellbare Hantelbank auf eine Neigung von 30–45 Grad ein.",
+      "Setzen Sie sich hin, legen Sie je eine Kurzhantel auf die Oberschenkel und lehnen Sie sich dann gegen die Bank zurück.",
+      "Drücke die Kurzhanteln vom oberen Brustbereich nach oben, bis deine Arme gestreckt sind.",
+      "Senke die Gewichte kontrolliert wieder in die Ausgangsposition."
+    ],
+    "tips": [
+      "Zieh deine Schulterblätter gegen die Bank zusammen.",
+      "Verwende eine moderate Neigung, um den Fokus auf die obere Brust zu legen.",
+      "Halte deine Handgelenke während der gesamten Bewegung über deinen Ellbogen ausgerichtet."
+    ]
+  },
+  "barbellInclineBenchPress": {
+    "description": "Das Drücken einer Langhantel auf einer Schrägbank zielt auf die obere Brust und die Schultern ab und ermöglicht oft höhere Lasten.",
+    "instructions": [
+      "Stelle die Bank auf eine Neigung von 30–45 Grad und positioniere dich unter der Stange.",
+      "Greifen Sie die Stange etwas weiter als schulterbreit.",
+      "Senke die Stange kontrolliert bis zum oberen Brustbereich.",
+      "Drücken Sie die Stange wieder nach oben, bis Ihre Arme vollständig ausgestreckt sind."
+    ],
+    "tips": [
+      "Halte deine Ellenbogen leicht eingezogen, nicht völlig nach außen abgespreizt.",
+      "Achte darauf, dass die Stange deine obere Brust berührt, nicht deinen Nacken.",
+      "Verwende einen Spotter aus Sicherheitsgründen."
+    ]
+  },
+  "smithMachineInclineBenchPress": {
+    "description": "Eine geführte Schrägbank-Press, die die obere Brust isoliert und sicheres Training in der Nähe des Muskelversagens ermöglicht.",
+    "instructions": [
+      "Stelle die verstellbare Bank in eine Neigung und positioniere sie mittig unter der Stange der Smith-Maschine.",
+      "Leg dich auf die Bank und positioniere dich so, dass die Stange über der oberen Brust liegt.",
+      "Entriegle die Stange und senke sie kontrolliert Richtung Brust.",
+      "Drücken Sie die Stange zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Konzentriere dich auf ein flüssiges, gleichmäßiges Tempo.",
+      "Stelle die Bankposition so ein, dass die Pressbewegung für dich am bequemsten ist.",
+      "Ausgezeichnet zum Ausarbeiten der oberen Brust."
+    ]
+  },
+  "barbellDeclineBenchPress": {
+    "description": "Das Drücken auf einer Negativbank zielt auf den unteren Brustbereich ab und ermöglicht oft schwerere Belastungen durch den mechanischen Vorteil.",
+    "instructions": [
+      "Fixiere deine Füße in der Negativbank und lege dich zurück.",
+      "Greifen Sie die Langhantel mit mittlerem Griffabstand.",
+      "Senke die Stange zu deinem unteren Brustbereich/oberem Bauch ab.",
+      "Drücken Sie die Stange wieder nach oben in die Ausgangsposition."
+    ],
+    "tips": [
+      "Lass dir von einem Spotter beim Aus- und Einracken der Stange helfen.",
+      "Führe die Bewegung kontrolliert aus; lass die Stange nicht von der Brust abprallen.",
+      "Konzentriere dich auf die Kontraktion im unteren Brustbereich."
+    ]
+  },
+  "dumbbellDeclineBenchPress": {
+    "description": "Das Kurzhantel-Decline-Press bietet eine intensive Dehnung des unteren Brustbereichs und verbessert den Bewegungsumfang.",
+    "instructions": [
+      "Setz dich ans Ende einer Negativbank mit Kurzhanteln auf den Oberschenkeln.",
+      "Lege dich zurück, während du die Gewichte auf Brusthöhe bringst.",
+      "Drücken Sie die Kurzhanteln nach oben, bis die Arme ausgestreckt sind.",
+      "Senke sie kontrolliert wieder ab."
+    ],
+    "tips": [
+      "Sei vorsichtig, wenn du dich mit schweren Kurzhanteln in die Position begibst und wieder herauskommst.",
+      "Konzentriere dich auf das Zusammendrücken oben in der Bewegung.",
+      "Spanne deine Körpermitte an."
+    ]
+  },
+  "smithMachineDeclineBenchPress": {
+    "description": "Eine geführte Decline-Press, die gezielt die unteren Brustmuskeln sicher anspricht.",
+    "instructions": [
+      "Positionieren Sie eine Negativbank unter der Stange der Smith-Maschine.",
+      "Lege dich hin und achte darauf, dass die Stange über deinem unteren Brustbereich verläuft.",
+      "Entriegele die Stange und senke sie kontrolliert in Richtung Brust.",
+      "Drücken Sie die Stange zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Stelle sicher, dass die Bank sicher positioniert und zentriert ist.",
+      "Halte den Rücken flach auf der Bank.",
+      "Ideal für Brusttraining mit hohem Volumen."
+    ]
+  },
+  "chestPressMachine": {
+    "description": "Bietet eine stabile und kontrollierte Möglichkeit, die Brustmuskulatur mit geringeren Balance-Anforderungen zu trainieren.",
+    "instructions": [
+      "Stelle die Sitzhöhe so ein, dass die Griffe auf Höhe deiner Brustmitte ausgerichtet sind.",
+      "Setz dich mit dem Rücken an die Polsterlehne und greife die Griffe.",
+      "Drücke die Griffe nach vorne, bis deine Arme vollständig gestreckt sind.",
+      "Führe die Griffe langsam zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Halte deine Ellenbogen leicht unter Schulterhöhe.",
+      "Halte jederzeit Kontakt zwischen deinem Rücken und dem Polster.",
+      "Vermeide, die Ellenbogen oben zu verriegeln."
+    ]
+  },
+  "dumbbellChestFly": {
+    "description": "Eine Isolationsbewegung, die die Brustmuskulatur dehnt und definiert.",
+    "instructions": [
+      "Leg dich flach auf eine Bank und halte die Kurzhanteln über der Brust, die Handflächen zueinander gerichtet.",
+      "Führe die Gewichte in einem weiten Bogen seitlich nach außen und halte die Ellbogen leicht gebeugt.",
+      "Stoppe, wenn du eine Dehnung in deiner Brust spürst, und führe dann die Gewichte wieder über deine Brust zusammen.",
+      "Spanne deine Brustmuskeln oben an."
+    ],
+    "tips": [
+      "Führe die Bewegung langsam und kontrolliert aus.",
+      "Geh nicht zu tief, wenn du Schulterbeschwerden spürst.",
+      "Konzentriere dich auf die 'einen Baum umarmen'-Bewegung."
+    ]
+  },
+  "cableFly": {
+    "description": "Verwendet Kabelzüge, um konstante Spannung auf die Brustmuskulatur über den gesamten Bewegungsumfang zu erzeugen.",
+    "instructions": [
+      "Stelle dich zwischen zwei Kabelzügen mit Griffen auf Brusthöhe.",
+      "Tritt leicht nach vorn und halte die Griffe mit seitlich ausgestreckten Armen.",
+      "Führe die Griffe vor deine Brust zusammen und halte dabei die Ellenbogen leicht gebeugt.",
+      "Kehre langsam in die Ausgangsposition zurück."
+    ],
+    "tips": [
+      "Konzentriere dich auf die Kontraktion in deiner Brust, während du die Hände zusammenführst.",
+      "Behalte eine leichte Vorwärtsneigung für bessere Stabilität.",
+      "Spanne deine Körpermitte fest an, um ein Schwingen des Körpers zu verhindern."
+    ]
+  },
+  "cableCrunchPress": {
+    "description": "Eine kniende Kabelübung für die Bauchmuskulatur, die das Crunch-Muster stärker belastet, um kräftigere, definiertere Bauchmuskeln aufzubauen.",
+    "instructions": [
+      "Befestigen Sie ein Seil an der oberen Rolle und knien Sie mit Blick zur Kabelzugmaschine.",
+      "Halte das Seil neben deinem Kopf und spanne die Hüften an, sodass die Bewegung aus dem Rumpf kommt.",
+      "Ziehe deinen Brustkorb Richtung Becken, während du die Ellbogen nahe bei dir hältst und die Bauchmuskeln voll angespannt sind.",
+      "Führe die Bewegung langsam zurück in die Ausgangsposition, ohne dass der Gewichtsstapel dich ruckartig hochzieht."
+    ],
+    "tips": [
+      "Versuche, deine Wirbelsäule Wirbel für Wirbel einzukrümmen, statt nur mit den Armen zu ziehen.",
+      "Halte deine Hüften größtenteils fixiert, damit deine Bauchmuskeln und nicht die Hüftbeuger die Arbeit machen.",
+      "Wähle eine kontrollierte Last, die es dir ermöglicht, die Bauchmuskulatur bei jeder Wiederholung vollständig zu kontrahieren."
+    ]
+  },
+  "highToLowCableFly": {
+    "description": "Die Kabel hoch einstellen und nach unten ziehen zielt auf die unteren Brustfasern.",
+    "instructions": [
+      "Stelle die Kabelrollen auf die höchste Position.",
+      "Greifen Sie die Griffe und machen Sie zur Stabilität mit einem Fuß einen Schritt nach vorn.",
+      "Zieh die Griffe nach unten und vor deiner Taille zusammen.",
+      "Bringe deine Arme langsam wieder in die hohe Ausgangsposition."
+    ],
+    "tips": [
+      "Spanne deine untere Brust am unteren Ende der Bewegung an.",
+      "Behalte eine leichte Vorwärtsneigung.",
+      "Vermeide, dein Körpergewicht zum Ziehen der Kabel zu verwenden."
+    ]
+  },
+  "lowToHighCableFly": {
+    "description": "Die Kabel niedrig einstellen und nach oben ziehen zielt auf die obere Brust und die vorderen Deltamuskeln.",
+    "instructions": [
+      "Stelle die Kabelrollen in die niedrigste Position.",
+      "Greifen Sie die Griffe, stellen Sie sich in die Mitte und machen Sie einen kleinen Schritt nach vorn.",
+      "Zieh die Griffe nach oben und vor deiner oberen Brust zusammen.",
+      "Senke die Griffe langsam zurück in die untere Ausgangsposition."
+    ],
+    "tips": [
+      "Konzentriere dich auf die Kontraktion in deiner oberen Brust.",
+      "Behalte während der ganzen Bewegung eine leichte Beugung in den Ellbogen.",
+      "Kontrolliere das Gewicht während der gesamten Bewegung."
+    ]
+  },
+  "pecDeckFly": {
+    "description": "Ein maschinenbasierter Fly, der konstante Spannung auf die Brust ausübt und so bessere Isolation ermöglicht.",
+    "instructions": [
+      "Setz dich in die Maschine und lege deine Unterarme an die gepolsterten Hebel.",
+      "Greifen Sie die Griffe und ziehen Sie die Hebel vor Ihrer Brust zusammen.",
+      "Pausiere eine Sekunde am Punkt der maximalen Kontraktion.",
+      "Kehre langsam in die Ausgangsposition zurück."
+    ],
+    "tips": [
+      "Drücke Rücken und Kopf gegen die Rückenlehne.",
+      "Konzentriere dich darauf, mit der Brust zu drücken statt mit den Armen zu ziehen.",
+      "Behalte ein konstantes, kontrolliertes Tempo bei."
+    ]
+  },
+  "barbellOverheadPress": {
+    "description": "Eine kraftvolle vertikale Druckbewegung, die breite Schultern und Stabilität im Oberkörper aufbaut.",
+    "instructions": [
+      "Stelle die Füße schulterbreit auseinander und halte eine Langhantel auf Schulterhöhe mit Obergriff.",
+      "Spanne deinen Rumpf an und drücke die Stange gerade über den Kopf, bis die Arme vollständig gestreckt sind.",
+      "Strecken Sie die Ellenbogen oben vollständig durch und schieben Sie den Kopf leicht nach vorne.",
+      "Führe die Stange kontrolliert zurück zu den Schultern."
+    ],
+    "tips": [
+      "Benutze deine Beine nicht, um beim Heben zu helfen (das wäre ein Push Press).",
+      "Spanne deinen Rumpf und deine Gesäßmuskulatur fest an, um den Oberkörper zu stabilisieren.",
+      "Konzentriere dich auf eine vertikale Stangenführung."
+    ]
+  },
+  "dumbbellOverheadPress": {
+    "description": "Das Drücken von Kurzhanteln über Kopf ermöglicht einen natürlichen Bewegungsumfang und hilft, muskuläre Ungleichgewichte auszugleichen.",
+    "instructions": [
+      "Stehen oder sitzen Sie mit einer Kurzhantel in jeder Hand auf Schulterhöhe, Handflächen nach vorne.",
+      "Drücke die Gewichte nach oben, bis deine Arme vollständig gestreckt sind.",
+      "Senke die Kurzhanteln kontrolliert zurück auf Schulterhöhe.",
+      "Spanne deine Körpermitte an, um ein Überstrecken des Rückens zu vermeiden."
+    ],
+    "tips": [
+      "Konzentriere dich auf eine flüssige, kontrollierte Pressbewegung.",
+      "Halte eine stabile Basis, egal ob du sitzt oder stehst.",
+      "Kurzhanteln bieten dem Schultergelenk mehr Bewegungsfreiheit als eine Langhantel."
+    ]
+  },
+  "smithMachineOverheadPress": {
+    "description": "Eine geführte vertikale Press-Variante, die es ermöglicht, sich ganz auf den Schulterantrieb zu konzentrieren und zusätzliche Sicherheit bietet.",
+    "instructions": [
+      "Positionieren Sie einen Sitz oder stellen Sie sich unter die Stange der Smith-Maschine.",
+      "Greifen Sie die Stange etwas weiter als schulterbreit.",
+      "Entriegle die Stange und drücke sie über den Kopf, bis deine Arme gestreckt sind.",
+      "Senke es zurück auf Schulterhöhe und wiederhole."
+    ],
+    "tips": [
+      "Stelle sicher, dass deine Position einen sicheren vertikalen Stangenverlauf ermöglicht.",
+      "Konzentriere dich darauf, deine Deltamuskeln oben anzuspannen.",
+      "Vermeide ein übermäßiges Hohlkreuz."
+    ]
+  },
+  "arnoldPress": {
+    "description": "Eine Schulterpresse mit Rotationsanteil, die alle drei Köpfe des Deltamuskels beansprucht.",
+    "instructions": [
+      "Setz dich oder stell dich hin, halte Kurzhanteln vor den Schultern, die Handflächen zu dir gerichtet.",
+      "Drücken Sie die Gewichte über den Kopf und drehen Sie dabei die Handflächen nach vorne.",
+      "Beende mit den Armen über dem Kopf gestreckt und den Handflächen nach außen gerichtet.",
+      "Drehe die Handflächen beim Ablassen der Gewichte wieder zu dir."
+    ],
+    "tips": [
+      "Behalte eine kontrollierte Rotation während der gesamten Pressbewegung bei.",
+      "Halte den Rücken gerade und die Körpermitte angespannt.",
+      "Vermeide übermäßig schwere Gewichte, bis du die Koordination beherrschst."
+    ]
+  },
+  "lateralRaise": {
+    "description": "Die zentrale Isolationsübung zum Aufbau der Schulterbreite.",
+    "instructions": [
+      "Stelle die Füße hüftbreit auseinander und halte Kurzhanteln an den Seiten deines Körpers.",
+      "Führe die Arme seitlich aus mit leicht gebeugten Ellbogen, bis sie auf Schulterhöhe sind.",
+      "Pausiere eine Sekunde oben, dann senke die Gewichte langsam zurück an deine Seiten."
+    ],
+    "tips": [
+      "Schwinge die Gewichte nicht und setze keine Schwungkraft ein.",
+      "Führe die Bewegung mit den Ellbogen, nicht mit den Handgelenken.",
+      "Stell dir vor, du kippst am oberen Ende der Bewegung Wasser aus einem Krug."
+    ]
+  },
+  "cableLateralRaise": {
+    "description": "Eine seitliche Hebung mit Kabelzug, die während der gesamten Bewegung konstante Spannung auf die seitlichen Deltamuskeln ausübt.",
+    "instructions": [
+      "Stellen Sie sich seitlich zu einer Kabelmaschine mit der Umlenkrolle in der tiefsten Einstellung.",
+      "Greifen Sie den Griff mit der weiter entfernten Hand und ziehen Sie ihn über den Körper, oder greifen Sie mit der näheren Hand hinter dem Rücken.",
+      "Führe deinen Arm seitlich aus, bis er auf Schulterhöhe ist, und halte dabei eine leichte Beugung im Ellenbogen.",
+      "Senke den Griff langsam in die Ausgangsposition."
+    ],
+    "tips": [
+      "Halte eine aufrechte Haltung und vermeide es, dich von der Maschine wegzulehnen.",
+      "Konzentriere dich darauf, mit dem Ellbogen zu führen, und halte die Bewegung kontrolliert.",
+      "Das Kabel erzeugt auch am unteren Punkt der Wiederholung Spannung, im Gegensatz zu Kurzhanteln."
+    ]
+  },
+  "frontRaise": {
+    "description": "Zielt auf den vorderen Schulterbereich ab für bessere Definition und Kraft.",
+    "instructions": [
+      "Stehen Sie mit Kurzhanteln vor den Oberschenkeln, Handflächen zu Ihnen gerichtet.",
+      "Heb die Gewichte nach vorne und oben, bis deine Arme parallel zum Boden sind.",
+      "Halte eine Sekunde, dann senke die Gewichte kontrolliert wieder ab."
+    ],
+    "tips": [
+      "Spanne deine Körpermitte fest an, um ein Wippen des Körpers zu vermeiden.",
+      "Hebe die Gewichte nicht über Schulterhöhe.",
+      "Kann abwechselnd mit einem Arm oder mit beiden gleichzeitig ausgeführt werden."
+    ]
+  },
+  "cableFrontRaise": {
+    "description": "Isoliert den vorderen Deltamuskel mit Kabelwiderstand für eine gleichmäßige, konstante Spannung.",
+    "instructions": [
+      "Stelle dich mit dem Rücken zu einer Kabelzugmaschine, bei der die Rolle auf der niedrigsten Einstellung steht.",
+      "Halte den Griff (oder einen Stangenaufsatz) zwischen den Beinen oder an deiner Seite.",
+      "Heb die Arme nach vorne und oben, bis sie auf Schulterhöhe sind.",
+      "Senke dich langsam wieder in die Ausgangsposition."
+    ],
+    "tips": [
+      "Spanne deine Körpermitte an, um ein Schwingen des Oberkörpers zu verhindern.",
+      "Kontrolliere das Gewicht über den gesamten Bewegungsumfang.",
+      "Vermeide, Schwung zu nutzen, um das Gewicht zu heben."
+    ]
+  },
+  "cableRearDeltFly": {
+    "description": "Isoliert die hinteren Deltamuskeln mit Kabeln und sorgt so für ein gleichmäßiges Widerstandsprofil.",
+    "instructions": [
+      "Stellen Sie sich in die Mitte einer Kabelzug‑Kreuzmaschine, wobei die Umlenkrollen auf Kopfhöhe eingestellt sind.",
+      "Kreuze die Arme und greife den linken Griff mit deiner rechten Hand und den rechten Griff mit deiner linken Hand.",
+      "Zieh die Griffe nach außen und dann zurück in einem weiten Bogen, und spanne dabei deine hinteren Deltamuskeln an.",
+      "Kehre langsam in die Ausgangsposition zurück und halte dabei die Spannung."
+    ],
+    "tips": [
+      "Halte während der gesamten Bewegung eine leichte Beugung in den Ellbogen.",
+      "Konzentriere dich darauf, mit den Schultern zu ziehen, nicht mit den Rückenmuskeln.",
+      "Stehen Sie aufrecht und halten Sie Ihre Körpermitte angespannt."
+    ]
+  },
+  "cableUprightRow": {
+    "description": "Zielt auf die Schultern und Trapezmuskulatur, indem ein Kabelgriff vertikal zur Kinnhöhe gezogen wird.",
+    "instructions": [
+      "Stelle dich vor ein Kabelzuggerät, bei dem die Rolle auf der niedrigsten Einstellung steht und eine gerade Stange angebracht ist.",
+      "Greifen Sie die Stange mit einem Obergriff, die Hände etwa schulterbreit auseinander.",
+      "Führe die Stange vertikal zum Kinn, indem du mit den Ellbogen führst.",
+      "Stoppe, wenn die Stange auf Brusthöhe ist und deine Ellbogen hoch sind.",
+      "Senke die Stange langsam in die Ausgangsposition."
+    ],
+    "tips": [
+      "Halte die Stange während des gesamten Lifts dicht am Körper.",
+      "Vermeide, die Schultern zu sehr hochzuziehen; konzentriere dich auf die Deltamuskeln.",
+      "Halte eine stabile, aufrechte Haltung."
+    ]
+  },
+  "cableExternalRotation": {
+    "description": "Kräftigt die Rotatorenmanschette, indem Sie den Arm gegen den Kabelwiderstand nach außen drehen.",
+    "instructions": [
+      "Stellen Sie sich seitlich zu einer Kabelmaschine mit der Umlenkrolle auf Ellbogenhöhe.",
+      "Greifen Sie den Griff mit der entfernten Hand und halten Sie den Ellbogen am Körper in einem 90-Grad-Winkel.",
+      "Drehe deinen Unterarm nach außen, weg vom Körper, so weit wie es bequem ist.",
+      "Kehre langsam in die Ausgangsposition zurück."
+    ],
+    "tips": [
+      "Lege ein Handtuch zwischen Ellbogen und Seite, damit dein Arm eng am Körper bleibt.",
+      "Verwende sehr leichtes Gewicht; es geht um Gelenkgesundheit und Stabilität, nicht um maximale Belastung.",
+      "Bewege dich kontrolliert und innerhalb eines komfortablen Bewegungsumfangs."
+    ]
+  },
+  "cableInternalRotation": {
+    "description": "Kräftigt die Innenrotatoren der Schulter mithilfe einer Kabelzugmaschine.",
+    "instructions": [
+      "Stellen Sie sich seitlich zu einer Kabelmaschine mit der Umlenkrolle auf Ellbogenhöhe.",
+      "Greifen Sie den Griff mit der näheren Hand und halten Sie den Ellbogen am Körper in einem 90-Grad-Winkel.",
+      "Drehe deinen Unterarm nach innen in Richtung Körper.",
+      "Kehre langsam in die Ausgangsposition zurück."
+    ],
+    "tips": [
+      "Halte deinen Ellbogen während des gesamten Satzes eng an deiner Seite.",
+      "Konzentriere dich auf die Qualität der Bewegung statt auf das Gewicht.",
+      "Halte eine aufrechte, stabile Haltung."
+    ]
+  },
+  "tricepsDip": {
+    "description": "Eine anspruchsvolle Körpergewichtsübung, die erhebliche Kraft in Trizeps und Brust aufbaut.",
+    "instructions": [
+      "Greifen Sie die Parallelstangen und drücken Sie sich hoch, bis die Arme vollständig gestreckt sind.",
+      "Senke deinen Körper, indem du die Ellbogen beugst, bis deine Oberarme mindestens parallel zum Boden sind.",
+      "Drücke dich durch Armstreckung zurück in die Ausgangsposition.",
+      "Halte den Oberkörper größtenteils aufrecht, um den Trizeps zu beanspruchen."
+    ],
+    "tips": [
+      "Vermeide, dass deine Schultern zu den Ohren hochgezogen werden.",
+      "Halte deine Ellenbogen eng am Körper angelegt.",
+      "Wenn Dips mit dem eigenen Körpergewicht zu schwierig sind, verwende eine unterstützende Dips-Maschine oder Widerstandsbänder."
+    ]
+  },
+  "chestDip": {
+    "description": "Eine Dip-Variante, bei der du den Oberkörper nach vorne neigst, um den Fokus von den Trizeps auf die Brustmuskulatur zu verlagern.",
+    "instructions": [
+      "Greifen Sie die Parallelstangen und drücken Sie sich in die Ausgangsposition hoch.",
+      "Lehne deinen Oberkörper beim Absenken um etwa 45 Grad nach vorne.",
+      "Lass deine Ellenbogen beim Absenken leicht nach außen zeigen.",
+      "Drücke dich zurück in die Ausgangsposition und halte dabei die Vorwärtsneigung bei."
+    ],
+    "tips": [
+      "Spanne deine Brust am oberen Ende der Bewegung an.",
+      "Senke dich ab, bis deine Schultern leicht unter deinen Ellbogen sind.",
+      "Kontrolliere die Absenkung, um Schulterbelastungen zu vermeiden."
+    ]
+  },
+  "tricepsPushdown": {
+    "description": "Eine beliebte Kabelübung zur Isolierung und zum Aufbau des Trizeps.",
+    "instructions": [
+      "Befestigen Sie eine Stange oder ein Seil an der oberen Rolle der Kabelzugmaschine.",
+      "Greifen Sie den Griff und ziehen Sie ihn nach unten, bis Ihre Ellenbogen einen 90-Grad-Winkel erreichen.",
+      "Drücke den Aufsatz nach unten, bis deine Arme vollständig gestreckt sind, und spanne dabei deine Trizeps unten an.",
+      "Kehre langsam in die 90-Grad-Ausgangsposition zurück."
+    ],
+    "tips": [
+      "Halte deine Ellenbogen während des gesamten Satzes eng am Körper.",
+      "Vermeide, dein Körpergewicht zu verwenden, um das Kabel nach unten zu drücken.",
+      "Behalte eine leichte Vorwärtsneigung und halte die Rumpfmuskulatur angespannt."
+    ]
+  },
+  "overheadTricepsExtension": {
+    "description": "Zielt auf den langen Kopf des Trizeps ab, indem Sie das Gewicht über den Kopf strecken.",
+    "instructions": [
+      "Setz dich oder stell dich hin und halte eine Kurzhantel mit beiden Händen über dem Kopf.",
+      "Senke das Gewicht hinter deinen Kopf, indem du die Ellbogen beugst.",
+      "Strecke die Arme, um das Gewicht zurück in die Ausgangsposition über dem Kopf zu bringen.",
+      "Halte deine Oberarme während der gesamten Bewegung still."
+    ],
+    "tips": [
+      "Halte deine Ellenbogen nach vorne gerichtet und nicht seitlich nach außen.",
+      "Lass deinen unteren Rücken nicht übermäßig ins Hohlkreuz gehen; halte deine Körpermitte angespannt.",
+      "Verwende ein kontrolliertes Tempo, um das Anschlagen von Kopf oder Nacken zu vermeiden."
+    ]
+  },
+  "cableOverheadTricepsExtension": {
+    "description": "Eine Kabelversion der Überkopf-Trizepsstreckung, die während des gesamten Bewegungsbereichs konstante Spannung auf den langen Kopf des Trizeps ausübt.",
+    "instructions": [
+      "Befestigen Sie ein Seil an einem unteren Kabel oder positionieren Sie sich so, dass das Kabel hinter Ihrem Kopf verläuft.",
+      "Dreh den Rücken zur Maschine und führe das Seil über den Kopf, die Ellbogen gebeugt und nach vorn gerichtet.",
+      "Strecke die Ellbogen, bis die Arme gestreckt sind, und spanne die Trizeps oben an.",
+      "Kehre langsam in die gedehnte Ausgangsposition zurück, ohne dass deine Ellbogen übermäßig nach außen abstehen."
+    ],
+    "tips": [
+      "Halte deine Ellenbogen größtenteils fixiert und bewege nur die Unterarme.",
+      "Spanne deinen Rumpf an, damit dein unterer Rücken während des Satzes nicht ins Hohlkreuz fällt.",
+      "Führe die Bewegung in einem gleichmäßigen Tempo aus und nutze die Dehnung am unteren Ende der Bewegung."
+    ]
+  },
+  "ringDip": {
+    "description": "Eine fortgeschrittene Dip-Variation an den Ringen, die erhebliche Stabilität und Kraft erfordert.",
+    "instructions": [
+      "Stützen Sie sich an den Ringen mit vollständig gestreckten Armen.",
+      "Senke deinen Körper kontrolliert und halte die Ringe dicht an den Seiten.",
+      "Drücke dich zurück in die Ausgangsposition und konzentriere dich darauf, die Ringe zu stabilisieren.",
+      "Drehe die Handflächen oben leicht nach außen für maximale Stabilität."
+    ],
+    "tips": [
+      "Spanne deine Körpermitte extrem fest an, um Schwingen zu minimieren.",
+      "Beginne mit statischem Halten an den Ringen, um die nötige Stabilität aufzubauen, bevor du vollständige Wiederholungen versuchst.",
+      "Stelle sicher, dass die Ringe auf einer angemessenen Höhe für deinen Bewegungsumfang sind."
+    ]
+  },
+  "pullUp": {
+    "description": "Eine erstklassige Körpergewichtsübung zum Aufbau eines breiten, kraftvollen Rückens und starker Arme.",
+    "instructions": [
+      "Greifen Sie die Stange mit den Handflächen von sich weg gerichtet, etwas weiter als schulterbreit.",
+      "Hänge mit den Armen vollständig ausgestreckt und mit angespanntem Rumpf.",
+      "Zieh deine Brust zur Stange, indem du die Ellbogen nach unten in Richtung Hüften führst.",
+      "Senke dich kontrolliert zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Konzentriere dich darauf, mit den Rückenmuskeln zu ziehen statt nur mit den Armen.",
+      "Vermeide, die Beine zu schwingen oder Schwung zu benutzen (Kipping).",
+      "Wenn du keinen vollständigen Klimmzug schaffst, beginne mit unterstützten Varianten oder Negativwiederholungen."
+    ]
+  },
+  "chinUp": {
+    "description": "Eine Klimmzugvariation mit den Handflächen zu dir gerichtet, die Bizeps und den unteren Latissimus betont.",
+    "instructions": [
+      "Greifen Sie die Stange mit den Handflächen zu sich gerichtet, etwa schulterbreit.",
+      "Hänge mit den Armen vollständig ausgestreckt.",
+      "Zieh dein Kinn über die Stange, indem du die Ellbogen nach unten drückst.",
+      "Senke dich kontrolliert zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Chin-ups beanspruchen in der Regel mehr Bizeps und Brustmuskulatur als Pull-ups.",
+      "Spanne deine Körpermitte fest an, um ein Schwingen des Körpers zu verhindern.",
+      "Stelle einen vollen Bewegungsumfang vom toten Hang bis zum Kinn über der Stange sicher."
+    ]
+  },
+  "latPulldown": {
+    "description": "Eine maschinenbasierte Übung, mit der du die vertikale Zugkraft kontrolliert aufbauen kannst.",
+    "instructions": [
+      "Setz dich in die Maschine und stell die Kniepolster so ein, dass du sicher gehalten wirst.",
+      "Greifen Sie die Stange weiter als schulterbreit und lehnen Sie sich leicht zurück.",
+      "Ziehe die Stange nach unten zur oberen Brust und konzentriere dich darauf, die Schulterblätter zusammenzuziehen.",
+      "Führe die Stange langsam zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Zieh die Stange nicht hinter deinen Nacken; zieh sie zu deiner oberen Brust.",
+      "Konzentriere dich darauf, mit den Ellbogen zu führen.",
+      "Kontrolliere das Gewicht beim Hochziehen, um Spannung in deinen Latissimusmuskeln zu halten."
+    ]
+  },
+  "cableLatPushdown": {
+    "description": "Eine stehende Kabelübung, die den Latissimus durch Schulterextension trainiert, während die Arme nahezu gestreckt bleiben.",
+    "instructions": [
+      "Befestige eine gerade Stange oder ein Seil an einer hohen Kabelrolle und stelle dich mit Blick zur Maschine.",
+      "Halte den Griff mit leicht gebeugten Ellbogen, trete einen Schritt zurück und beuge dich leicht aus der Hüfte nach vorne.",
+      "Halte die Arme nahezu gestreckt und ziehe den Griff nach unten in Richtung Oberschenkel, indem du die Oberarme nach unten und nach hinten führst.",
+      "Halte kurz inne, kehre dann kontrolliert in die Ausgangsposition zurück, ohne die Schultern hochzuziehen."
+    ],
+    "tips": [
+      "Behalte nur eine kleine, feste Beugung in den Ellbogen bei, damit die Latissimusmuskulatur und nicht die Trizeps die Arbeit verrichtet.",
+      "Halte die Brust aufrecht und vermeide, den Rumpf zu schwingen, um die Last zu bewegen.",
+      "Verwende einen kontrollierten Bewegungsumfang, bei dem du die Dehnung des Latissimus oben und die Kontraktion nahe den Oberschenkeln spürst."
+    ]
+  },
+  "seatedCableRow": {
+    "description": "Zielt auf die Rückendicke, indem man im Sitzen die Kabel zum Rumpf zieht.",
+    "instructions": [
+      "Setz dich, stelle die Füße auf die Plattformen und halte die Knie leicht gebeugt.",
+      "Greifen Sie den Griff und setzen Sie sich aufrecht hin, die Arme ausgestreckt.",
+      "Zieh den Griff zu deinen unteren Rippen und drücke dabei die Schulterblätter zusammen.",
+      "Führe die Bewegung langsam zurück in die Ausgangsposition, ohne dass der Gewichtsstapel aufschlägt."
+    ],
+    "tips": [
+      "Halte den Rücken gerade und vermeide ein Hin- und Herschaukeln des Oberkörpers.",
+      "Konzentriere dich darauf, mit den Ellbogen zu ziehen, nicht mit den Händen.",
+      "Halte die Körpermitte während der gesamten Bewegung stabil."
+    ]
+  },
+  "seatedMachineRow": {
+    "description": "Eine brustgestützte Ruderübung an der Maschine, die die Rückenmuskulatur isoliert und gleichzeitig den unteren Rücken schont.",
+    "instructions": [
+      "Stelle Sitz und Brustpolster so ein, dass du mit ausgestreckten Armen bequem die Griffe erreichst.",
+      "Setz dich mit der Brust gegen das Polster und greife die Griffe.",
+      "Zieh die Griffe zu dir und konzentriere dich auf die Kontraktion im mittleren Rücken.",
+      "Führe die Griffe langsam zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Halte deine Brust fest ans Polster gepresst, um den Rücken zu isolieren.",
+      "Konzentriere dich darauf, die Schulterblätter im Moment maximaler Kontraktion zusammenzuziehen.",
+      "Vermeide, die Schultern hochzuziehen."
+    ]
+  },
+  "barbellBentOverRow": {
+    "description": "Eine kraftvolle zusammengesetzte Bewegung, die die Dicke des Rückens und die allgemeine Oberkörperkraft steigert.",
+    "instructions": [
+      "Stelle die Füße schulterbreit auseinander und halte eine Langhantel mit Obergriff.",
+      "Beuge dich aus der Hüfte und beuge die Knie leicht, halte den Rücken gerade.",
+      "Ziehe die Langhantel zu den unteren Rippen, wobei die Ellbogen dicht am Körper bleiben.",
+      "Führe die Stange kontrolliert zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Halte die Wirbelsäule neutral und vermeide, den Rücken zu runden.",
+      "Spanne deine Körpermitte an, um deinen unteren Rücken zu stützen.",
+      "Nutze nicht Schwung, um das Gewicht 'hochzutricksen'."
+    ]
+  },
+  "dumbbellBentOverRow": {
+    "description": "Das Vorbeugen und Heranziehen der Kurzhanteln zur Taille beansprucht die Rückenmuskulatur bei größerem Bewegungsumfang.",
+    "instructions": [
+      "Stelle die Füße schulterbreit auseinander und halte in jeder Hand eine Kurzhantel.",
+      "Beuge dich an der Hüfte, bis dein Oberkörper fast parallel zum Boden ist.",
+      "Ziehe die Kurzhanteln zu den Hüften und presse die Schulterblätter zusammen.",
+      "Senke die Gewichte kontrolliert wieder ab."
+    ],
+    "tips": [
+      "Halte den Rücken flach und die Körpermitte während der gesamten Übung angespannt.",
+      "Konzentriere dich darauf, mit den Ellbogen zu ziehen.",
+      "Kurzhanteln ermöglichen es jeder Seite des Rückens, unabhängig zu arbeiten."
+    ]
+  },
+  "smithMachineBentOverRow": {
+    "description": "Eine geführte Rudervariante, die schweres Laden ermöglicht und den Fokus auf die Kontraktion des mittleren Rückens legt.",
+    "instructions": [
+      "Positionieren Sie sich in einer vorgebeugten Haltung über der Stange der Smith-Maschine.",
+      "Greifen Sie die Stange und lösen Sie die Verriegelung.",
+      "Ziehe die Stange zu den unteren Rippen und halte den Rücken gerade.",
+      "Senke die Stange wieder ab und wiederhole."
+    ],
+    "tips": [
+      "Halte die Hüftbeugeposition während des gesamten Satzes stabil.",
+      "Der feste Bewegungsweg hilft, die Zielmuskeln zu isolieren.",
+      "Passe deinen Abstand zur Stange für mehr Komfort an."
+    ]
+  },
+  "singleArmDumbbellRow": {
+    "description": "Ermöglicht einen größeren Bewegungsumfang und hilft, muskuläre Ungleichgewichte im Rücken zu korrigieren.",
+    "instructions": [
+      "Stelle ein Knie und eine Hand zur Unterstützung auf eine Bank, halte dabei den Rücken gerade.",
+      "Halte eine Kurzhantel in der anderen Hand, den Arm zum Boden ausgestreckt.",
+      "Ziehe die Kurzhantel nach oben zur Hüfte und halte den Ellbogen dicht an der Seite.",
+      "Senke die Kurzhantel langsam in die Ausgangsposition."
+    ],
+    "tips": [
+      "Konzentriere dich darauf, mit dem Rücken und dem Schulterblatt zu ziehen, nicht nur mit dem Arm.",
+      "Halte den Rumpf stabil und vermeide, den Körper beim Ziehen zu drehen.",
+      "Halte den Nacken in einer neutralen Position."
+    ]
+  },
+  "facePull": {
+    "description": "Wichtig für die Schultergesundheit; zielt auf die hinteren Deltamuskeln und die obere Rückenmuskulatur ab.",
+    "instructions": [
+      "Befestigen Sie ein Seil an einer Rolle des Kabelzugs auf Brust- oder Augenhöhe.",
+      "Greifen Sie die Enden des Seils, wobei die Daumen nach hinten zeigen.",
+      "Zieh das Seil zur Stirn und spreize die Enden auseinander, je näher es deinem Gesicht kommt.",
+      "Konzentriere dich darauf, deine hinteren Deltas und den mittleren Rücken am Ende der Bewegung anzuspannen."
+    ],
+    "tips": [
+      "Halte deine Ellbogen hoch und nach außen gespreizt.",
+      "Vermeide, deinen unteren Rücken zum Ziehen zu benutzen; bleibe aufrecht und stabil.",
+      "Verwende leichtere Gewichte und konzentriere dich auf die Qualität der Kontraktion."
+    ]
+  },
+  "rearDeltFly": {
+    "description": "Isoliert den hinteren Schulterbereich, um zu einer ausgewogenen Körperform beizutragen.",
+    "instructions": [
+      "Setz dich auf die Kante einer Bank oder eines Gestells und beuge dich aus der Hüfte nach vorn, wobei du den Rücken gerade hältst.",
+      "Halte Kurzhanteln mit den Handflächen zueinander gerichtet und die Arme zum Boden ausgestreckt.",
+      "Führe die Gewichte seitlich nach außen, bis deine Arme auf Schulterhöhe sind.",
+      "Senke die Gewichte langsam in die Ausgangsposition."
+    ],
+    "tips": [
+      "Konzentriere dich darauf, die hinteren Deltamuskeln zu nutzen, nicht die Trapezmuskeln.",
+      "Halte während der gesamten Bewegung eine leichte Beugung in den Ellbogen.",
+      "Schwinge die Gewichte nicht."
+    ]
+  },
+  "machineRearDeltFly": {
+    "description": "Isoliert die hinteren Deltamuskeln mit einer Maschine für kontrollierte und effektive Ergebnisse.",
+    "instructions": [
+      "Setze dich zur Maschine gewandt und lehne die Brust fest gegen das Polster.",
+      "Greifen Sie die Griffe und halten Sie die Arme vor sich ausgestreckt.",
+      "Ziehe die Griffe in einem weiten Bogen nach hinten, bis deine Arme in einer Linie mit den Schultern sind.",
+      "Spanne deine hinteren Deltamuskeln an und kehre dann langsam in die Ausgangsposition zurück."
+    ],
+    "tips": [
+      "Drücke die Brust gegen das Polster, um die hinteren Deltamuskeln zu isolieren.",
+      "Konzentriere dich auf die Kontraktion im hinteren Bereich der Schultern.",
+      "Behalte ein konstantes, kontrolliertes Tempo bei."
+    ]
+  },
+  "bicepsCurl": {
+    "description": "Die klassische Isolationsübung zum Aufbau und zur Definition der Bizepsmuskulatur.",
+    "instructions": [
+      "Stelle die Füße hüftbreit auseinander und halte die Kurzhanteln an den Seiten mit den Handflächen nach vorn.",
+      "Ziehe die Gewichte durch Beugen der Ellbogen zu den Schultern.",
+      "Spanne deine Bizeps am oberen Punkt an, dann senke die Gewichte langsam wieder ab.",
+      "Halte deine Oberarme während der gesamten Bewegung still."
+    ],
+    "tips": [
+      "Vermeide, deinen Körper zu schwingen oder Schwung zu nutzen, um die Gewichte zu heben.",
+      "Halte deine Ellenbogen dicht am Oberkörper.",
+      "Voller Bewegungsumfang: Strecke deine Arme am unteren Ende vollständig."
+    ]
+  },
+  "cableCurl": {
+    "description": "Ein stehender Kabelcurl, der während der gesamten Wiederholung durchgehend Spannung auf dem Bizeps hält.",
+    "instructions": [
+      "Befestigen Sie einen geraden oder EZ-förmigen Griff an der unteren Rolle und stellen Sie sich mit dem Gesicht zur Maschine.",
+      "Greifen Sie den Griff mit den Handflächen nach oben und halten Sie die Ellbogen dicht am Körper.",
+      "Ziehe den Griff zu den Schultern, während du die Oberarme weitgehend ruhig hältst.",
+      "Senke das Gewicht kontrolliert, bis deine Ellbogen wieder vollständig gestreckt sind."
+    ],
+    "tips": [
+      "Lass deine Schultern beim Absenken des Gewichts nicht nach vorn rollen.",
+      "Halte den Oberkörper still und vermeide es, dich nach hinten zu lehnen, um die Last zu bewegen.",
+      "Pausiere kurz nahe dem oberen Punkt, um die Bizepskontraktion zu maximieren."
+    ]
+  },
+  "bayesianCableCurl": {
+    "description": "Ein Kabelcurl hinter dem Körper, der den Bizeps zu Beginn der Wiederholung verlängert und die Dehnungsposition betont.",
+    "instructions": [
+      "Befestigen Sie einen Einzelgriff an der unteren Rolle und stellen Sie sich mit dem Rücken zur Maschine, wobei Sie den Griff mit einer Hand hinter Ihrer Hüfte halten.",
+      "Mach einen Schritt nach vorne, bis das Kabel deinen arbeitenden Arm leicht hinter deinen Rumpf zieht.",
+      "Ziehe den Griff zur Schulter, dabei darauf achten, dass der Ellbogen nicht zu weit nach vorne driftet.",
+      "Senke den Rücken kontrolliert zurück in die gestreckte Ausgangsposition, bevor du wiederholst."
+    ],
+    "tips": [
+      "Stelle genügend Abstand zur Maschine ein, um unten eine Dehnung im Bizeps zu spüren.",
+      "Halte die Brust aufrecht und vermeide, den Oberkörper beim Curl zu verdrehen.",
+      "Verwende moderate Lasten und volle Kontrolle, um das Beste aus der Dehnung herauszuholen."
+    ]
+  },
+  "hammerCurl": {
+    "description": "Ein Curl mit neutralem Griff, der Bizeps und Brachialis anspricht, für kräftigere Arme.",
+    "instructions": [
+      "Stehen Sie mit Kurzhanteln an den Seiten, Handflächen zum Rumpf gerichtet (neutraler Griff).",
+      "Ziehe die Gewichte hoch und behalte dabei den neutralen Griff bei.",
+      "Kontrahiere am oberen Punkt und senke die Hantel kontrolliert ab.",
+      "Halte deine Ellenbogen eng am Körper."
+    ],
+    "tips": [
+      "Konzentriere dich auf die Kontraktion in deinen Bizeps und Unterarmen.",
+      "Halte eine aufrechte Haltung und vermeide Schwingen.",
+      "Kann abwechselnd mit einem Arm oder mit beiden gleichzeitig ausgeführt werden."
+    ]
+  },
+  "suspensionRow": {
+    "description": "Verwendet einen Suspension‑Trainer, um Körpergewichts‑Rudern auszuführen; die Schwierigkeit lässt sich leicht über den Körperwinkel anpassen.",
+    "instructions": [
+      "Greifen Sie die Griffe, lehnen Sie sich zurück, die Arme gestreckt und die Füße nach vorne.",
+      "Halte eine gerade Linie von Kopf bis Ferse.",
+      "Zieh deine Brust zu den Griffen, indem du die Ellbogen nach hinten führst.",
+      "Senke dich kontrolliert zurück in die Ausgangsposition."
+    ],
+    "tips": [
+      "Passe die Schwierigkeit an, indem du deine Fußposition veränderst (je näher an der Verankerung, desto schwerer).",
+      "Spanne Rumpf- und Gesäßmuskulatur an, um ein Einsinken der Hüften zu verhindern.",
+      "Konzentriere dich auf eine flüssige, kontrollierte Bewegung."
+    ]
+  },
+  "landmineRow": {
+    "description": "Eine kraftvolle Rückenübung, bei der ein Ende einer Langhantel verankert wird und das gewichtete Ende zum Oberkörper gezogen wird.",
+    "instructions": [
+      "Befestigen Sie ein Ende einer Langhantel in einer Landmine-Halterung oder in einer Ecke am Boden.",
+      "Laden Sie Gewichtsscheiben auf das andere Ende und stellen Sie sich mit gespreizten Beinen über die Stange, mit dem Rücken zur Verankerung.",
+      "Beuge dich an der Hüfte und beuge leicht die Knie, halte den Rücken flach.",
+      "Greifen Sie die Stange (verwenden Sie bei Bedarf einen V-Griff) und ziehen Sie das beschwerte Ende zu Ihren unteren Rippen.",
+      "Senke das Gewicht kontrolliert wieder ab und halte dabei den Rücken gerade."
+    ],
+    "tips": [
+      "Spanne während der gesamten Bewegung deinen Rumpf an, um deinen unteren Rücken zu schützen.",
+      "Konzentriere dich darauf, mit den Ellbogen zu ziehen und die Schulterblätter zusammenzudrücken.",
+      "Halte eine konstante Hüftposition; vermeide, das Gewicht 'hochzuschwingen'."
+    ]
+  },
+  "plank": {
+    "description": "Eine grundlegende Core-Übung, die isometrische Kraft und Stabilität in der gesamten Rumpfregion aufbaut.",
+    "instructions": [
+      "Platziere deine Unterarme auf dem Boden, die Ellbogen unter den Schultern ausgerichtet.",
+      "Strecke die Beine nach hinten und balanciere dich auf den Zehen.",
+      "Halte den Körper in einer geraden Linie von Kopf bis Fersen.",
+      "Spanne deine Körpermitte an und halte die Position."
+    ],
+    "tips": [
+      "Vermeide, dass deine Hüften durchhängen oder zu hoch angehoben werden.",
+      "Halte eine neutrale Nackenposition; schaue zum Boden.",
+      "Atme während der gesamten Haltezeit gleichmäßig."
+    ]
+  },
+  "sidePlank": {
+    "description": "Konzentriert sich auf die schrägen Bauchmuskeln und die seitliche Rumpfstabilität, um Gleichgewicht zu verbessern und Rückenschmerzen vorzubeugen.",
+    "instructions": [
+      "Leg dich auf die Seite, die Beine gestreckt und die Füße übereinandergelegt.",
+      "Stütze deinen Oberkörper auf dem Unterarm, wobei der Ellbogen direkt unter der Schulter liegt.",
+      "Heb deine Hüften, bis dein Körper eine gerade Linie von Kopf bis Fuß bildet.",
+      "Halte die Position, halte dabei den Rumpf angespannt und die Hüften auf gleicher Höhe."
+    ],
+    "tips": [
+      "Lass deine Hüften nicht in Richtung Boden durchhängen.",
+      "Halte den Nacken in einer neutralen Position und schaue geradeaus.",
+      "Für eine leichtere Variante führe die Planke mit den Knien auf dem Boden aus."
+    ]
+  },
+  "deadBug": {
+    "description": "Eine sichere und effektive Methode, um Rumpfstabilität und Koordination aufzubauen, ohne den Rücken zu belasten.",
+    "instructions": [
+      "Leg dich auf den Rücken, die Arme zur Decke gestreckt und die Knie im 90°-Winkel gebeugt (Tabletop-Position).",
+      "Senke langsam deinen rechten Arm hinter deinen Kopf, während du gleichzeitig das linke Bein Richtung Boden streckst.",
+      "Drücke deinen unteren Rücken während der gesamten Bewegung fest auf den Boden.",
+      "Kehre in die Ausgangsposition zurück und wiederhole mit dem gegenüberliegenden Arm und Bein."
+    ],
+    "tips": [
+      "Wichtig ist, den Rücken flach zu halten; wenn dein Rücken hohl wird, senke das Bein nicht so weit.",
+      "Bewege dich langsam und kontrolliert.",
+      "Atme aus, während du deine Gliedmaßen streckst."
+    ]
+  },
+  "birdDog": {
+    "description": "Verbessert Gleichgewicht und Stabilität der Wirbelsäule, indem Rumpf, Gesäßmuskulatur und Schultern gleichzeitig aktiviert werden.",
+    "instructions": [
+      "Beginne auf allen Vieren mit deinen Händen unter den Schultern und den Knien unter den Hüften.",
+      "Strecke langsam deinen rechten Arm nach vorn und dein linkes Bein nach hinten, bis beide parallel zum Boden sind.",
+      "Halte deine Hüften waagrecht und deine Körpermitte angespannt, um ein Hohlkreuz zu vermeiden.",
+      "Halte eine Sekunde, dann kehre in die Ausgangsposition zurück und wechsle die Seite."
+    ],
+    "tips": [
+      "Stell dir vor, auf deinem Rücken stünde ein Glas Wasser, das du nicht verschütten möchtest.",
+      "Hebe deinen Arm oder dein Bein nicht zu hoch; konzentriere dich auf Länge statt Höhe.",
+      "Richte deinen Blick zum Boden, um eine neutrale Nackenposition beizubehalten."
+    ]
+  },
+  "mountainClimber": {
+    "description": "Eine dynamische Übung, die den Rumpf trainiert und gleichzeitig eine erhebliche Belastung für das Herz-Kreislauf-System darstellt.",
+    "instructions": [
+      "Beginne in einer hohen Plank-Position mit den Händen unter den Schultern und dem Körper in einer geraden Linie.",
+      "Zieh ein Knie zur Brust und wechsle dann schnell die Beine, als würdest du in einer Plank-Position auf der Stelle rennen.",
+      "Halte die Hüften niedrig und die Körpermitte angespannt.",
+      "Behalte ein konstantes, zügiges Tempo bei."
+    ],
+    "tips": [
+      "Vermeide, dass deine Hüften auf und ab wippen.",
+      "Konzentriere dich darauf, deine Knie gerade nach vorne zu schieben.",
+      "Halte dein Gewicht mittig über deinen Händen."
+    ]
+  },
+  "russianTwist": {
+    "description": "Trainiert die schrägen Bauchmuskeln mit einer Rotationsbewegung, die Rumpfkraft und Definition verbessert.",
+    "instructions": [
+      "Setz dich auf den Boden mit angewinkelten Knien und leicht angehobenen Füßen.",
+      "Lehne dich leicht zurück, halte den Rücken gerade und die Rumpfmuskulatur angespannt.",
+      "Drehe deinen Oberkörper zu einer Seite und führe deine Hände zum Boden neben deiner Hüfte.",
+      "Drehe dich kontrolliert zurück zur anderen Seite."
+    ],
+    "tips": [
+      "Folge mit den Augen deinen Händen, um sicherzustellen, dass dein ganzer Oberkörper rotiert.",
+      "Halte die Füße zusammen und so ruhig wie möglich.",
+      "Für eine zusätzliche Herausforderung halte ein Gewicht oder einen Medizinball."
+    ]
+  },
+  "bicycleCrunch": {
+    "description": "Eine ausgezeichnete, vielseitige Rumpfübung, die obere und untere Bauchmuskeln sowie die schrägen Bauchmuskeln (Obliquen) anspricht.",
+    "instructions": [
+      "Leg dich auf den Rücken, die Hände hinter dem Kopf und die Knie in Tabletop-Position.",
+      "Führe deinen rechten Ellenbogen in Richtung deines linken Knies, während du das rechte Bein ausstreckst.",
+      "Wechseln Sie die Seite: Bringen Sie Ihren linken Ellenbogen Richtung rechtes Knie und strecken Sie dabei das linke Bein.",
+      "Setze das abwechselnde Pedalieren fort."
+    ],
+    "tips": [
+      "Konzentriere dich darauf, deinen Rumpf zu drehen, statt nur die Ellbogen zu ziehen.",
+      "Drücke deinen unteren Rücken gegen den Boden.",
+      "Bewege dich kontrolliert statt schnell, um die Muskelaktivierung zu verbessern."
+    ]
+  },
+  "hangingLegRaise": {
+    "description": "Eine fortgeschrittene Core-Übung, die speziell die unteren Bauchmuskeln anspricht und die Griffkraft verbessert.",
+    "instructions": [
+      "Hängen Sie an einer Klimmzugstange mit vollständig gestreckten Armen und schulterbreitem Griff.",
+      "Halte die Beine gestreckt (oder leicht gebeugt) und hebe sie, bis sie parallel zum Boden sind.",
+      "Senke die Beine langsam und kontrolliert wieder ab.",
+      "Vermeide, deinen Körper zu schwingen, um Schwung zu holen."
+    ],
+    "tips": [
+      "Spanne deine Körpermitte und Latissimus an, um deinen Körper zu stabilisieren.",
+      "Konzentriere dich auf das 'Einklappen' des Beckens, um die unteren Bauchmuskeln zu aktivieren.",
+      "Wenn vollständige Beinheben zu schwierig sind, beginne mit hängenden Knieheben."
+    ]
+  },
+  "lyingLegRaise": {
+    "description": "Eine bodenbasierte Rumpfübung, die die Bauchmuskeln trainiert, das Becken zu kontrollieren, während die Beine durch Hüftbeugung bewegt werden.",
+    "instructions": [
+      "Lege dich auf den Rücken, die Arme entlang des Körpers und die Beine gestreckt.",
+      "Spanne die Bauchmuskeln an und drücke den unteren Rücken sanft in den Boden.",
+      "Hebe beide Beine gemeinsam an, bis sie fast senkrecht sind; halte sie gestreckt oder bei Bedarf leicht gebeugt.",
+      "Senke die Beine langsam nur so weit ab, wie du kannst, ohne dass dein unterer Rücken vom Boden abhebt."
+    ],
+    "tips": [
+      "Strebe nicht nach maximaler Bewegungsamplitude; stoppe das Absenken, sobald sich dein unterer Rücken zu heben beginnt.",
+      "Beuge die Knie oder tippe abwechselnd mit den Fersen den Boden an, um die Übung zu erleichtern.",
+      "Bewege dich langsam und vermeide Schwung mit den Beinen, damit die Bauchmuskeln und nicht das Momentum die Bewegung kontrollieren."
+    ]
+  },
+  "cableWoodchop": {
+    "description": "Eine funktionelle Rotationsbewegung, die die Kraft des Rumpfes entwickelt und mit Kabelwiderstand die schrägen Bauchmuskeln trainiert.",
+    "instructions": [
+      "Stellen Sie sich seitlich zu einer Kabelmaschine, wobei der Griff auf hoher oder niedriger Position eingestellt ist.",
+      "Greifen Sie den Griff mit beiden Händen und treten Sie vom Gerät weg.",
+      "Ziehe den Griff diagonal über den Körper nach unten (oder oben) in einer holzhackenden Bewegung und rotiere dabei den Oberkörper.",
+      "Kehre langsam in die Ausgangsposition zurück."
+    ],
+    "tips": [
+      "Halte die Arme weitgehend gestreckt und rotiere aus dem Rumpf.",
+      "Drehe den hinteren Fuß beim Rotieren, um deine Knie zu schützen.",
+      "Halte eine stabile Basis mit den Füßen schulterbreit auseinander."
+    ]
+  },
+  "burpee": {
+    "description": "Die ultimative Ganzkörperübung zum Fettverbrennen und zum Aufbau explosiver Kraft und Ausdauer.",
+    "instructions": [
+      "Beginne in aufrechter Position.",
+      "Gehe in die Hocke und stelle deine Hände auf den Boden.",
+      "Springe mit den Füßen zurück in eine Plank-Position und mache eine Liegestütze.",
+      "Springe mit den Füßen zurück zu den Händen und springe explosiv in die Luft, die Arme über dem Kopf."
+    ],
+    "tips": [
+      "Spanne deinen Rumpf während der gesamten Bewegung an.",
+      "Lande nach dem Sprung sanft auf den Füßen.",
+      "Kann abgeändert werden, indem man statt zu springen zurücktritt, um die Stoßbelastung zu reduzieren."
+    ]
+  },
+  "jumpingJacks": {
+    "description": "Eine klassische Ganzkörper-Aufwärm- und Konditionsübung, die Koordination und Herz-Kreislauf-Gesundheit verbessert.",
+    "instructions": [
+      "Stelle die Füße zusammen und halte die Arme an den Seiten.",
+      "Spring in die Luft, spreize dabei die Beine schulterbreit und schwinge die Arme über den Kopf.",
+      "Springe erneut, um in die Ausgangsposition zurückzukehren.",
+      "Wiederhole rhythmisch."
+    ],
+    "tips": [
+      "Lande sanft auf dem Fußballen.",
+      "Halte die Knie leicht gebeugt.",
+      "Spanne deine Körpermitte während der gesamten Bewegung an."
+    ]
+  },
+  "highKnees": {
+    "description": "Eine hochintensive Cardio-Übung, die Beine und Rumpf kräftigt und gleichzeitig die Lauftechnik verbessert.",
+    "instructions": [
+      "Stelle die Füße hüftbreit auseinander.",
+      "Zieh dein rechtes Knie so hoch wie möglich zur Brust, während du den linken Arm schwingst.",
+      "Wechsle schnell die Beine, hebe dein linkes Knie und schwinge deinen rechten Arm.",
+      "Wechsle weiterhin in schnellem Tempo und bleibe auf den Fußballen."
+    ],
+    "tips": [
+      "Konzentriere dich darauf, die Knie mindestens auf Hüfthöhe zu heben.",
+      "Halte den Oberkörper aufrecht; lehne dich nicht nach hinten.",
+      "Schwinge die Arme, um die Dynamik aufrechtzuerhalten."
+    ]
+  },
+  "squatJump": {
+    "description": "Kombiniert eine klassische Kniebeuge mit einem explosiven Sprung, um Kraft aufzubauen und die Herzfrequenz zu erhöhen.",
+    "instructions": [
+      "Stelle die Füße schulterbreit auseinander.",
+      "Geh in die Hocke, bis deine Oberschenkel parallel zum Boden sind.",
+      "Springe explosiv in die Luft und strecke dich so hoch wie möglich.",
+      "Lande sanft und sinke sofort in die nächste Kniebeuge."
+    ],
+    "tips": [
+      "Dämpfe die Landung, indem du auf den Ballen landest und zur Ferse abrollst.",
+      "Achte darauf, dass deine Knie beim Abspringen oder Landen nicht nach innen einknicken.",
+      "Schwingen Sie die Arme, um Aufwärtskraft zu erzeugen."
+    ]
+  },
+  "butterflySitUp": {
+    "description": "Eine klassische Freeletics-Rumpfübung, die eine Schmetterlingsbeinposition verwendet, um die Beteiligung der Hüftbeuger zu minimieren.",
+    "instructions": [
+      "Leg dich auf den Rücken, die Fußsohlen zusammen und die Knie nach außen gerichtet.",
+      "Strecke die Arme über den Kopf und berühre den Boden hinter dir.",
+      "Spanne deine Körpermitte an und setze dich vollständig auf, sodass du den Boden vor deinen Zehen berührst.",
+      "Senke dich kontrolliert wieder ab."
+    ],
+    "tips": [
+      "Nutze bei Bedarf die Arme für Schwung, konzentriere dich jedoch auf die Aktivierung der Bauchmuskeln.",
+      "Drücke deinen unteren Rücken während der Anfangsphase des Sit-ups gegen den Boden.",
+      "Atme aus, während du dich aufsetzt."
+    ]
+  },
+  "sprawl": {
+    "description": "Eine 'down-and-up'-Bewegung, ähnlich einem Burpee, aber ohne Liegestütz und Sprung, mit Fokus auf Geschwindigkeit und metabolischer Konditionierung.",
+    "instructions": [
+      "Aus dem Stand geh in die Hocke und platziere deine Hände auf dem Boden.",
+      "Spring mit den Füßen zurück in eine hohe Plank-Position.",
+      "Springe sofort mit den Füßen zurück in Richtung deiner Hände.",
+      "Kehre so schnell wie möglich in den Stand zurück."
+    ],
+    "tips": [
+      "Spanne deine Körpermitte fest an, um ein Durchhängen der Hüften in der Plank-Position zu verhindern.",
+      "Konzentriere dich auf schnelle Übergänge zwischen dem Stehen und der Planke.",
+      "Halte einen gleichmäßigen Rhythmus."
+    ]
+  },
+  "pikePushUp": {
+    "description": "Eine Liegestützvariation mit Körpergewicht in Pike-Position, die die Schultern und den oberen Brustbereich anspricht.",
+    "instructions": [
+      "Beginne in einer hohen Plank-Position, hebe dann deine Hüften, bis dein Körper eine umgekehrte V‑Form bildet.",
+      "Halte Beine und Arme gerade, mit dem Kopf zwischen den Armen eingezogen.",
+      "Senke den Scheitel deines Kopfes Richtung Boden, indem du die Ellbogen beugst.",
+      "Drücke dich zurück in die Ausgangs-Pike-Position."
+    ],
+    "tips": [
+      "Je näher deine Füße an deinen Händen sind, desto schwieriger wird die Übung.",
+      "Spanne deine Körpermitte an und halte den Rücken gerade.",
+      "Konzentriere dich darauf, durch die Schultern zu drücken."
+    ]
+  },
+  "superman": {
+    "description": "Kräftigt die gesamte hintere Muskelkette, einschließlich unterer Rücken, Gesäßmuskeln und hintere Oberschenkelmuskulatur.",
+    "instructions": [
+      "Lege dich mit dem Gesicht nach unten auf den Boden, die Arme über den Kopf ausgestreckt und die Beine gestreckt.",
+      "Hebe gleichzeitig Arme, Brust und Beine vom Boden an.",
+      "Halte die Position eine Sekunde lang, indem du deine Gesäßmuskeln und den unteren Rücken anspannst.",
+      "Senke den Rücken kontrolliert ab."
+    ],
+    "tips": [
+      "Schau nicht nach oben; halte deinen Nacken in Neutralstellung, indem du auf den Boden schaust.",
+      "Konzentriere dich auf Länge statt Höhe.",
+      "Atme aus, während du hebst."
+    ]
+  },
+  "handReleasePushUp": {
+    "description": "Eine Liegestützvariation, bei der du am unteren Ende jeder Wiederholung die Hände vom Boden hebst, um vollen Bewegungsumfang sicherzustellen und Explosivkraft aufzubauen.",
+    "instructions": [
+      "Beginne in einer hohen Plank-Position.",
+      "Senke deine Brust ganz bis zum Boden.",
+      "Heb kurz beide Hände vom Boden ab und setze sie dann wieder ab.",
+      "Drücke dich explosiv zurück in die Ausgangsposition der Planke."
+    ],
+    "tips": [
+      "Spanne den Rumpf an, um 'snaking' vom Boden zu vermeiden.",
+      "Halte den Körper in einer geraden Linie von Kopf bis Fersen.",
+      "Konzentriere dich darauf, durch die gesamte Handfläche zu drücken."
+    ]
+  },
+  "climber": {
+    "description": "Ähnlich wie Mountain Climbers, aber mit den Füßen, die außerhalb der Hände springen, wobei die Hüftmobilität und die Rumpfkraft betont werden.",
+    "instructions": [
+      "Beginne in einer hohen Plank-Position.",
+      "Springe mit dem rechten Fuß nach vorn und setze ihn außerhalb deiner rechten Hand ab.",
+      "Wechsele explosiv die Beine: springe mit dem rechten Fuß nach hinten, während du den linken Fuß außerhalb deiner linken Hand platzierst.",
+      "Wechsle weiterhin in einem schnellen, rhythmischen Tempo."
+    ],
+    "tips": [
+      "Halte deine Hüften so tief wie möglich.",
+      "Konzentriere dich auf einen großen Bewegungsumfang für deine Beine.",
+      "Halte einen starken, stabilen Oberkörper."
+    ]
+  },
+  "boxingBagWork": {
+    "description": "Intensive Intervalle am schweren Boxsack verbessern die kardiovaskuläre Ausdauer, die Kraft und die Koordination.",
+    "instructions": [
+      "Stellen Sie sich in Boxstellung auf, die Hände oben zum Schutz des Gesichts.",
+      "Führe verschiedene Schläge aus (Jab, Cross, Hook, Uppercut) gegen den Sandsack.",
+      "Bleibe leicht auf den Füßen und bewege dich um den Boxsack herum.",
+      "Behalte während der gesamten Runde eine hohe Intensität bei."
+    ],
+    "tips": [
+      "Konzentriere dich auf die richtige Schlagtechnik, um Handgelenksverletzungen zu vermeiden.",
+      "Atme bei jedem Schlag aus.",
+      "Spanne deine Körpermitte an für mehr Kraft und Stabilität."
+    ]
+  },
+  "catCow": {
+    "description": "Eine sanfte Wirbelsäulenbewegung, die die Beweglichkeit verbessert und Verspannungen im Rücken löst.",
+    "instructions": [
+      "Beginne auf allen Vieren mit den Händen unter den Schultern und den Knien unter den Hüften.",
+      "Kuh: Atme ein, während du deinen Bauch Richtung Boden fallen lässt, hebe die Brust und schaue nach oben.",
+      "Katze: Atme aus, wölbe deinen Rücken zur Decke, ziehe das Kinn ein und ziehe den Bauchnabel nach innen.",
+      "Wechsle sanft zwischen den beiden Positionen und folge deinem Atem."
+    ],
+    "tips": [
+      "Konzentriere dich darauf, einen Wirbel nach dem anderen zu bewegen.",
+      "Führe die Bewegungen sanft und innerhalb eines angenehmen Bewegungsumfangs aus.",
+      "Spreize die Finger weit für besseren Halt."
+    ]
+  },
+  "hipFlexorStretch": {
+    "description": "Lindert Verspannungen in den Hüften, verursacht durch langes Sitzen oder intensives Training.",
+    "instructions": [
+      "Gehe auf ein Knie, während der andere Fuß mit der Sohle flach vor dir steht (Halb-Kniestellung).",
+      "Halte den Oberkörper aufrecht und schiebe sanft deine Hüften nach vorne.",
+      "Spanne das Gesäß der knienden Seite an, um die Dehnung zu vertiefen.",
+      "Halte die Position für die gewünschte Dauer und wechsle dann das Bein."
+    ],
+    "tips": [
+      "Vermeide ein Hohlkreuz; spanne deine Körpermitte an.",
+      "Du solltest die Dehnung an der Vorderseite deiner knienden Hüfte spüren.",
+      "Halte während der gesamten Dehnung eine aufrechte Körperhaltung."
+    ]
+  },
+  "hamstringStretch": {
+    "description": "Verbessert die Flexibilität der hinteren Oberschenkel und hilft, Schmerzen im unteren Rücken vorzubeugen.",
+    "instructions": [
+      "Setz dich auf den Boden, ein Bein ausgestreckt und den anderen Fuß an der Innenseite deines Oberschenkels.",
+      "Beuge dich an der Hüfte und greife nach den Zehen, dabei den Rücken flach halten.",
+      "Halte die Dehnung, wenn du Spannung an der Rückseite des Beins spürst.",
+      "Wiederhole auf der anderen Seite."
+    ],
+    "tips": [
+      "Nicht wippen; halte eine gleichmäßige, sanfte Dehnung.",
+      "Konzentriere dich darauf, mit der Brust nach vorne zu reichen statt mit dem Kopf, damit dein Rücken gerader bleibt.",
+      "Atme tief ein und versuche, dich in die Dehnung zu entspannen."
+    ]
+  },
+  "thoracicRotation": {
+    "description": "Lockert den oberen Rücken und verbessert die Rotationsmobilität für bessere Haltung und Leistung.",
+    "instructions": [
+      "Beginne auf allen Vieren oder in Seitlage mit angewinkelten Knien.",
+      "Lege eine Hand hinter deinen Kopf.",
+      "Drehe deinen Ellbogen und Rumpf zur Decke und folge mit den Augen.",
+      "Kehre langsam in die Ausgangsposition zurück."
+    ],
+    "tips": [
+      "Halte die Hüften still und konzentriere die Rotation im oberen Rücken.",
+      "Atme aus, während du dich nach oben drehst.",
+      "Erzwinge nicht den Bewegungsbereich; bewege dich innerhalb deiner Komfortzone."
+    ]
+  },
+  "shoulderMobilityFlow": {
+    "description": "Eine Abfolge von Bewegungen zur Verbesserung des Bewegungsumfangs und der Gesundheit der Schultergelenke.",
+    "instructions": [
+      "Führe eine Reihe kontrollierter Schulterbewegungen aus, wie Armkreisen, Schulterrollen und 'Wall Slides'.",
+      "Führe jede Bewegung langsam und in ihrem vollen Bewegungsumfang aus.",
+      "Konzentriere dich darauf, die Schultern entspannt und nach unten, weg von den Ohren, zu halten.",
+      "Halte einen gleichmäßigen, rhythmischen Fluss."
+    ],
+    "tips": [
+      "Vermeiden Sie alle Bewegungen, die stechende Schmerzen verursachen.",
+      "Spanne deine Körpermitte an, um den Oberkörper während der Armbewegungen zu stabilisieren.",
+      "Ideal als Aufwärmübung für jedes Oberkörpertraining."
+    ]
+  },
+  "worldGreatestStretch": {
+    "description": "Ein umfassendes dynamisches Stretching, das die Hüften, die hintere Oberschenkelmuskulatur und die Brustwirbelsäule anspricht.",
+    "instructions": [
+      "Beginne in einer hohen Plank-Position.",
+      "Setze deinen rechten Fuß nach vorne außerhalb deiner rechten Hand.",
+      "Heb deinen rechten Arm und drehe deinen Oberkörper in Richtung Decke, während du auf deine Hand schaust.",
+      "Führe deinen rechten Ellenbogen nach unten zur Innenseite deines rechten Fußes.",
+      "Drücke dich zurück in eine Dehnung der hinteren Oberschenkel, indem du dein vorderes Bein streckst und die Zehen anhebst.",
+      "Kehre in die Plank-Position zurück und wiederhole auf der anderen Seite."
+    ],
+    "tips": [
+      "Durchlaufe jede Phase langsam und bewusst.",
+      "Halte das hintere Bein während der Rotation so gerade wie möglich.",
+      "Konzentriere dich darauf, beim Drehen die Brust zu öffnen."
+    ]
+  },
+  "pigeonPose": {
+    "description": "Eine effektive Yoga-Position zum Öffnen der Hüften und zur Linderung von Verspannungen im Gesäß.",
+    "instructions": [
+      "Aus der Herabschauenden-Hund- oder Vierfüßlerposition bringe dein rechtes Knie nach vorne in Richtung deines rechten Handgelenks.",
+      "Lege dein rechtes Schienbein auf den Boden, so dass es parallel zur Vorderseite deiner Matte liegt (oder so, wie es bequem ist).",
+      "Strecke dein linkes Bein gerade nach hinten.",
+      "Halte die Hüften parallel und senke den Oberkörper langsam über das vordere Bein.",
+      "Halte die Position und atme in die Dehnung hinein, dann die Seite wechseln."
+    ],
+    "tips": [
+      "Zwinge dein Schienbein nicht parallel, wenn das Knieschmerzen verursacht.",
+      "Verwende einen Block oder ein Kissen unter deiner Hüfte zur Unterstützung, falls nötig.",
+      "Halte den vorderen Fuß gebeugt, um dein Knie zu schützen."
+    ]
+  },
+  "cobraStretch": {
+    "description": "Eine sanfte Rückenstreckung, die die Bauchmuskulatur dehnt und die Beweglichkeit der Wirbelsäule verbessert.",
+    "instructions": [
+      "Lege dich mit dem Gesicht nach unten auf den Boden, die Beine ausgestreckt und die Fußrücken auf dem Boden.",
+      "Platziere deine Hände unter den Schultern.",
+      "Atme ein und strecke langsam die Arme, um deine Brust vom Boden zu heben.",
+      "Halte die Hüften auf dem Boden und die Schultern von den Ohren weg.",
+      "Blicke leicht nach oben und halte die Dehnung."
+    ],
+    "tips": [
+      "Zwinge deine Arme nicht vollständig zu strecken, wenn das im unteren Rücken schmerzt.",
+      "Spanne deine Gesäßmuskulatur leicht an, um die Wirbelsäule zu unterstützen.",
+      "Konzentriere dich auf Länge durch die Vorderseite deines Körpers."
+    ]
+  },
+  "childsPose": {
+    "description": "Eine erholsame Haltung, die Rücken, Hüften und Schultern sanft dehnt.",
+    "instructions": [
+      "Knie dich auf den Boden, die großen Zehen berühren sich, und setze dich auf die Fersen.",
+      "Stelle deine Knie etwa hüftbreit auseinander.",
+      "Atme aus und beuge dich nach vorn, sodass dein Oberkörper zwischen den Oberschenkeln ruht.",
+      "Strecke die Arme mit den Handflächen nach unten nach vorn aus oder lege sie entspannt an die Seiten.",
+      "Lege die Stirn auf den Boden und atme tief."
+    ],
+    "tips": [
+      "Weite bei Bedarf deine Knie weiter, um deinem Oberkörper mehr Platz zu verschaffen.",
+      "Konzentriere dich darauf, deinen Atem in den unteren Rücken zu lenken.",
+      "Entspanne deinen Kiefer und deine Schultern vollständig."
+    ]
+  },
+  "inchworm": {
+    "description": "Eine dynamische Bewegung, die die hintere Oberschenkelmuskulatur dehnt und gleichzeitig die Stabilität von Rumpf und Schultern aufbaut.",
+    "instructions": [
+      "Stelle die Füße hüftbreit auseinander.",
+      "Beuge dich an der Hüfte und setze die Hände auf den Boden (bei Bedarf die Knie leicht beugen).",
+      "Gehe mit den Händen nach vorne, bis du die hohe Plank‑Position erreichst.",
+      "Pausiere kurz, dann geh mit kleinen Schritten mit den Füßen zu deinen Händen, wobei die Beine so gerade wie möglich bleiben.",
+      "Kehre in eine stehende Position zurück und wiederhole."
+    ],
+    "tips": [
+      "Spanne den Rumpf an, um ein Durchhängen der Hüften in der Plank zu vermeiden.",
+      "Halte die Beine so lange wie möglich gestreckt, um die Dehnung der hinteren Oberschenkelmuskulatur zu maximieren.",
+      "Bewege dich kontrolliert und vermeide Hast."
+    ]
+  },
+  "armCircles": {
+    "description": "Eine einfache Mobilitätsübung für die Schulter, die die Rotatorenmanschette aufwärmt und die Gelenkgesundheit verbessert.",
+    "instructions": [
+      "Stelle die Füße schulterbreit auseinander und strecke die Arme seitlich auf Schulterhöhe aus.",
+      "Führe kleine, kontrollierte Kreisbewegungen mit den Armen nach vorne aus.",
+      "Nach der gewünschten Dauer die Richtung umkehren und rückwärts kreisen.",
+      "Vergrößern Sie nach und nach die Größe der Kreisbewegungen, sobald sich Ihre Schultern wärmer anfühlen."
+    ],
+    "tips": [
+      "Halte die Schultern entspannt und nach unten, weg von den Ohren.",
+      "Halte den Rumpf stabil; lass deinen Körper nicht schaukeln.",
+      "Atme während der Bewegung natürlich weiter."
+    ]
+  },
+  "legSwings": {
+    "description": "Ein dynamisches Stretching, das die Hüftmobilität verbessert und die Beine auf das Training vorbereitet.",
+    "instructions": [
+      "Stellen Sie sich in die Nähe einer Wand oder eines stabilen Gegenstandes, um das Gleichgewicht zu halten.",
+      "Schwinge ein Bein vorwärts und rückwärts in kontrollierter Bewegung und vergrößere den Bewegungsumfang nach und nach.",
+      "Nach den gewünschten Wiederholungen wechsle zu seitlichen Schwüngen über den Körper.",
+      "Wechseln Sie die Beine und wiederholen Sie."
+    ],
+    "tips": [
+      "Halte den Oberkörper aufrecht und die Rumpfmuskulatur angespannt; vermeide übermäßiges Hohlkreuz.",
+      "Erzwinge nicht den Bewegungsbereich; bleibe in einer angenehmen Dehnung.",
+      "Behalte ein rhythmisches, gleichmäßiges Tempo bei."
+    ]
+  },
+  "wristCircles": {
+    "description": "Verbessert die Beweglichkeit des Handgelenks und hilft, Überlastungen bei Übungen für den Oberkörper zu vermeiden.",
+    "instructions": [
+      "Strecke die Arme vor dir aus oder halte sie entspannt an den Seiten.",
+      "Drehe deine Handgelenke in kreisenden Bewegungen und durch die volle Bewegungsamplitude.",
+      "Führe Kreisbewegungen sowohl im Uhrzeigersinn als auch gegen den Uhrzeigersinn aus.",
+      "Du kannst auch die Finger verschränken und die Handgelenke gemeinsam drehen."
+    ],
+    "tips": [
+      "Führe die Bewegung langsam und konzentriert aus.",
+      "Entspanne deine Hände und Finger.",
+      "Besonders nützlich vor Übungen wie Liegestützen oder Bankdrücken."
+    ]
+  },
+  "ankleCircles": {
+    "description": "Verbessert die Sprunggelenksmobilität und bereitet die Füße auf belastende Aktivitäten vor.",
+    "instructions": [
+      "Stehen Sie auf einem Bein (verwenden Sie eine Wand zur Stabilisierung) oder setzen Sie sich und strecken Sie ein Bein aus.",
+      "Drehe deinen Knöchel in kreisender Bewegung und zeichne mit den Zehen den größtmöglichen Kreis.",
+      "Führe Kreisbewegungen in beide Richtungen aus.",
+      "Wechseln Sie die Füße und wiederholen Sie."
+    ],
+    "tips": [
+      "Konzentriere dich darauf, nur den Knöchel zu bewegen, nicht das ganze Bein.",
+      "Bewege dich langsam, um sicherzustellen, dass du jede Phase der Rotation erreichst.",
+      "Ideal, um die Tiefe der Kniebeuge und die Laufmechanik zu verbessern."
+    ]
+  },
+  "deepSquatHold": {
+    "description": "Eine isometrische Halteposition am unteren Ende einer Kniebeuge, um die Mobilität von Hüfte, Knie und Sprunggelenk zu verbessern.",
+    "instructions": [
+      "Stelle die Füße schulterbreit auseinander, die Zehen leicht nach außen gedreht.",
+      "Geh in die tiefstmögliche Kniebeuge, wobei deine Fersen auf dem Boden bleiben.",
+      "Lege deine Ellbogen an die Innenseite deiner Knie, um diese sanft nach außen zu drücken.",
+      "Halte die Brust so aufrecht wie möglich.",
+      "Halte die Position für die gewünschte Dauer und atme dabei tief."
+    ],
+    "tips": [
+      "Wenn deine Fersen abheben, stell sie auf eine kleine Erhöhung oder halte dich an einem stabilen Gegenstand zur Balance fest.",
+      "Konzentriere dich darauf, in die Hüften zu entspannen.",
+      "Verlagere dein Gewicht sanft von einer Seite zur anderen, um verschiedene Bereiche anzusprechen."
+    ]
+  },
+  "scapularCircles": {
+    "description": "Verbessert die Beweglichkeit und Gesundheit der Schulterblätter (Scapula), fördert eine bessere Haltung und eine bessere Funktionsweise des Oberkörpers.",
+    "instructions": [
+      "Stehen oder sitzen Sie aufrecht, die Arme entspannt an den Seiten.",
+      "Ziehe deine Schultern bis zu den Ohren hoch (Elevation).",
+      "Zieh sie zurück und presse die Schulterblätter zusammen (Retraktion).",
+      "Senke die Schulterblätter so weit wie möglich (Depression).",
+      "Schiebe die Schulterblätter nach vorne und runde dabei leicht den oberen Rücken (Protraktion).",
+      "Führe diese Bewegungen fließend zu einer kreisenden Bewegung aus und wiederhole sie in beide Richtungen."
+    ],
+    "tips": [
+      "Halte die Arme gestreckt und ruhig; die Bewegung soll aus den Schulterblättern kommen.",
+      "Stell dir vor, du zeichnest einen Kreis mit den Punkten deiner Schultern.",
+      "Vermeide das Hohlkreuz."
+    ]
+  },
+  "quadStretch": {
+    "description": "Ein klassisches Dehnen der Vorderseite des Oberschenkels zur Verbesserung der Flexibilität und der Kniesgesundheit.",
+    "instructions": [
+      "Stehen Sie auf einem Bein und verwenden Sie bei Bedarf eine Wand oder einen Stuhl zur Unterstützung.",
+      "Beuge dein anderes Knie und greife mit derselben Hand nach deinem Fuß oder Knöchel.",
+      "Ziehe deine Ferse sanft zu deinem Gesäß.",
+      "Halte die Knie zusammen und den Oberkörper aufrecht.",
+      "Halte die Position und wechsle dann das Bein."
+    ],
+    "tips": [
+      "Spanne das Gesäß des gedehnten Beins an, um die Dehnung des Hüftbeugers zu vertiefen.",
+      "Vermeide das Hohlkreuz.",
+      "Achte darauf, dass du aufrecht stehst und dich nicht nach vorne lehnen."
+    ]
+  },
+  "doorwayChestStretch": {
+    "description": "Verwendet eine Türöffnung oder einen Rahmen, um die Brust und die Vorderseite der Schultern zu öffnen und einer nach vorn geneigten Haltung entgegenzuwirken.",
+    "instructions": [
+      "Stellen Sie sich in einen Türrahmen oder an die Ecke einer Wand.",
+      "Platziere den/die Unterarm(e) an den Türrahmen, sodass der Ellbogen auf Schulterhöhe ist.",
+      "Lehne dich oder mache einen Schritt nach vorne, bis du eine angenehme Dehnung in der Brust spürst.",
+      "Halte die Position und atme tief.",
+      "Du kannst die Höhe deiner Arme anpassen, um verschiedene Bereiche der Brustmuskulatur anzusprechen."
+    ],
+    "tips": [
+      "Lehne dich nicht zu weit; die Dehnung sollte sanft sein.",
+      "Halte die Schultern unten und von den Ohren weg.",
+      "Spanne deine Körpermitte an, um ein Hohlkreuz zu vermeiden."
+    ]
+  },
+  "scorpions": {
+    "description": "Ein dynamisches Stretching für Hüften, unteren Rücken und Brust, ausgeführt in Bauchlage.",
+    "instructions": [
+      "Lege dich mit dem Gesicht nach unten auf den Boden, die Arme seitlich in T‑Form ausgestreckt.",
+      "Heb dein rechtes Bein und führe es über deinen Körper in Richtung deiner linken Hand, während du die Hüften rotierst.",
+      "Versuche, mit deinem rechten Fuß den Boden zu berühren, während du Brust und Arme so flach wie möglich hältst.",
+      "Kehre zur Mitte zurück und wiederhole mit dem linken Bein."
+    ],
+    "tips": [
+      "Bewege dich langsam und kontrolliert, um deinen unteren Rücken zu schützen.",
+      "Konzentriere dich auf die Rotation der Wirbelsäule und das Öffnen der Hüften.",
+      "Greife nur so weit, wie es sich angenehm anfühlt; dein Fuß muss deine Hand nicht berühren."
+    ]
+  },
+  "threadTheNeedle": {
+    "description": "Eine sanfte Rotation für den oberen Rücken und die Schultern, die ebenfalls den Nacken dehnt.",
+    "instructions": [
+      "Beginne auf allen Vieren mit den Händen unter den Schultern und den Knien unter den Hüften.",
+      "Führe deinen rechten Arm unter deinem Körper nach links, wobei der Handrücken über den Boden gleitet.",
+      "Senke deine rechte Schulter und dein Ohr in Richtung Boden.",
+      "Halte die Hüften parallel zum Boden und atme in die Dehnung zwischen den Schulterblättern.",
+      "Halten, dann zur Mitte zurückkehren und auf der anderen Seite wiederholen."
+    ],
+    "tips": [
+      "Konzentriere dich auf die Dehnung im oberen Rücken und im hinteren Schulterbereich.",
+      "Drücke die linke Hand sanft in den Boden und vertiefe die Rotation, wenn es sich angenehm anfühlt.",
+      "Entspanne deinen Nacken vollständig."
+    ]
+  },
+  "neckCircles": {
+    "description": "Löst sanft Verspannungen im Nacken und verbessert die Beweglichkeit der Halswirbelsäule.",
+    "instructions": [
+      "Setz dich oder stell dich aufrecht hin, mit entspannten Schultern.",
+      "Lass dein Kinn sanft zur Brust sinken.",
+      "Rolle deinen Kopf langsam zur einen Schulter, dann vorsichtig nach hinten und weiter zur anderen Schulter.",
+      "Führe die kreisende Bewegung weiterhin langsam und gleichmäßig aus.",
+      "Wechsle die Richtung nach der gewünschten Dauer."
+    ],
+    "tips": [
+      "Vermeiden Sie schnelle oder ruckartige Bewegungen.",
+      "Wenn du stechende Schmerzen oder Schwindel empfindest, hör sofort auf.",
+      "Halte die Schultern während der gesamten Übung unten und entspannt."
+    ]
+  }
+}

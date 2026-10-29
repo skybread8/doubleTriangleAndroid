@@ -32,7 +32,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Hexagon
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.PieChart
-import androidx.compose.material.icons.filled.SportsGymnastics
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
@@ -269,7 +269,7 @@ fun AnalyticsScreen(
                 .thenBy { exerciseDisplayName(it.first.exercise.imageKey, it.first.exercise.name) },
         ).map { it.first }
         AnalyticsData(
-            allSessions.filter { cutoff == null || it.timestampMillis >= cutoff },
+            allSessions.filter { (cutoff == null || it.timestampMillis >= cutoff) && localDate(it.timestampMillis) <= LocalDate.now() },
             summaries,
             histories,
         )
@@ -284,7 +284,9 @@ fun AnalyticsScreen(
     }
 
     val completed = data.sessions.size
-    val planned = timeframe.days?.let { plannedWorkoutsInRange(state.trainingDays, it) } ?: 0
+    val planned = timeframe.days?.let {
+        plannedWorkoutsInRange(state.trainingDays, ChronoUnit.DAYS.between(analyticsStartDate(timeframe), LocalDate.now()).toInt() + 1)
+    } ?: 0
     val volume = data.sessions.sumOf { it.volumeKg }.takeIf { it > 0 } ?: data.exercises.sumOf { it.totalVolumeKg }
     val averageVolume = averageVolumePerWorkout(data.sessions)
     val minutes = totalActiveMinutes(data.sessions)
@@ -499,9 +501,7 @@ private fun analyticsIcon(glyph: String): ImageVector = when (glyph) {
     "♨", "🔥" -> Icons.Filled.LocalFireDepartment
     "▣", "▦" -> Icons.Filled.CalendarToday
     "◷", "⌛" -> Icons.Filled.AccessTime
-    // iOS uses `figure.mixed.cardio` for muscle balance; this is the closest
-    // filled Material counterpart and avoids the crossed-dumbbell glyph.
-    "◈" -> Icons.Filled.SportsGymnastics
+    "◈" -> Icons.Filled.FitnessCenter
     "◉" -> Icons.Filled.PieChart
     "☷" -> Icons.Filled.ViewWeek
     "#" -> Icons.Filled.Tag
@@ -525,7 +525,8 @@ private fun analyticsIcon(glyph: String): ImageVector = when (glyph) {
     // grows the content instead of allowing Compose to split a word in the
     // middle. Give the horizontal strip a little more room at large Android
     // font scales while preserving the normal iOS-equivalent geometry.
-    val cardWidth = if (LocalDensity.current.fontScale > 1.15f) 204.dp else 164.dp
+    // SwiftUI applies 16pt padding outside the 164pt content frame.
+    val cardWidth = if (LocalDensity.current.fontScale > 1.15f) 236.dp else 196.dp
     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         items.forEach { item ->
             Column(Modifier.width(cardWidth).background(colors.card, RoundedCornerShape(22.dp)).border(1.dp, colors.border, RoundedCornerShape(22.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -780,7 +781,8 @@ private fun analyticsFocusEnglishName(raw: String): String = when (raw.lowercase
     SectionHeader("Récords personales", "Mejores marcas de ejercicios en este periodo", "★")
     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         records.forEach { record ->
-            Column(Modifier.width(188.dp).height(168.dp).background(colors.inset, RoundedCornerShape(22.dp)).border(1.dp, colors.border, RoundedCornerShape(22.dp)).padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
+            // The iOS 188 × 168 frame describes the content, before padding.
+            Column(Modifier.width(220.dp).height(200.dp).background(colors.inset, RoundedCornerShape(22.dp)).border(1.dp, colors.border, RoundedCornerShape(22.dp)).padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Badge(record.glyph); Text(shortDate(record.recordedAtMillis), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary) }
                 Column { Text(record.exerciseName, style = MaterialTheme.typography.subtitle1, maxLines = 2); Text(record.title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 Text(record.value, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
@@ -961,8 +963,16 @@ private fun analyticsFocusEnglishName(raw: String): String = when (raw.lowercase
         }
         if (history.isEmpty()) DashboardCard { Text("Completa este ejercicio en un entrenamiento para desbloquear analíticas detalladas.", color = WildforceThemeTokens.textSecondary) }
         else {
-            Text("Progresión", style = MaterialTheme.typography.h6); ProgressionChart(history, summary.exercise, useImperial)
-            Text("Volumen a lo largo del tiempo", style = MaterialTheme.typography.h6); VolumeChart(exerciseDailyVolumeBuckets(history), useImperial = useImperial)
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("Progresión", style = MaterialTheme.typography.h6)
+                ProgressionChart(history, summary.exercise, useImperial)
+            }
+            if (exerciseDailyVolumeBuckets(history).isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("Volumen a lo largo del tiempo", style = MaterialTheme.typography.h6)
+                    VolumeChart(exerciseDailyVolumeBuckets(history), useImperial = useImperial)
+                }
+            }
             exerciseRecordMetrics(history, summary.exercise, useImperial).takeIf { it.isNotEmpty() }?.let { metrics ->
                 HighlightGrid(metrics, title = "Récords")
             }
@@ -1175,8 +1185,22 @@ internal fun exerciseDailyVolumeBuckets(history: List<ExerciseAnalyticsPoint>): 
 
 @Composable private fun HighlightGrid(metrics: List<Kpi>, title: String = "Resumen") {
     val colors = analyticsColors()
-    Text(title, style = MaterialTheme.typography.h6)
-    metrics.chunked(2).forEach { row -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { row.forEach { metric -> Column(Modifier.weight(1f).background(colors.inset, RoundedCornerShape(16.dp)).border(1.dp, colors.border, RoundedCornerShape(16.dp)).padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { Badge(metric.glyph, 28); AnimatedKpiValue(metric.value); Text(metric.title, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textPrimary) } }; if (row.size == 1) Spacer(Modifier.weight(1f)) } }
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(title, style = MaterialTheme.typography.h6)
+        metrics.chunked(2).forEach { row ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                row.forEach { metric ->
+                    Column(Modifier.weight(1f).background(colors.inset, RoundedCornerShape(16.dp)).padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(analyticsIcon(metric.glyph), contentDescription = null, tint = colors.accentText, modifier = Modifier.size(18.dp))
+                        AnimatedKpiValue(metric.value)
+                        Text(metric.title, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textPrimary)
+                        if (metric.subtitle.isNotEmpty()) Text(metric.subtitle, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    }
+                }
+                if (row.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
+    }
 }
 
 internal fun exercisePerformanceMetrics(history: List<ExerciseAnalyticsPoint>, useImperial: Boolean = false): List<Kpi> {
@@ -1226,7 +1250,7 @@ internal fun volumeBuckets(
 internal fun personalRecords(
     histories: Map<ExerciseAnalyticsSummary, List<ExerciseAnalyticsPoint>>,
     useImperial: Boolean = false,
-): List<PersonalRecord> = histories.flatMap { (summary, history) ->
+): List<PersonalRecord> = histories.mapNotNull { (summary, history) ->
     fun <T : Comparable<T>> record(
         title: String,
         glyph: String,
@@ -1240,14 +1264,18 @@ internal fun personalRecords(
         return PersonalRecord(exerciseDisplayName(summary.exercise.imageKey, summary.exercise.name), title, format(valueOf(best)), best.timestampMillis, glyph, delta)
     }
 
-    buildList {
-        record("Mejor peso", "★", history.filter { it.maxWeightKg > 0 }, ExerciseAnalyticsPoint::maxWeightKg) { formatWeight(it, useImperial) }?.let(::add)
-        record("Mejores repeticiones", "#", history.filter { it.reps > 0 }, ExerciseAnalyticsPoint::reps) { "$it reps" }?.let(::add)
-        record("Mayor volumen", "▥", history.filter { it.volumeKg > 0 }, ExerciseAnalyticsPoint::volumeKg) { formatWeight(it, useImperial) }?.let(::add)
-        record("Mayor duración", "⌛", history.filter { it.durationSeconds > 0 }, ExerciseAnalyticsPoint::durationSeconds) { formatDurationSeconds(it) }?.let(::add)
-        record("Mayor distancia", "↔", history.filter { it.distanceKm > 0 }, ExerciseAnalyticsPoint::distanceKm) { formatDistance(it, useImperial) }?.let(::add)
+    fun weight() = record("Mejor peso", "★", history.filter { it.maxWeightKg > 0 }, ExerciseAnalyticsPoint::maxWeightKg) { formatWeight(it, useImperial) }
+    fun reps() = record("Mejores repeticiones", "#", history.filter { it.reps > 0 }, ExerciseAnalyticsPoint::reps) { "$it reps" }
+    fun duration() = record("Mayor duración", "⌛", history.filter { it.durationSeconds > 0 }, ExerciseAnalyticsPoint::durationSeconds) { formatDurationSeconds(it) }
+    fun distance() = record("Mayor distancia", "↔", history.filter { it.distanceKm > 0 }, ExerciseAnalyticsPoint::distanceKm) { formatDistance(it, useImperial) }
+    when (analyticsExerciseCategoryType(summary.exercise)) {
+        AnalyticsExerciseCategory.Strength -> weight() ?: reps()
+        AnalyticsExerciseCategory.Bodyweight -> reps() ?: weight()
+        AnalyticsExerciseCategory.Hiit -> reps() ?: duration()
+        AnalyticsExerciseCategory.Cardio -> distance() ?: duration()
+        AnalyticsExerciseCategory.Mobility -> duration()
     }
-}.sortedByDescending(PersonalRecord::recordedAtMillis).take(8)
+}.sortedWith(compareByDescending<PersonalRecord> { it.recordedAtMillis }.thenBy { it.exerciseName }).take(8)
 
 internal fun muscleDistribution(histories: Map<ExerciseAnalyticsSummary, List<ExerciseAnalyticsPoint>>): List<MuscleScore> = histories
     .flatMap { (summary, points) ->
@@ -1376,7 +1404,7 @@ internal fun averageActiveVolume(volumes: List<Double>): Double? {
 }
 internal fun roundedDurationMinutes(durationSeconds: Int): Int = (durationSeconds.coerceAtLeast(0) / 60.0).roundToInt()
 internal fun totalActiveMinutes(sessions: List<TrainingSessionHistoryEntry>): Int = sessions.sumOf { roundedDurationMinutes(it.durationSeconds) }
-internal fun averageActiveMinutes(sessions: List<TrainingSessionHistoryEntry>): Int? = sessions.takeIf { it.isNotEmpty() }?.map { roundedDurationMinutes(it.durationSeconds) }?.average()?.roundToInt()
+internal fun averageActiveMinutes(sessions: List<TrainingSessionHistoryEntry>): Int? = sessions.filter { it.durationSeconds > 0 }.takeIf { it.isNotEmpty() }?.map { roundedDurationMinutes(it.durationSeconds) }?.average()?.roundToInt()
 internal fun longestStreak(sessions: List<TrainingSessionHistoryEntry>): Int { val days = sessions.map { localDate(it.timestampMillis) }.distinct().sorted(); var best = 0; var current = 0; var previous: LocalDate? = null; days.forEach { day -> current = if (previous?.plusDays(1) == day) current + 1 else 1; best = max(best, current); previous = day }; return best }
 internal fun longestStreakForAnalytics(sessions: List<TrainingSessionHistoryEntry>, persistedLongestStreak: Int): Int = maxOf(longestStreak(sessions), persistedLongestStreak.coerceAtLeast(0))
 internal fun plannedWorkoutsInRange(trainingDays: Set<DayOfWeek>, days: Int, today: LocalDate = LocalDate.now()): Int =
@@ -1396,7 +1424,8 @@ internal fun filteredAnalyticsHistory(
     today: LocalDate = LocalDate.now(),
 ): List<ExerciseAnalyticsPoint> {
     val cutoff = timeframe.days?.let { analyticsStartMillis(timeframe, today) }
-    return points.filter { cutoff == null || it.timestampMillis >= cutoff }
+    val end = today.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    return points.filter { (cutoff == null || it.timestampMillis >= cutoff) && it.timestampMillis < end }
 }
 internal fun muscleGroup(imageKey: String?, name: String): String { val key = "${imageKey.orEmpty()} ${name.lowercase()}"; return when { listOf("squat", "lunge", "legpress", "legcurl", "quad", "sentadilla", "zancada", "pierna").any { it in key } -> "Piernas"; listOf("deadlift", "row", "pull", "lat", "back", "remo", "dominada", "espalda").any { it in key } -> "Espalda"; listOf("shoulder", "overhead", "lateral", "facepull", "hombro", "militar").any { it in key } -> "Hombros"; listOf("bench", "pushup", "chest", "pec", "pecho", "flexión").any { it in key } -> "Pecho"; listOf("curl", "biceps", "bíceps").any { it in key } -> "Bíceps"; listOf("triceps", "pushdown", "tríceps").any { it in key } -> "Tríceps"; listOf("plank", "bug", "core", "abs", "abdominal", "plancha").any { it in key } -> "Core"; else -> "General" } }
 internal fun exerciseMuscleGroups(imageKey: String?, name: String): List<String> =
@@ -1409,7 +1438,8 @@ internal fun mediumDate(timestamp: Long) = DateFormat.getDateInstance(DateFormat
 internal fun formatWeight(valueKg: Double, useImperial: Boolean = false): String {
     val displayed = if (useImperial) valueKg * 2.2046226218 else valueKg
     val unit = if (useImperial) "lb" else "kg"
-    return String.format(esLocale, if (displayed < 100) "%.1f $unit" else "%.0f $unit", displayed)
+    val precision = if (useImperial) 1 else 0
+    return String.format(esLocale, "%.$precision" + "f $unit", displayed)
 }
 internal fun formatMinutes(minutes: Int) = if (minutes < 60) "$minutes min" else if (minutes % 60 == 0) "${minutes / 60} h" else "${minutes / 60} h ${minutes % 60} min"
 internal fun formatDurationSeconds(seconds: Int): String {

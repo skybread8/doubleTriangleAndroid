@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.AudioManager
+import android.media.ToneGenerator
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -237,6 +239,11 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
     }
     var useFrontCamera by remember { mutableStateOf(context.getSharedPreferences("wildforce_body_progress", 0).getBoolean("preferred_front_camera", false)) }
     var cameraCaptureAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    var captureFlashTarget by remember { mutableFloatStateOf(0f) }
+    var announcesNextCapture by remember { mutableStateOf(false) }
+    val captureFlashOpacity by animateFloatAsState(captureFlashTarget, tween(450), label = "capture-flash")
+    val captureChime = remember { ToneGenerator(AudioManager.STREAM_MUSIC, 85) }
+    DisposableEffect(captureChime) { onDispose { captureChime.release() } }
     // iOS springs the countdown bubble for each tick; key the Animatable by
     // the remaining second so 3 → 2 → 1 is perceived as three distinct beats.
     val countdownScale = remember(countdown) { Animatable(if (countdown == null) 0f else .68f) }
@@ -253,22 +260,43 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
     val referencePath = sessions.maxByOrNull { it.date }?.let { if (step == Step.Front) it.frontPath else it.profilePath }
     var ghostScale by remember(step, referencePath) { mutableStateOf(1f) }
     var ghostOffset by remember(step, referencePath) { mutableStateOf(Offset.Zero) }
-    fun startCamera() {
+    fun playCaptureFeedback() {
+        captureFlashTarget = 1f
+        scope.launch {
+            delay(80)
+            captureFlashTarget = 0f
+        }
+        if (announcesNextCapture) {
+            announcesNextCapture = false
+            // Hands-free captures need an audible acknowledgement: the phone is
+            // normally propped up, so vibration is neither useful nor desirable.
+            captureChime.startTone(ToneGenerator.TONE_PROP_ACK, 450)
+        }
+    }
+    fun startCamera(isHandsFree: Boolean = false) {
         if (!cameraPermissionGranted) { requestCameraPermission.launch(Manifest.permission.CAMERA); return }
-        val capture = { cameraCaptureAction?.invoke() }
-        if (timerSeconds == 0) capture() else scope.launch { for (remaining in timerSeconds downTo 1) { countdown = remaining; delay(1_000) }; countdown = null; capture() }
+        val capture = {
+            announcesNextCapture = isHandsFree
+            cameraCaptureAction?.invoke()
+        }
+        if (timerSeconds == 0) capture() else scope.launch {
+            for (remaining in timerSeconds downTo 1) { countdown = remaining; delay(1_000) }
+            countdown = null
+            announcesNextCapture = true
+            cameraCaptureAction?.invoke()
+        }
     }
     fun toggleVoiceCapture() {
         if (!microphonePermissionGranted) {
             requestMicrophonePermission.launch(Manifest.permission.RECORD_AUDIO)
         } else {
-            voiceCapture.toggle { startCamera() }
+            voiceCapture.toggle { startCamera(isHandsFree = true) }
         }
     }
     LaunchedEffect(startVoiceAfterPermission) {
         if (startVoiceAfterPermission) {
             startVoiceAfterPermission = false
-            voiceCapture.toggle { startCamera() }
+            voiceCapture.toggle { startCamera(isHandsFree = true) }
         }
     }
     Column(Modifier.fillMaxSize().background(Color.Black).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -294,7 +322,10 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
                         useFrontCamera = useFrontCamera,
                         modifier = Modifier.fillMaxSize(),
                         onReady = { cameraCaptureAction = it },
-                        onPhotoCaptured = ::assignCapturedImage,
+                        onPhotoCaptured = { bitmap ->
+                            assignCapturedImage(bitmap)
+                            playCaptureFeedback()
+                        },
                         onFailure = { error = it },
                     )
                     if (overlay == Overlay.Reference && referencePath != null) {
@@ -319,6 +350,9 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
                         }
                     }
                     FramingGuideOverlay()
+                    Box(
+                        Modifier.fillMaxSize().background(Color.White.copy(alpha = captureFlashOpacity)),
+                    )
                     TiltIndicator(tiltState, Modifier.align(Alignment.CenterEnd))
                     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) { Text(if (overlay == Overlay.Reference && referencePath != null) "Arrastra y pellizca para alinear tu último check-in" else "Alinea tu cuerpo dentro de la guía", color = Color.White, textAlign = TextAlign.Center) }
                 } else {

@@ -118,6 +118,7 @@ object CoachExerciseMediaStore {
                     coachExerciseId = id,
                     imageUrl = media.imageUrl ?: media.youtubeThumbnailUrl,
                     trackingMode = media.trackingMode.androidTrackingMode(),
+                    durationUsesMinutes = media.trackingMode?.trim()?.lowercase() in setOf("durationminutes", "duration_minutes"),
                     isPerSideLoad = media.isPerSideLoad,
                 )
             }

@@ -57,6 +57,12 @@ class WorkoutMuscleEffortTest {
         )
     }
 
+    @Test
+    fun `bodyweight and unknown exercises do not add equipment`() {
+        assertEquals(emptyList<EquipmentVisual>(), ExerciseVisualCatalog.equipmentVisualsFor("pushUp"))
+        assertEquals(emptyList<EquipmentVisual>(), ExerciseVisualCatalog.equipmentVisualsFor(null))
+    }
+
     private fun workout(vararg blocks: WorkoutBlockSummary) = WorkoutDaySummary(
         id = "effort",
         order = 1,

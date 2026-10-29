@@ -1,0 +1,1892 @@
+{
+  "walking": {
+    "description": "Une méthode naturelle et à faible impact pour améliorer la santé cardiovasculaire et brûler des calories.",
+    "instructions": [
+      "Maintenez une posture droite, la tête relevée et les épaules détendues.",
+      "Balancez légèrement et naturellement les bras à chaque pas.",
+      "Faites un pas en avant en atterrissant sur le talon puis en déroulant jusqu'aux orteils.",
+      "Maintenez un rythme régulier et confortable qui vous permet de respirer facilement."
+    ],
+    "tips": [
+      "Portez des chaussures de maintien pour protéger vos articulations.",
+      "Maintiens le gainage légèrement engagé pour soutenir le bas du dos.",
+      "Concentrez-vous sur une foulée fluide et rythmée."
+    ]
+  },
+  "outdoorRunning": {
+    "description": "Un entraînement cardio classique à haute intensité qui développe l'endurance et brûle un nombre important de calories.",
+    "instructions": [
+      "Gardez la tête haute et regardez à environ 10–20 pieds devant vous.",
+      "Maintenez le haut du corps détendu, les coudes pliés à 90 degrés.",
+      "Atterris doucement sur le médio-pied et pousse avec les orteils.",
+      "Maintiens le gainage et évite de te pencher trop en avant ou en arrière."
+    ],
+    "tips": [
+      "Commencez par une courte marche d'échauffement ou un léger jogging.",
+      "Augmentez progressivement votre distance ou intensité pour éviter les blessures.",
+      "Restez hydraté et portez des chaussures de course adaptées."
+    ]
+  },
+  "treadmillWalking": {
+    "description": "Marcher sur un tapis roulant permet de contrôler précisément l'allure et l'inclinaison dans un environnement maîtrisé.",
+    "instructions": [
+      "Montez sur le tapis de course et fixez la pince de sécurité à vos vêtements.",
+      "Commencez à une vitesse lente pour vous familiariser avec le mouvement.",
+      "Maintenez une posture droite et évitez de vous tenir aux barres latérales pour améliorer l'équilibre et la dépense calorique.",
+      "Ajustez la vitesse et l'inclinaison selon les besoins pour les adapter à votre niveau de forme."
+    ],
+    "tips": [
+      "Regardez vers l'avant pour maintenir l'équilibre.",
+      "Utilisez la fonction d'inclinaison pour simuler la marche en extérieur et augmenter l'intensité.",
+      "Diminuez progressivement la vitesse en fin de séance pour le retour au calme."
+    ]
+  },
+  "treadmillRunning": {
+    "description": "Courir sur un tapis de course offre une surface constante et la possibilité de suivre les métriques facilement.",
+    "instructions": [
+      "Fixez la pince de sécurité et commencez par une marche lente pour vous échauffer.",
+      "Augmentez progressivement la vitesse jusqu'à votre allure de course souhaitée.",
+      "Concentrez-vous pour atterrir doucement sur la partie médiane du pied et garder un rythme constant.",
+      "Maintiens le gainage et bouge les bras de manière contrôlée."
+    ],
+    "tips": [
+      "Variez vos séances avec des intervalles de vitesse ou d'inclinaison plus élevés.",
+      "Ayez une bouteille d'eau à portée de main pour rester hydraté.",
+      "Terminez par quelques minutes de marche pour récupérer avant de descendre."
+    ]
+  },
+  "stationaryBike": {
+    "description": "Une option cardio à faible impact qui cible le bas du corps tout en épargnant les articulations.",
+    "instructions": [
+      "Ajustez la hauteur du siège pour que le genou soit légèrement fléchi au bas du mouvement de pédalage.",
+      "Assieds-toi droit ou penche-toi légèrement en avant, en gardant le dos droit et le gainage activé.",
+      "Pédale en effectuant un mouvement circulaire et fluide, en appuyant vers le bas et en tirant vers le haut.",
+      "Ajustez le niveau de résistance pour solliciter votre système cardiovasculaire."
+    ],
+    "tips": [
+      "Assurez‑vous que vos pieds soient bien fixés aux pédales ou aux sangles.",
+      "Maintenez une cadence constante (RPM) pour une meilleure efficacité.",
+      "Ne vous appuyez pas trop fortement sur le guidon."
+    ]
+  },
+  "elliptical": {
+    "description": "Offre un entraînement complet, à faible impact, qui reproduit le mouvement de la course sans les impacts.",
+    "instructions": [
+      "Montez sur les pédales et saisissez les poignées.",
+      "Commencez à bouger les jambes avec un mouvement elliptique et fluide, soit vers l'avant soit vers l'arrière.",
+      "Maintiens le gainage et garde le dos droit.",
+      "Utilisez les poignées pour solliciter le haut du corps et augmenter la dépense calorique totale."
+    ],
+    "tips": [
+      "Concentre-toi sur la poussée avec tout le pied, pas seulement avec les orteils.",
+      "Variez la résistance et l'inclinaison pour cibler différents groupes musculaires.",
+      "Détendez les épaules et évitez de serrer les poignées trop fort."
+    ]
+  },
+  "rowing": {
+    "description": "Un entraînement complet et puissant qui combine le conditionnement cardiovasculaire avec le renforcement musculaire.",
+    "instructions": [
+      "Assieds-toi et fixe tes pieds dans les sangles.",
+      "La phase de prise : Penchez-vous légèrement vers l'avant, bras tendus et genoux fléchis.",
+      "La phase de poussée : Poussez avec les jambes, puis penchez-vous légèrement en arrière et tirez la poignée vers vos côtes inférieures.",
+      "La phase finale : Jambes tendues, la poignée au niveau de la poitrine et vous êtes légèrement incliné en arrière.",
+      "La récupération : Tendez les bras, penchez-vous vers l'avant, puis pliez les genoux pour revenir à la phase de prise."
+    ],
+    "tips": [
+      "Maintenez un core fort et le dos plat tout au long du mouvement.",
+      "La puissance devrait provenir à 60 % des jambes, à 20 % du tronc et à 20 % des bras.",
+      "Concentrez-vous sur un mouvement fluide et rythmique et évitez de tirer brusquement sur la poignée."
+    ]
+  },
+  "jumpRope": {
+    "description": "Un entraînement cardio portable et à haute intensité qui améliore la coordination et l'agilité.",
+    "instructions": [
+      "Tenez les poignées avec une prise détendue, les coudes près du corps.",
+      "Saute seulement quelques centimètres du sol, juste assez pour que la corde passe en dessous.",
+      "Atterris en douceur sur l'avant-pied.",
+      "Utilisez les poignets pour faire tourner la corde, pas tout le bras."
+    ],
+    "tips": [
+      "Maintiens le gainage et détends les épaules.",
+      "Commencez par des intervalles plus courts et augmentez progressivement la durée.",
+      "Maintenez un rythme constant pour une meilleure efficacité."
+    ]
+  },
+  "stairClimber": {
+    "description": "Une façon efficace de développer la force du bas du corps et l'endurance cardiovasculaire en imitant la montée des escaliers.",
+    "instructions": [
+      "Montez sur la machine et sélectionnez la vitesse ou le programme souhaité.",
+      "Gardez une posture droite et évitez de vous appuyer fortement sur les mains courantes.",
+      "Posez tout le pied et poussez avec les talons pour engager les fessiers.",
+      "Maintiens le gainage et effectue les mouvements de façon contrôlée."
+    ],
+    "tips": [
+      "Variez la hauteur de marche et la vitesse pour solliciter différents muscles.",
+      "Concentrez-vous sur un rythme stable et soutenable.",
+      "Évite de sauter des marches sauf si c'est spécifiquement programmé pour un entraînement avancé."
+    ]
+  },
+  "skiErgWork": {
+    "description": "Un entraînement complet et puissant qui simule le ski de fond, développant endurance et force du haut du corps.",
+    "instructions": [
+      "Placez les pieds à la largeur des épaules, en tenant les poignées au-dessus de la tête.",
+      "Tirez les poignées vers le bas en direction des hanches tout en vous penchant au niveau des hanches et en fléchissant les genoux.",
+      "Terminez la traction avec les bras étendus au-delà des cuisses.",
+      "Étendez les hanches et les genoux tout en ramenant les poignées à la position de départ."
+    ],
+    "tips": [
+      "Utilisez le tronc et les jambes pour générer de la puissance, pas seulement les bras.",
+      "Gardez le dos droit et le gainage activé pendant tout le mouvement.",
+      "Concentrez-vous sur un rythme fluide et continu."
+    ]
+  },
+  "airSquat": {
+    "description": "Un mouvement de base au poids du corps qui améliore la force et la mobilité du bas du corps.",
+    "instructions": [
+      "Placez les pieds à la largeur des épaules, les orteils légèrement pointés vers l'extérieur.",
+      "Contractez votre sangle abdominale et gardez la poitrine relevée en commençant à vous asseoir vers vos hanches.",
+      "Abaissez votre corps jusqu'à ce que vos cuisses soient au moins parallèles au sol.",
+      "Poussez avec les talons pour revenir à la position de départ."
+    ],
+    "tips": [
+      "Gardez le poids sur les talons, pas sur les orteils.",
+      "Veillez à ce que vos genoux restent alignés avec vos orteils et ne s'effondrent pas vers l'intérieur.",
+      "Maintenez la colonne neutre pendant tout le mouvement."
+    ]
+  },
+  "gobletSquat": {
+    "description": "Tenir un poids au niveau de la poitrine pendant le squat aide à améliorer la technique et la stabilité du tronc.",
+    "instructions": [
+      "Maintenez un haltère ou une kettlebell contre la poitrine avec les deux mains.",
+      "Placez les pieds un peu plus écartés que la largeur des épaules.",
+      "Abaissez vos hanches en arrière et vers le bas, en gardant la poitrine levée et le poids proche du corps.",
+      "Poussez sur vos talons pour revenir à la position de départ."
+    ],
+    "tips": [
+      "Gardez les coudes pointés vers le bas et à l'intérieur des genoux en bas du squat.",
+      "Inspirez en descendant et expirez en poussant pour remonter.",
+      "Maintenez la colonne neutre et évitez d'arrondir le dos."
+    ]
+  },
+  "barbellBackSquat": {
+    "description": "La référence pour développer la force totale du corps et la masse des jambes avec une barre.",
+    "instructions": [
+      "Placez la barre sur la partie supérieure du dos, reposant sur les trapèzes.",
+      "Placez les pieds à la largeur des épaules, les orteils légèrement pointés vers l'extérieur.",
+      "Contractez votre sangle abdominale et descendez les hanches jusqu'à ce que vos cuisses soient au moins parallèles au sol.",
+      "Poussez avec les talons pour revenir en position verticale."
+    ],
+    "tips": [
+      "Gardez la poitrine relevée et regardez légèrement vers l'avant pendant tout le mouvement.",
+      "Évite que tes genoux s'affaissent vers l'intérieur.",
+      "Utilisez une cage à squat et un spotter pour la sécurité lorsque vous soulevez lourd."
+    ]
+  },
+  "barbellFrontSquat": {
+    "description": "Placer la barre sur l'avant des épaules sollicite plus intensément les quadriceps et le haut du dos.",
+    "instructions": [
+      "Posez la barre à l'avant des épaules, en utilisant soit la prise 'clean', soit la prise 'cross-arm'.",
+      "Gardez les coudes hauts pendant tout le mouvement pour stabiliser la barre.",
+      "Descendez en squat en poussant les hanches vers l'arrière et en pliant les genoux.",
+      "Remontez en gardant le torse droit jusqu'à la position de départ."
+    ],
+    "tips": [
+      "La barre doit donner l'impression de reposer sur vos deltoïdes, pas sur la clavicule.",
+      "Maintenez le gainage pour soutenir votre posture droite.",
+      "Concentrez-vous sur le maintien des talons au sol."
+    ]
+  },
+  "smithMachineSquat": {
+    "description": "Le squat à la Smith machine offre une stabilité supplémentaire, vous permettant de vous concentrer sur l'impulsion des jambes et le positionnement.",
+    "instructions": [
+      "Placez-vous sous la barre avec les pieds légèrement en avant et écartés à la largeur des épaules.",
+      "Détachez la barre et abaissez vos hanches jusqu'à ce que vos cuisses soient parallèles au sol.",
+      "Poussez avec les talons pour revenir à la position de départ.",
+      "Verrouillez la barre de manière sûre après avoir terminé vos répétitions."
+    ],
+    "tips": [
+      "Gardez la poitrine relevée et le gainage activé pendant tout le mouvement.",
+      "Expérimentez le placement des pieds pour cibler différentes parties des jambes.",
+      "Le parcours fixe de la machine Smith réduit les exigences en matière d'équilibre."
+    ]
+  },
+  "dumbbellSquat": {
+    "description": "Tenir des haltères le long du corps pendant le squat est une manière accessible d'ajouter de la résistance au mouvement de squat de base.",
+    "instructions": [
+      "Placez les pieds à la largeur des épaules, en tenant un haltère dans chaque main le long du corps.",
+      "Abaisse les hanches vers l'arrière et vers le bas comme si tu t'asseyais sur une chaise, en gardant la poitrine relevée.",
+      "Descendez jusqu'à ce que vos cuisses soient parallèles au sol.",
+      "Poussez sur vos talons pour revenir en position verticale."
+    ],
+    "tips": [
+      "Maintenez les poids stables le long du corps ; ne les laissez pas balancer.",
+      "Maintenez la colonne neutre et évitez d'arrondir les épaules.",
+      "Idéal pour ceux qui trouvent le squat avec barre inconfortable."
+    ]
+  },
+  "legPress": {
+    "description": "Une presse à la machine qui permet des charges lourdes pour le bas du corps avec une contrainte minimale sur le dos.",
+    "instructions": [
+      "Assieds-toi dans la machine, le dos et la tête à plat contre le support rembourré.",
+      "Placez vos pieds sur la plateforme, à environ la largeur des épaules.",
+      "Libérez les barres de sécurité et abaissez la plateforme vers la poitrine en fléchissant les genoux.",
+      "Ramenez la plate-forme à la position de départ sans verrouiller les genoux en haut."
+    ],
+    "tips": [
+      "Évite de soulever le bas du dos du siège.",
+      "Gardez les pieds à plat sur la plateforme en tout temps.",
+      "Contrôlez la charge aussi bien pendant la phase de descente que pendant la poussée."
+    ]
+  },
+  "walkingLunge": {
+    "description": "Un mouvement fonctionnel qui développe la force sur une jambe, l'équilibre et la coordination.",
+    "instructions": [
+      "Faites un pas en avant avec une jambe, en abaissant les hanches jusqu'à ce que les deux genoux soient fléchis à environ 90 degrés.",
+      "Assurez‑vous que votre genou avant soit directement au‑dessus de la cheville.",
+      "Poussez avec le talon avant pour vous lever et faire un pas en avant avec l'autre jambe.",
+      "Continuez d'alterner les jambes en avançant."
+    ],
+    "tips": [
+      "Gardez le buste droit et le core activé.",
+      "Ne laissez pas votre genou arrière toucher le sol avec impact.",
+      "Maintenez votre équilibre en fixant un point devant vous."
+    ]
+  },
+  "reverseLunge": {
+    "description": "Faites un pas en arrière en fente pour cibler les fessiers et les ischio-jambiers tout en réduisant la pression sur les genoux.",
+    "instructions": [
+      "Placez les pieds à la largeur des hanches.",
+      "Faites un pas en arrière avec un pied et abaissez les hanches jusqu'à ce que les deux genoux forment un angle de 90°.",
+      "Assurez‑vous que votre genou avant soit aligné au‑dessus de la cheville.",
+      "Poussez avec le pied arrière pour revenir à la position de départ."
+    ],
+    "tips": [
+      "Gardez le poids principalement sur le pied avant.",
+      "Maintenez une posture droite pendant tout le mouvement.",
+      "Contrôlez la descente pour éviter que votre genou arrière ne heurte le sol."
+    ]
+  },
+  "bulgarianSplitSquat": {
+    "description": "Surélevez le pied arrière pour concentrer et intensifier l'étirement au niveau des quadriceps et des fessiers de la jambe avant.",
+    "instructions": [
+      "Placez-vous à quelques pas devant un banc et posez le dessus d'un pied sur le banc derrière vous.",
+      "Abaisse les hanches jusqu'à ce que ta cuisse avant soit presque parallèle au sol.",
+      "Assurez‑vous que votre genou avant reste aligné avec le pied et ne dépasse pas les orteils.",
+      "Poussez avec le talon avant pour revenir en position verticale."
+    ],
+    "tips": [
+      "Concentrez-vous sur le maintien du torse droit ou avec une légère inclinaison vers l'avant.",
+      "Cet exercice demande un bon équilibre ; commencez avec le poids du corps avant d'ajouter des haltères.",
+      "Ajustez votre distance par rapport au banc pour trouver la position la plus confortable et efficace."
+    ]
+  },
+  "stepUp": {
+    "description": "Montez sur une surface surélevée pour développer des fessiers puissants et améliorer la force fonctionnelle des jambes.",
+    "instructions": [
+      "Pose un pied sur un banc solide ou une box.",
+      "Poussez avec ce talon pour élever votre corps sur la plateforme.",
+      "Descendez d'abord avec l'autre pied, puis avec le pied de départ.",
+      "Alternez les jambes ou effectuez toutes les répétitions d'un côté avant de changer."
+    ],
+    "tips": [
+      "Maintiens le gainage et garde la poitrine relevée.",
+      "Essayez de ne pas vous pousser au sol avec le pied arrière ; laissez la jambe surélevée faire le travail.",
+      "Contrôlez votre descente pour protéger vos articulations."
+    ]
+  },
+  "legExtension": {
+    "description": "Un exercice d'isolation qui cible spécifiquement et développe les muscles quadriceps.",
+    "instructions": [
+      "Assieds-toi sur la machine d'extension des jambes, le dos appuyé contre le coussinet.",
+      "Placez vos tibias derrière le levier rembourré.",
+      "Tends les jambes jusqu'à ce qu'elles soient droites, en te concentrant sur la contraction des quadriceps.",
+      "Abaissez lentement le poids jusqu'à la position de départ."
+    ],
+    "tips": [
+      "Évite d'utiliser l'élan pour soulever la charge.",
+      "Ne verrouillez pas vos genoux avec force en haut du mouvement.",
+      "Veillez à ce que le levier rembourré soit positionné juste au‑dessus de vos chevilles."
+    ]
+  },
+  "lyingLegCurl": {
+    "description": "Vise à isoler les ischio-jambiers pour améliorer la force et la stabilité du genou.",
+    "instructions": [
+      "Allongez-vous face contre la machine de curl des ischio-jambiers, les jambes complètement tendues.",
+      "Positionnez le levier rembourré juste au-dessus de vos talons.",
+      "Ramenez vos jambes aussi haut que possible en contractant les ischio-jambiers en haut.",
+      "Abaissez le poids jusqu'à la position de départ de manière contrôlée."
+    ],
+    "tips": [
+      "Garde les hanches pressées contre le banc pendant tout le mouvement.",
+      "Concentrez-vous sur une phase excentrique (de descente) lente et contrôlée.",
+      "Évite de balancer la charge."
+    ]
+  },
+  "seatedLegCurl": {
+    "description": "Isole les ischio-jambiers en position assise pour une contraction maximale et le développement musculaire.",
+    "instructions": [
+      "Assieds-toi dans la machine et règle le coussin du bassin pour qu'il repose fermement contre tes cuisses.",
+      "Placez vos jambes sur le levier rembourré afin qu'il se trouve derrière vos chevilles.",
+      "Start with your knees nearly straight, then curl your lower legs down and back as far as possible.",
+      "Ramenez lentement le levier à la position de départ."
+    ],
+    "tips": [
+      "Maintenez le haut du corps stable et évitez d'utiliser les bras pour aider à tirer.",
+      "Contractez les ischio-jambiers en bas du mouvement.",
+      "Gardez les pieds en flexion pendant toute la série."
+    ]
+  },
+  "calfRaise": {
+    "description": "Renforce et développe les mollets en soulevant les talons du sol.",
+    "instructions": [
+      "Tenez-vous sur le bord d'une marche ou d'une plateforme avec la plante des pieds.",
+      "Abaissez vos talons sous le niveau de la marche pour étirer les mollets.",
+      "Poussez sur l'avant-pied pour lever les talons le plus haut possible.",
+      "Ramenez lentement le dos à la position de départ de l'étirement."
+    ],
+    "tips": [
+      "Tenez-vous à un mur ou à une rampe pour l'équilibre si nécessaire.",
+      "Fais une pause d'une seconde en haut pour maximiser la contraction.",
+      "Peut être réalisé sur une jambe à la fois pour augmenter la difficulté."
+    ]
+  },
+  "hipThrust": {
+    "description": "Considéré par beaucoup comme le meilleur exercice pour le développement maximal et la force des fessiers.",
+    "instructions": [
+      "Assieds-toi au sol, le haut du dos appuyé contre un banc et une barre posée sur les hanches.",
+      "Placez vos pieds fermement au sol, à environ la largeur des épaules.",
+      "Poussez avec les talons pour relever les hanches vers le plafond jusqu'à ce que votre corps forme une ligne droite des épaules aux genoux.",
+      "Contractez vos fessiers en haut, puis redescendez les hanches vers le sol de manière contrôlée."
+    ],
+    "tips": [
+      "Placez un coussinet ou une serviette autour de la barre pour plus de confort.",
+      "Rentrez le menton et contractez le gainage pour protéger le bas du dos.",
+      "Ne cambriez pas excessivement le bas du dos en haut du mouvement."
+    ]
+  },
+  "gluteBridge": {
+    "description": "Un exercice au sol au poids du corps qui active les fessiers et améliore l'extension de la hanche.",
+    "instructions": [
+      "Allonge-toi sur le dos, genoux pliés et pieds à plat sur le sol.",
+      "Maintenez les bras le long du corps, paumes vers le bas.",
+      "Soulève les hanches du sol en contractant les fessiers et en poussant sur les talons.",
+      "Maintenez la position une seconde en haut, puis redescendez."
+    ],
+    "tips": [
+      "Assurez‑vous que votre sangle abdominale est engagée afin que le bas du dos ne se creuse pas excessivement.",
+      "Concentrez-vous sur l'utilisation des fessiers plutôt que du bas du dos ou des ischio-jambiers.",
+      "Pour plus de défi, effectuez le pont en gardant une jambe tendue."
+    ]
+  },
+  "deadlift": {
+    "description": "Un mouvement de base pour la force globale, ciblant l'ensemble de la chaîne postérieure.",
+    "instructions": [
+      "Placez le milieu du pied sous la barre.",
+      "Pivotez sur les hanches et pliez les genoux pour saisir la barre juste à l'extérieur de vos jambes.",
+      "Maintenez le dos à plat et la poitrine haute pendant que vous poussez avec les talons pour vous lever.",
+      "Gardez la barre près du corps pendant tout le mouvement et redressez-vous complètement."
+    ],
+    "tips": [
+      "Ne cambrez pas le dos ; maintenez la colonne neutre.",
+      "Inspirez et contractez votre sangle abdominale avant de tirer la charge.",
+      "Abaissez la barre en basculant d'abord au niveau des hanches, puis en fléchissant les genoux une fois que la barre les a dépassés."
+    ]
+  },
+  "barbellRomanianDeadlift": {
+    "description": "Une variante du soulevé de terre qui met l'accent sur l'étirement et la contraction des ischio‑jambiers.",
+    "instructions": [
+      "Tenez-vous les pieds à la largeur des hanches, une barre devant les cuisses.",
+      "Pivotez sur les hanches et descendez la barre vers le sol en gardant les jambes principalement droites (légère flexion des genoux).",
+      "Abaissez la barre jusqu'à ressentir une tension dans les ischio-jambiers, en gardant le dos plat.",
+      "Poussez les hanches vers l'avant pour revenir à la position de départ."
+    ],
+    "tips": [
+      "Gardez la barre très près de vos jambes en permanence.",
+      "Concentre-toi sur l'action de pousser les hanches vers l'arrière aussi loin que possible.",
+      "Évite d'arrondir les épaules ou le bas du dos."
+    ]
+  },
+  "dumbbellRomanianDeadlift": {
+    "description": "Une flexion de hanche ciblant les ischio‑jambiers réalisée avec haltères, qui permet une amplitude de mouvement plus naturelle.",
+    "instructions": [
+      "Placez les pieds à la largeur des hanches et tenez un haltère dans chaque main devant vos cuisses.",
+      "Pivotez sur les hanches et descendez les poids vers vos pieds, en gardant le dos plat.",
+      "Descendez jusqu'à ressentir un bon étirement aux ischio-jambiers.",
+      "Contractez les fessiers et les ischio‑jambiers pour revenir en position debout."
+    ],
+    "tips": [
+      "Gardez les haltères près de vos jambes pendant tout le mouvement.",
+      "Concentrez-vous sur le fait de pousser les hanches vers l'arrière plutôt que d'essayer d'atteindre le sol.",
+      "Maintenez une légère flexion des genoux."
+    ]
+  },
+  "machineGluteKickback": {
+    "description": "Un exercice ciblé à la machine qui isole les fessiers par un mouvement de kickback.",
+    "instructions": [
+      "Installez-vous dans la machine et posez un pied sur la plateforme.",
+      "Poussez la plate-forme en arrière et vers le haut en étendant la hanche.",
+      "Contractez vos fessiers en haut du mouvement.",
+      "Revenez lentement à la position de départ et répétez."
+    ],
+    "tips": [
+      "Maintenez la sangle abdominale stable et évitez d'arquer le dos.",
+      "Maintenez le mouvement contrôlé et concentrez-vous sur la contraction des fessiers.",
+      "Ne balancez pas la jambe ; utilisez vos muscles pour déplacer la charge."
+    ]
+  },
+  "cableGluteKickback": {
+    "description": "Utilise la résistance du câble pour isoler les fessiers via un mouvement de kickback contrôlé, assurant une tension constante sur toute l'amplitude.",
+    "instructions": [
+      "Fixez une sangle de cheville à la machine à câble au réglage le plus bas et attachez-la autour d'une cheville.",
+      "Placez-vous face à la machine et tenez le cadre pour garder l'équilibre.",
+      "En gardant le tronc gainé et la jambe d'appui légèrement fléchie, poussez la jambe attachée vers l'arrière et vers le haut en étendant la hanche.",
+      "Contractez vos fessiers en haut du mouvement, puis revenez lentement à la position de départ."
+    ],
+    "tips": [
+      "Gardez le buste droit et évitez de faire pivoter les hanches.",
+      "Effectuez toute l'amplitude d'extension de la hanche pour maximiser l'activation des fessiers.",
+      "Contrôlez la charge lors du retour plutôt que de laisser le câble tirer votre jambe vers l'avant."
+    ]
+  },
+  "machineHipAbduction": {
+    "description": "Cible la partie externe des hanches et le moyen fessier pour améliorer la stabilité et l'esthétique de la hanche.",
+    "instructions": [
+      "Assieds-toi dans la machine avec l'extérieur des cuisses contre les coussins.",
+      "Poussez vos jambes vers l'extérieur contre la résistance.",
+      "Fais une pause d'une seconde au point de contraction maximale.",
+      "Rapprochez lentement les jambes."
+    ],
+    "tips": [
+      "Maintenez le dos à plat contre l'assise.",
+      "Adoptez un tempo contrôlé pour les phases d'ouverture et de fermeture.",
+      "Ajustez la position de départ à une amplitude de mouvement confortable."
+    ]
+  },
+  "machineHipAdduction": {
+    "description": "Renforce les muscles internes de la cuisse (adducteurs) pour améliorer la stabilité de la jambe.",
+    "instructions": [
+      "Assieds-toi dans la machine avec l'intérieur des cuisses contre les coussins.",
+      "Serrez vos jambes l'une contre l'autre contre la résistance.",
+      "Fais une pause d'une seconde au point de contraction maximale.",
+      "Laissez vos jambes revenir lentement à la position de départ."
+    ],
+    "tips": [
+      "Maintenez le haut du corps stable pendant toute la série.",
+      "Concentrez-vous sur l'utilisation des muscles adducteurs, pas des pieds.",
+      "Ne laissez pas les poids s'entrechoquer à la fin de la répétition."
+    ]
+  },
+  "cableHipAbduction": {
+    "description": "Utilise un câble et une sangle cheville pour isoler les hanches externes et le moyen fessier, un côté à la fois.",
+    "instructions": [
+      "Fixez une sangle de cheville à la poulie basse et attachez-la autour de la jambe extérieure.",
+      "Placez-vous de profil par rapport à la machine et tenez le cadre pour vous équilibrer.",
+      "Déplacez la jambe travaillante sur le côté contre le câble tout en gardant le torse principalement immobile.",
+      "Marquez une brève pause, puis revenez avec contrôle à la position de départ."
+    ],
+    "tips": [
+      "Maintenez le mouvement court et contrôlé plutôt que de balancer la jambe.",
+      "Contractez le gainage afin que ce soit la hanche qui travaille et non le tronc.",
+      "Tournez légèrement les pointes des pieds vers l'avant pour mieux cibler le moyen fessier."
+    ]
+  },
+  "cableHipAdduction": {
+    "description": "Utilise un câble et une sangle cheville pour renforcer les muscles internes de la cuisse, un côté à la fois.",
+    "instructions": [
+      "Fixez une sangle de cheville à la poulie basse et attachez-la autour de la jambe intérieure.",
+      "Placez-vous de profil par rapport à la machine, la jambe travaillée la plus éloignée de la pile de poids, et tenez le cadre pour garder l'équilibre.",
+      "Balayez la jambe travaillante devant votre corps contre la résistance.",
+      "Marquez une brève pause, puis revenez à la position de départ avec contrôle."
+    ],
+    "tips": [
+      "Gardez le buste droit et évitez de faire pivoter les hanches.",
+      "Bougez lentement pour que l'intérieur de la cuisse contrôle les deux directions du mouvement.",
+      "Utilisez une charge légère à modérée et concentrez-vous sur la contraction en fin d'amplitude."
+    ]
+  },
+  "boxJump": {
+    "description": "Un mouvement explosif qui développe la puissance du bas du corps et améliore la condition cardiovasculaire.",
+    "instructions": [
+      "Placez-vous face à une box solide, pieds écartés à la largeur des hanches.",
+      "Pivotez sur les hanches et balancez les bras en arrière, puis sautez de manière explosive sur la box.",
+      "Atterris en douceur en demi-squat, les deux pieds entièrement sur la box.",
+      "Tenez-vous complètement debout, puis redescendez un pied après l'autre."
+    ],
+    "tips": [
+      "Concentrez-vous sur un atterrissage discret pour vous assurer d'absorber l'impact.",
+      "Choisissez une hauteur de box qui permette une technique d'atterrissage correcte.",
+      "Ne sautez pas en arrière ; descendre en posant le pied est plus sûr pour vos articulations."
+    ]
+  },
+  "pushUp": {
+    "description": "Un exercice au poids du corps classique qui développe la force de la poitrine, des épaules et des triceps.",
+    "instructions": [
+      "Commencez en position de planche haute, avec les mains légèrement plus écartées que la largeur des épaules.",
+      "Maintenez le corps en ligne droite de la tête aux talons.",
+      "Abaissez votre poitrine vers le sol en gardant les coudes à un angle de 45°.",
+      "Poussez avec les paumes des mains pour revenir à la position de départ."
+    ],
+    "tips": [
+      "Ne laissez pas votre bas du dos s'affaisser ; gardez votre sangle abdominale contractée.",
+      "Concentrez-vous sur une amplitude complète de mouvement pour une meilleure activation musculaire.",
+      "Inspirez en descendant et expirez en poussant vers le haut."
+    ]
+  },
+  "declinePushUp": {
+    "description": "Effectue des pompes avec les pieds surélevés sur un banc pour mettre davantage l'accent sur le haut de la poitrine et les épaules.",
+    "instructions": [
+      "Placez vos pieds sur un banc plat et vos mains au sol, un peu plus écartées que la largeur des épaules.",
+      "Maintenez une ligne droite de la tête aux talons en contractant la sangle abdominale.",
+      "Abaissez votre poitrine vers le sol en pliant les coudes.",
+      "Poussez vers le haut jusqu'à la position de départ en étendant les bras."
+    ],
+    "tips": [
+      "Maintenez les coudes à un angle de 45 degrés par rapport à votre corps.",
+      "Ne laissez pas vos hanches s'affaisser ; gardez les fessiers et la sangle abdominale contractés.",
+      "Plus le banc est haut, plus l'exercice devient difficile."
+    ]
+  },
+  "barbellBenchPress": {
+    "description": "Le mouvement fondamental du haut du corps pour développer la puissance maximale de la poitrine et des bras.",
+    "instructions": [
+      "Allonge-toi sur le banc, les pieds bien ancrés au sol.",
+      "Saisissez la barre avec une prise légèrement plus large que la largeur des épaules.",
+      "Descendez la barre jusqu'au milieu de la poitrine de façon contrôlée.",
+      "Remontez la barre jusqu'à ce que vos bras soient complètement tendus."
+    ],
+    "tips": [
+      "Gardez les omoplates rétractées (serrées l'une contre l'autre) pendant tout le mouvement.",
+      "Maintenez une légère cambrure lombaire, mais gardez les fessiers sur le banc.",
+      "Travaillez avec un spotter, surtout lorsque vous soulevez des charges lourdes."
+    ]
+  },
+  "dumbbellBenchPress": {
+    "description": "Pousser des haltères en étant allongé sur un banc plat permet une plus grande amplitude de mouvement et améliore la santé des épaules.",
+    "instructions": [
+      "Allonge-toi à plat sur un banc en tenant un haltère dans chaque main au niveau de la poitrine.",
+      "Poussez les poids vers le haut jusqu'à ce que vos bras soient complètement tendus au-dessus de la poitrine.",
+      "Abaissez les haltères de manière contrôlée jusqu'à ce qu'ils soient au niveau de votre poitrine.",
+      "Maintenez la sangle abdominale stable et les pieds à plat sur le sol."
+    ],
+    "tips": [
+      "Concentrez-vous pour rapprocher les haltères en haut sans qu'ils se touchent.",
+      "Maintenez les coudes à un angle de 45 degrés par rapport au torse.",
+      "Les haltères nécessitent plus de stabilisation qu'une barre."
+    ]
+  },
+  "smithMachineBenchPress": {
+    "description": "La machine Smith offre un guide de trajectoire pour le développé couché, ce qui la rend plus sûre pour les personnes s'entraînant seules et permet de se concentrer intensément sur les muscles.",
+    "instructions": [
+      "Allonge-toi sur le banc et positionne-toi de façon à ce que la barre s'aligne avec le milieu de ta poitrine.",
+      "Dégagez la barre et descendez-la lentement jusqu'à la poitrine.",
+      "Repoussez la barre vers le haut jusqu'à ce que vos bras soient complètement tendus.",
+      "Verrouillez la barre en toute sécurité une fois que vous avez terminé."
+    ],
+    "tips": [
+      "Assurez‑vous que le banc soit parfaitement centré sous la barre.",
+      "Concentrez-vous sur la contraction de la poitrine pendant tout le mouvement.",
+      "Une excellente option pour les exercices d'isolation et les séries dégressives."
+    ]
+  },
+  "dumbbellInclineBenchPress": {
+    "description": "Le développé incliné avec haltères met l'accent sur la partie supérieure de la poitrine tout en permettant à chaque bras de se déplacer indépendamment.",
+    "instructions": [
+      "Réglez un banc réglable sur une inclinaison de 30–45 degrés.",
+      "Asseyez-vous en posant un haltère sur chaque cuisse, puis allongez-vous contre le banc.",
+      "Poussez les haltères vers le haut depuis le haut de la poitrine jusqu'à ce que vos bras soient tendus.",
+      "Redescendez les charges jusqu'à la position de départ en gardant le contrôle."
+    ],
+    "tips": [
+      "Gardez vos omoplates rétractées contre le banc.",
+      "Utilisez une inclinaison modérée pour maintenir l'accent sur le haut de la poitrine.",
+      "Maintenez vos poignets alignés au-dessus des coudes pendant tout le développé."
+    ]
+  },
+  "barbellInclineBenchPress": {
+    "description": "Pousser une barre sur un banc incliné cible le haut de la poitrine et les épaules tout en permettant des charges plus lourdes.",
+    "instructions": [
+      "Réglez le banc sur une inclinaison de 30–45 degrés et positionnez-vous sous la barre.",
+      "Saisissez la barre légèrement plus large que la largeur des épaules.",
+      "Descendez la barre vers le haut de la poitrine de manière contrôlée.",
+      "Repoussez la barre vers le haut jusqu'à ce que vos bras soient complètement tendus."
+    ],
+    "tips": [
+      "Gardez les coudes légèrement rentrés, pas complètement écartés sur les côtés.",
+      "Veillez à ce que la barre touche le haut de la poitrine, pas le cou.",
+      "Utilisez un spotter pour des raisons de sécurité."
+    ]
+  },
+  "smithMachineInclineBenchPress": {
+    "description": "Une presse inclinée guidée qui isole la partie supérieure de la poitrine et permet de s'entraîner en toute sécurité près de l'échec.",
+    "instructions": [
+      "Réglez le banc inclinable et centrez-le sous la barre de la Smith.",
+      "Allonge-toi sur le banc et assure-toi que la barre s'aligne avec le haut de ta poitrine.",
+      "Détachez la barre et abaissez-la avec contrôle vers la poitrine.",
+      "Ramenez la barre à la position de départ."
+    ],
+    "tips": [
+      "Concentrez-vous sur un tempo fluide et constant.",
+      "Ajustez la position du banc pour trouver la trajectoire de poussée la plus confortable.",
+      "Excellent pour achever le travail du haut de la poitrine."
+    ]
+  },
+  "barbellDeclineBenchPress": {
+    "description": "Le développé décliné cible la partie inférieure de la poitrine et permet souvent des charges plus lourdes en raison de l'avantage mécanique.",
+    "instructions": [
+      "Fixez vos pieds dans le banc décliné et allongez-vous.",
+      "Saisissez le bar avec une prise de largeur moyenne.",
+      "Abaissez la barre vers le bas de la poitrine/la partie supérieure des abdominaux.",
+      "Repoussez la barre vers le haut jusqu'à la position de départ."
+    ],
+    "tips": [
+      "Demandez à un partenaire d'entraînement de vous aider à décrocher et à raccrocher la barre.",
+      "Maintenez le mouvement contrôlé ; ne laissez pas la barre rebondir sur votre poitrine.",
+      "Concentrez-vous sur la contraction dans le bas de la poitrine."
+    ]
+  },
+  "dumbbellDeclineBenchPress": {
+    "description": "Le développé décliné avec haltères procure un étirement important du bas de la poitrine et améliore l'amplitude de mouvement.",
+    "instructions": [
+      "Assieds-toi à l'extrémité d'un banc décliné, les haltères posées sur tes cuisses.",
+      "Allongez-vous sur le dos en ramenant les poids au niveau de la poitrine.",
+      "Poussez les haltères vers le haut jusqu'à ce que les bras soient tendus.",
+      "Redescendez-les avec contrôle."
+    ],
+    "tips": [
+      "Fais attention en te mettant en position et en en sortant avec des haltères lourds.",
+      "Concentrez-vous sur la contraction en haut du mouvement.",
+      "Maintiens le gainage."
+    ]
+  },
+  "smithMachineDeclineBenchPress": {
+    "description": "Une presse déclinée guidée qui cible en toute sécurité les muscles inférieurs de la poitrine.",
+    "instructions": [
+      "Placez un banc décliné sous la barre de la machine Smith.",
+      "Allongez-vous et assurez-vous que la trajectoire de la barre passe au‑dessus de la partie inférieure de la poitrine.",
+      "Dégagez la barre et abaissez-la vers la poitrine de manière contrôlée.",
+      "Ramenez la barre à la position de départ."
+    ],
+    "tips": [
+      "Assurez‑vous que le banc soit solidement positionné et centré.",
+      "Maintenez le dos à plat contre le banc.",
+      "Idéal pour un travail pectoral à volume élevé."
+    ]
+  },
+  "chestPressMachine": {
+    "description": "Permet de cibler la musculature pectorale de manière stable et contrôlée, avec des exigences d'équilibre réduites.",
+    "instructions": [
+      "Ajustez la hauteur du siège pour que les poignées soient alignées avec le milieu de votre poitrine.",
+      "Assieds-toi le dos contre le coussin et saisis les poignées.",
+      "Poussez les poignées vers l'avant jusqu'à ce que vos bras soient complètement tendus.",
+      "Ramenez lentement les poignées à la position de départ."
+    ],
+    "tips": [
+      "Gardez les coudes légèrement en dessous du niveau des épaules.",
+      "Maintenez le contact entre votre dos et le coussinet en permanence.",
+      "Évite de verrouiller les coudes en haut."
+    ]
+  },
+  "dumbbellChestFly": {
+    "description": "Un mouvement d'isolation qui étire et définit les muscles pectoraux.",
+    "instructions": [
+      "Allonge-toi à plat sur un banc, les haltères tenus au-dessus de la poitrine, paumes se faisant face.",
+      "Abaissez les poids sur les côtés en large arc, en gardant une légère flexion des coudes.",
+      "Arrêtez lorsque vous sentez un étirement dans la poitrine, puis rapprochez les poids au-dessus de votre poitrine.",
+      "Contractez les muscles pectoraux en haut."
+    ],
+    "tips": [
+      "Maintenez le mouvement lent et contrôlé.",
+      "Ne descends pas trop si tu ressens une gêne à l'épaule.",
+      "Concentrez-vous sur le mouvement de 'serrer un arbre dans ses bras'."
+    ]
+  },
+  "cableFly": {
+    "description": "Utilise des câbles pour maintenir une tension constante des muscles pectoraux sur toute l'amplitude de mouvement.",
+    "instructions": [
+      "Placez-vous entre deux poulies avec les poignées à hauteur de poitrine.",
+      "Faites un petit pas en avant et tenez les poignées, les bras étendus sur les côtés.",
+      "Rapprochez les poignées devant la poitrine en gardant une légère flexion des coudes.",
+      "Revenez lentement à la position de départ."
+    ],
+    "tips": [
+      "Concentrez-vous sur la contraction de la poitrine lorsque vous rapprochez les mains.",
+      "Maintenez une légère inclinaison vers l'avant pour une meilleure stabilité.",
+      "Maintiens le gainage serré pour éviter que ton corps ne se balance."
+    ]
+  },
+  "cableCrunchPress": {
+    "description": "Un exercice abdominal à la poulie en position à genoux qui surcharge le schéma du crunch pour développer des abdominaux plus forts et définis.",
+    "instructions": [
+      "Fixez une corde à la poulie haute et mettez-vous à genoux face à la machine à câble.",
+      "Tenez la corde à côté de la tête et verrouillez les hanches afin que le mouvement provienne du torse.",
+      "Ramenez votre cage thoracique vers votre bassin en gardant les coudes près du corps et les abdominaux bien engagés.",
+      "Revenez lentement à la position de départ sans laisser le bloc de poids vous tirer brusquement vers le haut."
+    ],
+    "tips": [
+      "Pensez à courber votre colonne vertébrale segment par segment au lieu de simplement tirer avec les bras.",
+      "Gardez les hanches principalement fixes pour que ce soient vos abdominaux, et non vos fléchisseurs de hanche, qui travaillent.",
+      "Utilisez une charge contrôlée qui vous permette de bien contracter les abdominaux à chaque répétition."
+    ]
+  },
+  "highToLowCableFly": {
+    "description": "Régler les câbles en haut et tirer vers le bas cible les fibres inférieures de la poitrine.",
+    "instructions": [
+      "Réglez les poulies du câble sur la position la plus haute.",
+      "Saisissez les poignées et avancez un pied pour plus de stabilité.",
+      "Tirez les poignées vers le bas et rapprochez-les devant votre taille.",
+      "Ramenez lentement vos bras à la position haute de départ."
+    ],
+    "tips": [
+      "Contractez le bas de votre poitrine au bas du mouvement.",
+      "Maintenez une légère inclinaison vers l'avant.",
+      "Évite d'utiliser le poids de ton corps pour tirer les câbles."
+    ]
+  },
+  "lowToHighCableFly": {
+    "description": "Régler les câbles en bas et tirer vers le haut cible le haut de la poitrine et les deltoïdes antérieurs.",
+    "instructions": [
+      "Réglez les poulies du câble sur la position la plus basse.",
+      "Saisissez les poignées et placez-vous au centre en faisant un léger pas en avant.",
+      "Tirez les poignées vers le haut et rapprochez-les devant le haut de la poitrine.",
+      "Abaissez lentement les poignées jusqu'à la position basse de départ."
+    ],
+    "tips": [
+      "Concentrez-vous sur la contraction de la partie supérieure de la poitrine.",
+      "Gardez une légère flexion des coudes pendant tout le mouvement.",
+      "Contrôlez la charge pendant tout le mouvement."
+    ]
+  },
+  "pecDeckFly": {
+    "description": "Un fly à la machine qui offre une tension constante sur la poitrine pour une meilleure isolation.",
+    "instructions": [
+      "Assieds-toi dans la machine et pose tes avant-bras contre les leviers rembourrés.",
+      "Saisissez les poignées et rapprochez les leviers devant la poitrine.",
+      "Fais une pause d'une seconde au point de contraction maximale.",
+      "Revenez lentement à la position de départ."
+    ],
+    "tips": [
+      "Maintenez le dos et la tête contre le dossier.",
+      "Concentrez-vous sur la contraction de la poitrine plutôt que de tirer avec les bras.",
+      "Maintenez un tempo constant et contrôlé."
+    ]
+  },
+  "barbellOverheadPress": {
+    "description": "Un puissant développé vertical qui développe des épaules larges et la stabilité du haut du corps.",
+    "instructions": [
+      "Placez les pieds à la largeur des épaules et tenez une barre à hauteur d'épaules avec une prise en pronation.",
+      "Contractez votre sangle abdominale et poussez la barre directement au-dessus de la tête jusqu'à ce que les bras soient complètement tendus.",
+      "Verrouillez vos coudes en haut et poussez légèrement la tête vers l'avant.",
+      "Ramenez la barre vers vos épaules avec contrôle."
+    ],
+    "tips": [
+      "N'utilisez pas vos jambes pour aider à soulever le poids (c'est un push press).",
+      "Gardez le gainage et les fessiers contractés pour stabiliser le torse.",
+      "Concentrez-vous sur une trajectoire verticale de la barre."
+    ]
+  },
+  "dumbbellOverheadPress": {
+    "description": "Pousser des haltères au-dessus de la tête permet une amplitude de mouvement naturelle et aide à corriger les déséquilibres musculaires.",
+    "instructions": [
+      "Tenez-vous debout ou assis, une haltère dans chaque main au niveau des épaules, paumes vers l'avant.",
+      "Poussez les poids vers le haut jusqu'à ce que vos bras soient complètement tendus.",
+      "Abaissez les haltères de manière contrôlée jusqu'à la hauteur des épaules.",
+      "Maintiens le gainage pour éviter de cambrer le dos."
+    ],
+    "tips": [
+      "Concentrez-vous sur une poussée fluide et contrôlée.",
+      "Maintenez une base stable, que vous soyez assis ou debout.",
+      "Les haltères offrent plus de liberté à l'articulation de l'épaule qu'une barre."
+    ]
+  },
+  "smithMachineOverheadPress": {
+    "description": "Une presse verticale guidée qui vous permet de vous concentrer uniquement sur l'impulsion des épaules, avec une sécurité renforcée.",
+    "instructions": [
+      "Placez un siège ou tenez-vous sous la barre de la machine Smith.",
+      "Saisissez la barre légèrement plus large que la largeur des épaules.",
+      "Détachez la barre et pressez-la au-dessus de la tête jusqu'à ce que les bras soient tendus.",
+      "Redescends-le au niveau des épaules et répète."
+    ],
+    "tips": [
+      "Assurez-vous que votre position permet une trajectoire verticale sûre de la barre.",
+      "Concentrez-vous sur la contraction des deltoïdes en haut du mouvement.",
+      "Évite d'arquer excessivement le bas du dos."
+    ]
+  },
+  "arnoldPress": {
+    "description": "Un développé d'épaules avec composante de rotation qui sollicite les trois faisceaux du deltoïde.",
+    "instructions": [
+      "Assieds-toi ou tiens-toi debout, haltères devant les épaules, paumes tournées vers toi.",
+      "Poussez les poids au-dessus de la tête tout en faisant pivoter vos paumes vers l'avant.",
+      "Terminez avec les bras tendus au-dessus de la tête et les paumes tournées vers l'extérieur.",
+      "Ramenez vos paumes vers vous en abaissant les poids jusqu'à la position de départ."
+    ],
+    "tips": [
+      "Maintenez une rotation contrôlée tout au long du press.",
+      "Maintenez le dos droit et le gainage engagé.",
+      "Évite d'utiliser des charges excessivement lourdes tant que tu n'as pas maîtrisé la coordination."
+    ]
+  },
+  "lateralRaise": {
+    "description": "L'exercice d'isolation clé pour développer la largeur des épaules.",
+    "instructions": [
+      "Placez les pieds à la largeur des hanches, en tenant les haltères le long du corps.",
+      "Levez les bras sur les côtés avec une légère flexion des coudes jusqu'à ce qu'ils soient à la hauteur des épaules.",
+      "Fais une pause d'une seconde en haut, puis abaisse lentement les poids le long de ton corps."
+    ],
+    "tips": [
+      "Ne balancez pas les poids et n'utilisez pas d'élan.",
+      "Menez le mouvement avec les coudes, pas avec les poignets.",
+      "Imaginez verser de l'eau d'un pichet au sommet du mouvement."
+    ]
+  },
+  "cableLateralRaise": {
+    "description": "Une élévation latérale à la poulie offrant une tension constante sur les deltoïdes latéraux pendant tout le mouvement.",
+    "instructions": [
+      "Placez-vous de profil par rapport à la machine à câbles, la poulie en position la plus basse.",
+      "Saisissez la poignée avec la main la plus éloignée et tirez-la à travers le corps, ou avec la main la plus proche derrière le dos.",
+      "Levez le bras sur le côté jusqu'à ce qu'il soit à la hauteur de l'épaule, en gardant une légère flexion du coude.",
+      "Abaissez lentement la poignée jusqu'à la position de départ."
+    ],
+    "tips": [
+      "Maintenez une posture droite et évitez de vous pencher en vous éloignant de la machine.",
+      "Concentrez-vous pour mener avec le coude et garder le mouvement contrôlé.",
+      "Le câble maintient la tension même en bas de la répétition, contrairement aux haltères."
+    ]
+  },
+  "frontRaise": {
+    "description": "Cible la partie antérieure de l'épaule pour une meilleure définition et force.",
+    "instructions": [
+      "Tenez-vous avec des haltères devant les cuisses, paumes vers vous.",
+      "Lève les poids vers l'avant et vers le haut jusqu'à ce que tes bras soient parallèles au sol.",
+      "Fais une pause d'une seconde, puis abaisse les poids avec contrôle."
+    ],
+    "tips": [
+      "Maintiens le gainage serré pour éviter que ton corps ne bascule.",
+      "Ne soulevez pas les poids au-dessus du niveau des épaules.",
+      "Peut être réalisé en alternant les bras ou avec les deux simultanément."
+    ]
+  },
+  "cableFrontRaise": {
+    "description": "Isole le deltoïde antérieur en utilisant la résistance du câble pour une tension douce et constante.",
+    "instructions": [
+      "Placez-vous dos à une machine à câbles avec la poulie en position la plus basse.",
+      "Tenez la poignée (ou un accessoire de barre) entre les jambes ou à côté de vous.",
+      "Lève les bras vers l'avant et vers le haut jusqu'à ce qu'ils soient à la hauteur des épaules.",
+      "Revenez lentement à la position de départ."
+    ],
+    "tips": [
+      "Maintiens le gainage pour éviter que ton torse ne se balance.",
+      "Contrôlez la charge sur toute l'amplitude de mouvement.",
+      "Évite d'utiliser l'élan pour soulever la charge."
+    ]
+  },
+  "cableRearDeltFly": {
+    "description": "Isole les deltoïdes postérieurs à l'aide de câbles, permettant un profil de résistance constant.",
+    "instructions": [
+      "Placez-vous au centre d'une poulie croisée avec les poulies à la hauteur de la tête.",
+      "Croisez les bras et attrapez la poignée gauche avec la main droite et la poignée droite avec la main gauche.",
+      "Tirez les poignées vers l'extérieur puis vers l'arrière dans un large arc en serrant vos deltoïdes postérieurs.",
+      "Revenez lentement à la position de départ en maintenant la tension."
+    ],
+    "tips": [
+      "Gardez une légère flexion des coudes tout au long du mouvement.",
+      "Concentre-toi sur le tirage avec les épaules, pas avec les muscles du dos.",
+      "Tenez-vous droit et gardez vos abdominaux engagés."
+    ]
+  },
+  "cableUprightRow": {
+    "description": "Cible les épaules et les trapèzes en tirant une prise de câble verticalement vers le menton.",
+    "instructions": [
+      "Placez-vous face à une machine à câbles avec la poulie en position la plus basse et une barre droite attachée.",
+      "Saisissez la barre en prise pronation, mains à environ la largeur des épaules.",
+      "Tirez la barre verticalement vers le menton en menant avec les coudes.",
+      "Arrêtez lorsque la barre est à hauteur de poitrine et que vos coudes sont hauts.",
+      "Abaissez lentement la barre jusqu'à la position de départ."
+    ],
+    "tips": [
+      "Gardez la barre près du corps pendant tout le mouvement.",
+      "Évite de hausser trop les épaules; concentre-toi sur les deltoïdes.",
+      "Maintenez une posture stable et droite."
+    ]
+  },
+  "cableExternalRotation": {
+    "description": "Renforce la coiffe des rotateurs en faisant pivoter le bras vers l'extérieur contre la résistance du câble.",
+    "instructions": [
+      "Placez-vous de profil par rapport à la machine à câbles, la poulie à la hauteur du coude.",
+      "Saisissez la poignée avec la main la plus éloignée, en maintenant le coude serré au corps à un angle de 90°.",
+      "Tournez votre avant-bras vers l'extérieur, loin du corps, aussi loin que confortable.",
+      "Revenez lentement à la position de départ."
+    ],
+    "tips": [
+      "Place une serviette entre le coude et le torse pour t'assurer que le bras reste collé.",
+      "Utilisez une charge très légère ; il s'agit de la santé et de la stabilité des articulations, pas de la charge maximale.",
+      "Bougez avec contrôle et dans une amplitude de mouvement confortable."
+    ]
+  },
+  "cableInternalRotation": {
+    "description": "Renforce les rotateurs internes de l'épaule à l'aide d'une machine à câble.",
+    "instructions": [
+      "Placez-vous de profil par rapport à la machine à câbles, la poulie à la hauteur du coude.",
+      "Saisissez la poignée avec la main la plus proche, en maintenant le coude serré au corps à un angle de 90°.",
+      "Tournez votre avant-bras vers l'intérieur, en direction du corps.",
+      "Revenez lentement à la position de départ."
+    ],
+    "tips": [
+      "Maintenez votre coude plaqué contre le corps pendant toute la série.",
+      "Concentrez-vous sur la qualité du mouvement plutôt que sur la charge.",
+      "Maintenez une posture droite et stable."
+    ]
+  },
+  "tricepsDip": {
+    "description": "Un exercice au poids du corps exigeant qui développe une puissance importante des triceps et de la poitrine.",
+    "instructions": [
+      "Saisissez les barres parallèles et poussez-vous jusqu'à ce que les bras soient entièrement tendus.",
+      "Abaissez votre corps en pliant les coudes jusqu'à ce que vos bras supérieurs soient au moins parallèles au sol.",
+      "Remontez à la position de départ en tendant les bras.",
+      "Gardez le buste plutôt droit pour cibler les triceps."
+    ],
+    "tips": [
+      "Évite de hausser les épaules vers les oreilles.",
+      "Gardez les coudes serrés contre le corps.",
+      "Si réaliser des dips au poids du corps est trop difficile, utilisez une machine à dips assistée ou des bandes élastiques."
+    ]
+  },
+  "chestDip": {
+    "description": "Une variante des dips où vous inclinez le buste vers l'avant pour déplacer l'accent des triceps vers les muscles pectoraux.",
+    "instructions": [
+      "Saisissez les barres parallèles et poussez-vous jusqu'à la position de départ.",
+      "Inclinez votre torse vers l'avant d'environ 45 degrés en descendant votre corps.",
+      "Laissez vos coudes s'écarter légèrement lors de la descente.",
+      "Poussez vers le haut jusqu'à la position de départ tout en maintenant l'inclinaison vers l'avant."
+    ],
+    "tips": [
+      "Contractez la poitrine en haut du mouvement.",
+      "Descends jusqu'à ce que tes épaules soient légèrement sous tes coudes.",
+      "Contrôlez la descente pour éviter une tension au niveau des épaules."
+    ]
+  },
+  "tricepsPushdown": {
+    "description": "Un exercice à poulie populaire pour isoler et développer les triceps.",
+    "instructions": [
+      "Fixez une barre ou une corde à la poulie haute d'une machine à câble.",
+      "Saisissez l'accessoire et tirez vers le bas jusqu'à ce que vos coudes forment un angle de 90°.",
+      "Poussez l'accessoire vers le bas jusqu'à ce que vos bras soient complètement tendus, en contractant vos triceps en bas.",
+      "Revenez lentement à la position de départ à 90 degrés."
+    ],
+    "tips": [
+      "Maintenez les coudes collés au corps pendant toute la série.",
+      "Évite d'utiliser le poids de ton corps pour pousser le câble vers le bas.",
+      "Maintenez une légère inclinaison vers l'avant et le tronc engagé."
+    ]
+  },
+  "overheadTricepsExtension": {
+    "description": "Cible la longue portion du triceps en étendant la charge au-dessus de la tête.",
+    "instructions": [
+      "Assieds-toi ou tiens-toi debout, en tenant un haltère des deux mains au-dessus de la tête.",
+      "Abaissez le poids derrière votre tête en pliant les coudes.",
+      "Tendez les bras pour ramener la charge en position de départ au-dessus de la tête.",
+      "Maintenez le haut des bras immobile pendant tout le mouvement."
+    ],
+    "tips": [
+      "Gardez les coudes dirigés vers l'avant plutôt que vers l'extérieur.",
+      "Ne laissez pas votre bas du dos se cambrer excessivement ; gardez votre sangle abdominale contractée.",
+      "Adoptez un tempo contrôlé pour éviter de heurter la tête ou le cou."
+    ]
+  },
+  "cableOverheadTricepsExtension": {
+    "description": "Une version à la poulie de l'extension triceps au-dessus de la tête qui maintient une tension constante sur la longue portion du triceps pendant toute l'amplitude du mouvement.",
+    "instructions": [
+      "Fixez une corde à la poulie basse ou placez-vous de sorte que le câble passe derrière votre tête.",
+      "Tourne le dos à la machine et amène la corde au-dessus de la tête, coudes pliés et dirigés vers l'avant.",
+      "Tendez les coudes jusqu'à ce que les bras soient droits, en contractant les triceps en haut.",
+      "Revenez lentement en position de départ étirée sans laisser vos coudes s'écarter excessivement."
+    ],
+    "tips": [
+      "Gardez vos coudes principalement immobiles et ne laissez bouger que les avant-bras.",
+      "Contractez le gainage pour éviter que le bas du dos ne s'arque pendant la série.",
+      "Adoptez un tempo fluide et profitez de l'étirement en bas du mouvement."
+    ]
+  },
+  "ringDip": {
+    "description": "Une variation avancée de dips aux anneaux qui exige une grande stabilité et force.",
+    "instructions": [
+      "Soutenez-vous aux anneaux, bras complètement tendus.",
+      "Abaissez votre corps avec contrôle en gardant les anneaux près des côtés.",
+      "Remontez jusqu'à la position de départ en vous concentrant sur la stabilisation des anneaux.",
+      "Tournez légèrement les paumes vers l'extérieur en haut pour une stabilité maximale."
+    ],
+    "tips": [
+      "Maintiens ton gainage très serré pour minimiser les oscillations.",
+      "Commencez par des maintiens aux anneaux pour développer la stabilité nécessaire avant d'essayer des répétitions complètes.",
+      "Assurez‑vous que les anneaux sont à une hauteur adaptée à votre amplitude de mouvement."
+    ]
+  },
+  "pullUp": {
+    "description": "Un mouvement au poids de corps d'élite pour développer un dos large et puissant et des bras forts.",
+    "instructions": [
+      "Saisissez la barre paumes tournées vers l'extérieur, légèrement plus large que la largeur des épaules.",
+      "Suspendez-vous, les bras complètement tendus et le tronc engagé.",
+      "Ramenez votre poitrine vers la barre en poussant les coudes vers le bas en direction des hanches.",
+      "Redescends jusqu'à la position de départ de manière contrôlée."
+    ],
+    "tips": [
+      "Concentre-toi sur le tirage avec les muscles du dos plutôt qu'uniquement avec les bras.",
+      "Évite de balancer les jambes ou d'utiliser l'élan (kipping).",
+      "Si vous ne pouvez pas effectuer une traction complète, commencez par des variantes assistées ou des négatives."
+    ]
+  },
+  "chinUp": {
+    "description": "Une variante de traction avec paumes vers soi, mettant l'accent sur les biceps et la partie inférieure du grand dorsal.",
+    "instructions": [
+      "Saisissez la barre paumes tournées vers vous, à environ la largeur des épaules.",
+      "Suspendez-vous, les bras complètement tendus.",
+      "Ramenez votre menton au-dessus de la barre en poussant les coudes vers le bas.",
+      "Redescends jusqu'à la position de départ de manière contrôlée."
+    ],
+    "tips": [
+      "Les tractions en supination sollicitent généralement davantage les biceps et la poitrine que les tractions en pronation.",
+      "Maintiens le gainage serré pour éviter que ton corps ne se balance.",
+      "Assurez‑vous d'une amplitude complète du mouvement, de la suspension morte jusqu'au menton au‑dessus de la barre."
+    ]
+  },
+  "latPulldown": {
+    "description": "Un exercice à la machine qui vous permet de développer la force de traction verticale de manière contrôlée.",
+    "instructions": [
+      "Assieds-toi dans la machine et règle les coussins pour les genoux afin d'être bien maintenu.",
+      "Saisissez la barre plus large que la largeur des épaules et penchez-vous légèrement en arrière.",
+      "Tirez la barre vers le haut de la poitrine en vous concentrant sur la compression des omoplates.",
+      "Ramenez lentement la barre à la position de départ."
+    ],
+    "tips": [
+      "Ne tirez pas la barre derrière la nuque ; tirez-la vers le haut de la poitrine.",
+      "Concentrez-vous sur le fait de mener avec les coudes.",
+      "Contrôlez la charge à la montée pour maintenir la tension dans vos dorsaux."
+    ]
+  },
+  "cableLatPushdown": {
+    "description": "Exercice debout à la poulie qui sollicite les dorsaux par l'extension de l'épaule, en gardant les bras quasi tendus.",
+    "instructions": [
+      "Fixez une barre droite ou une corde à la poulie haute et placez-vous face à la machine.",
+      "Tenez l'attache avec une légère flexion des coudes, faites un pas en arrière et penchez-vous légèrement au niveau des hanches.",
+      "En gardant les bras quasi tendus, tirez l'attache vers vos cuisses en poussant les bras supérieurs vers le bas et l'arrière.",
+      "Faites une brève pause, puis revenez au point de départ de manière contrôlée sans hausser les épaules."
+    ],
+    "tips": [
+      "Gardez une petite flexion fixe des coudes afin que ce soient les dorsaux, et non les triceps, qui fassent le travail.",
+      "Gardez la poitrine haute et évitez de balancer le torse pour déplacer la charge.",
+      "Utilisez une amplitude contrôlée qui vous permet de sentir les dorsaux s'étirer en haut et se contracter près des cuisses."
+    ]
+  },
+  "seatedCableRow": {
+    "description": "Cible l'épaisseur du dos en tirant les câbles vers le torse en position assise.",
+    "instructions": [
+      "Assieds-toi, pose les pieds sur les plateformes et garde les genoux légèrement fléchis.",
+      "Saisissez la poignée et asseyez-vous droit, les bras tendus.",
+      "Tirez la poignée vers vos côtes inférieures en serrant les omoplates l'une contre l'autre.",
+      "Revenez lentement à la position de départ sans laisser le bloc de poids claquer."
+    ],
+    "tips": [
+      "Maintenez le dos droit et évitez de balancer le torse d'avant en arrière.",
+      "Concentre-toi sur le tirage avec les coudes plutôt qu'avec les mains.",
+      "Maintenez la sangle abdominale stable tout au long du mouvement."
+    ]
+  },
+  "seatedMachineRow": {
+    "description": "Un tirage à la machine avec appui sur la poitrine qui isole les muscles du dos tout en protégeant le bas du dos.",
+    "instructions": [
+      "Ajustez le siège et le coussin thoracique afin d'atteindre confortablement les poignées les bras tendus.",
+      "Assieds-toi la poitrine contre le coussin et saisis les poignées.",
+      "Tirez les poignées vers vous en vous concentrant sur la contraction du milieu du dos.",
+      "Ramenez lentement les poignées à la position de départ."
+    ],
+    "tips": [
+      "Maintenez la poitrine bien appuyée contre le coussinet pour isoler le dos.",
+      "Concentrez-vous sur la compression des omoplates au point de contraction maximale.",
+      "Évite de hausser les épaules."
+    ]
+  },
+  "barbellBentOverRow": {
+    "description": "Un puissant mouvement polyarticulaire qui développe l'épaisseur du dos et la force générale du haut du corps.",
+    "instructions": [
+      "Placez les pieds à la largeur des épaules, en tenant une barre avec une prise en pronation.",
+      "Pivotez sur les hanches et pliez légèrement les genoux, en gardant le dos plat.",
+      "Tirez la barre vers vos côtes inférieures en gardant les coudes près du corps.",
+      "Ramenez la barre à la position de départ avec contrôle."
+    ],
+    "tips": [
+      "Maintenez la colonne neutre et évitez d'arrondir le dos.",
+      "Maintiens le gainage pour soutenir le bas du dos.",
+      "N'utilisez pas d'élan pour 'tricher' en soulevant le poids."
+    ]
+  },
+  "dumbbellBentOverRow": {
+    "description": "En vous penchant et en tirant les haltères vers la taille, vous sollicitez les muscles du dos avec une amplitude de mouvement plus grande.",
+    "instructions": [
+      "Placez les pieds à la largeur des épaules, en tenant un haltère dans chaque main.",
+      "Pivotez sur les hanches jusqu'à ce que votre torse soit presque parallèle au sol.",
+      "Tirez les haltères vers les hanches en serrant les omoplates.",
+      "Redescendez les poids avec contrôle."
+    ],
+    "tips": [
+      "Maintenez le dos à plat et le gainage engagé tout au long de l'exercice.",
+      "Concentre-toi sur le tirage avec les coudes.",
+      "Les haltères permettent à chaque côté du dos de travailler indépendamment."
+    ]
+  },
+  "smithMachineBentOverRow": {
+    "description": "Une variante de tirage guidée permettant de charger lourd en mettant l'accent sur la contraction du milieu du dos.",
+    "instructions": [
+      "Placez-vous en position penchée au-dessus de la barre de la machine Smith.",
+      "Saisissez la barre et désenclenchez-la.",
+      "Tirez la barre vers vos côtes inférieures en gardant le dos à plat.",
+      "Redescends la barre et répète."
+    ],
+    "tips": [
+      "Maintenez la position de charnière stable pendant toute la série.",
+      "Le parcours fixe aide à isoler les muscles ciblés.",
+      "Ajustez votre distance par rapport à la barre pour plus de confort."
+    ]
+  },
+  "singleArmDumbbellRow": {
+    "description": "Permet une amplitude de mouvement plus importante et aide à corriger les déséquilibres musculaires du dos.",
+    "instructions": [
+      "Placez un genou et une main sur un banc pour vous soutenir, en gardant le dos droit.",
+      "Tenez un haltère dans l'autre main, le bras tendu vers le sol.",
+      "Tirez l'haltère vers la hanche en gardant le coude près du corps.",
+      "Abaissez lentement l'haltère jusqu'à la position de départ."
+    ],
+    "tips": [
+      "Concentre-toi sur le tirage avec le dos et l'omoplate, pas seulement avec le bras.",
+      "Maintenez le tronc stable et évitez de tourner le corps lors de la traction.",
+      "Gardez le cou en position neutre."
+    ]
+  },
+  "facePull": {
+    "description": "Essentiel pour la santé de l'épaule, ciblant les deltoïdes postérieurs et les muscles du haut du dos.",
+    "instructions": [
+      "Fixez une corde à la poulie du câble à hauteur du haut de la poitrine ou des yeux.",
+      "Saisissez les extrémités de la corde, les pouces pointant vers l'arrière.",
+      "Tirez la corde vers le front en écartant les extrémités au fur et à mesure qu'elle se rapproche du visage.",
+      "Concentrez-vous sur la contraction des deltoïdes postérieurs et du milieu du dos en fin de mouvement."
+    ],
+    "tips": [
+      "Gardez les coudes hauts et écartés sur les côtés.",
+      "Évite d'utiliser le bas du dos pour tirer; reste droit et stable.",
+      "Utilisez des charges plus légères et concentrez‑vous sur la qualité de la contraction."
+    ]
+  },
+  "rearDeltFly": {
+    "description": "Isole la partie arrière des épaules pour aider à créer une silhouette harmonieuse.",
+    "instructions": [
+      "Assieds-toi au bord d'un banc ou d'un support et penche-toi en avant depuis les hanches, en gardant le dos plat.",
+      "Tenez les haltères paumes face à face, bras tendus vers le sol.",
+      "Levez les poids sur les côtés jusqu'à ce que vos bras soient à la hauteur des épaules.",
+      "Abaissez lentement les poids jusqu'à la position de départ."
+    ],
+    "tips": [
+      "Concentrez-vous sur l'utilisation des deltoïdes postérieurs, pas des trapèzes.",
+      "Gardez une légère flexion des coudes tout au long du mouvement.",
+      "Ne balancez pas les poids."
+    ]
+  },
+  "machineRearDeltFly": {
+    "description": "Isole les deltoïdes postérieurs à l'aide d'une machine pour des résultats contrôlés et efficaces.",
+    "instructions": [
+      "Assieds-toi face à l'appareil, la poitrine fermement appuyée contre le coussinet.",
+      "Saisissez les poignées, les bras tendus devant vous.",
+      "Tirez les poignées vers l'arrière dans un large arc jusqu'à ce que vos bras soient alignés avec vos épaules.",
+      "Contractez vos deltoïdes postérieurs, puis revenez lentement à la position de départ."
+    ],
+    "tips": [
+      "Maintenez la poitrine contre le coussin pour isoler les deltoïdes postérieurs.",
+      "Concentrez-vous sur la contraction à l'arrière des épaules.",
+      "Maintenez un tempo constant et contrôlé."
+    ]
+  },
+  "bicepsCurl": {
+    "description": "L'exercice d'isolation classique pour développer et définir les biceps.",
+    "instructions": [
+      "Placez les pieds à la largeur des hanches, en tenant les haltères le long du corps, paumes tournées vers l'avant.",
+      "Remontez les poids vers les épaules en fléchissant les coudes.",
+      "Contractez vos biceps en haut, puis redescendez lentement les charges.",
+      "Maintenez le haut des bras immobile pendant tout le mouvement."
+    ],
+    "tips": [
+      "Évite de balancer ton corps ou d'utiliser l'élan pour soulever les poids.",
+      "Gardez les coudes serrés contre le torse.",
+      "Amplitude complète : étendez complètement les bras en bas du mouvement."
+    ]
+  },
+  "cableCurl": {
+    "description": "Un curl à la poulie debout qui maintient une tension constante sur les biceps du début à la fin de chaque répétition.",
+    "instructions": [
+      "Fixez une barre droite ou de type EZ à la poulie basse et placez-vous face à la machine.",
+      "Saisissez la poignée paumes vers le haut et gardez les coudes près du corps.",
+      "Ramenez la poignée vers vos épaules en gardant les bras supérieurs presque immobiles.",
+      "Abaissez le poids sous contrôle jusqu'à ce que vos coudes soient de nouveau complètement étendus."
+    ],
+    "tips": [
+      "Ne laissez pas vos épaules basculer vers l'avant lorsque la charge descend.",
+      "Maintenez le tronc immobile et évitez de vous pencher en arrière pour déplacer la charge.",
+      "Fais une brève pause près du sommet pour maximiser la contraction du biceps."
+    ]
+  },
+  "bayesianCableCurl": {
+    "description": "Un curl à la poulie derrière le corps qui étire le biceps au début de la répétition et met l'accent sur la position d'étirement.",
+    "instructions": [
+      "Fixez une poignée simple à la poulie basse et tenez-vous dos à la machine, la poignée dans une main derrière la hanche.",
+      "Faites un pas en avant jusqu'à ce que le câble tire légèrement votre bras en action derrière votre torse.",
+      "Ramenez la poignée vers votre épaule en évitant que le coude n'avance trop.",
+      "Ramenez le dos en position étirée de départ avec contrôle avant de répéter."
+    ],
+    "tips": [
+      "Éloignez-vous suffisamment de la machine pour sentir un étirement du biceps en bas.",
+      "Maintenez la poitrine haute et évitez de tourner le torse pendant le curl.",
+      "Utilisez des charges modérées et un contrôle total pour tirer le meilleur parti de l'étirement."
+    ]
+  },
+  "hammerCurl": {
+    "description": "Un curl en prise neutre qui cible le biceps et le brachial pour des bras plus volumineux.",
+    "instructions": [
+      "Tenez-vous avec des haltères le long du corps, paumes face au torse (prise neutre).",
+      "Remontez les poids en maintenant une prise neutre.",
+      "Contractez en haut du mouvement puis redescendez de façon contrôlée.",
+      "Maintenez les coudes collés au corps."
+    ],
+    "tips": [
+      "Concentrez-vous sur la contraction des biceps et des avant-bras.",
+      "Gardez une posture droite et évitez de vous balancer.",
+      "Peut être réalisé en alternant les bras ou avec les deux simultanément."
+    ]
+  },
+  "suspensionRow": {
+    "description": "Utilise un système de suspension pour effectuer des tirages au poids du corps, ce qui permet d'ajuster facilement la difficulté via l'angle du corps.",
+    "instructions": [
+      "Saisissez les poignées et penchez-vous en arrière, les bras tendus et les pieds en avant.",
+      "Maintenez une ligne droite de la tête aux talons.",
+      "Ramenez votre poitrine vers les poignées en poussant les coudes vers l'arrière.",
+      "Redescends jusqu'à la position de départ de manière contrôlée."
+    ],
+    "tips": [
+      "Ajustez la difficulté en changeant la position des pieds (plus proche du point d'ancrage = plus difficile).",
+      "Contractez le gainage et les fessiers pour empêcher les hanches de s'affaisser.",
+      "Concentrez-vous sur un mouvement fluide et contrôlé."
+    ]
+  },
+  "landmineRow": {
+    "description": "Un exercice dorsal puissant réalisé en fixant une extrémité d'une barre et en tirant l'extrémité chargée vers le buste.",
+    "instructions": [
+      "Ancrez une extrémité d'une barre dans une fixation landmine ou dans un coin au sol.",
+      "Chargez des disques de poids à l'autre extrémité et placez-vous à califourchon sur la barre, dos tourné vers l'ancrage.",
+      "Pivotez sur vos hanches et pliez légèrement les genoux, en gardant le dos plat.",
+      "Saisissez la barre (utilisez une poignée en V si disponible) et tirez l'extrémité lestée vers vos côtes inférieures.",
+      "Redescendez le poids avec contrôle en maintenant le dos plat."
+    ],
+    "tips": [
+      "Maintenez le gainage tout au long du mouvement pour protéger le bas du dos.",
+      "Concentre-toi sur le tirage avec les coudes et sur le rapprochement des omoplates.",
+      "Maintenez une position de charnière constante ; évitez de 'rebondir' la charge vers le haut."
+    ]
+  },
+  "plank": {
+    "description": "Un exercice fondamental du core qui développe la force isométrique et la stabilité de l'ensemble de la sangle abdominale.",
+    "instructions": [
+      "Placez vos avant-bras au sol, les coudes alignés sous les épaules.",
+      "Tendez les jambes derrière vous et tenez-vous en équilibre sur la pointe des pieds.",
+      "Maintenez le corps en ligne droite de la tête aux talons.",
+      "Contractez votre sangle abdominale et maintenez la position."
+    ],
+    "tips": [
+      "Évite que tes hanches s'affaissent ou se lèvent trop haut.",
+      "Maintenez une position neutre du cou ; regardez vers le sol.",
+      "Respirez régulièrement pendant toute la tenue."
+    ]
+  },
+  "sidePlank": {
+    "description": "Cible les obliques et la stabilité latérale du tronc pour améliorer l'équilibre et prévenir les maux de dos.",
+    "instructions": [
+      "Allonge-toi sur le côté, jambes tendues et les pieds l'un sur l'autre.",
+      "Appuyez le haut du corps sur l'avant-bras, avec le coude directement sous l'épaule.",
+      "Soulève les hanches jusqu'à ce que ton corps forme une ligne droite de la tête aux pieds.",
+      "Maintenez la position en gardant le tronc engagé et les hanches à niveau."
+    ],
+    "tips": [
+      "Ne laissez pas vos hanches s'affaisser vers le sol.",
+      "Gardez le cou en position neutre, le regard dirigé vers l'avant.",
+      "Pour une variation plus facile, faites la planche avec les genoux au sol."
+    ]
+  },
+  "deadBug": {
+    "description": "Un moyen sûr et efficace de développer la stabilité du tronc et la coordination sans solliciter le dos.",
+    "instructions": [
+      "Allonge-toi sur le dos, bras tendus vers le plafond et genoux pliés à 90 degrés (position tabletop).",
+      "Abaissez lentement votre bras droit derrière la tête tout en étendant simultanément la jambe gauche vers le sol.",
+      "Maintenez le bas du dos fermement collé au sol pendant tout le mouvement.",
+      "Revenez en position de départ et répétez avec le bras et la jambe opposés."
+    ],
+    "tips": [
+      "L'essentiel est de garder le dos plat ; si votre dos creuse, ne descendez pas autant la jambe.",
+      "Bougez lentement et avec contrôle.",
+      "Expire en étendant les membres."
+    ]
+  },
+  "birdDog": {
+    "description": "Améliore l'équilibre et la stabilité de la colonne vertébrale en sollicitant simultanément le tronc, les fessiers et les épaules.",
+    "instructions": [
+      "Commencez à quatre pattes, les mains sous les épaules et les genoux sous les hanches.",
+      "Étendez lentement votre bras droit vers l'avant et votre jambe gauche vers l'arrière jusqu'à ce qu'ils soient tous deux parallèles au sol.",
+      "Gardez les hanches de niveau et le tronc engagé pour empêcher le dos de se cambrer.",
+      "Maintenez pendant une seconde, puis revenez en position de départ et changez de côté."
+    ],
+    "tips": [
+      "Imaginez qu'il y a un verre d'eau sur votre dos que vous ne voulez pas renverser.",
+      "Ne levez pas trop le bras ou la jambe ; privilégiez l'allongement plutôt que la hauteur.",
+      "Gardez le regard vers le sol pour maintenir une nuque neutre."
+    ]
+  },
+  "mountainClimber": {
+    "description": "Un exercice dynamique qui sollicite les muscles du tronc tout en constituant un défi cardiovasculaire notable.",
+    "instructions": [
+      "Commencez en position de planche haute, les mains sous les épaules et le corps aligné.",
+      "Ramenez un genou vers la poitrine, puis alternez rapidement les jambes, comme si vous couriez sur place en position de planche.",
+      "Gardez les hanches basses et le tronc serré.",
+      "Maintenez un rythme constant et rapide."
+    ],
+    "tips": [
+      "Évite que tes hanches rebondissent de haut en bas.",
+      "Concentrez-vous à pousser vos genoux droit vers l'avant.",
+      "Maintenez votre poids centré au-dessus des mains."
+    ]
+  },
+  "russianTwist": {
+    "description": "Cible les obliques avec un mouvement de rotation qui améliore la puissance et la définition du tronc.",
+    "instructions": [
+      "Assieds-toi par terre, genoux pliés et pieds légèrement surélevés.",
+      "Inclinez-vous légèrement en arrière en gardant le dos droit et le gainage activé.",
+      "Tournez votre torse d'un côté en amenant vos mains vers le sol à côté de la hanche.",
+      "Tournez de l'autre côté de manière contrôlée."
+    ],
+    "tips": [
+      "Suivez vos mains du regard pour vous assurer que tout votre torse tourne.",
+      "Gardez les pieds joints et aussi immobiles que possible.",
+      "Pour plus de défi, tenez un poids ou un ballon médicinal."
+    ]
+  },
+  "bicycleCrunch": {
+    "description": "Un excellent exercice de gainage complet qui sollicite les abdominaux supérieurs, inférieurs et les obliques.",
+    "instructions": [
+      "Allonge-toi sur le dos, mains derrière la tête et genoux en position tabletop.",
+      "Amène ton coude droit vers ton genou gauche tout en tendant la jambe droite.",
+      "Changez de côté en rapprochant le coude gauche vers le genou droit et en tendant la jambe gauche.",
+      "Continuez d'alterner les côtés en effectuant un mouvement de pédalage."
+    ],
+    "tips": [
+      "Concentrez-vous sur la rotation du torse plutôt que de simplement tirer les coudes.",
+      "Gardez le bas du dos collé au sol.",
+      "Privilégiez le contrôle plutôt que la vitesse pour une meilleure activation musculaire."
+    ]
+  },
+  "hangingLegRaise": {
+    "description": "Un exercice de gainage avancé qui cible spécifiquement les abdominaux inférieurs et améliore la force de préhension.",
+    "instructions": [
+      "Suspendez-vous à une barre de traction, les bras complètement tendus et la prise à largeur d'épaules.",
+      "Gardez les jambes droites (ou légèrement fléchies), relevez-les jusqu'à ce qu'elles soient parallèles au sol.",
+      "Redescends les jambes lentement et de manière contrôlée.",
+      "Évite de balancer ton corps pour prendre de l'élan."
+    ],
+    "tips": [
+      "Contractez votre sangle abdominale et vos dorsaux pour stabiliser le corps.",
+      "Concentrez-vous sur le 'basculement' du bassin pour engager les abdominaux inférieurs.",
+      "Si les relevés de jambes complets sont trop difficiles, commencez par des relevés de genoux en suspension."
+    ]
+  },
+  "lyingLegRaise": {
+    "description": "Un exercice de gainage au sol qui entraîne les abdominaux à contrôler le bassin pendant que les jambes effectuent une flexion de hanche.",
+    "instructions": [
+      "Allongez-vous sur le dos, les bras le long du corps et les jambes tendues.",
+      "Rentrez les abdominaux et appuyez doucement le bas du dos contre le sol.",
+      "Levez les deux jambes ensemble jusqu'à ce qu'elles soient presque verticales, en les gardant droites ou légèrement fléchies si nécessaire.",
+      "Descendez les jambes lentement, seulement jusqu'à ce que vous puissiez le faire sans que le bas du dos ne se décolle du sol."
+    ],
+    "tips": [
+      "Ne cherchez pas l'amplitude maximale ; arrêtez la descente dès que le bas du dos commence à se relever.",
+      "Pliez les genoux ou effectuez des tapes alternées des talons pour rendre l'exercice plus facile.",
+      "Bougez lentement et évitez de balancer les jambes afin que ce soient les abdominaux, et non l'élan, qui contrôlent le mouvement."
+    ]
+  },
+  "cableWoodchop": {
+    "description": "Un mouvement rotatoire fonctionnel qui développe la puissance du core et cible les obliques en utilisant une résistance par câble.",
+    "instructions": [
+      "Placez-vous de côté par rapport à la machine à câbles, la poignée positionnée en haut ou en bas.",
+      "Saisissez la poignée à deux mains et reculez par rapport à la machine.",
+      "Tirez la poignée à travers votre corps et vers le bas (ou vers le haut) en un mouvement diagonal type «couper du bois», en faisant pivoter le torse.",
+      "Revenez lentement à la position de départ."
+    ],
+    "tips": [
+      "Maintenez les bras principalement droits et tournez depuis le tronc.",
+      "Tourne le pied arrière pendant la rotation pour protéger tes genoux.",
+      "Maintenez une base stable, les pieds écartés à la largeur des épaules."
+    ]
+  },
+  "burpee": {
+    "description": "L'exercice complet par excellence pour brûler les graisses et développer puissance explosive et endurance.",
+    "instructions": [
+      "Commencez en position debout.",
+      "Accroupissez-vous et posez les mains au sol.",
+      "Saute les pieds en arrière en position de planche et effectue une pompe.",
+      "Ramène les pieds vers les mains puis saute de façon explosive en l'air les bras au-dessus de la tête."
+    ],
+    "tips": [
+      "Gardez vos abdominaux gainés pendant tout le mouvement.",
+      "Atterrissez en douceur sur vos pieds après le saut.",
+      "Peut être modifié en reculant les pieds au lieu de sauter pour réduire l'impact."
+    ]
+  },
+  "jumpingJacks": {
+    "description": "Un exercice classique d'échauffement et de conditionnement pour tout le corps qui améliore la coordination et la santé cardiovasculaire.",
+    "instructions": [
+      "Placez les pieds joints et les bras le long du corps.",
+      "Saute en écartant les jambes à la largeur des épaules et en balançant les bras au-dessus de la tête.",
+      "Sautez à nouveau pour revenir à la position de départ.",
+      "Répétez de manière rythmée."
+    ],
+    "tips": [
+      "Atterris en douceur sur l'avant-pied.",
+      "Maintenez une légère flexion des genoux.",
+      "Maintiens le gainage pendant tout le mouvement."
+    ]
+  },
+  "highKnees": {
+    "description": "Un exercice cardio à haute intensité qui renforce les jambes et le tronc tout en améliorant la technique de course.",
+    "instructions": [
+      "Placez les pieds à la largeur des hanches.",
+      "Ramène le genou droit vers la poitrine aussi haut que possible tout en balançant le bras gauche.",
+      "Changez rapidement de jambe, en relevant le genou gauche et en balançant le bras droit.",
+      "Continuez d'alterner à un rythme soutenu, en restant sur la plante des pieds."
+    ],
+    "tips": [
+      "Concentrez-vous à lever les genoux au moins à la hauteur des hanches.",
+      "Gardez le torse droit ; ne vous penchez pas en arrière.",
+      "Balancez les bras pour aider à maintenir l'élan."
+    ]
+  },
+  "squatJump": {
+    "description": "Combine un squat traditionnel avec un saut explosif pour développer la puissance et augmenter la fréquence cardiaque.",
+    "instructions": [
+      "Placez les pieds à la largeur des épaules.",
+      "Descends en position de squat jusqu'à ce que vos cuisses soient parallèles au sol.",
+      "Saute de façon explosive en l'air en atteignant la plus grande hauteur possible.",
+      "Atterris en douceur et redescends immédiatement dans le squat suivant."
+    ],
+    "tips": [
+      "Absorbez l'impact en atterrissant sur l'avant-pied puis en roulant jusqu'aux talons.",
+      "Assurez‑vous que vos genoux ne s'affaissent pas vers l'intérieur lors du décollage ou de l'atterrissage.",
+      "Balancez les bras pour aider à générer de la puissance vers le haut."
+    ]
+  },
+  "butterflySitUp": {
+    "description": "Un exercice de gainage classique de Freeletics qui utilise une position des jambes en papillon pour limiter l'implication des fléchisseurs de la hanche.",
+    "instructions": [
+      "Allonge-toi sur le dos, les plantes des pieds l'une contre l'autre et les genoux pointés vers l'extérieur.",
+      "Tendez les bras au-dessus de la tête et touchez le sol derrière vous.",
+      "Contractez votre sangle abdominale et relevez‑vous complètement, en touchant le sol devant vos orteils.",
+      "Redescends de manière contrôlée."
+    ],
+    "tips": [
+      "Utilisez les bras pour prendre de l'élan si nécessaire, mais concentrez‑vous sur l'utilisation des abdominaux.",
+      "Maintenez le bas du dos collé au sol pendant la phase initiale du sit-up.",
+      "Expirez en vous redressant."
+    ]
+  },
+  "sprawl": {
+    "description": "Un mouvement 'down-and-up' similaire à un burpee mais sans la pompe ni le saut, axé sur la vitesse et le conditionnement métabolique.",
+    "instructions": [
+      "Depuis la position debout, descendez en squat et placez vos mains au sol.",
+      "Saute les pieds en arrière pour revenir en position de planche haute.",
+      "Sautez immédiatement vos pieds vers l'arrière en direction de vos mains.",
+      "Revenez en position debout aussi rapidement que possible."
+    ],
+    "tips": [
+      "Maintiens le gainage serré pour éviter que tes hanches ne s'affaissent en position de planche.",
+      "Concentrez-vous sur des transitions rapides entre la position debout et la planche.",
+      "Maintenez un rythme régulier."
+    ]
+  },
+  "pikePushUp": {
+    "description": "Une variante de pompe au poids du corps effectuée en position pike pour cibler les épaules et le haut de la poitrine.",
+    "instructions": [
+      "Commencez en position de planche haute, puis levez les hanches jusqu'à ce que votre corps forme un V inversé.",
+      "Gardez les jambes et les bras tendus, la tête rentrée entre les bras.",
+      "Abaissez le sommet de la tête vers le sol en fléchissant les coudes.",
+      "Poussez vers le haut pour revenir à la position de départ en pike."
+    ],
+    "tips": [
+      "Plus vos pieds sont proches de vos mains, plus l'exercice devient difficile.",
+      "Maintiens le gainage et garde le dos droit.",
+      "Concentre-toi sur la poussée avec les épaules."
+    ]
+  },
+  "superman": {
+    "description": "Renforce toute la chaîne postérieure, y compris le bas du dos, les fessiers et les ischio-jambiers.",
+    "instructions": [
+      "Allongez-vous face contre le sol, les bras étendus au‑dessus de la tête et les jambes tendues.",
+      "Soulève simultanément les bras, la poitrine et les jambes du sol.",
+      "Maintenez la position pendant une seconde en contractant les fessiers et le bas du dos.",
+      "Redescends le dos en gardant le contrôle."
+    ],
+    "tips": [
+      "Ne regardez pas vers le haut ; maintenez la nuque en position neutre en regardant le sol.",
+      "Concentrez-vous sur la longueur plutôt que sur la hauteur.",
+      "Expirez en remontant."
+    ]
+  },
+  "handReleasePushUp": {
+    "description": "Une variante de pompe où vous soulevez les mains du sol au bas de chaque répétition pour garantir une amplitude complète et développer la puissance explosive.",
+    "instructions": [
+      "Commencez en position de planche haute.",
+      "Abaissez votre poitrine complètement jusqu'au sol.",
+      "Lève brièvement les deux mains du sol, puis repose-les.",
+      "Poussez de façon explosive vers le haut pour revenir à la position de planche de départ."
+    ],
+    "tips": [
+      "Maintenez le gainage pour éviter le 'snaking' hors du sol.",
+      "Maintenez le corps en ligne droite de la tête aux talons.",
+      "Concentre-toi sur la poussée avec toute la paume."
+    ]
+  },
+  "climber": {
+    "description": "Similaire aux mountain climbers mais avec les pieds sautant à l'extérieur des mains, en mettant l'accent sur la mobilité des hanches et la puissance du tronc.",
+    "instructions": [
+      "Commencez en position de planche haute.",
+      "Saute en avant avec le pied droit et place-le à l'extérieur de ta main droite.",
+      "Changez de jambe de façon explosive : sautez en ramenant le pied droit vers l'arrière tout en plaçant le pied gauche à l'extérieur de votre main gauche.",
+      "Continuez d'alterner à un rythme rapide et rythmé."
+    ],
+    "tips": [
+      "Gardez les hanches aussi basses que possible.",
+      "Concentrez-vous sur une grande amplitude de mouvement pour les jambes.",
+      "Maintenez le haut du corps fort et stable."
+    ]
+  },
+  "boxingBagWork": {
+    "description": "Des intervalles à haute intensité sur le sac de frappe développent l'endurance cardiovasculaire, la puissance et la coordination.",
+    "instructions": [
+      "Placez-vous en garde de boxe, les mains levées pour protéger le visage.",
+      "Effectue diverses frappes (jab, cross, crochet, uppercut) contre le sac de frappe.",
+      "Restez léger sur vos appuis et déplacez-vous autour du sac.",
+      "Maintenez une intensité élevée pendant toute la durée du round."
+    ],
+    "tips": [
+      "Concentre-toi sur la technique de frappe correcte pour éviter les blessures au poignet.",
+      "Expirez à chaque coup.",
+      "Maintiens le gainage pour plus de puissance et de stabilité."
+    ]
+  },
+  "catCow": {
+    "description": "Un mouvement spinal doux qui améliore la mobilité et soulage les tensions du dos.",
+    "instructions": [
+      "Commencez à quatre pattes, les mains sous les épaules et les genoux sous les hanches.",
+      "Vache: Inspirez en laissant tomber le ventre vers le sol, relevez la poitrine et regardez vers le haut.",
+      "Chat : Expirez en arrondissant le dos vers le plafond, rentrez le menton et contractez le nombril.",
+      "Passez en douceur d'une position à l'autre en suivant votre respiration."
+    ],
+    "tips": [
+      "Concentre-toi sur le mouvement d'une vertèbre à la fois.",
+      "Effectuez les mouvements en douceur et à l'intérieur d'une amplitude de mouvement confortable.",
+      "Écartez bien les doigts pour un meilleur appui."
+    ]
+  },
+  "hipFlexorStretch": {
+    "description": "Soulage la raideur des hanches causée par une position assise prolongée ou un entraînement intensif.",
+    "instructions": [
+      "Agenouillez-vous sur un genou, l'autre pied à plat devant vous (position demi-agenouillée).",
+      "Gardez le buste droit et poussez doucement les hanches vers l'avant.",
+      "Serrez les fessiers de la jambe à genoux pour approfondir l'étirement.",
+      "Maintenez pendant la durée souhaitée, puis changez de jambe."
+    ],
+    "tips": [
+      "Évite d'arquer le bas du dos; garde le gainage engagé.",
+      "Vous devriez sentir l'étirement à l'avant de la hanche en appui sur le genou.",
+      "Maintenez une posture bien droite tout au long de l'étirement."
+    ]
+  },
+  "hamstringStretch": {
+    "description": "Améliore la flexibilité à l'arrière des jambes et aide à prévenir les douleurs lombaires.",
+    "instructions": [
+      "Assieds-toi par terre avec une jambe étendue et l'autre pied contre l'intérieur de la cuisse.",
+      "Pivotez sur les hanches et penchez-vous vers vos orteils, en gardant le dos plat.",
+      "Maintenez l'étirement lorsque vous sentez une tension à l'arrière de la jambe.",
+      "Répétez de l'autre côté."
+    ],
+    "tips": [
+      "Ne faites pas de rebonds ; maintenez un étirement doux et régulier.",
+      "Concentrez-vous sur le fait d'avancer la poitrine plutôt que la tête pour garder le dos plus droit.",
+      "Respirez profondément et tentez de vous détendre dans l'étirement."
+    ]
+  },
+  "thoracicRotation": {
+    "description": "Ouvre le haut du dos et améliore la mobilité en rotation pour une meilleure posture et de meilleures performances.",
+    "instructions": [
+      "Commencez à quatre pattes ou en décubitus latéral avec les genoux fléchis.",
+      "Placez une main derrière votre tête.",
+      "Tournez votre coude et votre torse vers le plafond, en suivant du regard.",
+      "Revenez lentement à la position de départ."
+    ],
+    "tips": [
+      "Garde les hanches immobiles et concentre la rotation dans le haut du dos.",
+      "Expirez en tournant vers le haut.",
+      "Ne forcez pas l'amplitude de mouvement ; bougez dans votre zone de confort."
+    ]
+  },
+  "shoulderMobilityFlow": {
+    "description": "Une séquence de mouvements conçue pour améliorer l'amplitude et la santé des articulations de l'épaule.",
+    "instructions": [
+      "Effectue une série de mouvements d'épaules contrôlés, tels que cercles de bras, roulades d'épaules et 'wall slides'.",
+      "Effectuez chaque mouvement lentement et sur toute son amplitude.",
+      "Concentrez-vous pour garder les épaules détendues et abaissées, éloignées des oreilles.",
+      "Maintenez un flux régulier et rythmique."
+    ],
+    "tips": [
+      "Évitez tout mouvement qui provoque une douleur aiguë.",
+      "Maintiens le gainage pour stabiliser le torse pendant les mouvements des bras.",
+      "Parfait comme échauffement pour tout entraînement du haut du corps."
+    ]
+  },
+  "worldGreatestStretch": {
+    "description": "Un étirement dynamique complet qui cible les hanches, les ischio‑jambiers et la colonne thoracique.",
+    "instructions": [
+      "Commencez en position de planche haute.",
+      "Avancez le pied droit à l'extérieur de votre main droite.",
+      "Lève ton bras droit et fais pivoter ton torse vers le plafond, en regardant ta main.",
+      "Amène ton coude droit vers l'intérieur de ton pied droit.",
+      "Poussez en arrière pour effectuer un étirement des ischio-jambiers en tendant la jambe avant et en relevant les orteils.",
+      "Revenez en planche et répétez de l'autre côté."
+    ],
+    "tips": [
+      "Parcourez chaque phase lentement et délibérément.",
+      "Maintenez la jambe arrière aussi droite que possible pendant la rotation.",
+      "Concentre-toi sur l'ouverture de la poitrine pendant la rotation."
+    ]
+  },
+  "pigeonPose": {
+    "description": "Une posture de yoga efficace pour ouvrir les hanches et soulager les tensions dans les fessiers.",
+    "instructions": [
+      "Depuis la position du chien tête en bas ou à quatre pattes, amenez votre genou droit vers l'avant en direction de votre poignet droit.",
+      "Placez votre tibia droit au sol, en visant qu'il soit parallèle à l'avant de votre tapis (ou selon votre confort).",
+      "Étendez la jambe gauche droit derrière vous.",
+      "Garde les hanches alignées et abaisse lentement le buste sur la jambe avant.",
+      "Maintenez la position et respirez dans l'étirement, puis changez de côté."
+    ],
+    "tips": [
+      "Ne forcez pas votre tibia à être parallèle si cela vous provoque des douleurs au genou.",
+      "Utilisez un bloc ou un coussin sous la hanche pour vous soutenir si nécessaire.",
+      "Gardez le pied avant en flexion pour protéger le genou."
+    ]
+  },
+  "cobraStretch": {
+    "description": "Une extension dorsale douce qui étire les muscles abdominaux et améliore la flexibilité de la colonne vertébrale.",
+    "instructions": [
+      "Allongez-vous face contre le sol, les jambes tendues et le dessus des pieds posé au sol.",
+      "Placez vos mains sous vos épaules.",
+      "Inspirez et redressez lentement vos bras pour soulever votre poitrine du sol.",
+      "Garde les hanches au sol et les épaules éloignées des oreilles.",
+      "Regarde légèrement vers le haut et maintiens l'étirement."
+    ],
+    "tips": [
+      "Ne forcez pas vos bras à être totalement tendus si cela vous provoque des douleurs dans le bas du dos.",
+      "Contractez légèrement les fessiers pour soutenir la colonne vertébrale.",
+      "Concentrez-vous sur l'allongement de l'avant de votre corps."
+    ]
+  },
+  "childsPose": {
+    "description": "Une posture de repos qui étire doucement le dos, les hanches et les épaules.",
+    "instructions": [
+      "Mettez-vous à genoux sur le sol, les gros orteils se touchant, et asseyez-vous sur vos talons.",
+      "Écartez vos genoux d'environ la largeur des hanches.",
+      "Expirez et penchez-vous vers l'avant, en reposant le torse entre vos cuisses.",
+      "Tendez les bras vers l'avant paumes vers le bas, ou laissez-les le long du corps.",
+      "Posez le front au sol et respirez profondément."
+    ],
+    "tips": [
+      "Écartez davantage les genoux si nécessaire pour laisser plus d'espace au tronc.",
+      "Concentrez-vous à diriger votre respiration vers le bas du dos.",
+      "Détendez complètement la mâchoire et les épaules."
+    ]
+  },
+  "inchworm": {
+    "description": "Un mouvement dynamique qui étire les ischio-jambiers tout en renforçant la stabilité du tronc et des épaules.",
+    "instructions": [
+      "Placez les pieds à la largeur des hanches.",
+      "Pivotez sur vos hanches et posez les mains au sol (pliez légèrement les genoux si nécessaire).",
+      "Avance les mains vers l'avant jusqu'à atteindre la position de planche haute.",
+      "Fais une brève pause, puis rapproche tes pieds de tes mains par petits pas en gardant les jambes aussi droites que possible.",
+      "Revenez en position debout et répétez."
+    ],
+    "tips": [
+      "Gardez le gainage pour éviter que les hanches ne s'affaissent pendant la planche.",
+      "Gardez les jambes tendues aussi longtemps que possible pour maximiser l'étirement des ischio‑jambiers.",
+      "Bougez avec contrôle, évitez de vous précipiter."
+    ]
+  },
+  "armCircles": {
+    "description": "Un exercice simple de mobilité d'épaule qui échauffe la coiffe des rotateurs et améliore la santé articulaire.",
+    "instructions": [
+      "Placez les pieds à la largeur des épaules et étendez les bras sur les côtés à la hauteur des épaules.",
+      "Effectue de petits cercles contrôlés avec les bras vers l'avant.",
+      "Après la durée souhaitée, inversez le sens pour effectuer des cercles vers l'arrière.",
+      "Augmentez progressivement la taille des cercles à mesure que vos épaules se réchauffent."
+    ],
+    "tips": [
+      "Détendez les épaules et abaissez-les, loin des oreilles.",
+      "Maintenez le tronc stable ; ne laissez pas votre corps se balancer.",
+      "Respirez naturellement pendant tout le mouvement."
+    ]
+  },
+  "legSwings": {
+    "description": "Un étirement dynamique qui améliore la mobilité de la hanche et prépare les jambes à l'entraînement.",
+    "instructions": [
+      "Placez-vous près d'un mur ou d'un objet solide pour garder l'équilibre.",
+      "Balancez une jambe d'avant en arrière de manière contrôlée, en augmentant l'amplitude progressivement.",
+      "Après le nombre de répétitions souhaité, passez à des balancements latéraux qui traversent le corps.",
+      "Changez de jambe et répétez."
+    ],
+    "tips": [
+      "Gardez le buste droit et le core activé ; évitez une cambrure excessive du dos.",
+      "Ne forcez pas l'amplitude de mouvement ; restez dans un étirement confortable.",
+      "Maintenez un tempo rythmique et régulier."
+    ]
+  },
+  "wristCircles": {
+    "description": "Améliore la mobilité de l'articulation du poignet et aide à prévenir les tensions lors des exercices du haut du corps.",
+    "instructions": [
+      "Tendez les bras devant vous ou gardez-les détendues le long du corps.",
+      "Faites pivoter vos poignets en mouvement circulaire, en parcourant toute l'amplitude de mouvement.",
+      "Effectue des cercles dans le sens horaire et dans le sens antihoraire.",
+      "Vous pouvez également entrelacer les doigts et faire tourner les poignets ensemble."
+    ],
+    "tips": [
+      "Maintenez le mouvement lent et concentré.",
+      "Détendez vos mains et vos doigts.",
+      "Particulièrement utile avant des exercices comme les pompes ou le développé couché."
+    ]
+  },
+  "ankleCircles": {
+    "description": "Améliore la mobilité de la cheville et prépare les pieds aux activités de port de charge.",
+    "instructions": [
+      "Tenez-vous sur une jambe (en vous aidant d'un mur pour l'équilibre) ou asseyez-vous avec une jambe tendue.",
+      "Faites tourner votre cheville en mouvement circulaire, en dessinant le plus grand cercle possible avec vos orteils.",
+      "Effectue des cercles dans les deux directions.",
+      "Changez de pied et répétez."
+    ],
+    "tips": [
+      "Concentre-toi sur le mouvement de la cheville uniquement, pas sur toute la jambe.",
+      "Bougez lentement pour vous assurer de solliciter toutes les phases de la rotation.",
+      "Idéal pour améliorer la profondeur du squat et la mécanique de course."
+    ]
+  },
+  "deepSquatHold": {
+    "description": "Une contraction isométrique en bas d'un squat pour améliorer la mobilité des hanches, des genoux et des chevilles.",
+    "instructions": [
+      "Placez les pieds à la largeur des épaules, les orteils légèrement pointés vers l'extérieur.",
+      "Descendez dans votre squat le plus profond possible, en gardant les talons au sol.",
+      "Posez vos coudes à l'intérieur des genoux pour pousser doucement ces derniers vers l'extérieur.",
+      "Maintenez la poitrine aussi droite que possible.",
+      "Maintenez la position pendant la durée souhaitée en respirant profondément."
+    ],
+    "tips": [
+      "Si vos talons se décollent, posez-les sur une petite élévation ou tenez-vous à un objet solide pour l'équilibre.",
+      "Concentrez-vous sur la détente au niveau des hanches.",
+      "Déplacez doucement votre poids d'un côté à l'autre pour cibler différentes zones."
+    ]
+  },
+  "scapularCircles": {
+    "description": "Améliore la mobilité et la santé des omoplates (scapulas), favorisant une meilleure posture et une meilleure mécanique du haut du corps.",
+    "instructions": [
+      "Tenez-vous debout ou assis, le buste droit, les bras détendus le long du corps.",
+      "Hausse les épaules vers les oreilles (élévation).",
+      "Tirez-les vers l'arrière en serrant les omoplates (rétraction).",
+      "Abaissez-les autant que possible (dépression).",
+      "Poussez les omoplates vers l'avant en arrondissant légèrement le haut du dos (protraction).",
+      "Effectuez ces mouvements de façon fluide en un mouvement circulaire, dans les deux sens."
+    ],
+    "tips": [
+      "Maintenez les bras droits et immobiles ; le mouvement doit venir des omoplates.",
+      "Imaginez tracer un cercle avec les points de vos épaules.",
+      "Évite d'arquer le bas du dos."
+    ]
+  },
+  "quadStretch": {
+    "description": "Un étirement classique de l'avant de la cuisse pour améliorer la flexibilité et la santé du genou.",
+    "instructions": [
+      "Tenez-vous sur une jambe, en vous aidant d'un mur ou d'une chaise pour l'équilibre si nécessaire.",
+      "Plie l'autre genou et tends la main vers l'arrière pour attraper ton pied ou ta cheville du même côté.",
+      "Ramenez doucement votre talon vers vos fessiers.",
+      "Garde les genoux serrés et le buste droit.",
+      "Maintenez la position, puis changez de jambe."
+    ],
+    "tips": [
+      "Contractez les fessiers de la jambe étirée pour approfondir l'étirement du fléchisseur de la hanche.",
+      "Évite d'arquer le bas du dos.",
+      "Veillez à rester bien droit, sans vous pencher vers l'avant."
+    ]
+  },
+  "doorwayChestStretch": {
+    "description": "Utilise un encadrement de porte pour ouvrir la poitrine et l'avant des épaules, en compensant une posture « voûtée ».",
+    "instructions": [
+      "Placez-vous dans un encadrement de porte ou à l'angle d'un mur.",
+      "Placez votre/vos avant-bras contre le cadre de la porte, le coude à la hauteur de l'épaule.",
+      "Penchez-vous ou avancez d'un pas jusqu'à ressentir un étirement confortable dans la poitrine.",
+      "Maintenez la position en respirant profondément.",
+      "Vous pouvez ajuster la hauteur des bras pour cibler différentes parties de la poitrine."
+    ],
+    "tips": [
+      "Ne vous penchez pas trop ; l'étirement doit rester doux.",
+      "Gardez les épaules basses et éloignées des oreilles.",
+      "Maintiens le gainage pour éviter de cambrer le bas du dos."
+    ]
+  },
+  "scorpions": {
+    "description": "Un étirement dynamique des hanches, du bas du dos et de la poitrine, effectué en position couchée sur le ventre.",
+    "instructions": [
+      "Allongez-vous face contre le sol, les bras étendus sur les côtés en forme de 'T'.",
+      "Lève la jambe droite et amène-la au-dessus de ton corps vers ta main gauche, en faisant pivoter les hanches.",
+      "Essayez de toucher le sol avec le pied droit tout en gardant la poitrine et les bras aussi plats que possible.",
+      "Revenez au centre et répétez avec la jambe gauche."
+    ],
+    "tips": [
+      "Bougez lentement et avec contrôle pour protéger le bas du dos.",
+      "Concentrez-vous sur la rotation de la colonne vertébrale et l'ouverture des hanches.",
+      "Allez seulement jusqu'où cela reste confortable ; votre pied n'a pas besoin de toucher votre main."
+    ]
+  },
+  "threadTheNeedle": {
+    "description": "Une rotation douce pour le haut du dos et les épaules qui étire également le cou.",
+    "instructions": [
+      "Commencez à quatre pattes, les mains sous les épaules et les genoux sous les hanches.",
+      "Passez le bras droit sous le corps vers la gauche en faisant glisser le dos de la main sur le sol.",
+      "Abaisse ton épaule droite et ton oreille vers le sol.",
+      "Garde les hanches alignées et respire en direction de l'étirement entre les omoplates.",
+      "Maintenez la position, puis revenez au centre et répétez de l'autre côté."
+    ],
+    "tips": [
+      "Concentrez-vous sur l'étirement du haut du dos et de l'arrière de l'épaule.",
+      "Utilisez votre main gauche pour appuyer doucement contre le sol et approfondir la rotation si cela est confortable.",
+      "Détendez complètement la nuque."
+    ]
+  },
+  "neckCircles": {
+    "description": "Relâche doucement les tensions du cou et améliore l'amplitude de mouvement cervicale.",
+    "instructions": [
+      "Assieds-toi ou tiens-toi debout, le dos droit et les épaules détendues.",
+      "Abaissez doucement le menton vers la poitrine.",
+      "Faites rouler lentement la tête vers une épaule, puis prudemment vers l'arrière et enfin vers l'autre épaule.",
+      "Continuez le mouvement circulaire lentement et en douceur.",
+      "Inversez le sens après la durée souhaitée."
+    ],
+    "tips": [
+      "Évitez les mouvements rapides ou saccadés.",
+      "Si vous ressentez une douleur aiguë ou des étourdissements, arrêtez immédiatement.",
+      "Gardez les épaules basses et détendues tout au long de l'exercice."
+    ]
+  }
+}

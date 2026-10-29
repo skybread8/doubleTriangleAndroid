@@ -303,26 +303,29 @@ object ExerciseVisualCatalog {
         "gobletSquat", "overheadPress", "lateralRaise", "bicepsCurl", "hammerCurl" -> listOf(EquipmentVisual.Dumbbells)
         "pullUp" -> listOf(EquipmentVisual.PullUpBar)
         "legPress" -> listOf(EquipmentVisual.LegPressMachine)
-        else -> listOf(EquipmentVisual.Bodyweight)
+        else -> emptyList()
     }
 }
 
 @Composable
 internal fun MuscleStrip(imageKey: String?, onDarkBackground: Boolean, modifier: Modifier = Modifier, wrapContent: Boolean = false) {
     val metadata = ExerciseVisualCatalog.metadata(imageKey) ?: run {
-        androidx.compose.material.Text("Músculos no catalogados", modifier.padding(vertical = 8.dp), color = if (onDarkBackground) Color.White.copy(alpha = 0.7f) else Color.Gray, style = androidx.compose.material.MaterialTheme.typography.caption)
         return
     }
     val tint = if (onDarkBackground) Color.White else Color.Unspecified
     val muscles = metadata.primary.map { it to true } + metadata.secondary.map { it to false }
+    val primaryNames = metadata.primary.map { tutorialMuscleName(it) }.sorted()
+    val secondaryNames = metadata.secondary.map { tutorialMuscleName(it) }.sorted()
+    val primaryLabel = tutorialText("Primary muscles: %@").replace(": %@", "")
+    val secondaryLabel = tutorialText("Secondary muscles: %@").replace(": %@", "")
     val muscleAccessibilityLabel = buildString {
-        metadata.primary.map(MuscleVisual::label).sorted().takeIf { it.isNotEmpty() }?.let {
-            append("Músculos principales: ")
+        primaryNames.takeIf { it.isNotEmpty() }?.let {
+            append("$primaryLabel: ")
             append(it.joinToString(", "))
         }
-        metadata.secondary.map(MuscleVisual::label).sorted().takeIf { it.isNotEmpty() }?.let {
+        secondaryNames.takeIf { it.isNotEmpty() }?.let {
             if (isNotEmpty()) append(". ")
-            append("Músculos secundarios: ")
+            append("$secondaryLabel: ")
             append(it.joinToString(", "))
         }
     }
@@ -363,7 +366,7 @@ private fun MuscleIcon(muscle: MuscleVisual) {
     Box(Modifier.padding(end = 6.dp).size(58.dp).clip(RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
         Image(
             painter = painterResource(muscle.drawable),
-            contentDescription = muscle.label,
+            contentDescription = tutorialMuscleName(muscle),
             modifier = Modifier.size(58.dp),
         )
     }

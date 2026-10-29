@@ -1,0 +1,1892 @@
+{
+  "walking": {
+    "description": "Uma forma natural e de baixo impacto de melhorar a saúde cardiovascular e queimar calorias.",
+    "instructions": [
+      "Mantenha uma postura ereta com a cabeça erguida e os ombros relaxados.",
+      "Balanceie os braços de forma natural e ligeira a cada passo.",
+      "Dê um passo à frente, pousando o calcanhar e rolando até os dedos do pé.",
+      "Mantenha um ritmo constante e confortável que lhe permita respirar facilmente."
+    ],
+    "tips": [
+      "Use calçado de suporte para proteger as suas articulações.",
+      "Mantenha o core ligeiramente ativado para apoiar a região lombar.",
+      "Concentre-se numa passada suave e rítmica."
+    ]
+  },
+  "outdoorRunning": {
+    "description": "Um treino cardio clássico de alta intensidade que melhora a resistência e queima uma quantidade significativa de calorias.",
+    "instructions": [
+      "Mantenha a cabeça erguida e olhe cerca de 10-20 pés à sua frente.",
+      "Mantenha a parte superior do corpo relaxada com os cotovelos dobrados a 90 graus.",
+      "Aterre suavemente no meio do pé e empurre com os dedos dos pés.",
+      "Mantenha o core ativado e evite inclinar-se demasiado para a frente ou para trás."
+    ],
+    "tips": [
+      "Comece com uma breve caminhada de aquecimento ou uma corrida leve.",
+      "Aumente gradualmente a sua distância ou intensidade para evitar lesões.",
+      "Mantenha-se hidratado e use calçado de corrida adequado."
+    ]
+  },
+  "treadmillWalking": {
+    "description": "Caminhar na passadeira permite um controlo preciso do ritmo e da inclinação num ambiente controlado.",
+    "instructions": [
+      "Suba na esteira e prenda o clip de segurança à sua roupa.",
+      "Comece em velocidade lenta para se acostumar ao movimento.",
+      "Mantenha uma postura ereta e evite segurar-se aos corrimãos laterais para melhorar o equilíbrio e queimar mais calorias.",
+      "Ajuste a velocidade e a inclinação conforme necessário para adaptá‑las ao seu nível de forma física."
+    ],
+    "tips": [
+      "Mantenha os olhos voltados para a frente para manter o equilíbrio.",
+      "Use a função de inclinação para simular caminhada ao ar livre e aumentar a intensidade.",
+      "Diminua gradualmente a velocidade no final da sessão para o desaquecimento."
+    ]
+  },
+  "treadmillRunning": {
+    "description": "Correr na esteira proporciona uma superfície consistente e a capacidade de acompanhar métricas com facilidade.",
+    "instructions": [
+      "Prenda a presilha de segurança e comece com uma caminhada lenta para aquecer.",
+      "Aumente gradualmente a velocidade até o ritmo de corrida desejado.",
+      "Concentre-se em aterrar suavemente sobre o médio do pé e manter um ritmo consistente.",
+      "Mantenha o core ativado e mova os braços de forma controlada."
+    ],
+    "tips": [
+      "Varie seus treinos com intervalos de maior velocidade ou inclinação.",
+      "Tenha uma garrafa de água por perto para se manter hidratado.",
+      "Faça um desaquecimento com alguns minutos de caminhada antes de descer."
+    ]
+  },
+  "stationaryBike": {
+    "description": "Uma opção de cardio de baixo impacto que trabalha a parte inferior do corpo sendo suave para as articulações.",
+    "instructions": [
+      "Ajuste a altura do assento de modo que haja uma ligeira flexão do joelho na parte inferior do ciclo de pedalada.",
+      "Sente-se ereto ou incline-se ligeiramente para a frente, mantendo as costas direitas e o core ativado.",
+      "Pedale num movimento circular e suave, empurrando para baixo e puxando para cima.",
+      "Ajuste o nível de resistência para desafiar o seu sistema cardiovascular."
+    ],
+    "tips": [
+      "Certifique‑se de que os pés estejam firmemente nos pedais ou nas correias.",
+      "Mantenha uma cadência constante (RPM) para melhor eficiência.",
+      "Não se apoie excessivamente no guiador."
+    ]
+  },
+  "elliptical": {
+    "description": "Proporciona um treino de corpo inteiro, de baixo impacto, que imita o movimento de correr sem o impacto.",
+    "instructions": [
+      "Suba para os pedais e segure as alças.",
+      "Comece a mover as pernas num movimento elíptico e suave, para a frente ou para trás.",
+      "Mantenha o core ativado e mantenha as costas direitas.",
+      "Use as pegas para envolver a parte superior do corpo e aumentar a queima calórica total."
+    ],
+    "tips": [
+      "Concentre-se em empurrar com todo o pé, não apenas com os dedos.",
+      "Varie a resistência e a inclinação para trabalhar diferentes grupos musculares.",
+      "Mantenha os ombros relaxados e evite agarrar as pegas com força excessiva."
+    ]
+  },
+  "rowing": {
+    "description": "Um treino de corpo inteiro poderoso que combina condicionamento cardiovascular com desenvolvimento de força.",
+    "instructions": [
+      "Sente-se no assento e prenda os pés nas tiras.",
+      "A fase de captura: Incline-se ligeiramente para a frente com os braços estendidos e os joelhos dobrados.",
+      "A fase de impulsão: Empurre com as pernas, depois incline-se ligeiramente para trás e puxe a alça em direção às costelas inferiores.",
+      "A fase final: Pernas estendidas, a alça junto ao peito e você está levemente inclinado para trás.",
+      "A recuperação: Estenda os braços, incline-se para a frente e depois dobre os joelhos para regressar à fase de captura."
+    ],
+    "tips": [
+      "Mantenha o core forte e as costas direitas durante todo o movimento.",
+      "A potência deve vir 60% das pernas, 20% do core e 20% dos braços.",
+      "Concentre-se num movimento suave e rítmico e evite puxar o cabo de forma brusca."
+    ]
+  },
+  "jumpRope": {
+    "description": "Um treino cardio de alta intensidade e portátil que melhora a coordenação e a agilidade.",
+    "instructions": [
+      "Segure as alças com uma pegada relaxada, cotovelos próximos aos lados.",
+      "Salta apenas alguns centímetros do chão, apenas o suficiente para a corda passar por baixo.",
+      "Aterre suavemente nas pontas dos pés.",
+      "Use os pulsos para rodar a corda, não todo o braço."
+    ],
+    "tips": [
+      "Mantenha o core ativado e os ombros relaxados.",
+      "Comece com intervalos mais curtos e aumente a duração gradualmente.",
+      "Mantenha um ritmo constante para melhor eficiência."
+    ]
+  },
+  "stairClimber": {
+    "description": "Uma forma eficaz de desenvolver a força da parte inferior do corpo e a resistência cardiovascular, imitando o ato de subir escadas.",
+    "instructions": [
+      "Suba para a máquina e selecione a velocidade ou o programa desejado.",
+      "Mantenha uma postura ereta e evite apoiar-se fortemente nos corrimãos.",
+      "Pise com todo o pé e empurre com os calcanhares para ativar os glúteos.",
+      "Mantenha o core ativado e faça os movimentos de forma controlada."
+    ],
+    "tips": [
+      "Altere a altura do passo e a velocidade para desafiar diferentes músculos.",
+      "Concentre-se num ritmo estável e sustentável.",
+      "Evita saltar degraus, a menos que esteja especificamente programado para treino avançado."
+    ]
+  },
+  "skiErgWork": {
+    "description": "Um poderoso treino de corpo inteiro que simula o esqui cross-country, desenvolvendo resistência e força da parte superior do corpo.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos ombros, segurando as pegas acima da cabeça.",
+      "Puxe as alças para baixo em direção aos quadris enquanto, simultaneamente, se inclina a partir dos quadris e dobra os joelhos.",
+      "Termine a puxada com os braços estendidos além das coxas.",
+      "Estenda os quadris e os joelhos enquanto retorna as alças à posição inicial."
+    ],
+    "tips": [
+      "Use o core e as pernas para gerar potência, não apenas os braços.",
+      "Mantenha as costas retas e o core ativado durante todo o movimento.",
+      "Concentre-se num ritmo suave e contínuo."
+    ]
+  },
+  "airSquat": {
+    "description": "Um movimento básico com o peso do corpo que melhora a força e a mobilidade da parte inferior do corpo.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos ombros, com as pontas dos pés ligeiramente viradas para fora.",
+      "Ative o seu core e mantenha o peito erguido enquanto começa a sentar‑se para trás nos quadris.",
+      "Abaixe o corpo até que suas coxas estejam pelo menos paralelas ao chão.",
+      "Empurre com os calcanhares para retornar à posição inicial."
+    ],
+    "tips": [
+      "Mantenha o peso sobre os calcanhares, não sobre as pontas dos pés.",
+      "Certifique-se de que os joelhos fiquem alinhados com os dedos dos pés e não desabem para dentro.",
+      "Mantenha a coluna neutra durante todo o movimento."
+    ]
+  },
+  "gobletSquat": {
+    "description": "Segurar um peso na altura do peito durante o agachamento ajuda a melhorar a técnica e a estabilidade do core.",
+    "instructions": [
+      "Segure um haltere ou kettlebell junto ao peito com ambas as mãos.",
+      "Fique em pé com os pés um pouco mais afastados que a largura dos ombros.",
+      "Abaixe os quadris para trás e para baixo, mantendo o peito ereto e o peso próximo ao corpo.",
+      "Empurre com os calcanhares para regressar à posição inicial."
+    ],
+    "tips": [
+      "Mantenha os cotovelos apontados para baixo e para dentro dos joelhos na parte inferior do agachamento.",
+      "Inspira ao descer e expira ao empurrar de volta para cima.",
+      "Mantenha a coluna neutra e evite arredondar as costas."
+    ]
+  },
+  "barbellBackSquat": {
+    "description": "O standard de ouro para construir força de corpo inteiro e massa nas pernas usando uma barra.",
+    "instructions": [
+      "Posicione a barra sobre a parte superior das costas, apoiada nos trapézios.",
+      "Fique em pé com os pés à largura dos ombros, com as pontas dos pés ligeiramente viradas para fora.",
+      "Ative o core e baixe os quadris até que as coxas estejam pelo menos paralelas ao chão.",
+      "Empurre com os calcanhares para voltar à posição ereta."
+    ],
+    "tips": [
+      "Mantenha o peito erguido e olhe ligeiramente para a frente durante toda a elevação.",
+      "Evita que os teus joelhos cedam para o interior.",
+      "Use um suporte para agachamento (squat rack) e um spotter por segurança ao levantar cargas pesadas."
+    ]
+  },
+  "barbellFrontSquat": {
+    "description": "Colocar a barra na parte frontal dos ombros ativa mais intensamente os quadríceps e a parte superior das costas.",
+    "instructions": [
+      "Descanse a barra na frente dos ombros, usando a pega 'clean' ou a pega 'cross-arm'.",
+      "Mantenha os cotovelos altos durante todo o movimento para estabilizar a barra.",
+      "Agache empurrando os quadris para trás e dobrando os joelhos.",
+      "Retorne à posição inicial empurrando, mantendo o tronco ereto."
+    ],
+    "tips": [
+      "A barra deve parecer que repousa nos seus deltoides, não na clavícula.",
+      "Mantenha o core contraído para suportar a sua postura ereta.",
+      "Concentre-se em manter os calcanhares no chão."
+    ]
+  },
+  "smithMachineSquat": {
+    "description": "Fazer agachamento na máquina Smith proporciona estabilidade extra, permitindo que você se concentre no impulso das pernas e no posicionamento.",
+    "instructions": [
+      "Posicione-se por baixo da barra com os pés ligeiramente à frente e à largura dos ombros.",
+      "Desencaixe a barra e baixe os quadris até que as suas coxas fiquem paralelas ao chão.",
+      "Empurre com os calcanhares para retornar à posição inicial.",
+      "Trave a barra com segurança após completar suas repetições."
+    ],
+    "tips": [
+      "Mantenha o peito erguido e o core ativado durante todo o movimento.",
+      "Experimente a posição dos pés para atingir diferentes partes das pernas.",
+      "O percurso fixo da máquina Smith reduz as exigências de equilíbrio."
+    ]
+  },
+  "dumbbellSquat": {
+    "description": "Segurar halteres ao lado do corpo enquanto faz agachamento é uma forma acessível de adicionar resistência ao movimento básico do agachamento.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos ombros, segurando um haltere em cada mão ao lado do corpo.",
+      "Abaixe os quadris para trás e para baixo como se estivesse sentado numa cadeira, mantendo o peito erguido.",
+      "Baixe até que suas coxas estejam paralelas ao chão.",
+      "Empurre com os calcanhares para regressar à posição ereta."
+    ],
+    "tips": [
+      "Mantenha os pesos firmes ao lado do corpo; não os deixe balançar.",
+      "Mantenha a coluna neutra e evite arredondar os ombros.",
+      "Ótimo para quem acha desconfortável o agachamento com barra."
+    ]
+  },
+  "legPress": {
+    "description": "Um press em máquina que permite cargas pesadas na parte inferior do corpo com mínimo esforço nas costas.",
+    "instructions": [
+      "Sente-se na máquina com as costas e a cabeça apoiadas contra o apoio acolchoado.",
+      "Coloque os pés na plataforma aproximadamente à largura dos ombros.",
+      "Libere as barras de segurança e abaixe a plataforma em direção ao peito, dobrando os joelhos.",
+      "Empurre a plataforma de volta à posição inicial sem travar os joelhos no topo."
+    ],
+    "tips": [
+      "Evita levantar a parte inferior das costas do assento.",
+      "Mantenha os pés completamente apoiados na plataforma o tempo todo.",
+      "Controle o peso tanto durante a fase de descida quanto durante a fase de empurrão."
+    ]
+  },
+  "walkingLunge": {
+    "description": "Um movimento funcional que desenvolve força numa perna, equilíbrio e coordenação.",
+    "instructions": [
+      "Dê um passo à frente com uma perna, baixando os quadris até que ambos os joelhos estejam dobrados cerca de 90 graus.",
+      "Certifique‑se de que o joelho da frente esteja diretamente sobre o tornozelo.",
+      "Empurre com o calcanhar da frente para levantar-se e dar um passo à frente com a outra perna.",
+      "Continue alternando as pernas enquanto avança."
+    ],
+    "tips": [
+      "Mantenha o tronco ereto e o core ativado.",
+      "Não deixe o joelho de trás tocar o chão com impacto.",
+      "Mantenha o equilíbrio focando em um ponto à sua frente."
+    ]
+  },
+  "reverseLunge": {
+    "description": "Dê um passo para trás num avanço para trabalhar glúteos e isquiotibiais com menos pressão nos joelhos.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos quadris.",
+      "Dê um passo para trás com um pé e baixe os quadris até que ambos os joelhos estejam dobrados em ângulo de 90°.",
+      "Certifique‑se de que o seu joelho da frente esteja alinhado sobre o tornozelo.",
+      "Impulse com o pé traseiro para voltar à posição inicial."
+    ],
+    "tips": [
+      "Mantenha o peso principalmente no pé da frente.",
+      "Mantenha uma postura ereta durante todo o movimento.",
+      "Controle a descida para evitar que o joelho traseiro bata no chão."
+    ]
+  },
+  "bulgarianSplitSquat": {
+    "description": "Eleve o pé traseiro para focar e intensificar o alongamento e a carga nos quadríceps e glúteos da perna da frente.",
+    "instructions": [
+      "Fique a alguns passos na frente de um banco e coloque a parte superior de um pé no banco atrás de você.",
+      "Abaixe os quadris até que a coxa da frente esteja quase paralela ao chão.",
+      "Certifique‑se de que o joelho da frente se mantenha alinhado com o pé e não ultrapasse os dedos.",
+      "Empurre com o calcanhar da frente para retornar à posição ereta."
+    ],
+    "tips": [
+      "Concentre-se em manter o tronco ereto ou com uma ligeira inclinação para a frente.",
+      "Este exercício exige bastante equilíbrio; comece com o peso do corpo antes de adicionar halteres.",
+      "Ajuste a sua distância do banco para encontrar a posição mais confortável e eficaz."
+    ]
+  },
+  "stepUp": {
+    "description": "Suba para uma superfície elevada para desenvolver glúteos potentes e melhorar a força funcional das pernas.",
+    "instructions": [
+      "Coloque um pé num banco ou caixa resistente.",
+      "Empurre com esse calcanhar para levantar o corpo na plataforma.",
+      "Desça primeiro com o outro pé, seguido pelo pé que iniciou o movimento.",
+      "Alterne as pernas ou complete todas as repetições de um lado antes de mudar."
+    ],
+    "tips": [
+      "Mantenha o core ativado e o peito erguido.",
+      "Tente não empurrar o chão com o pé de apoio; deixe que a perna elevada faça o trabalho.",
+      "Controle a descida para proteger suas articulações."
+    ]
+  },
+  "legExtension": {
+    "description": "Um exercício de isolamento que foca especificamente no desenvolvimento dos músculos quadríceps.",
+    "instructions": [
+      "Sente-se na máquina de extensão de pernas com as costas apoiadas contra a almofada.",
+      "Coloque as suas canelas atrás da alavanca almofadada.",
+      "Estenda as pernas até ficarem esticadas, concentrando-se na contração dos quadríceps.",
+      "Baixe o peso lentamente de volta à posição inicial."
+    ],
+    "tips": [
+      "Evita usar impulso para levantar o peso.",
+      "Não trave os joelhos com força no topo do movimento.",
+      "Certifique‑se de que a alavanca almofadada esteja posicionada logo acima dos seus tornozelos."
+    ]
+  },
+  "lyingLegCurl": {
+    "description": "Se concentra em isolar os isquiotibiais para melhorar a força e a estabilidade do joelho.",
+    "instructions": [
+      "Deite-se de bruços na máquina de leg curl com as pernas totalmente estendidas.",
+      "Posicione a alavanca almofadada logo acima dos seus calcanhares.",
+      "Traga as pernas para cima o máximo possível, contraindo os isquiotibiais no topo.",
+      "Baixe o peso de volta à posição inicial de forma controlada."
+    ],
+    "tips": [
+      "Mantenha os quadris pressionados contra o banco durante todo o movimento.",
+      "Concentre-se numa fase excêntrica (de descida) lenta e controlada.",
+      "Evita balançar o peso."
+    ]
+  },
+  "seatedLegCurl": {
+    "description": "Isola os isquiotibiais em posição sentada para máxima contração e desenvolvimento muscular.",
+    "instructions": [
+      "Sente-se na máquina e ajuste a almofada do regaço para que fique apoiada firmemente nas suas coxas.",
+      "Coloque as pernas sobre a alavanca almofadada de modo que fique atrás dos tornozelos.",
+      "Start with your knees nearly straight, then curl your lower legs down and back as far as possible.",
+      "Retorne lentamente a alavanca para a posição inicial."
+    ],
+    "tips": [
+      "Mantenha a parte superior do corpo estável e evite usar os braços para ajudar a puxar.",
+      "Contraia os isquiotibiais na parte inferior do movimento.",
+      "Mantenha os pés flexionados durante toda a série."
+    ]
+  },
+  "calfRaise": {
+    "description": "Fortalece e desenvolve os músculos da panturrilha ao levantar os calcanhares do chão.",
+    "instructions": [
+      "Fique na beira de um degrau ou plataforma com a parte anterior dos pés.",
+      "Abaixe os calcanhares abaixo do nível do degrau para alongar as panturrilhas.",
+      "Empurre com a parte da frente dos pés para elevar os calcanhares o mais alto possível.",
+      "Abaixe as costas lentamente até a posição inicial do alongamento."
+    ],
+    "tips": [
+      "Apoie-se numa parede ou corrimão para equilíbrio, se necessário.",
+      "Faça uma pausa de um segundo no topo para maximizar a contração.",
+      "Pode ser realizado numa perna de cada vez para aumentar a dificuldade."
+    ]
+  },
+  "hipThrust": {
+    "description": "Ampliamente considerado o melhor exercício para o desenvolvimento e força máxima dos glúteos.",
+    "instructions": [
+      "Sente-se no chão com a parte superior das costas apoiada contra um banco e uma barra sobre os quadris.",
+      "Coloque os pés firmemente no chão, aproximadamente à largura dos ombros.",
+      "Empurre com os calcanhares para levantar os quadris em direção ao teto até que o corpo forme uma linha reta dos ombros aos joelhos.",
+      "Contraia os glúteos no topo, depois abaixe os quadris em direção ao chão com controle."
+    ],
+    "tips": [
+      "Use uma almofada ou uma toalha na barra para maior conforto.",
+      "Mantenha o queixo recolhido e o core ativado para proteger a lombar.",
+      "Não hiperestenda a parte inferior das costas no topo do movimento."
+    ]
+  },
+  "gluteBridge": {
+    "description": "Um exercício no chão com o peso do corpo que ativa os glúteos e melhora a extensão do quadril.",
+    "instructions": [
+      "Deita-te de costas com os joelhos dobrados e os pés apoiados no chão.",
+      "Mantenha os braços ao lado do corpo com as palmas voltadas para baixo.",
+      "Eleva as ancas do chão apertando os glúteos e empurrando com os calcanhares.",
+      "Mantenha a posição por um segundo no topo, depois baixe de volta."
+    ],
+    "tips": [
+      "Certifique‑se de ativar o core para que a lombar não arqueie excessivamente.",
+      "Concentre-se em usar os glúteos em vez da parte lombar ou dos isquiotibiais.",
+      "Para um desafio extra, execute a ponte com uma perna estendida."
+    ]
+  },
+  "deadlift": {
+    "description": "Um levantamento fundamental para a força de todo o corpo, direcionado a toda a cadeia posterior.",
+    "instructions": [
+      "Coloque a parte média do pé por baixo da barra.",
+      "Dobre-se a partir das ancas e dobre os joelhos para segurar a barra logo fora das pernas.",
+      "Mantenha as costas planas e o peito erguido enquanto empurra com os calcanhares para se levantar.",
+      "Mantenha a barra junto ao corpo durante todo o movimento e fique completamente ereto."
+    ],
+    "tips": [
+      "Não encurves as costas; mantém a coluna neutra.",
+      "Inspire e contraia o core antes de puxar o peso.",
+      "Baixe a barra articulando primeiro os quadris e só depois dobre os joelhos quando a barra os ultrapassar."
+    ]
+  },
+  "barbellRomanianDeadlift": {
+    "description": "Uma variação do levantamento terra que enfatiza o alongamento e a contração dos isquiotibiais.",
+    "instructions": [
+      "Fique com os pés à largura dos quadris, segurando uma barra à frente das coxas.",
+      "Dobre-se a partir das ancas e baixe a barra em direção ao chão mantendo as pernas principalmente esticadas (leve flexão dos joelhos).",
+      "Baixe a barra até sentir um alongamento nos isquiotibiais, mantendo as costas direitas.",
+      "Empurre os quadris para a frente para voltar à posição inicial."
+    ],
+    "tips": [
+      "Mantenha a barra muito perto das suas pernas em todos os momentos.",
+      "Concentre-se em empurrar os quadris para trás o máximo possível.",
+      "Evita arredondar os ombros ou a parte inferior das costas."
+    ]
+  },
+  "dumbbellRomanianDeadlift": {
+    "description": "Um movimento de flexão de anca focado nos isquiotibiais com halteres, que permite uma amplitude de movimento mais natural.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos quadris, segurando um haltere em cada mão à frente das suas coxas.",
+      "Dobre-se pelas ancas e baixe os pesos na direção dos pés, mantendo as costas planas.",
+      "Baixe até sentir um bom alongamento nos isquiotibiais.",
+      "Ative os glúteos e isquiotibiais para regressar à posição em pé."
+    ],
+    "tips": [
+      "Mantenha os halteres próximos das suas pernas durante todo o movimento.",
+      "Concentre-se em empurrar os quadris para trás em vez de tentar alcançar o chão.",
+      "Mantenha os joelhos ligeiramente dobrados."
+    ]
+  },
+  "machineGluteKickback": {
+    "description": "Um exercício de máquina direcionado que isola os glúteos através de um movimento de kickback.",
+    "instructions": [
+      "Coloque-se na máquina e coloque um pé na plataforma.",
+      "Empurre a plataforma para trás e para cima estendendo a anca.",
+      "Contraia os glúteos no topo do movimento.",
+      "Retorne lentamente à posição inicial e repita."
+    ],
+    "tips": [
+      "Mantenha o core estável e evite arquear as costas.",
+      "Mantenha o movimento controlado e concentre-se na contração dos glúteos.",
+      "Não balance a perna; use os músculos para mover o peso."
+    ]
+  },
+  "cableGluteKickback": {
+    "description": "Utiliza a resistência do cabo para isolar os glúteos através de um movimento de ‘kickback’ controlado, proporcionando tensão constante durante toda a amplitude de movimento.",
+    "instructions": [
+      "Prenda uma tornozeleira na máquina de cabos na configuração mais baixa e fixe-a em torno de um tornozelo.",
+      "Fique de frente para a máquina e segure a estrutura para manter o equilíbrio.",
+      "Mantendo o core contraído e a perna de apoio ligeiramente dobrada, empurre a perna com a correia para trás e para cima estendendo a anca.",
+      "Contraia os glúteos no topo do movimento e, em seguida, retorne lentamente à posição inicial."
+    ],
+    "tips": [
+      "Mantenha o tronco ereto e evite girar os quadris.",
+      "Execute toda a amplitude de extensão da anca para maximizar a ativação dos glúteos.",
+      "Controle o peso ao recolher em vez de deixar que o cabo puxe a sua perna para a frente."
+    ]
+  },
+  "machineHipAbduction": {
+    "description": "Foca nas partes externas do quadril e no glúteo médio para melhorar a estabilidade e estética do quadril.",
+    "instructions": [
+      "Sente-se na máquina com a parte externa das coxas encostada às almofadas.",
+      "Empurre as pernas para fora contra a resistência.",
+      "Faça uma pausa de um segundo no ponto de máxima contração.",
+      "Junte as pernas lentamente."
+    ],
+    "tips": [
+      "Mantenha as costas planas contra o assento.",
+      "Use um ritmo controlado tanto na fase de abertura quanto na de fechamento.",
+      "Ajuste a posição inicial para uma amplitude de movimento confortável."
+    ]
+  },
+  "machineHipAdduction": {
+    "description": "Fortalece os músculos internos da coxa (adutores) para melhorar a estabilidade da perna.",
+    "instructions": [
+      "Sente-se na máquina com a parte interna das coxas encostada às almofadas.",
+      "Aperte as pernas juntas contra a resistência.",
+      "Faça uma pausa de um segundo no ponto de máxima contração.",
+      "Deixe as pernas voltarem lentamente à posição inicial."
+    ],
+    "tips": [
+      "Mantenha a parte superior do corpo estável durante toda a série.",
+      "Concentre-se em usar os músculos internos da coxa, não os pés.",
+      "Não deixe os pesos baterem uns nos outros no final da repetição."
+    ]
+  },
+  "cableHipAbduction": {
+    "description": "Utiliza um cabo e uma tornozeleira para isolar a parte externa da anca e o glúteo médio, um lado de cada vez.",
+    "instructions": [
+      "Prenda uma tornozeleira na polia baixa do cabo e fixe-a em torno da perna externa.",
+      "Fique de lado para a máquina e segure a estrutura para manter o equilíbrio.",
+      "Afaste a perna que trabalha para o lado contra o cabo, mantendo o tronco maioritariamente imóvel.",
+      "Faça uma pausa breve, depois volte com controle à posição inicial."
+    ],
+    "tips": [
+      "Mantenha o movimento pequeno e controlado em vez de balançar a perna.",
+      "Ative o core para que o quadril faça o trabalho em vez do tronco.",
+      "Gire ligeiramente as pontas dos pés para a frente para ativar melhor o glúteo médio."
+    ]
+  },
+  "cableHipAdduction": {
+    "description": "Utiliza um cabo e uma tornozeleira para fortalecer os músculos internos da coxa, um lado de cada vez.",
+    "instructions": [
+      "Prenda uma tornozeleira na polia baixa do cabo e fixe-a em torno da perna interna.",
+      "Fique de lado para a máquina com a perna que vai trabalhar mais afastada da pilha de pesos e segure a estrutura para manter o equilíbrio.",
+      "Varra a perna que trabalha pela frente do corpo contra a resistência.",
+      "Faça uma pausa breve, depois retorne à posição inicial com controle."
+    ],
+    "tips": [
+      "Mantenha o tronco ereto e evite girar os quadris.",
+      "Mova-se lentamente para que a parte interna da coxa controle ambas as direções da repetição.",
+      "Use uma carga leve a moderada e concentre-se na contração no final da amplitude de movimento."
+    ]
+  },
+  "boxJump": {
+    "description": "Um movimento explosivo que desenvolve a potência da parte inferior do corpo e melhora o condicionamento cardiovascular.",
+    "instructions": [
+      "Fique de frente para uma caixa estável com os pés na largura dos quadris.",
+      "Dobre-se pelas ancas e balanceie os braços para trás, depois salte de forma explosiva para cima da caixa.",
+      "Aterre suavemente num agachamento parcial com ambos os pés totalmente sobre a caixa.",
+      "Fique totalmente em pé, depois desça um pé de cada vez."
+    ],
+    "tips": [
+      "Concentre-se numa aterragem silenciosa para garantir que está a absorver o impacto.",
+      "Escolha uma altura da caixa que permita uma técnica de aterrissagem adequada.",
+      "Não salte para trás; descer com um passo é mais seguro para as suas articulações."
+    ]
+  },
+  "pushUp": {
+    "description": "Um exercício clássico com o peso do corpo que desenvolve a força do peito, dos ombros e dos tríceps.",
+    "instructions": [
+      "Comece em posição de prancha alta com as mãos um pouco mais afastadas que a largura dos ombros.",
+      "Mantenha o corpo em linha reta da cabeça aos calcanhares.",
+      "Abaixe o peito em direção ao chão, mantendo os cotovelos em um ângulo de 45 graus.",
+      "Empurre com as palmas das mãos para regressar à posição inicial."
+    ],
+    "tips": [
+      "Não deixe a parte inferior das costas afundar; mantenha o core contraído.",
+      "Concentre-se numa amplitude completa de movimento para um melhor recrutamento muscular.",
+      "Inspire ao descer e expire ao empurrar para cima."
+    ]
+  },
+  "declinePushUp": {
+    "description": "Faça flexões com os pés elevados num banco para dar mais ênfase à parte superior do peito e aos ombros.",
+    "instructions": [
+      "Coloque os pés num banco plano e as mãos no chão, um pouco mais afastadas que a largura dos ombros.",
+      "Mantenha uma linha reta da cabeça aos calcanhares, ativando o core.",
+      "Abaixe o peito em direção ao chão, dobrando os cotovelos.",
+      "Empurre para cima até a posição inicial estendendo os braços."
+    ],
+    "tips": [
+      "Mantenha os cotovelos em um ângulo de 45 graus em relação ao corpo.",
+      "Não deixe os quadris cederem; mantenha os glúteos e o core contraídos.",
+      "Quanto mais alta for a banca, mais difícil se torna o exercício."
+    ]
+  },
+  "barbellBenchPress": {
+    "description": "O movimento fundamental da parte superior do corpo para desenvolver a máxima potência de peito e braços.",
+    "instructions": [
+      "Deita-te no banco com os pés firmemente apoiados no chão.",
+      "Segure a barra ligeiramente mais larga que a largura dos ombros.",
+      "Baixe a barra até ao meio do peito de forma controlada.",
+      "Empurre a barra de volta até que os braços estejam totalmente estendidos."
+    ],
+    "tips": [
+      "Mantenha as omoplatas retraídas (apertadas entre si) durante toda a subida.",
+      "Mantenha uma ligeira curvatura na parte inferior das costas, mas mantenha os glúteos no banco.",
+      "Tenha um spotter, especialmente ao levantar cargas pesadas."
+    ]
+  },
+  "dumbbellBenchPress": {
+    "description": "Pressionar halteres enquanto está deitado num banco plano permite uma maior amplitude de movimento e melhora a saúde dos ombros.",
+    "instructions": [
+      "Deita-te num banco segurando um haltere em cada mão à altura do peito.",
+      "Empurre os pesos para cima até que os braços estejam totalmente estendidos acima do peito.",
+      "Abaixe os halteres com controle até que fiquem à altura do peito.",
+      "Mantenha o core estável e os pés apoiados no chão."
+    ],
+    "tips": [
+      "Concentre-se em aproximar os halteres no topo sem que se toquem.",
+      "Mantenha os cotovelos em um ângulo de 45 graus em relação ao tronco.",
+      "Os halteres exigem mais estabilização do que uma barra."
+    ]
+  },
+  "smithMachineBenchPress": {
+    "description": "A máquina Smith fornece um trajeto guiado para o supino, tornando-a mais segura para quem treina sozinho e permitindo um foco muscular intenso.",
+    "instructions": [
+      "Deita-te no banco e posiciona-te para que a barra se alinhe com o centro do teu peito.",
+      "Desengate a barra e baixe-a lentamente até o peito.",
+      "Empurre a barra para cima até que os seus braços estejam totalmente estendidos.",
+      "Trave a barra com segurança quando terminar."
+    ],
+    "tips": [
+      "Certifique‑se de que o banco esteja perfeitamente centrado debaixo da barra.",
+      "Concentre-se na contração do peito durante todo o movimento.",
+      "Uma ótima opção para isolamento e séries decrescentes."
+    ]
+  },
+  "dumbbellInclineBenchPress": {
+    "description": "O supino inclinado com halteres enfatiza a parte superior do peito, permitindo que cada braço se mova de forma independente.",
+    "instructions": [
+      "Ajuste um banco ajustável para uma inclinação de 30–45 graus.",
+      "Sente-se com um haltere apoiado em cada coxa e, em seguida, recline-se contra o banco.",
+      "Empurre os halteres para cima a partir da altura superior do peito até que os braços estejam estendidos.",
+      "Abaixe os pesos de volta à posição inicial com controlo."
+    ],
+    "tips": [
+      "Mantenha as omoplatas retraídas contra o banco.",
+      "Use uma inclinação moderada para manter a ênfase na parte superior do peito.",
+      "Mantenha os pulsos alinhados sobre os cotovelos durante todo o movimento."
+    ]
+  },
+  "barbellInclineBenchPress": {
+    "description": "Pressionar uma barra num banco inclinado trabalha a parte superior do peito e os ombros, permitindo cargas mais pesadas.",
+    "instructions": [
+      "Ajuste o banco para uma inclinação de 30–45 graus e posicione-se sob a barra.",
+      "Segure a barra ligeiramente mais larga que a largura dos ombros.",
+      "Baixe a barra até à parte superior do peito de forma controlada.",
+      "Empurre a barra para cima até que os seus braços estejam totalmente estendidos."
+    ],
+    "tips": [
+      "Mantenha os cotovelos ligeiramente junto ao corpo, sem abri-los totalmente para os lados.",
+      "Certifique‑se de que a barra toque a parte superior do peito, não o pescoço.",
+      "Use um spotter por segurança."
+    ]
+  },
+  "smithMachineInclineBenchPress": {
+    "description": "Um supino inclinado guiado que isola a parte superior do peito e permite treinar com segurança perto da falha.",
+    "instructions": [
+      "Ajuste o banco inclinável e posicione-o centralizado sob a barra da máquina Smith.",
+      "Deita-te no banco e certifica-te de que a barra se alinha com a parte superior do teu peito.",
+      "Desencaixe a barra e abaixe-a com controlo em direção ao peito.",
+      "Empurre a barra de volta para a posição inicial."
+    ],
+    "tips": [
+      "Concentre-se num ritmo suave e constante.",
+      "Ajuste a posição do banco para encontrar a linha de pressão mais confortável.",
+      "Excelente para finalizar a parte superior do peito."
+    ]
+  },
+  "barbellDeclineBenchPress": {
+    "description": "Pressionar em declínio foca a parte inferior do peito e muitas vezes permite cargas mais pesadas devido à vantagem mecânica.",
+    "instructions": [
+      "Prenda os pés no banco declinado e deite-se.",
+      "Segure a barra com uma pegada de largura média.",
+      "Baixe a barra até à região do peito inferior/parte superior do abdómen.",
+      "Empurre a barra de volta para a posição inicial."
+    ],
+    "tips": [
+      "Peça a um parceiro de treino que o ajude a desencaixar e a voltar a encaixar a barra.",
+      "Mantenha o movimento controlado; não deixe a barra rebater no seu peito.",
+      "Concentre-se na contração na parte inferior do peito."
+    ]
+  },
+  "dumbbellDeclineBenchPress": {
+    "description": "O supino declinado com halteres proporciona um alongamento profundo do peitoral inferior e melhora a amplitude de movimento.",
+    "instructions": [
+      "Sente-se na ponta de um banco declinado com halteres sobre as coxas.",
+      "Deite-se de costas enquanto traz os pesos à altura do peito.",
+      "Empurre os halteres para cima até que os braços estejam estendidos.",
+      "Baixe-as de volta com controle."
+    ],
+    "tips": [
+      "Tenha cuidado ao entrar e sair da posição com halteres pesados.",
+      "Concentre-se na contração no topo do movimento.",
+      "Mantenha o core ativado."
+    ]
+  },
+  "smithMachineDeclineBenchPress": {
+    "description": "Um supino declinado guiado que direciona com segurança os músculos inferiores do peito.",
+    "instructions": [
+      "Coloque um banco declinado por baixo da barra da máquina Smith.",
+      "Deite-se e certifique-se de que o percurso da barra esteja sobre a parte inferior do peito.",
+      "Desengate a barra e baixe-a em direção ao peito com controle.",
+      "Empurre a barra de volta para a posição inicial."
+    ],
+    "tips": [
+      "Certifique‑se de que o banco esteja posicionado de forma segura e centrado.",
+      "Mantenha as costas planas contra o banco.",
+      "Ótimo para trabalho de peito com alto volume."
+    ]
+  },
+  "chestPressMachine": {
+    "description": "Fornece uma forma estável e controlada de trabalhar os músculos do peito com requisitos de equilíbrio reduzidos.",
+    "instructions": [
+      "Ajuste a altura do assento para que as alças fiquem alinhadas com o meio do seu peito.",
+      "Sente-se com as costas encostadas ao apoio e segure as alças.",
+      "Empurre as alças para a frente até os braços estarem totalmente estendidos.",
+      "Retorne lentamente as alças à posição inicial."
+    ],
+    "tips": [
+      "Mantenha os cotovelos ligeiramente abaixo do nível dos ombros.",
+      "Mantenha o contato entre as costas e a almofada o tempo todo.",
+      "Evita bloquear os cotovelos no topo."
+    ]
+  },
+  "dumbbellChestFly": {
+    "description": "Um movimento de isolamento que alonga e define os músculos do peito.",
+    "instructions": [
+      "Deita-te num banco com os halteres mantidos sobre o peito, palmas viradas uma para a outra.",
+      "Baixe os pesos para os lados em um amplo arco, mantendo uma leve flexão nos cotovelos.",
+      "Pare quando sentir um alongamento no peito e, em seguida, junte novamente os pesos sobre o peito.",
+      "Contraia os músculos do peito na parte superior."
+    ],
+    "tips": [
+      "Mantenha o movimento lento e controlado.",
+      "Não desças demais se sentires algum desconforto no ombro.",
+      "Concentre-se no movimento de 'abraçar uma árvore'."
+    ]
+  },
+  "cableFly": {
+    "description": "Utiliza cabos para proporcionar tensão constante nos músculos do peito ao longo de toda a amplitude de movimento.",
+    "instructions": [
+      "Fique entre duas polias de cabo com as alças à altura do peito.",
+      "Dê um pequeno passo à frente e segure as alças com os braços estendidos para os lados.",
+      "Junta as empunhaduras à frente do peito, mantendo uma leve flexão dos cotovelos.",
+      "Retorne lentamente à posição inicial."
+    ],
+    "tips": [
+      "Concentre-se na contração do peito ao juntar as mãos.",
+      "Mantenha uma ligeira inclinação para a frente para maior estabilidade.",
+      "Mantenha o core firme para evitar que o corpo balance."
+    ]
+  },
+  "cableCrunchPress": {
+    "description": "Um exercício abdominal ajoelhado com cabo que sobrecarrega o padrão de crunch para construir abdominais mais fortes e definidos.",
+    "instructions": [
+      "Prenda uma corda na polia alta e ajoelhe-se de frente para a máquina de cabos.",
+      "Segure a corda ao lado da cabeça e firme os quadris para que o movimento venha do tronco.",
+      "Aproxime a caixa torácica da pelve mantendo os cotovelos próximos e o abdómen totalmente contraído.",
+      "Volte lentamente à posição inicial sem deixar que o bloco de pesos te puxe bruscamente para cima."
+    ],
+    "tips": [
+      "Pense em arquear a coluna vértebra por vértebra em vez de puxar apenas com os braços.",
+      "Mantenha os quadris principalmente fixos para que os seus abdominais, e não os flexores do quadril, façam o trabalho.",
+      "Use uma carga controlada que lhe permita contrair completamente os abdominais em cada repetição."
+    ]
+  },
+  "highToLowCableFly": {
+    "description": "Colocar as polias na posição alta e puxar para baixo foca nas fibras inferiores do peito.",
+    "instructions": [
+      "Coloque as polias do cabo na posição mais alta.",
+      "Segure as alças e dê um passo à frente com um pé para maior estabilidade.",
+      "Puxe as alças para baixo e junte-as à sua frente, na altura da cintura.",
+      "Retorne lentamente os braços à posição alta inicial."
+    ],
+    "tips": [
+      "Contraia a parte inferior do peito na fase baixa do movimento.",
+      "Mantenha uma ligeira inclinação para a frente.",
+      "Evite usar o peso do seu corpo para puxar os cabos."
+    ]
+  },
+  "lowToHighCableFly": {
+    "description": "Colocar as polias na posição baixa e puxar para cima foca na parte superior do peito e nos deltóides anteriores.",
+    "instructions": [
+      "Coloque as polias do cabo na posição mais baixa.",
+      "Segure as alças e fique no centro, dando um pequeno passo à frente.",
+      "Puxe as alças para cima e junte-as à frente da parte superior do peito.",
+      "Abaixe lentamente as alças de volta à posição inicial baixa."
+    ],
+    "tips": [
+      "Concentre-se na contração da parte superior do peito.",
+      "Mantém uma ligeira flexão nos cotovelos ao longo de todo o movimento.",
+      "Controle o peso durante todo o movimento."
+    ]
+  },
+  "pecDeckFly": {
+    "description": "Um voador em máquina que fornece tensão consistente no peito para melhor isolamento.",
+    "instructions": [
+      "Sente-se na máquina e apoie os antebraços contra as alavancas acolchoadas.",
+      "Segure as alças e junte as alavancas em frente ao peito.",
+      "Faça uma pausa de um segundo no ponto de máxima contração.",
+      "Retorne lentamente à posição inicial."
+    ],
+    "tips": [
+      "Mantenha as costas e a cabeça apoiadas no assento.",
+      "Concentre-se em apertar com o peito em vez de puxar com os braços.",
+      "Mantenha um ritmo constante e controlado."
+    ]
+  },
+  "barbellOverheadPress": {
+    "description": "Um potente movimento de empurrão vertical que desenvolve ombros largos e estabilidade da parte superior do corpo.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos ombros, segurando uma barra à altura dos ombros com pegada em pronação.",
+      "Ative o core e empurre a barra diretamente acima da cabeça até que os braços estejam totalmente estendidos.",
+      "Estenda completamente os cotovelos na parte superior e empurre ligeiramente a cabeça para a frente.",
+      "Baixe a barra de volta aos ombros com controlo."
+    ],
+    "tips": [
+      "Não use as pernas para ajudar a levantar o peso (isso é um push press).",
+      "Mantenha o core e os glúteos firmes para estabilizar o tronco.",
+      "Concentre-se numa trajetória vertical da barra."
+    ]
+  },
+  "dumbbellOverheadPress": {
+    "description": "Pressionar halteres acima da cabeça permite uma amplitude de movimento natural e ajuda a corrigir desequilíbrios musculares.",
+    "instructions": [
+      "Fique em pé ou sente-se com um haltere em cada mão à altura dos ombros, palmas voltadas para a frente.",
+      "Empurre os pesos para cima até que os braços estejam totalmente estendidos.",
+      "Abaixe os halteres com controle até a altura dos ombros.",
+      "Mantenha o core ativado para evitar arquear as costas."
+    ],
+    "tips": [
+      "Concentre-se num movimento de press suave e controlado.",
+      "Mantenha uma base estável quer esteja sentado quer em pé.",
+      "Os halteres oferecem mais liberdade para a articulação do ombro do que uma barra."
+    ]
+  },
+  "smithMachineOverheadPress": {
+    "description": "Uma prensa vertical guiada que permite focar exclusivamente no impulso dos ombros com maior segurança.",
+    "instructions": [
+      "Coloque um assento ou coloque-se por baixo da barra da máquina Smith.",
+      "Segure a barra ligeiramente mais larga que a largura dos ombros.",
+      "Desencaixe a barra e pressione-a por cima da cabeça até que os braços estejam estendidos.",
+      "Baixe-o de volta à altura dos ombros e repita."
+    ],
+    "tips": [
+      "Garanta que seu posicionamento permita um trajeto vertical seguro da barra.",
+      "Concentre-se em contrair os deltóides no topo do movimento.",
+      "Evita arquear excessivamente a parte inferior das costas."
+    ]
+  },
+  "arnoldPress": {
+    "description": "Um desenvolvimento de ombros com componente rotacional que atinge as três porções do deltóide.",
+    "instructions": [
+      "Sente-se ou fique em pé com halteres à frente dos ombros, palmas voltadas para você.",
+      "Empurre os pesos acima da cabeça enquanto rotaciona as palmas para a frente.",
+      "Termine com os braços estendidos acima da cabeça e as palmas viradas para fora.",
+      "Gire as palmas das mãos em sua direção enquanto abaixa os pesos até a posição inicial."
+    ],
+    "tips": [
+      "Mantenha uma rotação controlada durante todo o movimento de press.",
+      "Mantenha as costas direitas e o core ativado.",
+      "Evita usar pesos excessivamente pesados até que domines a coordenação."
+    ]
+  },
+  "lateralRaise": {
+    "description": "O exercício de isolamento chave para aumentar a largura dos ombros.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos quadris, segurando halteres ao lado do corpo.",
+      "Erga os braços para os lados com uma ligeira flexão nos cotovelos até ficarem ao nível dos ombros.",
+      "Faça uma pausa de um segundo no topo, depois abaixe lentamente os pesos junto aos lados do corpo."
+    ],
+    "tips": [
+      "Não balance os pesos nem use o impulso.",
+      "Conduza o movimento com os cotovelos, não com os pulsos.",
+      "Imagine que está a verter água de um jarro no topo do movimento."
+    ]
+  },
+  "cableLateralRaise": {
+    "description": "Uma elevação lateral com cabo que fornece tensão constante nos deltóides laterais durante todo o movimento.",
+    "instructions": [
+      "Fique de lado para a máquina de cabos com a polia na configuração mais baixa.",
+      "Segure a pega com a mão mais distante e puxe-a através do corpo, ou com a mão mais próxima atrás das costas.",
+      "Erga o braço para o lado até ficar ao nível do ombro, mantendo uma ligeira flexão no cotovelo.",
+      "Abaixe lentamente a alça de volta à posição inicial."
+    ],
+    "tips": [
+      "Mantenha uma postura ereta e evite inclinar-se afastando-se da máquina.",
+      "Concentre-se em liderar com o cotovelo e mantenha o movimento controlado.",
+      "O cabo fornece tensão mesmo na parte inferior da repetição, ao contrário dos halteres."
+    ]
+  },
+  "frontRaise": {
+    "description": "Foca na parte frontal dos ombros para melhor definição e força.",
+    "instructions": [
+      "Fique com os halteres à frente das coxas, palmas voltadas para você.",
+      "Levanta os pesos para a frente e para cima até que os teus braços fiquem paralelos ao chão.",
+      "Faça uma pausa de um segundo, depois baixe os pesos com controlo."
+    ],
+    "tips": [
+      "Mantenha o core firme para evitar que o corpo balance.",
+      "Não levante os pesos acima do nível dos ombros.",
+      "Pode ser realizado alternando os braços ou com ambos ao mesmo tempo."
+    ]
+  },
+  "cableFrontRaise": {
+    "description": "Isola os deltoides anteriores utilizando a resistência do cabo para uma tensão suave e constante.",
+    "instructions": [
+      "Fique de costas para uma máquina de cabos com a polia na configuração mais baixa.",
+      "Segure o cabo (ou um acessório de barra) entre as pernas ou ao seu lado.",
+      "Levanta os braços para a frente e para cima até que fiquem ao nível dos ombros.",
+      "Desça lentamente de volta à posição inicial."
+    ],
+    "tips": [
+      "Mantenha o core ativado para evitar que o tronco balance.",
+      "Controle o peso durante toda a amplitude de movimento.",
+      "Evita usar impulso para levantar o peso."
+    ]
+  },
+  "cableRearDeltFly": {
+    "description": "Isola os deltoides posteriores usando cabos, permitindo um perfil de resistência constante.",
+    "instructions": [
+      "Fique no centro de uma máquina crossover com as polias à altura da cabeça.",
+      "Cruza os braços e segure a pega esquerda com a mão direita e a pega direita com a mão esquerda.",
+      "Puxe as alças para fora e depois para trás em um arco amplo, contraindo os deltoides posteriores.",
+      "Retorne lentamente à posição inicial, mantendo a tensão."
+    ],
+    "tips": [
+      "Mantém uma ligeira flexão nos cotovelos durante todo o movimento.",
+      "Concentre-se em puxar com os ombros, não com os músculos das costas.",
+      "Fique ereto e mantenha o core firme."
+    ]
+  },
+  "cableUprightRow": {
+    "description": "Trabalha ombros e trapézios puxando um acessório de cabo verticalmente em direção ao queixo.",
+    "instructions": [
+      "Fique em frente a uma máquina de cabos com a polia na configuração mais baixa e uma barra reta conectada.",
+      "Segure a barra com pegada pronada, as mãos aproximadamente à largura dos ombros.",
+      "Puxe a barra verticalmente em direção ao queixo, liderando com os cotovelos.",
+      "Pare quando a barra estiver na altura do peito e os seus cotovelos estiverem altos.",
+      "Baixe lentamente a barra de volta à posição inicial."
+    ],
+    "tips": [
+      "Mantenha a barra junto ao corpo durante todo o levantamento.",
+      "Evita encolher demasiado os ombros; concentra-te nos deltoides.",
+      "Mantenha uma postura estável e ereta."
+    ]
+  },
+  "cableExternalRotation": {
+    "description": "Fortalece o manguito rotador ao girar o braço para fora contra a resistência do cabo.",
+    "instructions": [
+      "Fique de lado para a máquina de cabos com a polia à altura do cotovelo.",
+      "Segure a pega com a mão mais afastada, mantendo o cotovelo junto ao corpo a um ângulo de 90°.",
+      "Gire o antebraço para fora, afastando-o do corpo, até onde for confortável.",
+      "Retorne lentamente à posição inicial."
+    ],
+    "tips": [
+      "Coloque uma toalha entre o cotovelo e o lado do corpo para garantir que o braço fique junto.",
+      "Use uma carga muito leve; trata-se da saúde e da estabilidade das articulações, não da carga máxima.",
+      "Mova-se com controlo e dentro de uma amplitude de movimento confortável."
+    ]
+  },
+  "cableInternalRotation": {
+    "description": "Fortalece os rotadores internos do ombro usando uma máquina de cabos.",
+    "instructions": [
+      "Fique de lado para a máquina de cabos com a polia à altura do cotovelo.",
+      "Segure a pega com a mão mais próxima, mantendo o cotovelo junto ao corpo em um ângulo de 90°.",
+      "Gire o antebraço para dentro em direção ao corpo.",
+      "Retorne lentamente à posição inicial."
+    ],
+    "tips": [
+      "Mantenha o cotovelo colado ao lado do corpo durante toda a série.",
+      "Concentre-se na qualidade do movimento em vez do peso.",
+      "Mantenha uma postura ereta e estável."
+    ]
+  },
+  "tricepsDip": {
+    "description": "Um exercício exigente com o peso do corpo que desenvolve grande potência nos tríceps e no peito.",
+    "instructions": [
+      "Segure as barras paralelas e empurre-se até que os braços estejam totalmente estendidos.",
+      "Abaixe o corpo dobrando os cotovelos até que os seus braços superiores estejam pelo menos paralelos ao chão.",
+      "Empurre de volta para a posição inicial estendendo os braços.",
+      "Mantenha o tronco predominantemente ereto para focar nos tríceps."
+    ],
+    "tips": [
+      "Evita encolher os ombros em direção às orelhas.",
+      "Mantenha os cotovelos junto ao corpo.",
+      "Se fazer dips apenas com o peso do corpo for demasiado difícil, use uma máquina assistida para dips ou bandas elásticas."
+    ]
+  },
+  "chestDip": {
+    "description": "Uma variação de dip em que você inclina o tronco para frente para transferir o foco dos tríceps para os músculos do peito.",
+    "instructions": [
+      "Segure as barras paralelas e empurre-se até a posição inicial.",
+      "Incline o tronco para a frente em cerca de 45 graus enquanto baixa o corpo.",
+      "Permita que os cotovelos se abram ligeiramente ao descer.",
+      "Empurre para cima até a posição inicial mantendo a inclinação para a frente."
+    ],
+    "tips": [
+      "Contraia o peito na parte alta do movimento.",
+      "Desce até que os ombros fiquem ligeiramente abaixo dos cotovelos.",
+      "Controle a descida para evitar sobrecarga nos ombros."
+    ]
+  },
+  "tricepsPushdown": {
+    "description": "Um exercício popular na polia para isolar e desenvolver o tríceps.",
+    "instructions": [
+      "Prenda uma barra ou corda na polia alta da máquina de cabos.",
+      "Segure o acessório e puxe-o para baixo até que seus cotovelos formem um ângulo de 90 graus.",
+      "Empurre o acessório para baixo até os braços estarem totalmente estendidos, contraindo os tríceps na parte inferior.",
+      "Retorne lentamente à posição inicial de 90 graus."
+    ],
+    "tips": [
+      "Mantenha os cotovelos junto ao corpo durante toda a série.",
+      "Evite usar o peso do seu corpo para empurrar o cabo para baixo.",
+      "Mantenha uma ligeira inclinação para a frente e o core ativado."
+    ]
+  },
+  "overheadTricepsExtension": {
+    "description": "Foca na cabeça longa do tríceps ao estender o peso acima da cabeça.",
+    "instructions": [
+      "Sente-se ou fique em pé, segurando um haltere com as duas mãos acima da cabeça.",
+      "Baixe o peso atrás da cabeça dobrando os cotovelos.",
+      "Estenda os braços para elevar o peso de volta à posição inicial acima da cabeça.",
+      "Mantenha a parte superior dos braços imóvel durante todo o movimento."
+    ],
+    "tips": [
+      "Mantenha os cotovelos apontados para a frente em vez de para os lados.",
+      "Não deixe a parte inferior das costas arquear excessivamente; mantenha o core contraído.",
+      "Use um ritmo controlado para evitar bater a cabeça ou o pescoço."
+    ]
+  },
+  "cableOverheadTricepsExtension": {
+    "description": "Uma versão no cabo da extensão de tríceps acima da cabeça que mantém tensão constante na cabeça longa do tríceps durante toda a amplitude de movimento.",
+    "instructions": [
+      "Prenda uma corda no cabo baixo ou posicione-se de forma que o cabo passe por trás da sua cabeça.",
+      "Coloque-se de costas para a máquina e leve a corda acima da cabeça com os cotovelos dobrados e virados para a frente.",
+      "Estenda os cotovelos até que os braços fiquem esticados, contraindo os tríceps no topo.",
+      "Volte lentamente à posição inicial alongada sem que os cotovelos se abram excessivamente."
+    ],
+    "tips": [
+      "Mantenha os cotovelos quase imóveis e deixe que apenas os antebraços se movam.",
+      "Ative o core para que a lombar não se arqueie durante a série.",
+      "Use um ritmo suave e aproveite o alongamento na parte inferior do movimento."
+    ]
+  },
+  "ringDip": {
+    "description": "Uma variação avançada de dip nas argolas que requer considerável estabilidade e força.",
+    "instructions": [
+      "Apoie-se nos anéis com os braços totalmente estendidos.",
+      "Abaixe o corpo com controle, mantendo os anéis próximos aos lados do corpo.",
+      "Impulsione-se de volta à posição inicial, concentrando-se em estabilizar os anéis.",
+      "Vire as palmas ligeiramente para fora no topo para máxima estabilidade."
+    ],
+    "tips": [
+      "Mantenha o core extremamente firme para minimizar o balanço.",
+      "Comece com sustentos nos anéis para desenvolver a estabilidade necessária antes de tentar repetições completas.",
+      "Certifique‑se de que as argolas estejam a uma altura apropriada para a sua amplitude de movimento."
+    ]
+  },
+  "pullUp": {
+    "description": "Um movimento de peso corporal de elite para desenvolver costas largas e poderosas e braços fortes.",
+    "instructions": [
+      "Segure a barra com as palmas voltadas para fora, ligeiramente mais largas que a largura dos ombros.",
+      "Pendure-se com os braços completamente estendidos e com o core ativado.",
+      "Puxe o peito em direção à barra, empurrando os cotovelos para baixo em direção aos quadris.",
+      "Baixa-te de volta à posição inicial com controlo."
+    ],
+    "tips": [
+      "Concentre-se em puxar com os músculos das costas em vez de apenas com os braços.",
+      "Evita balançar as pernas ou usar impulso (kipping).",
+      "Se não consegue fazer uma puxada completa, comece com variações assistidas ou negativas."
+    ]
+  },
+  "chinUp": {
+    "description": "Uma variação de pull-up com as palmas voltadas para ti, enfatizando os bíceps e a parte inferior dos dorsais.",
+    "instructions": [
+      "Segure a barra com as palmas voltadas para você, aproximadamente na largura dos ombros.",
+      "Pendure-se com os braços completamente estendidos.",
+      "Leve o queixo acima da barra empurrando os cotovelos para baixo.",
+      "Baixa-te de volta à posição inicial com controlo."
+    ],
+    "tips": [
+      "As trações na barra com pegada supinada geralmente recrutam mais bíceps e peitoral do que as trações com pegada prona.",
+      "Mantenha o core firme para evitar que o corpo balance.",
+      "Garanta uma amplitude completa de movimento desde a suspensão passiva até o queixo acima da barra."
+    ]
+  },
+  "latPulldown": {
+    "description": "Um exercício em máquina que permite desenvolver força de puxada vertical de forma controlada.",
+    "instructions": [
+      "Sente-se na máquina e ajuste as almofadas para os joelhos de forma a ficar firmemente preso.",
+      "Segure a barra mais larga que a largura dos ombros e incline-se ligeiramente para trás.",
+      "Puxe a barra em direção à parte superior do peito, concentrando-se em apertar as omoplatas.",
+      "Retorne lentamente a barra à posição inicial."
+    ],
+    "tips": [
+      "Não puxe a barra por trás do pescoço; puxe-a até a parte superior do peito.",
+      "Concentre-se em liderar com os cotovelos.",
+      "Controle o peso ao puxar para cima para manter a tensão nos dorsais."
+    ]
+  },
+  "cableLatPushdown": {
+    "description": "Um exercício em pé com cabo que trabalha os dorsais por extensão do ombro, mantendo os braços quase esticados.",
+    "instructions": [
+      "Prenda uma barra reta ou uma corda na polia alta e fique em frente à máquina.",
+      "Segure o acessório com uma leve flexão dos cotovelos, dê um passo para trás e incline-se ligeiramente a partir dos quadris.",
+      "Mantendo os braços quase esticados, puxe o acessório para baixo em direção às coxas, empurrando os braços superiores para baixo e para trás.",
+      "Faça uma breve pausa e, em seguida, retorne com controlo à posição inicial sem encolher os ombros."
+    ],
+    "tips": [
+      "Mantenha apenas uma pequena dobra fixa nos cotovelos para que sejam os dorsais, e não os tríceps, a fazer o trabalho.",
+      "Mantenha o peito ereto e evite balançar o tronco para mover a carga.",
+      "Use uma amplitude controlada que lhe permita sentir os dorsais alongarem-se no ponto alto e contraírem-se perto das coxas."
+    ]
+  },
+  "seatedCableRow": {
+    "description": "Aponta para a espessura das costas, puxando os cabos em direção ao tronco enquanto está sentado.",
+    "instructions": [
+      "Sente-se com os pés nas plataformas e os joelhos ligeiramente dobrados.",
+      "Segure a alça e sente-se ereto com os braços estendidos.",
+      "Puxe a alça em direção às suas costelas inferiores, apertando as omoplatas juntas.",
+      "Volte lentamente à posição inicial sem deixar que o bloco de pesos bata."
+    ],
+    "tips": [
+      "Mantenha as costas direitas e evite balançar o tronco para a frente e para trás.",
+      "Concentre-se em puxar com os cotovelos em vez das mãos.",
+      "Mantenha o core estável durante todo o movimento."
+    ]
+  },
+  "seatedMachineRow": {
+    "description": "Um puxador na máquina com apoio no peito que isola os músculos das costas enquanto protege a lombar.",
+    "instructions": [
+      "Ajuste o assento e o encosto de peito de modo a conseguir alcançar confortavelmente as alças com os braços estendidos.",
+      "Sente-se com o peito encostado ao encosto e segure as alças.",
+      "Puxe as alças em sua direção, concentrando-se na contração da região média das costas.",
+      "Retorne lentamente as alças à posição inicial."
+    ],
+    "tips": [
+      "Mantenha o peito pressionado firmemente contra o apoio para isolar as costas.",
+      "Concentre-se em apertar as omoplatas no ponto de máxima contração.",
+      "Evita encolher os ombros."
+    ]
+  },
+  "barbellBentOverRow": {
+    "description": "Um poderoso movimento composto que desenvolve a espessura das costas e a força geral da parte superior do corpo.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos ombros, segurando uma barra com pegada em pronação.",
+      "Dobre-se a partir das ancas e flexione ligeiramente os joelhos, mantendo as costas direitas.",
+      "Puxe a barra em direção às suas costelas inferiores, mantendo os cotovelos próximos ao corpo.",
+      "Baixe a barra de volta à posição inicial com controlo."
+    ],
+    "tips": [
+      "Mantenha a coluna neutra e evite arredondar as costas.",
+      "Mantenha o core ativado para apoiar a região lombar.",
+      "Não use o impulso para 'enganar' e levantar o peso."
+    ]
+  },
+  "dumbbellBentOverRow": {
+    "description": "Ao inclinar-se e puxar os halteres em direção à cintura, trabalha-se a musculatura das costas com uma amplitude de movimento maior.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos ombros, segurando um haltere em cada mão.",
+      "Dobre-se a partir das ancas até que o tronco esteja quase paralelo ao chão.",
+      "Puxe os halteres em direção aos quadris, apertando as omoplatas.",
+      "Baixe os pesos de volta com controle."
+    ],
+    "tips": [
+      "Mantenha as costas planas e o core ativado ao longo de todo o exercício.",
+      "Concentre-se em puxar com os cotovelos.",
+      "Os halteres permitem que cada lado das costas trabalhe de forma independente."
+    ]
+  },
+  "smithMachineBentOverRow": {
+    "description": "Uma variação de remada guiada que permite cargas pesadas com foco na contração da região média das costas.",
+    "instructions": [
+      "Posicione-se numa postura inclinada sobre a barra da máquina Smith.",
+      "Segure a barra e desbloqueie-a.",
+      "Puxe a barra em direção às suas costelas inferiores, mantendo as costas planas.",
+      "Baixe a barra novamente e repita."
+    ],
+    "tips": [
+      "Mantenha a posição de dobradiça do quadril estável durante toda a série.",
+      "O percurso fixo ajuda a isolar os músculos alvo.",
+      "Ajuste a sua distância da barra para maior conforto."
+    ]
+  },
+  "singleArmDumbbellRow": {
+    "description": "Permite uma amplitude de movimento maior e ajuda a corrigir desequilíbrios musculares nas costas.",
+    "instructions": [
+      "Coloque um joelho e uma mão em um banco para apoio, mantendo as costas retas.",
+      "Segure um haltere na outra mão com o braço estendido em direção ao chão.",
+      "Puxe o haltere em direção ao quadril, mantendo o cotovelo perto do corpo.",
+      "Abaixe lentamente o haltere de volta à posição inicial."
+    ],
+    "tips": [
+      "Concentre-se em puxar com as costas e a omoplata, não apenas com o braço.",
+      "Mantenha o tronco estável e evite rodar o corpo enquanto puxa.",
+      "Mantenha o pescoço em posição neutra."
+    ]
+  },
+  "facePull": {
+    "description": "Essencial para a saúde do ombro, direcionado aos deltóides posteriores e aos músculos da parte superior das costas.",
+    "instructions": [
+      "Prenda uma corda na polia do cabo à altura do peito superior ou dos olhos.",
+      "Segure as extremidades da corda com os polegares apontando para trás.",
+      "Puxe a corda em direção à sua testa, afastando as extremidades à medida que se aproxima do rosto.",
+      "Concentre-se em contrair os deltóides posteriores e a parte média das costas no final do movimento."
+    ],
+    "tips": [
+      "Mantenha os cotovelos altos e voltados para os lados.",
+      "Evite usar a parte inferior das costas para puxar; mantenha-se ereto e estável.",
+      "Use pesos mais leves e concentre‑se na qualidade da contração."
+    ]
+  },
+  "rearDeltFly": {
+    "description": "Isola a parte posterior dos ombros para ajudar a criar um físico equilibrado.",
+    "instructions": [
+      "Sente-se na beira de um banco ou suporte e incline-se para a frente a partir dos quadris, mantendo as costas retas.",
+      "Segure os halteres com as palmas voltadas uma para a outra e os braços estendidos em direção ao chão.",
+      "Erga os pesos para os lados até que os braços fiquem à altura dos ombros.",
+      "Abaixe lentamente os pesos até a posição inicial."
+    ],
+    "tips": [
+      "Concentre-se em usar os deltóides posteriores, não os trapézios.",
+      "Mantém uma ligeira flexão nos cotovelos durante todo o movimento.",
+      "Não balance os pesos."
+    ]
+  },
+  "machineRearDeltFly": {
+    "description": "Isola os deltoides posteriores usando uma máquina para resultados controlados e eficazes.",
+    "instructions": [
+      "Sente-se de frente para a máquina com o peito firmemente apoiado contra a almofada.",
+      "Segure as alças com os braços estendidos à sua frente.",
+      "Puxe as pegas para trás em um amplo arco até que seus braços estejam alinhados com os ombros.",
+      "Contraia os deltóides posteriores e, em seguida, retorne lentamente à posição inicial."
+    ],
+    "tips": [
+      "Mantenha o peito contra a almofada para isolar os deltóides posteriores.",
+      "Concentre-se na contração na parte de trás dos ombros.",
+      "Mantenha um ritmo constante e controlado."
+    ]
+  },
+  "bicepsCurl": {
+    "description": "O exercício de isolamento clássico para desenvolver e definir os bíceps.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos quadris, segurando halteres ao lado do corpo com as palmas voltadas para a frente.",
+      "Eleve os pesos em direção aos ombros dobrando os cotovelos.",
+      "Contraia seus bíceps no topo e depois baixe os pesos lentamente.",
+      "Mantenha a parte superior dos braços imóvel durante todo o movimento."
+    ],
+    "tips": [
+      "Evita balançar o corpo ou usar o impulso para levantar os pesos.",
+      "Mantenha os cotovelos junto ao tronco.",
+      "Amplitude completa de movimento: estenda totalmente os braços na parte inferior."
+    ]
+  },
+  "cableCurl": {
+    "description": "Um curl com cabo em pé que mantém tensão constante nos bíceps do início ao fim de cada repetição.",
+    "instructions": [
+      "Prenda um cabo reto ou tipo EZ na polia baixa e fique de frente para a máquina.",
+      "Segure a pega com as palmas viradas para cima e mantenha os cotovelos junto ao corpo.",
+      "Puxe a pega em direção aos ombros mantendo a parte superior dos braços praticamente imóvel.",
+      "Baixe o peso com controle até que os cotovelos estejam totalmente estendidos novamente."
+    ],
+    "tips": [
+      "Não deixe os ombros rodarem para a frente enquanto o peso desce.",
+      "Mantenha o tronco imóvel e evite inclinar-se para trás para mover a carga.",
+      "Faça uma breve pausa perto do ponto máximo para maximizar a contração do bíceps."
+    ]
+  },
+  "bayesianCableCurl": {
+    "description": "Um curl no cabo por trás do corpo que alonga o bíceps no início da repetição e enfatiza a posição de alongamento.",
+    "instructions": [
+      "Prenda uma pega simples na polia baixa e fique de costas para a máquina com a pega numa mão atrás do quadril.",
+      "Dê um passo à frente até que o cabo puxe o seu braço de trabalho ligeiramente para trás do tronco.",
+      "Puxe a pega em direção ao ombro, evitando que o cotovelo desloque demasiado para a frente.",
+      "Baixe as costas até à posição inicial esticada com controlo antes de repetir."
+    ],
+    "tips": [
+      "Afaste-se o suficiente da máquina para sentir um alongamento no bíceps na parte inferior.",
+      "Mantenha o peito erguido e evite torcer o tronco enquanto realiza o curl.",
+      "Use cargas moderadas e controlo total para tirar o máximo partido do alongamento."
+    ]
+  },
+  "hammerCurl": {
+    "description": "Um curl com pegada neutra que foca nos bíceps e no braquial para braços mais volumosos.",
+    "instructions": [
+      "Fique com os halteres ao lado do corpo, palmas voltadas para o tronco (pegada neutra).",
+      "Eleve os pesos mantendo a pegada neutra.",
+      "Contraia no topo e abaixe de volta com controle.",
+      "Mantenha os cotovelos junto ao corpo."
+    ],
+    "tips": [
+      "Concentre-se na contração nos bíceps e nos antebraços.",
+      "Mantenha uma postura ereta e evite balançar-se.",
+      "Pode ser realizado alternando os braços ou com ambos ao mesmo tempo."
+    ]
+  },
+  "suspensionRow": {
+    "description": "Utiliza um sistema de suspensão para executar remadas com o peso corporal, permitindo ajustar facilmente a dificuldade pelo ângulo do corpo.",
+    "instructions": [
+      "Segure as alças e incline-se para trás com os braços estendidos e os pés voltados para a frente.",
+      "Mantenha uma linha reta da cabeça aos calcanhares.",
+      "Puxe o peito em direção às alças, empurrando os cotovelos para trás.",
+      "Baixa-te de volta à posição inicial com controlo."
+    ],
+    "tips": [
+      "Ajuste a dificuldade alterando a posição dos pés (mais próximo do ponto de ancoragem é mais difícil).",
+      "Ative o core e os glúteos para evitar que os quadris afundem.",
+      "Concentre-se num movimento suave e controlado."
+    ]
+  },
+  "landmineRow": {
+    "description": "Um exercício de costas poderoso que consiste em ancorar uma extremidade da barra e puxar a extremidade carregada em direção ao tronco.",
+    "instructions": [
+      "Prenda uma extremidade da barra num suporte landmine ou num canto do chão.",
+      "Coloque anilhas na outra extremidade e posicione-se a cavalo da barra, de costas para a ancoragem.",
+      "Dobre-se pelas ancas e dobre ligeiramente os joelhos, mantendo as costas planas.",
+      "Segure a barra (use uma pega em V se disponível) e puxe a extremidade com peso em direção às suas costelas inferiores.",
+      "Baixe o peso de volta com controle, mantendo as costas planas."
+    ],
+    "tips": [
+      "Mantenha o core ativo durante todo o movimento para proteger a lombar.",
+      "Concentre-se em puxar com os cotovelos e em apertar as omoplatas.",
+      "Mantenha uma posição consistente de dobradiça de quadril; evite 'quicar' o peso para cima."
+    ]
+  },
+  "plank": {
+    "description": "Um exercício fundamental do core que desenvolve força isométrica e estabilidade em toda a região do tronco.",
+    "instructions": [
+      "Coloque os antebraços no chão, com os cotovelos alinhados sob os ombros.",
+      "Estenda as pernas atrás de si e equilibre-se nas pontas dos pés.",
+      "Mantenha o corpo em linha reta da cabeça aos calcanhares.",
+      "Ative o seu core e mantenha a posição."
+    ],
+    "tips": [
+      "Evita que as tuas ancas cedam ou se elevem demasiado.",
+      "Mantenha uma posição neutra do pescoço; olhe para o chão.",
+      "Respire de forma constante durante toda a manutenção."
+    ]
+  },
+  "sidePlank": {
+    "description": "Foca nos oblíquos e na estabilidade lateral do core para melhorar o equilíbrio e prevenir dores nas costas.",
+    "instructions": [
+      "Deita-te de lado com as pernas esticadas e os pés um sobre o outro.",
+      "Apoie a parte superior do corpo no antebraço, com o cotovelo diretamente sob o ombro.",
+      "Eleva as ancas até que o teu corpo forme uma linha reta da cabeça aos pés.",
+      "Mantenha a posição mantendo o core ativado e os quadris nivelados."
+    ],
+    "tips": [
+      "Não deixe os quadris afundarem em direção ao chão.",
+      "Mantenha o pescoço em posição neutra, olhando para a frente.",
+      "Para uma variação mais fácil, faça a prancha com os joelhos no chão."
+    ]
+  },
+  "deadBug": {
+    "description": "Uma forma segura e eficaz de desenvolver estabilidade do core e coordenação sem sobrecarregar as costas.",
+    "instructions": [
+      "Deita-te de costas com os braços estendidos em direção ao teto e os joelhos dobrados a 90 graus (posição tabletop).",
+      "Baixe lentamente o braço direito atrás da cabeça enquanto estende simultaneamente a perna esquerda em direção ao chão.",
+      "Mantenha a parte inferior das costas pressionada firmemente contra o chão durante todo o movimento.",
+      "Volte à posição inicial e repita com o braço e a perna opostos."
+    ],
+    "tips": [
+      "O importante é manter as costas planas; se as suas costas arquearem, não baixe a perna tanto.",
+      "Mova-se lentamente e com controlo.",
+      "Expire ao estender os membros."
+    ]
+  },
+  "birdDog": {
+    "description": "Melhora o equilíbrio e a estabilidade da coluna ao ativar simultaneamente o core, os glúteos e os ombros.",
+    "instructions": [
+      "Comece a quatro apoios com as mãos sob os ombros e os joelhos sob os quadris.",
+      "Estenda lentamente o braço direito para a frente e a perna esquerda para trás até que ambos estejam paralelos ao chão.",
+      "Mantenha os quadris nivelados e o core ativado para evitar que as costas arquem.",
+      "Mantenha por um segundo, depois volte à posição inicial e troque de lado."
+    ],
+    "tips": [
+      "Imagine que há um copo de água nas suas costas que não quer derramar.",
+      "Não levante demasiado o braço ou a perna; foque-se no alongamento mais do que na altura.",
+      "Mantenha o olhar voltado para o chão para manter o pescoço neutro."
+    ]
+  },
+  "mountainClimber": {
+    "description": "Um exercício dinâmico que trabalha o core e, ao mesmo tempo, oferece um desafio cardiovascular significativo.",
+    "instructions": [
+      "Comece em posição de prancha alta com as mãos sob os ombros e o corpo em linha reta.",
+      "Leve um joelho em direção ao peito, depois troque rapidamente de perna, como se estivesse correndo no lugar em posição de prancha.",
+      "Mantenha os quadris baixos e o core apertado.",
+      "Mantenha um ritmo constante e rápido."
+    ],
+    "tips": [
+      "Evita que as tuas ancas saltem para cima e para baixo.",
+      "Concentre-se em impulsionar os joelhos diretamente para a frente.",
+      "Mantenha o peso centrado sobre as mãos."
+    ]
+  },
+  "russianTwist": {
+    "description": "Trabalha os oblíquos com um movimento rotativo que melhora a potência e definição do core.",
+    "instructions": [
+      "Sente-se no chão com os joelhos dobrados e os pés ligeiramente elevados.",
+      "Incline-se ligeiramente para trás, mantendo as costas direitas e o core ativado.",
+      "Gire o tronco para um dos lados, levando as mãos em direção ao chão ao lado do quadril.",
+      "Gire de volta para o outro lado de forma controlada."
+    ],
+    "tips": [
+      "Siga suas mãos com os olhos para garantir que todo o seu tronco esteja girando.",
+      "Mantenha os pés juntos e o mais imóveis possível.",
+      "Para um desafio extra, segure um peso ou uma bola medicinal."
+    ]
+  },
+  "bicycleCrunch": {
+    "description": "Um excelente exercício de core completo que trabalha os abdominais superiores, inferiores e os oblíquos.",
+    "instructions": [
+      "Deita-te de costas com as mãos atrás da cabeça e os joelhos em posição tabletop.",
+      "Aproxima o cotovelo direito do joelho esquerdo enquanto estendes a perna direita.",
+      "Mude de lado, aproximando o cotovelo esquerdo do joelho direito e estendendo a perna esquerda.",
+      "Continue alternando os lados em um movimento de pedalada."
+    ],
+    "tips": [
+      "Concentre-se em rotacionar o tronco em vez de apenas puxar os cotovelos.",
+      "Mantenha a parte inferior das costas pressionada contra o chão.",
+      "Mova-se com controlo em vez de velocidade para uma melhor ativação muscular."
+    ]
+  },
+  "hangingLegRaise": {
+    "description": "Um exercício avançado de core que visa especificamente os abdominais inferiores e melhora a força de preensão.",
+    "instructions": [
+      "Pendure-se numa barra de tração com os braços totalmente estendidos e uma pegada à largura dos ombros.",
+      "Mantenha as pernas estendidas (ou ligeiramente dobradas) e eleve-as até ficarem paralelas ao chão.",
+      "Baixe as pernas devagar e com controlo.",
+      "Evita balançar o corpo para ganhar impulso."
+    ],
+    "tips": [
+      "Ative o seu core e os dorsais para estabilizar o corpo.",
+      "Concentre-se na 'inclinação' da pelve para ativar os abdominais inferiores.",
+      "Se as elevações completas das pernas forem muito difíceis, comece com elevações de joelhos suspensas."
+    ]
+  },
+  "lyingLegRaise": {
+    "description": "Um exercício de core no chão que treina os abdominais a controlar a pelve enquanto as pernas se movem em flexão do quadril.",
+    "instructions": [
+      "Deite-se de costas com os braços ao lado do corpo e as pernas estendidas.",
+      "Ative os abdominais e pressione suavemente a parte baixa das costas contra o chão.",
+      "Eleve ambas as pernas juntas até ficarem quase verticais, mantendo-as estendidas ou ligeiramente dobradas conforme necessário.",
+      "Baixe as pernas lentamente apenas até onde conseguir sem que a parte inferior das costas se descole do chão."
+    ],
+    "tips": [
+      "Não force a amplitude de movimento; pare a descida assim que a parte inferior das costas começar a se elevar.",
+      "Dobre os joelhos ou faça toques alternados com os calcanhares para tornar o exercício mais fácil.",
+      "Movimente-se devagar e evite balançar as pernas para que sejam os abdominais, e não o impulso, a controlar o movimento."
+    ]
+  },
+  "cableWoodchop": {
+    "description": "Um movimento rotacional funcional que desenvolve potência do core e trabalha os oblíquos usando resistência por cabo.",
+    "instructions": [
+      "Fique de lado para a máquina de cabos com a pega ajustada em posição alta ou baixa.",
+      "Segure a pega com ambas as mãos e afaste-se da máquina.",
+      "Puxe a pega através do corpo e para baixo (ou para cima) num movimento diagonal de cortar lenha, rodando o tronco.",
+      "Retorne lentamente à posição inicial."
+    ],
+    "tips": [
+      "Mantenha os braços maioritariamente estendidos e gire a partir do tronco.",
+      "Gire o pé de trás enquanto roda para proteger os joelhos.",
+      "Mantenha uma base estável com os pés afastados à largura dos ombros."
+    ]
+  },
+  "burpee": {
+    "description": "O exercício total definitivo para queimar gordura e desenvolver potência explosiva e resistência.",
+    "instructions": [
+      "Comece em posição em pé.",
+      "Agache-se e coloque as mãos no chão.",
+      "Salta com os pés para trás até ficar em posição de prancha e faz uma flexão.",
+      "Leva os pés de volta em direção às mãos e salta explosivamente no ar com os braços acima da cabeça."
+    ],
+    "tips": [
+      "Mantenha o core contraído durante todo o movimento.",
+      "Aterre suavemente sobre os pés após o salto.",
+      "Pode ser modificado recuando em vez de saltar para reduzir o impacto."
+    ]
+  },
+  "jumpingJacks": {
+    "description": "Um exercício clássico de aquecimento e condicionamento de corpo inteiro que melhora a coordenação e a saúde cardiovascular.",
+    "instructions": [
+      "Fique com os pés juntos e os braços ao lado do corpo.",
+      "Salte no ar abriendo as pernas à largura dos ombros e balançando os braços acima da cabeça.",
+      "Salte novamente para voltar à posição inicial.",
+      "Repita de forma ritmada."
+    ],
+    "tips": [
+      "Aterre suavemente nas pontas dos pés.",
+      "Mantenha os joelhos ligeiramente dobrados.",
+      "Mantenha o core ativado durante todo o movimento."
+    ]
+  },
+  "highKnees": {
+    "description": "Um exercício cardio de alta intensidade que fortalece pernas e core enquanto melhora a forma de corrida.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos quadris.",
+      "Leva o joelho direito em direção ao peito o mais alto possível enquanto balanças o braço esquerdo.",
+      "Troque rapidamente as pernas, levantando o joelho esquerdo e bombeando o braço direito.",
+      "Continue alternando em um ritmo rápido, mantendo-se nas pontas dos pés."
+    ],
+    "tips": [
+      "Concentre-se em levantar os joelhos pelo menos até a altura do quadril.",
+      "Mantenha o tronco ereto; não se incline para trás.",
+      "Balanceie os braços para ajudar a manter o ímpeto."
+    ]
+  },
+  "squatJump": {
+    "description": "Combina um agachamento tradicional com um salto explosivo para desenvolver potência e aumentar a frequência cardíaca.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos ombros.",
+      "Desce até a posição de agachamento até que as tuas coxas estejam paralelas ao chão.",
+      "Salte de forma explosiva no ar, alcançando a maior altura possível.",
+      "Aterre suavemente e desça imediatamente para o próximo agachamento."
+    ],
+    "tips": [
+      "Absorva o impacto aterrissando sobre as pontas dos pés e rolando até os calcanhares.",
+      "Certifique‑se de que os joelhos não colapsem para dentro durante a impulsão ou a aterrissagem.",
+      "Balanceie os braços para ajudar a gerar força para cima."
+    ]
+  },
+  "butterflySitUp": {
+    "description": "Um exercício clássico de core da Freeletics que utiliza a posição das pernas em borboleta para minimizar o envolvimento dos flexores do quadril.",
+    "instructions": [
+      "Deita-te de costas com as solas dos pés juntas e os joelhos apontando para fora.",
+      "Estenda os braços acima da cabeça e toque o chão atrás de si.",
+      "Ative o seu core e sente‑se completamente, tocando o chão à frente dos seus dedos dos pés.",
+      "Baixa-te de novo com controlo."
+    ],
+    "tips": [
+      "Use os braços para ganhar impulso se necessário, mas concentre‑se em usar os abdominais.",
+      "Mantenha a parte inferior das costas pressionada contra o chão durante a fase inicial do sit-up.",
+      "Expire enquanto se senta."
+    ]
+  },
+  "sprawl": {
+    "description": "Um movimento 'down-and-up' semelhante a um burpee, mas sem a flexão nem o salto, focado na velocidade e no condicionamento metabólico.",
+    "instructions": [
+      "A partir da posição em pé, agache-se e coloque as mãos no chão.",
+      "Salta com os pés para trás até ficar em posição de prancha alta.",
+      "Salte imediatamente com os pés para trás na direção das suas mãos.",
+      "Volte para a posição em pé o mais rápido possível."
+    ],
+    "tips": [
+      "Mantenha o core firme para evitar que os quadris afundem na posição de prancha.",
+      "Concentre-se em transições rápidas entre ficar em pé e a prancha.",
+      "Mantenha um ritmo constante."
+    ]
+  },
+  "pikePushUp": {
+    "description": "Uma variação de flexão com peso corporal executada em posição pike para atingir os ombros e a parte superior do peito.",
+    "instructions": [
+      "Comece em posição de prancha alta, depois levante os quadris até que seu corpo forme um V invertido.",
+      "Mantenha as pernas e os braços esticados, com a cabeça encolhida entre os braços.",
+      "Baixe a parte superior da cabeça em direção ao chão, dobrando os cotovelos.",
+      "Empurre para cima até à posição inicial de pike."
+    ],
+    "tips": [
+      "Quanto mais os seus pés estiverem perto das suas mãos, mais difícil fica o exercício.",
+      "Mantenha o core ativado e mantenha as costas direitas.",
+      "Concentre-se em empurrar com os ombros."
+    ]
+  },
+  "superman": {
+    "description": "Fortalece toda a cadeia posterior, incluindo lombares, glúteos e isquiotibiais.",
+    "instructions": [
+      "Deite-se de bruços no chão com os braços estendidos acima da cabeça e as pernas esticadas.",
+      "Levante simultaneamente os braços, o peito e as pernas do chão.",
+      "Mantenha a posição por um segundo, contraindo os glúteos e a lombar.",
+      "Baixe as costas com controlo."
+    ],
+    "tips": [
+      "Não olhe para cima; mantenha o pescoço em posição neutra olhando para o chão.",
+      "Concentre-se no comprimento em vez da altura.",
+      "Expire ao levantar."
+    ]
+  },
+  "handReleasePushUp": {
+    "description": "Uma variação da flexão em que levantas as mãos do chão na parte baixa de cada repetição para garantir toda a amplitude de movimento e desenvolver potência explosiva.",
+    "instructions": [
+      "Comece em posição de prancha alta.",
+      "Abaixe o peito completamente até o chão.",
+      "Levanta brevemente ambas as mãos do chão e depois pousa-as novamente.",
+      "Empurre de forma explosiva para voltar à posição inicial da prancha."
+    ],
+    "tips": [
+      "Mantenha o core contraído para evitar o 'snaking' fora do chão.",
+      "Mantenha o corpo em linha reta da cabeça aos calcanhares.",
+      "Concentre-se em empurrar com toda a palma da mão."
+    ]
+  },
+  "climber": {
+    "description": "Similar aos mountain climbers, mas com os pés saltando para fora das mãos, enfatizando a mobilidade do quadril e a potência do core.",
+    "instructions": [
+      "Comece em posição de prancha alta.",
+      "Salta com o pé direito para a frente e coloca-o fora da tua mão direita.",
+      "Troque as pernas de forma explosiva: salte levando o pé direito para trás enquanto posiciona o pé esquerdo fora da sua mão esquerda.",
+      "Continue alternando em um ritmo rápido e rítmico."
+    ],
+    "tips": [
+      "Mantenha os quadris o mais baixo possível.",
+      "Concentre-se numa grande amplitude de movimento para as pernas.",
+      "Mantenha a parte superior do corpo forte e estável."
+    ]
+  },
+  "boxingBagWork": {
+    "description": "Intervalos de alta intensidade no saco de pancadas desenvolvem a resistência cardiovascular, a potência e a coordenação.",
+    "instructions": [
+      "Fique em posição de boxe com as mãos levantadas protegendo o rosto.",
+      "Execute vários golpes (jab, cross, gancho, uppercut) contra o saco de pancada.",
+      "Mantenha-se leve nos pés e mova-se ao redor do saco.",
+      "Mantenha alta intensidade durante todo o round."
+    ],
+    "tips": [
+      "Concentre-se na técnica correta do soco para evitar lesões no pulso.",
+      "Expire a cada soco.",
+      "Mantenha o core ativado para mais potência e estabilidade."
+    ]
+  },
+  "catCow": {
+    "description": "Um movimento suave da coluna que melhora a mobilidade e alivia a tensão nas costas.",
+    "instructions": [
+      "Comece a quatro apoios com as mãos sob os ombros e os joelhos sob os quadris.",
+      "Vaca: Inspire enquanto deixa a barriga cair em direção ao chão, levante o peito e olhe para cima.",
+      "Gato: Expira enquanto arqueias as costas em direção ao teto, encolhe o queixo e puxa o umbigo para dentro.",
+      "Mova-se suavemente entre as duas posições, acompanhando a sua respiração."
+    ],
+    "tips": [
+      "Concentre-se em mover uma vértebra de cada vez.",
+      "Faça os movimentos de forma suave e dentro de uma amplitude de movimento confortável.",
+      "Abra bem os dedos para um melhor apoio."
+    ]
+  },
+  "hipFlexorStretch": {
+    "description": "Alivia a rigidez nos quadris causada por longos períodos sentado ou por treinos intensos.",
+    "instructions": [
+      "Ajoelhe-se apoiado num joelho, com o outro pé apoiado plano à sua frente (posição semi-ajoelhada).",
+      "Mantenha o tronco ereto e empurre suavemente os quadris para a frente.",
+      "Aperte o glúteo da perna que está de joelhos para aprofundar o alongamento.",
+      "Mantenha pela duração desejada e depois troque de perna."
+    ],
+    "tips": [
+      "Evita arquear a parte inferior das costas; mantém o core ativado.",
+      "Deve sentir o alongamento na parte frontal da anca da perna que está ajoelhada.",
+      "Mantenha uma postura ereta durante todo o alongamento."
+    ]
+  },
+  "hamstringStretch": {
+    "description": "Melhora a flexibilidade na parte posterior das pernas e ajuda a prevenir dores na lombar.",
+    "instructions": [
+      "Sente-se no chão com uma perna estendida e o outro pé encostado na parte interna da coxa.",
+      "Dobre-se pelas ancas e alcance os seus dedos dos pés, mantendo as costas planas.",
+      "Mantenha o alongamento quando sentir tensão na parte de trás da perna.",
+      "Repita do outro lado."
+    ],
+    "tips": [
+      "Não salte; mantenha um alongamento suave e constante.",
+      "Concentre-se em estender o peito em vez da cabeça para manter as costas mais retas.",
+      "Respire profundamente e tente relaxar-se no alongamento."
+    ]
+  },
+  "thoracicRotation": {
+    "description": "Abre a parte superior das costas e melhora a mobilidade rotacional para uma melhor postura e desempenho.",
+    "instructions": [
+      "Comece em posição de quatro apoios ou deitado de lado com os joelhos dobrados.",
+      "Coloque uma mão atrás da cabeça.",
+      "Gire o cotovelo e o tronco em direção ao teto, acompanhando com os olhos.",
+      "Retorne lentamente à posição inicial."
+    ],
+    "tips": [
+      "Mantenha os quadris imóveis e concentre a rotação na região superior das costas.",
+      "Expire enquanto gira para cima.",
+      "Não force a amplitude de movimento; mova-se dentro da sua zona de conforto."
+    ]
+  },
+  "shoulderMobilityFlow": {
+    "description": "Uma sequência de movimentos projetada para melhorar a amplitude de movimento e a saúde das articulações do ombro.",
+    "instructions": [
+      "Execute uma série de movimentos controlados dos ombros, como círculos com os braços, rotações dos ombros e 'wall slides'.",
+      "Execute cada movimento lentamente e através de toda a sua amplitude de movimento.",
+      "Concentre-se em manter os ombros relaxados e para baixo, afastados das orelhas.",
+      "Mantenha um fluxo constante e rítmico."
+    ],
+    "tips": [
+      "Evite quaisquer movimentos que causem dor aguda.",
+      "Mantenha o core ativado para estabilizar o tronco durante os movimentos dos braços.",
+      "Excelente como aquecimento para qualquer treino da parte superior do corpo."
+    ]
+  },
+  "worldGreatestStretch": {
+    "description": "Um alongamento dinâmico abrangente que trabalha os quadris, os isquiotibiais e a coluna torácica.",
+    "instructions": [
+      "Comece em posição de prancha alta.",
+      "Coloque o pé direito à frente, do lado de fora da sua mão direita.",
+      "Levanta o braço direito e roda o tronco em direção ao teto, olhando para a tua mão.",
+      "Leva o teu cotovelo direito em direção à parte interna do teu pé direito.",
+      "Empurre para trás até sentir um alongamento dos isquiotibiais, esticando a perna da frente e levantando os dedos do pé.",
+      "Volte para a prancha e repita do outro lado."
+    ],
+    "tips": [
+      "Percorra cada fase lentamente e deliberadamente.",
+      "Mantenha a perna de trás o mais esticada possível durante a rotação.",
+      "Concentre-se em abrir o peito enquanto gira."
+    ]
+  },
+  "pigeonPose": {
+    "description": "Uma postura de ioga eficaz para abrir os quadris e aliviar a tensão nos glúteos.",
+    "instructions": [
+      "A partir da posição de cão virado para baixo ou de quatro, leve o joelho direito para a frente em direção ao seu pulso direito.",
+      "Coloque a canela direita no chão, procurando que fique paralela à parte frontal do seu tapete (ou na posição mais confortável).",
+      "Estenda a perna esquerda esticada para trás.",
+      "Mantenha os quadris alinhados e baixe lentamente o tronco sobre a perna da frente.",
+      "Mantenha a posição e respire dentro do alongamento, depois troque de lado."
+    ],
+    "tips": [
+      "Não force a canela a ficar paralela se isso causar dor no joelho.",
+      "Use um bloco ou almofada sob o quadril para apoio, se necessário.",
+      "Mantenha o pé da frente flexionado para proteger o joelho."
+    ]
+  },
+  "cobraStretch": {
+    "description": "Uma extensão suave das costas que alonga os músculos abdominais e melhora a flexibilidade da coluna vertebral.",
+    "instructions": [
+      "Deite-se de bruços no chão com as pernas estendidas e o dorso dos pés apoiado.",
+      "Coloque as mãos sob os ombros.",
+      "Inspire e estenda lentamente os braços para levantar o peito do chão.",
+      "Mantenha os quadris no chão e os ombros afastados das orelhas.",
+      "Olhe ligeiramente para cima e mantenha o alongamento."
+    ],
+    "tips": [
+      "Não force os braços a ficarem totalmente estendidos se isso causar dor na região lombar.",
+      "Ative ligeiramente os glúteos para apoiar a coluna vertebral.",
+      "Concentre-se no alongamento da frente do seu corpo."
+    ]
+  },
+  "childsPose": {
+    "description": "Uma posição de descanso que alonga suavemente as costas, os quadris e os ombros.",
+    "instructions": [
+      "Ajoelhe-se no chão com os dedões dos pés a tocar-se e sente-se sobre os calcanhares.",
+      "Separe os joelhos aproximadamente na largura dos quadris.",
+      "Expire e incline-se para a frente, apoiando o torso entre as coxas.",
+      "Estenda os braços para a frente com as palmas viradas para baixo ou descanse-os ao lado do corpo.",
+      "Apoie a testa no chão e respire profundamente."
+    ],
+    "tips": [
+      "Alargue os joelhos mais, se necessário, para dar mais espaço ao tronco.",
+      "Concentre-se em levar a respiração para a parte inferior das costas.",
+      "Relaxe completamente a mandíbula e os ombros."
+    ]
+  },
+  "inchworm": {
+    "description": "Um movimento dinâmico que alonga os isquiotibiais enquanto desenvolve a estabilidade do core e dos ombros.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos quadris.",
+      "Dobre-se pelas ancas e coloque as mãos no chão (flexione ligeiramente os joelhos, se necessário).",
+      "Leve as mãos para a frente até atingir a posição de prancha alta.",
+      "Pause brevemente, depois caminhe com os pés em direção às mãos usando passos pequenos, mantendo as pernas o mais retas possível.",
+      "Volte para a posição em pé e repita."
+    ],
+    "tips": [
+      "Mantenha o core contraído para evitar que os quadris afundem durante a prancha.",
+      "Mantenha as pernas direitas o mais tempo possível para maximizar o alongamento dos isquiotibiais.",
+      "Mova-se com controlo, evitando apressar-se."
+    ]
+  },
+  "armCircles": {
+    "description": "Um exercício simples de mobilidade do ombro que aquece a coifa dos rotadores e melhora a saúde articular.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos ombros e estenda os braços para os lados à altura dos ombros.",
+      "Faça pequenos círculos controlados com os braços em direção à frente.",
+      "Após o tempo desejado, inverta a direção para fazer círculos para trás.",
+      "Aumente gradualmente o tamanho dos círculos à medida que os ombros aquecem."
+    ],
+    "tips": [
+      "Mantenha os ombros relaxados e para baixo, longe das orelhas.",
+      "Mantenha o tronco estável; não deixe o corpo balançar.",
+      "Respire naturalmente durante todo o movimento."
+    ]
+  },
+  "legSwings": {
+    "description": "Um alongamento dinâmico que melhora a mobilidade do quadril e prepara as pernas para o treino.",
+    "instructions": [
+      "Fique perto de uma parede ou de um objeto resistente para manter o equilíbrio.",
+      "Balanceie uma perna para frente e para trás em movimento controlado, aumentando a amplitude progressivamente.",
+      "Após as repetições desejadas, mude para balanços laterais atravessando o corpo.",
+      "Mude de perna e repita."
+    ],
+    "tips": [
+      "Mantenha o tronco ereto e o core ativado; evite uma curvatura excessiva das costas.",
+      "Não force a amplitude de movimento; mantenha-se em um alongamento confortável.",
+      "Mantenha um ritmo rítmico e constante."
+    ]
+  },
+  "wristCircles": {
+    "description": "Melhora a mobilidade da articulação do pulso e ajuda a prevenir sobrecarga durante os exercícios da parte superior do corpo.",
+    "instructions": [
+      "Estenda os braços à sua frente ou mantenha-os relaxados ao lado do corpo.",
+      "Gire os pulsos em movimento circular, percorrendo toda a amplitude de movimento.",
+      "Faça círculos tanto no sentido horário quanto no sentido anti-horário.",
+      "Também pode entrelaçar os dedos e rodar os pulsos em conjunto."
+    ],
+    "tips": [
+      "Mantenha o movimento lento e focado.",
+      "Relaxe as mãos e os dedos.",
+      "Particularmente útil antes de exercícios como flexões ou press de banca."
+    ]
+  },
+  "ankleCircles": {
+    "description": "Melhora a mobilidade do tornozelo e prepara os pés para atividades de suporte de peso.",
+    "instructions": [
+      "Fique em pé sobre uma perna (usando uma parede para equilíbrio) ou sente-se com uma perna estendida.",
+      "Gire o tornozelo em movimento circular, desenhando o maior círculo possível com os dedos do pé.",
+      "Faça círculos em ambas as direções.",
+      "Troque os pés e repita."
+    ],
+    "tips": [
+      "Concentre-se em mover apenas o tornozelo, não a perna inteira.",
+      "Mova-se lentamente para garantir que trabalhe todas as partes da rotação.",
+      "Ótimo para melhorar a profundidade do agachamento e a mecânica da corrida."
+    ]
+  },
+  "deepSquatHold": {
+    "description": "Uma contração isométrica na parte baixa de um agachamento para melhorar a mobilidade de quadris, joelhos e tornozelos.",
+    "instructions": [
+      "Fique em pé com os pés à largura dos ombros, com as pontas dos pés ligeiramente viradas para fora.",
+      "Desce até ao agachamento mais profundo possível, mantendo os calcanhares no chão.",
+      "Descanse os cotovelos na parte interna dos joelhos para empurrá-los suavemente para fora.",
+      "Mantenha o peito o mais erguido possível.",
+      "Mantenha a posição pela duração desejada, respirando profundamente."
+    ],
+    "tips": [
+      "Se os seus calcanhares se levantarem, coloque-os numa pequena elevação ou segure-se num objeto resistente para equilíbrio.",
+      "Concentre-se em relaxar os quadris.",
+      "Desloque suavemente o peso de um lado para o outro para atingir diferentes áreas."
+    ]
+  },
+  "scapularCircles": {
+    "description": "Melhora a mobilidade e a saúde das omoplatas (escápulas), promovendo melhor postura e mecânica da parte superior do corpo.",
+    "instructions": [
+      "Fique em pé ou sente-se ereto, com os braços relaxados ao lado do corpo.",
+      "Encolhe os ombros em direção às orelhas (elevação).",
+      "Puxe-as para trás, apertando as omoplatas juntas (retração).",
+      "Baixe-as o máximo possível (depressão).",
+      "Empurre as omoplatas para a frente, arredondando ligeiramente a parte superior das costas (protração).",
+      "Suavize esses movimentos em um movimento circular, executando-os em ambas as direções."
+    ],
+    "tips": [
+      "Mantenha os braços estendidos e imóveis; o movimento deve vir das omoplatas.",
+      "Imagine desenhar um círculo com os pontos dos seus ombros.",
+      "Evita arquear a parte inferior das costas."
+    ]
+  },
+  "quadStretch": {
+    "description": "Um alongamento clássico da parte frontal da coxa para melhorar a flexibilidade e a saúde do joelho.",
+    "instructions": [
+      "Fique em pé sobre uma perna, usando uma parede ou cadeira para apoio se necessário.",
+      "Flexiona o outro joelho e estique o braço para trás para agarrar o pé ou o tornozelo com a mão do mesmo lado.",
+      "Puxe suavemente o calcanhar em direção aos glúteos.",
+      "Mantenha os joelhos juntos e o tronco ereto.",
+      "Mantenha a posição e depois troque a perna."
+    ],
+    "tips": [
+      "Contraia os glúteos da perna que está a alongar para aprofundar o alongamento do flexor do quadril.",
+      "Evita arquear a parte inferior das costas.",
+      "Certifique‑se de estar ereto, sem se inclinar para a frente."
+    ]
+  },
+  "doorwayChestStretch": {
+    "description": "Utiliza um vão de porta ou moldura para abrir o peito e a parte frontal dos ombros, contrariando a postura curvada.",
+    "instructions": [
+      "Fique em um batente de porta ou no canto de uma parede.",
+      "Coloque o(s) antebraço(s) contra o batente da porta com o cotovelo à altura do ombro.",
+      "Incline-se ou dê um passo à frente até sentir um alongamento confortável no peito.",
+      "Mantenha a posição, respirando profundamente.",
+      "Pode ajustar a altura dos braços para direcionar diferentes partes do peito."
+    ],
+    "tips": [
+      "Não se incline demais; o alongamento deve ser suave.",
+      "Mantenha os ombros baixos e afastados das orelhas.",
+      "Mantenha o core ativado para evitar arquear a região lombar."
+    ]
+  },
+  "scorpions": {
+    "description": "Um alongamento dinâmico para quadris, lombar e peito realizado deitado de barriga para baixo.",
+    "instructions": [
+      "Deite-se de bruços no chão com os braços estendidos aos lados em forma de 'T'.",
+      "Levanta a perna direita e alcança-a através do corpo em direção à tua mão esquerda, rodando os quadris.",
+      "Tente tocar o chão com o pé direito enquanto mantém o peito e os braços o mais planos possível.",
+      "Volte ao centro e repita com a perna esquerda."
+    ],
+    "tips": [
+      "Mova-se lentamente e com controlo para proteger a região lombar.",
+      "Concentre-se na rotação da coluna e na abertura dos quadris.",
+      "Alcance apenas até onde for confortável; o seu pé não precisa tocar a sua mão."
+    ]
+  },
+  "threadTheNeedle": {
+    "description": "Uma rotação suave para a parte superior das costas e ombros que também alonga o pescoço.",
+    "instructions": [
+      "Comece a quatro apoios com as mãos sob os ombros e os joelhos sob os quadris.",
+      "Leve o braço direito por baixo do corpo para a esquerda, deslizando o dorso da mão pelo chão.",
+      "Abaixe o ombro direito e a orelha em direção ao chão.",
+      "Mantenha os quadris alinhados e respire na sensação de alongamento entre as omoplatas.",
+      "Mantenha a posição, depois volte ao centro e repita do outro lado."
+    ],
+    "tips": [
+      "Concentre-se no alongamento da parte superior das costas e do ombro posterior.",
+      "Use a mão esquerda para pressionar suavemente o chão e aprofundar a rotação se estiver confortável.",
+      "Relaxe completamente o pescoço."
+    ]
+  },
+  "neckCircles": {
+    "description": "Alivia suavemente a tensão no pescoço e melhora a amplitude de movimento cervical.",
+    "instructions": [
+      "Sente-se ou fique em pé ereto, com os ombros relaxados.",
+      "Abaixe suavemente o queixo em direção ao peito.",
+      "Gire lentamente a cabeça em direção a um ombro, depois cuidadosamente para trás e até o outro ombro.",
+      "Continue o movimento circular lentamente e suavemente.",
+      "Inverta a direção após a duração desejada."
+    ],
+    "tips": [
+      "Evite movimentos rápidos ou bruscos.",
+      "Se sentir alguma dor aguda ou tontura, pare imediatamente.",
+      "Mantenha os ombros baixos e relaxados durante todo o exercício."
+    ]
+  }
+}

@@ -1,6 +1,9 @@
 package io.codepassion.doubletriangle.nutrition
 
 import android.content.Context
+import android.content.BroadcastReceiver
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.BitmapFactory
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
@@ -66,6 +69,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.core.content.ContextCompat
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
@@ -76,6 +80,7 @@ import io.codepassion.doubletriangle.WorkoutRemoteSync
 import io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker
 import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
+import io.codepassion.doubletriangle.feature.onboarding.NutritionPlanProfileSnapshot
 import io.codepassion.doubletriangle.feature.onboarding.SubscriptionPaywall
 import io.codepassion.doubletriangle.feature.onboarding.SubscriptionTier
 import io.codepassion.doubletriangle.feature.onboarding.SubscriptionAccessStore
@@ -118,6 +123,26 @@ internal val FatColor = Color(0xFFFFCC00)
 
 internal fun formatNutritionInteger(value: Int, locale: Locale = Locale.getDefault()): String =
     NumberFormat.getIntegerInstance(locale).format(value)
+
+internal fun nutritionSelectionAfterDateChange(selected: LocalDate, previousToday: LocalDate, newToday: LocalDate): LocalDate =
+    if (selected == previousToday) newToday else selected
+
+internal fun nutritionSelectionAfterPlanChange(selected: LocalDate, today: LocalDate, planDates: Collection<LocalDate>): LocalDate =
+    if (selected != today && selected !in planDates) today else selected
+
+internal fun nutritionCalendarWindow(today: LocalDate, planDates: Collection<LocalDate>): Pair<LocalDate, LocalDate> {
+    val currentMonday = today.minusDays((today.dayOfWeek.value - 1).toLong())
+    val defaultStart = currentMonday.minusDays(7)
+    val defaultEnd = defaultStart.plusDays(20)
+    return minOf(planDates.minOrNull() ?: defaultStart, defaultStart) to
+        maxOf(planDates.maxOrNull() ?: defaultEnd, defaultEnd)
+}
+
+internal fun nutritionCalendarProgress(consumed: Int, target: Int): Float =
+    if (target > 0) consumed.toFloat() / target else 0f
+
+internal fun normalizeSavedMeal(entry: MealLog, date: LocalDate, replacementKey: String?, editing: MealLog?): MealLog =
+    entry.copy(loggedDate = date, plannedMealKey = replacementKey ?: editing?.plannedMealKey)
 
 /** Android counterpart of the iOS HealthKit onboarding completion callback. */
 internal typealias HealthConnectRequest = (((Boolean, Int?, Double?, Double?, Double?) -> Unit) -> Unit)
@@ -182,6 +207,12 @@ fun NutritionScreen(
     val accountToken = accountPreferences.getString("token", null)
     val lifecycleOwner = LocalLifecycleOwner.current
 
+    fun refreshToday() {
+        val newToday = LocalDate.now()
+        selectedDate = nutritionSelectionAfterDateChange(selectedDate, today, newToday)
+        today = newToday
+    }
+
     LaunchedEffect(openLogging, hasNutritionProfile) {
         if (openLogging) {
             if (hasNutritionProfile) showLogFlow = true else showPreferences = true
@@ -194,14 +225,31 @@ fun NutritionScreen(
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) today = LocalDate.now()
+            if (event == Lifecycle.Event.ON_RESUME) refreshToday()
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    DisposableEffect(context) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) { refreshToday() }
+        }
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_DATE_CHANGED)
+            addAction(Intent.ACTION_TIME_CHANGED)
+            addAction(Intent.ACTION_TIMEZONE_CHANGED)
+        }
+        ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        onDispose { context.unregisterReceiver(receiver) }
+    }
+
+    LaunchedEffect(plan) {
+        selectedDate = nutritionSelectionAfterPlanChange(selectedDate, today, plan.map { it.date })
+    }
+
     LaunchedEffect(profile) {
-        energyHistory = runCatching { withContext(Dispatchers.IO) { NutritionEnergyBalance.read(context, { date -> NutritionStore.load(context, date).sumOf { it.calories } }) } }.getOrDefault(emptyMap())
+        energyHistory = runCatching { withContext(Dispatchers.IO) { NutritionEnergyBalance.read(context, { date -> NutritionStore.load(context, date).sumOf { it.loggedCalories() }.roundToInt() }) } }.getOrDefault(emptyMap())
         // Retry locally persisted nutrition records when the user returns
         // after granting Health Connect access or after a transient provider
         // failure. The local store remains the source of truth.
@@ -238,7 +286,7 @@ fun NutritionScreen(
     fun refreshEnergyBalance() {
         scope.launch {
             energyHistory = runCatching {
-                withContext(Dispatchers.IO) { NutritionEnergyBalance.read(context, { date -> NutritionStore.load(context, date).sumOf { it.calories } }) }
+                withContext(Dispatchers.IO) { NutritionEnergyBalance.read(context, { date -> NutritionStore.load(context, date).sumOf { it.loggedCalories() }.roundToInt() }) }
             }.getOrDefault(energyHistory)
         }
     }
@@ -271,10 +319,7 @@ fun NutritionScreen(
     }
 
     fun updateHubBookmark(entry: MealLog, bookmarkName: String?) {
-        val updated = entry.copy(
-            isBookmarked = bookmarkName != null,
-            bookmarkName = bookmarkName.orEmpty(),
-        )
+        val updated = applyNutritionBookmark(entry, bookmarkName)
         val dayEntries = NutritionStore.load(context, entry.loggedDate)
         NutritionStore.save(
             context,
@@ -349,11 +394,11 @@ fun NutritionScreen(
         queueRemoteSync()
     }
 
-    fun openLogForSomethingElse(date: LocalDate) {
+    fun openLogForSomethingElse(date: LocalDate, meal: PlannedMeal) {
         selectedDate = date
         plannedMethod = null
         plannedTitle = null
-        plannedMealKey = null
+        plannedMealKey = NutritionStore.plannedMealKey(date, meal)
         showLogFlow = true
     }
 
@@ -425,12 +470,11 @@ fun NutritionScreen(
             onEditPlan = { showTargets = true },
             onEditPreferences = { showPreferences = true },
             onPlanGrocery = { showGrocery = true },
-            onPlanRegenerate = ::requestPlanGeneration,
             onGeneratePlan = ::requestPlanGeneration,
             onPlannedMealAction = { meal, method -> handlePlannedMealAction(selectedDate, meal, method) },
             onDiscardPlannedMeal = { meal -> discardPlannedMeal(selectedDate, meal) },
             isSuggestionHidden = { meal -> isPlannedMealHidden(selectedDate, meal) },
-            onLogSomethingElse = { openLogForSomethingElse(selectedDate) },
+            onLogSomethingElse = { meal -> openLogForSomethingElse(selectedDate, meal) },
             onBookmark = ::updateHubBookmark,
             modifier = Modifier.padding(contentPadding),
         )
@@ -446,9 +490,10 @@ fun NutritionScreen(
             recent = NutritionStore.recent(context),
             aiNutritionAccess = aiNutritionAccess,
             onPremiumOffer = { showNutritionPaywall = true },
+            onBookmarkChanged = { reload(); queueRemoteSync() },
             onDismiss = { showLogFlow = false; editingMeal = null; plannedMethod = null; plannedTitle = null; plannedMealKey = null },
             onSave = { entry ->
-                val normalized = entry.copy(loggedDate = selectedDate, plannedMealKey = plannedMealKey)
+                val normalized = normalizeSavedMeal(entry, selectedDate, plannedMealKey, editingMeal)
                 val dateEntries = if (editingMeal == null) NutritionStore.load(context, selectedDate) + normalized else NutritionStore.load(context, selectedDate).map { if (it.id == editingMeal!!.id) normalized.copy(id = it.id) else it }
                 NutritionStore.save(context, selectedDate, dateEntries)
                 scope.launch { HealthConnectNutritionSync.publish(context, NutritionStore.allForSync(context)) }
@@ -468,7 +513,7 @@ fun NutritionScreen(
         isHealthConnectEnabled = profile?.isHealthConnectEnabled == true,
         onRequestHealthConnect = onRequestHealthConnect,
     ) { value ->
-        preferences = value; NutritionStore.savePreferences(context, value); hasNutritionProfile = true; NutritionStore.clearGeneratedPlan(context); generatedPlan = null; planMetadata = null; showPreferences = false; queueRemoteSync()
+        NutritionPlanProfileSnapshot.ensureBaseline(context); preferences = value; NutritionStore.savePreferences(context, value); hasNutritionProfile = true; showPreferences = false; queueRemoteSync()
     }
     if (showIdeas) MealIdeasDialog(plan.firstOrNull { it.date == selectedDate }, fridgeTarget, { showIdeas = false; fridgeTarget = null }) { planned ->
         val entry = MealLog(System.currentTimeMillis(), planned.title, planned.targets.calories, planned.targets.protein, planned.targets.carbs, planned.targets.fat, planned.type, selectedDate, planned.guidance, "meal_idea", plannedMealKey = plannedMealKey)
@@ -497,6 +542,7 @@ fun NutritionScreen(
             onSave = {
                 val metadata = NutritionStore.metadataForPlan(profile, preview)
                 NutritionStore.saveGeneratedPlan(context, preview, metadata)
+                NutritionPlanProfileSnapshot.save(context)
                 generatedPlan = preview
                 planMetadata = metadata
                 generatedPlanPreview = null
@@ -626,12 +672,11 @@ private fun NutritionHub(
     onEditPlan: () -> Unit,
     onEditPreferences: () -> Unit,
     onPlanGrocery: () -> Unit,
-    onPlanRegenerate: () -> Unit,
     onGeneratePlan: () -> Unit,
     onPlannedMealAction: (PlannedMeal, LogMethod) -> Unit,
     onDiscardPlannedMeal: (PlannedMeal) -> Unit,
     isSuggestionHidden: (PlannedMeal) -> Boolean,
-    onLogSomethingElse: () -> Unit,
+    onLogSomethingElse: (PlannedMeal) -> Unit,
     onBookmark: (MealLog, String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -648,7 +693,7 @@ private fun NutritionHub(
                 plan = plan,
                 selected = selectedDate,
                 today = today,
-                caloriesForDate = { date -> NutritionStore.load(context, date).sumOf { it.calories } },
+                caloriesForDate = { date -> NutritionStore.load(context, date).sumOf { it.loggedCalories() }.roundToInt() },
                 onSelect = onSelectDate,
             )
         }
@@ -770,9 +815,9 @@ private fun CompactPlanMetric(icon: ImageVector, label: String) {
 }
 
 private fun nutritionGoalIcon(goal: FitnessGoal?): ImageVector = when (goal) {
-    null -> Icons.Filled.SportsGymnastics
+    null -> Icons.Filled.FitnessCenter
     FitnessGoal.LoseWeight -> Icons.Filled.Sync
-    FitnessGoal.BuildMuscle -> Icons.Filled.SportsGymnastics
+    FitnessGoal.BuildMuscle -> Icons.Filled.FitnessCenter
     FitnessGoal.GainStrength -> Icons.Filled.Bolt
     FitnessGoal.ImproveEndurance -> Icons.Filled.DirectionsRun
     FitnessGoal.ImproveMobility -> Icons.Filled.SelfImprovement
@@ -794,7 +839,7 @@ private fun NutritionPlanTimeline(plan: List<NutritionDayPlan>, onDay: (Nutritio
     val today = LocalDate.now()
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp)).padding(horizontal = 20.dp, vertical = 8.dp)) {
         week.forEachIndexed { index, day ->
-            val loggedCalories = NutritionStore.load(context, day.date).sumOf { it.calories }
+            val loggedCalories = NutritionStore.load(context, day.date).sumOf { it.loggedCalories() }.roundToInt()
             val isPastOrToday = day.date <= today
             Row(Modifier.fillMaxWidth().clickable { onDay(day) }.padding(vertical = 4.dp), verticalAlignment = Alignment.Top) {
                 Box(Modifier.width(18.dp), contentAlignment = Alignment.Center) {
@@ -965,7 +1010,7 @@ private fun DayMealsPreview(
     onPlannedMealAction: (PlannedMeal, LogMethod) -> Unit,
     onDiscardPlannedMeal: (PlannedMeal) -> Unit,
     isSuggestionHidden: (PlannedMeal) -> Boolean,
-    onLogSomethingElse: () -> Unit,
+    onLogSomethingElse: (PlannedMeal) -> Unit,
     onBookmark: (MealLog, String?) -> Unit,
 ) {
     val visibleSuggestions = visibleNutritionHubSuggestions(day, entries, isSuggestionHidden)
@@ -1022,7 +1067,7 @@ private fun DayMealsPreview(
                     canLog = canLog,
                     onAction = onPlannedMealAction,
                     onDiscard = onDiscardPlannedMeal,
-                    onLogSomethingElse = onLogSomethingElse,
+                    onLogSomethingElse = { onLogSomethingElse(meal) },
                 )
             }
         }
@@ -1071,7 +1116,7 @@ private fun HubPlannedMealRow(
                     Box {
                         Button(
                             onClick = { menuOpen = true },
-                            modifier = Modifier.height(34.dp),
+                            modifier = Modifier.heightIn(min = 40.dp),
                             shape = RoundedCornerShape(50.dp),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                             colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText),
@@ -1149,10 +1194,10 @@ private fun HubMealRow(entry: MealLog, onBookmark: (MealLog, String?) -> Unit) {
                 }
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                MealMacro(NutritionMacroIcon.Calories, "${entry.calories} kcal", NutritionCaloriesColor)
-                MealMacro(NutritionMacroIcon.Protein, "${entry.protein}g", ProteinColor)
-                MealMacro(NutritionMacroIcon.Carbs, "${entry.carbs}g", CarbsColor)
-                MealMacro(NutritionMacroIcon.Fat, "${entry.fat}g", FatColor)
+                MealMacro(NutritionMacroIcon.Calories, "${entry.loggedCalories().roundToInt()} kcal", NutritionCaloriesColor)
+                MealMacro(NutritionMacroIcon.Protein, "${entry.loggedProtein().roundToInt()}g", ProteinColor)
+                MealMacro(NutritionMacroIcon.Carbs, "${entry.loggedCarbs().roundToInt()}g", CarbsColor)
+                MealMacro(NutritionMacroIcon.Fat, "${entry.loggedFat().roundToInt()}g", FatColor)
                 if (entry.items.size > 1) {
                     Spacer(Modifier.weight(1f))
                     IconButton(onClick = { expanded = !expanded }, modifier = Modifier.size(32.dp)) {
@@ -1174,10 +1219,10 @@ private fun HubMealRow(entry: MealLog, onBookmark: (MealLog, String?) -> Unit) {
                                 if (food.quantity > 0) Text("${food.quantity} ${food.unit}".trim(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                             }
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                MealMacro(NutritionMacroIcon.Calories, "${food.calories} kcal", NutritionCaloriesColor)
-                                MealMacro(NutritionMacroIcon.Protein, "${food.protein}g", ProteinColor)
-                                MealMacro(NutritionMacroIcon.Carbs, "${food.carbs}g", CarbsColor)
-                                MealMacro(NutritionMacroIcon.Fat, "${food.fat}g", FatColor)
+                                MealMacro(NutritionMacroIcon.Calories, "${food.calories.roundToInt()} kcal", NutritionCaloriesColor)
+                                MealMacro(NutritionMacroIcon.Protein, "${food.protein.roundToInt()}g", ProteinColor)
+                                MealMacro(NutritionMacroIcon.Carbs, "${food.carbs.roundToInt()}g", CarbsColor)
+                                MealMacro(NutritionMacroIcon.Fat, "${food.fat.roundToInt()}g", FatColor)
                             }
                             if (food.notes.isNotBlank()) Text(food.notes, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                         }
@@ -1284,10 +1329,8 @@ private fun NutritionCalendar(
     onSelect: (LocalDate) -> Unit,
 ) {
     val planDates = plan.associateBy { it.date }
-    // Same three-week window as iOS: previous Monday through 20 days after the current Monday.
-    val currentMonday = today.minusDays((today.dayOfWeek.value - 1).toLong())
-    val firstVisibleDate = minOf(plan.minOfOrNull { it.date } ?: today, currentMonday.minusDays(7))
-    val lastVisibleDate = maxOf(plan.maxOfOrNull { it.date } ?: today, currentMonday.plusDays(20))
+    // Three weeks starting on the previous Monday, extended to include the plan.
+    val (firstVisibleDate, lastVisibleDate) = nutritionCalendarWindow(today, planDates.keys)
     val visibleDates = generateSequence(firstVisibleDate) { date -> date.plusDays(1).takeIf { !it.isAfter(lastVisibleDate) } }.toList()
     val selectedIndex = visibleDates.indexOf(selected).coerceAtLeast(0)
     val calendarState = rememberLazyListState(initialFirstVisibleItemIndex = (selectedIndex - 2).coerceAtLeast(0))
@@ -1301,13 +1344,13 @@ private fun NutritionCalendar(
         items(visibleDates, key = { it }) { date ->
             val day = planDates[date]
             val isSelectable = day != null
-            val isSelected = isSelectable && date == selected
+            val isSelected = date == selected
             val isPast = date.isBefore(today)
             Column(
                 Modifier.width(54.dp).height(84.dp).clip(RoundedCornerShape(12.dp))
                     .background(if (isSelected) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = .08f))
                     .border(1.dp, if (date == today && !isSelected) WildforceThemeTokens.accent.copy(alpha = .15f) else Color.Transparent, RoundedCornerShape(12.dp))
-                    .alpha(if (!isSelectable) if (date == today) .72f else .55f else if (isPast) .9f else 1f)
+                    .alpha(if (isSelected) 1f else if (!isSelectable) if (date == today) .72f else .55f else if (isPast) .9f else 1f)
                     .clickable(enabled = isSelectable) { onSelect(date) }.padding(vertical = 9.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -1317,8 +1360,9 @@ private fun NutritionCalendar(
                 val consumed = caloriesForDate(date)
                 if (day != null && shouldShowCalendarCalorieRing(date, today, consumed)) {
                     CalendarCalorieRing(
-                        progress = consumed.toFloat() / day.targets.calories.coerceAtLeast(1),
-                        color = if (isSelected) WildforceThemeTokens.primaryButtonText else NutritionCoral,
+                        progress = nutritionCalendarProgress(consumed, day.targets.calories),
+                        color = if (consumed > day.targets.calories) NutritionCoral else if (isSelected) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.accent,
+                        isSelected = isSelected,
                     )
                 } else if (day != null) {
                     Box(Modifier.padding(top = 4.dp).size(8.dp).background(if (isSelected) WildforceThemeTokens.primaryButtonText else demandColor(day.energyDemand), CircleShape))
@@ -1334,16 +1378,21 @@ internal fun shouldShowCalendarCalorieRing(date: LocalDate, today: LocalDate, _c
     !date.isAfter(today)
 
 @Composable
-private fun CalendarCalorieRing(progress: Float, color: Color) {
+private fun CalendarCalorieRing(progress: Float, color: Color, isSelected: Boolean) {
     val animatedProgress by animateFloatAsState(
-        targetValue = progress.coerceIn(0f, 2f),
+        targetValue = progress.coerceAtLeast(0f),
         animationSpec = tween(durationMillis = 560),
         label = "calendar-calorie-ring",
     )
-    Canvas(Modifier.padding(top = 1.dp).size(18.dp)) {
-        drawArc(color.copy(alpha = .24f), -90f, 360f, false, style = Stroke(3.dp.toPx(), cap = StrokeCap.Round))
-        drawArc(color, -90f, 360f * animatedProgress.coerceIn(0f, 1f), false, style = Stroke(3.dp.toPx(), cap = StrokeCap.Round))
-        if (animatedProgress > 1f) drawArc(color, -90f, 360f * (animatedProgress - 1f).coerceIn(0f, 1f), false, style = Stroke(1.5.dp.toPx(), cap = StrokeCap.Round))
+    Box(Modifier.padding(top = 1.dp).size(18.dp), contentAlignment = Alignment.Center) {
+        Canvas(Modifier.size(16.dp)) {
+            val background = if (isSelected) Color.White.copy(alpha = .3f) else Color.Gray.copy(alpha = .14f)
+            drawArc(background, -90f, 360f, false, style = Stroke(3.dp.toPx(), cap = StrokeCap.Round))
+            if (animatedProgress > 0f) drawArc(color, -90f, 360f * animatedProgress.coerceIn(0f, 1f), false, style = Stroke(3.dp.toPx(), cap = StrokeCap.Round))
+        }
+        if (progress > 1f && (progress - 1f) % 1f > 0f) {
+            Icon(Icons.Filled.Error, contentDescription = null, tint = Color.Red, modifier = Modifier.size(14.dp))
+        }
     }
 }
 
@@ -1446,7 +1495,7 @@ private fun WeeklyBalanceCard(energyHistory: Map<LocalDate, NutritionEnergyPoint
     val dates = remember(today) { (0L..14L).map { today.minusDays(it) }.reversed() }
     // Read intake on every recomposition so saving a meal immediately moves
     // today's bar and the displayed average, matching the iOS live update.
-    val history = dates.map { date -> NutritionStore.load(context, date).sumOf { it.calories } }
+    val history = dates.map { date -> NutritionStore.load(context, date).sumOf { it.loggedCalories() }.roundToInt() }
     var inspectedDate by remember(today) { mutableStateOf<LocalDate?>(null) }
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
@@ -1694,7 +1743,7 @@ private fun PlanHeader(
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             PlanTag(Icons.Filled.CalendarToday, "7 días")
             PlanTag(Icons.Filled.LocalFireDepartment, "Objetivo diario")
-            PlanTag(Icons.Filled.SportsGymnastics, "Adaptado al entreno")
+            PlanTag(Icons.Filled.FitnessCenter, "Adaptado al entreno")
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
             PlanMetric(Icons.Filled.Restaurant, "Estilo", preferences.dietaryStyle, onEditPreferences)
@@ -1784,7 +1833,7 @@ internal fun NutritionDayHeader(day: NutritionDayPlan, logged: NutritionTargets,
             Column { Text(day.date.format(DateTimeFormatter.ofPattern("d MMMM", Locale("es"))), style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = .82f)); Text(if (isToday) "HOY" else day.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es")).uppercase(), fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = Color.White) }
             Spacer(Modifier.weight(1f)); Column(horizontalAlignment = Alignment.End) { Text(day.type.title.uppercase(), style = MaterialTheme.typography.caption, color = Color.White, modifier = Modifier.graphicsLayer { scaleX = typeBadgeScale; scaleY = typeBadgeScale; alpha = if (typeBadgeAppeared) 1f else 0f }.background(dayTypeColor.copy(alpha = .62f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp)); Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) { NutritionMacroSymbol(NutritionMacroIcon.Calories, Color.White, Modifier.size(15.dp)); Text("${day.targets.calories} kcal", Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold, color = Color.White) } }
         }
-        Row(Modifier.background(Color.White.copy(alpha = .12f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.SportsGymnastics, null, tint = Color.White, modifier = Modifier.size(14.dp)); Text(day.safeWorkoutTitle().ifBlank { day.type.title }.uppercase(), Modifier.padding(start = 5.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White) }
+        Row(Modifier.background(Color.White.copy(alpha = .12f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.FitnessCenter, null, tint = Color.White, modifier = Modifier.size(14.dp)); Text(day.safeWorkoutTitle().ifBlank { day.type.title }.uppercase(), Modifier.padding(start = 5.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White) }
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
             HeaderMacroPill(NutritionMacroIcon.Protein, logged.protein, day.targets.protein); HeaderMacroPill(NutritionMacroIcon.Carbs, logged.carbs, day.targets.carbs); HeaderMacroPill(NutritionMacroIcon.Fat, logged.fat, day.targets.fat); HeaderPill(Icons.Filled.Bolt, day.energyDemand.title)
         }
@@ -1835,4 +1884,9 @@ internal fun nutritionDayTypeColor(type: NutritionDayType): Color = when (type) 
 }
 
 private fun demandColor(demand: EnergyDemand) = when (demand) { EnergyDemand.High -> NutritionRed; EnergyDemand.Medium -> NutritionOrange; EnergyDemand.Low -> NutritionGreen }
-internal fun List<MealLog>.total() = NutritionTargets(sumOf { it.calories }, sumOf { it.protein }, sumOf { it.carbs }, sumOf { it.fat })
+internal fun List<MealLog>.total() = NutritionTargets(
+    sumOf { it.loggedCalories() }.roundToInt(),
+    sumOf { it.loggedProtein() }.roundToInt(),
+    sumOf { it.loggedCarbs() }.roundToInt(),
+    sumOf { it.loggedFat() }.roundToInt(),
+)

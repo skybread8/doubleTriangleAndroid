@@ -409,7 +409,7 @@ class AnalyticsScreenTest {
     }
 
     @Test
-    fun personalRecordsIncludeEveryRecordedMetricType() {
+    fun personalRecordsSelectOneMetricAccordingToExerciseCategory() {
         val summary = ExerciseAnalyticsSummary(
             exercise = ExerciseSummary("Carrera", "run", 1, "libre", 0),
             sessions = 1,
@@ -422,9 +422,34 @@ class AnalyticsScreenTest {
         )
 
         assertEquals(
-            setOf("Mejor peso", "Mejores repeticiones", "Mayor volumen", "Mayor duración", "Mayor distancia"),
+            setOf("Mejor peso"),
             records.map { it.title }.toSet(),
         )
+    }
+
+    @Test
+    fun personalRecordsPreferCategoryMetricAndExcludeFutureHistory() {
+        val exercise = ExerciseSummary("Flexiones", "pushUp", 1, "libre", 0)
+        val summary = ExerciseAnalyticsSummary(exercise, 1, 20.0, 100.0, null)
+        val today = LocalDate.of(2026, 10, 20)
+        fun point(day: LocalDate, reps: Int) = ExerciseAnalyticsPoint(
+            day.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+            1, reps, 20.0, 100.0, null,
+        )
+        val filtered = filteredAnalyticsHistory(listOf(point(today, 12), point(today.plusDays(1), 50)), AnalyticsTimeframe.AllTime, today)
+        val records = personalRecords(mapOf(summary to filtered))
+        assertEquals(1, records.size)
+        assertEquals("Mejores repeticiones", records.single().title)
+        assertEquals("12 reps", records.single().value)
+    }
+
+    @Test
+    fun averageDurationExcludesSessionsWithoutDuration() {
+        val sessions = listOf(
+            TrainingSessionHistoryEntry(timestampMillis = 1, durationSeconds = 1800, sets = 0, volumeKg = 0.0),
+            TrainingSessionHistoryEntry(timestampMillis = 2, durationSeconds = 0, sets = 0, volumeKg = 0.0),
+        )
+        assertEquals(30, averageActiveMinutes(sessions))
     }
 
     @Test
@@ -436,7 +461,7 @@ class AnalyticsScreenTest {
         )
 
         assertEquals(
-            listOf("80,0 kg", "70,0 kg"),
+            listOf("80 kg", "70 kg"),
             exerciseRecordMetrics(history, exercise, useImperial = false).map { it.value },
         )
         assertEquals(

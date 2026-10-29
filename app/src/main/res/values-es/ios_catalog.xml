@@ -19,10 +19,24 @@
     <string name="ios_catalog_67c8b6991a583abc" formatted="false">(Objetivo: %@)</string>
     <!-- iOS key: (Target: %d) -->
     <string name="ios_catalog_3be591bb4fb5ace5" formatted="false">(Objetivo: %d)</string>
+    <!-- iOS key: @ %@ -->
+    <string name="ios_catalog_7485b31ddbf4c106" formatted="false">@ %@</string>
     <!-- iOS key: %.0f rpm -->
     <string name="ios_catalog_ae163deb9bb60d22" formatted="false">%.0f rpm</string>
+    <!-- iOS key: %.0fs -->
+    <string name="ios_catalog_2e74cc2ad4a19849" formatted="false">%.0fs</string>
+    <!-- iOS key: %.1fs -->
+    <string name="ios_catalog_1ae406c43e660be6" formatted="false">%.1fs</string>
+    <!-- iOS key: %@ -->
+    <string name="ios_catalog_ee17b0047b7589b9" formatted="false">%@</string>
     <!-- iOS key: %@ (Over target) -->
     <string name="ios_catalog_05bf24e9f738aa51" formatted="false">%@ (Por encima del objetivo)</string>
+    <!-- iOS key: %@ / %@ -->
+    <string name="ios_catalog_f7fe73b265eec57e" formatted="false">%@ / %@</string>
+    <!-- iOS key: %@ %@ -->
+    <string name="ios_catalog_d0a0503307366bf2" formatted="false">%@ %@</string>
+    <!-- iOS key: %@ %@ of %@ -->
+    <string name="ios_catalog_7f1c8b03db4f731c" formatted="false">%@ %@ of %@</string>
     <!-- iOS key: %@ %@ x %@ g = %@ g total -->
     <string name="ios_catalog_e83aec3847cd91e0" formatted="false">%@ %@ x %@ g = %@ g en total</string>
     <!-- iOS key: %@ • %d locations -->
@@ -31,28 +45,48 @@
     <string name="ios_catalog_f520c5c9db65c7db" formatted="false">%@ + %d más</string>
     <!-- iOS key: %@ before -->
     <string name="ios_catalog_819ba8e4a8923f14" formatted="false">hace %@</string>
+    <!-- iOS key: %@ cm -->
+    <string name="ios_catalog_d9705eb8cd7e86a3" formatted="false">%@ cm</string>
     <!-- iOS key: %@ energy demand -->
     <string name="ios_catalog_5c97414f18a9fc5e" formatted="false">%@ demanda energética</string>
     <!-- iOS key: %@ faster -->
     <string name="ios_catalog_8a1549adc3f86b17" formatted="false">%@ más rápido</string>
+    <!-- iOS key: %@ g -->
+    <string name="ios_catalog_ee48ba14f26b0374" formatted="false">%@ g</string>
     <!-- iOS key: %@ history -->
     <string name="ios_catalog_0cae601b8d60f573" formatted="false">%@ historial</string>
+    <!-- iOS key: %@ in -->
+    <string name="ios_catalog_ea49c1ec7c7947ed" formatted="false">%@ in</string>
     <!-- iOS key: %@ intake -->
     <string name="ios_catalog_ab640a2404a68731" formatted="false">%@ ingesta</string>
     <!-- iOS key: %@ intake: %d of %d kilocalories, %d percent of target. -->
     <string name="ios_catalog_2913d7bcfef89f13" formatted="false">%@ ingesta: %d de %d kilocalorías, %d por ciento del objetivo.</string>
+    <!-- iOS key: %@ kg -->
+    <string name="ios_catalog_012d7eb84d87cf05" formatted="false">%@ kg</string>
+    <!-- iOS key: %@ km -->
+    <string name="ios_catalog_1c5c11a61b043124" formatted="false">%@ km</string>
+    <!-- iOS key: %@ lb -->
+    <string name="ios_catalog_0209df670b10dafb" formatted="false">%@ lb</string>
     <!-- iOS key: %@ meals -->
     <string name="ios_catalog_6ad62b224caefc06" formatted="false">%@ comidas</string>
+    <!-- iOS key: %@ mi -->
+    <string name="ios_catalog_fc54e842d4064d10" formatted="false">%@ mi</string>
+    <!-- iOS key: %@ min -->
+    <string name="ios_catalog_3b8711ffac0a515a" formatted="false">%@ min</string>
     <!-- iOS key: %@ per week -->
     <string name="ios_catalog_66002b5e7251eead" formatted="false">%@ por semana</string>
     <!-- iOS key: %@ progress -->
     <string name="ios_catalog_47868b9225f5e4e4" formatted="false">%@ progreso</string>
     <!-- iOS key: %@ reps -->
     <string name="ios_catalog_9efeb0c8ed80ac4b" formatted="false">%@ reps</string>
+    <!-- iOS key: %@ scored noticeably lower than your top-trained muscle groups this period. -->
+    <string name="ios_catalog_e6befcefc3c3bb28" formatted="false">%@ obtuvo una puntuación notablemente inferior a la de los grupos musculares que más entrenaste durante este período.</string>
     <!-- iOS key: %@ stimulus: %d of %d sets -->
     <string name="ios_catalog_7fdeefd26f07428a" formatted="false">%@ estímulo: %d de %d series</string>
     <!-- iOS key: %@ work is underrepresented -->
     <string name="ios_catalog_6b0921701cf57a0c" formatted="false">El trabajo de %@ está infrarepresentado</string>
+    <!-- iOS key: %@, %@ -->
+    <string name="ios_catalog_29b70cff605762a5" formatted="false">%@, %@</string>
     <!-- iOS key: %@, %@ training level -->
     <string name="ios_catalog_3ecf502b1d95ba8c" formatted="false">%@, %@ nivel de entrenamiento</string>
     <!-- iOS key: %@, %@, min %@, peak %@ -->
@@ -67,12 +101,22 @@
     <string name="ios_catalog_eacba57779a361f9" formatted="false">%@, sin plan de nutrición</string>
     <!-- iOS key: %@, Workout Planned -->
     <string name="ios_catalog_94d2a3a016b96980" formatted="false">%@, Entrenamiento planificado</string>
+    <!-- iOS key: %@: %@ -->
+    <string name="ios_catalog_201b2f6972383c51" formatted="false">%@: %@</string>
+    <!-- iOS key: %@: %d -->
+    <string name="ios_catalog_48a9e3751be20a0d" formatted="false">%@: %d</string>
+    <!-- iOS key: %@. %@ -->
+    <string name="ios_catalog_e7cf76b321ed3f73" formatted="false">%@. %@</string>
     <!-- iOS key: %@. %d calories. %d grams protein, %d grams carbs, %d grams fat. Tap to log. -->
     <string name="ios_catalog_1b6dee4cbf216d16" formatted="false">%@. %d calorías. %d gramos de proteína, %d gramos de carbohidratos, %d gramos de grasa. Toca para registrar.</string>
     <!-- iOS key: %@. Goal: %@. -->
     <string name="ios_catalog_eaa148ec86e03e95" formatted="false">%@. Objetivo: %@.</string>
     <!-- iOS key: %@. No activity -->
     <string name="ios_catalog_7eae7e519960de59" formatted="false">%@. Sin actividad</string>
+    <!-- iOS key: %@%% -->
+    <string name="ios_catalog_4d67a6c454fa9f6a" formatted="false">%@%%</string>
+    <!-- iOS key: %d / %d XP -->
+    <string name="ios_catalog_1f2377c6bfa1a0a5" formatted="false">%d / %d XP</string>
     <!-- iOS key: %d auto-detected -->
     <string name="ios_catalog_9c57530acc102431" formatted="false">%d detectado automáticamente</string>
     <!-- iOS key: %d calories -->
@@ -81,12 +125,18 @@
     <string name="ios_catalog_7b22fff2a013fc59" formatted="false">%d calorías quemadas</string>
     <!-- iOS key: %d calories daily average -->
     <string name="ios_catalog_b94af0078cbb0aab" formatted="false">%d calorías (promedio diario)</string>
+    <!-- iOS key: %d characters remaining -->
+    <string name="ios_catalog_df3587413a2578f6" formatted="false">%d caracteres restantes</string>
     <!-- iOS key: %d check-ins -->
     <string name="ios_catalog_2d754c93fb8412ec" formatted="false">%d registros</string>
+    <!-- iOS key: %d cm -->
+    <string name="ios_catalog_143d9379554a6ea1" formatted="false">%d cm</string>
     <!-- iOS key: %d completions -->
     <string name="ios_catalog_216f5193d58de2f5" formatted="false">%d completions</string>
     <!-- iOS key: %d days ahead -->
     <string name="ios_catalog_67726e95b366657f" formatted="false">%d días de antelación</string>
+    <!-- iOS key: %d exercises -->
+    <string name="ios_catalog_83cba3a86ad9e16c" formatted="false">%d ejercicios</string>
     <!-- iOS key: %d ft %d in -->
     <string name="ios_catalog_54482b6dc9ae4108" formatted="false">%d ft %d in</string>
     <!-- iOS key: %d grams carbs -->
@@ -95,6 +145,8 @@
     <string name="ios_catalog_5ca843d91bcc3396" formatted="false">%d g de grasa</string>
     <!-- iOS key: %d grams protein -->
     <string name="ios_catalog_8d18ddee38251ef6" formatted="false">%d g de proteína</string>
+    <!-- iOS key: %d h -->
+    <string name="ios_catalog_ec925b5304abb43b" formatted="false">%d h</string>
     <!-- iOS key: %d h %d min -->
     <string name="ios_catalog_36cf9ca8375a7523" formatted="false">%d h %d min</string>
     <!-- iOS key: %d in the last 30 days -->
@@ -107,22 +159,34 @@
     <string name="ios_catalog_25144e4ffba6dca6" formatted="false">%d comidas</string>
     <!-- iOS key: %d meals per day -->
     <string name="ios_catalog_c74996c825d97f01" formatted="false">%d comidas al día</string>
+    <!-- iOS key: %d min -->
+    <string name="ios_catalog_9f6b1f6f2c879396" formatted="false">%d min</string>
     <!-- iOS key: %d minutes remaining -->
     <string name="ios_catalog_0409005095371c82" formatted="false">%d minutos restantes</string>
     <!-- iOS key: %d minutes, %d seconds remaining -->
     <string name="ios_catalog_d7a7116730c21118" formatted="false">%d minutos, %d segundos restantes</string>
+    <!-- iOS key: %d of %d -->
+    <string name="ios_catalog_3081063455c4f57a" formatted="false">%d of %d</string>
+    <!-- iOS key: %d of %d calories logged -->
+    <string name="ios_catalog_08e16a14832b7174" formatted="false">%d de %d calorías registradas</string>
     <!-- iOS key: %d of %d grams -->
     <string name="ios_catalog_401baeb69f400e15" formatted="false">%d de %d g</string>
     <!-- iOS key: %d of %d sessions -->
     <string name="ios_catalog_a6bf8042ce929f9f" formatted="false">%d of %d sessions</string>
+    <!-- iOS key: %d of %d sessions centered on %@ this period. -->
+    <string name="ios_catalog_bde93e2cb448ed60" formatted="false">%d de %d sesiones se centraron en %@ durante este período.</string>
     <!-- iOS key: %d of %d sessions completed -->
     <string name="ios_catalog_383b4275bc134d13" formatted="false">%d de %d sesiones completadas</string>
     <!-- iOS key: %d percent of target calories -->
     <string name="ios_catalog_a1a28e9028aad02b" formatted="false">%d por ciento de las calorías objetivo</string>
     <!-- iOS key: %d places left -->
     <string name="ios_catalog_885c42f8b9f562c6" formatted="false">Quedan %d plazas</string>
+    <!-- iOS key: %d reps -->
+    <string name="ios_catalog_8b4cc755c1317e15" formatted="false">%d reps</string>
     <!-- iOS key: %d rounds -->
     <string name="ios_catalog_0085ab7652427ae1" formatted="false">%d rondas</string>
+    <!-- iOS key: %d sec -->
+    <string name="ios_catalog_0f066b1cfa3175f1" formatted="false">%d sec</string>
     <!-- iOS key: %d sec rest -->
     <string name="ios_catalog_7e0965a61d5df892" formatted="false">%d s de descanso</string>
     <!-- iOS key: %d seconds remaining -->
@@ -141,26 +205,36 @@
     <string name="ios_catalog_f41d00d66858290a" formatted="false">%d total completions</string>
     <!-- iOS key: %d unique exercises -->
     <string name="ios_catalog_b8f0708e818fe2e4" formatted="false">%d unique exercises</string>
+    <!-- iOS key: %d-%d reps -->
+    <string name="ios_catalog_823c61ffe6c2a04f" formatted="false">%d-%d reps</string>
     <!-- iOS key: %d-week cycle -->
     <string name="ios_catalog_eba06959c535e5ee" formatted="false">Ciclo de %d semanas</string>
+    <!-- iOS key: %d:%02d -->
+    <string name="ios_catalog_22aa5926e2099fcd" formatted="false">%d:%02d</string>
+    <!-- iOS key: %d%% -->
+    <string name="ios_catalog_71fafb7498ddf411" formatted="false">%d%%</string>
     <!-- iOS key: %d%% below best -->
     <string name="ios_catalog_496777621903e1a6" formatted="false">%d%% por debajo del mejor</string>
     <!-- iOS key: %d%% slowdown across reps -->
     <string name="ios_catalog_75f9ccf5fdd65e2e" formatted="false">%d%% desaceleración entre repeticiones</string>
+    <!-- iOS key: %ds -->
+    <string name="ios_catalog_1d0eee5be05e00a0" formatted="false">%ds</string>
     <!-- iOS key: =+%@ in this period -->
-    <string name="ios_catalog_2f19e82089c548fa" formatted="false">=+%@ en este periodo</string>
+    <string name="ios_catalog_2f19e82089c548fa" formatted="false">#ERROR!</string>
     <!-- iOS key: =+%@ since first log -->
-    <string name="ios_catalog_adacf87e50e9b7e8" formatted="false">=+%@ desde el primer registro</string>
+    <string name="ios_catalog_adacf87e50e9b7e8" formatted="false">#ERROR!</string>
     <!-- iOS key: =+%@ vs previous best -->
-    <string name="ios_catalog_2ae68d50d3415c5a" formatted="false">=+%@ vs el mejor anterior</string>
+    <string name="ios_catalog_2ae68d50d3415c5a" formatted="false">#ERROR!</string>
     <!-- iOS key: =+15s -->
-    <string name="ios_catalog_ebcd542ea5719b8e" formatted="false">=+15s</string>
+    <string name="ios_catalog_ebcd542ea5719b8e" formatted="false">#ERROR!</string>
     <!-- iOS key: =+30s -->
-    <string name="ios_catalog_0de027afbb7fd304" formatted="false">=+30s</string>
+    <string name="ios_catalog_0de027afbb7fd304" formatted="false">#ERROR!</string>
     <!-- iOS key: =+6mo -->
-    <string name="ios_catalog_1553eb1ec34d15f5" formatted="false">=+6mo</string>
+    <string name="ios_catalog_1553eb1ec34d15f5" formatted="false">#ERROR!</string>
     <!-- iOS key: 1 check-in -->
     <string name="ios_catalog_635e5aed7f6fcbcb" formatted="false">1 registro</string>
+    <!-- iOS key: 1 selected -->
+    <string name="ios_catalog_0e222355f5230d3a" formatted="false">1 seleccionado</string>
     <!-- iOS key: 10 seconds -->
     <string name="ios_catalog_f78b958d638585f7" formatted="false">10 segundos</string>
     <!-- iOS key: 12W -->
@@ -183,6 +257,8 @@
     <string name="ios_catalog_d50aade27375357f" formatted="false">7 días</string>
     <!-- iOS key: A \'down-and-up\' movement similar to a burpee but without the push-up and jump, focused on speed and metabolic conditioning. -->
     <string name="ios_catalog_2069d256ef0e12b1" formatted="false">Un movimiento \'down-and-up\' similar a un burpee pero sin la flexión ni el salto, enfocado en la velocidad y el acondicionamiento metabólico.</string>
+    <!-- iOS key: A %@ movement for %@ with %@ as the main focus. -->
+    <string name="ios_catalog_10938a557249ff85" formatted="false">Un movimiento %@ para %@ con %@ como foco principal.</string>
     <!-- iOS key: A behind-the-body cable curl that lengthens the biceps at the start of the rep and emphasizes the stretch position. -->
     <string name="ios_catalog_b836297f2a7a8c6a" formatted="false">Un curl con cable por detrás del cuerpo que alarga el bíceps al inicio de la repetición y enfatiza la posición de estiramiento.</string>
     <!-- iOS key: A bodyweight floor exercise that activates the glutes and improves hip extension. -->
@@ -219,6 +295,10 @@
     <string name="ios_catalog_ab5288de0aeebe33" formatted="false">Un estiramiento dinámico de caderas, zona lumbar y pecho realizado tumbado boca abajo.</string>
     <!-- iOS key: A dynamic stretch that improves hip mobility and prepares the legs for training. -->
     <string name="ios_catalog_d82b8cd1c70d1295" formatted="false">Un estiramiento dinámico que mejora la movilidad de la cadera y prepara las piernas para el entrenamiento.</string>
+    <!-- iOS key: A few small habits and tools make each progress photo easier to compare over time. -->
+    <string name="ios_catalog_e717c5bc0f42a3d4" formatted="false">Algunos pequeños hábitos y herramientas hacen que cada foto de progreso sea más fácil de comparar con el tiempo.</string>
+    <!-- iOS key: A few small habits make your gallery much more useful. -->
+    <string name="ios_catalog_fd7f006032564cc6" formatted="false">Algunos pequeños hábitos hacen que tu galería sea mucho más útil.</string>
     <!-- iOS key: A floor-based core exercise that trains the abs to control the pelvis while the legs move through hip flexion. -->
     <string name="ios_catalog_bc585033f5de1f52" formatted="false">Un ejercicio de core en el suelo que entrena los abdominales para controlar la pelvis mientras las piernas se mueven mediante la flexión de cadera.</string>
     <!-- iOS key: A foundational bodyweight movement that improves lower body strength and mobility. -->
@@ -269,6 +349,10 @@
     <string name="ios_catalog_3f3c7f0244b80dcf" formatted="false">Una forma natural y de bajo impacto para mejorar la salud cardiovascular y quemar calorías.</string>
     <!-- iOS key: A neutral-grip curl that targets the biceps and the brachialis for thicker arms. -->
     <string name="ios_catalog_5c20ad6c738dfa92" formatted="false">Un curl con agarre neutral que apunta al bíceps y al braquial para unos brazos más gruesos.</string>
+    <!-- iOS key: A new journey begins today. -->
+    <string name="ios_catalog_dce7960c5aed573f" formatted="false">Un nuevo viaje comienza hoy.</string>
+    <!-- iOS key: A planned workout exists locally on the watch, but nothing is marked in progress. -->
+    <string name="ios_catalog_b7f07905aa6ead47" formatted="false">Hay un entrenamiento planificado en el reloj, pero nada está marcado como en curso.</string>
     <!-- iOS key: A popular cable exercise for isolating and building the back of the arms. -->
     <string name="ios_catalog_1cec6d60835d55e2" formatted="false">Un ejercicio popular con polea para aislar y desarrollar los tríceps.</string>
     <!-- iOS key: A powerful back exercise performed by anchoring one end of a barbell and pulling the weighted end toward your torso. -->
@@ -319,6 +403,14 @@
     <string name="ios_catalog_64774b950e595db4" formatted="false">Tasa metabólica activa</string>
     <!-- iOS key: Active Workout -->
     <string name="ios_catalog_f95d79cd8c5c1119" formatted="false">Active Workout</string>
+    <!-- iOS key: Adapt this session -->
+    <string name="ios_catalog_c352c42a454ac70c" formatted="false">Adaptar esta sesión</string>
+    <!-- iOS key: Adapt this session to the equipment available at another training location. -->
+    <string name="ios_catalog_bc7f3b369eaab04e" formatted="false">Adapta esta sesión al equipo disponible en otra ubicación de entrenamiento.</string>
+    <!-- iOS key: Adapt to another location -->
+    <string name="ios_catalog_fd7a5a2eb3528460" formatted="false">Adaptar a otra ubicación</string>
+    <!-- iOS key: Adapt to another training location -->
+    <string name="ios_catalog_fb2eca4731fb44c8" formatted="false">Adaptar a otra ubicación de entrenamiento</string>
     <!-- iOS key: Add -->
     <string name="ios_catalog_9fd728c66c9a256b" formatted="false">Añadir</string>
     <!-- iOS key: Add 15 seconds -->
@@ -327,10 +419,18 @@
     <string name="ios_catalog_88de38260a0bf4a1" formatted="false">Añadir 15 s de descanso</string>
     <!-- iOS key: Add 30 seconds -->
     <string name="ios_catalog_55c4f8768f321f7f" formatted="false">Añadir 30 segundos</string>
+    <!-- iOS key: Add a few movements to prepare the session. -->
+    <string name="ios_catalog_e3239b39e94a53f5" formatted="false">Añade unos movimientos para preparar la sesión.</string>
+    <!-- iOS key: Add a training location in your profile before adapting this workout. -->
+    <string name="ios_catalog_2ee1a8dcea646f14" formatted="false">Añade una ubicación de entrenamiento en tu perfil antes de adaptar este entrenamiento.</string>
+    <!-- iOS key: Add an easy finish or mobility work. -->
+    <string name="ios_catalog_bf3bcc286e250208" formatted="false">Añade un final suave o trabajo de movilidad.</string>
     <!-- iOS key: Add any useful context for future meal planning -->
     <string name="ios_catalog_e8d5771942a5dc01" formatted="false">Añade cualquier información útil para la planificación de futuras comidas</string>
     <!-- iOS key: Add any useful context for your workout plans -->
     <string name="ios_catalog_5f2aee9caed0a347" formatted="false">Añade cualquier información útil para tus planes de entrenamiento</string>
+    <!-- iOS key: Add Cooldown Exercise -->
+    <string name="ios_catalog_eb245e6bcc12ee0b" formatted="false">Añadir ejercicio de enfriamiento</string>
     <!-- iOS key: Add Exercise -->
     <string name="ios_catalog_6d5208e9c94eb0db" formatted="false">Añadir ejercicio</string>
     <!-- iOS key: Add food -->
@@ -339,8 +439,12 @@
     <string name="ios_catalog_201be3bdc49466d8" formatted="false">Añade alimentos a excluir y cualquier alergia o intolerancia en una lista simple separada por comas.</string>
     <!-- iOS key: Add grams to enable per 100 g mode. -->
     <string name="ios_catalog_6b7af0d167303de1" formatted="false">Añade gramos para activar el modo por 100 g.</string>
+    <!-- iOS key: Add ingredient -->
+    <string name="ios_catalog_ec65ad235fa2f23f" formatted="false">Añadir ingrediente</string>
     <!-- iOS key: Add location -->
     <string name="ios_catalog_db07192b3f0df913" formatted="false">Añadir ubicación</string>
+    <!-- iOS key: Add Main Exercise -->
+    <string name="ios_catalog_68efd78432ea32fa" formatted="false">Añadir ejercicio principal</string>
     <!-- iOS key: Add notes... -->
     <string name="ios_catalog_3bd1cd9d7e059032" formatted="false">Add notes...</string>
     <!-- iOS key: Add one or more foods yourself. -->
@@ -357,10 +461,18 @@
     <string name="ios_catalog_ec6fa722e170c0ce" formatted="false">Añadir serie</string>
     <!-- iOS key: Add volume -->
     <string name="ios_catalog_329618bac0f3848e" formatted="false">Añadir volumen de entrenamiento</string>
+    <!-- iOS key: Add Warmup Exercise -->
+    <string name="ios_catalog_281ab25241fb23f4" formatted="false">Añadir ejercicio de calentamiento</string>
+    <!-- iOS key: Add your actual distance when you finish. -->
+    <string name="ios_catalog_69049ef2755b4a9b" formatted="false">Añade tu distancia real cuando termines.</string>
+    <!-- iOS key: Add your main work here. -->
+    <string name="ios_catalog_0fc2dae0a7226852" formatted="false">Añade aquí tu trabajo principal.</string>
     <!-- iOS key: Additional Info (Optional) -->
     <string name="ios_catalog_92f3505f8b22dc62" formatted="false">Información adicional (opcional)</string>
     <!-- iOS key: Additional notes... -->
     <string name="ios_catalog_dab84826de2c307a" formatted="false">Notas adicionales...</string>
+    <!-- iOS key: Address -->
+    <string name="ios_catalog_56ef8f20955f2564" formatted="false">Dirección</string>
     <!-- iOS key: Adds 15 seconds to the timer -->
     <string name="ios_catalog_cd3ee86b383cfae2" formatted="false">Añade 15 segundos al temporizador</string>
     <!-- iOS key: Adjust speed and incline as needed to match your fitness level. -->
@@ -387,6 +499,10 @@
     <string name="ios_catalog_3b6d06ad2168f82f" formatted="false">Banco ajustable</string>
     <!-- iOS key: Advanced -->
     <string name="ios_catalog_9f088dbebd6c3c70" formatted="false">Avanzado</string>
+    <!-- iOS key: After both exercises, take %d seconds before repeating the block. -->
+    <string name="ios_catalog_e230d49c91d592db" formatted="false">Tras ambos ejercicios, descansa %d segundos antes de repetir el bloque.</string>
+    <!-- iOS key: After both exercises, take the planned block rest before repeating. -->
+    <string name="ios_catalog_8e8692d5fea0ad03" formatted="false">Tras ambos ejercicios, toma el descanso previsto del bloque antes de repetir.</string>
     <!-- iOS key: After the desired duration, reverse the direction to backward circles. -->
     <string name="ios_catalog_c24d5c7168f09fea" formatted="false">Tras la duración deseada, invierte la dirección para hacer círculos hacia atrás.</string>
     <!-- iOS key: After the desired reps, switch to side-to-side swings across your body. -->
@@ -401,6 +517,8 @@
     <string name="ios_catalog_d49be8c0f3d94ece" formatted="false">Registro de comidas con IA</string>
     <!-- iOS key: AI meal logging and meal ideas included. -->
     <string name="ios_catalog_ac4a60b684f778fc" formatted="false">Registro de comidas con IA e ideas de comidas incluidas.</string>
+    <!-- iOS key: AI processing -->
+    <string name="ios_catalog_d8dd270c0e7c8103" formatted="false">Procesamiento de IA</string>
     <!-- iOS key: AI Prompt Debug -->
     <string name="ios_catalog_9975386e9c038192" formatted="false">Depuración del prompt de IA</string>
     <!-- iOS key: Air Squat -->
@@ -467,6 +585,10 @@
     <string name="ios_catalog_a4de1f3655236cc5" formatted="false">Una contracción isométrica en la parte baja de una sentadilla para mejorar la movilidad de caderas, rodillas y tobillos.</string>
     <!-- iOS key: An upward-angled press that targets the upper portion of the chest and shoulders. -->
     <string name="ios_catalog_214220096c8c0751" formatted="false">Un press inclinado que trabaja la parte superior del pecho y los hombros.</string>
+    <!-- iOS key: Analysing current check-in photos… -->
+    <string name="ios_catalog_d16917bf2b3a17a2" formatted="false">Analizando las fotos de check-in actuales…</string>
+    <!-- iOS key: Analysing your check-in -->
+    <string name="ios_catalog_4585bbf8f05e9075" formatted="false">Analizando tu check-in</string>
     <!-- iOS key: Analytics -->
     <string name="ios_catalog_94c116ee118a7299" formatted="false">Estadísticas</string>
     <!-- iOS key: Analyze description -->
@@ -481,6 +603,8 @@
     <string name="ios_catalog_e2481a9509c2e062" formatted="false">Analizando tus objetivos de fitness...</string>
     <!-- iOS key: Analyzing your fridge... -->
     <string name="ios_catalog_89c7e66a54fe9331" formatted="false">Analizando tu nevera...</string>
+    <!-- iOS key: Analyzing your ingredients... -->
+    <string name="ios_catalog_e02c2a37d84c7e25" formatted="false">Analizando tus ingredientes...</string>
     <!-- iOS key: Analyzing your meal... -->
     <string name="ios_catalog_c5e00c629e92f9db" formatted="false">Analizando tu comida...</string>
     <!-- iOS key: Anchor one end of a barbell in a landmine attachment or a corner on the floor. -->
@@ -493,6 +617,8 @@
     <string name="ios_catalog_effe2a62a7782710" formatted="false">Dolor de tobillo</string>
     <!-- iOS key: Any -->
     <string name="ios_catalog_2b505597daa736f1" formatted="false">Cualquiera</string>
+    <!-- iOS key: Anything else? -->
+    <string name="ios_catalog_554e6ec0bec97ecc" formatted="false">¿Algo más?</string>
     <!-- iOS key: Anything to avoid? -->
     <string name="ios_catalog_c31d8b7383b918da" formatted="false">¿Algo que evitar?</string>
     <!-- iOS key: Apple did not return an authorization code. -->
@@ -503,6 +629,8 @@
     <string name="ios_catalog_95b962dcf64d8df7" formatted="false">Apple requiere permiso de Tiempo en pantalla antes de que Wildforce pueda proteger las categorías que elijas.</string>
     <!-- iOS key: Archived -->
     <string name="ios_catalog_bdb86505f8062d15" formatted="false">Archived</string>
+    <!-- iOS key: Are you leaving? -->
+    <string name="ios_catalog_49fd36734ad52d2a" formatted="false">¿Te vas?</string>
     <!-- iOS key: Are you sure you want to cancel this workout? All progress will be deleted. -->
     <string name="ios_catalog_a4a589f8355df9ba" formatted="false">¿Está seguro de que desea cancelar este entrenamiento? Se eliminará todo el progreso.</string>
     <!-- iOS key: Are you sure you want to redo this plan? The current plan will be deleted and a new one will be generated. -->
@@ -521,6 +649,8 @@
     <string name="ios_catalog_93d4d51b3d0f16f7" formatted="false">Press Arnold</string>
     <!-- iOS key: Ascending pyramids let you ease into heavy work instead of jumping straight to it. They can help with confidence, technical rhythm, and strength-focused training where ramping up matters. -->
     <string name="ios_catalog_d2f8b0423cc82116" formatted="false">Las pirámides ascendentes te permiten adaptarte progresivamente a cargas pesadas en lugar de ir directamente a ellas. Pueden ayudar a ganar confianza, mejorar el ritmo técnico y son útiles en entrenamientos centrados en la fuerza donde el aumento gradual de la carga es importante.</string>
+    <!-- iOS key: Ask for ideas using everything you have available. -->
+    <string name="ios_catalog_cbe29e9a74a15773" formatted="false">Pide ideas usando todo lo que tengas disponible.</string>
     <!-- iOS key: Athletic -->
     <string name="ios_catalog_1781e388eb4e51a4" formatted="false">Atlético</string>
     <!-- iOS key: Attach a bar or rope to a high pulley on a cable machine. -->
@@ -547,6 +677,8 @@
     <string name="ios_catalog_e01045b88fdc61ac" formatted="false">Coloque el clip de seguridad y comience con una caminata lenta para calentar.</string>
     <!-- iOS key: Authentication is not available right now. -->
     <string name="ios_catalog_fa1dee3c08706b73" formatted="false">La autenticación no está disponible en este momento.</string>
+    <!-- iOS key: Auto -->
+    <string name="ios_catalog_0286249762f7c943" formatted="false">Automático</string>
     <!-- iOS key: Auto reps -->
     <string name="ios_catalog_ebbc4955647d5f98" formatted="false">Repeticiones automáticas</string>
     <!-- iOS key: Auto-count supported reps on Apple Watch and unlock motion insights. -->
@@ -655,6 +787,8 @@
     <string name="ios_catalog_7882848ef862a8a5" formatted="false">serie de descarga</string>
     <!-- iOS key: backoff sets -->
     <string name="ios_catalog_7fac11a145a47402" formatted="false">Series de descarga</string>
+    <!-- iOS key: Backoff Weight -->
+    <string name="ios_catalog_4a61e0246eb7d9f4" formatted="false">Peso de descarga</string>
     <!-- iOS key: Balancing volume and intensity... -->
     <string name="ios_catalog_cb89701eab9b562c" formatted="false">Equilibrando volumen e intensidad...</string>
     <!-- iOS key: Barbell Back Squat -->
@@ -727,12 +861,16 @@
     <string name="ios_catalog_611b1b4d4875e6f0" formatted="false">Abdominal en bicicleta</string>
     <!-- iOS key: Big gym -->
     <string name="ios_catalog_e9fafcccbe4b4a7a" formatted="false">Big gym</string>
+    <!-- iOS key: Bilateral -->
+    <string name="ios_catalog_dc247fc01cfbdfee" formatted="false">Bilateral</string>
     <!-- iOS key: Bird Dog -->
     <string name="ios_catalog_088faa05b0b95d31" formatted="false">Bird Dog</string>
     <!-- iOS key: Birth date -->
     <string name="ios_catalog_5164b245126a227b" formatted="false">Birth date</string>
     <!-- iOS key: Birth month and year -->
     <string name="ios_catalog_3d6359c5f3d09160" formatted="false">Birth month and year</string>
+    <!-- iOS key: Block distracting app categories while a workout is active. -->
+    <string name="ios_catalog_94bd8611ea093bce" formatted="false">Bloquea categorías de apps que distraen mientras el entrenamiento está activo.</string>
     <!-- iOS key: Block distractions while you train -->
     <string name="ios_catalog_53eaf26c9c582ba4" formatted="false">Bloquea distracciones mientras entrenas</string>
     <!-- iOS key: Block Rest -->
@@ -741,6 +879,8 @@
     <string name="ios_catalog_c2e9bd60c3eff70e" formatted="false">Desenfocado</string>
     <!-- iOS key: BMR -->
     <string name="ios_catalog_9768405ae6c5282c" formatted="false">BMR</string>
+    <!-- iOS key: BMR adjusted for your (__(trainingPreferences.lifestyle.englishName)) lifestyle. -->
+    <string name="ios_catalog_d305e06960ff996f" formatted="false">BMR ajustado a tu (__(trainingPreferences.lifestyle.englishName)) estilo de vida.</string>
     <!-- iOS key: BMR adjusted for your \\(__(user.resolvedLifestyle.englishName)) lifestyle. -->
     <string name="ios_catalog_2351f91ddcd80ed6" formatted="false">BMR ajustado a tu \\(__(user.resolvedLifestyle.englishName)) estilo de vida.</string>
     <!-- iOS key: Body -->
@@ -764,9 +904,11 @@
     <!-- iOS key: Body Recomposition -->
     <string name="ios_catalog_5b24f8d6c1fd8e35" formatted="false">Recomposición corporal</string>
     <!-- iOS key: Body scan analysis -->
-    <string name="ios_catalog_4300e3d96db88d28" formatted="false"></string>
+    <string name="ios_catalog_4300e3d96db88d28" formatted="false">Análisis del escaneo corporal</string>
     <!-- iOS key: Bodyweight -->
     <string name="ios_catalog_581d1b4da4c0073f" formatted="false">Peso corporal</string>
+    <!-- iOS key: Bodyweight / time -->
+    <string name="ios_catalog_856252d2352f5c63" formatted="false">Peso corporal / tiempo</string>
     <!-- iOS key: Bodyweight only -->
     <string name="ios_catalog_8c15aa4dea5a62b5" formatted="false">Bodyweight only</string>
     <!-- iOS key: Book a room -->
@@ -831,6 +973,8 @@
     <string name="ios_catalog_bdd254b65baac169" formatted="false">Desarrollo</string>
     <!-- iOS key: Build a day-by-day nutrition plan aligned with your training, goals, and food preferences. -->
     <string name="ios_catalog_99827cb2d3772870" formatted="false">Crea un plan nutricional día a día alineado con tu entrenamiento, tus objetivos y tus preferencias alimentarias.</string>
+    <!-- iOS key: Build a workout by hand, exercise by exercise. -->
+    <string name="ios_catalog_fcd99e4c138940e2" formatted="false">Crea un entrenamiento manualmente, ejercicio por ejercicio.</string>
     <!-- iOS key: Build conditioning -->
     <string name="ios_catalog_2e702c574f181ae1" formatted="false">Desarrollar la condición física</string>
     <!-- iOS key: Build momentum -->
@@ -1007,6 +1151,10 @@
     <string name="ios_catalog_237635fca547a70d" formatted="false">Chinese (Simplified)</string>
     <!-- iOS key: Choose a box height that allows for proper landing form. -->
     <string name="ios_catalog_9ec32019872f29b5" formatted="false">Elige una altura de cajón que permita una técnica de aterrizaje adecuada.</string>
+    <!-- iOS key: Choose a suggestion to pin it on the map. -->
+    <string name="ios_catalog_e701c62031e8775e" formatted="false">Elige una sugerencia para marcarla en el mapa.</string>
+    <!-- iOS key: Choose at least one category to finish setup. -->
+    <string name="ios_catalog_52d7468de1bf9f1e" formatted="false">Elige al menos una categoría para terminar la configuración.</string>
     <!-- iOS key: Choose blocked categories -->
     <string name="ios_catalog_257b61473fe5e732" formatted="false">Seleccionar categorías bloqueadas</string>
     <!-- iOS key: Choose categories -->
@@ -1015,6 +1163,8 @@
     <string name="ios_catalog_2b3ec6d3f3cbac2e" formatted="false">Elige cómo el enfoque actual de tu composición corporal debe influir en tu plan de entrenamiento.</string>
     <!-- iOS key: Choose meals-per-day and a dietary style—get simple suggestions if you want. -->
     <string name="ios_catalog_e01291b4cb1a7389" formatted="false">Elige comidas por día y un estilo dietético—obtén sugerencias sencillas si quieres.</string>
+    <!-- iOS key: Choose the app categories you want blocked during workouts. -->
+    <string name="ios_catalog_60dc3db91e43d6b1" formatted="false">Elige las categorías de apps que quieres bloquear durante los entrenamientos.</string>
     <!-- iOS key: Choose the focus for each selected training day. The planner will create one workout per selected day and match each day\'s focus. -->
     <string name="ios_catalog_b350c41c85cbe267" formatted="false">Elige el enfoque para cada día de entrenamiento seleccionado. El planificador creará un entrenamiento por cada día seleccionado y ajustará cada día a su enfoque.</string>
     <!-- iOS key: Choose the level that best matches your recent training consistency, exercise technique, and ability to handle load safely. -->
@@ -1029,6 +1179,8 @@
     <string name="ios_catalog_fedddfdba43f0a45" formatted="false">Borrar la base de datos de nutrición</string>
     <!-- iOS key: Clear saved location -->
     <string name="ios_catalog_52ee25e9b16c276b" formatted="false">Borrar la ubicación guardada</string>
+    <!-- iOS key: Clear Superset -->
+    <string name="ios_catalog_2ab8c64e846fb4b1" formatted="false">Borrar superserie</string>
     <!-- iOS key: Clear text -->
     <string name="ios_catalog_b0470df90ef4eb9c" formatted="false">Borrar texto</string>
     <!-- iOS key: Clear whole database -->
@@ -1041,6 +1193,8 @@
     <string name="ios_catalog_7d9eb7acb13e2462" formatted="false">Close</string>
     <!-- iOS key: Close this sheet and tap \'See future\' to retry the generation. -->
     <string name="ios_catalog_85c8376add6cc5e3" formatted="false">Cierra esta hoja y pulsa \'See future\' para reintentar la generación.</string>
+    <!-- iOS key: cm -->
+    <string name="ios_catalog_b5039c325d7107d6" formatted="false">cm</string>
     <!-- iOS key: Coach notes -->
     <string name="ios_catalog_71b2dd43804adaea" formatted="false">Notas del entrenador</string>
     <!-- iOS key: Cobra Stretch -->
@@ -1087,6 +1241,8 @@
     <string name="ios_catalog_b25e855e64a762ba" formatted="false">Completa tu esfuerzo principal, luego reduce inmediatamente la carga en alrededor de %d%% y continúa. Repite eso %d %@ con descanso mínimo para que una serie se convierta en una secuencia prolongada de alta fatiga.</string>
     <!-- iOS key: Complete your main effort, then quickly lower the weight and keep going with little or no rest. The idea is to extend the set beyond the point where the original load would force you to stop. -->
     <string name="ios_catalog_bf28fe00d929df63" formatted="false">Completa tu esfuerzo principal, luego baja rápidamente el peso y continúa con poco o ningún descanso. La idea es prolongar la serie más allá del punto donde la carga original te habría obligado a parar.</string>
+    <!-- iOS key: Complete your set -->
+    <string name="ios_catalog_6dba9340e3c49dbe" formatted="false">Completa la serie</string>
     <!-- iOS key: Completed -->
     <string name="ios_catalog_22a970d2e5b1cc23" formatted="false">Completed</string>
     <!-- iOS key: Completed exercises -->
@@ -1213,6 +1369,8 @@
     <string name="ios_catalog_7bba1aed1a85cba2" formatted="false">No se pudieron sincronizar tus datos.</string>
     <!-- iOS key: Couldn’t enable privacy lock -->
     <string name="ios_catalog_49c8f361aa5b5685" formatted="false">No se pudo activar el bloqueo de privacidad</string>
+    <!-- iOS key: Couldn’t link an account -->
+    <string name="ios_catalog_62c5681a5e72b5e4" formatted="false">No se ha podido vincular la cuenta</string>
     <!-- iOS key: Couldn’t link Apple -->
     <string name="ios_catalog_0b03de9f700ac581" formatted="false">No se pudo vincular con Apple.</string>
     <!-- iOS key: Couldn’t link Google -->
@@ -1233,12 +1391,16 @@
     <string name="ios_catalog_63601fc0279e41f2" formatted="false">Crea un perfil para guardar notas personales e información específica de ejercicios.</string>
     <!-- iOS key: Create a single session for when you\'re away from your usual gym or want to try something new. -->
     <string name="ios_catalog_c574a9284fbd4a61" formatted="false">Crea una sesión única para cuando estés fuera de tu gimnasio habitual o quieras probar algo nuevo.</string>
+    <!-- iOS key: Create a superset -->
+    <string name="ios_catalog_c3cf2d506acb10cf" formatted="false">Crear una superserie</string>
     <!-- iOS key: Create account -->
     <string name="ios_catalog_798ca2ce18bf2038" formatted="false">Crear cuenta</string>
     <!-- iOS key: Create an account -->
     <string name="ios_catalog_86033f75a4c0876a" formatted="false">Crear una cuenta</string>
     <!-- iOS key: Create an account to continue -->
     <string name="ios_catalog_9f02aca0729fe7b7" formatted="false">Crea una cuenta para continuar</string>
+    <!-- iOS key: Create an account to keep your progress available on every device. -->
+    <string name="ios_catalog_dfa9972fb0889b28" formatted="false">Crea una cuenta para tener tu progreso disponible en todos tus dispositivos.</string>
     <!-- iOS key: Create an account to subscribe -->
     <string name="ios_catalog_e02ad1f3302116d8" formatted="false">Crea una cuenta para suscribirte</string>
     <!-- iOS key: Create fake 2 week plan -->
@@ -1297,6 +1459,8 @@
     <string name="ios_catalog_799f5f59397d03af" formatted="false">Enfoque semanal personalizado</string>
     <!-- iOS key: Custom Workout -->
     <string name="ios_catalog_b46dd90e6479d5df" formatted="false">Entrenamiento personalizado</string>
+    <!-- iOS key: Custom Workout Menu -->
+    <string name="ios_catalog_9ffbf42f90afd168" formatted="false">Menú de entrenamientos personalizados</string>
     <!-- iOS key: Custom workouts -->
     <string name="ios_catalog_89bcddf2b2f86127" formatted="false">Entrenamientos personalizados</string>
     <!-- iOS key: Cyclical Cardio -->
@@ -1309,6 +1473,8 @@
     <string name="ios_catalog_fd8b8dae44216610" formatted="false">Danger zone</string>
     <!-- iOS key: Dark -->
     <string name="ios_catalog_60acc53f13a5d1bf" formatted="false">Oscuro</string>
+    <!-- iOS key: Date -->
+    <string name="ios_catalog_99c40ab405926cb5" formatted="false">Fecha</string>
     <!-- iOS key: Day -->
     <string name="ios_catalog_8f2364e11b8be3ff" formatted="false">Día</string>
     <!-- iOS key: Day streak -->
@@ -1351,8 +1517,12 @@
     <string name="ios_catalog_97a1e63013a27487" formatted="false">¿Eliminar esta sesión de progreso?</string>
     <!-- iOS key: Describe how you feel to better personalize next sessions. -->
     <string name="ios_catalog_14a19827a479dbaf" formatted="false">Describe cómo te sientes para personalizar mejor las próximas sesiones.</string>
+    <!-- iOS key: Describe ingredients -->
+    <string name="ios_catalog_cbad4574a4ef3967" formatted="false">Describe los ingredientes</string>
     <!-- iOS key: Describe meal -->
     <string name="ios_catalog_ea333fbd35af86eb" formatted="false">Describe la comida</string>
+    <!-- iOS key: Describe the ingredients you have. You can type or dictate them naturally. -->
+    <string name="ios_catalog_c31dbb35880d7f56" formatted="false">Describe los ingredientes que tienes. Puedes escribirlos o dictarlos con naturalidad.</string>
     <!-- iOS key: Describe your meal in your own words. AI will estimate the ingredients and portions. -->
     <string name="ios_catalog_5a06698ecdba101c" formatted="false">Describe tu comida con tus propias palabras. La IA estimará los ingredientes y las porciones.</string>
     <!-- iOS key: Designing your nutrition week -->
@@ -1375,6 +1545,8 @@
     <string name="ios_catalog_5453d17e49f1d2f1" formatted="false">Descartar y cerrar</string>
     <!-- iOS key: Discard changes? -->
     <string name="ios_catalog_85bcf41666a53691" formatted="false">¿Descartar los cambios?</string>
+    <!-- iOS key: Disclaimer -->
+    <string name="ios_catalog_129c678fce59acee" formatted="false">Aviso legal</string>
     <!-- iOS key: Dislikes -->
     <string name="ios_catalog_c9d5a333a6637f7f" formatted="false">Aversiones</string>
     <!-- iOS key: Dismiss -->
@@ -1457,12 +1629,16 @@
     <string name="ios_catalog_6aab0016b70ea5eb" formatted="false">Estiramiento de pecho en el marco de la puerta</string>
     <!-- iOS key: Double-tap to collapse the nutrition history list -->
     <string name="ios_catalog_2f53b899da6b7532" formatted="false">Toca dos veces para contraer la lista del historial nutricional</string>
+    <!-- iOS key: Double-tap to edit this set -->
+    <string name="ios_catalog_49a337ed26b0f3b3" formatted="false">Toca dos veces para editar esta serie</string>
     <!-- iOS key: Double-tap to enter value manually -->
     <string name="ios_catalog_5424c62f91fb07d0" formatted="false">Toca dos veces para ingresar el valor manualmente</string>
     <!-- iOS key: Double-tap to expand history -->
     <string name="ios_catalog_f85dae2577117b18" formatted="false">Toca dos veces para expandir el historial</string>
     <!-- iOS key: Double-tap to filter workouts for this day -->
     <string name="ios_catalog_5778ef59a5ead8d6" formatted="false">Toca dos veces para filtrar los entrenamientos de este día</string>
+    <!-- iOS key: Double-tap to open numeric keypad -->
+    <string name="ios_catalog_8b8432b0154e5683" formatted="false">Toca dos veces para abrir el teclado numérico</string>
     <!-- iOS key: Double-tap to view nutrition for this date -->
     <string name="ios_catalog_e3ad0222b957c429" formatted="false">Toca dos veces para ver la nutrición de esta fecha</string>
     <!-- iOS key: Down -->
@@ -1499,6 +1675,8 @@
     <string name="ios_catalog_6030c94d2a479363" formatted="false">Empuja las caderas hacia adelante para volver a la posición inicial.</string>
     <!-- iOS key: Drop %d -->
     <string name="ios_catalog_5bdb16c003b93ca7" formatted="false">Serie descendente %d</string>
+    <!-- iOS key: Drop Count -->
+    <string name="ios_catalog_414f2a4c5ad88c73" formatted="false">Número de drops</string>
     <!-- iOS key: Drop into a squat and place your hands on the floor. -->
     <string name="ios_catalog_44529ce76c25db14" formatted="false">Baja a una sentadilla y apoya las manos en el suelo.</string>
     <!-- iOS key: Drop sets are useful when you want extra hypertrophy stimulus in less time. They drive a lot of fatigue and effort quickly, which makes them especially effective as a finisher or last hard set. -->
@@ -1529,6 +1707,8 @@
     <string name="ios_catalog_273c3f3db6fe9a74" formatted="false">Las mancuernas ofrecen más libertad para la articulación del hombro que una barra.</string>
     <!-- iOS key: Dumbbells require more stabilization than a barbell. -->
     <string name="ios_catalog_355142c404d6ddbc" formatted="false">Las mancuernas requieren más estabilización que una barra.</string>
+    <!-- iOS key: Duplicate -->
+    <string name="ios_catalog_02cdaabfca805d6a" formatted="false">Duplicar</string>
     <!-- iOS key: Duration -->
     <string name="ios_catalog_4fc52a3c4c558b51" formatted="false">Duration</string>
     <!-- iOS key: Duration (min) -->
@@ -1555,18 +1735,28 @@
     <string name="ios_catalog_91a4b31d46716f35" formatted="false">p. ej. Pollo &amp; Arroz</string>
     <!-- iOS key: e.g. eggs, Greek yogurt, salmon, tofu -->
     <string name="ios_catalog_b728d3755c11b2a3" formatted="false">p. ej. huevos, yogur griego, salmón, tofu</string>
+    <!-- iOS key: e.g. I have eggs, spinach, feta, tomatoes, and some leftover chicken. -->
+    <string name="ios_catalog_955c2721057103b6" formatted="false">p. ej., tengo huevos, espinacas, feta, tomates y un poco de pollo que sobró.</string>
     <!-- iOS key: e.g. mushrooms, olives, liver -->
     <string name="ios_catalog_4f878dc2d090c2bd" formatted="false">p. ej. champiñones, aceitunas, hígado</string>
     <!-- iOS key: e.g. olives, liver, cottage cheese -->
     <string name="ios_catalog_72380fbe3b3eab4e" formatted="false">p. ej. aceitunas, hígado, requesón</string>
     <!-- iOS key: e.g. peanuts, lactose -->
     <string name="ios_catalog_8ac75e93a7632582" formatted="false">p. ej. cacahuetes, lactosa</string>
+    <!-- iOS key: e.g. There was avocado under the eggs, and the chicken portion was about 200 g -->
+    <string name="ios_catalog_ca88b3374f4d1c12" formatted="false">p. ej., había aguacate debajo de los huevos y la ración de pollo era de unos 200 g</string>
     <!-- iOS key: Each check-in saves one profile and one front photo. -->
     <string name="ios_catalog_b16463275e265082" formatted="false">Cada check-in guarda un perfil y una foto frontal.</string>
     <!-- iOS key: Each drop should use about %d%% less weight than the effort before it. -->
     <string name="ios_catalog_67030b73c71b7358" formatted="false">Cada descenso debería usar aproximadamente %d%% menos peso que el esfuerzo anterior.</string>
+    <!-- iOS key: Each pass through the block counts as one full round. -->
+    <string name="ios_catalog_bc1b9c9d6d336b2a" formatted="false">Cada pasada por el bloque cuenta como una ronda completa.</string>
     <!-- iOS key: Each point is one logged %@ entry. -->
     <string name="ios_catalog_baebd99dc9cf8610" formatted="false">Cada punto es una entrada %@ registrada.</string>
+    <!-- iOS key: Each point is the monthly average of logged %@ entries. -->
+    <string name="ios_catalog_c14d4444d02f33c2" formatted="false">Cada punto es el promedio mensual de las entradas de %@ registradas.</string>
+    <!-- iOS key: Each point is the weekly average of logged %@ entries. -->
+    <string name="ios_catalog_939695583d277a6d" formatted="false">Cada punto es el promedio semanal de las entradas de %@ registradas.</string>
     <!-- iOS key: Earlier results for this exercise will appear here. -->
     <string name="ios_catalog_ea0d93a0c553809a" formatted="false">Resultados anteriores de este ejercicio aparecerán aquí.</string>
     <!-- iOS key: Easing down -->
@@ -1585,8 +1775,14 @@
     <string name="ios_catalog_d8492e469a5922a1" formatted="false">Ventana de alimentación</string>
     <!-- iOS key: Edit -->
     <string name="ios_catalog_464c4ffd019e1e96" formatted="false">Editar</string>
+    <!-- iOS key: Edit blocked categories -->
+    <string name="ios_catalog_e6a8afe4c4b66ccc" formatted="false">Editar categorías bloqueadas</string>
     <!-- iOS key: Edit categories -->
     <string name="ios_catalog_a3e7a9ea173eddfb" formatted="false">Editar categorías</string>
+    <!-- iOS key: Edit each set\'s reps and weight directly above. -->
+    <string name="ios_catalog_306e124f78a32af9" formatted="false">Edita las repeticiones y el peso de cada serie justo arriba.</string>
+    <!-- iOS key: Edit Exercise -->
+    <string name="ios_catalog_9137e949349b175e" formatted="false">Editar ejercicio</string>
     <!-- iOS key: Edit Food -->
     <string name="ios_catalog_1634b91e1a7ff7ae" formatted="false">Editar alimento</string>
     <!-- iOS key: Edit ingredient %@ -->
@@ -1595,12 +1791,16 @@
     <string name="ios_catalog_3976ab52be4bac20" formatted="false">Editar macros</string>
     <!-- iOS key: Edit name -->
     <string name="ios_catalog_308b88fcc3dffe50" formatted="false">Editar nombre</string>
+    <!-- iOS key: Edit sets -->
+    <string name="ios_catalog_e39ec997e4d61217" formatted="false">Editar series</string>
     <!-- iOS key: Edit the scanned values per 100 g. Totals update using the consumed amount above. -->
     <string name="ios_catalog_9aa5b37768fb98de" formatted="false">Edita los valores escaneados por 100 g. Los totales se actualizan usando la cantidad consumida indicada arriba.</string>
     <!-- iOS key: Edit the total macros for this ingredient. If you later adjust grams, these values will scale with it. -->
     <string name="ios_catalog_8e25245d83f370a3" formatted="false">Edita los macros totales para este ingrediente. Si luego ajustas los gramos, estos valores se escalarán en consecuencia.</string>
     <!-- iOS key: Effort -->
     <string name="ios_catalog_4387e5d3966fc436" formatted="false">Esfuerzo</string>
+    <!-- iOS key: Elapsed -->
+    <string name="ios_catalog_a194a68a45d32cab" formatted="false">Tiempo transcurrido</string>
     <!-- iOS key: Elbow Pain -->
     <string name="ios_catalog_c84e9840c3732b46" formatted="false">Dolor de codo</string>
     <!-- iOS key: Elevate your rear foot to place intense focus and stretch on the front leg\'s quads and glutes. -->
@@ -1613,6 +1813,8 @@
     <string name="ios_catalog_744075fe408893ba" formatted="false">Sesión de élite</string>
     <!-- iOS key: Elliptical -->
     <string name="ios_catalog_8a97e84889f234d8" formatted="false">Elíptica</string>
+    <!-- iOS key: Email -->
+    <string name="ios_catalog_969ccbd3cf6300ec" formatted="false">Correo electrónico</string>
     <!-- iOS key: Enable Apple Health in your profile to import body metrics automatically. -->
     <string name="ios_catalog_5c4c63152181ff59" formatted="false">Activa Apple Health en tu perfil para importar métricas corporales automáticamente.</string>
     <!-- iOS key: Enable camera access in Settings so progress photos can use the framing guides and consistent capture flow. -->
@@ -1633,6 +1835,8 @@
     <string name="ios_catalog_92c1cdfdf4cb9cf6" formatted="false">Activado</string>
     <!-- iOS key: End -->
     <string name="ios_catalog_f4db1e48476f6075" formatted="false">Fin</string>
+    <!-- iOS key: Ends -->
+    <string name="ios_catalog_e98982c9f2ba3332" formatted="false">Termina</string>
     <!-- iOS key: Energy -->
     <string name="ios_catalog_f2fcd3f7dccadd19" formatted="false">Energía</string>
     <!-- iOS key: Energy balance -->
@@ -1693,6 +1897,8 @@
     <string name="ios_catalog_268230502cf611c3" formatted="false">Asegúrate de que tu posicionamiento permita una trayectoria vertical segura de la barra.</string>
     <!-- iOS key: Enter the code your gym gave you, or scan its QR. -->
     <string name="ios_catalog_9ea4dcbe3601fa4f" formatted="false">Introduce el código que te dio tu gimnasio o escanea su código QR.</string>
+    <!-- iOS key: Enter your email and password to continue. -->
+    <string name="ios_catalog_3e4d5ab900ee9e40" formatted="false">Introduce tu correo electrónico y contraseña para continuar.</string>
     <!-- iOS key: Environment -->
     <string name="ios_catalog_9e471951a1b4106e" formatted="false">Environment</string>
     <!-- iOS key: Equipment -->
@@ -1703,16 +1909,26 @@
     <string name="ios_catalog_af4ba47e2d673e78" formatted="false">Equivalente a %@ por mes</string>
     <!-- iOS key: Essential for shoulder health, targeting the rear delts and upper back muscles. -->
     <string name="ios_catalog_62fa9ae34a780823" formatted="false">Esencial para la salud del hombro, enfocado en los deltoides posteriores y los músculos de la parte superior de la espalda.</string>
+    <!-- iOS key: Estimate body composition from this check-in -->
+    <string name="ios_catalog_51f637c50661715a" formatted="false">Estimar la composición corporal a partir de este registro</string>
     <!-- iOS key: Estimate it from a body composition reading such as a smart scale or DEXA scan, then track it with the same method over time. -->
     <string name="ios_catalog_d95254953565959e" formatted="false">Estímalo a partir de una lectura de composición corporal, como una báscula inteligente o una exploración DEXA, y luego regístralo con el mismo método a lo largo del tiempo.</string>
     <!-- iOS key: Estimate the meal from a photo, adjust details, and save. -->
     <string name="ios_catalog_cb51ef74116e5c66" formatted="false">Estima la comida a partir de una foto, ajusta los detalles y guarda.</string>
+    <!-- iOS key: Estimate unavailable -->
+    <string name="ios_catalog_7b031241e9502f51" formatted="false">Estimación no disponible</string>
     <!-- iOS key: Estimated 1RM -->
     <string name="ios_catalog_be1c9e4c967df6b7" formatted="false">1RM estimado</string>
     <!-- iOS key: Estimated body fat -->
     <string name="ios_catalog_c8262caee4724be9" formatted="false">Porcentaje de grasa corporal estimado</string>
+    <!-- iOS key: Estimated body-fat range -->
+    <string name="ios_catalog_e1b833d23cc8a639" formatted="false">Intervalo estimado de grasa corporal</string>
+    <!-- iOS key: Estimated Duration -->
+    <string name="ios_catalog_ae0bdf0462d9e1c5" formatted="false">Duración estimada</string>
     <!-- iOS key: Estimated Duration: %d minutes -->
     <string name="ios_catalog_7175d18d85f8269a" formatted="false">Duración estimada: %d minutos</string>
+    <!-- iOS key: Estimated using the U.S. Navy formula from waist(user.gender == .female ? -->
+    <string name="ios_catalog_52ca0155c678c161" formatted="false">Estimado mediante la fórmula de la Marina de EE. UU. a partir de la cintura (user.gender == .female ?</string>
     <!-- iOS key: Estimated using the U.S. Navy formula from waist\\(user.gender == .female ? -->
     <string name="ios_catalog_f14888bfc22ea510" formatted="false">Estimado usando la fórmula de la U.S. Navy a partir de la cintura\(user.gender == .female ?</string>
     <!-- iOS key: Estimating foods, macros, and calories from the image. -->
@@ -1745,6 +1961,8 @@
     <string name="ios_catalog_d890949710a7a06e" formatted="false">Exercise logs</string>
     <!-- iOS key: Exercise Menu -->
     <string name="ios_catalog_e61386e90916c2b0" formatted="false">Menú de ejercicios</string>
+    <!-- iOS key: Exercise not synced yet -->
+    <string name="ios_catalog_761d805b2d9e42d3" formatted="false">Ejercicio aún no sincronizado</string>
     <!-- iOS key: Exercise Profile -->
     <string name="ios_catalog_aa7b79d3950195e7" formatted="false">Perfil de ejercicio</string>
     <!-- iOS key: Exercise Watch Insights -->
@@ -1755,6 +1973,8 @@
     <string name="ios_catalog_988f06b3635487bb" formatted="false">Ejercicios</string>
     <!-- iOS key: Exercises in this period -->
     <string name="ios_catalog_4563e40aaaa33d87" formatted="false">Ejercicios en este período</string>
+    <!-- iOS key: Exercises must be consecutive. -->
+    <string name="ios_catalog_cbb5460a46f12a30" formatted="false">Los ejercicios deben ir seguidos.</string>
     <!-- iOS key: Exhale and lean forward, resting your torso between your thighs. -->
     <string name="ios_catalog_f5506271b97380d0" formatted="false">Exhala e inclínate hacia adelante, apoyando el torso entre los muslos.</string>
     <!-- iOS key: Exhale as you extend your limbs. -->
@@ -1797,6 +2017,8 @@
     <string name="ios_catalog_9e911cfbfff2d0fc" formatted="false">Extiende las piernas hasta que queden rectas, concentrándote en la contracción de los cuádriceps.</string>
     <!-- iOS key: Extends the effort quickly to create a strong hypertrophy stimulus. -->
     <string name="ios_catalog_719e125e779bbb71" formatted="false">Extiende el esfuerzo rápidamente para crear un fuerte estímulo de hipertrofia.</string>
+    <!-- iOS key: Extra ingredients needed -->
+    <string name="ios_catalog_cb89925d092d16ec" formatted="false">Ingredientes adicionales necesarios</string>
     <!-- iOS key: Extracting calories and macros from the image. -->
     <string name="ios_catalog_1a43ff1632f9f153" formatted="false">Extrayendo calorías y macronutrientes de la imagen.</string>
     <!-- iOS key: Eyes -->
@@ -1855,6 +2077,8 @@
     <string name="ios_catalog_a7b716b58e4b9dd5" formatted="false">Ajusta con precisión tu alineación</string>
     <!-- iOS key: Finish Round -->
     <string name="ios_catalog_cf1fcb1ed20adbae" formatted="false">Finalizar ronda</string>
+    <!-- iOS key: Finish setup before Full focus mode can turn on. -->
+    <string name="ios_catalog_1964d08d367c2301" formatted="false">Completa la configuración antes de activar el modo de concentración total.</string>
     <!-- iOS key: Finish strong -->
     <string name="ios_catalog_3811f98cc85e1aec" formatted="false">Termina con fuerza</string>
     <!-- iOS key: Finish the main effort, drop the weight quickly, and keep going. -->
@@ -1871,6 +2095,10 @@
     <string name="ios_catalog_9f872ed43d00d8bd" formatted="false">En forma</string>
     <!-- iOS key: Fitness profile -->
     <string name="ios_catalog_73d2f1771daac4ad" formatted="false">Perfil de fitness</string>
+    <!-- iOS key: Fix it -->
+    <string name="ios_catalog_8c6c8d92dfc9629d" formatted="false">Solucionar</string>
+    <!-- iOS key: Fix photo estimate -->
+    <string name="ios_catalog_086e755369294484" formatted="false">Corregir estimación de la foto</string>
     <!-- iOS key: Flat Bench -->
     <string name="ios_catalog_db4edc6fa9661959" formatted="false">Banco plano</string>
     <!-- iOS key: Flexible -->
@@ -2021,6 +2249,8 @@
     <string name="ios_catalog_33f53f246b560be1" formatted="false">Sigue tus manos con la mirada para asegurarte de que todo tu torso está girando.</string>
     <!-- iOS key: Food name -->
     <string name="ios_catalog_9a9269cb981f88d0" formatted="false">Nombre del alimento</string>
+    <!-- iOS key: For %@ g consumed -->
+    <string name="ios_catalog_57aaf1e257639283" formatted="false">Por %@ g consumidos</string>
     <!-- iOS key: For added challenge, hold a weight or medicine ball. -->
     <string name="ios_catalog_b7f53298e3a22b46" formatted="false">Para mayor desafío, sujeta un peso o una pelota medicinal.</string>
     <!-- iOS key: For an added challenge, perform the bridge with one leg extended. -->
@@ -2053,6 +2283,8 @@
     <string name="ios_catalog_4c976a1f1a357aa0" formatted="false">Desde una posición de pie, baja a una sentadilla y coloca las manos en el suelo.</string>
     <!-- iOS key: Front -->
     <string name="ios_catalog_a617590202898821" formatted="false">Frente</string>
+    <!-- iOS key: Front and profile photos from this session will be used together when possible. -->
+    <string name="ios_catalog_7e8cc3b3ee0ac06f" formatted="false">Las fotos de frente y de perfil de esta sesión se usarán juntas cuando sea posible.</string>
     <!-- iOS key: Front photo -->
     <string name="ios_catalog_c97467d29c6f9ad2" formatted="false">Foto frontal</string>
     <!-- iOS key: Front Raise -->
@@ -2063,6 +2295,8 @@
     <string name="ios_catalog_2d4838ff0e26acb1" formatted="false">Cubrir los macros faltantes</string>
     <!-- iOS key: Full Body -->
     <string name="ios_catalog_a54b18ef18c61ad3" formatted="false">Cuerpo completo</string>
+    <!-- iOS key: Full focus mode -->
+    <string name="ios_catalog_b089927edef6a296" formatted="false">Modo de concentración total</string>
     <!-- iOS key: Full focus mode blocks the app categories you choose while an iPhone workout is active. -->
     <string name="ios_catalog_8f733846c7b3a515" formatted="false">El modo Enfoque completo bloquea las categorías de apps que elijas mientras hay un entrenamiento activo en el iPhone.</string>
     <!-- iOS key: Full history loop -->
@@ -2089,12 +2323,16 @@
     <string name="ios_catalog_5a7df572126e10fe" formatted="false">Genera una vista previa realista basada en tu último registro, tu plan de entrenamiento y tu perfil nutricional.</string>
     <!-- iOS key: Generate a weekly nutrition plan to see day-by-day calories, macros, and workout fueling guidance here. -->
     <string name="ios_catalog_16bdd17a094baf54" formatted="false">Genera un plan nutricional semanal para ver aquí, día a día, las calorías, los macronutrientes y las recomendaciones de alimentación para los entrenamientos.</string>
+    <!-- iOS key: Generate another -->
+    <string name="ios_catalog_556f4bba96daab7a" formatted="false">Generar otra</string>
     <!-- iOS key: Generate New week plan -->
     <string name="ios_catalog_38ec30d5f3c1ef21" formatted="false">Generar nuevo plan semanal</string>
     <!-- iOS key: Generate Next Plan -->
     <string name="ios_catalog_95e21cb2f3084cd0" formatted="false">Generar siguiente plan</string>
     <!-- iOS key: Generate Plan -->
     <string name="ios_catalog_898b391f5d35497e" formatted="false">Generar plan</string>
+    <!-- iOS key: Generating meal ideas... -->
+    <string name="ios_catalog_680943af8759a9eb" formatted="false">Generando ideas de comidas...</string>
     <!-- iOS key: Generating your workout plan… -->
     <string name="ios_catalog_ed5f69d7774f6b21" formatted="false">Generating your workout plan…</string>
     <!-- iOS key: Generating… -->
@@ -2119,6 +2357,10 @@
     <string name="ios_catalog_24dce43479196961" formatted="false">Accede a todas las funciones y mejora tu entrenamiento.</string>
     <!-- iOS key: Get idea from fridge -->
     <string name="ios_catalog_8a1e2c14210dbdc7" formatted="false">Idea de la nevera</string>
+    <!-- iOS key: Get meal ideas -->
+    <string name="ios_catalog_cef7a8d8fed95bc7" formatted="false">Obtener ideas de comidas</string>
+    <!-- iOS key: Get more ideas -->
+    <string name="ios_catalog_d5813c5541c4fce3" formatted="false">Obtener más ideas</string>
     <!-- iOS key: Get ready -->
     <string name="ios_catalog_0b5f4af0f352bfd9" formatted="false">Prepárate</string>
     <!-- iOS key: Get reminders for upcoming workouts and meals you still need to log. -->
@@ -2127,6 +2369,8 @@
     <string name="ios_catalog_983f311018642b0a" formatted="false">Comenzar</string>
     <!-- iOS key: Get the complete Wildforce experience, built around your progress. -->
     <string name="ios_catalog_ed316d49f8295b53" formatted="false">Disfruta De La Experiencia Completa De Wildforce, Diseñada En Torno A Tu Progreso.</string>
+    <!-- iOS key: Get Wildforce Premium -->
+    <string name="ios_catalog_f1015de277252aa7" formatted="false">Consigue Wildforce Premium</string>
     <!-- iOS key: Ghost -->
     <string name="ios_catalog_df1bc4984a055e10" formatted="false">Fantasma</string>
     <!-- iOS key: Ghost mode helps you match your previous photo more precisely. -->
@@ -2401,6 +2645,8 @@
     <string name="ios_catalog_a42c5d26d7b0c814" formatted="false">Cómo funciona la comparación</string>
     <!-- iOS key: How do you eat? -->
     <string name="ios_catalog_69cc0d8645fa4deb" formatted="false">¿Cómo te alimentas?</string>
+    <!-- iOS key: How it runs -->
+    <string name="ios_catalog_934baec253f2d53d" formatted="false">Cómo funciona</string>
     <!-- iOS key: How it works -->
     <string name="ios_catalog_9c870aa6e5e93270" formatted="false">Cómo funciona</string>
     <!-- iOS key: How many meals fit your day? -->
@@ -2423,10 +2669,14 @@
     <string name="ios_catalog_7ba65f8870c8d15d" formatted="false">Tengo un código del gimnasio</string>
     <!-- iOS key: I\'m committed! -->
     <string name="ios_catalog_ab8887224cf732d6" formatted="false">¡Me comprometo!</string>
+    <!-- iOS key: I\'m lucky -->
+    <string name="ios_catalog_a1dc35c62c135501" formatted="false">Me siento con suerte</string>
     <!-- iOS key: I\'ve an account -->
     <string name="ios_catalog_0279297dc911036c" formatted="false">Tengo una cuenta</string>
     <!-- iOS key: Ideas that fit the macros you have left. -->
     <string name="ios_catalog_2dcd67dbab45619c" formatted="false">Ideas que encajan en los macros que te quedan.</string>
+    <!-- iOS key: Identifying ingredients from your photo before suggesting ideas. -->
+    <string name="ios_catalog_439318098a017e2b" formatted="false">Identificando los ingredientes de tu foto antes de sugerirte ideas.</string>
     <!-- iOS key: If bodyweight is too difficult, use an assisted dip machine or bands. -->
     <string name="ios_catalog_b4bf5f700866eba4" formatted="false">Si hacer fondos con tu propio peso corporal es demasiado difícil, usa una máquina de dips asistida o bandas elásticas.</string>
     <!-- iOS key: If full leg raises are too difficult, start with hanging knee raises. -->
@@ -2475,6 +2725,8 @@
     <string name="ios_catalog_71aa414d801fce99" formatted="false">Mejora la movilidad y la salud de las escápulas (omóplatos), promoviendo una mejor postura y mecánica de la parte superior del cuerpo.</string>
     <!-- iOS key: Improves wrist joint mobility and helps prevent strain during upper-body exercises. -->
     <string name="ios_catalog_500a5540fe4ec51a" formatted="false">Mejora la movilidad de la articulación de la muñeca y ayuda a prevenir sobrecargas durante los ejercicios de la parte superior del cuerpo.</string>
+    <!-- iOS key: in -->
+    <string name="ios_catalog_582967534d0f909d" formatted="false">pulg</string>
     <!-- iOS key: In Progress -->
     <string name="ios_catalog_b4cc4b07c300103a" formatted="false">In Progress</string>
     <!-- iOS key: Inchworm -->
@@ -2493,6 +2745,8 @@
     <string name="ios_catalog_a1a8d918797a0654" formatted="false">Aumenta la distancia o la intensidad gradualmente para evitar lesiones.</string>
     <!-- iOS key: Info -->
     <string name="ios_catalog_170322a32f3c35b2" formatted="false">Información</string>
+    <!-- iOS key: Ingredient -->
+    <string name="ios_catalog_c4c5ed008b8696b9" formatted="false">Ingrediente</string>
     <!-- iOS key: Ingredient name -->
     <string name="ios_catalog_f4d8bcc418578c8e" formatted="false">Nombre del ingrediente</string>
     <!-- iOS key: Ingredients -->
@@ -2621,6 +2875,8 @@
     <string name="ios_catalog_74abb7291c3910b7" formatted="false">Mantén el movimiento lento y concentrado.</string>
     <!-- iOS key: Keep the movement small and controlled rather than swinging the leg. -->
     <string name="ios_catalog_17c672e3f48983ee" formatted="false">Mantén el movimiento pequeño y controlado en lugar de balancear la pierna.</string>
+    <!-- iOS key: Keep the rhythm -->
+    <string name="ios_catalog_feac2a98e0e39268" formatted="false">Mantén el ritmo</string>
     <!-- iOS key: Keep the same distance and framing -->
     <string name="ios_catalog_6dbf89069b766360" formatted="false">Mantén la misma distancia y encuadre</string>
     <!-- iOS key: Keep the weights steady at your sides; don\'t let them swing. -->
@@ -2837,6 +3093,10 @@
     <string name="ios_catalog_8fa76eec0c740ca5" formatted="false">Mantén las piernas rectas (o ligeramente flexionadas) y elévalas hasta que queden paralelas al suelo.</string>
     <!-- iOS key: Kettlebells -->
     <string name="ios_catalog_6031e55a63ff50f0" formatted="false">Pesas rusas</string>
+    <!-- iOS key: kg -->
+    <string name="ios_catalog_131ed734290d30f3" formatted="false">kg</string>
+    <!-- iOS key: km -->
+    <string name="ios_catalog_1f34503f65b4a355" formatted="false">km</string>
     <!-- iOS key: Knee Pain -->
     <string name="ios_catalog_7b93b3c86c9e6859" formatted="false">Dolor de rodilla</string>
     <!-- iOS key: Kneel on one knee with the other foot flat in front of you (half-kneeling position). -->
@@ -2891,6 +3151,8 @@
     <string name="ios_catalog_4b3f9eec23b0b534" formatted="false">Última alerta del reloj</string>
     <!-- iOS key: Launch the companion watch workout when you start on iPhone. -->
     <string name="ios_catalog_b4f25f32b9bd807e" formatted="false">Inicia el entrenamiento complementario en el reloj cuando empieces en el iPhone.</string>
+    <!-- iOS key: lb -->
+    <string name="ios_catalog_fd26db45a8b53034" formatted="false">lb</string>
     <!-- iOS key: Lead with your elbows, not your wrists. -->
     <string name="ios_catalog_9b5cf19f233bbf6d" formatted="false">Dirige el movimiento con los codos, no con las muñecas.</string>
     <!-- iOS key: Lean back slightly, keeping your back straight and core engaged. -->
@@ -3003,14 +3265,20 @@
     <string name="ios_catalog_13008b98a4f3e1c6" formatted="false">Flexión de rodilla limitada</string>
     <!-- iOS key: Limited Shoulder Mobility -->
     <string name="ios_catalog_0b1dd0f785dee18a" formatted="false">Movilidad limitada del hombro</string>
+    <!-- iOS key: Linked accounts -->
+    <string name="ios_catalog_feda46a46abb0f71" formatted="false">Cuentas vinculadas</string>
     <!-- iOS key: Listening to your body is a sign of strength. -->
     <string name="ios_catalog_bcbc0c66fe998dc0" formatted="false">Escuchar a tu cuerpo es una muestra de fuerza.</string>
+    <!-- iOS key: Live progress -->
+    <string name="ios_catalog_1134f194a9ca711c" formatted="false">Progreso en directo</string>
     <!-- iOS key: Live Sync -->
     <string name="ios_catalog_e188139e1f837763" formatted="false">Sincronización en vivo</string>
     <!-- iOS key: Load -->
     <string name="ios_catalog_8a6bdb6b18da586f" formatted="false">Carga</string>
     <!-- iOS key: Load weight plates onto the other end and straddle the bar, facing away from the anchor. -->
     <string name="ios_catalog_cca0419de70229d9" formatted="false">Coloque discos de peso en el otro extremo y póngase a horcajadas sobre la barra, de espaldas al anclaje.</string>
+    <!-- iOS key: Loading exercise… -->
+    <string name="ios_catalog_ae23de204b9af860" formatted="false">Cargando ejercicio…</string>
     <!-- iOS key: Location -->
     <string name="ios_catalog_15b61974b2707a7b" formatted="false">Ubicación</string>
     <!-- iOS key: Location name -->
@@ -3023,20 +3291,32 @@
     <string name="ios_catalog_9276518c28a71ee9" formatted="false">Locomoción</string>
     <!-- iOS key: Log -->
     <string name="ios_catalog_21e49eb2b299c9f7" formatted="false">Registrar</string>
+    <!-- iOS key: Log %@ -->
+    <string name="ios_catalog_d4c438ea85885236" formatted="false">Registrar %@</string>
     <!-- iOS key: Log as suggested -->
     <string name="ios_catalog_2938f474bc553c88" formatted="false">Registrar como sugerido</string>
+    <!-- iOS key: Log body metrics -->
+    <string name="ios_catalog_220bc10d523d99d7" formatted="false">Registrar medidas corporales</string>
     <!-- iOS key: Log each effort as a set and keep the reps consistent with the target. -->
     <string name="ios_catalog_7be60af4d5b2d944" formatted="false">Registra cada esfuerzo como una serie y mantén las repeticiones consistentes con el objetivo.</string>
+    <!-- iOS key: Log in -->
+    <string name="ios_catalog_c189840cf7e2d6f6" formatted="false">Iniciar sesión</string>
     <!-- iOS key: Log meals from a photo, a label or a description. -->
     <string name="ios_catalog_95577d555730226b" formatted="false">Registra comidas a partir de una foto, una etiqueta o una descripción.</string>
     <!-- iOS key: Log nutrition -->
     <string name="ios_catalog_a792ac2ed5679ded" formatted="false">Registrar nutrición</string>
+    <!-- iOS key: Log nutrition meal -->
+    <string name="ios_catalog_cca4d7008ce97dc9" formatted="false">Registrar comida</string>
     <!-- iOS key: Log out -->
     <string name="ios_catalog_49616145514e9abf" formatted="false">Cerrar sesión</string>
     <!-- iOS key: Log out? -->
     <string name="ios_catalog_88474d9dd1be650a" formatted="false">¿Cerrar sesión?</string>
+    <!-- iOS key: Log something else -->
+    <string name="ios_catalog_6e0c578743087d0b" formatted="false">Registrar otra cosa</string>
     <!-- iOS key: Log sometihng else -->
     <string name="ios_catalog_fbfcf65f2a0e0136" formatted="false">Registrar otra cosa</string>
+    <!-- iOS key: Log this meal -->
+    <string name="ios_catalog_798f0c48efd32130" formatted="false">Registrar esta comida</string>
     <!-- iOS key: Log today’s intake -->
     <string name="ios_catalog_8133ad240dcce89d" formatted="false">Registrar la ingesta de hoy</string>
     <!-- iOS key: Log waist and neck circumference in Body Metrics to see this. -->
@@ -3193,6 +3473,12 @@
     <string name="ios_catalog_613676fd2f2b6eb4" formatted="false">Los campos de macronutrientes representan el total para la cantidad consumida.</string>
     <!-- iOS key: Macro mode -->
     <string name="ios_catalog_d4d64c04584c4c5e" formatted="false">Modo macro</string>
+    <!-- iOS key: Macro target -->
+    <string name="ios_catalog_e619021c60d4754c" formatted="false">Objetivo de macronutrientes</string>
+    <!-- iOS key: Macro target (optional) -->
+    <string name="ios_catalog_e663b0ba7235cdd9" formatted="false">Objetivo de macronutrientes (opcional)</string>
+    <!-- iOS key: Main -->
+    <string name="ios_catalog_eb814be3ca3b78c0" formatted="false">Principal</string>
     <!-- iOS key: Main exercises -->
     <string name="ios_catalog_523a8e5501686321" formatted="false">Ejercicios principales</string>
     <!-- iOS key: Maintain a consistent and rapid pace. -->
@@ -3315,8 +3601,12 @@
     <string name="ios_catalog_d8fcb7cd1a5f698b" formatted="false">Repeticiones manuales</string>
     <!-- iOS key: Map pin saved -->
     <string name="ios_catalog_a9c3424980eef350" formatted="false">Marcador del mapa guardado</string>
+    <!-- iOS key: Map preview -->
+    <string name="ios_catalog_f91fd6462ede423e" formatted="false">Vista previa del mapa</string>
     <!-- iOS key: Mark Complete -->
     <string name="ios_catalog_7b63c1db87da06bc" formatted="false">Mark Complete</string>
+    <!-- iOS key: Mark Ready -->
+    <string name="ios_catalog_f8df848acdbac119" formatted="false">Marcar como listo</string>
     <!-- iOS key: Match both sides -->
     <string name="ios_catalog_beda3362c8e41d83" formatted="false">Igualar ambos lados</string>
     <!-- iOS key: Max %d BPM -->
@@ -3333,8 +3623,12 @@
     <string name="ios_catalog_2ac741e6203af759" formatted="false">Quizás más tarde</string>
     <!-- iOS key: Meal -->
     <string name="ios_catalog_c3940d7d61c8703b" formatted="false">Comida</string>
+    <!-- iOS key: Meal idea -->
+    <string name="ios_catalog_51e5c9a60f39e6fb" formatted="false">Idea de comida</string>
     <!-- iOS key: Meal ideas -->
     <string name="ios_catalog_a28738584a1832f6" formatted="false">Ideas de comidas</string>
+    <!-- iOS key: Meal ideas from ingredients -->
+    <string name="ios_catalog_87cd7572f9dc7a2c" formatted="false">Ideas de comidas con los ingredientes</string>
     <!-- iOS key: Meal name -->
     <string name="ios_catalog_c50b756eb8711768" formatted="false">nombre de la comida</string>
     <!-- iOS key: Meal Planning That Fits You -->
@@ -3355,6 +3649,8 @@
     <string name="ios_catalog_e864f18b939a4743" formatted="false">Balón medicinal</string>
     <!-- iOS key: Medium -->
     <string name="ios_catalog_8e588cd187741f1c" formatted="false">Medio</string>
+    <!-- iOS key: Menu -->
+    <string name="ios_catalog_99af6606ff9d6cd5" formatted="false">Menú</string>
     <!-- iOS key: Mesocycle -->
     <string name="ios_catalog_33577f113c82de90" formatted="false">Mesociclo</string>
     <!-- iOS key: Mesocycle %d -->
@@ -3377,8 +3673,12 @@
     <string name="ios_catalog_2d275a74912cca2e" formatted="false">Metric</string>
     <!-- iOS key: Metric system -->
     <string name="ios_catalog_4a5ee73e58a6ff17" formatted="false">Metric system</string>
+    <!-- iOS key: mi -->
+    <string name="ios_catalog_eee1c1ade6525d24" formatted="false">mi</string>
     <!-- iOS key: min -->
     <string name="ios_catalog_1f6fa6f69d185e60" formatted="false">min</string>
+    <!-- iOS key: Min %@ -->
+    <string name="ios_catalog_aa3948d91f4e1a1a" formatted="false">Mín. %@</string>
     <!-- iOS key: min/km -->
     <string name="ios_catalog_1e91d2b8460464b2" formatted="false">min/km</string>
     <!-- iOS key: min/mi -->
@@ -3435,6 +3735,8 @@
     <string name="ios_catalog_0163c7127f963ff1" formatted="false">Muévete mejor</string>
     <!-- iOS key: Move Down -->
     <string name="ios_catalog_b58330ac25057a44" formatted="false">Mover hacia abajo</string>
+    <!-- iOS key: Move exercise to exercise -->
+    <string name="ios_catalog_5fbc026ff0a9abea" formatted="false">Mover ejercicio a otro ejercicio</string>
     <!-- iOS key: Move slowly and avoid swinging your legs so your abs, not momentum, control the movement. -->
     <string name="ios_catalog_246098754cbc2611" formatted="false">Muévete despacio y evita balancear las piernas para que sean tus abdominales, no el impulso, los que controlen el movimiento.</string>
     <!-- iOS key: Move slowly and with control to protect your lower back. -->
@@ -3511,6 +3813,8 @@
     <string name="ios_catalog_3a426a3a697ebdf2" formatted="false">Nuevo récord</string>
     <!-- iOS key: New workout cue -->
     <string name="ios_catalog_a2bfd8df2fe2f33a" formatted="false">Nueva señal de entrenamiento</string>
+    <!-- iOS key: New workout flow -->
+    <string name="ios_catalog_c5bf60c5a4bcddf9" formatted="false">Nuevo flujo de entrenamiento</string>
     <!-- iOS key: New Workout Plan -->
     <string name="ios_catalog_79ea4cfa27a00724" formatted="false">New Workout Plan</string>
     <!-- iOS key: Next -->
@@ -3563,6 +3867,8 @@
     <string name="ios_catalog_96565c977c59b6b2" formatted="false">No hay historial disponible para este ejercicio.</string>
     <!-- iOS key: No in-progress workout was found in watch storage. -->
     <string name="ios_catalog_98090d59e7488c4d" formatted="false">No se encontró ningún entrenamiento en curso en el almacenamiento del reloj.</string>
+    <!-- iOS key: No instructions -->
+    <string name="ios_catalog_24486a0cb6dd0842" formatted="false">Sin instrucciones</string>
     <!-- iOS key: No items -->
     <string name="ios_catalog_6c351c116cc7feea" formatted="false">No hay elementos</string>
     <!-- iOS key: No logged meals yet -->
@@ -3637,6 +3943,8 @@
     <string name="ios_catalog_a0e63d7c7125d29a" formatted="false">Ahora no</string>
     <!-- iOS key: Not set -->
     <string name="ios_catalog_4895f73177ab5d67" formatted="false">No establecido</string>
+    <!-- iOS key: Notes -->
+    <string name="ios_catalog_8a7525b1492fb848" formatted="false">Notas</string>
     <!-- iOS key: Notes (optional) -->
     <string name="ios_catalog_6239b93e96e9a8ee" formatted="false">Notas (opcional)</string>
     <!-- iOS key: Notes must be workout-specific and will be used to tailor your plan. They cannot override core settings like equipment or restrictions. -->
@@ -3657,6 +3965,8 @@
     <string name="ios_catalog_c3d692275822ec6a" formatted="false">Etiqueta nutricional</string>
     <!-- iOS key: Nutrition Monthly -->
     <string name="ios_catalog_2a3305895bdbbf98" formatted="false">Nutrición mensual</string>
+    <!-- iOS key: Nutrition per 100 g -->
+    <string name="ios_catalog_2bd05b0339c59709" formatted="false">Información nutricional por 100 g</string>
     <!-- iOS key: Nutrition per 100g -->
     <string name="ios_catalog_4a4029f2616ffdb9" formatted="false">Información nutricional por 100 g</string>
     <!-- iOS key: Nutrition profile -->
@@ -3673,10 +3983,18 @@
     <string name="ios_catalog_565339bc4d33d728" formatted="false">OK</string>
     <!-- iOS key: Olympic Barbell -->
     <string name="ios_catalog_96b9b6be29fae75b" formatted="false">Barra olímpica</string>
+    <!-- iOS key: On -->
+    <string name="ios_catalog_130011756125313c" formatted="false">Activado</string>
     <!-- iOS key: One shared effort -->
     <string name="ios_catalog_219c49dff76307a0" formatted="false">Un esfuerzo compartido</string>
+    <!-- iOS key: One-off workout from your goal, focus, equipment, and duration. -->
+    <string name="ios_catalog_0e70c76a6595b7c5" formatted="false">Un entrenamiento puntual según tu objetivo, enfoque, equipamiento y duración.</string>
     <!-- iOS key: Only reach as far as is comfortable; your foot doesn\'t have to touch your hand. -->
     <string name="ios_catalog_2beb784196fb066d" formatted="false">Alcanza solo hasta donde te resulte cómodo; tu pie no tiene que tocar tu mano.</string>
+    <!-- iOS key: Only the front photo is available, so the estimate will rely on that single angle. -->
+    <string name="ios_catalog_55a374d35be65317" formatted="false">Solo está disponible la foto frontal, así que la estimación se basará únicamente en ese ángulo.</string>
+    <!-- iOS key: Only the profile photo is available, so the estimate will rely on that single angle. -->
+    <string name="ios_catalog_f8b383fa873c9668" formatted="false">Solo está disponible la foto de perfil, así que la estimación se basará únicamente en ese ángulo.</string>
     <!-- iOS key: Open Settings -->
     <string name="ios_catalog_3f940108cb1ecd9c" formatted="false">Abrir ajustes</string>
     <!-- iOS key: Opens menu with feedback and help options -->
@@ -3691,6 +4009,10 @@
     <string name="ios_catalog_de57f417e0a3e2eb" formatted="false">Optimizando la división del entrenamiento...</string>
     <!-- iOS key: Optional location photo -->
     <string name="ios_catalog_027d3fc05c64d70d" formatted="false">Foto de ubicación opcional</string>
+    <!-- iOS key: Optional note -->
+    <string name="ios_catalog_970c43c080218f8b" formatted="false">Nota opcional</string>
+    <!-- iOS key: Optional. Use this to nudge ideas toward your target. -->
+    <string name="ios_catalog_685c2871aa371b6f" formatted="false">Opcional. Úsalo para orientar las ideas hacia tu objetivo.</string>
     <!-- iOS key: Or -->
     <string name="ios_catalog_0568bd03b8eb6cca" formatted="false">O</string>
     <!-- iOS key: Original -->
@@ -3725,6 +4047,8 @@
     <string name="ios_catalog_81bf1c065ac11d3d" formatted="false">Pace %@</string>
     <!-- iOS key: Particularly useful before exercises like push-ups or bench press. -->
     <string name="ios_catalog_7ea074f9e9a5e4ed" formatted="false">Particularmente útil antes de ejercicios como las flexiones o el press de banca.</string>
+    <!-- iOS key: Password -->
+    <string name="ios_catalog_e7cf3ef4f17c3999" formatted="false">Contraseña</string>
     <!-- iOS key: Pause -->
     <string name="ios_catalog_858e4ba7a29fd38b" formatted="false">Pausa</string>
     <!-- iOS key: Pause briefly near the top to maximize the biceps contraction. -->
@@ -3763,6 +4087,10 @@
     <string name="ios_catalog_ca3c143ca36a167e" formatted="false">Por 100g</string>
     <!-- iOS key: Per unit -->
     <string name="ios_catalog_004d0203abbf9460" formatted="false">Por unidad</string>
+    <!-- iOS key: Per-set targets -->
+    <string name="ios_catalog_eb55e9eb8d8b2121" formatted="false">Objetivos por serie</string>
+    <!-- iOS key: Per-set targets default from the selected style, but you can override them above. -->
+    <string name="ios_catalog_5ddb2b466eb528ac" formatted="false">Los objetivos por serie provienen por defecto del estilo seleccionado, pero puedes anularlos arriba.</string>
     <!-- iOS key: Per-side load -->
     <string name="ios_catalog_bb2b165e4157c381" formatted="false">Carga por lado</string>
     <!-- iOS key: Perfect consistency -->
@@ -3797,6 +4125,10 @@
     <string name="ios_catalog_ce7b41886f0a1fa0" formatted="false">Pescetariano</string>
     <!-- iOS key: Phase: %@ -->
     <string name="ios_catalog_b9fb4ba433de0875" formatted="false">Fase: %@</string>
+    <!-- iOS key: Photo -->
+    <string name="ios_catalog_d84eebada93efee1" formatted="false">Foto</string>
+    <!-- iOS key: Photo input -->
+    <string name="ios_catalog_5eedc2c2892e4b1a" formatted="false">Entrada de foto</string>
     <!-- iOS key: Photos (Required) -->
     <string name="ios_catalog_c02420887874d5e9" formatted="false">Fotos (obligatorias)</string>
     <!-- iOS key: Pick a gym below to book a room. -->
@@ -3851,6 +4183,8 @@
     <string name="ios_catalog_74c0ca2fe102c254" formatted="false">Plancha</string>
     <!-- iOS key: Planned -->
     <string name="ios_catalog_fb6f7c93e6bf3dfa" formatted="false">Planned</string>
+    <!-- iOS key: Planned foods: %@ -->
+    <string name="ios_catalog_2deacd33ade06ff3" formatted="false">Alimentos planificados: %@</string>
     <!-- iOS key: Planned Meal -->
     <string name="ios_catalog_1b26abec8a08c360" formatted="false">Comida planificada</string>
     <!-- iOS key: Planned Workout -->
@@ -3899,6 +4233,8 @@
     <string name="ios_catalog_7ab865c024f42702" formatted="false">Colócate bajo la barra con los pies ligeramente hacia delante y separados al ancho de los hombros.</string>
     <!-- iOS key: Post-workout -->
     <string name="ios_catalog_5a30de45ba5ce98c" formatted="false">Post-entrenamiento</string>
+    <!-- iOS key: PR: %@ -->
+    <string name="ios_catalog_253b9cdda57c7919" formatted="false">Récord personal: %@</string>
     <!-- iOS key: Practice form -->
     <string name="ios_catalog_591ece70ba2b7aae" formatted="false">Practicar la técnica</string>
     <!-- iOS key: Pre-workout -->
@@ -4163,6 +4499,8 @@
     <string name="ios_catalog_613b365e3652b37e" formatted="false">Comidas recientes</string>
     <!-- iOS key: Recent training stress by major muscle group, with newer sessions weighted more heavily. -->
     <string name="ios_catalog_469ff92b7a9e0f9f" formatted="false">Carga de entrenamiento reciente por grupo muscular principal, con las sesiones más recientes ponderadas con mayor peso.</string>
+    <!-- iOS key: Recommendations -->
+    <string name="ios_catalog_0738ee00b61bc3af" formatted="false">Recomendaciones</string>
     <!-- iOS key: Recommended Substitutes -->
     <string name="ios_catalog_880c0c4114bc2995" formatted="false">Sustitutos recomendados</string>
     <!-- iOS key: Records -->
@@ -4179,6 +4517,8 @@
     <string name="ios_catalog_661e0a609a0d4778" formatted="false">Rehacer plan</string>
     <!-- iOS key: Reference -->
     <string name="ios_catalog_71bf90935fc231d2" formatted="false">Referencia</string>
+    <!-- iOS key: Regenerate -->
+    <string name="ios_catalog_1651031bf58d8eea" formatted="false">Regenerar</string>
     <!-- iOS key: Regenerate Plan -->
     <string name="ios_catalog_9d7f7bc34291b80c" formatted="false">Regenerar plan</string>
     <!-- iOS key: Register with email -->
@@ -4209,6 +4549,8 @@
     <string name="ios_catalog_909d6ccfe9f92004" formatted="false">¿Eliminar marcador?</string>
     <!-- iOS key: Remove Exercise -->
     <string name="ios_catalog_ed399f795285ad92" formatted="false">Eliminar ejercicio</string>
+    <!-- iOS key: Remove ingredient %@ -->
+    <string name="ios_catalog_25626f0bde3de078" formatted="false">Eliminar ingrediente %@</string>
     <!-- iOS key: Remove photo -->
     <string name="ios_catalog_f46512ab2099fb0c" formatted="false">Eliminar foto</string>
     <!-- iOS key: Remove Round -->
@@ -4219,12 +4561,16 @@
     <string name="ios_catalog_8fc6e0e16f6ecf22" formatted="false">Se renueva</string>
     <!-- iOS key: rep -->
     <string name="ios_catalog_ca27e538f3b183aa" formatted="false">repetición</string>
+    <!-- iOS key: Rep %d -->
+    <string name="ios_catalog_ec2e98f8cbe0b477" formatted="false">Rep. %d</string>
     <!-- iOS key: Rep consistency -->
     <string name="ios_catalog_b81a2c2fac9f15e1" formatted="false">Consistencia de repeticiones</string>
     <!-- iOS key: Rep Insights -->
     <string name="ios_catalog_899a3f96b482c19b" formatted="false">Análisis de repeticiones</string>
     <!-- iOS key: Rep tracking -->
     <string name="ios_catalog_830d17dfcb4bb19e" formatted="false">Seguimiento de repeticiones</string>
+    <!-- iOS key: Repeat for %d rounds -->
+    <string name="ios_catalog_faee1b2a6114c060" formatted="false">Repetir durante %d rondas</string>
     <!-- iOS key: Repeat in a rhythmic fashion. -->
     <string name="ios_catalog_14cb900de341bbc3" formatted="false">Repite de forma rítmica.</string>
     <!-- iOS key: Repeat on the other side. -->
@@ -4233,6 +4579,8 @@
     <string name="ios_catalog_032f307a6d965e53" formatted="false">Repetir salida</string>
     <!-- iOS key: Repeat the same clean working pattern across each set. -->
     <string name="ios_catalog_d1b45ad8dd914074" formatted="false">Repite el mismo patrón de trabajo limpio en cada serie.</string>
+    <!-- iOS key: Replace workout day -->
+    <string name="ios_catalog_c52c77127549846f" formatted="false">Sustituir día de entrenamiento</string>
     <!-- iOS key: Reps -->
     <string name="ios_catalog_85bf5aae0c21e80f" formatted="false">Reps</string>
     <!-- iOS key: Requesting… -->
@@ -4253,14 +4601,20 @@
     <string name="ios_catalog_ec4b3ecb7ae2ed8f" formatted="false">Volver a escanear</string>
     <!-- iOS key: Reset -->
     <string name="ios_catalog_daee7606b339f3c3" formatted="false">Restablecer</string>
+    <!-- iOS key: Reset account sync -->
+    <string name="ios_catalog_ec3df9ffb0178f98" formatted="false">Restablecer sincronización de la cuenta</string>
     <!-- iOS key: Resistance Bands -->
     <string name="ios_catalog_dfd296817070ed56" formatted="false">Bandas de resistencia</string>
     <!-- iOS key: Rest -->
     <string name="ios_catalog_05863ec2c3789276" formatted="false">Descanso</string>
     <!-- iOS key: Rest %d sec after block -->
     <string name="ios_catalog_87517d126611c0cf" formatted="false">Descanso de %d s tras el bloque</string>
+    <!-- iOS key: Rest %d sec after each round -->
+    <string name="ios_catalog_7d88429947d707f4" formatted="false">Descansa %d s después de cada ronda</string>
     <!-- iOS key: Rest %ds -->
     <string name="ios_catalog_021994b0ef8c7731" formatted="false">Rest %ds</string>
+    <!-- iOS key: Rest after each round -->
+    <string name="ios_catalog_1a5f8fd228bdc836" formatted="false">Descansar después de cada ronda</string>
     <!-- iOS key: Rest Before Next Block -->
     <string name="ios_catalog_b9c117d684045cf7" formatted="false">Descanso antes del siguiente bloque</string>
     <!-- iOS key: Rest Before Next Round -->
@@ -4323,6 +4677,8 @@
     <string name="ios_catalog_f58deea3284d2b76" formatted="false">A continuación: revisión</string>
     <!-- iOS key: Review entry -->
     <string name="ios_catalog_c520d28db69b28cc" formatted="false">Revisar entrada</string>
+    <!-- iOS key: Review ingredients -->
+    <string name="ios_catalog_6baa04425cf2e3db" formatted="false">Revisar ingredientes</string>
     <!-- iOS key: Review the gallery, then compare your first and newer check-ins. -->
     <string name="ios_catalog_efb4b243fb2c760c" formatted="false">Revisa la galería y luego compara tu primer registro con los más recientes.</string>
     <!-- iOS key: Review your profile before creating it. -->
@@ -4331,6 +4687,8 @@
     <string name="ios_catalog_190fa9b0c640c6bd" formatted="false">Revisando las limitaciones de movimiento...</string>
     <!-- iOS key: Ring Dip -->
     <string name="ios_catalog_f89f3e02cc5f6b03" formatted="false">Fondos en anillas</string>
+    <!-- iOS key: RIR %d -->
+    <string name="ios_catalog_73589e393c39333f" formatted="false">RIR %d</string>
     <!-- iOS key: RIR %d means finish the set feeling like you could still do about %d more %@ with good form. -->
     <string name="ios_catalog_0afbb6d0ecadeb43" formatted="false">RIR %d significa terminar la serie sintiendo que podrías hacer aproximadamente %d %@ más con buena técnica.</string>
     <!-- iOS key: RIR 0 means finish the set at failure, with no reps left in reserve. -->
@@ -4413,8 +4771,14 @@
     <string name="ios_catalog_719a8bdbe9b7623c" formatted="false">Alimento escaneado</string>
     <!-- iOS key: Scapular Circles -->
     <string name="ios_catalog_cfff11954968df77" formatted="false">Rotaciones escapulares</string>
+    <!-- iOS key: Scope -->
+    <string name="ios_catalog_b073f6c68ef87211" formatted="false">Ámbito</string>
     <!-- iOS key: Scorpions -->
     <string name="ios_catalog_3fef6974cdbe75cc" formatted="false">Escorpiones</string>
+    <!-- iOS key: Screen Time permission is required before Full focus mode can turn on. -->
+    <string name="ios_catalog_93173809e467df37" formatted="false">Se necesita permiso para Tiempo de uso para activar el modo de concentración total.</string>
+    <!-- iOS key: Screen Time permission was revoked. Run setup again to re-enable it. -->
+    <string name="ios_catalog_24f8267628f5f084" formatted="false">Se ha revocado el permiso de Tiempo de uso. Vuelve a realizar la configuración para activarlo de nuevo.</string>
     <!-- iOS key: Search address or place -->
     <string name="ios_catalog_49925f2dfc6a3427" formatted="false">Buscar dirección o lugar</string>
     <!-- iOS key: Search and pick a location to pin it on the map. -->
@@ -4427,6 +4791,8 @@
     <string name="ios_catalog_7496bbe1891e6401" formatted="false">Buscar en la base de datos de alimentos</string>
     <!-- iOS key: Search for a gym, hotel, or address and pick a result to save the exact map position. -->
     <string name="ios_catalog_9c4666936dd3c9fd" formatted="false">Busca un gimnasio, hotel o dirección y selecciona un resultado para guardar la posición exacta en el mapa.</string>
+    <!-- iOS key: Search for a gym, hotel, or address and save the exact map position. -->
+    <string name="ios_catalog_d2682c9babc6c246" formatted="false">Busca un gimnasio, hotel o dirección y guarda la ubicación exacta en el mapa.</string>
     <!-- iOS key: Search meals or foods -->
     <string name="ios_catalog_05d746e0473c5c4a" formatted="false">Buscar comidas o alimentos</string>
     <!-- iOS key: Searching... -->
@@ -4443,6 +4809,8 @@
     <string name="ios_catalog_62f2ccfffcc5103e" formatted="false">Secundario</string>
     <!-- iOS key: Secondary muscles: %@ -->
     <string name="ios_catalog_a1185e36deb6a1c6" formatted="false">Músculos secundarios: %@</string>
+    <!-- iOS key: Section -->
+    <string name="ios_catalog_dfca5da56b8cdb62" formatted="false">Sección</string>
     <!-- iOS key: Secure your feet in the decline bench and lie back. -->
     <string name="ios_catalog_9c56e0660b630798" formatted="false">Asegura los pies en el banco declinado y recuéstate.</string>
     <!-- iOS key: Sedentary -->
@@ -4451,24 +4819,34 @@
     <string name="ios_catalog_5f32bc61dd5f570d" formatted="false">Ver detalles</string>
     <!-- iOS key: See future -->
     <string name="ios_catalog_654fcbee2f3f3e90" formatted="false">Ver próximos</string>
+    <!-- iOS key: Select 2 or more consecutive standard exercises. -->
+    <string name="ios_catalog_97391176d113bfa9" formatted="false">Selecciona 2 o más ejercicios estándar consecutivos.</string>
+    <!-- iOS key: Select Exercises -->
+    <string name="ios_catalog_9720be5ac52895b7" formatted="false">Seleccionar ejercicios</string>
     <!-- iOS key: Select Photo -->
     <string name="ios_catalog_3e77227f0a0b2dd9" formatted="false">Seleccionar foto</string>
     <!-- iOS key: Select Social and Games first, then add any other categories you want blocked during workouts. -->
     <string name="ios_catalog_a1fe0b1aeedafe9c" formatted="false">Selecciona primero Social y Juegos, luego añade cualquier otra categoría que quieras bloquear durante los entrenamientos.</string>
     <!-- iOS key: Select Social and Games first, then add any other distracting categories. -->
     <string name="ios_catalog_528e6a972878f0d8" formatted="false">Selecciona primero Social y Juegos, luego añade cualquier otra categoría que distraiga.</string>
+    <!-- iOS key: Select the equipment that is available at this location. -->
+    <string name="ios_catalog_72556ecbf2fc0482" formatted="false">Selecciona el equipamiento disponible en esta ubicación.</string>
     <!-- iOS key: Select when you train and what you have access to. -->
     <string name="ios_catalog_2940ab7ca90c47ff" formatted="false">Select when you train and what you have access to.</string>
     <!-- iOS key: Select when you want to train each week. -->
     <string name="ios_catalog_09c094a7711fdde6" formatted="false">Selecciona cuándo quieres entrenar cada semana.</string>
     <!-- iOS key: Select Workout -->
     <string name="ios_catalog_1fede448bded1084" formatted="false">Seleccionar entrenamiento</string>
+    <!-- iOS key: Selected app categories are blocked during active workouts. -->
+    <string name="ios_catalog_5ff057bbf643a274" formatted="false">Las categorías de apps seleccionadas se bloquean durante los entrenamientos activos.</string>
     <!-- iOS key: Selected categories -->
     <string name="ios_catalog_1135bd532ac945bc" formatted="false">Categorías seleccionadas</string>
     <!-- iOS key: Selected in iOS: %lld categories. -->
     <string name="ios_catalog_046b8d4161cef2bd" formatted="false">Seleccionado en iOS: %lld categorías.</string>
     <!-- iOS key: Selected in iOS: 1 category. -->
     <string name="ios_catalog_80a595d16a072441" formatted="false">Seleccionado en iOS: 1 categoría.</string>
+    <!-- iOS key: Selected location -->
+    <string name="ios_catalog_82f9787d72a9e255" formatted="false">Ubicación seleccionada</string>
     <!-- iOS key: Send Feedback -->
     <string name="ios_catalog_84195de9375af87c" formatted="false">Enviar comentarios</string>
     <!-- iOS key: Separate your knees about hip-width apart. -->
@@ -4481,8 +4859,24 @@
     <string name="ios_catalog_b20f8f7acc4d957d" formatted="false">Tamaño de la porción (p. ej. 60 g)</string>
     <!-- iOS key: Session mix in this period -->
     <string name="ios_catalog_82e9d9905d132788" formatted="false">Mezcla de sesiones en este periodo</string>
+    <!-- iOS key: Sessions -->
+    <string name="ios_catalog_6fa3cbf451b2a1d5" formatted="false">Sesiones</string>
+    <!-- iOS key: Set -->
+    <string name="ios_catalog_b6f6f3ad07b3c05f" formatted="false">Serie</string>
+    <!-- iOS key: Set %d -->
+    <string name="ios_catalog_9047e6a50002b0b2" formatted="false">Serie %d</string>
     <!-- iOS key: Set %d · Current -->
     <string name="ios_catalog_f822e605019d4704" formatted="false">Serie %d · Actual</string>
+    <!-- iOS key: Set %d reps -->
+    <string name="ios_catalog_a7eb95ae61010638" formatted="false">Establece %d repeticiones</string>
+    <!-- iOS key: Set %d weight -->
+    <string name="ios_catalog_61117ecb72da6b08" formatted="false">Establece el peso en %d</string>
+    <!-- iOS key: Set %d: -->
+    <string name="ios_catalog_34d7c69d301c8c15" formatted="false">Serie %d:</string>
+    <!-- iOS key: Set 1 %@ -->
+    <string name="ios_catalog_46a9ab101b5a53cf" formatted="false">Serie 1 %@</string>
+    <!-- iOS key: Set 1: %@ -->
+    <string name="ios_catalog_80177b22fa2042b5" formatted="false">Serie 1: %@</string>
     <!-- iOS key: Set an adjustable bench to a 30-45 degree incline. -->
     <string name="ios_catalog_2c66a1b32baedf1c" formatted="false">Ajusta un banco regulable a una inclinación de 30–45 grados.</string>
     <!-- iOS key: Set Analysis -->
@@ -4493,6 +4887,8 @@
     <string name="ios_catalog_11b9724b7d581e5b" formatted="false">Establecer descanso</string>
     <!-- iOS key: Set shutter timer -->
     <string name="ios_catalog_1f48fbac0181bdd1" formatted="false">Configurar temporizador del obturador</string>
+    <!-- iOS key: Set Style -->
+    <string name="ios_catalog_92804afed402509e" formatted="false">Tipo de serie</string>
     <!-- iOS key: Set the adjustable bench to an incline and center it under the Smith machine bar. -->
     <string name="ios_catalog_32211102e93306b4" formatted="false">Ajusta el banco regulable a una inclinación y colócalo centrado bajo la barra de la máquina Smith.</string>
     <!-- iOS key: Set the bench to a 30-45 degree incline and position yourself under the bar. -->
@@ -4523,6 +4919,8 @@
     <string name="ios_catalog_74a883a037bc227f" formatted="false">Ajustes</string>
     <!-- iOS key: Setup needed -->
     <string name="ios_catalog_3b19dc573d484352" formatted="false">Configuración necesaria</string>
+    <!-- iOS key: Setup required -->
+    <string name="ios_catalog_1a367c79441e13b7" formatted="false">Configuración necesaria</string>
     <!-- iOS key: Share workout -->
     <string name="ios_catalog_9b85068c91177b64" formatted="false">Compartir entrenamiento</string>
     <!-- iOS key: Short rests -->
@@ -4565,6 +4963,10 @@
     <string name="ios_catalog_1c3607d5f4fd9535" formatted="false">Lados</string>
     <!-- iOS key: Sign in to continue your training. -->
     <string name="ios_catalog_d9a3262551b8ecd5" formatted="false">Inicia sesión para continuar tu entrenamiento.</string>
+    <!-- iOS key: Sign in with email -->
+    <string name="ios_catalog_e6f13c85f15b8244" formatted="false">Iniciar sesión con correo electrónico</string>
+    <!-- iOS key: Sign in with Google -->
+    <string name="ios_catalog_1dbcee6824432178" formatted="false">Iniciar sesión con Google</string>
     <!-- iOS key: Sign it with email -->
     <string name="ios_catalog_0533e08f44e77f6d" formatted="false">Iniciar sesión con correo electrónico</string>
     <!-- iOS key: Sign up with email -->
@@ -4731,6 +5133,8 @@
     <string name="ios_catalog_04b7fd6e1ee61f87" formatted="false">Suaviza estos movimientos en un movimiento circular, realizando ambas direcciones.</string>
     <!-- iOS key: Snack -->
     <string name="ios_catalog_5aabb52b4aef08ed" formatted="false">Tentempié</string>
+    <!-- iOS key: Snap your ingredients and we’ll identify them for you. -->
+    <string name="ios_catalog_0637e4535ffc98b0" formatted="false">Haz una foto de tus ingredientes y los identificaremos.</string>
     <!-- iOS key: Solid session -->
     <string name="ios_catalog_3b11736cc112044b" formatted="false">Sesión sólida</string>
     <!-- iOS key: Some accessories -->
@@ -4901,6 +5305,8 @@
     <string name="ios_catalog_e36433effd8c9bf9" formatted="false">Comienza a una velocidad lenta para acostumbrarte al movimiento.</string>
     <!-- iOS key: Start date -->
     <string name="ios_catalog_8169693101a4536c" formatted="false">Fecha de inicio</string>
+    <!-- iOS key: Start estimate -->
+    <string name="ios_catalog_94ef1252103748f0" formatted="false">Iniciar estimación</string>
     <!-- iOS key: Start in a high plank position with your hands slightly wider than shoulder-width. -->
     <string name="ios_catalog_d0bc766df8eb7353" formatted="false">Comienza en posición de plancha alta con las manos un poco más separadas que el ancho de los hombros.</string>
     <!-- iOS key: Start in a high plank position with your hands under your shoulders and your body in a straight line. -->
@@ -4929,6 +5335,8 @@
     <string name="ios_catalog_cd370e18d2008193" formatted="false">Iniciar el entrenamiento de hoy</string>
     <!-- iOS key: START TRAINING -->
     <string name="ios_catalog_198de781f196adf4" formatted="false">INICIAR ENTRENAMIENTO</string>
+    <!-- iOS key: Start typing an address to search for it. -->
+    <string name="ios_catalog_d5e3713cb7b9e6fe" formatted="false">Empieza a escribir una dirección para buscarla.</string>
     <!-- iOS key: Start with a short warmup walk or light jog. -->
     <string name="ios_catalog_36608cf57d0c819d" formatted="false">Comienza con una breve caminata de calentamiento o trote suave.</string>
     <!-- iOS key: Start with easier sets before your hard work sets. The goal is to raise body temperature, practice the movement, and gradually get closer to your working weight without creating too much fatigue. -->
@@ -4957,6 +5365,8 @@
     <string name="ios_catalog_81d100f26d566955" formatted="false">Mantente dentro de la guía</string>
     <!-- iOS key: Stay light on your feet and move around the bag. -->
     <string name="ios_catalog_8c03c9eb771655f4" formatted="false">Mantente ligero sobre los pies y muévete alrededor del saco.</string>
+    <!-- iOS key: Stay moving -->
+    <string name="ios_catalog_24d815bcb0df189e" formatted="false">Sigue en movimiento</string>
     <!-- iOS key: Step %d of %d -->
     <string name="ios_catalog_1ce2169c501a8fb5" formatted="false">Paso %d de %d</string>
     <!-- iOS key: Step %d: %@ -->
@@ -5031,6 +5441,8 @@
     <string name="ios_catalog_d5972f115fe1ab30" formatted="false">Suscribirse Al Plan Anual</string>
     <!-- iOS key: Subscription -->
     <string name="ios_catalog_4999c6c6c7badf45" formatted="false">Suscripción</string>
+    <!-- iOS key: Subscription unavailable -->
+    <string name="ios_catalog_bc3442fff4d2147c" formatted="false">Suscripción no disponible</string>
     <!-- iOS key: Suggested · %@ -->
     <string name="ios_catalog_bfe38c9e5af80d53" formatted="false">Sugerido · %@</string>
     <!-- iOS key: Sunday -->
@@ -5041,6 +5453,10 @@
     <string name="ios_catalog_23ead86a6fff1769" formatted="false">Superserie</string>
     <!-- iOS key: Superset · Round %d of %d -->
     <string name="ios_catalog_0191d9148a06856c" formatted="false">Superserie · Ronda %d de %d</string>
+    <!-- iOS key: Superset Mode -->
+    <string name="ios_catalog_522d3d9f165f3d8c" formatted="false">Modo de superseries</string>
+    <!-- iOS key: Supersets are meant to feel smooth, not rushed. -->
+    <string name="ios_catalog_939de08563994350" formatted="false">Las superseries deben sentirse fluidas, no apresuradas.</string>
     <!-- iOS key: Support yourself on the rings with arms fully extended. -->
     <string name="ios_catalog_ae20d9087493a142" formatted="false">Apóyate en los anillos con los brazos completamente extendidos.</string>
     <!-- iOS key: Suspended -->
@@ -5071,6 +5487,8 @@
     <string name="ios_catalog_7c2e25efbed29027" formatted="false">Cambia de pierna y repite.</string>
     <!-- iOS key: Switch sides, bringing your left elbow toward your right knee and extending your left leg. -->
     <string name="ios_catalog_ab407f86d13f75a8" formatted="false">Cambia de lado, llevando el codo izquierdo hacia la rodilla derecha y extendiendo la pierna izquierda.</string>
+    <!-- iOS key: Switches to another gym -->
+    <string name="ios_catalog_525a026432127eb9" formatted="false">Cambia a otro gimnasio</string>
     <!-- iOS key: Sync with Apple Health -->
     <string name="ios_catalog_f3a6a4999ced85bf" formatted="false">Sincronizar con Apple Health</string>
     <!-- iOS key: Syncing from Apple Health... -->
@@ -5091,6 +5509,8 @@
     <string name="ios_catalog_7100ac9979a623d5" formatted="false">Tomar foto</string>
     <!-- iOS key: Take photos around the same time of day -->
     <string name="ios_catalog_72ca7bbaf9a550f6" formatted="false">Toma fotos aproximadamente a la misma hora del día</string>
+    <!-- iOS key: Take the main rest after the round -->
+    <string name="ios_catalog_c1b7491b07370e34" formatted="false">Haz el descanso principal después de la ronda</string>
     <!-- iOS key: Take your first progress photos -->
     <string name="ios_catalog_c85e2a036bb62829" formatted="false">Toma tus primeras fotos de progreso</string>
     <!-- iOS key: Tap to reveal -->
@@ -5127,6 +5547,8 @@
     <string name="ios_catalog_5c347cc7415c7f7a" formatted="false">Tell us about your current fitness experience.</string>
     <!-- iOS key: Tell us about your daily activity level. -->
     <string name="ios_catalog_ddb78b96ba7104c1" formatted="false">Cuéntanos sobre tu nivel de actividad diaria.</string>
+    <!-- iOS key: Tell us anything the photo estimate missed or got wrong, including ingredients, portions, or preparation. -->
+    <string name="ios_catalog_37c9ed66a823804f" formatted="false">Cuéntanos qué ha pasado por alto o ha calculado mal la estimación de la foto, incluidos los ingredientes, las porciones o la preparación.</string>
     <!-- iOS key: Tempo -->
     <string name="ios_catalog_214b5b846cf3925f" formatted="false">Tempo</string>
     <!-- iOS key: Tempo %@ -->
@@ -5135,8 +5557,14 @@
     <string name="ios_catalog_8c35486689c75db0" formatted="false">Tempo %@ indica cuán controlada debe ser cada repetición, abarcando por lo general las fases de descenso, las pausas y el levantamiento, en ese orden.</string>
     <!-- iOS key: Tempo work improves control, keeps tension on the target muscle, and can make lighter loads more effective. It\'s especially useful when technique, positioning, or muscle awareness matters more than moving the most weight possible. -->
     <string name="ios_catalog_93b8edb6b1370db1" formatted="false">El trabajo de tempo mejora el control, mantiene la tensión en el músculo objetivo y puede hacer que cargas más ligeras sean más efectivas. Es especialmente útil cuando la técnica, la colocación o la conciencia muscular importan más que mover el máximo peso posible.</string>
+    <!-- iOS key: Thank you -->
+    <string name="ios_catalog_268bc1833e83306f" formatted="false">Gracias</string>
     <!-- iOS key: Thank You! -->
     <string name="ios_catalog_cdd2fb2d19c934d9" formatted="false">¡Gracias!</string>
+    <!-- iOS key: The analysis was cancelled before it finished. -->
+    <string name="ios_catalog_eb943d29ed220ae7" formatted="false">El análisis se canceló antes de terminar.</string>
+    <!-- iOS key: The app tracks the block round by round, so the flow feels tighter and more intentional. -->
+    <string name="ios_catalog_30dd3d996d0d3f5d" formatted="false">La app registra el bloque ronda a ronda, para que el flujo sea más ágil e intencionado.</string>
     <!-- iOS key: The bar should feel like it\'s resting on your deltoids, not your collarbone. -->
     <string name="ios_catalog_969ee55919bb7b8c" formatted="false">La barra debe sentirse como si descansara sobre tus deltoides, no sobre la clavícula.</string>
     <!-- iOS key: The cable provides tension even at the bottom of the rep, unlike dumbbells. -->
@@ -5195,8 +5623,14 @@
     <string name="ios_catalog_5ceda7095f77a4dc" formatted="false">Estos valores son estimados y pueden no ser exactos.</string>
     <!-- iOS key: Think about curling your spine one segment at a time instead of just pulling with your arms. -->
     <string name="ios_catalog_a65db9f6519a221a" formatted="false">Piensa en curvar la columna vertebral vértebra a vértebra en lugar de tirar solo con los brazos.</string>
+    <!-- iOS key: Think in rounds -->
+    <string name="ios_catalog_e15008da0b928048" formatted="false">Piensa en rondas</string>
     <!-- iOS key: Thinking... -->
     <string name="ios_catalog_b4739a4f08650db2" formatted="false">Pensando...</string>
+    <!-- iOS key: This block pairs %@ into one flow for %d rounds. -->
+    <string name="ios_catalog_dca6cc233fe88123" formatted="false">Este bloque combina %@ en una secuencia de %d rondas.</string>
+    <!-- iOS key: This block pairs exercises together so you can move through them as one connected round. -->
+    <string name="ios_catalog_8c982d81ef9f01b4" formatted="false">Este bloque combina ejercicios para que puedas hacerlos como una única ronda continua.</string>
     <!-- iOS key: This controls whether your future plan should include meal ideas alongside macro targets. -->
     <string name="ios_catalog_56ed2a1318a51cee" formatted="false">Esto controla si tu plan futuro debe incluir ideas de comidas junto con los objetivos de macronutrientes.</string>
     <!-- iOS key: This cue means one hard set is broken into short mini-efforts with tiny rests. -->
@@ -5239,6 +5673,8 @@
     <string name="ios_catalog_704dd4fcf68dc566" formatted="false">Esto nos ayuda a distribuir calorías y macros de una manera que resulte realista.</string>
     <!-- iOS key: This is a backoff set. Reduce the load from your top set and keep the reps crisp. -->
     <string name="ios_catalog_ffc1ce7d37fea340" formatted="false">Esta es una serie de descarga. Reduce la carga respecto a tu serie máxima y mantén las repeticiones nítidas.</string>
+    <!-- iOS key: This is a non-medical estimate based on photos and app context. Accuracy may vary with pose, clothing, lighting, camera angle, and image quality. -->
+    <string name="ios_catalog_3a9c47b05a7f60af" formatted="false">Esta es una estimación no médica basada en fotos y en el contexto de la app. La precisión puede variar según la pose, la ropa, la iluminación, el ángulo de la cámara y la calidad de la imagen.</string>
     <!-- iOS key: This is a realistic projection based on your training and nutrition plan. Select \'Compare\' to see it alongside your current check-in. -->
     <string name="ios_catalog_b4b54c5158b0ea9b" formatted="false">Esta es una proyección realista basada en tu plan de entrenamiento y nutrición. Selecciona \'Compare\' para verla junto a tu registro actual.</string>
     <!-- iOS key: This is how we\'ll address you in the app. -->
@@ -5287,6 +5723,8 @@
     <string name="ios_catalog_b804d6bff406be6e" formatted="false">Este horario ya no está disponible. Es posible que la sala se haya cerrado.</string>
     <!-- iOS key: This time is outside the room’s booking window. -->
     <string name="ios_catalog_51b34b4ad6d39768" formatted="false">Este horario está fuera de la ventana de reservas de la sala.</string>
+    <!-- iOS key: This V1 estimate is limited to a body-fat range and brief qualitative observations. -->
+    <string name="ios_catalog_61ef6ee8b8876a84" formatted="false">Esta estimación V1 se limita a un rango de grasa corporal y a breves observaciones cualitativas.</string>
     <!-- iOS key: This week -->
     <string name="ios_catalog_8c4eef5ab2532515" formatted="false">Esta semana</string>
     <!-- iOS key: This will only take a moment. -->
@@ -5327,6 +5765,8 @@
     <string name="ios_catalog_2bf61a3bc850596a" formatted="false">veces</string>
     <!-- iOS key: Times are shown in the gym’s time zone (%@). -->
     <string name="ios_catalog_acf3e1cc9962aa76" formatted="false">Los horarios se muestran en la zona horaria del gimnasio (%@).</string>
+    <!-- iOS key: Tip: %@ -->
+    <string name="ios_catalog_74f056bbd94418c8" formatted="false">Consejo: %@</string>
     <!-- iOS key: Tips -->
     <string name="ios_catalog_3838a4d8cb8c5ccc" formatted="false">Consejos</string>
     <!-- iOS key: Today -->
@@ -5337,6 +5777,8 @@
     <string name="ios_catalog_d3a7b1068e30853d" formatted="false">Hoy, %@, sin plan nutricional</string>
     <!-- iOS key: Today\'s meals -->
     <string name="ios_catalog_e42a6cd22702b350" formatted="false">Comidas de hoy</string>
+    <!-- iOS key: Today\'s target -->
+    <string name="ios_catalog_36cd386b640c9593" formatted="false">Objetivo de hoy</string>
     <!-- iOS key: Today’s -->
     <string name="ios_catalog_82dd9a32b600d5d0" formatted="false">De hoy</string>
     <!-- iOS key: Today’s intake -->
@@ -5345,6 +5787,8 @@
     <string name="ios_catalog_aa1a8a696250dd01" formatted="false">Comidas de hoy</string>
     <!-- iOS key: Toggle voice capture -->
     <string name="ios_catalog_8954c86456fd10f0" formatted="false">Alternar captura de voz</string>
+    <!-- iOS key: Tomorrow -->
+    <string name="ios_catalog_456a73bbcefb1def" formatted="false">Mañana</string>
     <!-- iOS key: Tools to help -->
     <string name="ios_catalog_d569882ada66aa07" formatted="false">Herramientas de ayuda</string>
     <!-- iOS key: Top -->
@@ -5413,6 +5857,8 @@
     <string name="ios_catalog_d7b54b976c42113f" formatted="false">Tendencia de la carga de entrenamiento (Últimos 30 días)</string>
     <!-- iOS key: Training load trend (Last 7 days) -->
     <string name="ios_catalog_f2f9606b50e83717" formatted="false">Tendencia de la carga de entrenamiento (Últimos 7 días)</string>
+    <!-- iOS key: Training location -->
+    <string name="ios_catalog_b3552e14342c5aa6" formatted="false">Lugar de entrenamiento</string>
     <!-- iOS key: Training locations -->
     <string name="ios_catalog_312724f9c33deace" formatted="false">Lugares de entrenamiento</string>
     <!-- iOS key: Training plan -->
@@ -5423,6 +5869,8 @@
     <string name="ios_catalog_5e8d52f4b3c52bc2" formatted="false">El entrenamiento se mantuvo en buen rumbo</string>
     <!-- iOS key: Training time -->
     <string name="ios_catalog_ee93a0b48c855600" formatted="false">Hora de entrenamiento</string>
+    <!-- iOS key: Transition to the next exercise without losing setup focus. -->
+    <string name="ios_catalog_8f6f91df3a9f3f68" formatted="false">Pasa al siguiente ejercicio sin perder de vista la preparación.</string>
     <!-- iOS key: Trap Bar -->
     <string name="ios_catalog_76ad35b4e0ea7a0c" formatted="false">Barra hexagonal</string>
     <!-- iOS key: Treadmill -->
@@ -5455,6 +5903,8 @@
     <string name="ios_catalog_117b7a75f4c0246b" formatted="false">Activa la captura por voz cuando quieras disparar la foto sin tocar el teléfono.</string>
     <!-- iOS key: Turn your palms out slightly at the top for maximum stability. -->
     <string name="ios_catalog_b7a09583d68b36aa" formatted="false">Gira las palmas ligeramente hacia afuera en la parte superior para máxima estabilidad.</string>
+    <!-- iOS key: Turning your available ingredients into suggestions. -->
+    <string name="ios_catalog_defa48c3c52445e2" formatted="false">Convertimos los ingredientes que tienes en sugerencias.</string>
     <!-- iOS key: Tutorial animation for %@ -->
     <string name="ios_catalog_ac6ebc2fad900679" formatted="false">Animación del tutorial para %@</string>
     <!-- iOS key: Twist back to the other side in a controlled manner. -->
@@ -5463,16 +5913,22 @@
     <string name="ios_catalog_72c04e0d7126bb5a" formatted="false">Gira el torso hacia un lado, llevando las manos hacia el suelo junto a la cadera.</string>
     <!-- iOS key: Type or dictate what you ate and let AI estimate it. -->
     <string name="ios_catalog_5020c823d0596e45" formatted="false">Escribe o di lo que comiste y deja que la IA lo estime.</string>
+    <!-- iOS key: Type what you have on hand and get ideas from that list. -->
+    <string name="ios_catalog_591cf5e8ced2571a" formatted="false">Escribe lo que tienes a mano y descubre ideas a partir de esa lista.</string>
     <!-- iOS key: Typical Distance -->
     <string name="ios_catalog_b6d1d29e067ef30a" formatted="false">Distancia típica</string>
     <!-- iOS key: Typical Duration -->
     <string name="ios_catalog_6bf6d7686c9349b6" formatted="false">Duración típica</string>
     <!-- iOS key: Typical Pace -->
     <string name="ios_catalog_b0d6bf2d4328f1d6" formatted="false">Ritmo típico</string>
+    <!-- iOS key: Unable to prepare the avatar image. -->
+    <string name="ios_catalog_e1ef01e068ac0b61" formatted="false">No se pudo preparar la imagen del avatar.</string>
     <!-- iOS key: Unavailable -->
     <string name="ios_catalog_ca184496974204a0" formatted="false">No disponible</string>
     <!-- iOS key: Understand your training and stay consistent. -->
     <string name="ios_catalog_922d9e6d35a163ed" formatted="false">Comprende Tu Entrenamiento Y Mantente Constante.</string>
+    <!-- iOS key: Unilateral -->
+    <string name="ios_catalog_a0ea2d77053cc9b1" formatted="false">Unilateral</string>
     <!-- iOS key: Unit -->
     <string name="ios_catalog_4e545960f1bffc13" formatted="false">Unidad</string>
     <!-- iOS key: Units -->
@@ -5611,6 +6067,8 @@
     <string name="ios_catalog_5d71026315fd064d" formatted="false">Usa tu código de acceso para ver tus registros y comparaciones guardados.</string>
     <!-- iOS key: Use your wrists to rotate the rope, not your whole arms. -->
     <string name="ios_catalog_517086650efd1ece" formatted="false">Usa las muñecas para girar la cuerda, no todo el brazo.</string>
+    <!-- iOS key: Used ingredients -->
+    <string name="ios_catalog_cb55ca557227aecc" formatted="false">Ingredientes utilizados</string>
     <!-- iOS key: User Default -->
     <string name="ios_catalog_646b1d350eaf5ddb" formatted="false">Predeterminado del usuario</string>
     <!-- iOS key: User Prompt -->
@@ -5629,6 +6087,8 @@
     <string name="ios_catalog_2be9d9cd3baa7de6" formatted="false">Utiliza cables para proporcionar tensión constante en los músculos del pecho durante todo el rango de movimiento.</string>
     <!-- iOS key: Using manual entry for this set. -->
     <string name="ios_catalog_063ae3e3f090840d" formatted="false">Usando entrada manual para esta serie.</string>
+    <!-- iOS key: Value -->
+    <string name="ios_catalog_8e37953d23daca5f" formatted="false">Valor</string>
     <!-- iOS key: Values per 100g -->
     <string name="ios_catalog_d7b0eb9b09608eae" formatted="false">Valores por 100 g</string>
     <!-- iOS key: Vary the resistance and incline to target different muscle groups. -->
@@ -5657,10 +6117,14 @@
     <string name="ios_catalog_62a822f652de07ca" formatted="false">Ver prompt de IA</string>
     <!-- iOS key: View error details -->
     <string name="ios_catalog_a9d0604e9024d51e" formatted="false">Ver detalles del error</string>
+    <!-- iOS key: View notes -->
+    <string name="ios_catalog_49179afac787f8e9" formatted="false">Ver notas</string>
     <!-- iOS key: View progress photo tips -->
     <string name="ios_catalog_94832cea906542cd" formatted="false">Ver consejos para fotos de progreso</string>
     <!-- iOS key: View subscription options -->
     <string name="ios_catalog_e1f2620b9b2b86bd" formatted="false">Ver opciones de suscripción</string>
+    <!-- iOS key: Visible insights -->
+    <string name="ios_catalog_991bbb43d57a7196" formatted="false">Información visible</string>
     <!-- iOS key: Voice activation -->
     <string name="ios_catalog_cbf6faabed753f1c" formatted="false">Activación por voz</string>
     <!-- iOS key: Voice capture couldn\'t start. -->
@@ -5671,6 +6135,8 @@
     <string name="ios_catalog_1305e767c6b41274" formatted="false">Volumen (kg)</string>
     <!-- iOS key: Volume (lb) -->
     <string name="ios_catalog_f7ca9bde252b4bc7" formatted="false">Volumen (lb)</string>
+    <!-- iOS key: Volume %@ -->
+    <string name="ios_catalog_0e779e48630da252" formatted="false">Volumen %@</string>
     <!-- iOS key: Volume over time -->
     <string name="ios_catalog_326192660d47f0b3" formatted="false">Volumen a lo largo del tiempo</string>
     <!-- iOS key: Volume trend -->
@@ -5695,6 +6161,8 @@
     <string name="ios_catalog_111a4d2e2ef3e422" formatted="false">Warmup</string>
     <!-- iOS key: Warmup sets help you feel more prepared before heavy work, improve movement quality, and reduce the chance that your first hard set feels abrupt or sloppy. -->
     <string name="ios_catalog_f04db7566f02190d" formatted="false">Las series de calentamiento te ayudan a sentirte más preparado antes de cargas pesadas, a mejorar la calidad del movimiento y a reducir la probabilidad de que tu primera serie intensa sea brusca o torpe.</string>
+    <!-- iOS key: Warmup styling is applied without extra configuration. -->
+    <string name="ios_catalog_4e23e5c9e0d7bd06" formatted="false">El estilo del calentamiento se aplica sin configuración adicional.</string>
     <!-- iOS key: Watch Auto Tracking -->
     <string name="ios_catalog_965ab94149a18fcb" formatted="false">Seguimiento automático (Watch)</string>
     <!-- iOS key: Watch auto-tracking is disabled. -->
@@ -5707,16 +6175,26 @@
     <string name="ios_catalog_dbae3e9ba44b12b1" formatted="false">Ver vídeo</string>
     <!-- iOS key: Watch video for %@ -->
     <string name="ios_catalog_a1231312bef0d65f" formatted="false">Ver vídeo de %@</string>
+    <!-- iOS key: We couldn\'t finish the estimate right now. Please try again. -->
+    <string name="ios_catalog_61c117341bc968fb" formatted="false">No hemos podido completar la estimación ahora. Inténtalo de nuevo.</string>
+    <!-- iOS key: We couldn\'t read this check-in clearly enough to estimate body composition right now. -->
+    <string name="ios_catalog_440269c7bd2ae675" formatted="false">No hemos podido analizar este registro con suficiente claridad para estimar el porcentaje de grasa corporal.</string>
     <!-- iOS key: We couldn\'t sign you in. Check your details and try again. -->
     <string name="ios_catalog_09fa5dfbd4b96718" formatted="false">No hemos podido iniciar sesión. Comprueba tus datos e inténtalo de nuevo.</string>
     <!-- iOS key: We couldn’t find that location right now. -->
     <string name="ios_catalog_332aa128b01fd13c" formatted="false">No hemos podido encontrar esa ubicación en este momento.</string>
     <!-- iOS key: We recommend selecting Social and Games first, then adding anything else that tends to pull you out of your workout. -->
     <string name="ios_catalog_ee34a6fc62d330d5" formatted="false">Recomendamos seleccionar primero Social y Juegos, y luego añadir todo lo demás que tienda a sacarte del entrenamiento.</string>
+    <!-- iOS key: We\'ll analyse your current check-in photos with AI and return a non-medical body-fat estimate plus a few coaching notes. Accuracy can vary with pose, clothing, lighting, and image quality. -->
+    <string name="ios_catalog_2958538cbe4913b2" formatted="false">Analizaremos con IA tus fotos actuales del registro y te daremos una estimación no médica del porcentaje de grasa corporal, además de algunos consejos de entrenamiento. La precisión puede variar según la postura, la ropa, la iluminación y la calidad de la imagen.</string>
+    <!-- iOS key: We\'ll use any usable photo attached to this check-in. -->
+    <string name="ios_catalog_0143cc2e468aadc0" formatted="false">Usaremos cualquier foto válida adjunta a este registro.</string>
     <!-- iOS key: We\'ll use this to keep suggestions aligned with your food preferences. -->
     <string name="ios_catalog_3b67e9e7dedac6d7" formatted="false">Usaremos esto para mantener las sugerencias alineadas con tus preferencias alimentarias.</string>
     <!-- iOS key: We\'re analysing your check-in and training profile to generate a realistic 6-month preview. -->
     <string name="ios_catalog_1381ceca256fd79a" formatted="false">Estamos analizando tu check-in y tu perfil de entrenamiento para generar una vista previa realista de 6 meses.</string>
+    <!-- iOS key: We’re reviewing your current front and profile photos when available, then building a narrow body-fat estimate. -->
+    <string name="ios_catalog_8dd2ee61c001e347" formatted="false">Revisaremos tus fotos actuales de frente y de perfil, si están disponibles, y después elaboraremos una estimación precisa del porcentaje de grasa corporal.</string>
     <!-- iOS key: Wear similar clothing or fitted shorts -->
     <string name="ios_catalog_8891c13b480ee32f" formatted="false">Usa ropa similar o shorts ajustados</string>
     <!-- iOS key: Wear supportive footwear to protect your joints. -->
@@ -5731,6 +6209,8 @@
     <string name="ios_catalog_23fdd36a9c1aa1e1" formatted="false">Semana %d de %d</string>
     <!-- iOS key: Week %d of %d • %@ -->
     <string name="ios_catalog_2f96944f71c90405" formatted="false">Semana %d de %d • %@</string>
+    <!-- iOS key: Week of %@ -->
+    <string name="ios_catalog_bf9a94c39a658d4f" formatted="false">Semana del %@</string>
     <!-- iOS key: Weekday -->
     <string name="ios_catalog_6ff81986ead18583" formatted="false">Día de la semana</string>
     <!-- iOS key: Weekly nutrition preview -->
@@ -5747,6 +6227,14 @@
     <string name="ios_catalog_59e3643880a9b907" formatted="false">Weight (lb)</string>
     <!-- iOS key: Weight helps you monitor overall body mass trends. It is useful for seeing whether your nutrition and training are moving you toward fat loss, maintenance, or muscle gain. -->
     <string name="ios_catalog_f9b1454a7558500b" formatted="false">El peso te ayuda a controlar las tendencias generales de la masa corporal. Es útil para ver si tu nutrición y tu entrenamiento te están llevando hacia la pérdida de grasa, el mantenimiento o el aumento de masa muscular.</string>
+    <!-- iOS key: Weight per side -->
+    <string name="ios_catalog_d4e8f6c19788af37" formatted="false">Peso por lado</string>
+    <!-- iOS key: Weight per side (kg) -->
+    <string name="ios_catalog_bcffe8acf471cbd9" formatted="false">Peso por lado (kg)</string>
+    <!-- iOS key: Weight per side (lb) -->
+    <string name="ios_catalog_72b74117f3f7da42" formatted="false">Peso por lado (lb)</string>
+    <!-- iOS key: Weight Reduction -->
+    <string name="ios_catalog_5b1a6e73be389e04" formatted="false">Reducción de peso</string>
     <!-- iOS key: Weight supported -->
     <string name="ios_catalog_02fa64819dbd29bf" formatted="false">Peso soportado</string>
     <!-- iOS key: Welcome -->
@@ -5761,6 +6249,10 @@
     <string name="ios_catalog_eed88f3aa1edf2d6" formatted="false">Lo que significa</string>
     <!-- iOS key: What kind of environment will you be training in? -->
     <string name="ios_catalog_6335afc7fb2421e1" formatted="false">What kind of environment will you be training in?</string>
+    <!-- iOS key: What should we correct? -->
+    <string name="ios_catalog_f5a0f0597b9fcc91" formatted="false">¿Qué deberíamos corregir?</string>
+    <!-- iOS key: What to expect -->
+    <string name="ios_catalog_7ef84dcd839c5fcf" formatted="false">Qué puedes esperar</string>
     <!-- iOS key: What you get -->
     <string name="ios_catalog_41a1acbef2962368" formatted="false">Lo Que Obtienes</string>
     <!-- iOS key: What you’ll capture -->
@@ -5779,6 +6271,8 @@
     <string name="ios_catalog_49c2612f73823482" formatted="false">Cuando entrenas</string>
     <!-- iOS key: White -->
     <string name="ios_catalog_3495e757855a5c67" formatted="false">Blanco</string>
+    <!-- iOS key: Why are you leaving? -->
+    <string name="ios_catalog_b3a1a6634465e998" formatted="false">¿Por qué te vas?</string>
     <!-- iOS key: Why it\'s used -->
     <string name="ios_catalog_5d142df8ac1dfced" formatted="false">Por qué se usa</string>
     <!-- iOS key: Why it\'s useful -->
@@ -5791,6 +6285,8 @@
     <string name="ios_catalog_8ad963b2eb4d9f87" formatted="false">Wildforce te ayuda a establecer objetivos, planificar comidas y mantener la nutrición sencilla.</string>
     <!-- iOS key: Wildforce only stores category selections for Full focus mode. -->
     <string name="ios_catalog_bf0fb25a9e277f0e" formatted="false">Wildforce solo guarda las categorías seleccionadas para el modo Enfoque completo.</string>
+    <!-- iOS key: Wildforce Premium -->
+    <string name="ios_catalog_45d92c2135f42fa1" formatted="false">Wildforce Premium</string>
     <!-- iOS key: Work -->
     <string name="ios_catalog_104ab9213e28e4ff" formatted="false">Trabajo</string>
     <!-- iOS key: Working Weight -->
@@ -5823,6 +6319,8 @@
     <string name="ios_catalog_f8db69bb2d4dcde3" formatted="false">Entrenamiento recibido pero no cargado en el reloj</string>
     <!-- iOS key: Workout score -->
     <string name="ios_catalog_3bdeb7cf72c1e2ce" formatted="false">Puntuación del entrenamiento</string>
+    <!-- iOS key: Workout Title -->
+    <string name="ios_catalog_8087937f3cb92597" formatted="false">Título del entrenamiento</string>
     <!-- iOS key: Workouts -->
     <string name="ios_catalog_f6de4281c89a0ba2" formatted="false">Entrenamientos</string>
     <!-- iOS key: World\'s Greatest Stretch -->
@@ -5845,6 +6343,8 @@
     <string name="ios_catalog_85a39ab345d672ff" formatted="false">Sí</string>
     <!-- iOS key: Yes, include meal suggestions -->
     <string name="ios_catalog_5e042514e4440685" formatted="false">Sí, incluir sugerencias de comidas</string>
+    <!-- iOS key: Yesterday -->
+    <string name="ios_catalog_566181254b293aa6" formatted="false">Ayer</string>
     <!-- iOS key: You already have another reservation at this time. -->
     <string name="ios_catalog_ce695f21b0ce0d3d" formatted="false">Ya tienes otra reserva a esta hora.</string>
     <!-- iOS key: You are a champion of consistency! -->
@@ -5861,6 +6361,10 @@
     <string name="ios_catalog_182ad15007d77493" formatted="false">Siempre puedes actualizar esto en el futuro.</string>
     <!-- iOS key: You can cancel for free up to %@ before it starts. -->
     <string name="ios_catalog_c5de34cd51208afa" formatted="false">Puede cancelar gratis hasta %@ antes de que empiece.</string>
+    <!-- iOS key: You completed %d of %d planned sessions in this period. -->
+    <string name="ios_catalog_6138f34d89824151" formatted="false">Has completado %d de las %d sesiones planificadas durante este período.</string>
+    <!-- iOS key: You completed %d workouts and logged %@ in this period. -->
+    <string name="ios_catalog_42fdd1ef8bf74ec2" formatted="false">Has completado %d entrenamientos y registrado %@ durante este período.</string>
     <!-- iOS key: You got it done. Keep stacking sessions and the score will follow. -->
     <string name="ios_catalog_6bc02f2d572a18f9" formatted="false">Lo lograste. Sigue acumulando sesiones y la puntuación vendrá sola.</string>
     <!-- iOS key: You have a very high training base and can manage highly specialized or high-performance plans. -->
@@ -5873,6 +6377,8 @@
     <string name="ios_catalog_2b3f023893348a23" formatted="false">Tienes algo de experiencia inicial y estás construyendo consistencia, técnica y confianza.</string>
     <!-- iOS key: You kept the plan moving -->
     <string name="ios_catalog_ec921d75ed282035" formatted="false">Has mantenido el plan en marcha.</string>
+    <!-- iOS key: You logged %@ this period versus %@ in the previous one. -->
+    <string name="ios_catalog_4604c47a4c4a4b37" formatted="false">Has registrado %@ en este período, frente a %@ en el período anterior.</string>
     <!-- iOS key: You matched the workout beautifully and kept the effort high. -->
     <string name="ios_catalog_fc79e86c84d33b6e" formatted="false">Has seguido la sesión a la perfección y mantuviste un esfuerzo alto.</string>
     <!-- iOS key: You reached level %d! -->
@@ -5895,6 +6401,8 @@
     <string name="ios_catalog_594ec20904487ac4" formatted="false">Entrenas con cierta regularidad y puedes manejar progresiones simples en los ejercicios principales.</string>
     <!-- iOS key: You were close to the prescription and brought strong effort today. -->
     <string name="ios_catalog_49dbf638ef976bb3" formatted="false">Estuviste cerca de la prescripción y pusiste un gran esfuerzo hoy.</string>
+    <!-- iOS key: You will complete each exercise in order before the round resets. -->
+    <string name="ios_catalog_8a364c1b9e4d0cc7" formatted="false">Completarás cada ejercicio en orden antes de que la ronda vuelva a empezar.</string>
     <!-- iOS key: You will log this exercise by minutes, so steady control matters more than rushing. -->
     <string name="ios_catalog_c30175c2b099a179" formatted="false">Registrarás este ejercicio por minutos, así que el control constante importa más que acelerar.</string>
     <!-- iOS key: You will log this exercise by seconds, so the duration matters more than chasing extra reps. -->
@@ -5919,10 +6427,14 @@
     <string name="ios_catalog_f77061ba12895bec" formatted="false">Reserva confirmada</string>
     <!-- iOS key: Your 6-month forecast -->
     <string name="ios_catalog_86aa941b191ef3d4" formatted="false">Tu pronóstico a 6 meses</string>
+    <!-- iOS key: Your coach hasn\'t added instructions for this exercise. -->
+    <string name="ios_catalog_6c4ef08d83a2df27" formatted="false">Tu entrenador no ha añadido instrucciones para este ejercicio.</string>
     <!-- iOS key: Your coach will share your nutrition plan here. -->
     <string name="ios_catalog_644e1d5a5017fcbb" formatted="false">Tu entrenador compartirá aquí tu plan de nutrición.</string>
     <!-- iOS key: Your coach will share your workout plan here. -->
     <string name="ios_catalog_16c8183968434ee4" formatted="false">Tu entrenador compartirá aquí tu plan de entrenamiento.</string>
+    <!-- iOS key: Your coach\'s exercise will appear after the next sync. -->
+    <string name="ios_catalog_29a92e8eaec6b5ec" formatted="false">El ejercicio de tu entrenador aparecerá después de la próxima sincronización.</string>
     <!-- iOS key: Your coaches -->
     <string name="ios_catalog_c42584887c658966" formatted="false">Tus entrenadores</string>
     <!-- iOS key: Your completed main exercises will appear here once you finish a workout. -->
@@ -5931,6 +6443,8 @@
     <string name="ios_catalog_7464117beeadcca5" formatted="false">Tu posición actual en el ciclo activo.</string>
     <!-- iOS key: Your feedback has been sent successfully. We appreciate your input! -->
     <string name="ios_catalog_62670ac87e1232b5" formatted="false">Tu comentario se ha enviado correctamente. ¡Agradecemos tu opinión!</string>
+    <!-- iOS key: Your feedback helps us understand what to improve next. -->
+    <string name="ios_catalog_f3ddf0df4507355c" formatted="false">Tus comentarios nos ayudan a entender qué podemos mejorar a continuación.</string>
     <!-- iOS key: Your future self will thank you. -->
     <string name="ios_catalog_bd80d732a4a4de32" formatted="false">Tu yo del futuro te lo agradecerá.</string>
     <!-- iOS key: Your Goals -->
@@ -5959,8 +6473,14 @@
     <string name="ios_catalog_c6d4b67fa882d9f5" formatted="false">Tu plan fue acordado con nosotros. Contáctanos para cambiarlo.</string>
     <!-- iOS key: Your plan will be saved and ready on every device. -->
     <string name="ios_catalog_ad56da3cd6cd4633" formatted="false">Tu plan se guardará y estará listo en todos tus dispositivos</string>
+    <!-- iOS key: Your results -->
+    <string name="ios_catalog_4e2376da7763be38" formatted="false">Tus resultados</string>
+    <!-- iOS key: Your saved category selection is no longer valid. Run setup again. -->
+    <string name="ios_catalog_d570707d2badb3ae" formatted="false">La selección de categorías que guardaste ya no es válida. Vuelve a realizar la configuración.</string>
     <!-- iOS key: Your saved nutrition entries for this day will appear here. -->
     <string name="ios_catalog_a51b4f0864c8adc5" formatted="false">Tus entradas de nutrición guardadas para este día aparecerán aquí.</string>
+    <!-- iOS key: Your selected check-in photos are sent to AI for analysis. -->
+    <string name="ios_catalog_5ef2b1eb7ef2be13" formatted="false">Las fotos de registro que selecciones se enviarán a una IA para su análisis.</string>
     <!-- iOS key: Your training profile has changed since this plan was created. Recreate it for better results. -->
     <string name="ios_catalog_4991d7c9a032c68d" formatted="false">Tu perfil de entrenamiento ha cambiado desde que se creó este plan. Vuelve a crearlo para mejores resultados.</string>
     <!-- iOS key: Your workout schedule and intensity are factored into the result. -->

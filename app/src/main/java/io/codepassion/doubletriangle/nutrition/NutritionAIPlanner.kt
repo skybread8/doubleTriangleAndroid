@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle.nutrition
 
 import android.content.Context
+import android.util.Log
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
@@ -9,6 +10,7 @@ import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import io.codepassion.doubletriangle.AsyncOperationClient
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -21,7 +23,9 @@ internal object NutritionAIPlanner {
         val token = context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE).getString("token", null)
             ?: error("Inicia sesión para generar el plan nutricional")
         val idempotencyKey = UUID.randomUUID().toString()
-        val dailyEnergy = recentDailyEnergy(context)
+        val dailyEnergy = optionalHealthData(
+            onFailure = { Log.w("NutritionAIPlanner", "Could not read Health Connect energy; using estimated energy", it) },
+        ) { recentDailyEnergy(context) } ?: JSONArray()
         val requestBody = JSONObject().apply {
             if (dailyEnergy.length() > 0) put("daily_energy", dailyEnergy)
         }.toString()
@@ -122,6 +126,16 @@ internal object NutritionAIPlanner {
     }
     private fun nutritionDayType(value: String): NutritionDayType = when (value.trim().lowercase()) { "training" -> NutritionDayType.Training; "recovery" -> NutritionDayType.Recovery; else -> NutritionDayType.Rest }
     private fun energyDemand(value: String): EnergyDemand = when (value.trim().lowercase()) { "high" -> EnergyDemand.High; "medium" -> EnergyDemand.Medium; else -> EnergyDemand.Low }
+}
+
+/** Health data enriches the request, but provider failures must not block a plan. */
+internal suspend fun <T> optionalHealthData(onFailure: (Exception) -> Unit, read: suspend () -> T): T? = try {
+    read()
+} catch (error: CancellationException) {
+    throw error
+} catch (error: Exception) {
+    onFailure(error)
+    null
 }
 
 /** Mirrors iOS's ISO-8601 date decoding for nutrition sync payloads. */

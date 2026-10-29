@@ -9,7 +9,6 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class WorkoutPlanGeneratorTest {
-
     @Test fun generatedWorkoutIdsAreUniqueAndPersistedIdsAreKept() {
         assertEquals("saved-workout-id", WorkoutPlanGenerator.resolveWorkoutId("saved-workout-id"))
         assertNotEquals("ai-1", WorkoutPlanGenerator.resolveWorkoutId(""))

@@ -1,0 +1,1892 @@
+{
+  "walking": {
+    "description": "A natural, low-impact way to improve cardiovascular health and burn calories.",
+    "instructions": [
+      "Maintain an upright posture with your head up and shoulders relaxed.",
+      "Swing your arms naturally and slightly with each step.",
+      "Step forward, landing on your heel and rolling through to your toe.",
+      "Maintain a steady, comfortable pace that allows you to breathe easily."
+    ],
+    "tips": [
+      "Wear supportive footwear to protect your joints.",
+      "Keep your core slightly engaged to support your lower back.",
+      "Focus on a smooth, rhythmic stride."
+    ]
+  },
+  "outdoorRunning": {
+    "description": "A classic high-intensity cardio workout that builds endurance and burns significant calories.",
+    "instructions": [
+      "Keep your head up and look about 10-20 feet ahead of you.",
+      "Maintain a relaxed upper body with elbows bent at 90 degrees.",
+      "Land softly on the midfoot and push off with your toes.",
+      "Keep your core engaged and avoid leaning too far forward or backward."
+    ],
+    "tips": [
+      "Start with a short warmup walk or light jog.",
+      "Increase your distance or intensity gradually to avoid injury.",
+      "Stay hydrated and wear appropriate running shoes."
+    ]
+  },
+  "treadmillWalking": {
+    "description": "Walking on a treadmill allows for precise control of pace and incline in a controlled environment.",
+    "instructions": [
+      "Step onto the treadmill and attach the safety clip to your clothing.",
+      "Start at a slow speed to get accustomed to the movement.",
+      "Maintain an upright posture and avoid holding onto the side rails for better balance and calorie burn.",
+      "Adjust speed and incline as needed to match your fitness level."
+    ],
+    "tips": [
+      "Keep your eyes forward to maintain balance.",
+      "Use the incline feature to simulate outdoor walking and increase intensity.",
+      "Gradually decrease speed at the end of your session for a cooldown."
+    ]
+  },
+  "treadmillRunning": {
+    "description": "Running on a treadmill provides a consistent surface and the ability to track metrics easily.",
+    "instructions": [
+      "Attach the safety clip and start with a slow walk to warm up.",
+      "Gradually increase the speed to your desired running pace.",
+      "Focus on landing softly on your midfoot and maintain a consistent rhythm.",
+      "Keep your core engaged and arms moving in a controlled manner."
+    ],
+    "tips": [
+      "Vary your workouts with intervals of higher speed or incline.",
+      "Keep a water bottle nearby to stay hydrated.",
+      "Cool down with a few minutes of walking before stepping off."
+    ]
+  },
+  "stationaryBike": {
+    "description": "A low-impact cardio option that targets the lower body while being easy on the joints.",
+    "instructions": [
+      "Adjust the seat height so there is a slight bend in your knee at the bottom of the pedal stroke.",
+      "Sit upright or lean forward slightly, keeping your back straight and core engaged.",
+      "Pedal in a smooth, circular motion, pushing down and pulling up.",
+      "Adjust the resistance level to challenge your cardiovascular system."
+    ],
+    "tips": [
+      "Ensure your feet are securely in the pedals or straps.",
+      "Maintain a consistent cadence (RPM) for better efficiency.",
+      "Don't lean too heavily on the handlebars."
+    ]
+  },
+  "elliptical": {
+    "description": "Provides a full-body, low-impact workout that mimics the motion of running without the impact.",
+    "instructions": [
+      "Step onto the pedals and grasp the handles.",
+      "Begin moving your legs in a smooth, elliptical motion, either forward or backward.",
+      "Keep your core engaged and your back straight.",
+      "Use the handles to involve your upper body and increase total calorie burn."
+    ],
+    "tips": [
+      "Focus on pushing through your entire foot, not just your toes.",
+      "Vary the resistance and incline to target different muscle groups.",
+      "Keep your shoulders relaxed and avoid gripping the handles too tightly."
+    ]
+  },
+  "rowing": {
+    "description": "A powerful full-body workout that combines cardiovascular conditioning with strength building.",
+    "instructions": [
+      "Sit on the seat and secure your feet in the straps.",
+      "The Catch: Lean forward slightly with arms extended and knees bent.",
+      "The Drive: Push through your legs, then lean back slightly and pull the handle toward your lower ribs.",
+      "The Finish: Legs are extended, handle is at your chest, and you are leaning back slightly.",
+      "The Recovery: Extend your arms, lean forward, and then bend your knees to return to the catch."
+    ],
+    "tips": [
+      "Maintain a strong core and flat back throughout the motion.",
+      "The power should come 60% from legs, 20% from core, and 20% from arms.",
+      "Focus on a smooth, rhythmic motion and avoid jerking the handle."
+    ]
+  },
+  "jumpRope": {
+    "description": "A high-intensity, portable cardio workout that improves coordination and agility.",
+    "instructions": [
+      "Hold the handles with a relaxed grip, elbows close to your sides.",
+      "Jump only a few inches off the ground, just enough for the rope to pass under.",
+      "Land softly on the balls of your feet.",
+      "Use your wrists to rotate the rope, not your whole arms."
+    ],
+    "tips": [
+      "Keep your core engaged and your shoulders relaxed.",
+      "Start with shorter intervals and gradually increase duration.",
+      "Maintain a consistent rhythm for better efficiency."
+    ]
+  },
+  "stairClimber": {
+    "description": "An effective way to build lower body strength and cardiovascular endurance by mimicking climbing stairs.",
+    "instructions": [
+      "Step onto the machine and select your desired speed or program.",
+      "Maintain an upright posture and avoid leaning heavily on the handrails.",
+      "Step with your whole foot and push through your heels to engage the glutes.",
+      "Keep your core engaged and your movements controlled."
+    ],
+    "tips": [
+      "Vary your step height and speed to challenge different muscles.",
+      "Focus on a steady, sustainable pace.",
+      "Avoid skipping steps unless specifically programmed for advanced training."
+    ]
+  },
+  "skiErgWork": {
+    "description": "A powerful full-body workout that simulates cross-country skiing, building endurance and upper-body strength.",
+    "instructions": [
+      "Stand with your feet shoulder-width apart, holding the handles above your head.",
+      "Pull the handles down toward your hips while simultaneously hinging at the hips and bending your knees.",
+      "Finish the pull with your arms extended past your thighs.",
+      "Extend your hips and knees while returning the handles to the starting position."
+    ],
+    "tips": [
+      "Use your core and legs to generate power, not just your arms.",
+      "Maintain a flat back and engaged core throughout the movement.",
+      "Focus on a smooth, continuous rhythm."
+    ]
+  },
+  "airSquat": {
+    "description": "A foundational bodyweight movement that improves lower body strength and mobility.",
+    "instructions": [
+      "Stand with your feet shoulder-width apart, toes slightly pointed out.",
+      "Engage your core and keep your chest up as you begin to sit back into your hips.",
+      "Lower your body until your thighs are at least parallel to the floor.",
+      "Drive through your heels to return to the starting position."
+    ],
+    "tips": [
+      "Keep your weight on your heels, not your toes.",
+      "Ensure your knees stay in line with your toes and don't cave inward.",
+      "Maintain a neutral spine throughout the entire movement."
+    ]
+  },
+  "gobletSquat": {
+    "description": "Holding a weight at chest level while squatting helps improve form and core stability.",
+    "instructions": [
+      "Hold a dumbbell or kettlebell against your chest with both hands.",
+      "Stand with your feet slightly wider than shoulder-width apart.",
+      "Lower your hips back and down, keeping your chest up and the weight close to your body.",
+      "Push through your heels to return to the starting position."
+    ],
+    "tips": [
+      "Keep your elbows pointed down and inside your knees at the bottom of the squat.",
+      "Inhale as you lower and exhale as you push back up.",
+      "Maintain a neutral spine and avoid rounding your back."
+    ]
+  },
+  "barbellBackSquat": {
+    "description": "The gold standard for building total-body strength and leg mass using a barbell.",
+    "instructions": [
+      "Position the barbell across your upper back, resting on your traps.",
+      "Stand with feet shoulder-width apart, toes slightly pointed out.",
+      "Brace your core and lower your hips until your thighs are at least parallel to the floor.",
+      "Drive through your heels to return to an upright position."
+    ],
+    "tips": [
+      "Keep your chest up and look slightly forward throughout the lift.",
+      "Avoid letting your knees cave inward.",
+      "Use a squat rack and a spotter for safety when lifting heavy."
+    ]
+  },
+  "barbellFrontSquat": {
+    "description": "Placing the barbell on the front of the shoulders targets the quads and upper back more intensely.",
+    "instructions": [
+      "Rest the barbell across the front of your shoulders, using either a 'clean' grip or a 'cross-arm' grip.",
+      "Keep your elbows high throughout the entire movement to stabilize the bar.",
+      "Squat down by pushing your hips back and bending your knees.",
+      "Drive back up to the starting position, keeping your torso upright."
+    ],
+    "tips": [
+      "The bar should feel like it's resting on your deltoids, not your collarbone.",
+      "Maintain a tight core to support your upright posture.",
+      "Focus on keeping your heels on the ground."
+    ]
+  },
+  "smithMachineSquat": {
+    "description": "Squatting in a Smith machine provides extra stability, allowing you to focus on leg drive and positioning.",
+    "instructions": [
+      "Position yourself under the bar with your feet slightly forward and shoulder-width apart.",
+      "Unlatch the bar and lower your hips until your thighs are parallel to the floor.",
+      "Drive through your heels to return to the starting position.",
+      "Latch the bar securely after completing your reps."
+    ],
+    "tips": [
+      "Keep your chest up and core engaged throughout the movement.",
+      "Experiment with foot placement to target different parts of your legs.",
+      "The Smith machine's fixed path reduces balance demands."
+    ]
+  },
+  "dumbbellSquat": {
+    "description": "Holding dumbbells at your sides while squatting is an accessible way to add resistance to the basic squat movement.",
+    "instructions": [
+      "Stand with feet shoulder-width apart, holding a dumbbell in each hand at your sides.",
+      "Lower your hips back and down as if sitting in a chair, keeping your chest up.",
+      "Lower until your thighs are parallel to the floor.",
+      "Push through your heels to return to an upright position."
+    ],
+    "tips": [
+      "Keep the weights steady at your sides; don't let them swing.",
+      "Maintain a neutral spine and avoid rounding your shoulders.",
+      "Great for those who find barbell squats uncomfortable."
+    ]
+  },
+  "legPress": {
+    "description": "A machine-based press that allows for heavy lower body loading with minimal back strain.",
+    "instructions": [
+      "Sit in the machine with your back and head flat against the padded support.",
+      "Place your feet on the platform about shoulder-width apart.",
+      "Release the safety bars and lower the platform toward your chest by bending your knees.",
+      "Push the platform back to the starting position without locking your knees at the top."
+    ],
+    "tips": [
+      "Avoid lifting your lower back off the seat.",
+      "Keep your feet flat on the platform at all times.",
+      "Control the weight during both the lowering and pushing phases."
+    ]
+  },
+  "walkingLunge": {
+    "description": "A functional movement that builds single-leg strength, balance, and coordination.",
+    "instructions": [
+      "Step forward with one leg, lowering your hips until both knees are bent at about 90 degrees.",
+      "Ensure your front knee is directly above your ankle.",
+      "Drive through the front heel to stand up and step forward with the other leg.",
+      "Continue alternating legs as you walk forward."
+    ],
+    "tips": [
+      "Keep your torso upright and your core engaged.",
+      "Don't let your back knee touch the floor with impact.",
+      "Maintain your balance by focusing on a spot in front of you."
+    ]
+  },
+  "reverseLunge": {
+    "description": "Step backward into a lunge to target the glutes and hamstrings with less knee pressure.",
+    "instructions": [
+      "Stand with your feet hip-width apart.",
+      "Step backward with one foot and lower your hips until both knees are bent at a 90-degree angle.",
+      "Ensure your front knee is aligned over your ankle.",
+      "Push off with your back foot to return to the starting position."
+    ],
+    "tips": [
+      "Keep your weight primarily on the front foot.",
+      "Maintain an upright posture throughout the movement.",
+      "Control the descent to avoid banging your back knee on the floor."
+    ]
+  },
+  "bulgarianSplitSquat": {
+    "description": "Elevate your rear foot to place intense focus and stretch on the front leg's quads and glutes.",
+    "instructions": [
+      "Stand a few feet in front of a bench and place the top of one foot on the bench behind you.",
+      "Lower your hips until your front thigh is almost parallel to the floor.",
+      "Ensure your front knee stays aligned with your foot and doesn't pass your toes.",
+      "Drive through the front heel to return to an upright position."
+    ],
+    "tips": [
+      "Focus on keeping your torso upright or with a slight forward lean.",
+      "This exercise requires significant balance; start with bodyweight before adding dumbbells.",
+      "Adjust your distance from the bench to find the most comfortable and effective position."
+    ]
+  },
+  "stepUp": {
+    "description": "Step onto an elevated surface to build powerful glutes and improve functional leg strength.",
+    "instructions": [
+      "Place one foot on a sturdy bench or box.",
+      "Drive through that heel to lift your body onto the platform.",
+      "Step down with the other foot first, followed by the starting foot.",
+      "Alternate legs or complete all reps on one side before switching."
+    ],
+    "tips": [
+      "Keep your core engaged and your chest up.",
+      "Try not to push off the floor with your trailing foot; let the elevated leg do the work.",
+      "Control your descent to protect your joints."
+    ]
+  },
+  "legExtension": {
+    "description": "An isolation exercise that specifically targets and builds the quadriceps muscles.",
+    "instructions": [
+      "Sit in the leg extension machine with your back against the pad.",
+      "Place your shins behind the padded lever.",
+      "Extend your legs until they are straight, focusing on the contraction in your quads.",
+      "Lower the weight slowly back to the starting position."
+    ],
+    "tips": [
+      "Avoid using momentum to lift the weight.",
+      "Don't lock your knees forcefully at the top.",
+      "Ensure the padded lever is positioned just above your ankles."
+    ]
+  },
+  "lyingLegCurl": {
+    "description": "Focuses on isolating the hamstrings for improved strength and knee stability.",
+    "instructions": [
+      "Lie face down on the leg curl machine with your legs fully extended.",
+      "Position the padded lever just above your heels.",
+      "Curl your legs up as far as possible, squeezing your hamstrings at the top.",
+      "Lower the weight back to the starting position in a controlled manner."
+    ],
+    "tips": [
+      "Keep your hips pressed against the bench throughout the movement.",
+      "Focus on a slow and controlled eccentric (lowering) phase.",
+      "Avoid swinging the weight."
+    ]
+  },
+  "seatedLegCurl": {
+    "description": "Isolates the hamstrings in a seated position for maximum contraction and muscle building.",
+    "instructions": [
+      "Sit in the machine and adjust the lap pad so it rests firmly against your thighs.",
+      "Place your legs over the padded lever so it sits behind your ankles.",
+      "Start with your knees nearly straight, then curl your lower legs down and back as far as possible.",
+      "Slowly return the lever to the starting position."
+    ],
+    "tips": [
+      "Maintain a stable upper body and avoid using your arms to help pull.",
+      "Squeeze your hamstrings at the bottom of the movement.",
+      "Keep your feet flexed throughout the set."
+    ]
+  },
+  "calfRaise": {
+    "description": "Strengthens and builds the calf muscles by lifting your heels off the ground.",
+    "instructions": [
+      "Stand on the edge of a step or platform with the balls of your feet.",
+      "Lower your heels below the level of the step to stretch your calves.",
+      "Push through the balls of your feet to raise your heels as high as possible.",
+      "Lower back down slowly to the starting stretch position."
+    ],
+    "tips": [
+      "Hold onto a wall or rail for balance if needed.",
+      "Pause for a second at the top to maximize contraction.",
+      "Can be performed on one leg at a time to increase difficulty."
+    ]
+  },
+  "hipThrust": {
+    "description": "Widely considered the best exercise for maximum glute development and strength.",
+    "instructions": [
+      "Sit on the floor with your upper back against a bench and a barbell across your hips.",
+      "Plant your feet firmly on the ground, about shoulder-width apart.",
+      "Drive through your heels to lift your hips toward the ceiling until your body forms a straight line from shoulders to knees.",
+      "Squeeze your glutes at the top, then lower your hips back toward the floor."
+    ],
+    "tips": [
+      "Use a pad or towel on the barbell for comfort.",
+      "Keep your chin tucked and your core engaged to protect your lower back.",
+      "Don't overextend your lower back at the top of the movement."
+    ]
+  },
+  "gluteBridge": {
+    "description": "A bodyweight floor exercise that activates the glutes and improves hip extension.",
+    "instructions": [
+      "Lie on your back with your knees bent and feet flat on the floor.",
+      "Keep your arms at your sides with palms down.",
+      "Lift your hips off the floor by squeezing your glutes and pushing through your heels.",
+      "Hold the position for a second at the top, then lower back down."
+    ],
+    "tips": [
+      "Ensure your core is engaged so your lower back doesn't arch excessively.",
+      "Focus on using your glutes rather than your lower back or hamstrings.",
+      "For an added challenge, perform the bridge with one leg extended."
+    ]
+  },
+  "deadlift": {
+    "description": "A fundamental lift for total body strength, targeting the entire posterior chain.",
+    "instructions": [
+      "Stand with your mid-foot under the barbell.",
+      "Hinge at the hips and bend your knees to grip the bar just outside your legs.",
+      "Keep your back flat and chest up as you drive through your heels to stand up.",
+      "Keep the bar close to your body throughout the movement and stand fully upright."
+    ],
+    "tips": [
+      "Don't round your back; maintain a neutral spine.",
+      "Inhale and brace your core before you pull the weight.",
+      "Lower the bar by hinging at the hips first, then bending your knees once the bar clears them."
+    ]
+  },
+  "barbellRomanianDeadlift": {
+    "description": "A deadlift variation that emphasizes the stretch and contraction of the hamstrings.",
+    "instructions": [
+      "Stand with feet hip-width apart, holding a barbell in front of your thighs.",
+      "Hinge at the hips and lower the bar toward the floor while keeping your legs mostly straight (slight bend in knees).",
+      "Lower the bar until you feel a stretch in your hamstrings, keeping your back flat.",
+      "Drive your hips forward to return to the starting position."
+    ],
+    "tips": [
+      "Keep the bar very close to your legs at all times.",
+      "Focus on pushing your hips back as far as possible.",
+      "Avoid rounding your shoulders or lower back."
+    ]
+  },
+  "dumbbellRomanianDeadlift": {
+    "description": "A hamstring-focused hinge using dumbbells, which allows for a more natural range of motion.",
+    "instructions": [
+      "Stand with feet hip-width apart, holding a dumbbell in each hand in front of your thighs.",
+      "Hinge at your hips and lower the weights toward your feet, keeping your back flat.",
+      "Lower until you feel a good stretch in your hamstrings.",
+      "Engage your glutes and hamstrings to return to a standing position."
+    ],
+    "tips": [
+      "Keep the dumbbells close to your legs throughout the movement.",
+      "Focus on pushing your hips back rather than reaching for the floor.",
+      "Maintain a slight bend in your knees."
+    ]
+  },
+  "machineGluteKickback": {
+    "description": "A targeted machine exercise that isolates the glutes through a kickback motion.",
+    "instructions": [
+      "Position yourself in the machine and place one foot on the platform.",
+      "Push the platform back and up by extending your hip.",
+      "Squeeze your glutes at the top of the movement.",
+      "Slowly return to the starting position and repeat."
+    ],
+    "tips": [
+      "Maintain a stable core and avoid arching your back.",
+      "Keep the movement controlled and focus on the glute contraction.",
+      "Don't swing your leg; use your muscles to move the weight."
+    ]
+  },
+  "cableGluteKickback": {
+    "description": "Uses cable resistance to isolate the glutes through a controlled kickback motion, providing constant tension throughout the range of motion.",
+    "instructions": [
+      "Attach an ankle strap to the cable machine at the lowest setting and fasten it around one ankle.",
+      "Stand facing the machine and hold the frame for balance.",
+      "Keeping your core tight and a slight bend in the standing leg, kick the strapped leg back and up by extending your hip.",
+      "Squeeze your glutes at the top of the movement, then slowly return to the starting position."
+    ],
+    "tips": [
+      "Keep your torso upright and avoid rotating your hips.",
+      "Move through the full range of hip extension to maximize glute activation.",
+      "Control the weight on the way back down rather than letting the cable pull your leg forward."
+    ]
+  },
+  "machineHipAbduction": {
+    "description": "Targets the outer hips and glute medius to improve hip stability and aesthetics.",
+    "instructions": [
+      "Sit in the machine with your outer thighs against the pads.",
+      "Push your legs outward against the resistance.",
+      "Pause for a second at the point of maximum contraction.",
+      "Slowly bring your legs back together."
+    ],
+    "tips": [
+      "Keep your back flat against the seat.",
+      "Use a controlled tempo for both the opening and closing phases.",
+      "Adjust the starting position to a comfortable range of motion."
+    ]
+  },
+  "machineHipAdduction": {
+    "description": "Strengthens the inner thigh muscles (adductors) for improved leg stability.",
+    "instructions": [
+      "Sit in the machine with your inner thighs against the pads.",
+      "Squeeze your legs together against the resistance.",
+      "Pause for a second at the point of maximum contraction.",
+      "Slowly allow your legs to return to the starting position."
+    ],
+    "tips": [
+      "Keep your upper body stable throughout the set.",
+      "Focus on using your inner thigh muscles, not your feet.",
+      "Don't let the weights slam together at the end of the rep."
+    ]
+  },
+  "cableHipAbduction": {
+    "description": "Uses a cable and ankle strap to isolate the outer hips and glute medius one side at a time.",
+    "instructions": [
+      "Attach an ankle strap to a low cable pulley and secure it around the outside leg.",
+      "Stand side-on to the machine and hold the frame for balance.",
+      "Move the working leg out to the side against the cable while keeping your torso mostly still.",
+      "Pause briefly, then return with control to the starting position."
+    ],
+    "tips": [
+      "Keep the movement small and controlled rather than swinging the leg.",
+      "Brace your core so the hip does the work instead of your trunk.",
+      "Slightly turn the toes forward to better target the glute medius."
+    ]
+  },
+  "cableHipAdduction": {
+    "description": "Uses a cable and ankle strap to strengthen the inner thigh muscles one side at a time.",
+    "instructions": [
+      "Attach an ankle strap to a low cable pulley and secure it around the inside leg.",
+      "Stand side-on to the machine with the working leg farthest from the stack and hold the frame for balance.",
+      "Sweep the working leg across the front of your body against the resistance.",
+      "Pause briefly, then return to the starting position with control."
+    ],
+    "tips": [
+      "Keep your torso upright and avoid rotating your hips.",
+      "Move slowly so the inner thigh controls both directions of the rep.",
+      "Use a light to moderate load and focus on the squeeze at the end range."
+    ]
+  },
+  "boxJump": {
+    "description": "An explosive movement that builds lower-body power and improves cardiovascular fitness.",
+    "instructions": [
+      "Stand facing a sturdy box with feet hip-width apart.",
+      "Hinge at the hips and swing your arms back, then explosively jump onto the box.",
+      "Land softly in a partial squat with both feet entirely on the box.",
+      "Stand up fully, then step back down one foot at a time."
+    ],
+    "tips": [
+      "Focus on a quiet landing to ensure you are absorbing the impact.",
+      "Choose a box height that allows for proper landing form.",
+      "Don't jump back down; stepping down is safer for your joints."
+    ]
+  },
+  "pushUp": {
+    "description": "A classic bodyweight exercise that builds chest, shoulder, and triceps strength.",
+    "instructions": [
+      "Start in a high plank position with your hands slightly wider than shoulder-width.",
+      "Keep your body in a straight line from head to heels.",
+      "Lower your chest toward the floor, keeping your elbows at a 45-degree angle.",
+      "Push through your palms to return to the starting position."
+    ],
+    "tips": [
+      "Don't let your lower back sag; keep your core tight.",
+      "Focus on a full range of motion for better muscle engagement.",
+      "Breathe in as you lower and out as you push back up."
+    ]
+  },
+  "declinePushUp": {
+    "description": "Perform push-ups with your feet elevated on a bench to place more emphasis on the upper chest and shoulders.",
+    "instructions": [
+      "Place your feet on a flat bench and your hands on the floor slightly wider than shoulder-width.",
+      "Maintain a straight line from your head to your heels, engaging your core.",
+      "Lower your chest toward the floor by bending your elbows.",
+      "Push back up to the starting position by extending your arms."
+    ],
+    "tips": [
+      "Keep your elbows at a 45-degree angle to your body.",
+      "Don't let your hips sag; keep your glutes and core tight.",
+      "The higher the bench, the more difficult the exercise becomes."
+    ]
+  },
+  "barbellBenchPress": {
+    "description": "The fundamental upper body lift for developing maximum chest and arm power.",
+    "instructions": [
+      "Lie flat on the bench with your feet firmly planted on the floor.",
+      "Grip the barbell slightly wider than shoulder-width.",
+      "Lower the bar to your mid-chest in a controlled manner.",
+      "Drive the bar back up until your arms are fully extended."
+    ],
+    "tips": [
+      "Keep your shoulder blades retracted (squeezed together) throughout the lift.",
+      "Maintain a slight arch in your lower back, but keep your glutes on the bench.",
+      "Use a spotter, especially when lifting heavy weights."
+    ]
+  },
+  "dumbbellBenchPress": {
+    "description": "Pressing dumbbells while lying on a flat bench allows for a greater range of motion and improved shoulder health.",
+    "instructions": [
+      "Lie flat on a bench holding a dumbbell in each hand at chest level.",
+      "Press the weights upward until your arms are fully extended over your chest.",
+      "Lower the dumbbells with control until they are level with your chest.",
+      "Maintain a stable core and feet flat on the floor."
+    ],
+    "tips": [
+      "Focus on bringing the dumbbells together at the top without touching them.",
+      "Keep your elbows at a 45-degree angle to your torso.",
+      "Dumbbells require more stabilization than a barbell."
+    ]
+  },
+  "smithMachineBenchPress": {
+    "description": "The Smith machine provides a guided path for the bench press, making it safer for those training alone and allowing for intense muscle focus.",
+    "instructions": [
+      "Lie on the bench and position it so the bar aligns with your mid-chest.",
+      "Unlatch the bar and lower it slowly to your chest.",
+      "Press the bar back up until your arms are fully extended.",
+      "Latch the bar securely when finished."
+    ],
+    "tips": [
+      "Ensure the bench is perfectly centered under the bar.",
+      "Focus on the contraction in your chest throughout the movement.",
+      "A great option for isolation and drop sets."
+    ]
+  },
+  "dumbbellInclineBenchPress": {
+    "description": "Pressing dumbbells on an incline bench emphasizes the upper chest while allowing each arm to move independently.",
+    "instructions": [
+      "Set an adjustable bench to a 30-45 degree incline.",
+      "Sit with a dumbbell resting on each thigh, then lean back against the bench.",
+      "Press the dumbbells upward from upper-chest level until your arms are extended.",
+      "Lower the weights back to the starting position with control."
+    ],
+    "tips": [
+      "Keep your shoulder blades retracted against the bench.",
+      "Use a moderate incline to keep the emphasis on your upper chest.",
+      "Keep your wrists stacked over your elbows throughout the press."
+    ]
+  },
+  "barbellInclineBenchPress": {
+    "description": "Pressing a barbell on an incline bench targets the upper chest and shoulders while allowing for heavier loads.",
+    "instructions": [
+      "Set the bench to a 30-45 degree incline and position yourself under the bar.",
+      "Grip the bar slightly wider than shoulder-width.",
+      "Lower the bar to your upper chest in a controlled manner.",
+      "Press the bar back up until your arms are fully extended."
+    ],
+    "tips": [
+      "Keep your elbows tucked slightly, not flared completely to the sides.",
+      "Ensure the bar touches your upper chest, not your neck.",
+      "Use a spotter for safety."
+    ]
+  },
+  "smithMachineInclineBenchPress": {
+    "description": "A guided incline press that isolates the upper chest and allows for safe training near failure.",
+    "instructions": [
+      "Set the adjustable bench to an incline and center it under the Smith machine bar.",
+      "Lie on the bench and ensure the bar aligns with your upper chest.",
+      "Unlatch the bar and lower it with control toward your chest.",
+      "Press the bar back to the starting position."
+    ],
+    "tips": [
+      "Focus on a smooth, consistent tempo.",
+      "Adjust the bench position to find the most comfortable pressing line.",
+      "Excellent for finishing off the upper chest."
+    ]
+  },
+  "barbellDeclineBenchPress": {
+    "description": "Pressing on a decline targets the lower portion of the chest and often allows for heavier loading due to the mechanical advantage.",
+    "instructions": [
+      "Secure your feet in the decline bench and lie back.",
+      "Grip the barbell with a medium-width grip.",
+      "Lower the bar to your lower chest/upper abs area.",
+      "Press the bar back up to the starting position."
+    ],
+    "tips": [
+      "Have a spotter help you unrack and rack the bar.",
+      "Keep the movement controlled; don't bounce the bar off your chest.",
+      "Focus on the contraction in the lower chest."
+    ]
+  },
+  "dumbbellDeclineBenchPress": {
+    "description": "Dumbbell decline press provides a deep stretch for the lower chest and improved range of motion.",
+    "instructions": [
+      "Sit on the end of a decline bench with dumbbells on your thighs.",
+      "Lie back while bringing the weights to your chest level.",
+      "Press the dumbbells upward until arms are extended.",
+      "Lower them back down with control."
+    ],
+    "tips": [
+      "Be careful when getting into and out of position with heavy dumbbells.",
+      "Focus on the squeeze at the top of the movement.",
+      "Keep your core engaged."
+    ]
+  },
+  "smithMachineDeclineBenchPress": {
+    "description": "A guided decline press that safely targets the lower chest muscles.",
+    "instructions": [
+      "Position a decline bench under the Smith machine bar.",
+      "Lie down and ensure the bar path is over your lower chest.",
+      "Unlatch the bar and lower it toward your chest with control.",
+      "Press the bar back to the starting position."
+    ],
+    "tips": [
+      "Ensure the bench is securely positioned and centered.",
+      "Keep your back flat against the bench.",
+      "Great for high-volume chest work."
+    ]
+  },
+  "chestPressMachine": {
+    "description": "Provides a stable and controlled way to target the chest muscles with reduced balance requirements.",
+    "instructions": [
+      "Adjust the seat height so the handles are aligned with your mid-chest.",
+      "Sit with your back against the pad and grip the handles.",
+      "Push the handles forward until your arms are fully extended.",
+      "Slowly return the handles to the starting position."
+    ],
+    "tips": [
+      "Keep your elbows slightly below your shoulder level.",
+      "Maintain contact between your back and the pad at all times.",
+      "Avoid locking your elbows at the top."
+    ]
+  },
+  "dumbbellChestFly": {
+    "description": "An isolation movement that stretches and defines the chest muscles.",
+    "instructions": [
+      "Lie flat on a bench with dumbbells held over your chest, palms facing each other.",
+      "Lower the weights out to the sides in a wide arc, keeping a slight bend in your elbows.",
+      "Stop when you feel a stretch in your chest, then bring the weights back together over your chest.",
+      "Squeeze your chest muscles at the top."
+    ],
+    "tips": [
+      "Keep the movement slow and controlled.",
+      "Avoid going too deep if you feel any shoulder discomfort.",
+      "Focus on the 'hugging a tree' motion."
+    ]
+  },
+  "cableFly": {
+    "description": "Uses cables to provide constant tension on the chest muscles through the entire range of motion.",
+    "instructions": [
+      "Stand between two cable pulleys with handles at chest height.",
+      "Step forward slightly and hold the handles with your arms extended to the sides.",
+      "Bring the handles together in front of your chest, keeping a slight bend in your elbows.",
+      "Slowly return to the starting position."
+    ],
+    "tips": [
+      "Focus on the contraction in your chest as you bring your hands together.",
+      "Maintain a slight forward lean for better stability.",
+      "Keep your core tight to prevent your body from swaying."
+    ]
+  },
+  "cableCrunchPress": {
+    "description": "A kneeling cable ab exercise that overloads the crunch pattern to build stronger, more defined abdominal muscles.",
+    "instructions": [
+      "Attach a rope to a high pulley and kneel facing the cable machine.",
+      "Hold the rope beside your head and brace your hips so the movement comes from your torso.",
+      "Crunch your ribcage down toward your pelvis while keeping your elbows close and abs fully engaged.",
+      "Slowly return to the starting position without letting the weight stack yank you upright."
+    ],
+    "tips": [
+      "Think about curling your spine one segment at a time instead of just pulling with your arms.",
+      "Keep your hips mostly fixed so your abs, not your hip flexors, do the work.",
+      "Use a controlled load that lets you fully shorten the abs on every rep."
+    ]
+  },
+  "highToLowCableFly": {
+    "description": "Setting the cables high and pulling downward targets the lower fibers of the chest.",
+    "instructions": [
+      "Set the cable pulleys to the highest position.",
+      "Grip the handles and step forward with one foot for stability.",
+      "Pull the handles down and together in front of your waist.",
+      "Slowly return your arms to the starting high position."
+    ],
+    "tips": [
+      "Squeeze your lower chest at the bottom of the movement.",
+      "Maintain a slight forward lean.",
+      "Avoid using your body weight to pull the cables."
+    ]
+  },
+  "lowToHighCableFly": {
+    "description": "Setting the cables low and pulling upward targets the upper chest and front deltoids.",
+    "instructions": [
+      "Set the cable pulleys to the lowest position.",
+      "Grip the handles and stand in the center, stepping slightly forward.",
+      "Pull the handles upward and together in front of your upper chest.",
+      "Slowly lower the handles back to the starting low position."
+    ],
+    "tips": [
+      "Focus on the contraction in your upper chest.",
+      "Keep a slight bend in your elbows throughout.",
+      "Control the weight during the entire movement."
+    ]
+  },
+  "pecDeckFly": {
+    "description": "A machine-based fly that provides consistent tension on the chest for better isolation.",
+    "instructions": [
+      "Sit in the machine and place your forearms against the padded levers.",
+      "Grip the handles and pull the levers together in front of your chest.",
+      "Pause for a second at the point of maximum contraction.",
+      "Slowly return to the starting position."
+    ],
+    "tips": [
+      "Keep your back and head against the seat.",
+      "Focus on squeezing with your chest rather than pulling with your arms.",
+      "Maintain a consistent, controlled tempo."
+    ]
+  },
+  "barbellOverheadPress": {
+    "description": "A powerful vertical press that builds broad shoulders and upper body stability.",
+    "instructions": [
+      "Stand with feet shoulder-width apart, holding a barbell at shoulder height with an overhand grip.",
+      "Brace your core and press the bar directly overhead until your arms are fully extended.",
+      "Lock out your elbows at the top and push your head slightly forward.",
+      "Lower the bar back to your shoulders with control."
+    ],
+    "tips": [
+      "Don't use your legs to help lift the weight (that's a push press).",
+      "Keep your core and glutes tight to stabilize your torso.",
+      "Focus on a vertical bar path."
+    ]
+  },
+  "dumbbellOverheadPress": {
+    "description": "Pressing dumbbells overhead allows for a natural range of motion and helps address muscle imbalances.",
+    "instructions": [
+      "Stand or sit with a dumbbell in each hand at shoulder level, palms facing forward.",
+      "Press the weights upward until your arms are fully extended.",
+      "Lower the dumbbells back to shoulder height with control.",
+      "Keep your core engaged to avoid arching your back."
+    ],
+    "tips": [
+      "Focus on a smooth, controlled press.",
+      "Maintain a stable base whether sitting or standing.",
+      "Dumbbells offer more freedom for the shoulder joint than a barbell."
+    ]
+  },
+  "smithMachineOverheadPress": {
+    "description": "A guided vertical press that allows you to focus purely on shoulder drive with added safety.",
+    "instructions": [
+      "Position a seat or stand under the Smith machine bar.",
+      "Grip the bar slightly wider than shoulder-width.",
+      "Unlatch the bar and press it overhead until arms are extended.",
+      "Lower it back to shoulder level and repeat."
+    ],
+    "tips": [
+      "Ensure your positioning allows for a safe vertical bar path.",
+      "Focus on squeezing your deltoids at the top.",
+      "Avoid excessive arching of the lower back."
+    ]
+  },
+  "arnoldPress": {
+    "description": "A shoulder press with a rotational component that hits all three heads of the deltoids.",
+    "instructions": [
+      "Sit or stand with dumbbells in front of your shoulders, palms facing you.",
+      "Press the weights overhead while rotating your palms forward.",
+      "Finish with your arms extended overhead and palms facing away.",
+      "Rotate your palms back toward you as you lower the weights to the starting position."
+    ],
+    "tips": [
+      "Maintain a controlled rotation throughout the press.",
+      "Keep your back straight and core engaged.",
+      "Avoid using excessively heavy weights until you master the coordination."
+    ]
+  },
+  "lateralRaise": {
+    "description": "The key isolation exercise for building width in the shoulders.",
+    "instructions": [
+      "Stand with feet hip-width apart, holding dumbbells at your sides.",
+      "Raise your arms out to the sides with a slight bend in your elbows until they are level with your shoulders.",
+      "Pause for a second at the top, then slowly lower the weights back to your sides."
+    ],
+    "tips": [
+      "Don't swing the weights or use momentum.",
+      "Lead with your elbows, not your wrists.",
+      "Imagine you are pouring water out of a pitcher at the top of the movement."
+    ]
+  },
+  "cableLateralRaise": {
+    "description": "A lateral raise using a cable machine to provide constant tension on the side deltoids throughout the entire movement.",
+    "instructions": [
+      "Stand sideways to a cable machine with the pulley at the lowest setting.",
+      "Grip the handle with the far hand and pull it across your body, or with the near hand behind your back.",
+      "Raise your arm out to the side until it is level with your shoulder, keeping a slight bend in your elbow.",
+      "Slowly lower the handle back to the starting position."
+    ],
+    "tips": [
+      "Maintain a tall posture and avoid leaning away from the machine.",
+      "Focus on leading with your elbow and keep the movement controlled.",
+      "The cable provides tension even at the bottom of the rep, unlike dumbbells."
+    ]
+  },
+  "frontRaise": {
+    "description": "Targets the front part of the shoulders for better definition and strength.",
+    "instructions": [
+      "Stand with dumbbells in front of your thighs, palms facing you.",
+      "Lift the weights forward and up until your arms are parallel to the floor.",
+      "Pause for a second, then lower the weights back down with control."
+    ],
+    "tips": [
+      "Keep your core tight to avoid rocking your body.",
+      "Don't lift the weights above shoulder level.",
+      "Can be performed alternating arms or both together."
+    ]
+  },
+  "cableFrontRaise": {
+    "description": "Isolates the front deltoids using cable resistance for smooth, constant tension.",
+    "instructions": [
+      "Stand facing away from a cable machine with the pulley at the lowest setting.",
+      "Hold the handle (or a bar attachment) between your legs or at your side.",
+      "Lift your arm(s) forward and up until they are level with your shoulders.",
+      "Slowly lower back to the starting position."
+    ],
+    "tips": [
+      "Keep your core engaged to prevent your torso from swaying.",
+      "Control the weight throughout the entire range of motion.",
+      "Avoid using momentum to lift the weight."
+    ]
+  },
+  "cableRearDeltFly": {
+    "description": "Isolates the rear deltoids using cables, allowing for a consistent resistance profile.",
+    "instructions": [
+      "Stand in the center of a cable crossover machine with the pulleys at head height.",
+      "Cross your arms and grab the left handle with your right hand and the right handle with your left hand.",
+      "Pull the handles out and back in a wide arc, squeezing your rear delts.",
+      "Slowly return to the starting position, maintaining tension."
+    ],
+    "tips": [
+      "Keep a slight bend in your elbows throughout the movement.",
+      "Focus on pulling with your shoulders, not your back muscles.",
+      "Stand tall and keep your core tight."
+    ]
+  },
+  "cableUprightRow": {
+    "description": "Targets the shoulders and traps by pulling a cable attachment vertically toward the chin.",
+    "instructions": [
+      "Stand facing a cable machine with the pulley at the lowest setting and a straight bar attached.",
+      "Grip the bar with an overhand grip, hands about shoulder-width apart.",
+      "Pull the bar vertically toward your chin, leading with your elbows.",
+      "Stop when the bar is at chest height and your elbows are high.",
+      "Slowly lower the bar back to the starting position."
+    ],
+    "tips": [
+      "Keep the bar close to your body throughout the lift.",
+      "Avoid shrugging your shoulders too much; focus on the deltoids.",
+      "Maintain a stable, upright posture."
+    ]
+  },
+  "cableExternalRotation": {
+    "description": "Strengthens the rotator cuff by rotating the arm outward against cable resistance.",
+    "instructions": [
+      "Stand sideways to a cable machine with the pulley at elbow height.",
+      "Grip the handle with the far hand, keeping your elbow tucked into your side at a 90-degree angle.",
+      "Rotate your forearm outward away from your body as far as comfortable.",
+      "Slowly return to the starting position."
+    ],
+    "tips": [
+      "Place a towel between your elbow and your side to ensure your arm stays tucked.",
+      "Use a very light weight; this is about joint health and stability, not maximum load.",
+      "Move with control and through a comfortable range of motion."
+    ]
+  },
+  "cableInternalRotation": {
+    "description": "Strengthens the internal rotators of the shoulder using a cable machine.",
+    "instructions": [
+      "Stand sideways to a cable machine with the pulley at elbow height.",
+      "Grip the handle with the near hand, keeping your elbow tucked into your side at a 90-degree angle.",
+      "Rotate your forearm inward toward your body.",
+      "Slowly return to the starting position."
+    ],
+    "tips": [
+      "Keep your elbow pinned to your side throughout the set.",
+      "Focus on the quality of the movement rather than the weight.",
+      "Maintain a tall, stable posture."
+    ]
+  },
+  "tricepsDip": {
+    "description": "A demanding bodyweight exercise that builds serious power in the triceps and chest.",
+    "instructions": [
+      "Grip the parallel bars and push yourself up until your arms are fully extended.",
+      "Lower your body by bending your elbows until your upper arms are at least parallel to the floor.",
+      "Drive back up to the starting position by extending your arms.",
+      "Keep your torso mostly upright to focus on the triceps."
+    ],
+    "tips": [
+      "Avoid letting your shoulders shrug toward your ears.",
+      "Keep your elbows tucked in close to your body.",
+      "If bodyweight is too difficult, use an assisted dip machine or bands."
+    ]
+  },
+  "chestDip": {
+    "description": "A dip variation where you lean your torso forward to shift the focus from the triceps to the chest muscles.",
+    "instructions": [
+      "Grip the parallel bars and push yourself up to the starting position.",
+      "Lean your torso forward at about a 45-degree angle as you lower your body.",
+      "Allow your elbows to flare out slightly as you descend.",
+      "Push back up to the starting position while maintaining the forward lean."
+    ],
+    "tips": [
+      "Squeeze your chest at the top of the movement.",
+      "Lower yourself until your shoulders are slightly below your elbows.",
+      "Control the descent to avoid shoulder strain."
+    ]
+  },
+  "tricepsPushdown": {
+    "description": "A popular cable exercise for isolating and building the back of the arms.",
+    "instructions": [
+      "Attach a bar or rope to a high pulley on a cable machine.",
+      "Grip the attachment and pull it down until your elbows are at a 90-degree angle.",
+      "Push the attachment down until your arms are fully extended, squeezing your triceps at the bottom.",
+      "Slowly return to the 90-degree starting position."
+    ],
+    "tips": [
+      "Keep your elbows pinned to your sides throughout the set.",
+      "Avoid using your body weight to push the cable down.",
+      "Maintain a slight forward lean and engaged core."
+    ]
+  },
+  "overheadTricepsExtension": {
+    "description": "Targets the long head of the triceps by extending the weight overhead.",
+    "instructions": [
+      "Sit or stand, holding a dumbbell with both hands overhead.",
+      "Lower the weight behind your head by bending your elbows.",
+      "Extend your arms to lift the weight back to the starting position overhead.",
+      "Keep your upper arms stationary throughout the movement."
+    ],
+    "tips": [
+      "Keep your elbows pointed forward rather than out to the sides.",
+      "Don't let your lower back arch excessively; keep your core tight.",
+      "Use a controlled tempo to avoid hitting your head or neck."
+    ]
+  },
+  "cableOverheadTricepsExtension": {
+    "description": "A cable version of the overhead triceps extension that keeps constant tension on the long head of the triceps through the full range of motion.",
+    "instructions": [
+      "Attach a rope to a low cable or position yourself so the cable tracks behind your head.",
+      "Face away from the machine and bring the rope overhead with elbows bent and pointed forward.",
+      "Extend your elbows until your arms are straight, squeezing the triceps at the top.",
+      "Slowly return to the stretched starting position without letting your elbows flare excessively."
+    ],
+    "tips": [
+      "Keep your elbows mostly fixed in place and let only the forearms move.",
+      "Brace your core so your lower back does not arch during the set.",
+      "Use a smooth tempo and take advantage of the stretch at the bottom."
+    ]
+  },
+  "ringDip": {
+    "description": "An advanced dip variation on rings that requires significant stability and strength.",
+    "instructions": [
+      "Support yourself on the rings with arms fully extended.",
+      "Lower your body with control, keeping the rings close to your sides.",
+      "Drive back up to the starting position, focusing on stabilizing the rings.",
+      "Turn your palms out slightly at the top for maximum stability."
+    ],
+    "tips": [
+      "Keep your core extremely tight to minimize swinging.",
+      "Start with ring holds to build the necessary stability before attempting full reps.",
+      "Ensure the rings are at an appropriate height for your range of motion."
+    ]
+  },
+  "pullUp": {
+    "description": "An elite bodyweight movement for building a wide, powerful back and strong arms.",
+    "instructions": [
+      "Grip the bar with your palms facing away from you, slightly wider than shoulder-width.",
+      "Hang with your arms fully extended and your core engaged.",
+      "Pull your chest toward the bar by driving your elbows down toward your hips.",
+      "Lower yourself back to the starting position with control."
+    ],
+    "tips": [
+      "Focus on pulling with your back muscles rather than just your arms.",
+      "Avoid swinging your legs or using momentum (kipping).",
+      "If you can't perform a full pull-up, start with assisted variations or negatives."
+    ]
+  },
+  "chinUp": {
+    "description": "A pull-up variation with palms facing you, emphasizing the biceps and lower lats.",
+    "instructions": [
+      "Grip the bar with your palms facing toward you, about shoulder-width apart.",
+      "Hang with your arms fully extended.",
+      "Pull your chin over the bar by driving your elbows down.",
+      "Lower yourself back to the starting position with control."
+    ],
+    "tips": [
+      "Chin-ups generally recruit more biceps and chest than pull-ups.",
+      "Keep your core tight to prevent your body from swinging.",
+      "Ensure a full range of motion from a dead hang to chin over the bar."
+    ]
+  },
+  "latPulldown": {
+    "description": "A machine-based exercise that allows you to build vertical pulling strength in a controlled way.",
+    "instructions": [
+      "Sit in the machine and adjust the knee pads so you are securely held in place.",
+      "Grip the bar wider than shoulder-width and lean back slightly.",
+      "Pull the bar down toward your upper chest, focusing on squeezing your shoulder blades together.",
+      "Slowly return the bar to the starting position."
+    ],
+    "tips": [
+      "Don't pull the bar behind your neck; pull it to your upper chest.",
+      "Focus on leading with your elbows.",
+      "Control the weight on the way up to maintain tension in your lats."
+    ]
+  },
+  "cableLatPushdown": {
+    "description": "A standing cable exercise that trains the lats through shoulder extension while keeping the arms nearly straight.",
+    "instructions": [
+      "Attach a straight bar or rope to a high cable pulley and stand facing the machine.",
+      "Hold the attachment with a slight bend in your elbows, step back, and hinge forward slightly at the hips.",
+      "Keeping your arms nearly straight, pull the attachment down toward your thighs by driving your upper arms down and back.",
+      "Pause briefly, then return to the starting position with control without letting your shoulders shrug."
+    ],
+    "tips": [
+      "Keep only a small, fixed bend in your elbows so the lats, not the triceps, do the work.",
+      "Keep your chest tall and avoid swinging your torso to move the load.",
+      "Use a controlled range that lets you feel your lats stretch at the top and contract near your thighs."
+    ]
+  },
+  "seatedCableRow": {
+    "description": "Targets the thickness of the back by pulling cables toward the torso while seated.",
+    "instructions": [
+      "Sit with your feet on the platforms and your knees slightly bent.",
+      "Grip the handle and sit up straight with your arms extended.",
+      "Pull the handle toward your lower ribs, squeezing your shoulder blades together.",
+      "Slowly return to the starting position without letting the weight stack slam."
+    ],
+    "tips": [
+      "Keep your back straight and avoid rocking your torso back and forth.",
+      "Focus on pulling with your elbows rather than your hands.",
+      "Maintain a stable core throughout the movement."
+    ]
+  },
+  "seatedMachineRow": {
+    "description": "A chest-supported machine row that isolates the back muscles while protecting the lower back.",
+    "instructions": [
+      "Adjust the seat and chest pad so you can comfortably reach the handles with arms extended.",
+      "Sit with your chest against the pad and grip the handles.",
+      "Pull the handles toward you, focusing on the contraction in your mid-back.",
+      "Slowly return the handles to the starting position."
+    ],
+    "tips": [
+      "Keep your chest pressed firmly against the pad to isolate your back.",
+      "Focus on squeezing your shoulder blades at the point of maximum contraction.",
+      "Avoid shrugging your shoulders."
+    ]
+  },
+  "barbellBentOverRow": {
+    "description": "A powerful compound movement that builds back thickness and overall upper body strength.",
+    "instructions": [
+      "Stand with feet shoulder-width apart, holding a barbell with an overhand grip.",
+      "Hinge at the hips and bend your knees slightly, keeping your back flat.",
+      "Pull the barbell toward your lower ribs, keeping your elbows close to your body.",
+      "Lower the bar back to the starting position with control."
+    ],
+    "tips": [
+      "Maintain a neutral spine and avoid rounding your back.",
+      "Keep your core engaged to support your lower back.",
+      "Don't use momentum to 'cheat' the weight up."
+    ]
+  },
+  "dumbbellBentOverRow": {
+    "description": "Bending over and pulling dumbbells toward your waist targets the back muscles with a more flexible range of motion.",
+    "instructions": [
+      "Stand with feet shoulder-width apart, holding a dumbbell in each hand.",
+      "Hinge at the hips until your torso is nearly parallel to the floor.",
+      "Pull the dumbbells toward your hips, squeezing your shoulder blades.",
+      "Lower the weights back down with control."
+    ],
+    "tips": [
+      "Keep your back flat and core engaged throughout.",
+      "Focus on pulling with your elbows.",
+      "Dumbbells allow each side of the back to work independently."
+    ]
+  },
+  "smithMachineBentOverRow": {
+    "description": "A guided row variation that allows for heavy loading with a focus on mid-back contraction.",
+    "instructions": [
+      "Position yourself in a bent-over stance over the Smith machine bar.",
+      "Grip the bar and unlatch it.",
+      "Pull the bar toward your lower ribs, keeping your back flat.",
+      "Lower the bar back down and repeat."
+    ],
+    "tips": [
+      "Maintain a stable hinge position throughout the set.",
+      "The fixed path helps isolate the target muscles.",
+      "Adjust your distance from the bar for comfort."
+    ]
+  },
+  "singleArmDumbbellRow": {
+    "description": "Allows for a deeper range of motion and helps correct muscle imbalances in the back.",
+    "instructions": [
+      "Place one knee and one hand on a bench for support, with your back flat.",
+      "Hold a dumbbell in the other hand with your arm extended toward the floor.",
+      "Pull the dumbbell up toward your hip, keeping your elbow close to your side.",
+      "Slowly lower the dumbbell back to the starting position."
+    ],
+    "tips": [
+      "Focus on pulling with your back and shoulder blade, not just your arm.",
+      "Maintain a stable torso and avoid rotating your body as you pull.",
+      "Keep your neck in a neutral position."
+    ]
+  },
+  "facePull": {
+    "description": "Essential for shoulder health, targeting the rear delts and upper back muscles.",
+    "instructions": [
+      "Attach a rope to a cable pulley at upper-chest or eye level.",
+      "Grip the ends of the rope with your thumbs pointing back.",
+      "Pull the rope toward your forehead, pulling the ends apart as you get closer to your face.",
+      "Focus on squeezing your rear delts and mid-back at the end of the movement."
+    ],
+    "tips": [
+      "Keep your elbows high and out to the sides.",
+      "Avoid using your lower back to pull; stay upright and stable.",
+      "Use lighter weights and focus on the quality of the contraction."
+    ]
+  },
+  "rearDeltFly": {
+    "description": "Isolates the rear part of the shoulders to help create a well-rounded physique.",
+    "instructions": [
+      "Sit on the edge of a bench or stand and hinge forward at the hips, keeping your back flat.",
+      "Hold dumbbells with palms facing each other and arms extended toward the floor.",
+      "Raise the weights out to the sides until your arms are level with your shoulders.",
+      "Slowly lower the weights back to the starting position."
+    ],
+    "tips": [
+      "Focus on using your rear deltoids, not your traps.",
+      "Keep a slight bend in your elbows throughout the movement.",
+      "Don't swing the weights."
+    ]
+  },
+  "machineRearDeltFly": {
+    "description": "Isolates the rear deltoids using a machine for controlled and effective results.",
+    "instructions": [
+      "Sit facing the machine with your chest firmly against the pad.",
+      "Grip the handles with your arms extended in front of you.",
+      "Pull the handles back in a wide arc until your arms are in line with your shoulders.",
+      "Squeeze your rear delts, then slowly return to the starting position."
+    ],
+    "tips": [
+      "Keep your chest against the pad to isolate the rear delts.",
+      "Focus on the contraction in the back of your shoulders.",
+      "Maintain a consistent, controlled tempo."
+    ]
+  },
+  "bicepsCurl": {
+    "description": "The classic isolation exercise for building and defining the biceps.",
+    "instructions": [
+      "Stand with feet hip-width apart, holding dumbbells at your sides with palms facing forward.",
+      "Curl the weights up toward your shoulders by bending your elbows.",
+      "Squeeze your biceps at the top, then slowly lower the weights back down.",
+      "Keep your upper arms stationary throughout the movement."
+    ],
+    "tips": [
+      "Avoid swinging your body or using momentum to lift the weights.",
+      "Keep your elbows tucked in close to your torso.",
+      "Full range of motion: extend your arms fully at the bottom."
+    ]
+  },
+  "cableCurl": {
+    "description": "A standing cable curl that keeps constant tension on the biceps from the start to the finish of every rep.",
+    "instructions": [
+      "Attach a straight or EZ-style handle to a low cable pulley and stand facing the machine.",
+      "Grip the handle with palms facing up and keep your elbows close to your sides.",
+      "Curl the handle toward your shoulders while keeping your upper arms mostly still.",
+      "Lower the weight under control until your elbows are fully extended again."
+    ],
+    "tips": [
+      "Do not let your shoulders roll forward as the weight lowers.",
+      "Keep your torso still and avoid leaning back to move the load.",
+      "Pause briefly near the top to maximize the biceps contraction."
+    ]
+  },
+  "bayesianCableCurl": {
+    "description": "A behind-the-body cable curl that lengthens the biceps at the start of the rep and emphasizes the stretch position.",
+    "instructions": [
+      "Attach a single handle to a low pulley and stand facing away from the machine with the handle in one hand behind your hip.",
+      "Step forward until the cable pulls your working arm slightly behind your torso.",
+      "Curl the handle toward your shoulder while keeping your elbow from drifting too far forward.",
+      "Lower back to the stretched starting position with control before repeating."
+    ],
+    "tips": [
+      "Set up enough distance from the machine to feel a stretch in the biceps at the bottom.",
+      "Keep your chest tall and avoid twisting your torso as you curl.",
+      "Use moderate loads and full control to get the most from the stretch."
+    ]
+  },
+  "hammerCurl": {
+    "description": "A neutral-grip curl that targets the biceps and the brachialis for thicker arms.",
+    "instructions": [
+      "Stand with dumbbells at your sides, palms facing your torso (neutral grip).",
+      "Curl the weights up while maintaining the neutral grip.",
+      "Squeeze at the top and lower back down with control.",
+      "Keep your elbows pinned to your sides."
+    ],
+    "tips": [
+      "Focus on the contraction in your biceps and forearms.",
+      "Maintain an upright posture and avoid swaying.",
+      "Can be performed alternating arms or both together."
+    ]
+  },
+  "suspensionRow": {
+    "description": "Uses a suspension trainer to perform bodyweight rows, allowing for easy difficulty adjustment via body angle.",
+    "instructions": [
+      "Grip the handles and lean back with your arms extended and feet forward.",
+      "Maintain a straight line from your head to your heels.",
+      "Pull your chest toward the handles by driving your elbows back.",
+      "Lower yourself back to the starting position with control."
+    ],
+    "tips": [
+      "Adjust the difficulty by changing your foot position (closer to the anchor is harder).",
+      "Keep your core and glutes engaged to prevent your hips from sagging.",
+      "Focus on a smooth, controlled motion."
+    ]
+  },
+  "landmineRow": {
+    "description": "A powerful back exercise performed by anchoring one end of a barbell and pulling the weighted end toward your torso.",
+    "instructions": [
+      "Anchor one end of a barbell in a landmine attachment or a corner on the floor.",
+      "Load weight plates onto the other end and straddle the bar, facing away from the anchor.",
+      "Hinge at your hips and bend your knees slightly, keeping your back flat.",
+      "Grip the bar (using a V-handle if available) and pull the weighted end toward your lower ribs.",
+      "Lower the weight back down with control, maintaining a flat back."
+    ],
+    "tips": [
+      "Brace your core throughout the movement to protect your lower back.",
+      "Focus on pulling with your elbows and squeezing your shoulder blades together.",
+      "Maintain a consistent hinge position; avoid 'bouncing' the weight up."
+    ]
+  },
+  "plank": {
+    "description": "A fundamental core exercise that builds isometric strength and stability across the entire midsection.",
+    "instructions": [
+      "Place your forearms on the floor, elbows aligned under your shoulders.",
+      "Extend your legs behind you and balance on your toes.",
+      "Keep your body in a straight line from head to heels.",
+      "Engage your core and hold the position."
+    ],
+    "tips": [
+      "Avoid letting your hips sag or hike up too high.",
+      "Maintain a neutral neck position; look down at the floor.",
+      "Breathe steadily throughout the hold."
+    ]
+  },
+  "sidePlank": {
+    "description": "Focuses on the obliques and lateral core stability to improve balance and prevent back pain.",
+    "instructions": [
+      "Lie on your side with your legs straight and stack your feet.",
+      "Prop your upper body up on your forearm, with your elbow directly under your shoulder.",
+      "Lift your hips until your body forms a straight line from head to feet.",
+      "Hold the position while keeping your core engaged and hips level."
+    ],
+    "tips": [
+      "Don't let your hips sag toward the floor.",
+      "Keep your neck in a neutral position, looking straight ahead.",
+      "For an easier variation, perform the plank with your knees on the floor."
+    ]
+  },
+  "deadBug": {
+    "description": "A safe and effective way to build core stability and coordination without straining the back.",
+    "instructions": [
+      "Lie on your back with your arms extended toward the ceiling and knees bent at 90 degrees (tabletop position).",
+      "Slowly lower your right arm behind your head while simultaneously extending your left leg toward the floor.",
+      "Keep your lower back pressed firmly into the floor throughout the movement.",
+      "Return to the starting position and repeat with the opposite arm and leg."
+    ],
+    "tips": [
+      "The key is to maintain a flat back; if your back arches, don't lower your leg as far.",
+      "Move slowly and with control.",
+      "Exhale as you extend your limbs."
+    ]
+  },
+  "birdDog": {
+    "description": "Improves balance and spinal stability by engaging the core, glutes, and shoulders simultaneously.",
+    "instructions": [
+      "Start on all fours with your hands under your shoulders and knees under your hips.",
+      "Slowly extend your right arm forward and your left leg backward until both are parallel to the floor.",
+      "Keep your hips level and your core engaged to prevent your back from arching.",
+      "Hold for a second, then return to the starting position and switch sides."
+    ],
+    "tips": [
+      "Imagine there is a glass of water on your back that you don't want to spill.",
+      "Don't lift your arm or leg too high; focus on length rather than height.",
+      "Keep your gaze toward the floor to maintain a neutral neck."
+    ]
+  },
+  "mountainClimber": {
+    "description": "A dynamic exercise that targets the core while providing a significant cardiovascular challenge.",
+    "instructions": [
+      "Start in a high plank position with your hands under your shoulders and your body in a straight line.",
+      "Drive one knee toward your chest, then quickly switch legs, as if you are running in place in a plank position.",
+      "Keep your hips low and your core tight.",
+      "Maintain a consistent and rapid pace."
+    ],
+    "tips": [
+      "Avoid letting your hips bounce up and down.",
+      "Focus on driving your knees straight forward.",
+      "Keep your weight centered over your hands."
+    ]
+  },
+  "russianTwist": {
+    "description": "Targets the obliques with a rotational movement that improves core power and definition.",
+    "instructions": [
+      "Sit on the floor with your knees bent and feet slightly elevated.",
+      "Lean back slightly, keeping your back straight and core engaged.",
+      "Twist your torso to one side, bringing your hands toward the floor next to your hip.",
+      "Twist back to the other side in a controlled manner."
+    ],
+    "tips": [
+      "Follow your hands with your eyes to ensure your entire torso is rotating.",
+      "Keep your feet together and as still as possible.",
+      "For added challenge, hold a weight or medicine ball."
+    ]
+  },
+  "bicycleCrunch": {
+    "description": "An excellent all-around core exercise that hits the upper abs, lower abs, and obliques.",
+    "instructions": [
+      "Lie on your back with your hands behind your head and knees in a tabletop position.",
+      "Bring your right elbow toward your left knee while extending your right leg.",
+      "Switch sides, bringing your left elbow toward your right knee and extending your left leg.",
+      "Continue alternating sides in a pedaling motion."
+    ],
+    "tips": [
+      "Focus on rotating your torso rather than just pulling your elbows.",
+      "Keep your lower back pressed into the floor.",
+      "Move with control rather than speed for better muscle engagement."
+    ]
+  },
+  "hangingLegRaise": {
+    "description": "An advanced core exercise that specifically targets the lower abdominals and improves grip strength.",
+    "instructions": [
+      "Hang from a pull-up bar with your arms fully extended and a shoulder-width grip.",
+      "Keeping your legs straight (or slightly bent), lift them until they are parallel to the floor.",
+      "Lower your legs back down slowly and with control.",
+      "Avoid swinging your body to gain momentum."
+    ],
+    "tips": [
+      "Engage your core and lats to stabilize your body.",
+      "Focus on the 'tucking' of your pelvis to engage your lower abs.",
+      "If full leg raises are too difficult, start with hanging knee raises."
+    ]
+  },
+  "lyingLegRaise": {
+    "description": "A floor-based core exercise that trains the abs to control the pelvis while the legs move through hip flexion.",
+    "instructions": [
+      "Lie on your back with your arms by your sides and legs extended.",
+      "Brace your abs and gently press your lower back into the floor.",
+      "Raise both legs together until they are nearly vertical, keeping them straight or slightly bent as needed.",
+      "Lower your legs slowly only as far as you can without your lower back arching off the floor."
+    ],
+    "tips": [
+      "Do not chase range of motion; stop the descent as soon as your lower back starts to lift.",
+      "Bend your knees or perform alternating heel taps to make the exercise easier.",
+      "Move slowly and avoid swinging your legs so your abs, not momentum, control the movement."
+    ]
+  },
+  "cableWoodchop": {
+    "description": "A functional rotational movement that builds core power and targets the obliques using cable resistance.",
+    "instructions": [
+      "Stand sideways to a cable machine with the handle set to high or low position.",
+      "Grip the handle with both hands and step away from the machine.",
+      "Pull the handle across your body and down (or up) in a diagonal woodchopping motion, rotating your torso.",
+      "Slowly return to the starting position."
+    ],
+    "tips": [
+      "Keep your arms mostly straight and rotate from your core.",
+      "Pivot your back foot as you rotate to protect your knees.",
+      "Maintain a stable base with your feet shoulder-width apart."
+    ]
+  },
+  "burpee": {
+    "description": "The ultimate full-body exercise for burning fat and building explosive power and endurance.",
+    "instructions": [
+      "Start in a standing position.",
+      "Drop into a squat and place your hands on the floor.",
+      "Jump your feet back into a plank position and perform a push-up.",
+      "Jump your feet back toward your hands and explosively jump into the air with your arms overhead."
+    ],
+    "tips": [
+      "Maintain a tight core throughout the entire movement.",
+      "Land softly on your feet after the jump.",
+      "Can be modified by stepping back instead of jumping to reduce impact."
+    ]
+  },
+  "jumpingJacks": {
+    "description": "A classic total-body warm-up and conditioning exercise that improves coordination and cardiovascular health.",
+    "instructions": [
+      "Stand with your feet together and arms at your sides.",
+      "Jump into the air while spreading your legs to shoulder-width and swinging your arms over your head.",
+      "Jump again to return to the starting position.",
+      "Repeat in a rhythmic fashion."
+    ],
+    "tips": [
+      "Land softly on the balls of your feet.",
+      "Maintain a slight bend in your knees.",
+      "Keep your core engaged throughout the movement."
+    ]
+  },
+  "highKnees": {
+    "description": "A high-intensity cardio exercise that strengthens the legs and core while improving running form.",
+    "instructions": [
+      "Stand with your feet hip-width apart.",
+      "Lift your right knee toward your chest as high as possible while pumping your left arm.",
+      "Quickly switch legs, lifting your left knee and pumping your right arm.",
+      "Continue alternating at a fast pace, staying on the balls of your feet."
+    ],
+    "tips": [
+      "Focus on lifting your knees to at least hip height.",
+      "Keep your torso upright; don't lean back.",
+      "Pump your arms to help maintain momentum."
+    ]
+  },
+  "squatJump": {
+    "description": "Combines a traditional squat with an explosive jump to build power and increase heart rate.",
+    "instructions": [
+      "Stand with feet shoulder-width apart.",
+      "Lower into a squat position until your thighs are parallel to the floor.",
+      "Explosively jump into the air, reaching as high as possible.",
+      "Land softly and immediately descend into the next squat."
+    ],
+    "tips": [
+      "Absorb the impact by landing on the balls of your feet and rolling to your heels.",
+      "Ensure your knees don't cave inward during takeoff or landing.",
+      "Swing your arms to help generate upward power."
+    ]
+  },
+  "butterflySitUp": {
+    "description": "A classic Freeletics core exercise that uses a butterfly leg position to minimize hip flexor involvement.",
+    "instructions": [
+      "Lie on your back with the soles of your feet together and knees pointing out.",
+      "Extend your arms overhead and touch the floor behind you.",
+      "Engage your core and sit up fully, touching the floor in front of your toes.",
+      "Lower yourself back down with control."
+    ],
+    "tips": [
+      "Use your arms for momentum if needed, but focus on using your abs.",
+      "Keep your lower back pressed into the floor during the initial phase of the sit-up.",
+      "Exhale as you sit up."
+    ]
+  },
+  "sprawl": {
+    "description": "A 'down-and-up' movement similar to a burpee but without the push-up and jump, focused on speed and metabolic conditioning.",
+    "instructions": [
+      "From a standing position, drop into a squat and place your hands on the floor.",
+      "Jump your feet back into a high plank position.",
+      "Immediately jump your feet back toward your hands.",
+      "Return to a standing position as quickly as possible."
+    ],
+    "tips": [
+      "Keep your core tight to avoid sagging your hips in the plank position.",
+      "Focus on quick transitions between standing and plank.",
+      "Maintain a steady rhythm."
+    ]
+  },
+  "pikePushUp": {
+    "description": "A bodyweight push-up variation performed in a pike position to target the shoulders and upper chest.",
+    "instructions": [
+      "Start in a high plank position, then lift your hips until your body forms an inverted V-shape.",
+      "Keep your legs and arms straight, with your head tucked between your arms.",
+      "Lower the top of your head toward the floor by bending your elbows.",
+      "Push back up to the starting pike position."
+    ],
+    "tips": [
+      "The closer your feet are to your hands, the more difficult the exercise becomes.",
+      "Keep your core engaged and your back straight.",
+      "Focus on pushing through your shoulders."
+    ]
+  },
+  "superman": {
+    "description": "Strengthens the entire posterior chain, including the lower back, glutes, and hamstrings.",
+    "instructions": [
+      "Lie face down on the floor with your arms extended overhead and legs straight.",
+      "Simultaneously lift your arms, chest, and legs off the floor.",
+      "Hold the position for a second, squeezing your glutes and lower back.",
+      "Lower back down with control."
+    ],
+    "tips": [
+      "Don't look up; keep your neck in a neutral position by looking at the floor.",
+      "Focus on length rather than height.",
+      "Breathe out as you lift."
+    ]
+  },
+  "handReleasePushUp": {
+    "description": "A push-up variation where you lift your hands off the floor at the bottom of each rep to ensure a full range of motion and build explosive power.",
+    "instructions": [
+      "Start in a high plank position.",
+      "Lower your chest all the way to the floor.",
+      "Briefly lift both hands off the floor, then place them back down.",
+      "Push explosively back up to the starting plank position."
+    ],
+    "tips": [
+      "Maintain a tight core to avoid 'snaking' off the floor.",
+      "Keep your body in a straight line from head to heels.",
+      "Focus on pushing through the entire palm."
+    ]
+  },
+  "climber": {
+    "description": "Similar to mountain climbers but with your feet jumping outside your hands, emphasizing hip mobility and core power.",
+    "instructions": [
+      "Start in a high plank position.",
+      "Jump your right foot forward and place it outside your right hand.",
+      "Explosively switch legs, jumping your right foot back while bringing your left foot outside your left hand.",
+      "Continue alternating at a fast, rhythmic pace."
+    ],
+    "tips": [
+      "Keep your hips as low as possible.",
+      "Focus on a large range of motion for your legs.",
+      "Maintain a strong, stable upper body."
+    ]
+  },
+  "boxingBagWork": {
+    "description": "High-intensity intervals on the heavy bag build cardiovascular endurance, power, and coordination.",
+    "instructions": [
+      "Stand in a boxing stance with your hands up guarding your face.",
+      "Perform various punches (jabs, crosses, hooks, uppercuts) against the heavy bag.",
+      "Stay light on your feet and move around the bag.",
+      "Maintain a high intensity for the duration of the round."
+    ],
+    "tips": [
+      "Focus on proper punching technique to avoid wrist injury.",
+      "Exhale with every punch.",
+      "Keep your core engaged for more power and stability."
+    ]
+  },
+  "catCow": {
+    "description": "A gentle spinal movement that improves flexibility and relieves tension in the back.",
+    "instructions": [
+      "Start on all fours with hands under shoulders and knees under hips.",
+      "Cow: Inhale as you drop your belly toward the floor, lift your chest, and look up.",
+      "Cat: Exhale as you arch your back toward the ceiling, tuck your chin, and pull your belly button in.",
+      "Move smoothly between the two positions, following your breath."
+    ],
+    "tips": [
+      "Focus on moving one vertebra at a time.",
+      "Keep your movements gentle and within a comfortable range of motion.",
+      "Spread your fingers wide for better support."
+    ]
+  },
+  "hipFlexorStretch": {
+    "description": "Relieves tightness in the hips caused by prolonged sitting or intense training.",
+    "instructions": [
+      "Kneel on one knee with the other foot flat in front of you (half-kneeling position).",
+      "Keep your torso upright and gently push your hips forward.",
+      "Squeeze the glute of your kneeling leg to deepen the stretch.",
+      "Hold for the desired duration and then switch legs."
+    ],
+    "tips": [
+      "Avoid arching your lower back; keep your core engaged.",
+      "You should feel the stretch in the front of your kneeling hip.",
+      "Maintain a tall posture throughout the stretch."
+    ]
+  },
+  "hamstringStretch": {
+    "description": "Improves flexibility in the back of the legs and helps prevent lower back pain.",
+    "instructions": [
+      "Sit on the floor with one leg extended and the other foot against your inner thigh.",
+      "Hinge at your hips and reach toward your toes, keeping your back flat.",
+      "Hold the stretch when you feel tension in the back of your leg.",
+      "Repeat on the other side."
+    ],
+    "tips": [
+      "Don't bounce; hold a steady, gentle stretch.",
+      "Focus on reaching with your chest rather than your head to keep your back straighter.",
+      "Breathe deeply and try to relax into the stretch."
+    ]
+  },
+  "thoracicRotation": {
+    "description": "Opens up the upper back and improves rotational mobility for better posture and performance.",
+    "instructions": [
+      "Start on all fours or in a side-lying position with knees bent.",
+      "Place one hand behind your head.",
+      "Rotate your elbow and torso toward the ceiling, following with your eyes.",
+      "Slowly return to the starting position."
+    ],
+    "tips": [
+      "Keep your hips still and focus the rotation in your upper back.",
+      "Exhale as you rotate upward.",
+      "Don't force the range of motion; move within your comfort zone."
+    ]
+  },
+  "shoulderMobilityFlow": {
+    "description": "A sequence of movements designed to improve range of motion and health in the shoulder joints.",
+    "instructions": [
+      "Perform a series of controlled shoulder movements, such as arm circles, shoulder rolls, and 'wall slides'.",
+      "Move through each motion slowly and through its full range of motion.",
+      "Focus on keeping your shoulders relaxed and down away from your ears.",
+      "Maintain a steady, rhythmic flow."
+    ],
+    "tips": [
+      "Avoid any movements that cause sharp pain.",
+      "Keep your core engaged to stabilize your torso during the arm movements.",
+      "Great as a warmup for any upper body workout."
+    ]
+  },
+  "worldGreatestStretch": {
+    "description": "A comprehensive dynamic stretch that targets the hips, hamstrings, and thoracic spine.",
+    "instructions": [
+      "Start in a high plank position.",
+      "Step your right foot forward to the outside of your right hand.",
+      "Lift your right arm and rotate your torso toward the ceiling, looking at your hand.",
+      "Bring your right elbow down toward the inside of your right foot.",
+      "Push back into a hamstring stretch by straightening your front leg and lifting your toes.",
+      "Return to the plank and repeat on the other side."
+    ],
+    "tips": [
+      "Move through each phase slowly and deliberately.",
+      "Keep your back leg as straight as possible during the rotation.",
+      "Focus on opening your chest as you rotate."
+    ]
+  },
+  "pigeonPose": {
+    "description": "An effective yoga pose for opening the hips and relieving tension in the glutes.",
+    "instructions": [
+      "From a downward dog or all-fours position, bring your right knee forward toward your right wrist.",
+      "Place your right shin on the floor, aiming to have it parallel to the front of your mat (or as comfortable).",
+      "Extend your left leg straight back behind you.",
+      "Keep your hips square and slowly lower your torso over your front leg.",
+      "Hold and breathe into the stretch, then switch sides."
+    ],
+    "tips": [
+      "Don't force your shin to be parallel if it causes knee pain.",
+      "Use a block or cushion under your hip for support if needed.",
+      "Keep your front foot flexed to protect your knee."
+    ]
+  },
+  "cobraStretch": {
+    "description": "A gentle back extension that stretches the abdominal muscles and improves spinal flexibility.",
+    "instructions": [
+      "Lie face down on the floor with your legs extended and tops of your feet down.",
+      "Place your hands under your shoulders.",
+      "Inhale and slowly straighten your arms to lift your chest off the floor.",
+      "Keep your hips on the floor and your shoulders away from your ears.",
+      "Look slightly upward and hold the stretch."
+    ],
+    "tips": [
+      "Don't force your arms to be fully straight if it pinches your lower back.",
+      "Engage your glutes slightly to support your spine.",
+      "Focus on length through the front of your body."
+    ]
+  },
+  "childsPose": {
+    "description": "A restful pose that gently stretches the back, hips, and shoulders.",
+    "instructions": [
+      "Kneel on the floor with your big toes touching and sit on your heels.",
+      "Separate your knees about hip-width apart.",
+      "Exhale and lean forward, resting your torso between your thighs.",
+      "Extend your arms forward with palms down, or rest them by your sides.",
+      "Rest your forehead on the floor and breathe deeply."
+    ],
+    "tips": [
+      "Widen your knees further to make more room for your torso if needed.",
+      "Focus on sending your breath into your lower back.",
+      "Relax your jaw and shoulders completely."
+    ]
+  },
+  "inchworm": {
+    "description": "A dynamic movement that stretches the hamstrings while building core and shoulder stability.",
+    "instructions": [
+      "Stand with feet hip-width apart.",
+      "Hinge at your hips and place your hands on the floor (bend knees slightly if needed).",
+      "Walk your hands forward until you reach a high plank position.",
+      "Pause briefly, then walk your feet toward your hands using small steps while keeping legs as straight as possible.",
+      "Return to a standing position and repeat."
+    ],
+    "tips": [
+      "Maintain a tight core to avoid sagging your hips during the plank.",
+      "Keep your legs straight as long as possible to maximize the hamstring stretch.",
+      "Move with control, avoiding rushing."
+    ]
+  },
+  "armCircles": {
+    "description": "A simple shoulder mobility exercise that warms up the rotator cuff and improves joint health.",
+    "instructions": [
+      "Stand with feet shoulder-width apart and extend your arms out to the sides at shoulder height.",
+      "Perform small, controlled circles with your arms in a forward direction.",
+      "After the desired duration, reverse the direction to backward circles.",
+      "Gradually increase the size of the circles as your shoulders feel warmer."
+    ],
+    "tips": [
+      "Keep your shoulders relaxed and down away from your ears.",
+      "Maintain a stable torso; don't let your body rock.",
+      "Breathe naturally throughout the movement."
+    ]
+  },
+  "legSwings": {
+    "description": "A dynamic stretch that improves hip mobility and prepares the legs for training.",
+    "instructions": [
+      "Stand near a wall or sturdy object for balance.",
+      "Swing one leg forward and backward in a controlled motion, increasing the range as you go.",
+      "After the desired reps, switch to side-to-side swings across your body.",
+      "Switch legs and repeat."
+    ],
+    "tips": [
+      "Keep your torso upright and core engaged; avoid excessive arching of the back.",
+      "Don't force the range of motion; stay within a comfortable stretch.",
+      "Maintain a rhythmic, steady tempo."
+    ]
+  },
+  "wristCircles": {
+    "description": "Improves wrist joint mobility and helps prevent strain during upper-body exercises.",
+    "instructions": [
+      "Extend your arms in front of you or keep them relaxed at your sides.",
+      "Rotate your wrists in a circular motion, moving through the full range of motion.",
+      "Perform circles in both clockwise and counter-clockwise directions.",
+      "You can also interlace your fingers and rotate your wrists together."
+    ],
+    "tips": [
+      "Keep the movement slow and focused.",
+      "Relax your hands and fingers.",
+      "Particularly useful before exercises like push-ups or bench press."
+    ]
+  },
+  "ankleCircles": {
+    "description": "Enhances ankle mobility and prepares the feet for weight-bearing activities.",
+    "instructions": [
+      "Stand on one leg (using a wall for balance) or sit with one leg extended.",
+      "Rotate your ankle in a circular motion, drawing the largest circle possible with your toes.",
+      "Perform circles in both directions.",
+      "Switch feet and repeat."
+    ],
+    "tips": [
+      "Focus on moving only the ankle, not the whole leg.",
+      "Move slowly to ensure you hit every part of the rotation.",
+      "Great for improving squat depth and running mechanics."
+    ]
+  },
+  "deepSquatHold": {
+    "description": "An isometric hold in the bottom of a squat to improve hip, knee, and ankle mobility.",
+    "instructions": [
+      "Stand with feet shoulder-width apart, toes slightly pointed out.",
+      "Lower into your deepest possible squat, keeping your heels on the floor.",
+      "Rest your elbows on the inside of your knees to gently push them outward.",
+      "Keep your chest as upright as possible.",
+      "Hold the position for the desired duration, breathing deeply."
+    ],
+    "tips": [
+      "If your heels lift, place them on a small elevation or hold onto a sturdy object for balance.",
+      "Focus on relaxing into the hips.",
+      "Gently shift your weight from side to side to target different areas."
+    ]
+  },
+  "scapularCircles": {
+    "description": "Improves shoulder blade (scapula) mobility and health, promoting better posture and upper-body mechanics.",
+    "instructions": [
+      "Stand or sit upright with arms relaxed at your sides.",
+      "Shrug your shoulders up toward your ears (elevation).",
+      "Pull them back, squeezing your shoulder blades together (retraction).",
+      "Drop them down as far as possible (depression).",
+      "Push them forward, rounding your upper back slightly (protraction).",
+      "Smooth these movements into a circular motion, performing both directions."
+    ],
+    "tips": [
+      "Keep your arms straight and still; the movement should come from the shoulder blades.",
+      "Imagine drawing a circle with the points of your shoulders.",
+      "Avoid arching your lower back."
+    ]
+  },
+  "quadStretch": {
+    "description": "A classic stretch for the front of the thigh to improve flexibility and knee health.",
+    "instructions": [
+      "Stand on one leg, using a wall or chair for balance if needed.",
+      "Bend your other knee and reach back to grab your foot or ankle with the same-side hand.",
+      "Gently pull your heel toward your glutes.",
+      "Keep your knees together and your torso upright.",
+      "Hold and then switch legs."
+    ],
+    "tips": [
+      "Squeeze your glutes of the stretching leg to deepen the stretch in the hip flexor.",
+      "Avoid arching your lower back.",
+      "Ensure you're standing tall, not leaning forward."
+    ]
+  },
+  "doorwayChestStretch": {
+    "description": "Uses a doorway or frame to open up the chest and front of the shoulders, counteracting 'hunched' posture.",
+    "instructions": [
+      "Stand in a doorway or at the corner of a wall.",
+      "Place your forearm(s) against the doorframe with the elbow at shoulder height.",
+      "Gently lean or step forward until you feel a comfortable stretch in your chest.",
+      "Hold the position, breathing deeply.",
+      "You can adjust the height of your arms to target different parts of the chest."
+    ],
+    "tips": [
+      "Don't lean too far; the stretch should be gentle.",
+      "Keep your shoulders down and away from your ears.",
+      "Keep your core engaged to avoid arching your lower back."
+    ]
+  },
+  "scorpions": {
+    "description": "A dynamic stretch for the hips, lower back, and chest performed while lying face down.",
+    "instructions": [
+      "Lie face down on the floor with your arms extended out to the sides in a 'T' shape.",
+      "Lift your right leg and reach it across your body toward your left hand, rotating your hips.",
+      "Try to touch the floor with your right foot while keeping your chest and arms as flat as possible.",
+      "Return to center and repeat with the left leg."
+    ],
+    "tips": [
+      "Move slowly and with control to protect your lower back.",
+      "Focus on the rotation of the spine and opening of the hips.",
+      "Only reach as far as is comfortable; your foot doesn't have to touch your hand."
+    ]
+  },
+  "threadTheNeedle": {
+    "description": "A gentle rotation for the upper back and shoulders that also stretches the neck.",
+    "instructions": [
+      "Start on all fours with hands under shoulders and knees under hips.",
+      "Reach your right arm under your body to the left, sliding the back of your hand along the floor.",
+      "Lower your right shoulder and ear toward the floor.",
+      "Keep your hips square and breathe into the stretch between your shoulder blades.",
+      "Hold, then return to center and repeat on the other side."
+    ],
+    "tips": [
+      "Focus on the stretch in the upper back and rear shoulder.",
+      "Use your left hand to gently press into the floor and deepen the rotation if comfortable.",
+      "Relax your neck completely."
+    ]
+  },
+  "neckCircles": {
+    "description": "Gently releases tension in the neck and improves cervical range of motion.",
+    "instructions": [
+      "Sit or stand tall with shoulders relaxed.",
+      "Gently drop your chin toward your chest.",
+      "Slowly roll your head toward one shoulder, then carefully toward the back, and over to the other shoulder.",
+      "Continue the circular motion slowly and smoothly.",
+      "Reverse directions after the desired duration."
+    ],
+    "tips": [
+      "Avoid any rapid or jerky movements.",
+      "If you feel any sharp pain or dizziness, stop immediately.",
+      "Keep your shoulders down and relaxed throughout."
+    ]
+  }
+}

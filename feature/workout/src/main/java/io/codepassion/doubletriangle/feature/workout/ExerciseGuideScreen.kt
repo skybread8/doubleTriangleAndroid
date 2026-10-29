@@ -79,10 +79,10 @@ import org.json.JSONObject
 internal data class ExerciseGuide(val description: String, val instructions: List<String>, val tips: List<String>)
 
 private enum class ExerciseDetailsSection(val title: String) {
-    Instructions("Instrucciones"),
-    History("Historial"),
-    Profile("Perfil"),
-    Related("Relacionados"),
+    Instructions("Instructions"),
+    History("History"),
+    Profile("Profile"),
+    Related("Related"),
 }
 
 private data class LocalExerciseProfile(
@@ -205,16 +205,18 @@ private object LocalExerciseProfileStore {
 }
 
 internal object ExerciseGuideRepository {
-    private var guides: Map<String, ExerciseGuide>? = null
+    private var guides: Pair<String, Map<String, ExerciseGuide>>? = null
 
     fun get(context: Context, imageKey: String?): ExerciseGuide? {
         if (imageKey == null) return null
-        val loaded = guides ?: load(context).also { guides = it }
-        return loaded[imageKey]
+        val locale = context.resources.configuration.locales.toLanguageTags()
+        val loaded = guides?.takeIf { it.first == locale }?.second
+            ?: load(context).also { guides = locale to it }
+        return loaded[canonicalExerciseMediaKey(imageKey)] ?: loaded[imageKey]
     }
 
     private fun load(context: Context): Map<String, ExerciseGuide> = runCatching {
-        val root = JSONObject(context.resources.openRawResource(R.raw.exercise_guide_es).bufferedReader().use { it.readText() })
+        val root = JSONObject(context.resources.openRawResource(R.raw.exercise_guide).bufferedReader().use { it.readText() })
         buildMap {
             root.keys().forEach { key ->
                 val item = root.getJSONObject(key)
@@ -232,8 +234,11 @@ internal object ExerciseGuideRepository {
 @Composable
 fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    val guide = remember(exercise.imageKey) { ExerciseGuideRepository.get(context, exercise.imageKey) }
+    val locale = LocalLocale.current
+    val guide = remember(exercise.imageKey, locale) { ExerciseGuideRepository.get(context, exercise.imageKey) }
     val coachMedia = remember(exercise.imageKey) { CoachExerciseMediaStore.latest(context, exercise.imageKey) }
+    val exerciseName = coachMedia?.name ?: tutorialExerciseName(exercise.imageKey, exercise.name)
+    val backLabel = tutorialText("action.back")
     val visualMetadata = remember(exercise.imageKey) { ExerciseVisualCatalog.metadata(exercise.imageKey) }
     val equipmentVisuals = remember(exercise.imageKey) { ExerciseVisualCatalog.equipmentVisualsFor(exercise.imageKey) }
     val history = remember(exercise.imageKey) { WorkoutHistoryStore.history(context, exercise) }
@@ -249,11 +254,11 @@ fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () ->
     }
 
     Box(Modifier.fillMaxSize().background(WildforceThemeTokens.background)) {
-        RemoteTrainingImage(coachMedia?.imageUrl ?: exerciseImageUrl(exercise.imageKey, gender), exerciseDisplayName(exercise.imageKey, exercise.name), Modifier.fillMaxWidth().height(500.dp))
+        RemoteTrainingImage(coachMedia?.imageUrl ?: exerciseImageUrl(exercise.imageKey, gender), exerciseName, Modifier.fillMaxWidth().height(500.dp))
         Box(Modifier.fillMaxWidth().height(500.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.55f), Color.Transparent, WildforceThemeTokens.background))))
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 112.dp)) {
-            Box(Modifier.padding(14.dp).size(48.dp).clip(CircleShape).background(WildforceThemeTokens.imageControlBackground).semantics { contentDescription = "Volver" }.clickable(onClick = onBack), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = WildforceThemeTokens.imageControlContent, modifier = Modifier.size(22.dp))
+            Box(Modifier.padding(14.dp).size(48.dp).clip(CircleShape).background(WildforceThemeTokens.imageControlBackground).semantics { contentDescription = backLabel }.clickable(onClick = onBack), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = backLabel, tint = WildforceThemeTokens.imageControlContent, modifier = Modifier.size(22.dp))
             }
             Box(Modifier.fillMaxWidth().height(255.dp)) {
                 Row(
@@ -273,7 +278,7 @@ fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () ->
                         ) {
                             androidx.compose.foundation.Image(
                                 painter = androidx.compose.ui.res.painterResource(equipment.drawable),
-                                contentDescription = equipment.label,
+                                contentDescription = tutorialEquipmentName(equipment.label),
                                 modifier = Modifier.size(52.dp),
                             )
                         }
@@ -285,10 +290,10 @@ fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () ->
                 enter = fadeIn(tween(280, delayMillis = 80)) + slideInVertically(tween(320, delayMillis = 80)) { it / 12 },
             ) {
                 Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(topStart = 38.dp, topEnd = 38.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(20.dp)) {
-                Text((coachMedia?.name ?: exerciseDisplayName(exercise.imageKey, exercise.name)).uppercase(), fontFamily = AntonFontFamily, fontSize = 34.sp, color = WildforceThemeTokens.textPrimary, maxLines = 2)
-                Text("${exercise.sets} series · ${exercise.reps} reps", color = WildforceThemeTokens.textSecondary)
+                Text(exerciseName.uppercase(), fontFamily = AntonFontFamily, fontSize = 34.sp, color = WildforceThemeTokens.textPrimary, maxLines = 2)
+                Text("${exercise.sets} ${tutorialText("Sets")} · ${exercise.reps}", color = WildforceThemeTokens.textSecondary)
                 Text(
-                    if (coachMedia?.isUnilateral == true || ExerciseVisualCatalog.isUnilateral(exercise.imageKey)) "UNILATERAL" else "BILATERAL",
+                    tutorialText(if (coachMedia?.isUnilateral == true || ExerciseVisualCatalog.isUnilateral(exercise.imageKey)) "Unilateral" else "Bilateral").uppercase(),
                     Modifier
                         .padding(top = 8.dp)
                         .clip(RoundedCornerShape(50))
@@ -299,10 +304,10 @@ fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () ->
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(Modifier.height(22.dp))
-                Text("MÚSCULOS PRINCIPALES", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                Text(tutorialText("Primary muscles: %@").replace(": %@", "").uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 MuscleStrip(exercise.imageKey, onDarkBackground = false, modifier = Modifier.padding(vertical = 8.dp))
                 if (!visualMetadata?.secondary.isNullOrEmpty()) {
-                    Text("MÚSCULOS SECUNDARIOS", Modifier.padding(top = 10.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text(tutorialText("Secondary muscles: %@").replace(": %@", "").uppercase(), Modifier.padding(top = 10.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                     Row(Modifier.fillMaxWidth().padding(top = 8.dp).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         visualMetadata.secondary.forEach { muscle ->
                             Column(
@@ -311,17 +316,17 @@ fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () ->
                             ) {
                                 androidx.compose.foundation.Image(
                                     painter = androidx.compose.ui.res.painterResource(muscle.drawable),
-                                    contentDescription = muscle.label,
+                                    contentDescription = tutorialMuscleName(muscle),
                                     modifier = Modifier.size(48.dp),
                                 )
-                                Text(muscle.label, color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption, maxLines = 1)
+                                Text(tutorialMuscleName(muscle), color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption, maxLines = 1)
                             }
                         }
                     }
                 }
                 ExerciseDetailsTabs(section) { section = it }
                 when (section) {
-                    ExerciseDetailsSection.Instructions -> InstructionsContent(context, exercise, guide, coachMedia)
+                    ExerciseDetailsSection.Instructions -> InstructionsContent(context, exercise, gender, guide, coachMedia)
                     ExerciseDetailsSection.History -> HistoryContent(history, exercise)
                     ExerciseDetailsSection.Profile -> ProfileContent(
                         context = context,
@@ -357,39 +362,40 @@ private fun ExerciseDetailsTabs(selected: ExerciseDetailsSection, onSelected: (E
             Tab(
                 selected = selected == item,
                 onClick = { onSelected(item) },
-                text = { Text(item.title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.caption) },
+                text = { Text(tutorialText(item.title), maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.caption) },
             )
         }
     }
 }
 
 @Composable
-private fun InstructionsContent(context: Context, exercise: ExerciseSummary, guide: ExerciseGuide?, coachMedia: CoachExerciseMedia?) {
+private fun InstructionsContent(context: Context, exercise: ExerciseSummary, gender: String, guide: ExerciseGuide?, coachMedia: CoachExerciseMedia?) {
     coachMedia?.notes?.trim()?.takeIf(String::isNotBlank)?.let { notes ->
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
             Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(20.dp), tint = WildforceThemeTokens.textPrimary)
             Column(Modifier.weight(1f)) {
-                Text("NOTAS DEL ENTRENADOR", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                Text(tutorialText("Coach notes").uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 Text(notes, Modifier.padding(top = 6.dp), color = WildforceThemeTokens.textSecondary)
             }
         }
         Divider(Modifier.padding(top = 14.dp))
     }
-    Text(guide?.description?.takeIf(String::isNotBlank) ?: coachMedia?.notes?.takeIf(String::isNotBlank) ?: "Ejecuta el movimiento con control y mantén una postura estable.", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 12.dp))
+    Text(guide?.description?.takeIf(String::isNotBlank) ?: coachMedia?.notes?.takeIf(String::isNotBlank) ?: tutorialText("Move with control and stay inside a range of motion that feels clean."), color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 12.dp))
     if (!exercise.imageKey.isNullOrBlank()) RemoteTrainingImage(
-        url = coachMedia?.imageUrl ?: exerciseTutorialImageUrl(exercise.imageKey), contentDescription = "Tutorial de ${exerciseDisplayName(exercise.imageKey, exercise.name)}",
+        url = coachMedia?.imageUrl ?: exerciseTutorialImageUrl(exercise.imageKey), contentDescription = tutorialText("Tutorial animation for %@").replace("%@", tutorialExerciseName(exercise.imageKey, exercise.name)),
         modifier = Modifier.fillMaxWidth().height(230.dp).clip(RoundedCornerShape(24.dp)),
         contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+        unavailableContent = {},
     )
     coachMedia?.youtubeUrl?.let { url ->
         androidx.compose.material.OutlinedButton(onClick = {
             context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)))
-        }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) { Text("VER VÍDEO DEL ENTRENADOR") }
+        }, modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) { Text(tutorialText("Watch video").uppercase()) }
     }
     val instructions = guide?.instructions?.takeIf { it.isNotEmpty() }
         ?: coachMedia?.instructions?.takeIf { it.isNotEmpty() }
-        ?: listOf("Coloca el cuerpo en la posición inicial.", "Realiza el recorrido sin rebotes.", "Vuelve lentamente a la posición inicial.")
-    SectionTitle("PASOS")
+        ?: emptyList()
+    SectionTitle(tutorialText("Steps").uppercase())
     instructions.forEachIndexed { index, instruction ->
         Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.Top) {
             // iOS uses the general accent for numbered instruction steps;
@@ -402,7 +408,7 @@ private fun InstructionsContent(context: Context, exercise: ExerciseSummary, gui
     }
     val tips = guide?.tips?.takeIf { it.isNotEmpty() } ?: coachMedia?.tips.orEmpty()
     if (tips.isNotEmpty()) {
-        SectionTitle("CONSEJOS")
+        SectionTitle(tutorialText("Tips").uppercase())
         tips.forEach { tip ->
             Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 // Match SwiftUI's `.yellow` tip icon instead of the Android

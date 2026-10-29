@@ -53,6 +53,7 @@ internal object ProfileDetailPreferencesStore {
     }.getOrDefault(NutritionProfilePreferences())
 
     fun saveNutrition(context: Context, profile: NutritionProfilePreferences) {
+        NutritionPlanProfileSnapshot.ensureBaseline(context)
         val value = JSONObject()
             .put("isConfigured", profile.isConfigured)
             .put("dietaryStyle", profile.dietaryStyle)
@@ -87,6 +88,36 @@ internal object ProfileDetailPreferencesStore {
             .put("neckCm", measurements.neckCm ?: JSONObject.NULL)
             .put("hipCm", measurements.hipCm ?: JSONObject.NULL)
         context.getSharedPreferences(PREFERENCES, 0).edit().putString(BODY_KEY, value.toString()).apply()
+    }
+}
+
+object NutritionPlanProfileSnapshot {
+    private const val PREFS = "wildforce_nutrition"
+    private const val PLAN = "nutrition_generated_plan"
+    private const val SIGNATURE = "nutrition_plan_profile_signature"
+
+    private fun current(context: Context): String =
+        ProfileDetailPreferencesStore.loadNutrition(context).copy(isConfigured = false).toString()
+
+    fun ensureBaseline(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS, 0)
+        if (prefs.getString(PLAN, null) != null && prefs.getString(SIGNATURE, null) == null) {
+            prefs.edit().putString(SIGNATURE, current(context)).apply()
+        }
+    }
+
+    fun save(context: Context) {
+        context.getSharedPreferences(PREFS, 0).edit().putString(SIGNATURE, current(context)).apply()
+    }
+
+    fun requiresRegeneration(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREFS, 0)
+        val saved = prefs.getString(SIGNATURE, null)
+        return prefs.getString(PLAN, null) != null && saved != null && saved != current(context)
+    }
+
+    fun clear(context: Context) {
+        context.getSharedPreferences(PREFS, 0).edit().remove(SIGNATURE).apply()
     }
 }
 

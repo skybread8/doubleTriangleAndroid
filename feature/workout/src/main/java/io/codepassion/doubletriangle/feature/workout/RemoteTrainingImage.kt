@@ -68,10 +68,32 @@ fun publicAvatarUrl(id: String): String = "$IMAGE_BASE/avatars/${id.lowercase()}
 
 fun exerciseImageUrl(imageKey: String?, gender: String): String? =
     CoachExerciseMediaStore.cachedImageUrl(imageKey)
-        ?: imageKey?.takeIf(String::isNotBlank)?.let { "$IMAGE_BASE/vertical/${it}_${gender}.jpeg" }
+        ?: canonicalExerciseMediaKey(imageKey)?.let { "$IMAGE_BASE/vertical/${it}_${gender}.jpeg" }
 
-internal fun exerciseTutorialImageUrl(imageKey: String?): String? =
-    imageKey?.takeIf(String::isNotBlank)?.let { "$IMAGE_BASE/tutorial/${it}_female.png" }
+internal fun exerciseTutorialImageUrl(imageKey: String?, gender: String = "female"): String? =
+    canonicalExerciseMediaKey(imageKey)?.takeUnless { it.startsWith("coach:", ignoreCase = true) }
+        ?.let { "$IMAGE_BASE/tutorial/${it}_${gender}.png" }
+
+/**
+ * Maps Android's legacy shorthand exercise keys to the canonical keys used by
+ * iOS and by the public media catalog.  Existing plans are persisted with
+ * their original key, so resolve it only at the media boundary instead of
+ * mutating users' local workout data while rendering it.
+ */
+fun canonicalExerciseMediaKey(imageKey: String?): String? {
+    val key = imageKey?.trim()?.takeIf(String::isNotBlank) ?: return null
+    if (key.startsWith("coach:", ignoreCase = true)) return key
+    return when (key.filter(Char::isLetterOrDigit).lowercase()) {
+        "benchpress" -> "barbellBenchPress"
+        "inclinebenchpress" -> "barbellInclineBenchPress"
+        "chestfly" -> "dumbbellChestFly"
+        "overheadpress" -> "barbellOverheadPress"
+        "bentoverrow" -> "barbellBentOverRow"
+        "romaniandeadlift" -> "barbellRomanianDeadlift"
+        "hamstringcurl" -> "lyingLegCurl"
+        else -> key
+    }
+}
 
 /**
  * Mirrors `WorkoutDay.coverImage()` on iOS: a workout keeps the same cover
@@ -124,9 +146,13 @@ suspend fun loadTrainingBitmap(context: Context, url: String): Bitmap? = withCon
     memoryCache.get(url)?.let { return@withContext it }
     runCatching {
         val cached = trainingCacheFile(context, url).apply { parentFile?.mkdirs() }
-        val bitmap = if (cached.exists()) {
-            BitmapFactory.decodeFile(cached.absolutePath)
-        } else {
+        val bitmap = BitmapFactory.decodeFile(cached.absolutePath)
+            .takeIf { cached.exists() }
+            ?: run {
+                // A previous interrupted/invalid response must not become a
+                // permanent "image unavailable" state. Decode before
+                // committing the bytes and replace a bad cache entry.
+                if (cached.exists()) cached.delete()
             val connection = URL(url).openConnection() as HttpURLConnection
             try {
                 connection.connectTimeout = 15_000
@@ -134,8 +160,10 @@ suspend fun loadTrainingBitmap(context: Context, url: String): Bitmap? = withCon
                 connection.instanceFollowRedirects = true
                 check(connection.responseCode in 200..299)
                 val bytes = connection.inputStream.use { it.readBytes() }
-                cached.writeBytes(bytes)
-                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.also { decoded ->
+                    cached.writeBytes(bytes)
+                    decoded
+                }
             } finally {
                 connection.disconnect()
             }

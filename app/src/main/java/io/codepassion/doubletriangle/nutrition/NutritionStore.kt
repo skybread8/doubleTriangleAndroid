@@ -6,6 +6,7 @@ import io.codepassion.doubletriangle.WildforceNotificationScheduler
 import io.codepassion.doubletriangle.feature.onboarding.BodyCompositionPhase
 import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
+import io.codepassion.doubletriangle.feature.onboarding.NutritionPlanProfileSnapshot
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import org.json.JSONArray
 import org.json.JSONObject
@@ -23,7 +24,7 @@ internal enum class MealType(val title: String) {
     PostWorkout("Post-entreno");
     companion object {
         fun detect(): MealType = when (java.time.LocalTime.now().hour) {
-            in 5..10 -> Breakfast; in 11..15 -> Lunch; in 18..22 -> Dinner; else -> Snack
+            in 7..11 -> Breakfast; in 13..16 -> Lunch; in 20..23 -> Dinner; else -> Snack
         }
     }
 }
@@ -33,16 +34,34 @@ internal data class NutritionTargets(val calories: Int = 2350, val protein: Int 
 /** Mirrors iOS NutritionLogItem so reviewed food metadata survives local storage and sync. */
 internal data class MealItem(
     val name: String,
-    val calories: Int,
-    val protein: Int,
-    val carbs: Int,
-    val fat: Int,
+    val calories: Double,
+    val protein: Double,
+    val carbs: Double,
+    val fat: Double,
     val brand: String = "",
     val quantity: Double = 1.0,
     val unit: String = "",
     val grams: Double? = null,
     val notes: String = "",
-)
+) {
+    constructor(
+        name: String,
+        calories: Int,
+        protein: Int,
+        carbs: Int,
+        fat: Int,
+        brand: String = "",
+        quantity: Double = 1.0,
+        unit: String = "",
+        grams: Double? = null,
+        notes: String = "",
+    ) : this(name, calories.toDouble(), protein.toDouble(), carbs.toDouble(), fat.toDouble(), brand, quantity, unit, grams, notes)
+}
+
+internal fun MealLog.loggedCalories(): Double = items.takeIf { it.isNotEmpty() }?.sumOf { it.calories } ?: calories.toDouble()
+internal fun MealLog.loggedProtein(): Double = items.takeIf { it.isNotEmpty() }?.sumOf { it.protein } ?: protein.toDouble()
+internal fun MealLog.loggedCarbs(): Double = items.takeIf { it.isNotEmpty() }?.sumOf { it.carbs } ?: carbs.toDouble()
+internal fun MealLog.loggedFat(): Double = items.takeIf { it.isNotEmpty() }?.sumOf { it.fat } ?: fat.toDouble()
 
 internal data class MealLog(
     val id: Long,
@@ -64,7 +83,56 @@ internal data class MealLog(
     val bookmarkName: String = "",
     /** Remote product/meal image counterpart of iOS NutritionLogMedia.remoteURL. */
     val mediaUrl: String? = null,
+    val loggedAt: Instant? = null,
+    val createdAt: Instant? = null,
 )
+
+internal fun mealLoggedAt(meal: MealLog, zone: ZoneId = ZoneId.systemDefault()): Instant =
+    meal.loggedAt ?: Instant.ofEpochMilli(meal.id).takeIf { it.atZone(zone).toLocalDate() == meal.loggedDate }
+    ?: meal.loggedDate.atTime(12, 0).atZone(zone).toInstant()
+
+internal fun mealCreatedAt(meal: MealLog, zone: ZoneId = ZoneId.systemDefault()): Instant =
+    meal.createdAt ?: mealLoggedAt(meal, zone)
+
+internal fun orderNutritionMealsForDay(meals: List<MealLog>): List<MealLog> = meals.sortedBy { mealLoggedAt(it) }
+internal fun orderRecentNutritionMeals(meals: List<MealLog>): List<MealLog> = meals.sortedByDescending { mealCreatedAt(it) }
+
+/** Match iOS localizedStandardContains for titles and individual food names. */
+internal fun matchesRecentMealSearch(entry: MealLog, query: String): Boolean {
+    if (query.isEmpty()) return true
+    fun normalized(value: String): String = java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)
+        .filterNot { Character.getType(it) == Character.NON_SPACING_MARK.toInt() }
+        .lowercase(java.util.Locale.getDefault())
+    val needle = normalized(query)
+    return normalized(entry.name).contains(needle) || entry.items.any { normalized(it.name).contains(needle) }
+}
+
+internal fun applyNutritionBookmark(entry: MealLog, name: String?): MealLog =
+    if (name == null) entry.copy(isBookmarked = false, bookmarkName = "")
+    else entry.copy(name = name.trim().ifBlank { entry.name }, isBookmarked = true, bookmarkName = name.trim())
+
+internal data class RemoteNutritionItem(val order: Int, val item: MealItem, val deleted: Boolean)
+
+internal fun localNutritionLogId(remoteId: String, knownIds: Map<String, Long>): Long =
+    knownIds[remoteId] ?: stableRemoteLogId(remoteId)
+
+/** The caller supplies the materialized server snapshot, including tombstones. */
+internal fun activeRemoteNutritionItems(items: List<RemoteNutritionItem>): List<MealItem> =
+    items.filterNot { it.deleted }.sortedBy { it.order }.map { it.item }
+
+internal fun nutritionLogDate(value: String, zone: ZoneId = ZoneId.systemDefault()): LocalDate? {
+    val text = value.trim()
+    return runCatching { Instant.parse(text).atZone(zone).toLocalDate() }.getOrNull()
+        ?: runCatching { java.time.OffsetDateTime.parse(text).atZoneSameInstant(zone).toLocalDate() }.getOrNull()
+        ?: runCatching { LocalDate.parse(text) }.getOrNull()
+}
+
+internal fun nutritionLogTimestamp(date: LocalDate, previous: String?, localId: Long, zone: ZoneId = ZoneId.systemDefault()): String {
+    if (previous != null && nutritionLogDate(previous, zone) == date && runCatching { Instant.parse(previous) }.isSuccess) return previous
+    val created = runCatching { Instant.ofEpochMilli(localId) }.getOrNull()
+    if (created != null && created.atZone(zone).toLocalDate() == date) return created.toString()
+    return date.atTime(12, 0).atZone(zone).toInstant().toString()
+}
 
 internal enum class NutritionDayType(val title: String) { Training("Entrenamiento"), Rest("Descanso"), Recovery("Recuperación") }
 internal enum class EnergyDemand(val title: String) { High("Alta"), Medium("Media"), Low("Baja") }
@@ -273,6 +341,7 @@ internal object NutritionStore {
 
     /** Restores dietary preferences before Android's next push, matching iOS's initial snapshot. */
     fun importRemotePreferences(context: Context, remote: JSONObject) {
+        NutritionPlanProfileSnapshot.ensureBaseline(context)
         savePreferences(context, NutritionPreferences(
             dietaryStyle = dietaryStyleDisplayName(remote.optString("dietary_style", "standard")),
             mealsPerDay = remote.optInt("meals_per_day_preference", 4).coerceIn(1, 8),
@@ -297,32 +366,31 @@ internal object NutritionStore {
         remoteEntries: JSONArray,
         remoteItems: JSONArray,
         plannedMealKeys: Map<String, String> = emptyMap(),
+        knownLocalIds: Map<String, Long> = emptyMap(),
     ) {
-        // Pull pages are incremental: keep item changes by their iOS
-        // orderIndex so a one-item edit never drops the other foods locally.
-        val itemChangesByEntry = mutableMapOf<String, MutableMap<Int, MealItem?>>()
+        // The sync layer materializes all pages and cached records before this
+        // import. Rebuild from live rows so tombstones cannot delete a new row
+        // that happens to reuse the same order index.
+        val itemsByEntry = mutableMapOf<String, MutableList<RemoteNutritionItem>>()
         for (index in 0 until remoteItems.length()) {
             val item = remoteItems.optJSONObject(index) ?: continue
             val entryId = item.optString("nutrition_log_entry_id")
             if (entryId.isBlank()) continue
             val orderIndex = item.optInt("order_index", index).coerceAtLeast(0)
-            val changes = itemChangesByEntry.getOrPut(entryId) { mutableMapOf() }
-            if (!item.isNull("deleted_at")) {
-                changes[orderIndex] = null
-                continue
-            }
-            changes[orderIndex] = MealItem(
+            val mealItem = MealItem(
                 name = item.optString("name").trim().ifBlank { "Alimento" },
-                calories = item.optDouble("calories").toInt().coerceIn(0, 8000),
-                protein = item.optDouble("protein_grams").toInt().coerceIn(0, 500),
-                carbs = item.optDouble("carbs_grams").toInt().coerceIn(0, 1000),
-                fat = item.optDouble("fat_grams").toInt().coerceIn(0, 500),
+                calories = item.optDouble("calories").coerceIn(0.0, 8000.0),
+                protein = item.optDouble("protein_grams").coerceIn(0.0, 500.0),
+                carbs = item.optDouble("carbs_grams").coerceIn(0.0, 1000.0),
+                fat = item.optDouble("fat_grams").coerceIn(0.0, 500.0),
                 brand = item.optString("brand"),
                 quantity = item.optDouble("quantity", 1.0).coerceAtLeast(0.0),
                 unit = item.optString("unit"),
                 grams = item.optDouble("amount_grams", Double.NaN).takeUnless(Double::isNaN),
                 notes = item.optString("notes"),
             )
+            itemsByEntry.getOrPut(entryId) { mutableListOf() }
+                .add(RemoteNutritionItem(orderIndex, mealItem, !item.isNull("deleted_at")))
         }
 
         val merged = all(context).associateBy { it.id }.toMutableMap()
@@ -331,34 +399,21 @@ internal object NutritionStore {
             val entry = remoteEntries.optJSONObject(index) ?: continue
             val remoteId = entry.optString("id")
             if (remoteId.isBlank()) continue
-            val localId = stableRemoteLogId(remoteId, index)
+            val localId = localNutritionLogId(remoteId, knownLocalIds)
             if (!entry.isNull("deleted_at")) {
                 changed = merged.remove(localId) != null || changed
                 continue
             }
-            val loggedDate = runCatching { LocalDate.parse(entry.optString("logged_at").take(10)) }.getOrNull() ?: continue
-            // Pull responses are incremental. When an entry changes without its
-            // items in the same page, retain the already imported item graph.
+            val loggedDate = nutritionLogDate(entry.optString("logged_at")) ?: continue
             val existing = merged[localId]
-            val items = existing?.items.orEmpty().toMutableList()
-            itemChangesByEntry[remoteId]?.toSortedMap()?.forEach { (itemIndex, changedItem) ->
-                if (changedItem == null) {
-                    if (itemIndex in items.indices) items.removeAt(itemIndex)
-                } else if (itemIndex in items.indices) {
-                    items[itemIndex] = changedItem
-                } else {
-                    // New logs carry their complete ordered item list. A sparse
-                    // later page can only append after the known local items.
-                    items.add(changedItem)
-                }
-            }
+            val items = activeRemoteNutritionItems(itemsByEntry[remoteId].orEmpty())
             merged[localId] = MealLog(
                 id = localId,
                 name = entry.optString("title").trim().ifBlank { "Comida" },
-                calories = if (items.isEmpty()) existing?.calories ?: 0 else items.sumOf { it.calories }.coerceIn(0, 8000),
-                protein = if (items.isEmpty()) existing?.protein ?: 0 else items.sumOf { it.protein }.coerceIn(0, 500),
-                carbs = if (items.isEmpty()) existing?.carbs ?: 0 else items.sumOf { it.carbs }.coerceIn(0, 1000),
-                fat = if (items.isEmpty()) existing?.fat ?: 0 else items.sumOf { it.fat }.coerceIn(0, 500),
+                calories = items.sumOf { it.calories }.coerceIn(0.0, 8000.0).toInt(),
+                protein = items.sumOf { it.protein }.coerceIn(0.0, 500.0).toInt(),
+                carbs = items.sumOf { it.carbs }.coerceIn(0.0, 1000.0).toInt(),
+                fat = items.sumOf { it.fat }.coerceIn(0.0, 500.0).toInt(),
                 type = mealTypeFromRemote(entry.optString("meal_type")),
                 loggedDate = loggedDate,
                 notes = entry.optString("notes"),
@@ -369,6 +424,8 @@ internal object NutritionStore {
                 plannedMealKey = plannedMealKeys[entry.optString("nutrition_meal_id")],
                 bookmarkName = existing?.bookmarkName.orEmpty(),
                 mediaUrl = existing?.mediaUrl,
+                loggedAt = runCatching { Instant.parse(entry.optString("logged_at")) }.getOrNull(),
+                createdAt = runCatching { Instant.parse(entry.optString("created_at")) }.getOrNull(),
             )
             changed = true
         }
@@ -376,6 +433,7 @@ internal object NutritionStore {
     }
 
     fun clearGeneratedPlan(context: Context) {
+        NutritionPlanProfileSnapshot.clear(context)
         context.getSharedPreferences(PREFS, 0).edit()
             .remove(GENERATED_PLAN_KEY)
             .remove(PLAN_METADATA_KEY)
@@ -461,33 +519,17 @@ internal object NutritionStore {
     }
 
     fun load(context: Context, date: LocalDate = LocalDate.now()): List<MealLog> {
-        val everyEntry = all(context)
-        val forDate = everyEntry.filter { it.loggedDate == date }.sortedBy { it.id }
-        // A locally-created meal can come back from the remote pull with a
-        // deterministic sync id. Prefer the local entry so one banana (or any
-        // identical food) is not counted twice after synchronization.
-        val deduped = forDate.filterNot { candidate ->
-            candidate.source == "sync" && forDate.any { local ->
-                local.source != "sync" && local.name.trim().equals(candidate.name.trim(), ignoreCase = true) &&
-                    local.calories == candidate.calories && local.protein == candidate.protein &&
-                    local.carbs == candidate.carbs && local.fat == candidate.fat && local.notes.trim() == candidate.notes.trim()
-            }
-        }
-        if (deduped.size != forDate.size) {
-            write(context, everyEntry.filterNot { it.loggedDate == date } + deduped)
-        }
-        return deduped
+        return orderNutritionMealsForDay(all(context).filter { it.loggedDate == date })
     }
 
-    fun recent(context: Context, limit: Int = 12): List<MealLog> = all(context).sortedByDescending { it.id }
-        .distinctBy { listOf(it.name.lowercase(), it.calories, it.protein, it.carbs, it.fat) }.take(limit)
+    fun recent(context: Context, limit: Int = Int.MAX_VALUE): List<MealLog> = orderRecentNutritionMeals(all(context)).take(limit)
 
     /** Returns every local entry so the account synchronizer can upload its complete history. */
     fun allForSync(context: Context): List<MealLog> = all(context)
 
     /** Attaches a private image downloaded for an existing server log without creating a new log. */
-    fun attachRemotePhoto(context: Context, remoteEntryId: String, path: String) {
-        val localId = stableRemoteLogId(remoteEntryId, 0)
+    fun attachRemotePhoto(context: Context, remoteEntryId: String, path: String, knownLocalIds: Map<String, Long> = emptyMap()) {
+        val localId = localNutritionLogId(remoteEntryId, knownLocalIds)
         val entries = all(context)
         if (entries.none { it.id == localId }) return
         write(context, entries.map { entry -> if (entry.id == localId) entry.copy(photoPath = path) else entry })
@@ -533,8 +575,8 @@ internal object NutritionStore {
                     val id = item.optLong("id", System.currentTimeMillis() + index)
                     val fallbackDate = Instant.ofEpochMilli(id).atZone(ZoneId.systemDefault()).toLocalDate()
                     val date = runCatching { LocalDate.parse(item.optString("date")) }.getOrDefault(fallbackDate)
-                    val items = item.optJSONArray("items")?.let { array -> buildList { for (itemIndex in 0 until array.length()) { val food = array.getJSONObject(itemIndex); add(MealItem(food.cleanString("name"), food.optInt("calories"), food.optInt("protein"), food.optInt("carbs"), food.optInt("fat"), food.cleanString("brand"), food.optDouble("quantity", 1.0), food.cleanString("unit"), food.optDouble("grams", Double.NaN).takeUnless(Double::isNaN), food.cleanString("notes"))) } } }.orEmpty()
-                    add(MealLog(id, item.cleanString("name").trim().ifBlank { "Comida" }, item.optInt("calories").coerceIn(0, 8000), item.optInt("protein").coerceIn(0, 500), item.optInt("carbs").coerceIn(0, 1000), item.optInt("fat").coerceIn(0, 500), runCatching { MealType.valueOf(item.cleanString("type")) }.getOrDefault(MealType.Snack), date, item.cleanString("notes"), item.cleanString("source", "manual"), item.optBoolean("bookmarked", false), items, item.cleanString("photoPath").takeIf(String::isNotBlank), item.cleanString("plannedMealKey").takeIf(String::isNotBlank), item.cleanString("bookmarkName"), item.cleanString("mediaUrl").takeIf(String::isNotBlank)))
+                    val items = item.optJSONArray("items")?.let { array -> buildList { for (itemIndex in 0 until array.length()) { val food = array.getJSONObject(itemIndex); add(MealItem(food.cleanString("name"), food.optDouble("calories"), food.optDouble("protein"), food.optDouble("carbs"), food.optDouble("fat"), food.cleanString("brand"), food.optDouble("quantity", 1.0), food.cleanString("unit"), food.optDouble("grams", Double.NaN).takeUnless(Double::isNaN), food.cleanString("notes"))) } } }.orEmpty()
+                    add(MealLog(id, item.cleanString("name").trim().ifBlank { "Comida" }, item.optInt("calories").coerceIn(0, 8000), item.optInt("protein").coerceIn(0, 500), item.optInt("carbs").coerceIn(0, 1000), item.optInt("fat").coerceIn(0, 500), runCatching { MealType.valueOf(item.cleanString("type")) }.getOrDefault(MealType.Snack), date, item.cleanString("notes"), item.cleanString("source", "manual"), item.optBoolean("bookmarked", false), items, item.cleanString("photoPath").takeIf(String::isNotBlank), item.cleanString("plannedMealKey").takeIf(String::isNotBlank), item.cleanString("bookmarkName"), item.cleanString("mediaUrl").takeIf(String::isNotBlank), item.cleanString("loggedAt").let { runCatching { Instant.parse(it) }.getOrNull() }, item.cleanString("createdAt").let { runCatching { Instant.parse(it) }.getOrNull() }))
                 }
             }
         }.getOrDefault(emptyList())
@@ -544,7 +586,7 @@ internal object NutritionStore {
         val array = JSONArray().apply {
             entries.sortedBy { it.id }.forEach { meal ->
                 val itemArray = JSONArray().apply { meal.items.forEach { food -> put(JSONObject().put("name", food.name).put("calories", food.calories).put("protein", food.protein).put("carbs", food.carbs).put("fat", food.fat).put("brand", food.brand).put("quantity", food.quantity).put("unit", food.unit).put("grams", food.grams).put("notes", food.notes)) } }
-                put(JSONObject().put("id", meal.id).put("date", meal.loggedDate.toString()).put("name", meal.name).put("calories", meal.calories).put("protein", meal.protein).put("carbs", meal.carbs).put("fat", meal.fat).put("type", meal.type.name).put("notes", meal.notes).put("source", meal.source).put("bookmarked", meal.isBookmarked).put("bookmarkName", meal.bookmarkName).put("items", itemArray).put("photoPath", meal.photoPath ?: JSONObject.NULL).put("plannedMealKey", meal.plannedMealKey ?: JSONObject.NULL).put("mediaUrl", meal.mediaUrl ?: JSONObject.NULL))
+                put(JSONObject().put("id", meal.id).put("date", meal.loggedDate.toString()).put("name", meal.name).put("calories", meal.calories).put("protein", meal.protein).put("carbs", meal.carbs).put("fat", meal.fat).put("type", meal.type.name).put("notes", meal.notes).put("source", meal.source).put("bookmarked", meal.isBookmarked).put("bookmarkName", meal.bookmarkName).put("items", itemArray).put("photoPath", meal.photoPath ?: JSONObject.NULL).put("plannedMealKey", meal.plannedMealKey ?: JSONObject.NULL).put("mediaUrl", meal.mediaUrl ?: JSONObject.NULL).put("loggedAt", meal.loggedAt?.toString() ?: JSONObject.NULL).put("createdAt", meal.createdAt?.toString() ?: JSONObject.NULL))
             }
         }
         context.getSharedPreferences(PREFS, 0).edit().putString(ENTRIES_KEY, array.toString()).remove(LEGACY_KEY).apply()
@@ -590,8 +632,11 @@ internal object NutritionStore {
     }
 }
 
-private fun stableRemoteLogId(value: String, fallback: Int): Long =
-    value.hashCode().toLong().and(Long.MAX_VALUE).takeIf { it != 0L } ?: fallback.toLong() + 1
+private fun stableRemoteLogId(value: String): Long {
+    val digest = java.security.MessageDigest.getInstance("SHA-256").digest(value.toByteArray(Charsets.UTF_8))
+    val id = java.nio.ByteBuffer.wrap(digest).long and Long.MAX_VALUE
+    return id.takeIf { it != 0L } ?: 1L
+}
 
 /** Android labels mirror the Spanish UI while the sync contract keeps iOS's raw enum values. */
 internal fun dietaryStyleDisplayName(value: String): String = when (value.trim().lowercase()) {

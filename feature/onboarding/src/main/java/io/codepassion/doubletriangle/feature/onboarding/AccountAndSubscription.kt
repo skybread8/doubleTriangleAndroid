@@ -137,7 +137,7 @@ data class WildforceGymMembership(
     val gymName: String?,
 )
 
-suspend fun currentWildforceGymMemberships(context: Context): List<WildforceGymMembership> = withContext(Dispatchers.IO) {
+suspend fun currentWildforceGymMemberships(context: Context): List<WildforceGymMembership>? = withContext(Dispatchers.IO) {
     runCatching {
         val token = WildforceAccountStore(context).token() ?: return@runCatching emptyList()
         val response = authenticatedRequest("gym-memberships", token, null)
@@ -152,7 +152,7 @@ suspend fun currentWildforceGymMemberships(context: Context): List<WildforceGymM
                 }
             }.filterNotNull().filter { it.teamName.isNotBlank() }
         }.orEmpty()
-    }.getOrDefault(emptyList())
+    }.getOrNull()
 }
 
 /** Auth result shared by the onboarding entry point and the profile account area. */
@@ -334,6 +334,7 @@ internal fun initialRegistrationData(context: Context, profile: OnboardingProfil
             .put("birth_date", "%04d-%02d-%02dT00:00:00Z".format(profile.birthYear, profile.birthMonth, profile.birthDay.coerceIn(1, daysInBirthMonth(profile.birthYear, profile.birthMonth))))
             .put("gender", profile.gender.storedValue)
             .put("language", backendLanguage(profile.appLanguage))
+            .put("timezone", java.util.TimeZone.getDefault().id)
             .put("metric_system", profile.metricSystem.storedValue))
         .put("training_preferences", JSONObject()
             .put("id", childId("training-preferences"))
@@ -964,8 +965,24 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
                             }
                         } else {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                TextField(email, { email = it }, label = { Text("Email") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email), modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)), colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.background, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent))
-                                TextField(password, { password = it }, label = { Text("Contraseña") }, singleLine = true, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)), colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.background, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent))
+                                TextField(
+                                    email,
+                                    { email = it },
+                                    label = { Text("Email") },
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)),
+                                    colors = authenticationTextFieldColors(),
+                                )
+                                TextField(
+                                    password,
+                                    { password = it },
+                                    label = { Text("Contraseña") },
+                                    singleLine = true,
+                                    visualTransformation = PasswordVisualTransformation(),
+                                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)),
+                                    colors = authenticationTextFieldColors(),
+                                )
                                 if (register) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                                     PasswordRequirement.entries.forEach { requirement ->
                                         val satisfied = requirement.isSatisfiedBy(password)
@@ -991,6 +1008,18 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
         }
     }
 }
+
+/** Keeps credential text and labels legible over the authentication sheet's glass surface. */
+@Composable
+private fun authenticationTextFieldColors() = TextFieldDefaults.textFieldColors(
+    textColor = WildforceThemeTokens.textPrimary,
+    backgroundColor = WildforceThemeTokens.background,
+    cursorColor = WildforceThemeTokens.accent,
+    focusedLabelColor = WildforceThemeTokens.accent,
+    unfocusedLabelColor = WildforceThemeTokens.textSecondary,
+    focusedIndicatorColor = Color.Transparent,
+    unfocusedIndicatorColor = Color.Transparent,
+)
 
 @Composable
 fun SubscriptionPaywall(
@@ -1044,23 +1073,29 @@ fun SubscriptionPaywall(
             )).forEach { (title, detail) -> Row { Icon(Icons.Filled.Star, null, Modifier.width(24.dp), tint = WildforceThemeTokens.accent); Column(Modifier.padding(start = 12.dp)) { Text(title, fontWeight = FontWeight.Bold); Text(detail, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } } }
             if (selectedTier == SubscriptionTier.Nutrition && SubscriptionTier.Premium in offeredTiers) Text("Premium incluye todo lo de Nutrición, además de entrenamiento personalizado.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) { PlanCard("Mensual", selectedTier.monthlyProductId, if (selectedTier == SubscriptionTier.Premium) "6,99 €" else "2,99 €", if (selectedTier == SubscriptionTier.Premium) "1,61 € por semana" else "0,69 € por semana", selected, products) { selected = it }; PlanCard("Anual", selectedTier.yearlyProductId, if (selectedTier == SubscriptionTier.Premium) "69,99 €" else "29,99 €", if (selectedTier == SubscriptionTier.Premium) "1,35 € por semana" else "0,58 € por semana", selected, products, isYearly = true, best = true) { selected = it } }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            PlanCard("Mensual", selectedTier.monthlyProductId, "P1M", selected, products) { selected = it }
+            PlanCard("Anual", selectedTier.yearlyProductId, "P1Y", selected, products, isYearly = true, best = true) { selected = it }
+        }
+        val selectedPeriod = if (selected == selectedTier.yearlyProductId) "P1Y" else "P1M"
+        val selectedOffer = products[selected]?.renewableBaseOffer(selectedPeriod)
+        val selectedPrice = selectedOffer?.pricingPhases?.pricingPhaseList
+            ?.firstOrNull { it.recurrenceMode == ProductDetails.RecurrenceMode.INFINITE_RECURRING }?.formattedPrice
         error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
-        Button(enabled = !loading && !purchasing && activity != null && !accountId.isNullOrBlank() && products[selected] != null, onClick = {
+        Button(enabled = !loading && !purchasing && activity != null && !accountId.isNullOrBlank() && selectedOffer != null, onClick = {
             val detail = products[selected] ?: return@Button
-            // Prefer the renewable base offer. This avoids accidentally selecting a
-            // one-time introductory phase when Play Console has several offers.
-            val offer = detail.subscriptionOfferDetails?.firstOrNull { candidate ->
-                candidate.pricingPhases.pricingPhaseList.any { it.recurrenceMode == ProductDetails.RecurrenceMode.INFINITE_RECURRING }
-            } ?: detail.subscriptionOfferDetails?.firstOrNull() ?: run { error = "Esta suscripción no está disponible ahora mismo."; return@Button }
+            val offer = selectedOffer ?: return@Button
             purchasing = true
             val params = BillingFlowParams.newBuilder().setProductDetailsParamsList(listOf(BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(detail).setOfferToken(offer.offerToken).build()))
             accountId?.let { params.setObfuscatedAccountId(obfuscatedAccountId(it)) }
             val result = billing.launchBillingFlow(activity!!, params.build())
             if (result.responseCode != BillingClient.BillingResponseCode.OK) { error = result.debugMessage; purchasing = false }
         }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText)) { if (loading || purchasing) CircularProgressIndicator(Modifier.size(20.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp) else Text("SUSCRIBIRME", modifier = Modifier.padding(vertical = 4.dp), letterSpacing = 1.2.sp) }
-        val selectedPrice = products[selected]?.subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice ?: if (selected == selectedTier.yearlyProductId) if (selectedTier == SubscriptionTier.Premium) "69,99 €" else "29,99 €" else if (selectedTier == SubscriptionTier.Premium) "6,99 €" else "2,99 €"
-        Text("Se cobra $selectedPrice por ${if (selected == selectedTier.yearlyProductId) "año" else "mes"}. La suscripción se renueva automáticamente salvo que se cancele al menos 24 horas antes del final del periodo actual.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        if (selectedPrice != null) {
+            Text("Se cobra $selectedPrice por ${if (selectedPeriod == "P1Y") "año" else "mes"}. La suscripción se renueva automáticamente salvo que se cancele al menos 24 horas antes del final del periodo actual.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        } else if (!loading) {
+            Text("Este plan no está disponible ahora mismo en Google Play.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        }
         Text("Restaurar compras", Modifier.fillMaxWidth().clickable {
             scope.launch {
                 val result = billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build())
@@ -1087,19 +1122,26 @@ fun SubscriptionPaywall(
     } } }
 }
 
-@Composable private fun RowScope.PlanCard(title: String, id: String, fallback: String, weekly: String, selected: String, products: Map<String, ProductDetails>, isYearly: Boolean = false, best: Boolean = false, onClick: (String) -> Unit) {
+@Composable private fun RowScope.PlanCard(title: String, id: String, period: String, selected: String, products: Map<String, ProductDetails>, isYearly: Boolean = false, best: Boolean = false, onClick: (String) -> Unit) {
     val isSelected = selected == id
     val selectionScale by animateFloatAsState(if (isSelected) 1.035f else 1f, spring(dampingRatio = .65f, stiffness = 560f), label = "subscription-plan-$id")
     val detail = products[id]
-    val price = detail?.subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice ?: fallback
+    val price = detail?.renewableBaseOffer(period)?.pricingPhases?.pricingPhaseList
+        ?.firstOrNull { it.recurrenceMode == ProductDetails.RecurrenceMode.INFINITE_RECURRING }?.formattedPrice
     Column(Modifier.weight(1f).height(154.dp).graphicsLayer { scaleX = selectionScale; scaleY = selectionScale }.border(2.dp, if (isSelected) WildforceThemeTokens.accent else Color.Transparent, RoundedCornerShape(18.dp)).background(if (isSelected) WildforceThemeTokens.accent.copy(alpha = .10f) else WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(18.dp)).clickable { onClick(id) }.padding(16.dp)) {
         if (best) Text("MEJOR VALOR", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.primaryButtonText, modifier = Modifier.background(WildforceThemeTokens.accent, RoundedCornerShape(10.dp)).padding(horizontal = 6.dp, vertical = 2.dp))
         Spacer(Modifier.height(if (best) 10.dp else 30.dp))
-        Text(title, fontWeight = FontWeight.Bold); Text(price, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(title, fontWeight = FontWeight.Bold); Text(price ?: "—", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         Text("/ ${if (isYearly) "año" else "mes"}", style = MaterialTheme.typography.caption)
-        Text(weekly, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
 }
+
+private fun ProductDetails.renewableBaseOffer(period: String): ProductDetails.SubscriptionOfferDetails? =
+    subscriptionOfferDetails?.firstOrNull { offer ->
+        offer.offerId == null && offer.pricingPhases.pricingPhaseList.any { phase ->
+            phase.recurrenceMode == ProductDetails.RecurrenceMode.INFINITE_RECURRING && phase.billingPeriod == period
+        }
+    }
 
 private suspend fun queryProducts(client: BillingClient): Map<String, ProductDetails> {
     val result = client.queryProductDetails(QueryProductDetailsParams.newBuilder().setProductList(SubscriptionTier.entries.flatMap { listOf(it.monthlyProductId, it.yearlyProductId) }.map { QueryProductDetailsParams.Product.newBuilder().setProductId(it).setProductType(BillingClient.ProductType.SUBS).build() }).build())

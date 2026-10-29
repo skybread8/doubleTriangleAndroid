@@ -1,5 +1,6 @@
 package io.codepassion.doubletriangle.feature.workout
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -296,6 +298,7 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
     fun editorSnapshot(): WorkoutDaySummary = workout
         .withEditableBlocks(blocks)
         .copy(estimatedMinutes = CustomWorkoutStore.estimateBlockMinutes(blocks))
+    BackHandler(enabled = !selectingExercise) { onCancel(editorSnapshot()) }
     if (selectingExercise) {
         ExercisePickerScreen(gender, onBack = { selectingExercise = false }) { choice ->
             blocks = (blocks + WorkoutBlockSummary(WorkoutBlockType.Standard, exercises = listOf(choice.toExerciseSummary()))).workoutOrder()
@@ -303,15 +306,12 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
         }
         return
     }
-    // The app-level navigation rail is drawn above destinations. Keep the editor's
-    // persistent action outside that rail on tall physical devices as well as on
-    // smaller phones.
     Column(
         Modifier
             .fillMaxSize()
             .liquidGlassBackground()
+            .navigationBarsPadding()
             .padding(horizontal = 16.dp, vertical = 10.dp)
-            .padding(bottom = 92.dp),
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(48.dp).clip(CircleShape).background(WildforceThemeTokens.textPrimary).semantics { contentDescription = "Cerrar" }.clickable { onCancel(editorSnapshot()) }, contentAlignment = Alignment.Center) {
@@ -478,8 +478,8 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
             items(modes) { (mode, title) ->
                 val selected = exercise.trackingMode == mode
                 AnimatedSelectionChip(title, selected) {
-                    onChange(when (mode) {
-                        io.codepassion.doubletriangle.core.model.ExerciseTrackingMode.Repetitions -> exercise.copy(trackingMode = mode, targetDurationSeconds = null, targetDurationMinutes = null, targetDistanceKm = null)
+                    if (!selected) onChange(when (mode) {
+                        io.codepassion.doubletriangle.core.model.ExerciseTrackingMode.Repetitions -> exercise.withRepetitionTracking()
                         io.codepassion.doubletriangle.core.model.ExerciseTrackingMode.Duration -> exercise.copy(trackingMode = mode, reps = "${exercise.targetDurationSeconds ?: 30} s", targetDurationSeconds = exercise.targetDurationSeconds ?: 30, targetDurationMinutes = null, targetDistanceKm = null)
                         io.codepassion.doubletriangle.core.model.ExerciseTrackingMode.DurationAndDistance -> exercise.copy(trackingMode = mode, reps = "", targetDurationSeconds = null, targetDurationMinutes = exercise.targetDurationMinutes ?: 10, targetDistanceKm = exercise.targetDistanceKm ?: 1.0)
                     })
@@ -491,11 +491,11 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
                 EditorStepper(stringResource(R.string.workout_sets), exercise.sets.toString(), { onChange(exercise.copy(sets = (exercise.sets - 1).coerceAtLeast(1))) }, { onChange(exercise.copy(sets = exercise.sets + 1)) }, Modifier.weight(1f))
             }
             if (exercise.trackingMode == io.codepassion.doubletriangle.core.model.ExerciseTrackingMode.Repetitions) EditorStepper(stringResource(R.string.workout_reps), exercise.reps, {
-                val reps = ((exercise.reps.toIntOrNull() ?: 10) - 1).coerceAtLeast(1)
-                onChange(exercise.copy(reps = reps.toString(), repRange = io.codepassion.doubletriangle.core.model.RepRange(reps, reps)))
+                val reps = ((exercise.reps.toIntOrNull() ?: exercise.repRange?.maximum ?: exercise.targetRepsPerSet?.firstOrNull() ?: 10) - 1).coerceAtLeast(1)
+                onChange(exercise.withUniformRepTarget(reps))
             }, {
-                val reps = ((exercise.reps.toIntOrNull() ?: 10) + 1).coerceAtLeast(1)
-                onChange(exercise.copy(reps = reps.toString(), repRange = io.codepassion.doubletriangle.core.model.RepRange(reps, reps)))
+                val reps = (exercise.reps.toIntOrNull() ?: exercise.repRange?.maximum ?: exercise.targetRepsPerSet?.firstOrNull() ?: 10) + 1
+                onChange(exercise.withUniformRepTarget(reps))
             }, Modifier.weight(1f))
             if (!inSuperset) EditorStepper(stringResource(R.string.workout_rest), "${exercise.restSeconds}s", { onChange(exercise.copy(restSeconds = (exercise.restSeconds - 15).coerceAtLeast(0))) }, { onChange(exercise.copy(restSeconds = exercise.restSeconds + 15)) }, Modifier.weight(1f))
         }
@@ -698,6 +698,7 @@ internal fun ExercisePickerScreen(
     replacing: ExerciseSummary? = null,
     onSelect: (ExerciseChoice) -> Unit,
 ) {
+    BackHandler(onBack = onBack)
     val context = androidx.compose.ui.platform.LocalContext.current
     val catalog = remember { (CustomExerciseCatalog.load(context) + CoachExerciseMediaStore.customExerciseChoices(context)).sortedBy { it.name } }
     var search by remember { mutableStateOf("") }
@@ -711,7 +712,7 @@ internal fun ExercisePickerScreen(
         }
         ExerciseReplacementSections(filtered(source.recommendedSubstitutes), filtered(source.sameMuscleGroup), filtered(source.allOtherExercises))
     }
-    Column(Modifier.fillMaxSize().liquidGlassBackground().padding(16.dp)) {
+    Column(Modifier.fillMaxSize().liquidGlassBackground().navigationBarsPadding().padding(16.dp)) {
         val backLabel = stringResource(R.string.workout_back)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(backLabel, Modifier.heightIn(min = 48.dp).semantics { contentDescription = backLabel }.clickable(onClick = onBack).padding(horizontal = 10.dp), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)

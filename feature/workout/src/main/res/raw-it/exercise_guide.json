@@ -1,0 +1,1892 @@
+{
+  "walking": {
+    "description": "Un modo naturale e a basso impatto per migliorare la salute cardiovascolare e bruciare calorie.",
+    "instructions": [
+      "Mantieni una postura eretta con la testa alta e le spalle rilassate.",
+      "Oscilla le braccia in modo naturale e leggero a ogni passo.",
+      "Fai un passo in avanti, atterrando sul tallone e rullando fino alle dita del piede.",
+      "Mantieni un ritmo costante e confortevole che ti permetta di respirare facilmente."
+    ],
+    "tips": [
+      "Indossa calzature di supporto per proteggere le tue articolazioni.",
+      "Mantieni il core leggermente attivo per sostenere la zona lombare.",
+      "Concentrati su un passo fluido e ritmico."
+    ]
+  },
+  "outdoorRunning": {
+    "description": "Un classico allenamento cardio ad alta intensità che sviluppa la resistenza e brucia un numero significativo di calorie.",
+    "instructions": [
+      "Tieni la testa alta e guarda a circa 10-20 piedi davanti a te.",
+      "Mantieni la parte superiore del corpo rilassata con i gomiti piegati a 90 gradi.",
+      "Atterra dolcemente sul mesopiede e spingi con le dita dei piedi.",
+      "Mantieni il core attivo ed evita di inclinarti troppo in avanti o indietro."
+    ],
+    "tips": [
+      "Inizia con una breve camminata di riscaldamento o un leggero jogging.",
+      "Aumenta gradualmente la distanza o l'intensità per evitare infortuni.",
+      "Mantieniti idratato e indossa scarpe da corsa adeguate."
+    ]
+  },
+  "treadmillWalking": {
+    "description": "Camminare sul tapis roulant consente un controllo preciso del ritmo e dell'inclinazione in un ambiente controllato.",
+    "instructions": [
+      "Salite sul tapis roulant e fissate la clip di sicurezza ai vostri indumenti.",
+      "Inizia a una velocità lenta per abituarti al movimento.",
+      "Mantieni una postura eretta ed evita di tenerti alle maniglie laterali per migliorare l'equilibrio e bruciare più calorie.",
+      "Regola velocità e inclinazione secondo necessità per adattarle al tuo livello di forma fisica."
+    ],
+    "tips": [
+      "Tieni gli occhi rivolti in avanti per mantenere l'equilibrio.",
+      "Usa la funzione inclinazione per simulare la camminata all'aperto e aumentare l'intensità.",
+      "Riduci gradualmente la velocità al termine della sessione per il defaticamento."
+    ]
+  },
+  "treadmillRunning": {
+    "description": "Correre sul tapis roulant offre una superficie costante e la possibilità di monitorare facilmente le metriche.",
+    "instructions": [
+      "Fissare il clip di sicurezza e iniziare con una camminata lenta per riscaldarsi.",
+      "Aumenta gradualmente la velocità fino al ritmo di corsa desiderato.",
+      "Concentrati ad atterrare dolcemente sulla parte centrale del piede e a mantenere un ritmo costante.",
+      "Mantieni il core attivo e muovi le braccia in modo controllato."
+    ],
+    "tips": [
+      "Varia i tuoi allenamenti con intervalli a velocità o inclinazione maggiore.",
+      "Tieni una bottiglia d'acqua a portata di mano per mantenerti idratato.",
+      "Fai defaticamento con qualche minuto di camminata prima di scendere."
+    ]
+  },
+  "stationaryBike": {
+    "description": "Un'opzione cardio a basso impatto che mira alla parte inferiore del corpo ed è facile per le articolazioni.",
+    "instructions": [
+      "Regola l'altezza del sedile in modo che il ginocchio sia leggermente piegato al punto basso della pedalata.",
+      "Siediti eretto o inclina leggermente il busto in avanti, mantenendo la schiena dritta e il core attivato.",
+      "Pedala con un movimento circolare e fluido, spingendo verso il basso e tirando verso l'alto.",
+      "Regola il livello di resistenza per mettere alla prova il tuo sistema cardiovascolare."
+    ],
+    "tips": [
+      "Assicurati che i piedi siano saldamente nei pedali o nelle fascette.",
+      "Mantieni una cadenza costante (RPM) per una maggiore efficienza.",
+      "Non appoggiarti troppo sul manubrio."
+    ]
+  },
+  "elliptical": {
+    "description": "Fornisce un allenamento completo a basso impatto che imita il movimento della corsa senza gli impatti.",
+    "instructions": [
+      "Salite sui pedali e afferrate le maniglie.",
+      "Inizia a muovere le gambe con un movimento ellittico e fluido, avanti o indietro.",
+      "Mantieni il core attivo e mantieni la schiena dritta.",
+      "Usa le maniglie per coinvolgere la parte superiore del corpo e aumentare il dispendio calorico totale."
+    ],
+    "tips": [
+      "Concentrati nel spingere con tutto il piede, non solo con le dita dei piedi.",
+      "Varia la resistenza e l'inclinazione per coinvolgere diversi gruppi muscolari.",
+      "Tieni le spalle rilassate ed evita di stringere troppo le maniglie."
+    ]
+  },
+  "rowing": {
+    "description": "Un potente allenamento per tutto il corpo che combina condizionamento cardiovascolare e sviluppo della forza.",
+    "instructions": [
+      "Siediti sul sedile e fissa i piedi nelle cinghie.",
+      "La fase di presa: Inclina il busto leggermente in avanti con le braccia distese e le ginocchia piegate.",
+      "La fase di spinta: Spingi con le gambe, poi inclina leggermente indietro e tira la maniglia verso le coste inferiori.",
+      "La fase finale: Gambe estese, la maniglia al petto e sei leggermente inclinato all'indietro.",
+      "La fase di recupero: Estendi le braccia, inclina il busto in avanti e poi piega le ginocchia per tornare alla fase di presa."
+    ],
+    "tips": [
+      "Mantieni il core forte e la schiena piatta per tutta la durata del movimento.",
+      "La potenza dovrebbe provenire per il 60% dalle gambe, per il 20% dal core e per il 20% dalle braccia.",
+      "Concentrati su un movimento fluido e ritmico ed evita di strattonare la maniglia."
+    ]
+  },
+  "jumpRope": {
+    "description": "Un allenamento cardio ad alta intensità e portatile che migliora coordinazione e agilità.",
+    "instructions": [
+      "Tieni le impugnature con una presa rilassata, gomiti vicini ai fianchi.",
+      "Salta solo pochi centimetri da terra, giusto il necessario perché la corda passi sotto.",
+      "Atterra dolcemente sulle punte dei piedi.",
+      "Usa i polsi per ruotare la corda, non tutto il braccio."
+    ],
+    "tips": [
+      "Mantieni il core attivo e le spalle rilassate.",
+      "Inizia con intervalli più brevi e aumenta gradualmente la durata.",
+      "Mantieni un ritmo costante per una maggiore efficienza."
+    ]
+  },
+  "stairClimber": {
+    "description": "Un modo efficace per sviluppare la forza degli arti inferiori e la resistenza cardiovascolare imitando la salita delle scale.",
+    "instructions": [
+      "Salite sulla macchina e selezionate la velocità o il programma desiderato.",
+      "Mantieni una postura eretta ed evita di appoggiarti pesantemente ai corrimano.",
+      "Appoggia tutto il piede e spingi con i talloni per attivare i glutei.",
+      "Mantieni il core attivo ed esegui i movimenti in modo controllato."
+    ],
+    "tips": [
+      "Varia l'altezza del passo e la velocità per sfidare diversi muscoli.",
+      "Concentrati su un ritmo costante e sostenibile.",
+      "Evita di saltare i gradini, a meno che non sia programmato specificamente per un allenamento avanzato."
+    ]
+  },
+  "skiErgWork": {
+    "description": "Un potente allenamento per tutto il corpo che simula lo sci di fondo, costruendo resistenza e forza della parte superiore del corpo.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle spalle e tieni le maniglie sopra la testa.",
+      "Tira le maniglie verso il basso in direzione delle anche mentre contemporaneamente ti pieghi dalle anche e fletti le ginocchia.",
+      "Termina la trazione con le braccia estese oltre le cosce.",
+      "Estendi fianchi e ginocchia mentre riporti le maniglie alla posizione iniziale."
+    ],
+    "tips": [
+      "Usa il core e le gambe per generare potenza, non solo le braccia.",
+      "Mantieni la schiena piatta e il core attivo per tutta la durata del movimento.",
+      "Concentrati su un ritmo fluido e continuo."
+    ]
+  },
+  "airSquat": {
+    "description": "Un movimento fondamentale a corpo libero che migliora la forza e la mobilità degli arti inferiori.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle spalle, le punte leggermente rivolte verso l'esterno.",
+      "Contrai il core e mantieni il petto alto mentre inizi ad abbassarti portando i fianchi indietro.",
+      "Abbassa il corpo fino a quando le tue cosce non sono almeno parallele al pavimento.",
+      "Spingi con i talloni per tornare alla posizione di partenza."
+    ],
+    "tips": [
+      "Mantieni il peso sui talloni, non sulle punte dei piedi.",
+      "Assicurati che le ginocchia restino in linea con le dita dei piedi e non cedano verso l'interno.",
+      "Mantieni la colonna neutra per tutta la durata del movimento."
+    ]
+  },
+  "gobletSquat": {
+    "description": "Tenere un peso all'altezza del petto durante lo squat aiuta a migliorare la tecnica e la stabilità del core.",
+    "instructions": [
+      "Tieni un manubrio o una kettlebell contro il petto con entrambe le mani.",
+      "Posiziona i piedi leggermente più larghi dell'ampiezza delle spalle.",
+      "Abbassa i fianchi indietro e verso il basso, mantenendo il petto alto e il peso vicino al corpo.",
+      "Spingi con i talloni per tornare alla posizione di partenza."
+    ],
+    "tips": [
+      "Tieni i gomiti rivolti verso il basso e all'interno delle ginocchia nella parte bassa dello squat.",
+      "Inspira mentre scendi ed espira mentre spingi per risalire.",
+      "Mantieni la colonna neutra ed evita di arrotondare la schiena."
+    ]
+  },
+  "barbellBackSquat": {
+    "description": "Lo standard d'oro per sviluppare forza totale del corpo e massa alle gambe usando un bilanciere.",
+    "instructions": [
+      "Posiziona il bilanciere sulla parte superiore della schiena, appoggiato sui trapezi.",
+      "Posiziona i piedi alla larghezza delle spalle, le punte dei piedi leggermente rivolte verso l'esterno.",
+      "Mantieni il core contratto e abbassa i fianchi finché le cosce non sono almeno parallele al pavimento.",
+      "Spingi con i talloni per tornare in posizione eretta."
+    ],
+    "tips": [
+      "Tieni il petto sollevato e guarda leggermente in avanti per tutto il sollevamento.",
+      "Evita che le ginocchia si pieghino verso l'interno.",
+      "Usa un rack per squat e uno spotter per sicurezza quando sollevi carichi pesanti."
+    ]
+  },
+  "barbellFrontSquat": {
+    "description": "Posizionare il bilanciere sulla parte anteriore delle spalle coinvolge più intensamente i quadricipiti e la parte alta della schiena.",
+    "instructions": [
+      "Appoggia il bilanciere sulla parte anteriore delle spalle, utilizzando la presa 'clean' o la presa 'cross-arm'.",
+      "Tieni i gomiti alti per tutta la durata del movimento per stabilizzare il bilanciere.",
+      "Abbassati facendo squat, spingendo i fianchi indietro e piegando le ginocchia.",
+      "Ritorna alla posizione iniziale spingendo, mantenendo il busto in posizione eretta."
+    ],
+    "tips": [
+      "La barra dovrebbe dare la sensazione di poggiarsi sui deltoidi, non sulla clavicola.",
+      "Mantieni il core contratto per sostenere la tua postura eretta.",
+      "Concentrati a mantenere i talloni a terra."
+    ]
+  },
+  "smithMachineSquat": {
+    "description": "Eseguire lo squat alla Smith machine offre maggiore stabilità, permettendoti di concentrarti sulla spinta delle gambe e sul posizionamento.",
+    "instructions": [
+      "Posizionati sotto la barra con i piedi leggermente in avanti e alla larghezza delle spalle.",
+      "Sblocca il bilanciere e abbassa i fianchi fino a portare le cosce parallele al pavimento.",
+      "Spingi con i talloni per tornare alla posizione di partenza.",
+      "Blocca la barra in modo sicuro dopo aver completato le ripetizioni."
+    ],
+    "tips": [
+      "Tieni il petto sollevato e il core contratto per tutto il movimento.",
+      "Sperimenta la posizione dei piedi per colpire diverse parti delle gambe.",
+      "Il percorso fisso dello Smith riduce le esigenze di equilibrio."
+    ]
+  },
+  "dumbbellSquat": {
+    "description": "Tenere i manubri lungo i fianchi durante lo squat è un modo accessibile per aggiungere resistenza al movimento di squat di base.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle spalle e tieni un manubrio in ciascuna mano lungo i fianchi.",
+      "Abbassa i fianchi indietro e verso il basso come se ti stessi sedendo su una sedia, mantenendo il petto in alto.",
+      "Abbassa finché le tue cosce non siano parallele al pavimento.",
+      "Spingi con i talloni per tornare in posizione eretta."
+    ],
+    "tips": [
+      "Mantieni i pesi fermi ai lati; non farli oscillare.",
+      "Mantieni la colonna neutra ed evita di arrotondare le spalle.",
+      "Perfetto per chi trova scomodo lo squat con bilanciere."
+    ]
+  },
+  "legPress": {
+    "description": "Una pressa su macchina che consente carichi pesanti per la parte inferiore del corpo con scarso stress sulla schiena.",
+    "instructions": [
+      "Siediti nella macchina con la schiena e la testa appoggiate contro il supporto imbottito.",
+      "Posiziona i piedi sulla piattaforma a circa la larghezza delle spalle.",
+      "Rilascia le barre di sicurezza e abbassa la piattaforma verso il petto piegando le ginocchia.",
+      "Riporta la piattaforma alla posizione di partenza senza bloccare le ginocchia in alto."
+    ],
+    "tips": [
+      "Evita di sollevare la parte bassa della schiena dal sedile.",
+      "Tieni i piedi piatti sulla piattaforma in ogni momento.",
+      "Controlla il carico sia durante la fase di discesa sia durante quella di spinta."
+    ]
+  },
+  "walkingLunge": {
+    "description": "Un movimento funzionale che sviluppa forza su una gamba, equilibrio e coordinazione.",
+    "instructions": [
+      "Fai un passo in avanti con una gamba, abbassando i fianchi finché entrambe le ginocchia non sono piegate a circa 90 gradi.",
+      "Assicurati che il ginocchio anteriore sia direttamente sopra la caviglia.",
+      "Spingi con il tallone anteriore per alzarti e fare un passo in avanti con l'altra gamba.",
+      "Continua ad alternare le gambe mentre cammini in avanti."
+    ],
+    "tips": [
+      "Mantieni il busto eretto e il core attivo.",
+      "Non lasciare che il ginocchio posteriore tocchi il pavimento con impatto.",
+      "Mantieni l'equilibrio fissando un punto davanti a te."
+    ]
+  },
+  "reverseLunge": {
+    "description": "Fai un passo indietro in affondo per mirare ai glutei e ai femorali con meno stress sulle ginocchia.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle anche.",
+      "Fai un passo indietro con un piede e abbassa i fianchi fino a quando entrambe le ginocchia sono piegate a 90°.",
+      "Assicurati che il ginocchio anteriore sia allineato sopra la caviglia.",
+      "Spingi con il piede posteriore per tornare alla posizione iniziale."
+    ],
+    "tips": [
+      "Mantieni il peso principalmente sul piede anteriore.",
+      "Mantieni una postura eretta per tutto il movimento.",
+      "Controlla la discesa per evitare che il ginocchio posteriore sbatta a terra."
+    ]
+  },
+  "bulgarianSplitSquat": {
+    "description": "Solleva il piede posteriore per concentrare e intensificare lo stretching e la tensione sui quadricipiti e i glutei della gamba anteriore.",
+    "instructions": [
+      "Posizionati a pochi passi davanti a una panca e appoggia la parte superiore di un piede sulla panca dietro di te.",
+      "Abbassa i fianchi finché la coscia anteriore non sia quasi parallela al pavimento.",
+      "Assicurati che il ginocchio anteriore rimanga allineato con il piede e non superi le dita.",
+      "Spingi con il tallone anteriore per tornare in posizione eretta."
+    ],
+    "tips": [
+      "Concentrati a mantenere il busto eretto o con un leggero inclinarsi in avanti.",
+      "Questo esercizio richiede un buon equilibrio; inizia con il solo peso corporeo prima di aggiungere i manubri.",
+      "Regola la distanza dalla panca per trovare la posizione più comoda ed efficace."
+    ]
+  },
+  "stepUp": {
+    "description": "Salite su una superficie rialzata per sviluppare glutei potenti e migliorare la forza funzionale delle gambe.",
+    "instructions": [
+      "Posiziona un piede su una panca o su un box robusto.",
+      "Spingi con quel tallone per sollevare il corpo sulla pedana.",
+      "Scendi prima con l'altro piede, seguito dal piede di partenza.",
+      "Alterna le gambe o completa tutte le ripetizioni da un lato prima di cambiare."
+    ],
+    "tips": [
+      "Mantieni il core attivo e il petto sollevato.",
+      "Cerca di non spingere con il piede posteriore a terra; lascia che sia la gamba sollevata a fare il lavoro.",
+      "Controlla la discesa per proteggere le tue articolazioni."
+    ]
+  },
+  "legExtension": {
+    "description": "Un esercizio di isolamento che prende di mira e sviluppa specificamente i muscoli quadricipiti.",
+    "instructions": [
+      "Siediti sulla macchina per l'estensione delle gambe con la schiena appoggiata contro il cuscinetto.",
+      "Posiziona le tue tibie dietro la leva imbottita.",
+      "Estendi le gambe finché non sono completamente tese, concentrandoti sulla contrazione dei quadricipiti.",
+      "Abbassa lentamente il peso fino alla posizione iniziale."
+    ],
+    "tips": [
+      "Evita di usare lo slancio per sollevare il peso.",
+      "Non bloccare le ginocchia con forza nella fase alta.",
+      "Assicurati che la leva imbottita sia posizionata appena sopra le caviglie."
+    ]
+  },
+  "lyingLegCurl": {
+    "description": "Si concentra sull'isolamento dei muscoli posteriori della coscia per migliorare la forza e la stabilità del ginocchio.",
+    "instructions": [
+      "Sdraiati a pancia in giù sulla macchina per leg curl con le gambe completamente distese.",
+      "Posiziona la leva imbottita appena sopra i talloni.",
+      "Porta le gambe verso l'alto il più possibile, contraendo i muscoli posteriori della coscia in alto.",
+      "Riporta il peso alla posizione iniziale in modo controllato."
+    ],
+    "tips": [
+      "Mantieni i fianchi premuti contro la panca per tutta la durata del movimento.",
+      "Concentrati su una fase eccentrica (in discesa) lenta e controllata.",
+      "Evita di oscillare il peso."
+    ]
+  },
+  "seatedLegCurl": {
+    "description": "Isola i muscoli posteriori della coscia in posizione seduta per una contrazione massima e sviluppo muscolare.",
+    "instructions": [
+      "Siediti nella macchina e regola la staffa per il bacino in modo che appoggi saldamente sulle tue cosce.",
+      "Posiziona le gambe sopra la leva imbottita in modo che si trovi dietro le caviglie.",
+      "Start with your knees nearly straight, then curl your lower legs down and back as far as possible.",
+      "Riporta lentamente la leva alla posizione di partenza."
+    ],
+    "tips": [
+      "Mantieni la parte superiore del corpo stabile ed evita di usare le braccia per aiutare la trazione.",
+      "Contrai i muscoli posteriori della coscia nella parte bassa del movimento.",
+      "Tieni i piedi flessi per tutta la serie."
+    ]
+  },
+  "calfRaise": {
+    "description": "Rinforza e sviluppa i muscoli del polpaccio sollevando i talloni da terra.",
+    "instructions": [
+      "Stai sul bordo di un gradino o piattaforma appoggiando l'avampiede.",
+      "Abbassa i talloni sotto il livello del gradino per allungare i polpacci.",
+      "Spingi con l'avampiede per alzare i talloni il più possibile.",
+      "Riporta lentamente la schiena alla posizione iniziale dello stiramento."
+    ],
+    "tips": [
+      "Aggrappati a una parete o a un corrimano per mantenere l'equilibrio se necessario.",
+      "Fai una pausa di un secondo in alto per massimizzare la contrazione.",
+      "Può essere eseguito su una gamba alla volta per aumentare la difficoltà."
+    ]
+  },
+  "hipThrust": {
+    "description": "Considerato da molti il miglior esercizio per lo sviluppo e la forza massima dei glutei.",
+    "instructions": [
+      "Siediti a terra con la parte superiore della schiena appoggiata a una panca e una barra sulle anche.",
+      "Posiziona i piedi saldamente a terra, a circa larghezza delle spalle.",
+      "Spingi con i talloni per sollevare i fianchi verso il soffitto fino a quando il corpo forma una linea retta dalle spalle alle ginocchia.",
+      "Contrai i glutei nella parte alta, poi abbassa i fianchi verso il pavimento con controllo."
+    ],
+    "tips": [
+      "Usa un cuscinetto o un asciugamano sul bilanciere per comodità.",
+      "Tieni il mento basso e il core attivato per proteggere la zona lombare.",
+      "Non iperestendere la parte bassa della schiena nella fase alta del movimento."
+    ]
+  },
+  "gluteBridge": {
+    "description": "Un esercizio a corpo libero a terra che attiva i glutei e migliora l'estensione dell'anca.",
+    "instructions": [
+      "Sdraiati sulla schiena con le ginocchia piegate e i piedi appoggiati a terra.",
+      "Mantieni le braccia lungo i fianchi con i palmi rivolti verso il basso.",
+      "Solleva i fianchi da terra contraendo i glutei e spingendo con i talloni.",
+      "Mantieni la posizione in alto per un secondo, poi abbassa di nuovo."
+    ],
+    "tips": [
+      "Assicurati di attivare il core in modo che la parte bassa della schiena non si inarchi eccessivamente.",
+      "Concentrati a usare i glutei piuttosto che la parte bassa della schiena o i femorali.",
+      "Per una sfida in più, esegui il ponte con una gamba estesa."
+    ]
+  },
+  "deadlift": {
+    "description": "Un sollevamento fondamentale per la forza di tutto il corpo, che coinvolge l'intera catena posteriore.",
+    "instructions": [
+      "Posiziona la parte centrale del piede sotto il bilanciere.",
+      "Inclinati dalle anche e piega le ginocchia per afferrare la barra appena all'esterno delle gambe.",
+      "Mantieni la schiena piatta e il petto in alto mentre spingi attraverso i talloni per alzarti.",
+      "Tieni la barra vicino al corpo per tutto il movimento e rimettiti completamente in posizione eretta."
+    ],
+    "tips": [
+      "Non arrotondare la schiena; mantieni la colonna neutra.",
+      "Inspira e irrigidisci il core prima di tirare il peso.",
+      "Abbassa il bilanciere piegando prima le anche e poi le ginocchia una volta che il bilanciere le supera."
+    ]
+  },
+  "barbellRomanianDeadlift": {
+    "description": "Una variante dello stacco da terra che enfatizza l'allungamento e la contrazione degli ischiocrurali.",
+    "instructions": [
+      "Stai con i piedi alla larghezza delle anche, tenendo un bilanciere davanti alle cosce.",
+      "Inclinati dalle anche e abbassa il bilanciere verso il pavimento mantenendo le gambe per lo più dritte (leggera flessione delle ginocchia).",
+      "Abbassa il bilanciere fino a sentire un allungamento nei femorali, mantenendo la schiena piatta.",
+      "Spingi i fianchi in avanti per tornare alla posizione di partenza."
+    ],
+    "tips": [
+      "Tieni la barra molto vicino alle tue gambe in ogni momento.",
+      "Concentrati nello spingere i fianchi indietro il più possibile.",
+      "Evita di arrotondare le spalle o la parte bassa della schiena."
+    ]
+  },
+  "dumbbellRomanianDeadlift": {
+    "description": "Una flessione dell'anca mirata ai bicipiti femorali con manubri, che consente un range di movimento più naturale.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle anche e tieni un manubrio in ciascuna mano davanti alle cosce.",
+      "Inclinati dalle anche e abbassa i pesi verso i piedi, mantenendo la schiena piatta.",
+      "Abbassa finché non senti un buon allungamento ai muscoli posteriori della coscia (ischio-crurali).",
+      "Contrai i glutei e i muscoli posteriori della coscia per tornare in posizione eretta."
+    ],
+    "tips": [
+      "Tieni i manubri vicino alle gambe per tutto il movimento.",
+      "Concentrati sul portare indietro i fianchi invece di cercare di raggiungere il pavimento.",
+      "Mantieni le ginocchia leggermente piegate."
+    ]
+  },
+  "machineGluteKickback": {
+    "description": "Un esercizio mirato alla macchina che isola i glutei tramite un movimento di kickback.",
+    "instructions": [
+      "Posizionati nella macchina e appoggia un piede sulla piattaforma.",
+      "Spingi la piattaforma indietro e verso l'alto estendendo l'anca.",
+      "Contrae i glutei nella parte alta del movimento.",
+      "Torna lentamente alla posizione iniziale e ripeti."
+    ],
+    "tips": [
+      "Mantieni il core stabile ed evita di inarcare la schiena.",
+      "Mantieni il movimento controllato e concentrati sulla contrazione dei glutei.",
+      "Non dondolare la gamba; usa i muscoli per muovere il peso."
+    ]
+  },
+  "cableGluteKickback": {
+    "description": "Utilizza la resistenza del cavo per isolare i glutei tramite un movimento di kickback controllato, fornendo tensione costante per tutta l'escursione.",
+    "instructions": [
+      "Fissare una cavigliera alla macchina a cavi all'impostazione più bassa e fissarla attorno a una caviglia.",
+      "Posizionati di fronte alla macchina e tieni il telaio per mantenere l'equilibrio.",
+      "Mantenendo il core contratto e la gamba di appoggio leggermente piegata, spingi la gamba assicurata indietro e verso l'alto estendendo l'anca.",
+      "Contrai i glutei nella parte alta del movimento, poi torna lentamente alla posizione di partenza."
+    ],
+    "tips": [
+      "Mantieni il busto eretto ed evita di ruotare i fianchi.",
+      "Esegui l'intera ampiezza di estensione dell'anca per massimizzare l'attivazione dei glutei.",
+      "Controlla il carico nella fase di ritorno, invece di lasciare che il cavo tiri la gamba in avanti."
+    ]
+  },
+  "machineHipAbduction": {
+    "description": "Mira alla parte esterna dell'anca e al gluteo medio per migliorare stabilità e estetica dell'anca.",
+    "instructions": [
+      "Siediti nella macchina con l'esterno delle cosce contro i cuscinetti.",
+      "Spingi le gambe verso l'esterno contro la resistenza.",
+      "Fai una pausa di un secondo al punto di massima contrazione.",
+      "Riporta lentamente le gambe insieme."
+    ],
+    "tips": [
+      "Mantieni la schiena piatta contro il sedile.",
+      "Usa un tempo controllato sia nella fase di apertura che in quella di chiusura.",
+      "Regola la posizione di partenza in un range di movimento confortevole."
+    ]
+  },
+  "machineHipAdduction": {
+    "description": "Rinforza i muscoli interni della coscia (adduttori) per migliorare la stabilità della gamba.",
+    "instructions": [
+      "Siediti nella macchina con l'interno delle cosce contro i cuscinetti.",
+      "Stringi le gambe insieme contro la resistenza.",
+      "Fai una pausa di un secondo al punto di massima contrazione.",
+      "Lascia che le gambe tornino lentamente alla posizione di partenza."
+    ],
+    "tips": [
+      "Mantieni il busto stabile per tutta la serie.",
+      "Concentrati a usare i muscoli dell'interno coscia, non i piedi.",
+      "Non lasciare che i pesi sbattano tra loro alla fine della ripetizione."
+    ]
+  },
+  "cableHipAbduction": {
+    "description": "Utilizza un cavo e una cavigliera per isolare l'esterno dell'anca e il medio gluteo, un lato alla volta.",
+    "instructions": [
+      "Fissare una cavigliera alla puleggia bassa della macchina a cavi e assicurarla attorno alla gamba esterna.",
+      "Posizionati lateralmente alla macchina e tieni il telaio per mantenere l'equilibrio.",
+      "Sposta la gamba che lavora lateralmente contro il cavo mantenendo il busto per lo più fermo.",
+      "Fai una breve pausa, poi torna con controllo alla posizione di partenza."
+    ],
+    "tips": [
+      "Mantieni il movimento piccolo e controllato invece di dondolare la gamba.",
+      "Contrai il core in modo che sia l'anca a lavorare e non il busto.",
+      "Ruota leggermente le punte dei piedi in avanti per coinvolgere meglio il gluteo medio."
+    ]
+  },
+  "cableHipAdduction": {
+    "description": "Utilizza un cavo e una cavigliera per rafforzare i muscoli interni della coscia, un lato alla volta.",
+    "instructions": [
+      "Fissare una cavigliera alla puleggia bassa della macchina a cavi e assicurarla attorno alla gamba interna.",
+      "Posizionati lateralmente alla macchina con la gamba che lavora più lontana dal carico e tieni il telaio per mantenere l'equilibrio.",
+      "Fai scorrere la gamba di lavoro davanti al corpo contro la resistenza.",
+      "Fai una breve pausa, poi torna alla posizione di partenza in modo controllato."
+    ],
+    "tips": [
+      "Mantieni il busto eretto ed evita di ruotare i fianchi.",
+      "Muoviti lentamente in modo che la parte interna della coscia controlli entrambe le direzioni della ripetizione.",
+      "Usa un carico da leggero a moderato e concentrati sulla contrazione al termine dell'escursione."
+    ]
+  },
+  "boxJump": {
+    "description": "Un movimento esplosivo che sviluppa la potenza degli arti inferiori e migliora la forma cardiovascolare.",
+    "instructions": [
+      "Posizionati di fronte a una box solida con i piedi alla larghezza delle anche.",
+      "Inclinati dalle anche e porta indietro le braccia, poi salta esplosivamente sul box.",
+      "Atterra dolcemente in uno squat parziale con entrambi i piedi completamente sulla box.",
+      "Alzati completamente, poi scendi indietro un piede alla volta."
+    ],
+    "tips": [
+      "Concentrati su un atterraggio silenzioso per assicurarti di assorbire l'impatto.",
+      "Scegli un'altezza della box che consenta una corretta tecnica di atterraggio.",
+      "Non saltare indietro; scendere a piedi è più sicuro per le tue articolazioni."
+    ]
+  },
+  "pushUp": {
+    "description": "Un esercizio classico a corpo libero che sviluppa la forza del petto, delle spalle e dei tricipiti.",
+    "instructions": [
+      "Inizia in posizione plank alta con le mani leggermente più larghe della larghezza delle spalle.",
+      "Mantieni il corpo in linea retta dalla testa ai talloni.",
+      "Abbassa il petto verso il pavimento, mantenendo i gomiti a un angolo di 45 gradi.",
+      "Spingi con i palmi delle mani per tornare alla posizione di partenza."
+    ],
+    "tips": [
+      "Non lasciare che la parte bassa della schiena si afflosci; mantieni il core contratto.",
+      "Concentrati su un'ampia escursione del movimento per un migliore coinvolgimento muscolare.",
+      "Inspira mentre scendi ed espira mentre spingi verso l'alto."
+    ]
+  },
+  "declinePushUp": {
+    "description": "Esegui piegamenti con i piedi sollevati su una panca per mettere maggior enfasi sulla parte superiore del petto e sulle spalle.",
+    "instructions": [
+      "Posiziona i piedi su una panca piana e le mani a terra, leggermente più larghe della larghezza delle spalle.",
+      "Mantieni una linea retta dalla testa ai talloni, attivando il core.",
+      "Abbassa il petto verso il pavimento piegando i gomiti.",
+      "Spingi verso l'alto fino alla posizione iniziale estendendo le braccia."
+    ],
+    "tips": [
+      "Tieni i gomiti a un angolo di 45 gradi rispetto al corpo.",
+      "Non lasciare che i fianchi si affloscino; mantieni glutei e core contratti.",
+      "Più la panca è alta, più difficile diventa l'esercizio."
+    ]
+  },
+  "barbellBenchPress": {
+    "description": "Il sollevamento fondamentale per la parte superiore del corpo per sviluppare la massima potenza di petto e braccia.",
+    "instructions": [
+      "Sdraiati sulla panca con i piedi ben piantati a terra.",
+      "Afferra il bilanciere leggermente più largo della larghezza delle spalle.",
+      "Abbassa il bilanciere al centro del petto in modo controllato.",
+      "Riporta la barra verso l'alto fino a quando le braccia sono completamente estese."
+    ],
+    "tips": [
+      "Mantieni le scapole retratte (avvicinate tra loro) durante tutta la fase di sollevamento.",
+      "Mantieni una leggera curva nella parte bassa della schiena, ma tieni i glutei appoggiati sulla panca.",
+      "Allenati con uno spotter, specialmente quando sollevi pesi elevati."
+    ]
+  },
+  "dumbbellBenchPress": {
+    "description": "Spingere i manubri sdraiati su una panca piana permette una maggiore ampiezza di movimento e migliora la salute delle spalle.",
+    "instructions": [
+      "Sdraiati su una panca tenendo un manubrio in ogni mano all'altezza del petto.",
+      "Solleva i pesi verso l'alto fino a che le braccia siano completamente estese sopra il petto.",
+      "Abbassa i manubri in modo controllato fino a portarli all'altezza del petto.",
+      "Mantieni il core stabile e i piedi appoggiati a terra."
+    ],
+    "tips": [
+      "Concentrati nell'avvicinare i manubri in alto senza che si tocchino.",
+      "Tieni i gomiti a un angolo di 45 gradi rispetto al busto.",
+      "I manubri richiedono più stabilizzazione rispetto al bilanciere."
+    ]
+  },
+  "smithMachineBenchPress": {
+    "description": "La Smith machine fornisce un percorso guidato per la panca piana, rendendola più sicura per chi si allena da solo e permettendo un intenso lavoro muscolare.",
+    "instructions": [
+      "Sdraiati sulla panca e posizionati in modo che il bilanciere sia allineato con il centro del petto.",
+      "Sgancia la barra e abbassala lentamente verso il petto.",
+      "Spingi la barra verso l'alto fino a quando le braccia non sono completamente estese.",
+      "Blocca la barra in modo sicuro quando hai finito."
+    ],
+    "tips": [
+      "Assicurati che la panca sia perfettamente centrata sotto il bilanciere.",
+      "Concentrati sulla contrazione del petto per tutta la durata del movimento.",
+      "Un'ottima opzione per l'isolamento e le serie a scalare."
+    ]
+  },
+  "dumbbellInclineBenchPress": {
+    "description": "La spinta con manubri su panca inclinata enfatizza la parte superiore del petto e permette a ogni braccio di muoversi in modo indipendente.",
+    "instructions": [
+      "Regola una panca regolabile su un'inclinazione di 30–45 gradi.",
+      "Siediti con un manubrio appoggiato su ciascuna coscia, quindi appoggiati contro la panca.",
+      "Spingi i manubri verso l'alto partendo dalla parte superiore del petto fino a quando le braccia sono completamente estese.",
+      "Riporta i pesi alla posizione di partenza con controllo."
+    ],
+    "tips": [
+      "Mantieni le scapole retratte contro la panca.",
+      "Usa un'inclinazione moderata per mantenere l'enfasi sulla parte superiore del petto.",
+      "Mantieni i polsi allineati sopra i gomiti per tutta la fase di spinta."
+    ]
+  },
+  "barbellInclineBenchPress": {
+    "description": "Spingere un bilanciere su una panca inclinata coinvolge la parte superiore del petto e le spalle, permettendo carichi più elevati.",
+    "instructions": [
+      "Regola la panca su un'inclinazione di 30–45 gradi e posizionati sotto la barra.",
+      "Afferra la barra leggermente più larga della larghezza delle spalle.",
+      "Abbassa il bilanciere verso la parte superiore del petto in modo controllato.",
+      "Spingi la barra verso l'alto fino a quando le braccia non sono completamente estese."
+    ],
+    "tips": [
+      "Tieni i gomiti leggermente aderenti, non completamente aperti verso i lati.",
+      "Assicurati che il bilanciere tocchi la parte alta del petto, non il collo.",
+      "Usa uno spotter per sicurezza."
+    ]
+  },
+  "smithMachineInclineBenchPress": {
+    "description": "Una pressa inclinata guidata che isola la parte superiore del petto e permette di allenarsi in sicurezza vicino al cedimento.",
+    "instructions": [
+      "Regola la panca inclinabile e posizionala centrata sotto la barra della Smith.",
+      "Sdraiati sulla panca e assicurati che il bilanciere sia allineato con la parte superiore del torace.",
+      "Sblocca il bilanciere e abbassalo con controllo verso il petto.",
+      "Riporta la barra nella posizione iniziale."
+    ],
+    "tips": [
+      "Concentrati su un ritmo fluido e costante.",
+      "Regola la posizione della panca per trovare la traiettoria di spinta più confortevole.",
+      "Eccellente per rifinire la parte superiore del petto."
+    ]
+  },
+  "barbellDeclineBenchPress": {
+    "description": "Spingere su una panca declinata mira alla porzione inferiore del petto e spesso consente carichi maggiori grazie al vantaggio meccanico.",
+    "instructions": [
+      "Sicura i piedi sulla panca declinata e sdraiati.",
+      "Afferra il bilanciere con una presa di larghezza media.",
+      "Abbassa il bilanciere verso la parte inferiore del petto/parte superiore degli addominali.",
+      "Spingi la barra verso l'alto fino alla posizione iniziale."
+    ],
+    "tips": [
+      "Fatti aiutare da uno spotter per sganciare e riagganciare il bilanciere.",
+      "Mantieni il movimento controllato; non far rimbalzare il bilanciere sul petto.",
+      "Concentrati sulla contrazione nella parte inferiore del petto."
+    ]
+  },
+  "dumbbellDeclineBenchPress": {
+    "description": "La distensione su panca declinata con manubri offre un profondo allungamento del pettorale inferiore e migliora l'ampiezza di movimento.",
+    "instructions": [
+      "Siediti all'estremità di una panca declinata con i manubri poggiati sulle cosce.",
+      "Sdraiati sulla schiena mentre porti i pesi all'altezza del petto.",
+      "Spingi i manubri verso l'alto fino a quando le braccia non sono estese.",
+      "Abbassali di nuovo con controllo."
+    ],
+    "tips": [
+      "Fai attenzione quando entri ed esci dalla posizione con manubri pesanti.",
+      "Concentrati sulla contrazione nella parte alta del movimento.",
+      "Mantieni il core attivo."
+    ]
+  },
+  "smithMachineDeclineBenchPress": {
+    "description": "Una pressa declinata guidata che mira in sicurezza ai muscoli inferiori del torace.",
+    "instructions": [
+      "Posiziona una panca declinata sotto la barra della macchina Smith.",
+      "Sdraiati e assicurati che il percorso della barra passi sopra la parte inferiore del petto.",
+      "Sgancia la barra e abbassala verso il petto con controllo.",
+      "Riporta la barra nella posizione iniziale."
+    ],
+    "tips": [
+      "Assicurati che la panca sia posizionata in modo sicuro e centrata.",
+      "Mantieni la schiena piatta contro la panca.",
+      "Ottimo per un lavoro sui pettorali ad alto volume."
+    ]
+  },
+  "chestPressMachine": {
+    "description": "Offre un modo stabile e controllato per allenare i muscoli del petto con requisiti di equilibrio ridotti.",
+    "instructions": [
+      "Regola l'altezza del sedile in modo che le impugnature siano allineate con la parte centrale del petto.",
+      "Siediti con la schiena contro il cuscino e afferra le maniglie.",
+      "Spingi le maniglie in avanti fino a che le braccia sono completamente estese.",
+      "Riporta lentamente le impugnature alla posizione di partenza."
+    ],
+    "tips": [
+      "Tieni i gomiti leggermente sotto il livello delle spalle.",
+      "Mantieni il contatto tra la schiena e il cuscinetto in ogni momento.",
+      "Evita di bloccare i gomiti in alto."
+    ]
+  },
+  "dumbbellChestFly": {
+    "description": "Un movimento di isolamento che allunga e definisce i muscoli pettorali.",
+    "instructions": [
+      "Sdraiati su una panca con i manubri tenuti sopra il petto, i palmi rivolti l'uno verso l'altro.",
+      "Abbassa i pesi verso i lati con un ampio arco, mantenendo una leggera flessione dei gomiti.",
+      "Fermati quando senti un allungamento al petto, quindi riporta i pesi insieme sopra il petto.",
+      "Contrai i muscoli del petto in alto."
+    ],
+    "tips": [
+      "Mantieni il movimento lento e controllato.",
+      "Non scendere troppo se avverti fastidio alla spalla.",
+      "Concentrati sul movimento di 'abbracciare un albero'."
+    ]
+  },
+  "cableFly": {
+    "description": "Utilizza cavi per fornire una tensione costante sui muscoli pettorali per tutta l'escursione del movimento.",
+    "instructions": [
+      "Posizionati tra due carrucole con le maniglie all'altezza del petto.",
+      "Fai un piccolo passo avanti e tieni le impugnature con le braccia estese ai lati.",
+      "Avvicina le impugnature davanti al petto, mantenendo una leggera flessione dei gomiti.",
+      "Torna lentamente alla posizione iniziale."
+    ],
+    "tips": [
+      "Concentrati sulla contrazione del petto mentre avvicini le mani.",
+      "Mantieni una leggera inclinazione in avanti per una migliore stabilità.",
+      "Mantieni il core contratto per evitare che il corpo si muova."
+    ]
+  },
+  "cableCrunchPress": {
+    "description": "Un esercizio addominale in ginocchio con cavo che sovraccarica il movimento del crunch per costruire addominali più forti e definiti.",
+    "instructions": [
+      "Fissare una corda alla puleggia alta e inginocchiarsi di fronte alla macchina a cavi.",
+      "Tieni la corda accanto alla testa e stabilizza i fianchi in modo che il movimento provenga dal busto.",
+      "Avvicina la gabbia toracica al bacino mantenendo i gomiti vicini e gli addominali completamente attivati.",
+      "Torna lentamente alla posizione iniziale senza che la pila di pesi ti tiri su di scatto."
+    ],
+    "tips": [
+      "Pensa a flettere la colonna vertebrale vertebra dopo vertebra invece di tirare solo con le braccia.",
+      "Mantieni i fianchi per lo più fermi in modo che a lavorare siano gli addominali e non i flessori dell'anca.",
+      "Usa un carico controllato che ti permetta di contrarre completamente gli addominali a ogni ripetizione."
+    ]
+  },
+  "highToLowCableFly": {
+    "description": "Impostare i cavi in alto e tirare verso il basso prende di mira le fibre inferiori del petto.",
+    "instructions": [
+      "Posiziona le carrucole del cavo nella posizione più alta.",
+      "Afferra le impugnature e fai un passo avanti con un piede per maggiore stabilità.",
+      "Tira le maniglie verso il basso e avvicinale davanti alla vita.",
+      "Riporta lentamente le braccia nella posizione alta di partenza."
+    ],
+    "tips": [
+      "Contrai la parte inferiore del petto nella fase bassa del movimento.",
+      "Mantieni una leggera inclinazione in avanti.",
+      "Evita di usare il peso del tuo corpo per tirare i cavi."
+    ]
+  },
+  "lowToHighCableFly": {
+    "description": "Impostare i cavi in basso e tirare verso l'alto mira al petto superiore e ai deltoidi anteriori.",
+    "instructions": [
+      "Posiziona le carrucole del cavo nella posizione più bassa.",
+      "Afferra le impugnature e posizionati al centro, facendo un piccolo passo in avanti.",
+      "Tira le maniglie verso l'alto e avvicinale davanti alla parte superiore del petto.",
+      "Abbassa lentamente le maniglie fino alla posizione iniziale bassa."
+    ],
+    "tips": [
+      "Concentrati sulla contrazione della parte alta del petto.",
+      "Mantieni una leggera piegatura dei gomiti per tutto il movimento.",
+      "Controlla il carico per tutto il movimento."
+    ]
+  },
+  "pecDeckFly": {
+    "description": "Un fly su macchina che fornisce tensione costante sul petto per un miglior isolamento.",
+    "instructions": [
+      "Siediti nella macchina e appoggia gli avambracci contro le leve imbottite.",
+      "Afferra le impugnature e avvicina le leve davanti al petto.",
+      "Fai una pausa di un secondo al punto di massima contrazione.",
+      "Torna lentamente alla posizione iniziale."
+    ],
+    "tips": [
+      "Mantieni la schiena e la testa contro lo schienale.",
+      "Concentrati a stringere con il petto invece di tirare con le braccia.",
+      "Mantieni un tempo costante e controllato."
+    ]
+  },
+  "barbellOverheadPress": {
+    "description": "Una potente pressa verticale che sviluppa spalle larghe e stabilità della parte superiore del corpo.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle spalle e tieni un bilanciere all'altezza delle spalle con presa prona.",
+      "Mantieni il core contratto e spingi il bilanciere direttamente sopra la testa fino a completa estensione delle braccia.",
+      "Estendi completamente i gomiti in alto e spingi leggermente la testa in avanti.",
+      "Riporta la barra alle spalle con controllo."
+    ],
+    "tips": [
+      "Non usare le gambe per aiutare a sollevare il peso (quello sarebbe un push press).",
+      "Tieni il core e i glutei contratti per stabilizzare il busto.",
+      "Concentrati su un percorso verticale della barra."
+    ]
+  },
+  "dumbbellOverheadPress": {
+    "description": "Sollevare i manubri sopra la testa consente un'ampia gamma di movimento naturale e aiuta a correggere gli squilibri muscolari.",
+    "instructions": [
+      "Stai in piedi o siedi con un manubrio in ciascuna mano all'altezza delle spalle, palme rivolte in avanti.",
+      "Solleva i pesi verso l'alto fino a che le braccia sono completamente estese.",
+      "Abbassa i manubri in modo controllato fino all'altezza delle spalle.",
+      "Mantieni il core attivo per evitare di inarcare la schiena."
+    ],
+    "tips": [
+      "Concentrati su un movimento di spinta fluido e controllato.",
+      "Mantieni una base stabile sia da seduto che in piedi.",
+      "I manubri offrono maggiore libertà per l'articolazione della spalla rispetto al bilanciere."
+    ]
+  },
+  "smithMachineOverheadPress": {
+    "description": "Una pressa verticale guidata che ti permette di concentrarti esclusivamente sulla spinta delle spalle, con maggiore sicurezza.",
+    "instructions": [
+      "Posiziona una seduta o mettiti sotto la barra della macchina Smith.",
+      "Afferra la barra leggermente più larga della larghezza delle spalle.",
+      "Sblocca il bilanciere e spingilo sopra la testa fino a quando le braccia sono completamente estese.",
+      "Abbassalo di nuovo all'altezza delle spalle e ripeti."
+    ],
+    "tips": [
+      "Assicurati che la tua posizione permetta un percorso verticale della barra sicuro.",
+      "Concentrati a contrarre i deltoidi nella parte alta.",
+      "Evita di inarcare eccessivamente la parte bassa della schiena."
+    ]
+  },
+  "arnoldPress": {
+    "description": "Una pressa per spalle con componente rotazionale che colpisce tutte e tre le teste del deltoide.",
+    "instructions": [
+      "Siediti o stai in piedi con i manubri davanti alle spalle, i palmi rivolti verso di te.",
+      "Spingi i pesi sopra la testa ruotando i palmi in avanti.",
+      "Termina con le braccia estese sopra la testa e i palmi rivolti verso l'esterno.",
+      "Ruota i palmi verso di te mentre abbassi i pesi alla posizione iniziale."
+    ],
+    "tips": [
+      "Mantieni una rotazione controllata durante tutto il press.",
+      "Mantieni la schiena dritta e il core attivato.",
+      "Evita di usare pesi eccessivamente pesanti finché non padroneggi la coordinazione."
+    ]
+  },
+  "lateralRaise": {
+    "description": "L'esercizio di isolamento chiave per aumentare la larghezza delle spalle.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle anche e tieni i manubri lungo i fianchi.",
+      "Solleva le braccia lateralmente con una leggera flessione dei gomiti fino a che siano all'altezza delle spalle.",
+      "Fai una pausa di un secondo in alto, poi abbassa lentamente i pesi lungo i fianchi."
+    ],
+    "tips": [
+      "Non oscillare i pesi né usare lo slancio.",
+      "Guida il movimento con i gomiti, non con i polsi.",
+      "Immagina di versare acqua da una brocca nella parte alta del movimento."
+    ]
+  },
+  "cableLateralRaise": {
+    "description": "Un'alzata laterale con cavo che fornisce tensione costante sui deltoidi laterali per tutto il movimento.",
+    "instructions": [
+      "Posizionati di lato rispetto a una macchina a cavi con la carrucola nell'impostazione più bassa.",
+      "Afferra la maniglia con la mano più distante e tirala attraverso il corpo, oppure con la mano più vicina dietro la schiena.",
+      "Solleva il braccio di lato fino a portarlo all'altezza della spalla, mantenendo una leggera flessione del gomito.",
+      "Abbassa lentamente l'impugnatura fino alla posizione di partenza."
+    ],
+    "tips": [
+      "Mantieni una postura eretta ed evita di inclinarti allontanandoti dalla macchina.",
+      "Concentrati a guidare con il gomito e a mantenere il movimento controllato.",
+      "Il cavo mantiene tensione anche nella parte bassa della ripetizione, a differenza dei manubri."
+    ]
+  },
+  "frontRaise": {
+    "description": "Colpisce la parte anteriore delle spalle per migliorare definizione e forza.",
+    "instructions": [
+      "Stai con i manubri davanti alle cosce, palme rivolte verso di te.",
+      "Sollevare i pesi in avanti e verso l'alto fino a quando le braccia non sono parallele al pavimento.",
+      "Fai una pausa di un secondo, poi abbassa i pesi controllando il movimento."
+    ],
+    "tips": [
+      "Mantieni il core contratto per evitare che il corpo oscilli.",
+      "Non sollevare i pesi al di sopra del livello delle spalle.",
+      "Può essere eseguito alternando le braccia o con entrambe contemporaneamente."
+    ]
+  },
+  "cableFrontRaise": {
+    "description": "Isola i deltoidi anteriori usando la resistenza del cavo per una tensione fluida e costante.",
+    "instructions": [
+      "Posizionati con la schiena rivolta alla macchina a cavi, con la carrucola impostata alla posizione più bassa.",
+      "Tieni l'impugnatura (o un accessorio per barra) tra le gambe o al tuo fianco.",
+      "Solleva le braccia in avanti e verso l'alto fino a portarle all'altezza delle spalle.",
+      "Abbassati lentamente fino alla posizione di partenza."
+    ],
+    "tips": [
+      "Mantieni il core attivo per evitare che il busto ondeggi.",
+      "Controlla il carico per tutta la gamma di movimento.",
+      "Evita di usare lo slancio per sollevare il peso."
+    ]
+  },
+  "cableRearDeltFly": {
+    "description": "Isola i deltoidi posteriori usando cavi, permettendo un profilo di resistenza costante.",
+    "instructions": [
+      "Posizionati al centro di una macchina crossover con le carrucole all'altezza della testa.",
+      "Incrocia le braccia e afferra la maniglia sinistra con la mano destra e la maniglia destra con la mano sinistra.",
+      "Tira le maniglie verso l'esterno e poi indietro in un arco ampio, contraendo i deltoidi posteriori.",
+      "Torna lentamente alla posizione iniziale mantenendo la tensione."
+    ],
+    "tips": [
+      "Mantieni una leggera flessione dei gomiti per tutta la durata del movimento.",
+      "Concentrati nel tirare con le spalle, non con i muscoli della schiena.",
+      "Stai dritto e mantieni il core contratto."
+    ]
+  },
+  "cableUprightRow": {
+    "description": "Coinvolge spalle e trapezi sollevando un attacco a cavo verticalmente verso il mento.",
+    "instructions": [
+      "Posizionati di fronte a una macchina a cavi con la carrucola impostata alla posizione più bassa e con una barra dritta attaccata.",
+      "Afferra la barra con presa prona, mani a circa la larghezza delle spalle.",
+      "Tira la barra verticalmente verso il mento, guidando con i gomiti.",
+      "Fermati quando il bilanciere è all'altezza del petto e i gomiti sono alti.",
+      "Abbassa lentamente la barra fino alla posizione di partenza."
+    ],
+    "tips": [
+      "Tieni la barra vicino al corpo per tutto il sollevamento.",
+      "Evita di sollevare troppo le spalle; concentrati sui deltoidi.",
+      "Mantieni una postura stabile e eretta."
+    ]
+  },
+  "cableExternalRotation": {
+    "description": "Rinforza la cuffia dei rotatori ruotando il braccio verso l'esterno contro la resistenza del cavo.",
+    "instructions": [
+      "Posizionati di lato rispetto a una macchina a cavi con la carrucola all'altezza del gomito.",
+      "Afferra la maniglia con la mano più lontana, mantenendo il gomito aderente al fianco a 90°.",
+      "Ruota l'avambraccio verso l'esterno, lontano dal corpo, fino a dove è comodo.",
+      "Torna lentamente alla posizione iniziale."
+    ],
+    "tips": [
+      "Posiziona un asciugamano tra il gomito e il fianco per assicurarti che il braccio rimanga aderente.",
+      "Usa un carico molto leggero; si tratta della salute e della stabilità articolare, non del carico massimo.",
+      "Muoviti con controllo e attraverso un'ampiezza di movimento confortevole."
+    ]
+  },
+  "cableInternalRotation": {
+    "description": "Rinforza i rotatori interni della spalla usando una macchina a cavi.",
+    "instructions": [
+      "Posizionati di lato rispetto a una macchina a cavi con la carrucola all'altezza del gomito.",
+      "Afferra la maniglia con la mano più vicina, mantenendo il gomito aderente al fianco a 90°.",
+      "Ruota l'avambraccio verso l'interno, verso il corpo.",
+      "Torna lentamente alla posizione iniziale."
+    ],
+    "tips": [
+      "Tieni il gomito aderente al fianco per tutta la serie.",
+      "Concentrati sulla qualità del movimento più che sul peso.",
+      "Mantieni una postura eretta e stabile."
+    ]
+  },
+  "tricepsDip": {
+    "description": "Un esercizio a corpo libero impegnativo che sviluppa notevole potenza nei tricipiti e nel petto.",
+    "instructions": [
+      "Afferra le parallele e spingiti fino a che le braccia siano completamente estese.",
+      "Abbassa il corpo piegando i gomiti finché le tue braccia superiori non siano almeno parallele al pavimento.",
+      "Ritorna alla posizione iniziale estendendo le braccia.",
+      "Mantieni il busto per lo più eretto per concentrare il lavoro sui tricipiti."
+    ],
+    "tips": [
+      "Evita di sollevare le spalle verso le orecchie.",
+      "Tieni i gomiti aderenti al corpo.",
+      "Se fare le dip con il solo peso corporeo è troppo difficile, usa una macchina per dip assistita o delle bande elastiche."
+    ]
+  },
+  "chestDip": {
+    "description": "Una variante delle dip in cui inclini il busto in avanti per spostare l'enfasi dai tricipiti ai muscoli pettorali.",
+    "instructions": [
+      "Afferra le parallele e spingiti fino alla posizione di partenza.",
+      "Inclina il torso in avanti di circa 45 gradi mentre abbassi il corpo.",
+      "Permetti ai gomiti di aprirsi leggermente durante la discesa.",
+      "Spingi indietro fino alla posizione iniziale mantenendo l'inclinazione in avanti."
+    ],
+    "tips": [
+      "Contrai il petto nella parte alta del movimento.",
+      "Abbassati finché le spalle non siano leggermente sotto i gomiti.",
+      "Controlla la discesa per evitare tensione alle spalle."
+    ]
+  },
+  "tricepsPushdown": {
+    "description": "Un popolare esercizio ai cavi per isolare e sviluppare i tricipiti.",
+    "instructions": [
+      "Fissare una barra o una corda alla puleggia alta della macchina a cavi.",
+      "Afferra l'accessorio e tiralo verso il basso fino a quando i gomiti formano un angolo di 90 gradi.",
+      "Spingi l'accessorio verso il basso fino a che le braccia sono completamente estese, contraendo i tricipiti nella parte bassa.",
+      "Torna lentamente alla posizione iniziale a 90 gradi."
+    ],
+    "tips": [
+      "Tieni i gomiti aderenti al corpo per tutta la serie.",
+      "Evita di usare il peso del tuo corpo per spingere il cavo verso il basso.",
+      "Mantieni una leggera inclinazione in avanti e il core attivo."
+    ]
+  },
+  "overheadTricepsExtension": {
+    "description": "Mira alla testa lunga del tricipite estendendo il peso sopra la testa.",
+    "instructions": [
+      "Siediti o stai in piedi, tenendo un manubrio con entrambe le mani sopra la testa.",
+      "Abbassa il peso dietro la testa piegando i gomiti.",
+      "Estendi le braccia per riportare il peso alla posizione iniziale sopra la testa.",
+      "Mantieni la parte superiore delle braccia immobile durante tutto il movimento."
+    ],
+    "tips": [
+      "Tieni i gomiti rivolti in avanti invece che verso i lati.",
+      "Non lasciare che la parte bassa della schiena si inarchi eccessivamente; mantieni il core contratto.",
+      "Usa un tempo controllato per evitare di colpire la testa o il collo."
+    ]
+  },
+  "cableOverheadTricepsExtension": {
+    "description": "Una versione al cavo dell'estensione tricipiti sopra la testa che mantiene una tensione costante sul capo lungo del tricipite per tutta l'escursione del movimento.",
+    "instructions": [
+      "Fissare una corda al cavo basso o posizionarsi in modo che il cavo passi dietro la testa.",
+      "Mettiti di spalle alla macchina e porta la corda sopra la testa con i gomiti piegati e rivolti in avanti.",
+      "Estendi i gomiti fino a portare le braccia dritte, contraendo i tricipiti in alto.",
+      "Torna lentamente alla posizione iniziale allungata senza lasciare che i gomiti si allarghino eccessivamente."
+    ],
+    "tips": [
+      "Mantieni i gomiti per lo più fermi e lascia muovere soltanto gli avambracci.",
+      "Contrai il core in modo che la parte lombare non si inarchi durante la serie.",
+      "Usa un ritmo fluido e sfrutta l'allungamento nella parte bassa del movimento."
+    ]
+  },
+  "ringDip": {
+    "description": "Una variante avanzata di dip agli anelli che richiede notevole stabilità e forza.",
+    "instructions": [
+      "Sostenetevi agli anelli con le braccia completamente estese.",
+      "Abbassa il corpo in modo controllato, mantenendo gli anelli vicino ai fianchi.",
+      "Spingi indietro fino alla posizione di partenza, concentrandoti sulla stabilità degli anelli.",
+      "Gira leggermente i palmi verso l'esterno in alto per la massima stabilità."
+    ],
+    "tips": [
+      "Mantieni il core estremamente contratto per ridurre al minimo le oscillazioni.",
+      "Inizia con tenute agli anelli per sviluppare la stabilità necessaria prima di provare ripetizioni complete.",
+      "Assicurati che gli anelli siano a un'altezza adeguata alla tua escursione di movimento."
+    ]
+  },
+  "pullUp": {
+    "description": "Un movimento a corpo libero di livello avanzato per costruire una schiena ampia e potente e braccia forti.",
+    "instructions": [
+      "Afferra la barra con i palmi rivolti verso l'esterno, leggermente più larghi della larghezza delle spalle.",
+      "Sospenditi con le braccia completamente estese e il core attivo.",
+      "Avvicina il petto alla sbarra spingendo i gomiti verso il basso in direzione dei fianchi.",
+      "Abbassati di nuovo alla posizione di partenza con controllo."
+    ],
+    "tips": [
+      "Concentrati nel tirare con i muscoli della schiena piuttosto che solo con le braccia.",
+      "Evita di oscillare le gambe o usare lo slancio (kipping).",
+      "Se non riesci a fare una trazione completa, inizia con varianti assistite o negative."
+    ]
+  },
+  "chinUp": {
+    "description": "Una variante della trazione con i palmi rivolti verso di te, che enfatizza i bicipiti e la porzione inferiore dei dorsali.",
+    "instructions": [
+      "Afferra la barra con i palmi rivolti verso di te, a circa la larghezza delle spalle.",
+      "Sospenditi con le braccia completamente estese.",
+      "Porta il mento sopra la sbarra spingendo i gomiti verso il basso.",
+      "Abbassati di nuovo alla posizione di partenza con controllo."
+    ],
+    "tips": [
+      "Le trazioni con presa supina generalmente coinvolgono più i bicipiti e il petto rispetto alle trazioni con presa prona.",
+      "Mantieni il core contratto per evitare che il corpo oscilli.",
+      "Garantisci un'ampia escursione di movimento dalla sospensione totale fino al mento sopra la barra."
+    ]
+  },
+  "latPulldown": {
+    "description": "Un esercizio su macchina che ti permette di sviluppare la forza di trazione verticale in modo controllato.",
+    "instructions": [
+      "Siediti nella macchina e regola i cuscinetti per le ginocchia in modo da essere tenuto saldamente.",
+      "Afferra la barra più larga della larghezza delle spalle e inclina leggermente il busto all'indietro.",
+      "Tira la barra verso la parte superiore del petto, concentrandoti sul serramento delle scapole.",
+      "Riporta lentamente la barra alla posizione di partenza."
+    ],
+    "tips": [
+      "Non tirare la barra dietro al collo; tirala verso la parte superiore del petto.",
+      "Concentrati a guidare con i gomiti.",
+      "Controlla il carico nella fase di salita per mantenere la tensione nei dorsali."
+    ]
+  },
+  "cableLatPushdown": {
+    "description": "Un esercizio in piedi al cavo che allena i dorsali tramite estensione della spalla, mantenendo le braccia quasi dritte.",
+    "instructions": [
+      "Fissa una barra dritta o una corda alla puleggia alta e posizionati di fronte alla macchina.",
+      "Tieni l'attacco con una leggera flessione dei gomiti, fai un passo indietro e inclina leggermente il busto in avanti dalle anche.",
+      "Mantenendo le braccia quasi dritte, tira l'attacco verso le cosce spingendo le braccia superiori verso il basso e indietro.",
+      "Fai una breve pausa, poi torna controllando la posizione iniziale senza sollevare le spalle."
+    ],
+    "tips": [
+      "Mantieni una piccola piega fissa ai gomiti in modo che siano i dorsali, non i tricipiti, a lavorare.",
+      "Mantieni il petto alto ed evita di oscillare il busto per muovere il carico.",
+      "Usa un range controllato che ti permetta di sentire i dorsali allungarsi in alto e contrarsi vicino alle cosce."
+    ]
+  },
+  "seatedCableRow": {
+    "description": "Mira allo spessore della schiena tirando i cavi verso il busto da seduti.",
+    "instructions": [
+      "Siediti con i piedi sulle pedane e le ginocchia leggermente piegate.",
+      "Afferra l'impugnatura e siediti dritto con le braccia distese.",
+      "Tira la maniglia verso le coste inferiori, stringendo le scapole insieme.",
+      "Torna lentamente alla posizione di partenza senza far sbattere la pila di pesi."
+    ],
+    "tips": [
+      "Mantieni la schiena dritta ed evita di oscillare il busto avanti e indietro.",
+      "Concentrati nel tirare con i gomiti piuttosto che con le mani.",
+      "Mantieni il core stabile per tutta la durata del movimento."
+    ]
+  },
+  "seatedMachineRow": {
+    "description": "Un rematore in macchina con appoggio sul petto che isola i muscoli della schiena proteggendo la zona lombare.",
+    "instructions": [
+      "Regola seduta e poggiapetto in modo da poter raggiungere comodamente le maniglie con le braccia distese.",
+      "Siediti con il petto contro il cuscino e afferra le maniglie.",
+      "Tira le maniglie verso di te, concentrandoti sulla contrazione della parte centrale della schiena.",
+      "Riporta lentamente le impugnature alla posizione di partenza."
+    ],
+    "tips": [
+      "Tieni il petto premuto saldamente contro il cuscinetto per isolare la schiena.",
+      "Concentrati a stringere le scapole nel punto di massima contrazione.",
+      "Evita di alzare le spalle."
+    ]
+  },
+  "barbellBentOverRow": {
+    "description": "Un potente movimento multiarticolare che costruisce spessore dorsale e forza complessiva della parte superiore del corpo.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle spalle e tieni un bilanciere con presa prona.",
+      "Inclinati dalle anche e piega leggermente le ginocchia, mantenendo la schiena dritta.",
+      "Tira il bilanciere verso le coste inferiori, mantenendo i gomiti vicino al corpo.",
+      "Riporta la barra alla posizione di partenza con controllo."
+    ],
+    "tips": [
+      "Mantieni la colonna neutra ed evita di arrotondare la schiena.",
+      "Mantieni il core attivo per sostenere la zona lombare.",
+      "Non usare lo slancio per 'barare' sollevando il peso."
+    ]
+  },
+  "dumbbellBentOverRow": {
+    "description": "Piegandoti in avanti e tirando i manubri verso la vita, lavori i muscoli della schiena con un arco di movimento più ampio.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle spalle e tieni un manubrio in ciascuna mano.",
+      "Inclinati dalle anche finché il busto non è quasi parallelo al pavimento.",
+      "Tira i manubri verso i fianchi, stringendo le scapole.",
+      "Abbassa i manubri di nuovo con controllo."
+    ],
+    "tips": [
+      "Mantieni la schiena piatta e il core impegnato per tutta la durata.",
+      "Concentrati nel tirare con i gomiti.",
+      "I manubri consentono a ciascun lato della schiena di lavorare in modo indipendente."
+    ]
+  },
+  "smithMachineBentOverRow": {
+    "description": "Una variante di rematore guidata che consente carichi elevati con focus sulla contrazione della parte centrale della schiena.",
+    "instructions": [
+      "Posizionati con il busto piegato sopra la barra della macchina Smith.",
+      "Afferrate la barra e sganciatela.",
+      "Tira la barra verso le coste inferiori, mantenendo la schiena dritta.",
+      "Abbassa di nuovo il bilanciere e ripeti."
+    ],
+    "tips": [
+      "Mantieni una posizione a cerniera stabile per tutta la serie.",
+      "Il percorso fisso aiuta a isolare i muscoli bersaglio.",
+      "Regola la distanza dalla barra per maggiore comfort."
+    ]
+  },
+  "singleArmDumbbellRow": {
+    "description": "Consente un range di movimento più ampio e aiuta a correggere gli squilibri muscolari nella schiena.",
+    "instructions": [
+      "Appoggia un ginocchio e una mano su una panca per supporto, mantenendo la schiena dritta.",
+      "Tieni un manubrio nell'altra mano con il braccio esteso verso il pavimento.",
+      "Tira il manubrio verso l'anca, mantenendo il gomito vicino al fianco.",
+      "Abbassa lentamente il manubrio fino alla posizione di partenza."
+    ],
+    "tips": [
+      "Concentrati nel tirare con la schiena e la scapola, non solo con il braccio.",
+      "Mantieni il busto stabile ed evita di ruotare il corpo mentre tiri.",
+      "Mantieni il collo in posizione neutra."
+    ]
+  },
+  "facePull": {
+    "description": "Essenziale per la salute della spalla, mirato ai deltoidi posteriori e ai muscoli della parte superiore della schiena.",
+    "instructions": [
+      "Fissare una corda a una puleggia del cavo all'altezza del petto superiore o degli occhi.",
+      "Afferra le estremità della corda con i pollici rivolti all'indietro.",
+      "Tira la corda verso la fronte, allontanando le estremità man mano che si avvicina al viso.",
+      "Concentrati a contrarre i deltoidi posteriori e la parte centrale della schiena alla fine del movimento."
+    ],
+    "tips": [
+      "Tieni i gomiti alti e rivolti verso l'esterno.",
+      "Evita di usare la parte bassa della schiena per tirare; mantieniti eretto e stabile.",
+      "Usa pesi più leggeri e concentrati sulla qualità della contrazione."
+    ]
+  },
+  "rearDeltFly": {
+    "description": "Isola la parte posteriore delle spalle per contribuire a un fisico equilibrato.",
+    "instructions": [
+      "Siediti sul bordo di una panca o di un supporto e piegati in avanti dalle anche, mantenendo la schiena dritta.",
+      "Tieni i manubri con i palmi rivolti l'uno verso l'altro e le braccia estese verso il pavimento.",
+      "Solleva i pesi lateralmente finché le braccia non sono all'altezza delle spalle.",
+      "Abbassa lentamente i pesi fino alla posizione di partenza."
+    ],
+    "tips": [
+      "Concentrati a usare il deltoide posteriore, non i trapezi.",
+      "Mantieni una leggera flessione dei gomiti per tutta la durata del movimento.",
+      "Non oscillare i pesi."
+    ]
+  },
+  "machineRearDeltFly": {
+    "description": "Isola i deltoidi posteriori usando una macchina per risultati controllati ed efficaci.",
+    "instructions": [
+      "Siediti rivolto verso la macchina con il petto ben appoggiato al cuscinetto.",
+      "Afferra le impugnature con le braccia distese davanti a te.",
+      "Tira le impugnature all'indietro in un ampio arco finché le braccia sono allineate con le spalle.",
+      "Contrai i deltoidi posteriori, poi torna lentamente alla posizione di partenza."
+    ],
+    "tips": [
+      "Mantieni il petto contro il cuscinetto per isolare i deltoidi posteriori.",
+      "Concentrati sulla contrazione nella parte posteriore delle spalle.",
+      "Mantieni un tempo costante e controllato."
+    ]
+  },
+  "bicepsCurl": {
+    "description": "L'esercizio di isolamento classico per costruire e definire i bicipiti.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle anche e tieni i manubri lungo i fianchi con i palmi rivolti in avanti.",
+      "Solleva i pesi verso le spalle flettendo i gomiti.",
+      "Contrai i bicipiti in cima, poi abbassa lentamente i pesi.",
+      "Mantieni la parte superiore delle braccia immobile durante tutto il movimento."
+    ],
+    "tips": [
+      "Evita di oscillare il corpo o usare lo slancio per sollevare i pesi.",
+      "Tieni i gomiti vicino al busto.",
+      "Gamma completa di movimento: estendi completamente le braccia nella parte bassa."
+    ]
+  },
+  "cableCurl": {
+    "description": "Un curl ai cavi in piedi che mantiene la tensione costante sui bicipiti dall'inizio alla fine di ogni ripetizione.",
+    "instructions": [
+      "Fissare una barra dritta o tipo EZ alla puleggia bassa e posizionarsi di fronte alla macchina.",
+      "Afferra la maniglia con i palmi rivolti verso l'alto e tieni i gomiti vicino ai fianchi.",
+      "Avvicina la maniglia alle spalle mantenendo le braccia superiori quasi ferme.",
+      "Abbassa il peso in modo controllato fino a quando i gomiti sono di nuovo completamente estesi."
+    ],
+    "tips": [
+      "Non lasciare che le spalle rotolino in avanti mentre il peso scende.",
+      "Tieni il busto fermo ed evita di inclinarti indietro per spostare il carico.",
+      "Fai una breve pausa vicino al punto più alto per massimizzare la contrazione del bicipite."
+    ]
+  },
+  "bayesianCableCurl": {
+    "description": "Un curl al cavo dietro il corpo che allunga il bicipite all'inizio della ripetizione e enfatizza la posizione di allungamento.",
+    "instructions": [
+      "Fissare una impugnatura singola alla puleggia bassa e posizionarsi con la schiena alla macchina, tenendo l'impugnatura con una mano dietro l'anca.",
+      "Fai un passo in avanti finché il cavo non tira il braccio che stai usando leggermente dietro il busto.",
+      "Avvicina la maniglia alla spalla evitando che il gomito scivoli troppo in avanti.",
+      "Riporta la schiena nella posizione iniziale allungata con controllo prima di ripetere."
+    ],
+    "tips": [
+      "Posizionati a una distanza sufficiente dalla macchina per sentire un allungamento del bicipite in fondo.",
+      "Tieni il petto alto ed evita di ruotare il busto mentre esegui il curl.",
+      "Usa carichi moderati e controllo totale per sfruttare al meglio l'allungamento."
+    ]
+  },
+  "hammerCurl": {
+    "description": "Un curl a presa neutra che coinvolge bicipite e brachiale per braccia più grosse.",
+    "instructions": [
+      "Stai con i manubri ai lati, palme rivolte verso il busto (presa neutra).",
+      "Solleva i pesi mantenendo la presa neutra.",
+      "Contrai in cima e abbassa di nuovo con controllo.",
+      "Tieni i gomiti stretti lungo i fianchi."
+    ],
+    "tips": [
+      "Concentrati sulla contrazione nei bicipiti e negli avambracci.",
+      "Mantieni una postura eretta ed evita di dondolarti.",
+      "Può essere eseguito alternando le braccia o con entrambe contemporaneamente."
+    ]
+  },
+  "suspensionRow": {
+    "description": "Utilizza un trainer in sospensione per eseguire rematori a corpo libero, permettendo di regolare facilmente la difficoltà tramite l'angolo del corpo.",
+    "instructions": [
+      "Afferra le impugnature e inclina il corpo all'indietro con le braccia distese e i piedi in avanti.",
+      "Mantieni una linea retta dalla testa ai talloni.",
+      "Avvicina il petto alle maniglie spingendo i gomiti indietro.",
+      "Abbassati di nuovo alla posizione di partenza con controllo."
+    ],
+    "tips": [
+      "Regola la difficoltà cambiando la posizione dei piedi (più vicini al punto di ancoraggio è più difficile).",
+      "Attiva il core e i glutei per evitare che i fianchi cedano.",
+      "Concentrati su un movimento fluido e controllato."
+    ]
+  },
+  "landmineRow": {
+    "description": "Un esercizio dorsale potente eseguito ancorando un'estremità di un bilanciere e tirando l'estremità caricata verso il torace.",
+    "instructions": [
+      "Fissare un'estremità di un bilanciere in un attacco landmine o in un angolo del pavimento.",
+      "Carica i dischi di peso sull'altra estremità e mettiti a cavalcioni sulla barra, con la schiena rivolta verso l'ancoraggio.",
+      "Inclinati dalle anche e piega leggermente le ginocchia, mantenendo la schiena piatta.",
+      "Afferra la barra (usa un'impugnatura a V se disponibile) e tira l'estremità zavorrata verso le costole inferiori.",
+      "Abbassa il peso di nuovo con controllo, mantenendo la schiena dritta."
+    ],
+    "tips": [
+      "Mantieni il core contratto per tutta la durata del movimento per proteggere la parte lombare.",
+      "Concentrati nel tirare con i gomiti e nel stringere le scapole.",
+      "Mantieni una posizione di inclinazione costante; evita di 'rimbalzare' il peso verso l'alto."
+    ]
+  },
+  "plank": {
+    "description": "Un esercizio fondamentale per il core che sviluppa forza isometrica e stabilità in tutta la zona centrale.",
+    "instructions": [
+      "Appoggia gli avambracci sul pavimento, i gomiti allineati sotto le spalle.",
+      "Estendi le gambe dietro di te e bilanciati sulle punte dei piedi.",
+      "Mantieni il corpo in linea retta dalla testa ai talloni.",
+      "Contrai il core e mantieni la posizione."
+    ],
+    "tips": [
+      "Evita che i fianchi si abbassino o si sollevino troppo in alto.",
+      "Mantieni una posizione neutra del collo; guarda verso il pavimento.",
+      "Respira con regolarità per tutta la durata della tenuta."
+    ]
+  },
+  "sidePlank": {
+    "description": "Si concentra sugli obliqui e sulla stabilità laterale del core per migliorare l'equilibrio e prevenire il mal di schiena.",
+    "instructions": [
+      "Sdraiati sul fianco con le gambe dritte e i piedi uno sopra l'altro.",
+      "Sostieni la parte superiore del corpo sull'avambraccio, con il gomito direttamente sotto la spalla.",
+      "Solleva i fianchi fino a quando il corpo forma una linea retta dalla testa ai piedi.",
+      "Mantieni la posizione mantenendo il core attivato e i fianchi allineati."
+    ],
+    "tips": [
+      "Non lasciare che i fianchi scendano verso il pavimento.",
+      "Mantieni il collo in posizione neutra, guardando dritto in avanti.",
+      "Per una variante più facile, esegui il plank con le ginocchia a terra."
+    ]
+  },
+  "deadBug": {
+    "description": "Un modo sicuro ed efficace per sviluppare la stabilità del core e la coordinazione senza sforzare la schiena.",
+    "instructions": [
+      "Sdraiati sulla schiena con le braccia distese verso il soffitto e le ginocchia piegate a 90 gradi (posizione tabletop).",
+      "Abbassa lentamente il braccio destro dietro la testa mentre contemporaneamente estendi la gamba sinistra verso il pavimento.",
+      "Tieni la parte bassa della schiena saldamente a contatto con il pavimento per tutta la durata del movimento.",
+      "Torna alla posizione di partenza e ripeti con il braccio e la gamba opposti."
+    ],
+    "tips": [
+      "La chiave è mantenere la schiena piatta; se la schiena si inarca, non abbassare la gamba così tanto.",
+      "Muoviti lentamente e con controllo.",
+      "Espira mentre estendi gli arti."
+    ]
+  },
+  "birdDog": {
+    "description": "Migliora l'equilibrio e la stabilità spinale coinvolgendo simultaneamente core, glutei e spalle.",
+    "instructions": [
+      "Inizia a quattro zampe con le mani sotto le spalle e le ginocchia sotto i fianchi.",
+      "Estendi lentamente il braccio destro in avanti e la gamba sinistra indietro fino a quando entrambi sono paralleli al pavimento.",
+      "Tieni i fianchi allineati e il core attivo per evitare che la schiena si inarchi.",
+      "Mantieni per un secondo, poi torna alla posizione iniziale e cambia lato."
+    ],
+    "tips": [
+      "Immagina che ci sia un bicchiere d'acqua sulla tua schiena che non vuoi rovesciare.",
+      "Non sollevare troppo il braccio o la gamba; concentrati sulla lunghezza più che sull'altezza.",
+      "Mantieni lo sguardo verso il pavimento per mantenere il collo neutro."
+    ]
+  },
+  "mountainClimber": {
+    "description": "Un esercizio dinamico che coinvolge il core e al contempo rappresenta una sfida cardiovascolare significativa.",
+    "instructions": [
+      "Inizia in posizione plank alta con le mani sotto le spalle e il corpo in linea retta.",
+      "Porta un ginocchio verso il petto, poi cambia rapidamente gamba, come se corressi sul posto in posizione plank.",
+      "Mantieni i fianchi bassi e il core contratto.",
+      "Mantieni un ritmo costante e rapido."
+    ],
+    "tips": [
+      "Evita che i fianchi rimbalzino su e giù.",
+      "Concentrati a spingere le ginocchia direttamente in avanti.",
+      "Mantieni il peso centrato sopra le mani."
+    ]
+  },
+  "russianTwist": {
+    "description": "Coinvolge gli obliqui con un movimento di rotazione che migliora la potenza e la definizione del core.",
+    "instructions": [
+      "Siediti a terra con le ginocchia piegate e i piedi leggermente sollevati.",
+      "Inclina leggermente il busto all'indietro, mantenendo la schiena dritta e il core attivo.",
+      "Ruota il busto da un lato, portando le mani verso il pavimento accanto all'anca.",
+      "Ruota di nuovo verso l'altro lato in modo controllato."
+    ],
+    "tips": [
+      "Segui le tue mani con gli occhi per assicurarti che tutto il busto stia ruotando.",
+      "Tieni i piedi uniti e il più fermi possibile.",
+      "Per una sfida in più, tieni un peso o una palla medica."
+    ]
+  },
+  "bicycleCrunch": {
+    "description": "Un ottimo esercizio per il core che coinvolge gli addominali superiori, inferiori e gli obliqui.",
+    "instructions": [
+      "Sdraiati sulla schiena con le mani dietro la testa e le ginocchia in posizione tabletop.",
+      "Avvicina il gomito destro al ginocchio sinistro mentre estendi la gamba destra.",
+      "Cambia lato portando il gomito sinistro verso il ginocchio destro e estendendo la gamba sinistra.",
+      "Continua ad alternare i lati con un movimento di pedalata."
+    ],
+    "tips": [
+      "Concentrati a ruotare il busto invece di limitarti a tirare i gomiti.",
+      "Tieni la parte bassa della schiena premuta contro il pavimento.",
+      "Muoviti con controllo piuttosto che con velocità per un migliore reclutamento muscolare."
+    ]
+  },
+  "hangingLegRaise": {
+    "description": "Un esercizio avanzato per il core che mira specificamente agli addominali inferiori e migliora la forza di presa.",
+    "instructions": [
+      "Appendi a una sbarra per trazioni con le braccia completamente estese e una presa alla larghezza delle spalle.",
+      "Tieni le gambe dritte (o leggermente piegate) e sollevale fino a quando non siano parallele al pavimento.",
+      "Riporta le gambe verso il basso lentamente e con controllo.",
+      "Evita di oscillare il corpo per prendere slancio."
+    ],
+    "tips": [
+      "Contrai il core e i dorsali per stabilizzare il corpo.",
+      "Concentrati sul 'ribaltamento' del bacino per attivare gli addominali bassi.",
+      "Se i sollevamenti delle gambe completi sono troppo difficili, inizia con sollevamenti delle ginocchia da sospesi."
+    ]
+  },
+  "lyingLegRaise": {
+    "description": "Un esercizio per il core a terra che allena gli addominali a controllare il bacino mentre le gambe si muovono in flessione dell'anca.",
+    "instructions": [
+      "Sdraiati sulla schiena con le braccia lungo i fianchi e le gambe distese.",
+      "Contrai gli addominali e premi delicatamente la parte lombare contro il pavimento.",
+      "Solleva entrambe le gambe insieme fino a che non sono quasi verticali, mantenendole dritte o leggermente piegate se necessario.",
+      "Abbassa le gambe lentamente soltanto fino a dove puoi senza che la parte bassa della schiena si stacchi dal pavimento."
+    ],
+    "tips": [
+      "Non inseguire l'ampiezza di movimento; interrompi la discesa non appena la parte bassa della schiena comincia a sollevarsi.",
+      "Piega le ginocchia o esegui tocchi alternati con i talloni per rendere l'esercizio più semplice.",
+      "Muoviti lentamente e evita di oscillare le gambe in modo che siano gli addominali, non l'inerzia, a controllare il movimento."
+    ]
+  },
+  "cableWoodchop": {
+    "description": "Un movimento rotazionale funzionale che sviluppa la potenza del core e coinvolge gli obliqui utilizzando la resistenza del cavo.",
+    "instructions": [
+      "Posizionati di lato rispetto a una macchina a cavi con la maniglia impostata in posizione alta o bassa.",
+      "Afferra la maniglia con entrambe le mani e allontanati dalla macchina.",
+      "Tira la maniglia attraverso il corpo e verso il basso (o verso l'alto) in un movimento diagonale tipo tagliare legna, ruotando il busto.",
+      "Torna lentamente alla posizione iniziale."
+    ],
+    "tips": [
+      "Mantieni le braccia per lo più dritte e ruota dal tronco.",
+      "Ruota il piede posteriore mentre ruoti per proteggere le ginocchia.",
+      "Mantieni una base stabile con i piedi alla larghezza delle spalle."
+    ]
+  },
+  "burpee": {
+    "description": "L'esercizio totale per eccellenza per bruciare grassi e sviluppare potenza esplosiva e resistenza.",
+    "instructions": [
+      "Inizia in posizione eretta.",
+      "Scendi in uno squat e appoggia le mani a terra.",
+      "Salta indietro con i piedi fino alla posizione di plank e esegui una flessione.",
+      "Riporta i piedi indietro verso le mani e salta esplosivamente in aria con le braccia sopra la testa."
+    ],
+    "tips": [
+      "Mantieni il core contratto per tutta la durata del movimento.",
+      "Atterra dolcemente sui piedi dopo il salto.",
+      "Può essere modificato facendo un passo indietro invece di saltare per ridurre l'impatto."
+    ]
+  },
+  "jumpingJacks": {
+    "description": "Un classico esercizio di riscaldamento e condizionamento per tutto il corpo che migliora coordinazione e salute cardiovascolare.",
+    "instructions": [
+      "Posiziona i piedi uniti e le braccia lungo i fianchi.",
+      "Salta in aria aprendo le gambe alla larghezza delle spalle e oscillando le braccia sopra la testa.",
+      "Salta di nuovo per tornare alla posizione iniziale.",
+      "Ripeti in modo ritmico."
+    ],
+    "tips": [
+      "Atterra dolcemente sulle punte dei piedi.",
+      "Mantieni le ginocchia leggermente piegate.",
+      "Mantieni il core attivo per tutta la durata del movimento."
+    ]
+  },
+  "highKnees": {
+    "description": "Un esercizio cardio ad alta intensità che rafforza gambe e core mentre migliora la tecnica di corsa.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle anche.",
+      "Porta il ginocchio destro verso il petto il più in alto possibile mentre muovi il braccio sinistro.",
+      "Cambia rapidamente gamba, sollevando il ginocchio sinistro e muovendo energicamente il braccio destro.",
+      "Continua ad alternare a un ritmo veloce, restando sulla pianta dei piedi."
+    ],
+    "tips": [
+      "Concentrati a sollevare le ginocchia almeno all'altezza delle anche.",
+      "Mantieni il busto eretto; non inclinarti all'indietro.",
+      "Muovi le braccia per aiutare a mantenere lo slancio."
+    ]
+  },
+  "squatJump": {
+    "description": "Combina uno squat tradizionale con un salto esplosivo per sviluppare potenza e aumentare la frequenza cardiaca.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle spalle.",
+      "Abbassati in posizione di squat finché le cosce non sono parallele al pavimento.",
+      "Salta esplosivamente in aria, raggiungendo l'altezza massima possibile.",
+      "Atterra dolcemente e scendi immediatamente nello squat successivo."
+    ],
+    "tips": [
+      "Assorbi l'impatto atterrando sulle punte dei piedi e rotolando fino ai talloni.",
+      "Assicurati che le ginocchia non crollino verso l'interno durante il distacco o l'atterraggio.",
+      "Oscilla le braccia per aiutare a generare potenza verso l'alto."
+    ]
+  },
+  "butterflySitUp": {
+    "description": "Un classico esercizio core di Freeletics che utilizza la posizione a farfalla delle gambe per ridurre al minimo il coinvolgimento dei flessori dell'anca.",
+    "instructions": [
+      "Sdraiati sulla schiena con le piante dei piedi unite e le ginocchia rivolte verso l'esterno.",
+      "Estendi le braccia sopra la testa e tocca il pavimento dietro di te.",
+      "Contrai il core e alzati completamente, toccando il pavimento davanti alle dita dei piedi.",
+      "Abbassati di nuovo con controllo."
+    ],
+    "tips": [
+      "Usa le braccia per darti slancio se necessario, ma concentrati sull'attivazione degli addominali.",
+      "Tieni la parte bassa della schiena premuta contro il pavimento durante la fase iniziale del sit-up.",
+      "Espira mentre ti sollevi."
+    ]
+  },
+  "sprawl": {
+    "description": "Un movimento 'down-and-up' simile a un burpee ma senza la flessione e il salto, focalizzato sulla velocità e sul condizionamento metabolico.",
+    "instructions": [
+      "Da una posizione in piedi, scendi in accovacciamento e appoggia le mani a terra.",
+      "Salta indietro con i piedi fino a tornare in posizione plank alta.",
+      "Salta immediatamente con i piedi all'indietro verso le tue mani.",
+      "Torna in posizione eretta il più rapidamente possibile."
+    ],
+    "tips": [
+      "Mantieni il core contratto per evitare che i fianchi si abbassino nella posizione di plank.",
+      "Concentrati sulle transizioni rapide tra la posizione in piedi e la plank.",
+      "Mantieni un ritmo costante."
+    ]
+  },
+  "pikePushUp": {
+    "description": "Una variante della flessione a corpo libero eseguita in posizione pike per mirare le spalle e la parte superiore del petto.",
+    "instructions": [
+      "Inizia in posizione plank alta, poi solleva i fianchi finché il corpo non forma una V rovesciata.",
+      "Mantieni gambe e braccia dritte, con la testa infilata tra le braccia.",
+      "Abbassa la sommità della testa verso il pavimento piegando i gomiti.",
+      "Spingi verso l'alto fino a tornare nella posizione iniziale a pike."
+    ],
+    "tips": [
+      "Più i piedi sono vicini alle mani, più l'esercizio diventa difficile.",
+      "Mantieni il core attivo e mantieni la schiena dritta.",
+      "Concentrati nel spingere con le spalle."
+    ]
+  },
+  "superman": {
+    "description": "Rinforza l'intera catena posteriore, inclusi i lombari, i glutei e i muscoli posteriori della coscia.",
+    "instructions": [
+      "Sdraiati a pancia in giù a terra con le braccia distese sopra la testa e le gambe dritte.",
+      "Solleva simultaneamente le braccia, il petto e le gambe dal pavimento.",
+      "Mantieni la posizione per un secondo, contraendo i glutei e la parte bassa della schiena.",
+      "Riporta la schiena verso il basso controllando il movimento."
+    ],
+    "tips": [
+      "Non guardare verso l'alto; mantieni il collo in posizione neutra guardando il pavimento.",
+      "Concentrati sulla lunghezza piuttosto che sull'altezza.",
+      "Espira mentre sollevi."
+    ]
+  },
+  "handReleasePushUp": {
+    "description": "Una variante della flessione in cui sollevi le mani da terra nella fase bassa di ogni ripetizione per garantire un pieno range di movimento e sviluppare potenza esplosiva.",
+    "instructions": [
+      "Inizia in posizione plank alta.",
+      "Abbassa il petto fino al pavimento.",
+      "Solleva brevemente entrambe le mani da terra, poi rimettili giù.",
+      "Spingi esplosivamente verso l'alto fino alla posizione iniziale della plank."
+    ],
+    "tips": [
+      "Mantieni il core contratto per evitare il 'snaking' dal pavimento.",
+      "Mantieni il corpo in linea retta dalla testa ai talloni.",
+      "Concentrati nello spingere con l'intera palma della mano."
+    ]
+  },
+  "climber": {
+    "description": "Simile ai mountain climbers ma con i piedi che saltano all'esterno delle mani, enfatizzando la mobilità delle anche e la potenza del core.",
+    "instructions": [
+      "Inizia in posizione plank alta.",
+      "Salta in avanti con il piede destro e posizionalo all'esterno della tua mano destra.",
+      "Cambia le gambe in modo esplosivo: salta portando il piede destro indietro mentre posizioni il piede sinistro all'esterno della mano sinistra.",
+      "Continua ad alternare a un ritmo rapido e ritmico."
+    ],
+    "tips": [
+      "Mantieni i fianchi il più bassi possibile.",
+      "Concentrati su una grande ampiezza di movimento per le gambe.",
+      "Mantieni la parte superiore del corpo forte e stabile."
+    ]
+  },
+  "boxingBagWork": {
+    "description": "Gli intervalli ad alta intensità sul sacco pesante migliorano la resistenza cardiovascolare, la potenza e la coordinazione.",
+    "instructions": [
+      "Mettiti in posizione da boxe con le mani alzate a protezione del viso.",
+      "Esegui vari pugni (jab, cross, gancio, uppercut) contro il sacco pesante.",
+      "Rimani leggero sui piedi e muoviti intorno al sacco.",
+      "Mantieni un'alta intensità per tutta la durata del round."
+    ],
+    "tips": [
+      "Concentrati sulla tecnica di pugno corretta per evitare lesioni al polso.",
+      "Espira a ogni pugno.",
+      "Mantieni il core attivo per maggiore potenza e stabilità."
+    ]
+  },
+  "catCow": {
+    "description": "Un movimento delicato della colonna vertebrale che migliora la flessibilità e allevia la tensione alla schiena.",
+    "instructions": [
+      "Inizia a quattro zampe con le mani sotto le spalle e le ginocchia sotto i fianchi.",
+      "Mucca: Inspira mentre abbassi la pancia verso il pavimento, solleva il petto e guarda verso l'alto.",
+      "Gatto: Espira mentre incurvi la schiena verso il soffitto, rientra il mento e porta l'ombelico verso l'interno.",
+      "Muoviti senza intoppi tra le due posizioni, seguendo il tuo respiro."
+    ],
+    "tips": [
+      "Concentrati sul muovere una vertebra alla volta.",
+      "Esegui i movimenti in modo delicato e entro un range di movimento confortevole.",
+      "Allarga le dita per un migliore supporto."
+    ]
+  },
+  "hipFlexorStretch": {
+    "description": "Allevia la rigidità dei fianchi causata da lunghe ore da seduti o da allenamenti intensi.",
+    "instructions": [
+      "Inginocchiati su un ginocchio, con l'altro piede poggiato a terra davanti a te (posizione semi-inginocchiata).",
+      "Mantieni il busto eretto e spingi delicatamente i fianchi in avanti.",
+      "Contrai il gluteo della gamba inginocchiata per approfondire lo stiramento.",
+      "Mantieni per la durata desiderata e poi cambia gamba."
+    ],
+    "tips": [
+      "Evita di inarcare la parte bassa della schiena; mantieni il core attivo.",
+      "Dovresti sentire l'allungamento nella parte anteriore dell'anca della gamba inginocchiata.",
+      "Mantieni una postura eretta per tutta la durata dell'allungamento."
+    ]
+  },
+  "hamstringStretch": {
+    "description": "Migliora la flessibilità nella parte posteriore delle gambe e aiuta a prevenire il mal di schiena lombare.",
+    "instructions": [
+      "Siediti a terra con una gamba distesa e l'altro piede appoggiato contro l'interno della coscia.",
+      "Inclinati dalle anche e raggiungi le punte dei piedi, mantenendo la schiena piatta.",
+      "Mantieni lo stretching quando senti tensione nella parte posteriore della gamba.",
+      "Ripeti dall'altro lato."
+    ],
+    "tips": [
+      "Non rimbalzare; mantieni un allungamento dolce e stabile.",
+      "Concentrati a raggiungere con il petto invece che con la testa per mantenere la schiena più dritta.",
+      "Respira profondamente e cerca di rilassarti nello stretching."
+    ]
+  },
+  "thoracicRotation": {
+    "description": "Apre la parte superiore della schiena e migliora la mobilità in rotazione per una postura e prestazioni migliori.",
+    "instructions": [
+      "Inizia a quattro zampe o in posizione laterale con le ginocchia piegate.",
+      "Posiziona una mano dietro la testa.",
+      "Ruota il gomito e il busto verso il soffitto, seguendo con gli occhi.",
+      "Torna lentamente alla posizione iniziale."
+    ],
+    "tips": [
+      "Mantieni i fianchi fermi e concentra la rotazione nella parte alta della schiena.",
+      "Espira mentre ruoti verso l'alto.",
+      "Non forzare l'ampiezza di movimento; muoviti entro la tua zona di comfort."
+    ]
+  },
+  "shoulderMobilityFlow": {
+    "description": "Una sequenza di movimenti progettata per migliorare l'ampiezza di movimento e la salute delle articolazioni della spalla.",
+    "instructions": [
+      "Esegui una serie di movimenti controllati delle spalle, come cerchi con le braccia, rotazioni delle spalle e 'wall slides'.",
+      "Esegui ogni movimento lentamente e attraverso l'intera ampiezza di movimento.",
+      "Concentrati a mantenere le spalle rilassate e abbassate, lontane dalle orecchie.",
+      "Mantieni un flusso costante e ritmico."
+    ],
+    "tips": [
+      "Evitare qualsiasi movimento che provochi un dolore acuto.",
+      "Mantieni il core attivo per stabilizzare il busto durante i movimenti delle braccia.",
+      "Ottimo come riscaldamento per qualsiasi allenamento della parte superiore del corpo."
+    ]
+  },
+  "worldGreatestStretch": {
+    "description": "Uno stretching dinamico completo che mira ai fianchi, agli ischiocrurali e alla colonna toracica.",
+    "instructions": [
+      "Inizia in posizione plank alta.",
+      "Porta il piede destro in avanti, all'esterno della tua mano destra.",
+      "Solleva il braccio destro e ruota il busto verso il soffitto, guardando la tua mano.",
+      "Porta il gomito destro verso l'interno del piede destro.",
+      "Spingi indietro in un allungamento dei muscoli posteriori della coscia raddrizzando la gamba anteriore e sollevando le dita del piede.",
+      "Torna in plank e ripeti dall'altro lato."
+    ],
+    "tips": [
+      "Procedi attraverso ogni fase lentamente e con decisione.",
+      "Mantieni la gamba posteriore il più dritta possibile durante la rotazione.",
+      "Concentrati sull'aprire il petto mentre ruoti."
+    ]
+  },
+  "pigeonPose": {
+    "description": "Una posizione yoga efficace per aprire i fianchi e alleviare la tensione nei glutei.",
+    "instructions": [
+      "Da una posizione cane a testa in giù o a quattro zampe, porta il ginocchio destro in avanti verso il tuo polso destro.",
+      "Posiziona la tibia destra a terra, cercando di averla parallela alla parte anteriore del tuo tappetino (o nella posizione che ti risulta più comoda).",
+      "Estendi la gamba sinistra dritta dietro di te.",
+      "Mantieni i fianchi allineati e abbassa lentamente il busto sulla gamba anteriore.",
+      "Mantieni la posizione e respira nell'allungamento, poi cambia lato."
+    ],
+    "tips": [
+      "Non forzare lo stinco a essere parallelo se ti causa dolore al ginocchio.",
+      "Usa un blocco o un cuscino sotto il fianco come supporto se necessario.",
+      "Mantieni il piede anteriore flesso per proteggere il ginocchio."
+    ]
+  },
+  "cobraStretch": {
+    "description": "Un'estensione della schiena delicata che allunga i muscoli addominali e migliora la flessibilità della colonna vertebrale.",
+    "instructions": [
+      "Sdraiati a pancia in giù a terra con le gambe distese e il dorso dei piedi a contatto con il suolo.",
+      "Posiziona le mani sotto le spalle.",
+      "Inspira e lentamente raddrizza le braccia per sollevare il petto dal pavimento.",
+      "Mantieni i fianchi sul pavimento e le spalle lontane dalle orecchie.",
+      "Guarda leggermente verso l'alto e mantieni l'allungamento."
+    ],
+    "tips": [
+      "Non forzare le braccia fino a tenerle completamente distese se ti pizzica la parte bassa della schiena.",
+      "Contrai lievemente i glutei per sostenere la colonna vertebrale.",
+      "Concentrati sull'allungamento della parte anteriore del corpo."
+    ]
+  },
+  "childsPose": {
+    "description": "Una posizione di riposo che allunga delicatamente la schiena, i fianchi e le spalle.",
+    "instructions": [
+      "Mettiti in ginocchio sul pavimento con gli alluci che si toccano e siediti sui talloni.",
+      "Separa le ginocchia di circa la larghezza delle anche.",
+      "Espira e inclina il busto in avanti, appoggiando il torso tra le cosce.",
+      "Estendi le braccia in avanti con i palmi verso il basso o rilassale lungo i fianchi.",
+      "Appoggia la fronte a terra e respira profondamente."
+    ],
+    "tips": [
+      "Allarga le ginocchia ulteriormente, se necessario, per fare più spazio al busto.",
+      "Concentrati a portare il respiro nella parte bassa della schiena.",
+      "Rilassa completamente la mandibola e le spalle."
+    ]
+  },
+  "inchworm": {
+    "description": "Un movimento dinamico che allunga i muscoli posteriori della coscia e migliora la stabilità del core e delle spalle.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle anche.",
+      "Inclinati dalle anche e appoggia le mani a terra (piega leggermente le ginocchia se necessario).",
+      "Porta le mani in avanti fino a raggiungere la posizione di plank alta.",
+      "Fai una breve pausa, poi avvicina i piedi alle mani con piccoli passi mantenendo le gambe il più dritte possibile.",
+      "Torna in posizione eretta e ripeti."
+    ],
+    "tips": [
+      "Mantieni il core contratto per evitare che i fianchi si abbassino durante la plank.",
+      "Mantieni le gambe dritte il più a lungo possibile per massimizzare lo stiramento dei muscoli posteriori della coscia.",
+      "Muoviti con controllo, evitando di affrettarti."
+    ]
+  },
+  "armCircles": {
+    "description": "Un semplice esercizio di mobilità della spalla che riscalda la cuffia dei rotatori e migliora la salute articolare.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle spalle ed estendi le braccia ai lati all'altezza delle spalle.",
+      "Esegui piccoli cerchi controllati con le braccia in direzione anteriore.",
+      "Dopo la durata desiderata, inverti la direzione per eseguire cerchi all'indietro.",
+      "Aumenta gradualmente la dimensione dei cerchi man mano che le spalle si scaldano."
+    ],
+    "tips": [
+      "Tieni le spalle rilassate e abbassate, lontane dalle orecchie.",
+      "Mantieni il busto stabile; non lasciare che il corpo oscilli.",
+      "Respira naturalmente per tutta la durata del movimento."
+    ]
+  },
+  "legSwings": {
+    "description": "Un allungamento dinamico che migliora la mobilità dell'anca e prepara le gambe all'allenamento.",
+    "instructions": [
+      "Stai vicino a un muro o a un oggetto stabile per mantenere l'equilibrio.",
+      "Oscilla una gamba avanti e indietro con un movimento controllato, aumentando l'ampiezza via via.",
+      "Dopo le ripetizioni desiderate, passa a oscillazioni laterali che attraversano il corpo.",
+      "Cambia gamba e ripeti."
+    ],
+    "tips": [
+      "Mantieni il busto eretto e il core attivo; evita un'eccessiva curvatura della schiena.",
+      "Non forzare l'ampiezza di movimento; resta in un allungamento confortevole.",
+      "Mantieni un ritmo ritmico e costante."
+    ]
+  },
+  "wristCircles": {
+    "description": "Migliora la mobilità dell'articolazione del polso e aiuta a prevenire affaticamenti durante gli esercizi della parte superiore del corpo.",
+    "instructions": [
+      "Estendi le braccia davanti a te o tienile rilassate ai lati.",
+      "Ruota i polsi in un movimento circolare, lavorando sull'intera escursione articolare.",
+      "Esegui dei cerchi sia in senso orario che antiorario.",
+      "Puoi anche intrecciare le dita e ruotare i polsi insieme."
+    ],
+    "tips": [
+      "Mantieni il movimento lento e concentrato.",
+      "Rilassa le mani e le dita.",
+      "Particolarmente utile prima di esercizi come le flessioni o la panca piana."
+    ]
+  },
+  "ankleCircles": {
+    "description": "Migliora la mobilità della caviglia e prepara i piedi alle attività in carico.",
+    "instructions": [
+      "Stai in piedi su una gamba (usa il muro per l'equilibrio) oppure siediti con una gamba estesa.",
+      "Ruota la caviglia in un movimento circolare, disegnando il cerchio più grande possibile con le dita dei piedi.",
+      "Esegui dei cerchi in entrambe le direzioni.",
+      "Cambia i piedi e ripeti."
+    ],
+    "tips": [
+      "Concentrati nel muovere solo la caviglia, non tutta la gamba.",
+      "Muoviti lentamente per assicurarti di coinvolgere ogni parte della rotazione.",
+      "Ottimo per migliorare la profondità dello squat e la meccanica della corsa."
+    ]
+  },
+  "deepSquatHold": {
+    "description": "Una tenuta isometrica nella parte bassa di uno squat per migliorare la mobilità di anche, ginocchia e caviglie.",
+    "instructions": [
+      "Posiziona i piedi alla larghezza delle spalle, le punte dei piedi leggermente rivolte verso l'esterno.",
+      "Scendi nel più profondo squat possibile, mantenendo i talloni a terra.",
+      "Appoggia i gomiti sulla parte interna delle ginocchia per spingerle delicatamente verso l'esterno.",
+      "Mantieni il petto il più eretto possibile.",
+      "Mantieni la posizione per la durata desiderata, respirando profondamente."
+    ],
+    "tips": [
+      "Se i tuoi talloni si sollevano, posizionali su una piccola elevazione o aggrappati a un oggetto solido per l'equilibrio.",
+      "Concentrati sul rilassare i fianchi.",
+      "Sposta delicatamente il peso da un lato all'altro per coinvolgere aree diverse."
+    ]
+  },
+  "scapularCircles": {
+    "description": "Migliora la mobilità e la salute della scapola, promuovendo una migliore postura e meccanica della parte superiore del corpo.",
+    "instructions": [
+      "Stai in piedi o siedi con la schiena dritta e le braccia rilassate ai lati.",
+      "Solleva le spalle verso le orecchie (elevazione).",
+      "Tirale indietro, stringendo le scapole insieme (retrazione).",
+      "Abbassale il più possibile (depressione).",
+      "Spingi le scapole in avanti, arrotondando leggermente la parte superiore della schiena (protrazione).",
+      "Trasforma questi movimenti in un movimento circolare, eseguendoli in entrambe le direzioni."
+    ],
+    "tips": [
+      "Mantieni le braccia dritte e ferme; il movimento dovrebbe provenire dalle scapole.",
+      "Immagina di tracciare un cerchio con i punti delle tue spalle.",
+      "Evita di inarcare la parte bassa della schiena."
+    ]
+  },
+  "quadStretch": {
+    "description": "Un classico stretching per la parte anteriore della coscia per migliorare la flessibilità e la salute del ginocchio.",
+    "instructions": [
+      "Stai su una gamba, usando un muro o una sedia per l'equilibrio se necessario.",
+      "Piega l'altro ginocchio e allunga la mano indietro per afferrare il piede o la caviglia con la mano dello stesso lato.",
+      "Tira delicatamente il tallone verso i glutei.",
+      "Mantieni le ginocchia unite e il busto eretto.",
+      "Mantieni la posizione e poi cambia gamba."
+    ],
+    "tips": [
+      "Contrai i glutei della gamba che stai allungando per approfondire l'allungamento del flessore dell'anca.",
+      "Evita di inarcare la parte bassa della schiena.",
+      "Assicurati di stare dritto, senza inclinarti in avanti."
+    ]
+  },
+  "doorwayChestStretch": {
+    "description": "Utilizza un vano porta o telaio per aprire il petto e la parte anteriore delle spalle, contrastando la postura incurvata.",
+    "instructions": [
+      "Posizionati in un vano di porta o all'angolo di una parete.",
+      "Appoggia il/i avambraccio(i) contro il telaio della porta, con il gomito all'altezza della spalla.",
+      "Inclinatevi o fate un passo in avanti fino a sentire un allungamento confortevole al petto.",
+      "Mantieni la posizione, respirando profondamente.",
+      "Puoi regolare l'altezza delle braccia per colpire diverse parti del petto."
+    ],
+    "tips": [
+      "Non inclinarti troppo; l'allungamento deve essere delicato.",
+      "Tieni le spalle basse e lontane dalle orecchie.",
+      "Mantieni il core attivo per evitare di inarcare la zona lombare."
+    ]
+  },
+  "scorpions": {
+    "description": "Un allungamento dinamico per anche, lombari e petto eseguito sdraiati a pancia in giù.",
+    "instructions": [
+      "Sdraiati a pancia in giù a terra con le braccia distese ai lati a forma di 'T'.",
+      "Solleva la gamba destra e portala attraverso il corpo verso la mano sinistra, ruotando i fianchi.",
+      "Cerca di toccare il pavimento con il piede destro mantenendo petto e braccia il più piatti possibile.",
+      "Torna al centro e ripeti con la gamba sinistra."
+    ],
+    "tips": [
+      "Muoviti lentamente e con controllo per proteggere la parte bassa della schiena.",
+      "Concentrati sulla rotazione della colonna vertebrale e sull'apertura delle anche.",
+      "Arriva solo fino a dove è comodo; il tuo piede non deve necessariamente toccare la mano."
+    ]
+  },
+  "threadTheNeedle": {
+    "description": "Una rotazione delicata per la parte alta della schiena e le spalle che allunga anche il collo.",
+    "instructions": [
+      "Inizia a quattro zampe con le mani sotto le spalle e le ginocchia sotto i fianchi.",
+      "Porta il braccio destro sotto il corpo verso sinistra, facendo scivolare il dorso della mano sul pavimento.",
+      "Abbassa la spalla destra e l'orecchio verso il pavimento.",
+      "Mantieni i fianchi allineati e respira verso l'allungamento tra le scapole.",
+      "Mantieni la posizione, poi torna al centro e ripeti dall'altro lato."
+    ],
+    "tips": [
+      "Concentrati sull'allungamento della parte superiore della schiena e della spalla posteriore.",
+      "Usa la mano sinistra per premere delicatamente il pavimento e approfondire la rotazione se ti è comodo.",
+      "Rilassa completamente il collo."
+    ]
+  },
+  "neckCircles": {
+    "description": "Allenta delicatamente le tensioni del collo e migliora l'ampiezza di movimento cervicale.",
+    "instructions": [
+      "Siediti o stai in piedi mantenendo la schiena dritta e le spalle rilassate.",
+      "Abbassa delicatamente il mento verso il petto.",
+      "Inclina lentamente la testa verso una spalla, poi con attenzione verso la nuca e infine verso l'altra spalla.",
+      "Continua il movimento circolare lentamente e con fluidità.",
+      "Inverti la direzione dopo la durata desiderata."
+    ],
+    "tips": [
+      "Evitare movimenti rapidi o scattanti.",
+      "Se avverti un dolore acuto o vertigini, fermati immediatamente.",
+      "Tieni le spalle basse e rilassate per tutta la durata dell'esercizio."
+    ]
+  }
+}

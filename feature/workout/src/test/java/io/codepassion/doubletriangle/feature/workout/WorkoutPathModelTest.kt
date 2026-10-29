@@ -16,6 +16,37 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WorkoutPathModelTest {
+    @Test fun `skipping a superset exercise covers every round and advances past it`() {
+        val block = WorkoutBlockSummary(WorkoutBlockType.Superset, rounds = 3, exercises = listOf(
+            ExerciseSummary("Press", sets = 1, reps = "10", restSeconds = 0),
+            ExerciseSummary("Row", sets = 1, reps = "10", restSeconds = 0),
+        ))
+        val base = PreviewWorkoutRepository.load().workouts.first()
+        val workout = base.copy(blocks = listOf(block), exercises = block.executionExercises())
+        val path = workout.pathBlocks()
+        val skipped = path.first().skippedExecutionIndices(0, wholeBlock = false)
+        assertEquals(setOf(0, 2, 4), skipped)
+        assertEquals(1, nextUnskippedExecutionIndex(0, workout.exercises.size, skipped))
+        assertEquals(3, nextUnskippedExecutionIndex(1, workout.exercises.size, skipped))
+        assertEquals(5, nextUnskippedExecutionIndex(3, workout.exercises.size, skipped))
+        assertEquals(null, nextUnskippedExecutionIndex(5, workout.exercises.size, skipped))
+        assertEquals(1, path.mainExercises().skippedExerciseCount(skipped))
+        assertEquals(2, path.mainExercises().size)
+    }
+
+    @Test fun `imported skip is preserved through expanded rounds when selecting the first exercise`() {
+        val block = WorkoutBlockSummary(WorkoutBlockType.Superset, rounds = 2, exercises = listOf(
+            ExerciseSummary("Press", sets = 1, reps = "10", restSeconds = 0, skippedAt = "2026-10-28T08:00:00Z"),
+            ExerciseSummary("Row", sets = 1, reps = "10", restSeconds = 0),
+        ))
+        val expanded = block.executionExercises()
+        val skipped = expanded.indices.filter { expanded[it].skippedAt != null }.toSet()
+        assertEquals(setOf(0, 2), skipped)
+        assertEquals(1, firstUnskippedExecutionIndex(0, expanded.size, skipped))
+        assertEquals(3, firstUnskippedExecutionIndex(2, expanded.size, skipped))
+        assertEquals(null, firstUnskippedExecutionIndex(4, expanded.size, skipped))
+    }
+
     @Test
     fun `mesocycle start date keeps the iOS month and day metadata`() {
         assertTrue(formatMesocycleStartDate("2026-10-19T00:00:00Z")?.contains("19") == true)

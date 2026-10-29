@@ -14,13 +14,12 @@ internal data class TrainingSessionHistoryEntry(
 
 internal object TrainingSessionHistoryStore {
     private const val KEY = "completed_session_history"
-    private const val MAX_ENTRIES = 180
 
     fun record(preferences: SharedPreferences, durationSeconds: Int, sets: Int, volumeKg: Double, focus: String? = null) {
         val entries = load(preferences)
         val updated = listOf(TrainingSessionHistoryEntry(System.currentTimeMillis(), durationSeconds.coerceAtLeast(0), sets.coerceAtLeast(0), volumeKg.coerceAtLeast(0.0), focus?.trim()?.takeIf(String::isNotBlank))) + entries
         val json = JSONArray().apply {
-            updated.take(MAX_ENTRIES).forEach { entry ->
+            updated.forEach { entry ->
                 put(JSONObject().put("timestamp", entry.timestampMillis).put("duration", entry.durationSeconds).put("sets", entry.sets).put("volumeKg", entry.volumeKg).put("focus", entry.focus ?: JSONObject.NULL))
             }
         }
@@ -32,7 +31,6 @@ internal object TrainingSessionHistoryStore {
         val merged = (load(preferences) + entries)
             .distinctBy { it.timestampMillis }
             .sortedByDescending { it.timestampMillis }
-            .take(MAX_ENTRIES)
         val json = JSONArray().apply {
             merged.forEach { entry ->
                 put(JSONObject().put("timestamp", entry.timestampMillis).put("duration", entry.durationSeconds)

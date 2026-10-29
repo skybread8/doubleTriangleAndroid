@@ -59,7 +59,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.SportsGymnastics
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.MeetingRoom
 import androidx.compose.material.icons.filled.Close
@@ -86,9 +86,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.clip
@@ -121,6 +119,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.core.view.WindowCompat
 import android.graphics.Color as AndroidColor
 import java.util.Locale
+import io.codepassion.doubletriangle.core.model.confirmGeneratedPlan
 import io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.UserSummary
@@ -414,10 +413,7 @@ internal enum class RootDestination(
     val icon: ImageVector,
     val usesCarrotIcon: Boolean = false,
 ) {
-    // iOS uses figure.strengthtraining.traditional here; SportsGymnastics is
-    // the closest filled Material equivalent and avoids the crossed-dumbbell
-    // FitnessCenter glyph in the root dock.
-    Workout(R.string.ios_catalog_7b3abf24fddda1de, Icons.Filled.SportsGymnastics),
+    Workout(R.string.ios_catalog_7b3abf24fddda1de, Icons.Filled.FitnessCenter),
     // iOS uses `carrot.fill`; the Material set has no carrot glyph, so the
     // root dock renders the same silhouette with CarrotFillIcon below.
     Nutrition(R.string.ios_catalog_7ab78b7058dd1c09, Icons.Filled.Restaurant, usesCarrotIcon = true),
@@ -539,8 +535,7 @@ private fun RootBottomNavigation(destinations: List<RootDestination>, selected: 
                 icon = {
                     Box(
                         Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
+                            .size(48.dp)
                             .clip(RoundedCornerShape(24.dp))
                             .background(
                                 if (selected == destination) {
@@ -923,11 +918,13 @@ private fun WildforceRoot(
                 val generatedProfile = initialPlanProfile
                 if (generated != null && generatedProfile != null) {
                     persistOnboardingProfile(generatedProfile)
-                    workoutPlanStore.saveCurrentPlan(generated.first)
+                    val confirmedState = generated.second.confirmGeneratedPlan()
+                    workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(confirmedState))
+                    WorkoutRemoteSync.markResourcesDirty(context, "workout-plans", "workout-days", "workout-blocks", "planned-exercises", "exercise-results")
                     workoutPlanStore.saveProfileSignature(generatedProfile.workoutPlanProfileSignature())
                     WorkoutQuickAccessWidget.refresh(context)
                     AppQuickActions.refresh(context)
-                    generatedWorkoutState = generated.second
+                    generatedWorkoutState = confirmedState
                     profile = generatedProfile
                     initialPlanPreview = null
                     initialPlanProfile = null
@@ -1199,8 +1196,16 @@ private fun WildforceRoot(
             },
             onWorkoutCompleted = { id, duration, sets, volume ->
                 val previouslyCompleted = preferences.getStringSet("completed_workouts", emptySet()).orEmpty()
+                val isNewCompletion = id !in previouslyCompleted
+                val belongsToPlan = restoredState.workouts.any { it.id == id }
+                val completesPlan = belongsToPlan && restoredState.workouts.none { candidate ->
+                    candidate.id != id && !candidate.status.isPlanFinalized
+                }
+                val completesMesocycle = completesPlan &&
+                    restoredState.cycleLength > 1 &&
+                    restoredState.positionInCycle >= restoredState.cycleLength
                 val completed = previouslyCompleted + id
-                val totalCompleted = preferences.getInt("total_completed_workouts", 0) + if (id in previouslyCompleted) 0 else 1
+                val totalCompleted = preferences.getInt("total_completed_workouts", 0) + if (isNewCompletion) 1 else 0
                 preferences.edit().putStringSet("completed_workouts", completed)
                     .putInt("total_completed_workouts", totalCompleted)
                     .putInt("last_workout_duration", duration).putInt("last_workout_sets", sets)
@@ -1214,7 +1219,12 @@ private fun WildforceRoot(
                 runCatching { TrainingSessionHistoryStore.record(preferences, duration, sets, volume, completedWorkout?.focus) }
                 runCatching { WorkoutQuickAccessWidget.refresh(context) }
                 runCatching { AppQuickActions.refresh(context) }
-                WorkoutRemoteSync.recordWorkoutCompletion(context)
+                if (isNewCompletion) {
+                    WorkoutRemoteSync.recordWorkoutCompletion(
+                        context,
+                        xpAward = workoutCompletionXpAward(completesPlan, completesMesocycle),
+                    )
+                }
                 WorkoutRemoteSync.markResourcesDirty(context, "users", "workout-days", "planned-exercises", "exercise-results")
                 coroutineScope.launch {
                     when (val result = WorkoutRemoteSync.synchronize(context, currentProfile, preferences)) {
@@ -1303,6 +1313,10 @@ private fun WildforceRoot(
                 }
             },
             onRegenerateProfile = { updated ->
+                // The explicit profile sync below supersedes the debounced one.
+                // Otherwise its older snapshot could be pushed after generation.
+                scheduledRemoteSync?.cancel()
+                scheduledRemoteSync = null
                 generationError = null
                 pendingGeneratedPlan = null
                 val nextPlanRequested = preferences.getBoolean("generate_next_plan", false)
@@ -1310,9 +1324,20 @@ private fun WildforceRoot(
                 isGenerating = true
                 coroutineScope.launch {
                     runCatching {
+                        // Keep the profile context on the server ahead of generation,
+                        // but do not let unrelated nutrition sync failures block the
+                        // workout plan request.
+                        val profileResources = setOf("users", "training-preferences", "training-locations", "user-app-settings")
+                        WorkoutRemoteSync.markResourcesDirty(context, *profileResources.toTypedArray())
+                        when (val sync = WorkoutRemoteSync.synchronize(context, updated, preferences, resourcesOnly = profileResources)) {
+                            is WorkoutRemoteSync.Outcome.Synchronized -> Unit
+                            WorkoutRemoteSync.Outcome.NoAccount -> error("Inicia sesión para sincronizar el perfil antes de generar el plan.")
+                            WorkoutRemoteSync.Outcome.SubscriptionRequired -> error("Necesitas acceso AI para sincronizar el perfil.")
+                            is WorkoutRemoteSync.Outcome.Failed -> error(sync.message ?: "No se pudo sincronizar el perfil antes de generar el plan.")
+                        }
                         if (nextPlanRequested) {
                             WorkoutPlanGenerator.generateNext(updated, restoredState, context)
-                        } else WorkoutPlanGenerator.generate(updated, context)
+                        } else WorkoutPlanGenerator.generate(updated, context, recreate = true)
                     }
                         .onSuccess { (json, state) ->
                             pendingGeneratedPlan = json to state
@@ -1321,6 +1346,7 @@ private fun WildforceRoot(
                     isGenerating = false
                 }
             },
+            onWorkoutStateChanged = { generatedWorkoutState = it },
             onPlanWorkoutUpdated = { updatedState ->
                 generatedWorkoutState = updatedState
                 workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(updatedState))
@@ -1345,13 +1371,15 @@ private fun WildforceRoot(
                     // paused state from the plan being replaced before its IDs
                     // can be mistaken for the new week's sessions.
                     WorkoutSessionStore.discardPlanSessions(context, baseState.workouts.map(WorkoutDaySummary::id))
-                    workoutPlanStore.replaceCurrentPlan(json)
+                    val confirmedState = state.confirmGeneratedPlan()
+                    WorkoutRemoteSync.queuePreviousPlanArchive(preferences, baseState, confirmedState)
+                    workoutPlanStore.replaceCurrentPlan(WorkoutPlanGenerator.serialize(confirmedState))
                     workoutPlanStore.saveProfileSignature(currentProfile.workoutPlanProfileSignature())
                     WorkoutQuickAccessWidget.refresh(context)
                     AppQuickActions.refresh(context)
                     preferences.edit().remove("completed_workouts").remove("skipped_workouts").apply()
                     WorkoutRemoteSync.markResourcesDirty(context, "workout-plans", "workout-days", "workout-blocks", "planned-exercises", "exercise-results")
-                    generatedWorkoutState = state
+                    generatedWorkoutState = confirmedState
                     pendingGeneratedPlan = null
                     scheduleRemoteSync(currentProfile)
                 },
@@ -1530,6 +1558,7 @@ private fun WildforceApp(
     onResetOnboarding: () -> Unit = {},
     onProfileUpdated: (OnboardingProfile) -> Unit = {},
     onRegenerateProfile: (OnboardingProfile) -> Unit = {},
+    onWorkoutStateChanged: (WorkoutHubState) -> Unit = {},
     onPlanWorkoutUpdated: (WorkoutHubState) -> Unit = {},
     isGeneratingProfilePlan: Boolean = false,
     profileGenerationError: String? = null,
@@ -1587,8 +1616,11 @@ private fun WildforceApp(
     val coroutineScope = rememberCoroutineScope()
     var selected by remember { mutableStateOf(requestedDestination ?: RootDestination.Workout) }
     var bodyProgressOpen by remember { mutableStateOf(false) }
+    var customWorkoutEditorOpen by remember { mutableStateOf(false) }
+    var bookingFlowOpen by remember { mutableStateOf(false) }
     var bookingGyms by remember { mutableStateOf<List<BookingGym>?>(null) }
     var showJoinGymDialog by remember { mutableStateOf(false) }
+    var gymMembershipRevision by remember { mutableStateOf(0) }
     var isAiCoachOfferPresented by remember { mutableStateOf(false) }
     fun refreshSubscriptionAccess() {
         val token = appContext.getSharedPreferences("wildforce_account", 0).getString("token", null) ?: return
@@ -1819,6 +1851,10 @@ private fun WildforceApp(
                 workouts = skippedWorkouts,
             ).withPlanCompletionStatus()
             displayedWorkoutState = skippedState
+            // Keep the in-memory source used by regeneration aligned with the
+            // state currently shown on screen. Without this, recreating a plan
+            // in the same app session could use the pre-skip week snapshot.
+            onWorkoutStateChanged(skippedState)
             if (!workout.id.startsWith("custom-")) workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(skippedState))
             runCatching { WorkoutQuickAccessWidget.refresh(appContext) }
             runCatching { AppQuickActions.refresh(appContext) }
@@ -1838,6 +1874,7 @@ private fun WildforceApp(
                 workouts = displayedWorkoutState.workouts.map { if (it.id == workout.id) it.copy(status = WorkoutStatus.Planned) else it },
             )
             displayedWorkoutState = unskippedState
+            onWorkoutStateChanged(unskippedState)
             if (!workout.id.startsWith("custom-")) workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(unskippedState))
             runCatching { WorkoutQuickAccessWidget.refresh(appContext) }
             runCatching { AppQuickActions.refresh(appContext) }
@@ -1850,6 +1887,7 @@ private fun WildforceApp(
                 workouts = displayedWorkoutState.workouts.map { existing -> if (existing.id == updated.id) updated else existing },
             )
             displayedWorkoutState = updatedState
+            onWorkoutStateChanged(updatedState)
             if (!updated.id.startsWith("custom-")) workoutPlanStore.saveCurrentPlan(WorkoutPlanGenerator.serialize(updatedState))
             workoutDetail = updated
             runCatching { WorkoutQuickAccessWidget.refresh(appContext) }
@@ -1903,7 +1941,7 @@ private fun WildforceApp(
         modifier = Modifier.liquidGlassBackground(),
         backgroundColor = Color.Transparent,
         bottomBar = {
-            if (!bodyProgressOpen) {
+            if (!bodyProgressOpen && !customWorkoutEditorOpen && !bookingFlowOpen) {
                 Column {
                     resumableWorkout?.let { workout ->
                         ActiveWorkoutAccessory(
@@ -1956,6 +1994,7 @@ private fun WildforceApp(
                 openFeedback = openFeedback,
                 onFeedbackOpened = onFeedbackOpened,
                 customAiGenerator = { request -> WorkoutPlanGenerator.generateCustom(profile, request, appContext) },
+                onCustomEditorVisibilityChanged = { customWorkoutEditorOpen = it },
             )
             if (isAiCoachOfferPresented) {
                 SubscriptionPaywall(
@@ -2004,7 +2043,7 @@ private fun WildforceApp(
                 useImperial = profile.metricSystem == MetricSystem.Imperial,
             )
         } else if (selected == RootDestination.Gym) {
-            BookingScreen(overlayPadding)
+            BookingScreen(overlayPadding, onBookingVisibilityChanged = { bookingFlowOpen = it })
         } else if (selected == RootDestination.Profile) {
             ProfileScreen(
                 initial = profile,
@@ -2035,6 +2074,7 @@ private fun WildforceApp(
                 avatarPath = avatarPath,
                 avatarRevision = avatarRevision,
                 onRequestHealthConnect = onRequestHealthConnect,
+                gymMembershipRevision = gymMembershipRevision,
                 onSyncHealthConnect = onSyncHealthConnect,
                 onSave = onProfileUpdated,
                 onRegenerate = onRegenerateProfile,
@@ -2078,6 +2118,7 @@ private fun WildforceApp(
             onDismiss = { showJoinGymDialog = false },
             onJoined = {
                 showJoinGymDialog = false
+                gymMembershipRevision++
                 refreshSubscriptionAccess()
                 onRemoteSyncRequested()
                 coroutineScope.launch { reloadBookingGyms() }
@@ -2168,12 +2209,6 @@ private fun ActiveWorkoutAccessory(
                     painter = painterResource(primaryMuscleDrawable),
                     contentDescription = currentExercise?.let { exerciseDisplayName(it.imageKey, it.name) },
                     modifier = Modifier.size(28.dp),
-                    // iOS uses Color.accentColor for the muscle icon in the
-                    // resume accessory; the warm orange emphasis is reserved
-                    // for workout actions, not this navigation surface.
-                    // Use SrcIn explicitly so the source bitmap can never
-                    // leak its own warm/orange pixels into this accessory.
-                    colorFilter = ColorFilter.tint(WildforceThemeTokens.accent, BlendMode.SrcIn),
                 )
             } else {
                 Icon(

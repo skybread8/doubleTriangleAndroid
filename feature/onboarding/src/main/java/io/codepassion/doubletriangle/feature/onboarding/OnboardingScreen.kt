@@ -35,6 +35,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -82,7 +84,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.SportsGymnastics
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
@@ -457,7 +458,11 @@ fun OnboardingScreen(
         label = "onboarding-step",
     ) { currentStep ->
         when (currentStep) {
-            0 -> CoverStep(onStart = { step = 1 }, onLogin = {
+            0 -> CoverStep(onStart = {
+                gymJoinCode = null
+                gymJoinName = null
+                step = 1
+            }, onLogin = {
                 authenticationRegisters = false
                 registrationCompletesOnboarding = false
                 isLoginVisible = true
@@ -470,6 +475,9 @@ fun OnboardingScreen(
                 onBack = { step = 0 },
                 onContinue = { step = 2 },
             ) {
+                gymJoinName?.let { name ->
+                    Text("Te unes a $name", color = WildforceThemeTokens.accent, fontWeight = FontWeight.SemiBold)
+                }
                 NameStepInput(name = name, onNameChange = { name = it })
             }
             2 -> FormStep(
@@ -571,15 +579,20 @@ fun OnboardingScreen(
             9 -> FormStep(progress=progressFor(9),title="Gimnasio",subtitle="¿En qué entorno vas a entrenar?",canContinue=gymType!=null,onBack={step=previousVisibleStep(9)},onContinue={step=nextVisibleStep(9)}){
                 GymType.entries.forEach{gym->ChoiceOption(gym.title,null,gym.glyph,gymType==gym,{gymType=gym;equipment=gym.defaultEquipment}, onboardingGymTypeIcon(gym));Spacer(Modifier.height(10.dp))}
             }
-            10 -> FormStep(progress=progressFor(10),title="Equipamiento",subtitle="Ajusta el material al que realmente tienes acceso.",canContinue=true,onBack={step=previousVisibleStep(10)},onContinue={step=nextVisibleStep(10)}){
+            10 -> FormStep(progress=progressFor(10),title="Equipamiento",subtitle="Ajusta el material al que realmente tienes acceso.",canContinue=true,onBack={step=previousVisibleStep(10)},onContinue={step=nextVisibleStep(10)}, lazyContent = {
+                item {
                 OutlinedTextField(value=equipmentSearch,onValueChange={equipmentSearch=it},modifier=Modifier.fillMaxWidth(),placeholder={Text("Buscar equipamiento")},singleLine=true,shape=RoundedCornerShape(14.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text("${equipment.size} seleccionados",Modifier.padding(vertical=12.dp),color=WildforceThemeTokens.textSecondary)
                     Text("Deseleccionar todo", Modifier.heightIn(min = 48.dp).clickable { equipment = emptySet() }.padding(horizontal = 8.dp, vertical = 8.dp), color = WildforceThemeTokens.textSecondary)
                 }
+                }
                 Equipment.entries.filter{it.title.contains(equipmentSearch.trim(),ignoreCase=true)}.groupBy { it.category }.forEach { (category, categoryItems) ->
+                    item(key = "category-$category") {
                     Text(category, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 12.dp, bottom = 8.dp))
+                    }
                     categoryItems.chunked(2).forEach{items->
+                    item(key = "equipment-${items.first().storedValue}") {
                     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(10.dp)){
                         items.forEach { item ->
                             Box(Modifier.weight(1f)) {
@@ -591,8 +604,9 @@ fun OnboardingScreen(
                         if(items.size==1)Spacer(Modifier.weight(1f))
                     };Spacer(Modifier.height(10.dp))
                     }
+                    }
                 }
-            }
+            })
             11 -> FormStep(progress=progressFor(11),title="Restricciones",subtitle="Indica cualquier lesión o limitación que debamos tener en cuenta.",canContinue=true,onBack={step=previousVisibleStep(11)},onContinue={step=12}){
                 ChoiceOption("No tengo restricciones","Podrás cambiarlo más adelante.","✓",!hasRestrictions, onClick = {hasRestrictions=false;restrictions=emptySet()})
                 Spacer(Modifier.height(10.dp))
@@ -682,7 +696,7 @@ fun OnboardingScreen(
                     Text("Introduce el código que te ha dado tu gimnasio.")
                     OutlinedTextField(
                         value = gymCodeInput,
-                        onValueChange = { gymCodeInput = it.uppercase().filter(Char::isLetterOrDigit).take(16); gymCodeError = null },
+                        onValueChange = { gymCodeInput = it; gymCodeError = null },
                         label = { Text("Código de gimnasio") },
                         singleLine = true,
                         enabled = !checking,
@@ -692,8 +706,25 @@ fun OnboardingScreen(
                                     gymCodeScanner.startScan()
                                         .addOnSuccessListener { barcode ->
                                             barcode.rawValue?.let { value ->
-                                                gymCodeInput = value.uppercase().filter(Char::isLetterOrDigit).take(16)
-                                                gymCodeError = null
+                                                val parsed = parseGymJoinCode(value)
+                                                if (parsed == null) gymCodeError = "Este QR no contiene un código de gimnasio."
+                                                else {
+                                                    gymCodeInput = parsed
+                                                    gymCodeError = null
+                                                    checking = true
+                                                    gymCodeScope.launch {
+                                                        val result = runCatching { onCheckGymJoinCode(parsed) }.getOrNull()
+                                                        if (result != null) {
+                                                            gymJoinCode = result.code
+                                                            gymJoinName = result.gymName
+                                                            gymType = GymType.BigGym
+                                                            equipment = GymType.BigGym.defaultEquipment
+                                                            isGymCodePickerVisible = false
+                                                            step = 1
+                                                        } else gymCodeError = "No se pudo validar el código."
+                                                        checking = false
+                                                    }
+                                                }
                                             }
                                         }
                                 },
@@ -707,10 +738,10 @@ fun OnboardingScreen(
                 }
             },
             confirmButton = {
-                TextButton(enabled = gymCodeInput.isNotBlank() && !checking, onClick = {
+                TextButton(enabled = parseGymJoinCode(gymCodeInput) != null && !checking, onClick = {
                     checking = true
                     gymCodeScope.launch {
-                        val result = runCatching { onCheckGymJoinCode(gymCodeInput) }.getOrNull()
+                        val result = runCatching { onCheckGymJoinCode(requireNotNull(parseGymJoinCode(gymCodeInput))) }.getOrNull()
                         if (result != null) {
                             gymJoinCode = result.code
                             gymJoinName = result.gymName
@@ -820,15 +851,12 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit, onJoinGym: () ->
                 Brush.verticalGradient(listOf(Color.Transparent, Color.Black, Color.Black)),
             ),
         )
-        // Exact counterpart of iOS's DustParticlesEffectView. iOS does not draw
-        // large decorative orbs here; the cover photo supplies its soft bokeh.
-        // iOS keeps the moving dust in the upper image area; the lower black
-        // section remains clean for the logo, copy and actions.
+        // Keep the subtle dust behind the whole cover, including the actions,
+        // so the lower black area feels connected to the photo above it.
+        // The cover photo still supplies the larger soft bokeh.
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(.58f)
-                .align(Alignment.TopCenter),
+                .fillMaxSize(),
         ) {
             FloatingDustOverlay(timeSeconds = dustTime)
         }
@@ -876,9 +904,9 @@ private fun FloatingDustOverlay(timeSeconds: Float) {
             // Keep the same soft dust language as iOS, but express the radius
             // in dp. The old raw-pixel values were sub-pixel on this emulator,
             // so the animation existed but was effectively invisible.
-            val radius = (1.4f + kotlin.math.abs(kotlin.math.sin(seedValue * 3.7f)) * 2.3f).dp.toPx()
+            val radius = (1.25f + kotlin.math.abs(kotlin.math.sin(seedValue * 3.7f)) * 2.05f).dp.toPx()
             val baseAlpha = 0.32f + kotlin.math.abs(kotlin.math.cos(seedValue * 5.1f)) * 0.36f
-            val riseSpeed = 6f + kotlin.math.abs(kotlin.math.sin(seedValue * 2.9f)) * 14f
+            val riseSpeed = 8f + kotlin.math.abs(kotlin.math.sin(seedValue * 2.9f)) * 18f
             val wrapHeight = size.height + 24.dp.toPx()
             val yRaw = initialY - (timeSeconds * riseSpeed % wrapHeight) - 12.dp.toPx()
             val y = if (yRaw < -12.dp.toPx()) yRaw + wrapHeight else yRaw
@@ -975,7 +1003,8 @@ private fun FormStep(
     buttonTitle: String = "Continuar",
     showBottomAction: Boolean = true,
     showTopBar: Boolean = true,
-    content: @Composable ColumnScope.() -> Unit,
+    lazyContent: (LazyListScope.() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit = {},
 ) {
     // iOS uses the plain semantic background here; frosted treatment is
     // reserved for modal surfaces, not the onboarding canvas.
@@ -999,7 +1028,18 @@ private fun FormStep(
                 }
             }
         }
-        Column(
+        if (lazyContent != null) {
+            LazyColumn(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 16.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 16.dp)) {
+                item {
+                    if (title.isNotBlank()) {
+                        Text(title, style = MaterialTheme.typography.h4.copy(fontSize = 40.sp), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                        if (subtitle.isNotBlank()) Text(subtitle, color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.body1)
+                        Spacer(Modifier.height(34.dp))
+                    }
+                }
+                lazyContent()
+            }
+        } else Column(
             Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 16.dp),
         ) {
             if (title.isNotBlank()) {
@@ -1186,7 +1226,7 @@ private fun onboardingIcon(glyph: String) = when (glyph) {
 
 private fun onboardingGoalIcon(goal: FitnessGoal): ImageVector = when (goal) {
     FitnessGoal.LoseWeight -> Icons.Filled.Sync
-    FitnessGoal.BuildMuscle -> Icons.Filled.SportsGymnastics
+    FitnessGoal.BuildMuscle -> Icons.Filled.FitnessCenter
     FitnessGoal.GainStrength -> Icons.Filled.Bolt
     FitnessGoal.ImproveEndurance -> Icons.Filled.DirectionsRun
     FitnessGoal.ImproveMobility -> Icons.Filled.AccessibilityNew
@@ -1212,9 +1252,9 @@ private fun onboardingTrainingLevelIcon(level: TrainingLevel): ImageVector = whe
 
 private fun onboardingTrainingSplitIcon(split: TrainingSplitPreference): ImageVector = when (split) {
     TrainingSplitPreference.Automatic -> Icons.Filled.AutoAwesome
-    TrainingSplitPreference.FullBody -> Icons.Filled.SportsGymnastics
+    TrainingSplitPreference.FullBody -> Icons.Filled.FitnessCenter
     TrainingSplitPreference.UpperLower -> Icons.Filled.UnfoldMore
-    TrainingSplitPreference.PushPullLegs -> Icons.Filled.SportsGymnastics
+    TrainingSplitPreference.PushPullLegs -> Icons.Filled.FitnessCenter
     TrainingSplitPreference.BodyPartSplit -> Icons.Filled.AccessibilityNew
     TrainingSplitPreference.Custom -> Icons.Filled.Tune
 }

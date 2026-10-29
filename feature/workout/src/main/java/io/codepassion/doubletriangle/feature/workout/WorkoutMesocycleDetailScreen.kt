@@ -235,7 +235,8 @@ private fun MesocycleEntryRow(entry: MesocycleTimelineEntry) {
             else Text(entry.position.toString(), fontWeight = FontWeight.Bold, color = Color.White)
         }
         Column(Modifier.weight(1f).padding(start = 14.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text(if (entry.isProjected) "Próximamente" else entry.state?.planName.orEmpty(), style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            val title = entry.state?.planName ?: "${entry.phase.label} · semana ${entry.position}"
+            Text(title, style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Text("${entry.phase.label} · semana ${entry.phaseWeek}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
             formatMesocycleStartDate(entry.startsOn)?.let { startsOn ->
                 Row(Modifier.padding(top = 5.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -255,8 +256,12 @@ private fun currentMesocycleGroup(current: WorkoutHubState, history: List<Workou
     val cycleLength = current.cycleLength.coerceIn(1, 12)
     val saved = (history.filter { it.mesocycleIndex == current.mesocycleIndex } + current).associateBy { it.positionInCycle.coerceIn(1, cycleLength) }
     val currentPosition = current.positionInCycle.coerceIn(1, cycleLength)
-    return MesocycleTimelineGroup(current.mesocycleIndex, cycleLength, (1..cycleLength).map { position ->
+    val entries = (1..cycleLength).mapNotNull { position ->
         val plan = saved[position]
+        // iOS includes saved plans in the current mesocycle and projects only
+        // the remaining future weeks. Missing past weeks are omitted instead
+        // of appearing as empty timeline rows.
+        if (plan == null && position <= currentPosition) return@mapNotNull null
         val phase = plan?.mesocyclePhase ?: phaseForMesocycleWeek(position, cycleLength)
         MesocycleTimelineEntry(
             state = plan,
@@ -269,7 +274,8 @@ private fun currentMesocycleGroup(current: WorkoutHubState, history: List<Workou
             isCompleted = position < currentPosition && isCompletedPlanStatus(plan?.planStatus),
             startsOn = plan?.planStartsOn,
         )
-    })
+    }
+    return MesocycleTimelineGroup(current.mesocycleIndex, cycleLength, entries)
 }
 
 private fun previousMesocycleGroups(current: WorkoutHubState, history: List<WorkoutHubState>): List<MesocycleTimelineGroup> =

@@ -1,6 +1,11 @@
 package io.codepassion.doubletriangle
 
 import android.content.Context
+import android.icu.text.DateTimePatternGenerator
+import android.icu.text.MeasureFormat
+import android.icu.util.Measure
+import android.icu.util.MeasureUnit
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -39,10 +44,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.model.WildforceApiEnvironment
 import io.codepassion.doubletriangle.feature.onboarding.GymJoinCodeInfo
+import io.codepassion.doubletriangle.feature.onboarding.parseGymJoinCode
 import io.codepassion.doubletriangle.feature.workout.RemoteTrainingImage
+import io.codepassion.wildforce.android.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -56,6 +66,8 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 import java.util.UUID
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
@@ -65,11 +77,11 @@ import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
  * remain server-authoritative: slots are only guides until the POST succeeds. */
 internal data class BookingGym(val id: String, val name: String, val address: String?, val teamName: String, val zone: ZoneId, val avatarUrl: String?)
 internal data class BookingRoom(val id: String, val name: String, val avatarUrl: String?, val capacity: Int, val interval: Int, val minDuration: Int, val maxDuration: Int, val windowDays: Int, val cancellationCutoff: Int) {
-    val durations: List<Int> get() = (interval..maxDuration step interval).filter { it >= minDuration }
+    val durations: List<Int> get() = if (interval > 0) (interval..maxDuration step interval).filter { it >= minDuration } else emptyList()
 }
 internal data class BookingSlot(val startsAt: OffsetDateTime, val endsAt: OffsetDateTime, val availablePlaces: Int, val isBookable: Boolean)
 internal data class BookingStart(val startsAt: OffsetDateTime, val endsAt: OffsetDateTime, val availablePlaces: Int)
-internal data class BookingReservation(val id: String, val status: String, val startsAt: OffsetDateTime, val endsAt: OffsetDateTime, val cancellableUntil: OffsetDateTime?, val roomName: String, val roomAvatar: String?, val gymId: String, val gymName: String, val gymAvatar: String?) {
+internal data class BookingReservation(val id: String, val status: String, val startsAt: OffsetDateTime, val endsAt: OffsetDateTime, val cancellableUntil: OffsetDateTime?, val roomName: String, val roomAvatar: String?, val gymId: String, val gymName: String, val gymAvatar: String?, val gymZone: ZoneId) {
     val isCancelled get() = status.equals("cancelled", true)
     val isCancellable get() = !isCancelled && cancellableUntil?.isAfter(OffsetDateTime.now()) == true
 }
@@ -79,7 +91,7 @@ internal class BookingApi(private val context: Context) {
         ?: throw IllegalStateException("Inicia sesión para gestionar reservas.")
 
     suspend fun gyms(): List<BookingGym> = getArray("booking/gyms").map { json ->
-        BookingGym(json.getString("id"), json.getString("name"), json.optString("address").ifBlank { null }, json.optJSONObject("team")?.optString("name").orEmpty(), ZoneId.of(json.optString("timezone", ZoneId.systemDefault().id)), json.optString("avatar_url").ifBlank { null })
+        BookingGym(json.getString("id"), json.getString("name"), json.optionalBookingString("address"), json.optJSONObject("team")?.optionalBookingString("name").orEmpty(), bookingZone(json.optionalBookingString("timezone")), json.optionalBookingString("avatar_url"))
     }
     suspend fun rooms(gymId: String): List<BookingRoom> = getArray("booking/gyms/$gymId/rooms").map(::room)
     suspend fun availability(roomId: String, date: String): List<BookingSlot> {
@@ -104,10 +116,10 @@ internal class BookingApi(private val context: Context) {
     suspend fun reserve(roomId: String, start: BookingStart, idempotencyKey: UUID): BookingReservation = post("booking/rooms/$roomId/reservations", JSONObject().put("starts_at", start.startsAt).put("ends_at", start.endsAt), idempotencyKey).getJSONObject("data").let(::reservation)
     suspend fun cancel(id: String): BookingReservation = post("booking/reservations/$id/cancel", null).getJSONObject("data").let(::reservation)
 
-    private fun room(json: JSONObject) = BookingRoom(json.getString("id"), json.getString("name"), json.optString("avatar_url").ifBlank { null }, json.getInt("participant_capacity"), json.getInt("slot_interval_minutes"), json.getInt("min_duration_minutes"), json.getInt("max_duration_minutes"), json.getInt("booking_window_days"), json.getInt("cancellation_cutoff_minutes"))
+    private fun room(json: JSONObject) = BookingRoom(json.getString("id"), json.getString("name"), json.optionalBookingString("avatar_url"), json.getInt("participant_capacity"), json.getInt("slot_interval_minutes"), json.getInt("min_duration_minutes"), json.getInt("max_duration_minutes"), json.getInt("booking_window_days"), json.getInt("cancellation_cutoff_minutes"))
     private fun reservation(json: JSONObject): BookingReservation {
         val room = json.getJSONObject("room"); val gym = json.getJSONObject("gym")
-        return BookingReservation(json.getString("id"), json.getString("status"), OffsetDateTime.parse(json.getString("starts_at")), OffsetDateTime.parse(json.getString("ends_at")), json.optString("cancellable_until").takeIf { it.isNotBlank() }?.let(OffsetDateTime::parse), room.getString("name"), room.optString("avatar_url").ifBlank { null }, gym.getString("id"), gym.getString("name"), gym.optString("avatar_url").ifBlank { null })
+        return BookingReservation(json.getString("id"), json.getString("status"), OffsetDateTime.parse(json.getString("starts_at")), OffsetDateTime.parse(json.getString("ends_at")), json.optionalBookingString("cancellable_until")?.let(OffsetDateTime::parse), room.getString("name"), room.optionalBookingString("avatar_url"), gym.getString("id"), gym.getString("name"), gym.optionalBookingString("avatar_url"), bookingZone(json.optionalBookingString("timezone")))
     }
     private suspend fun getArray(path: String): List<JSONObject> = getObject(path).getJSONArray("data").objects()
     private suspend fun getObject(path: String): JSONObject = withContext(Dispatchers.IO) { connection(path, "GET").useResponse() }
@@ -125,7 +137,7 @@ internal class BookingApi(private val context: Context) {
     private fun HttpURLConnection.useResponse(): JSONObject {
         val body = BufferedReader((if (responseCode in 200..299) inputStream else errorStream).reader()).use { it.readText() }
         disconnect()
-        if (responseCode !in 200..299) throw IllegalStateException(runCatching { JSONObject(body).optString("message") }.getOrDefault("").ifBlank { "No se pudo completar la reserva." })
+        if (responseCode !in 200..299) throw BookingHttpException(responseCode, runCatching { JSONObject(body).optString("message") }.getOrDefault("").ifBlank { "No se pudo completar la reserva." })
         return JSONObject(body)
     }
 }
@@ -133,14 +145,20 @@ internal class BookingApi(private val context: Context) {
 private const val SELECTED_BOOKING_GYM_ID = "booking_selected_gym_id"
 
 private fun JSONArray.objects() = List(length()) { getJSONObject(it) }
+private fun JSONObject.optionalBookingString(key: String): String? = if (isNull(key)) null else normalizeBookingOptionalString(optString(key))
 internal fun contiguousStarts(slots: List<BookingSlot>, duration: Int): List<BookingStart> = slots.indices.mapNotNull { index ->
+    if (duration <= 0) return@mapNotNull null
     val start = slots[index].startsAt; val end = start.plusMinutes(duration.toLong()); var cursor = start; var places = Int.MAX_VALUE
-    for (slot in slots.drop(index)) { if (!cursor.isBefore(end)) break; if (slot.startsAt != cursor || !slot.isBookable) return@mapNotNull null; places = minOf(places, slot.availablePlaces); cursor = slot.endsAt }
-    BookingStart(start, end, places).takeIf { cursor == end }
+    for (slot in slots.drop(index)) { if (!cursor.isBefore(end)) break; if (slot.startsAt.toInstant() != cursor.toInstant() || !slot.isBookable) return@mapNotNull null; places = minOf(places, slot.availablePlaces); cursor = slot.endsAt }
+    BookingStart(start, end, places).takeIf { cursor.toInstant() == end.toInstant() }
 }
 
+internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<BookingSlot>, duration: Int): BookingStart? =
+    selected?.let { old -> contiguousStarts(slots, duration).firstOrNull { it.startsAt.toInstant() == old.startsAt.toInstant() } }
+
 @OptIn(ExperimentalMaterialApi::class)
-@Composable internal fun BookingScreen(contentPadding: PaddingValues) {
+@Composable internal fun BookingScreen(contentPadding: PaddingValues, onBookingVisibilityChanged: (Boolean) -> Unit = {}) {
+    val locale = LocalLocale.current.platformLocale
     val context = androidx.compose.ui.platform.LocalContext.current
     val api = remember { BookingApi(context.applicationContext) }
     val gymCodeScanner = remember(context) {
@@ -153,8 +171,10 @@ internal fun contiguousStarts(slots: List<BookingSlot>, duration: Int): List<Boo
     var gyms by remember { mutableStateOf<List<BookingGym>>(emptyList()) }
     val bookingPreferences = remember { context.getSharedPreferences("wildforce_booking", Context.MODE_PRIVATE) }
     var selectedGymId by remember { mutableStateOf(bookingPreferences.getString(SELECTED_BOOKING_GYM_ID, null)) }
-    var reservations by remember { mutableStateOf<List<BookingReservation>>(emptyList()) }; var loading by remember { mutableStateOf(true) }; var error by remember { mutableStateOf<String?>(null) }
+    var reservations by remember { mutableStateOf<List<BookingReservation>>(emptyList()) }; var loading by remember { mutableStateOf(true) }; var error by remember { mutableStateOf<String?>(null) }; var actionError by remember { mutableStateOf<String?>(null) }
     var bookingGym by remember { mutableStateOf<BookingGym?>(null) }; var cancellation by remember { mutableStateOf<BookingReservation?>(null) }
+    LaunchedEffect(bookingGym != null) { onBookingVisibilityChanged(bookingGym != null) }
+    DisposableEffect(Unit) { onDispose { onBookingVisibilityChanged(false) } }
     var joiningGym by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     suspend fun reload() { loading = true; error = null; runCatching { api.gyms() to api.reservations() }.onSuccess { (nextGyms, nextReservations) -> gyms = nextGyms; selectedGymId = selectedGymId?.takeIf { id -> nextGyms.any { it.id == id } } ?: nextGyms.firstOrNull()?.id; bookingPreferences.edit().putString(SELECTED_BOOKING_GYM_ID, selectedGymId).apply(); reservations = nextReservations }.onFailure { error = it.message ?: "No se pudieron cargar las reservas." }; loading = false }
@@ -227,7 +247,15 @@ internal fun contiguousStarts(slots: List<BookingSlot>, duration: Int): List<Boo
             reload()
         },
     )
-    cancellation?.let { reservation -> AlertDialog(onDismissRequest = { cancellation = null }, title = { Text("¿Cancelar esta reserva?") }, text = { Text("${reservation.roomName} · ${formatDateTime(reservation.startsAt)}") }, confirmButton = { TextButton(onClick = { cancellation = null; scope.launch { runCatching { api.cancel(reservation.id) }.onFailure { error = it.message }; reload() } }) { Text("CANCELAR") } }, dismissButton = { TextButton(onClick = { cancellation = null }) { Text("MANTENER") } }) }
+    cancellation?.let { reservation -> AlertDialog(onDismissRequest = { cancellation = null }, title = { Text("¿Cancelar esta reserva?") }, text = { Text("${reservation.roomName} · ${formatDateTime(reservation.startsAt, reservation.gymZone, locale)}") }, confirmButton = { TextButton(onClick = { cancellation = null; scope.launch { runCatching { api.cancel(reservation.id) }.onFailure { actionError = it.message ?: "No se pudo cancelar la reserva." }; reload() } }) { Text("CANCELAR") } }, dismissButton = { TextButton(onClick = { cancellation = null }) { Text("MANTENER") } }) }
+    actionError?.let { message ->
+        AlertDialog(
+            onDismissRequest = { actionError = null },
+            title = { Text("Algo salió mal") },
+            text = { Text(message) },
+            confirmButton = { TextButton(onClick = { actionError = null }) { Text("OK") } },
+        )
+    }
 }
 
 /** Android counterpart of iOS's JoinGymView for an authenticated user. */
@@ -244,7 +272,7 @@ internal fun contiguousStarts(slots: List<BookingSlot>, duration: Int): List<Boo
                 Text("Introduce el código que te ha dado tu gimnasio.", color = WildforceThemeTokens.textSecondary)
                 OutlinedTextField(
                     value = code,
-                    onValueChange = { code = it.uppercase().filter(Char::isLetterOrDigit).take(16); localError = null },
+                    onValueChange = { code = it; localError = null },
                     label = { Text("Código de gimnasio") },
                     singleLine = true,
                     enabled = !submitting,
@@ -253,7 +281,19 @@ internal fun contiguousStarts(slots: List<BookingSlot>, duration: Int): List<Boo
                             Icons.Filled.QrCodeScanner,
                             contentDescription = "Escanear código QR",
                             modifier = Modifier.clickable(enabled = !submitting) {
-                                onScan { value -> code = value.uppercase().filter(Char::isLetterOrDigit).take(16); localError = null }
+                                onScan { value ->
+                                    val parsed = parseGymJoinCode(value)
+                                    if (parsed == null) localError = "Este QR no contiene un código de gimnasio."
+                                    else {
+                                        code = parsed
+                                        localError = null
+                                        submitting = true
+                                        scope.launch {
+                                            runCatching { onJoin(parsed) }.onFailure { localError = it.message ?: "No se pudo unir al gimnasio." }
+                                            submitting = false
+                                        }
+                                    }
+                                }
                             },
                         )
                     },
@@ -263,11 +303,11 @@ internal fun contiguousStarts(slots: List<BookingSlot>, duration: Int): List<Boo
         },
         confirmButton = {
             TextButton(
-                enabled = code.isNotBlank() && !submitting,
+                enabled = parseGymJoinCode(code) != null && !submitting,
                 onClick = {
                     submitting = true
                     scope.launch {
-                        runCatching { onJoin(code) }.onFailure { localError = it.message ?: "No se pudo unir al gimnasio." }
+                        runCatching { onJoin(requireNotNull(parseGymJoinCode(code))) }.onFailure { localError = it.message ?: "No se pudo unir al gimnasio." }
                         submitting = false
                     }
                 },
@@ -355,6 +395,7 @@ private fun GymHeading(gym: BookingGym, gyms: List<BookingGym>, onSelect: (Booki
 @Composable
 private fun ReservationCard(reservation: BookingReservation, onCancel: () -> Unit) {
     var menuOpen by remember(reservation.id) { mutableStateOf(false) }
+    val locale = LocalLocale.current.platformLocale
     Card(
         modifier = Modifier.fillMaxWidth(),
         backgroundColor = WildforceThemeTokens.backgroundSecondary,
@@ -380,11 +421,11 @@ private fun ReservationCard(reservation: BookingReservation, onCancel: () -> Uni
                         }
                     }
                 }
-                Text(formatDateTime(reservation.startsAt), fontSize = 14.sp, color = WildforceThemeTokens.textSecondary)
-                Text("${formatTime(reservation.startsAt)}–${formatTime(reservation.endsAt)}", fontSize = 14.sp, color = WildforceThemeTokens.textSecondary)
+                Text(formatRelativeDay(reservation.startsAt, reservation.gymZone, locale), fontSize = 14.sp, color = WildforceThemeTokens.textSecondary)
+                Text("${formatTime(reservation.startsAt, reservation.gymZone, locale)} – ${formatTime(reservation.endsAt, reservation.gymZone, locale)}", fontSize = 14.sp, color = WildforceThemeTokens.textSecondary)
                 if (!reservation.isCancelled && reservation.cancellableUntil != null) {
                     Text(
-                        if (reservation.isCancellable) "Cancelación gratuita hasta ${formatDateTime(reservation.cancellableUntil)}" else "Ya no se puede cancelar",
+                        if (reservation.isCancellable) "Cancelación gratuita hasta ${formatDateTime(reservation.cancellableUntil, reservation.gymZone, locale)}" else "Ya no se puede cancelar",
                         style = MaterialTheme.typography.caption,
                         color = WildforceThemeTokens.textSecondary,
                         modifier = Modifier.padding(top = 4.dp),
@@ -402,37 +443,89 @@ private fun BookingStatusBadge(status: String) {
         status.equals("waitlisted", true) -> "EN ESPERA" to Color(0xFFFF9500)
         else -> "CANCELADA" to Color(0xFF8E8E93)
     }
-    Text(label, style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = color, modifier = Modifier.background(color.copy(alpha = .12f), RoundedCornerShape(6.dp)).padding(horizontal = 6.dp, vertical = 2.dp))
+    Text(label, style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = Color.White, modifier = Modifier.background(color, RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 2.dp))
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable private fun NewBookingScreen(gym: BookingGym, api: BookingApi, contentPadding: PaddingValues, onBack: () -> Unit, onBooked: () -> Unit) {
-    var rooms by remember { mutableStateOf<List<BookingRoom>>(emptyList()) }; var selectedRoom by remember { mutableStateOf<BookingRoom?>(null) }; var selectedDate by remember { mutableStateOf(ZonedDateTime.now(gym.zone).toLocalDate()) }; var duration by remember { mutableIntStateOf(0) }; var slots by remember { mutableStateOf<List<BookingSlot>>(emptyList()) }; var selected by remember { mutableStateOf<BookingStart?>(null) }; var loading by remember { mutableStateOf(true) }; var refreshing by remember { mutableStateOf(false) }; var roomError by remember { mutableStateOf<String?>(null) }; var availabilityError by remember { mutableStateOf<String?>(null) }; var error by remember { mutableStateOf<String?>(null) }; var confirm by remember { mutableStateOf(false) }; var reserving by remember { mutableStateOf(false) }; var confirmedReservation by remember { mutableStateOf<BookingReservation?>(null) }
+    val locale = LocalLocale.current.platformLocale
+    var rooms by remember { mutableStateOf<List<BookingRoom>>(emptyList()) }; var selectedRoom by remember { mutableStateOf<BookingRoom?>(null) }; var selectedDate by remember { mutableStateOf(ZonedDateTime.now(gym.zone).toLocalDate()) }; var duration by remember { mutableIntStateOf(0) }; var slots by remember { mutableStateOf<List<BookingSlot>>(emptyList()) }; var selected by remember { mutableStateOf<BookingStart?>(null) }; var loading by remember { mutableStateOf(true) }; var availabilityLoading by remember { mutableStateOf(false) }; var refreshing by remember { mutableStateOf(false) }; var availabilityRequestId by remember { mutableIntStateOf(0) }; var roomError by remember { mutableStateOf<String?>(null) }; var availabilityError by remember { mutableStateOf<String?>(null) }; var error by remember { mutableStateOf<String?>(null) }; var confirm by remember { mutableStateOf(false) }; var reserving by remember { mutableStateOf(false) }; var confirmedReservation by remember { mutableStateOf<BookingReservation?>(null) }; var pendingAttempt by remember { mutableStateOf<BookingAttempt?>(null) }
+    var confirmingStart by remember { mutableStateOf<BookingStart?>(null) }
     val scope = rememberCoroutineScope()
-    val confirmationSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val confirmationSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden, confirmValueChange = { it != ModalBottomSheetValue.Hidden || !reserving })
+    BackHandler {
+        when {
+            reserving -> Unit
+            confirmedReservation != null -> scope.launch {
+                confirmationSheetState.hide()
+                confirm = false
+            }
+            confirm -> scope.launch { confirmationSheetState.hide(); confirm = false }
+            else -> onBack()
+        }
+    }
+    fun selectRoom(room: BookingRoom) {
+        if (room == selectedRoom) return
+        selectedRoom = room
+        if (!room.durations.contains(duration)) duration = room.durations.firstOrNull() ?: 0
+        val lastAvailableDay = ZonedDateTime.now(gym.zone).toLocalDate().plusDays(room.windowDays.toLong())
+        if (selectedDate.isAfter(lastAvailableDay)) selectedDate = lastAvailableDay
+        selected = null
+        error = null
+    }
     suspend fun loadRooms() {
         loading = true
         roomError = null
         runCatching { api.rooms(gym.id) }
             .onSuccess { next ->
                 rooms = next
-                selectedRoom = next.firstOrNull()
-                duration = selectedRoom?.durations?.firstOrNull() ?: 0
+                val nextRoom = next.firstOrNull { it.id == selectedRoom?.id } ?: next.firstOrNull()
+                selectedRoom = null
+                nextRoom?.let(::selectRoom)
             }
             .onFailure { roomError = it.message ?: "No se pudieron cargar las salas." }
         loading = false
     }
     suspend fun refreshAvailability() {
         val room = selectedRoom ?: return
+        val requestedDate = selectedDate
+        val requestId = ++availabilityRequestId
         refreshing = true
+        availabilityLoading = true
         availabilityError = null
-        runCatching { api.availability(room.id, selectedDate.toString()) }
-            .onSuccess { next -> slots = next; selected = selected?.takeIf { candidate -> contiguousStarts(next, duration).any { it.startsAt == candidate.startsAt } } }
-            .onFailure { slots = emptyList(); availabilityError = it.message ?: "No se pudo cargar la disponibilidad." }
-        refreshing = false
+        runCatching { api.availability(room.id, requestedDate.toString()) }
+            .onSuccess { next ->
+                // A delayed response for a room or day the user already left must not replace the current grid.
+                if (availabilityRequestId == requestId && selectedRoom?.id == room.id && selectedDate == requestedDate) {
+                    slots = next
+                    selected = refreshedBookingSelection(selected, next, duration)
+                }
+            }
+            .onFailure {
+                if (availabilityRequestId == requestId && selectedRoom?.id == room.id && selectedDate == requestedDate) {
+                    slots = emptyList()
+                    availabilityError = it.message ?: "No se pudo cargar la disponibilidad."
+                }
+            }
+        if (availabilityRequestId == requestId) {
+            if (selectedRoom?.id == room.id && selectedDate == requestedDate) availabilityLoading = false
+            refreshing = false
+        }
     }
-    LaunchedEffect(gym.id) { loadRooms() }
-    LaunchedEffect(selectedRoom?.id, selectedDate) { selected = null; slots = emptyList(); availabilityError = null; refreshAvailability() }
+    LaunchedEffect(gym.id) {
+        // A new gym is a new booking flow, just like a new iOS navigation destination.
+        selectedDate = ZonedDateTime.now(gym.zone).toLocalDate()
+        rooms = emptyList()
+        selectedRoom = null
+        duration = 0
+        slots = emptyList()
+        selected = null
+        availabilityError = null
+        confirmedReservation = null
+        pendingAttempt = null
+        loadRooms()
+    }
+    LaunchedEffect(selectedRoom?.id, selectedDate) { selected = null; slots = emptyList(); availabilityError = null; error = null; refreshAvailability() }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -446,10 +539,18 @@ private fun BookingStatusBadge(status: String) {
     LaunchedEffect(confirm, confirmedReservation) {
         if (confirm) confirmationSheetState.show() else confirmationSheetState.hide()
     }
+    var sheetWasVisible by remember { mutableStateOf(false) }
     LaunchedEffect(confirmationSheetState.currentValue) {
-        if (confirmationSheetState.currentValue == ModalBottomSheetValue.Hidden && confirm) {
+        if (confirmationSheetState.currentValue != ModalBottomSheetValue.Hidden) {
+            sheetWasVisible = true
+        } else if (sheetWasVisible) {
+            sheetWasVisible = false
+            val wasBooked = confirmedReservation != null
             confirm = false
             confirmedReservation = null
+            error = null
+            confirmingStart = null
+            if (wasBooked) onBooked()
         }
     }
     ModalBottomSheetLayout(
@@ -458,29 +559,35 @@ private fun BookingStatusBadge(status: String) {
         sheetBackgroundColor = WildforceThemeTokens.background,
         sheetContent = {
             confirmedReservation?.let { reservation ->
-                BookingSuccessSheet(reservation) {
+                BookingSuccessSheet(reservation, locale) {
                     scope.launch {
                         confirmationSheetState.hide()
                         confirm = false
-                        confirmedReservation = null
-                        onBooked()
                     }
                 }
-            } ?: selected?.let { start ->
+            } ?: confirmingStart?.let { start ->
                 selectedRoom?.let { room ->
                     BookingConfirmationSheet(
                         gym = gym,
                         room = room,
                         start = start,
+                        locale = locale,
                         error = error,
                         reserving = reserving,
                         onCancel = { scope.launch { confirmationSheetState.hide(); confirm = false } },
                         onConfirm = {
                             reserving = true
+                            error = null
                             scope.launch {
-                                runCatching { api.reserve(room.id, start, UUID.randomUUID()) }
-                                    .onSuccess { reservation -> confirmedReservation = reservation; reserving = false }
-                                    .onFailure { failure -> error = failure.message ?: "No se pudo confirmar la reserva."; reserving = false; refreshAvailability() }
+                                val attempt = bookingAttemptFor(pendingAttempt, room.id, start)
+                                pendingAttempt = attempt
+                                runCatching { api.reserve(room.id, start, attempt.key) }
+                                    .onSuccess { reservation -> pendingAttempt = null; confirmedReservation = reservation; reserving = false; refreshAvailability() }
+                                    .onFailure { failure ->
+                                        error = failure.message ?: "No se pudo confirmar la reserva."
+                                        reserving = false
+                                        if (isDefiniteBookingRejection(failure)) { pendingAttempt = null; refreshAvailability() }
+                                    }
                             }
                         },
                     )
@@ -493,18 +600,20 @@ private fun BookingStatusBadge(status: String) {
                 Modifier
                     .fillMaxSize()
                     .padding(contentPadding)
+                    .navigationBarsPadding()
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
+                    .padding(horizontal = 20.dp, vertical = 20.dp)
+                    .padding(bottom = if (selectedRoom != null) 76.dp else 0.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
             Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onBack) { Icon(Icons.Filled.Close, "Volver") }; Column { Text("NUEVA RESERVA", fontSize = 22.sp, fontWeight = FontWeight.Black, color = WildforceThemeTokens.textPrimary); Text(gym.name, color = WildforceThemeTokens.textSecondary) } }
             if (loading) Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } else if (roomError != null) BookingEmpty("No se pudieron cargar las salas", roomError!!, onRetry = { scope.launch { loadRooms() } }, icon = Icons.Filled.WarningAmber) else if (rooms.isEmpty()) BookingEmpty("No hay salas disponibles", "Este gimnasio no tiene salas abiertas para reservar.") else {
-                BookingSection("DÍA") { LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items((0..selectedRoom!!.windowDays).map { selectedDate.plusDays(it.toLong()) }) { day -> BookingDayChoice(day, day == selectedDate, onClick = { selectedDate = day }) } } }
+                BookingSection("DÍA") { LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(bookingWindowDays(ZonedDateTime.now(gym.zone).toLocalDate(), selectedRoom!!.windowDays)) { day -> BookingDayChoice(day, day == selectedDate, onClick = { selectedDate = day }) } } }
                 BookingSection("SALA") {
                     val showsImages = rooms.any { it.avatarUrl != null }
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(rooms, key = { it.id }) { room ->
-                            RoomChoice(room, room == selectedRoom, showsImages = showsImages, onClick = { selectedRoom = room; duration = room.durations.firstOrNull() ?: 0; selected = null })
+                            RoomChoice(room, room == selectedRoom, showsImages = showsImages, locale = locale, onClick = { selectRoom(room) })
                         }
                     }
                 }
@@ -512,10 +621,11 @@ private fun BookingStatusBadge(status: String) {
                     BookingDurationPicker(
                         durations = selectedRoom!!.durations,
                         selection = duration,
-                        onSelect = { duration = it; selected = null },
+                        locale = locale,
+                        onSelect = { duration = it; selected = refreshedBookingSelection(selected, slots, it); error = null },
                     )
                 }
-                BookingSection("HORAS DISPONIBLES") { if (availabilityError != null) BookingEmpty("No se pudo cargar la disponibilidad", availabilityError!!, onRetry = { scope.launch { refreshAvailability() } }, icon = Icons.Filled.WarningAmber) else if (starts.isEmpty()) BookingEmpty("No hay horas disponibles", "Prueba otro día o una duración más corta.") else FlowTimes(starts, selected, { selected = it }) }
+                BookingSection("HORAS DISPONIBLES") { when { availabilityError != null -> BookingEmpty("No se pudo cargar la disponibilidad", availabilityError!!, onRetry = { scope.launch { refreshAvailability() } }, icon = Icons.Filled.WarningAmber); availabilityLoading -> Box(Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }; starts.isEmpty() -> BookingEmpty("No hay horas disponibles", "Prueba otro día o una duración más corta."); else -> FlowTimes(starts, selected, gym.zone, locale, { selected = it; error = null }) } }
                  if (gym.zone != ZoneId.systemDefault()) {
                      Text(
                          "Las horas se muestran en la zona horaria del gimnasio (${gym.zone.id}).",
@@ -523,8 +633,25 @@ private fun BookingStatusBadge(status: String) {
                          color = WildforceThemeTokens.textSecondary,
                      )
                  }
-                selected?.let { Button(onClick = { confirm = true }, modifier = Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.background)) { Text("CONTINUAR", fontWeight = FontWeight.Bold) } }
             }
+            }
+            selectedRoom?.let {
+                Button(
+                    onClick = { selected?.let { start -> confirmingStart = start; confirm = true } },
+                    enabled = selected != null,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .height(52.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = WildforceThemeTokens.textPrimary,
+                        contentColor = WildforceThemeTokens.background,
+                        disabledBackgroundColor = WildforceThemeTokens.textPrimary.copy(alpha = 0.12f),
+                        disabledContentColor = WildforceThemeTokens.textSecondary,
+                    ),
+                ) { Text("CONTINUAR", fontWeight = FontWeight.Bold) }
             }
             PullRefreshIndicator(refreshing, refreshState, Modifier.align(Alignment.TopCenter))
         }
@@ -536,6 +663,7 @@ private fun BookingConfirmationSheet(
     gym: BookingGym,
     room: BookingRoom,
     start: BookingStart,
+    locale: Locale,
     error: String?,
     reserving: Boolean,
     onCancel: () -> Unit,
@@ -546,8 +674,9 @@ private fun BookingConfirmationSheet(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("CONFIRMAR RESERVA", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.weight(1f))
-            TextButton(enabled = !reserving, onClick = onCancel) { Text("CANCELAR") }
+            TextButton(enabled = !reserving, onClick = onCancel) { Text(stringResource(R.string.ios_catalog_19766ed6ccb2f4a3)) }
+            Text(stringResource(R.string.ios_catalog_a52a24719590f68b), fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+            Spacer(Modifier.width(64.dp))
         }
         Card(Modifier.fillMaxWidth(), backgroundColor = WildforceThemeTokens.backgroundSecondary, shape = RoundedCornerShape(14.dp)) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -555,12 +684,12 @@ private fun BookingConfirmationSheet(
                 Divider()
                 BookingSummaryRow("Gimnasio", gym.name)
                 Divider()
-                BookingSummaryRow("Día", formatDateTime(start.startsAt))
+                BookingSummaryRow("Día", formatRelativeDay(start.startsAt, gym.zone, locale))
                 Divider()
-                BookingSummaryRow("Hora", "${formatTime(start.startsAt)}–${formatTime(start.endsAt)}")
+                BookingSummaryRow("Hora", "${formatTime(start.startsAt, gym.zone, locale)} – ${formatTime(start.endsAt, gym.zone, locale)}")
             }
         }
-        Text("Puedes cancelar gratis hasta ${room.cancellationCutoff} min antes de que empiece.", color = WildforceThemeTokens.textSecondary, fontSize = 13.sp)
+        Text("Puedes cancelar gratis hasta ${formatDuration(room.cancellationCutoff, locale)} antes de que empiece.", color = WildforceThemeTokens.textSecondary, fontSize = 13.sp)
         error?.let {
             Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Icon(Icons.Filled.WarningAmber, contentDescription = null, tint = Color(0xFFFF9500), modifier = Modifier.size(18.dp))
@@ -573,7 +702,7 @@ private fun BookingConfirmationSheet(
             modifier = Modifier.fillMaxWidth().height(52.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.background),
         ) {
-            if (reserving) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.background, strokeWidth = 2.dp) else Text(if (error == null) "CONFIRMAR" else "REINTENTAR", fontWeight = FontWeight.Bold)
+            if (reserving) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.background, strokeWidth = 2.dp) else Text(if (error == null) stringResource(R.string.ios_catalog_a52a24719590f68b).uppercase(locale) else "REINTENTAR", fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -587,7 +716,7 @@ private fun BookingSummaryRow(label: String, value: String) {
 }
 
 @Composable
-private fun BookingSuccessSheet(reservation: BookingReservation, onDone: () -> Unit) {
+private fun BookingSuccessSheet(reservation: BookingReservation, locale: Locale, onDone: () -> Unit) {
     Column(
         Modifier.fillMaxWidth().navigationBarsPadding().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -596,9 +725,9 @@ private fun BookingSuccessSheet(reservation: BookingReservation, onDone: () -> U
         Spacer(Modifier.height(18.dp))
         Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.size(72.dp), tint = Color(0xFF34C759))
         Text("RESERVA CONFIRMADA", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-        RemoteTrainingImage(reservation.roomAvatar, reservation.roomName, Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)))
+        if (reservation.roomAvatar != null) RemoteTrainingImage(reservation.roomAvatar, reservation.roomName, Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)))
         Text(reservation.roomName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-        Text("${formatDateTime(reservation.startsAt)} · ${formatTime(reservation.startsAt)}–${formatTime(reservation.endsAt)}", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+        Text("${formatRelativeDay(reservation.startsAt, reservation.gymZone, locale)} · ${formatTime(reservation.startsAt, reservation.gymZone, locale)} – ${formatTime(reservation.endsAt, reservation.gymZone, locale)}", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
         Spacer(Modifier.height(14.dp))
         Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.background)) { Text("LISTO", fontWeight = FontWeight.Bold) }
     }
@@ -609,6 +738,7 @@ private fun BookingSuccessSheet(reservation: BookingReservation, onDone: () -> U
 private fun BookingDurationPicker(
     durations: List<Int>,
     selection: Int,
+    locale: Locale,
     onSelect: (Int) -> Unit,
 ) {
     val outerShape = RoundedCornerShape(10.dp)
@@ -633,7 +763,7 @@ private fun BookingDurationPicker(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    "$minutes min",
+                    formatDuration(minutes, locale),
                     fontSize = 13.sp,
                     fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
                     color = if (selected) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.textPrimary,
@@ -663,7 +793,7 @@ private fun BookingDayChoice(day: java.time.LocalDate, selected: Boolean, onClic
 }
 
 @Composable
-private fun RoomChoice(room: BookingRoom, selected: Boolean, showsImages: Boolean, onClick: () -> Unit) {
+private fun RoomChoice(room: BookingRoom, selected: Boolean, showsImages: Boolean, locale: Locale, onClick: () -> Unit) {
     val foreground = if (selected) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.textPrimary
     val secondary = if (selected) foreground.copy(alpha = .7f) else WildforceThemeTokens.textSecondary
     Card(modifier = Modifier.width(150.dp).clickable(onClick = onClick), backgroundColor = if (selected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.backgroundSecondary, shape = RoundedCornerShape(14.dp)) {
@@ -677,27 +807,62 @@ private fun RoomChoice(room: BookingRoom, selected: Boolean, showsImages: Boolea
                     unavailableContent = { Box(Modifier.fillMaxSize().background(WildforceThemeTokens.textPrimary.copy(alpha = .08f))) },
                 )
             }
-            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(room.name, fontWeight = FontWeight.Bold, color = foreground, maxLines = 2)
-                Text("${room.capacity} plazas", color = secondary, fontSize = 12.sp)
-                Text("${room.minDuration}–${room.maxDuration} min", color = secondary, fontSize = 12.sp)
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(room.name, fontWeight = FontWeight.Bold, color = foreground, minLines = 2, maxLines = 2)
+                Text(stringResource(R.string.ios_catalog_e53c3780fcde4a4f).replace("%d", room.capacity.toString()), color = secondary, fontSize = 12.sp)
+                Text("${formatDuration(room.minDuration, locale)} – ${formatDuration(room.maxDuration, locale)}", color = secondary, fontSize = 12.sp)
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable private fun FlowTimes(starts: List<BookingStart>, selected: BookingStart?, onSelected: (BookingStart) -> Unit) = androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { starts.forEach { start ->
-    val isSelected = selected?.startsAt == start.startsAt
-    val foreground = if (isSelected) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.textPrimary
-    val placesColor = if (isSelected) foreground.copy(alpha = .7f) else if (start.availablePlaces == 1) Color(0xFFFF9500) else WildforceThemeTokens.textSecondary
-    Column(
-        Modifier.width(110.dp).clip(RoundedCornerShape(12.dp)).background(if (isSelected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.backgroundSecondary).clickable { onSelected(start) }.padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        Text(formatTime(start.startsAt), fontWeight = FontWeight.SemiBold, color = foreground)
-        Text("${start.availablePlaces} plazas libres", style = MaterialTheme.typography.caption, color = placesColor)
+@Composable
+private fun FlowTimes(starts: List<BookingStart>, selected: BookingStart?, zone: ZoneId, locale: Locale, onSelected: (BookingStart) -> Unit) {
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val columns = ((maxWidth.value + 8f) / 108f).toInt().coerceAtLeast(1)
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            starts.chunked(columns).forEach { row ->
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    row.forEach { start ->
+                        val isSelected = selected?.startsAt?.toInstant() == start.startsAt.toInstant()
+                        val foreground = if (isSelected) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.textPrimary
+                        val placesColor = if (isSelected) foreground.copy(alpha = .7f) else if (start.availablePlaces == 1) Color(0xFFFF9500) else WildforceThemeTokens.textSecondary
+                        Column(
+                            Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.backgroundSecondary)
+                                .semantics { this.selected = isSelected }.clickable { onSelected(start) }
+                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            Text(formatTime(start.startsAt, zone, locale), fontWeight = FontWeight.SemiBold, color = foreground)
+                            Text(stringResource(R.string.ios_catalog_885c42f8b9f562c6).replace("%d", start.availablePlaces.toString()), fontSize = 11.sp, color = placesColor)
+                        }
+                    }
+                    repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
+                }
+            }
+        }
     }
-} }
-private fun formatDateTime(time: OffsetDateTime) = time.format(DateTimeFormatter.ofPattern("EEE d MMM"))
-private fun formatTime(time: OffsetDateTime) = time.format(DateTimeFormatter.ofPattern("HH:mm"))
+}
+/** Every booking instant is rendered in the gym's time zone, as on iOS. */
+private fun formatDateTime(time: OffsetDateTime, zone: ZoneId, locale: Locale) = time.atZoneSameInstant(zone).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(locale))
+private fun formatRelativeDay(time: OffsetDateTime, zone: ZoneId, locale: Locale): String {
+    val date = time.atZoneSameInstant(zone).toLocalDate()
+    val today = ZonedDateTime.now(zone).toLocalDate()
+    val prefix = when (date) {
+        today -> "Hoy, "
+        today.plusDays(1) -> "Mañana, "
+        else -> ""
+    }
+    val pattern = DateTimePatternGenerator.getInstance(locale).getBestPattern("dMMMM")
+    return prefix + time.atZoneSameInstant(zone).format(DateTimeFormatter.ofPattern(pattern, locale))
+}
+private fun formatTime(time: OffsetDateTime, zone: ZoneId, locale: Locale) = time.atZoneSameInstant(zone).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale))
+private fun formatDuration(minutes: Int, locale: Locale): String {
+    val hours = minutes / 60
+    val remainingMinutes = minutes % 60
+    val measures = mutableListOf<Measure>()
+    if (hours > 0) measures += Measure(hours, MeasureUnit.HOUR)
+    if (remainingMinutes > 0 || hours == 0) measures += Measure(remainingMinutes, MeasureUnit.MINUTE)
+    return MeasureFormat.getInstance(locale, MeasureFormat.FormatWidth.SHORT).formatMeasures(*measures.toTypedArray())
+}

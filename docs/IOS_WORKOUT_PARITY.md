@@ -4,6 +4,11 @@ This document is the persistent source of truth for bringing the Android workout
 
 ## Reference implementation
 
+### Tutorial localization and media audit (2026-10-29)
+
+- Exercise guides and names include all 134 iOS catalog exercises and use the iOS translations, with English fallback where the iOS catalog has no translation. The first-exposure tutorial uses the selected gender's tutorial image; exercise details use the female image as on iOS, with coach media taking precedence.
+- The tutorial media URL rules have unit coverage. The workout unit tests and debug app build pass. Remote image availability and visual rendering on a device still need verification; the public media host was inaccessible from this environment. This does not establish full workout parity.
+
 The canonical behavior lives in the sibling iOS repository:
 
 - `../doubleTriangle/Wildforce/Views/App/Training/Workout/WorkoutDayView.swift`
@@ -82,6 +87,33 @@ Initial estimate: functional 70%, visual 55%, accessibility/localization/integra
 - [x] Haptics cover set, exercise, feedback, rest adjustment, and final completion. Android now maps the iOS selection/success cues across calendar/mode selection, set completion, exercise transitions, feedback, timers/rest adjustment, and completion records/summary/milestones.
 
 ## Implementation log
+
+### 2026-10-28 — custom superset zero rest persistence
+
+- Preserve an explicit zero-second block rest when saving and loading a custom workout; a missing rest remains null. Previously loading converted zero to null, so splitting a superset or removing one of its exercises could replace the chosen zero with 60 seconds. Added coverage for both editing operations with zero rest.
+- The custom workout editor and its exercise picker hide the root navigation and active-workout accessory, matching the iOS sheet presentation and preventing the floating controls from covering editor content.
+- Android Back closes the exercise picker first and then the editor, retaining a meaningful draft just like the editor's close action; it no longer opens the app exit prompt from those screens.
+- Manual workout duration estimates now use the iOS estimator's typed repetition and duration targets, round work, inter-exercise rest, and rest between rounds. Unit tests cover timed and distance exercises, repetitions, and supersets with and without block rest.
+- Changing the custom editor's uniform repetition target clears older per-set targets, so the session uses the value shown in the editor. Returning from timed tracking to repetitions restores a typed repetition value and clears the duration and distance fields.
+- Completion scoring treats an empty per-set target array as absent and uses the typed repetition range, matching iOS; an empty saved array no longer produces a zero target and penalizes a correctly completed exercise.
+- Completion scoring compares accumulated timed work to the single prescribed duration, and excludes warmup/cooldown feedback from perceived effort, matching iOS WorkoutScore.
+- Completion scoring aggregates expanded superset rounds by original exercise within each block, including the block's shared feedback. Regression tests cover per-round targets and adjacent supersets with identical labels.
+- Coach-library exercises now receive the iOS initial timed prescription (30 seconds, 3 minutes, or 20 minutes and 1 km according to tracking mode), so selecting one creates a working timer instead of a durationless exercise.
+- The standard exercise picker uses the iOS catalog's timed and distance modes and corresponding initial prescriptions, including the 45-second plank defaults, instead of treating every catalog exercise as repetitions.
+- Replacing an exercise retains compatible sets and targets, clears exercise-specific load, converts incompatible tracking fields using iOS defaults, and refreshes the active inputs and timer.
+- Adding an exercise after an active superset creates a separate standard block after it, rather than inserting the new exercise into every round; this matches iOS EditWorkoutBlocks.
+- Superset round and rest controls resolve the current block against the expanded execution path, including later rounds and preceding supersets.
+- Adding, moving, or removing an exercise remaps saved session records, feedback, notes and set counts to their original exercises and rounds instead of leaving them attached to old execution positions. Removal resolves the source exercise from the expanded path; tests cover reordered, repeated and superset exercises.
+- Removing one exercise from a two-exercise superset converts the survivor to a standard block as on iOS; completed rounds are combined and their set records renumbered rather than discarded.
+- Splitting an active superset restores iOS set counts and remaps each exercise's recorded rounds. Changing its round count remaps later exercises and retains records from removed rounds.
+- Creating an active superset groups adjacent exercises within the same standard block and derives rounds and rest from their prescriptions, as in iOS EditWorkoutBlocks.
+- Skipping a superset exercise skips all of its remaining rounds, discards its pending results, and advances to the next unskipped exercise. Round rest and final feedback use the remaining path; the completion summary counts logical exercises rather than expanded rounds.
+- Sync maps omitted execution indices back to their logical planned exercise across all superset rounds and offsets subsequent blocks by the expanded round count.
+- Planned-exercise skip timestamps survive sync and local session serialization; a newly opened or restored session starts at an unskipped exercise instead of replaying an omission imported from iOS.
+- Imported omissions are merged without overwriting local targets; pending records for newly omitted exercises are discarded on restoration. For older snapshots without planned-exercise IDs, only unambiguous structurally matching exercises can be reconciled.
+- Planned-exercise IDs survive plan and session persistence. Newly selected and duplicated exercises receive independent IDs; reconciliation uses them even when the same exercise appears more than once or its block order changes. Older snapshots without IDs retain the conservative fallback.
+- Workout history records retain the workout and planned-exercise identity. Sync does not re-upload imported results or attach legacy/ambiguous results to another workout's first matching exercise.
+- Cancelling a workout resets its status, completion metrics and exercise omissions; duplicating a workout also clears omissions, as in iOS.
 
 ### 2026-10-22 — warmup non-timed phase parity
 
@@ -598,3 +630,15 @@ The checklist is intentionally kept in version control so future audits and codi
 ### Health Connect workout timestamp parity
 
 Android's completed-workout export now uses the persisted completion timestamp from the local completion metrics when creating the Health Connect exercise session and calorie record. This matches iOS HealthKit's `completedAt` handling; sessions without that persisted value retain the safe current-time fallback.
+
+### 2026-10-28 — synced completion XP parity
+
+- Android now applies the same completion rewards persisted by iOS: 25 XP for every completed session, plus 50 XP when the plan completes and 100 XP when the mesocycle completes. The `users` sync resource receives the resulting `xp` and `xp_level` values.
+- Streaks remain limited to one increment per local day, while XP is awarded per distinct workout; re-opening an already completed Android workout cannot award the remote account twice.
+- Added unit coverage for the three reward totals. Full completion-flow screenshot comparison remains unchanged because this affects persistence rather than the existing celebration UI.
+
+### 2026-10-29 — workout detail tab placement
+
+- Matched WorkoutDayView: target-muscle effort and equipment appear in Information only; Exercises starts with the planned workout blocks. Source comparison completed; Android build and visual verification remain pending in this environment.
+
+- The Information equipment list no longer invents a bodyweight item for exercises without catalogued equipment; an empty list hides the equipment section. Added regression coverage; execution remains pending due to the unavailable JDK.

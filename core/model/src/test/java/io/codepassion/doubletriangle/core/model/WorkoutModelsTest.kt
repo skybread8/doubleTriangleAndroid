@@ -25,6 +25,14 @@ class WorkoutModelsTest {
         assertEquals(true, WorkoutStatus.Skipped.isPlanFinalized)
     }
 
+    @Test fun confirmingGeneratedPlanActivatesDraftAndKeepsIdentity() {
+        val draft = state.copy(planId = "server-plan-id", planStatus = "draft")
+        assertEquals("active", draft.confirmGeneratedPlan().planStatus)
+        assertEquals("server-plan-id", draft.confirmGeneratedPlan().planId)
+        assertEquals("draft", draft.planStatus)
+        assertEquals("completed", draft.copy(planStatus = "completed").confirmGeneratedPlan().planStatus)
+    }
+
     @Test fun planBecomesCompletedWhenAllSlotsAreFinalized() {
         val completed = state.copy(workouts = state.workouts.map { it.copy(status = WorkoutStatus.Completed) })
         val skipped = state.copy(workouts = state.workouts.mapIndexed { index, workout -> workout.copy(status = if (index == 0) WorkoutStatus.Skipped else WorkoutStatus.Completed) })

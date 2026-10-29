@@ -1,0 +1,1892 @@
+{
+  "walking": {
+    "description": "Una manera natural i de baix impacte per millorar la salut cardiovascular i cremar calories.",
+    "instructions": [
+      "Mantén una postura erguida amb el cap aixecat i les espatlles relaxades.",
+      "Fons de tríceps",
+      "Fes un pas endavant, aterrant amb el taló i rodant fins als dits del peu.",
+      "Mantén un ritme constant i còmode que et permeti respirar fàcilment."
+    ],
+    "tips": [
+      "Porta calçat de suport per protegir les teves articulacions.",
+      "Mantén el teu core lleugerament actiu per donar suport a la zona lumbar.",
+      "Centra't en una passada suau i rítmica."
+    ]
+  },
+  "outdoorRunning": {
+    "description": "Un entrenament cardiovascular clàssic d'alta intensitat que millora la resistència i crema una quantitat significativa de calories.",
+    "instructions": [
+      "Mantén el cap elevat i mira a uns 10-20 peus al davant teu.",
+      "Mantén la part superior del cos relaxada amb els colzes flexionats a 90 graus.",
+      "Elevació lateral",
+      "Mantén el teu core actiu i evita inclinar-te massa cap endavant o cap enrere."
+    ],
+    "tips": [
+      "Comença amb una breu caminada d'escalfament o un lleu trote.",
+      "Augmenta la distància o la intensitat gradualment per evitar lesions.",
+      "Mantingues-te hidratat i porta unes sabatilles de córrer adequades."
+    ]
+  },
+  "treadmillWalking": {
+    "description": "Caminar a la cinta de córrer permet un control precís del ritme i de la inclinació en un entorn controlat.",
+    "instructions": [
+      "Puja a la cinta i fixa la pinça de seguretat a la teva roba.",
+      "Comença a una velocitat lenta per acostumar-te al moviment.",
+      "Mantingues una postura erguida i evita agafar-te a les barres laterals per millorar l'equilibri i cremar més calories.",
+      "Ajusta la velocitat i la inclinació segons calgui per adaptar-les al teu nivell de forma física."
+    ],
+    "tips": [
+      "Mantén la mirada cap endavant per mantenir l'equilibri.",
+      "Fes servir la funció d'inclinació per simular caminar a l'aire lliure i augmentar la intensitat.",
+      "Redueix gradualment la velocitat al final de la sessió per fer el refredament."
+    ]
+  },
+  "treadmillRunning": {
+    "description": "Córrer a la cinta ofereix una superfície constant i la possibilitat de fer un seguiment de les mètriques fàcilment.",
+    "instructions": [
+      "Fixeu el clip de seguretat i comenceu amb una caminada lenta per escalfar.",
+      "Augmenta gradualment la velocitat fins a arribar al ritme de cursa desitjat.",
+      "Centra't a aterrar suaument sobre el mig peu i mantenir un ritme constant.",
+      "Mantén el teu core actiu i mou els braços de manera controlada."
+    ],
+    "tips": [
+      "Varia els teus entrenaments amb intervals d'alta velocitat o inclinació.",
+      "Tingues una ampolla d'aigua a prop per mantenir-te hidratat.",
+      "Fes un refredament amb uns minuts de caminada abans de baixar."
+    ]
+  },
+  "stationaryBike": {
+    "description": "Una opció de cardio de baix impacte que treballa la part inferior del cos i respecta les articulacions.",
+    "instructions": [
+      "Ajusta l'altura del seient perquè el genoll quedi lleugerament doblegat al punt baix de la pedalada.",
+      "Seu dret o inclina't una mica cap endavant, mantenint l'esquena recta i el nucli activat.",
+      "Pedala amb un moviment suau i circular, empenyent cap avall i tirant cap amunt.",
+      "Ajusta el nivell de resistència per desafiar el teu sistema cardiovascular."
+    ],
+    "tips": [
+      "Assegura't que els teus peus estiguin ben subjectats als pedals o corretges.",
+      "Mantingues una cadència constant (RPM) per a una millor eficiència.",
+      "No et recolzis massa al manillar."
+    ]
+  },
+  "elliptical": {
+    "description": "Proporciona un entrenament de cos sencer de baix impacte que imita el moviment de córrer sense l'impacte.",
+    "instructions": [
+      "Puja als pedals i agafa les manetes.",
+      "Comença a moure les cames amb un moviment el·líptic suau, cap endavant o cap enrere.",
+      "Mantingues el core activat i l'esquena recta.",
+      "Fes servir els agafadors per implicar la part superior del cos i augmentar la despesa calòrica total."
+    ],
+    "tips": [
+      "Concentra't en empènyer amb tot el peu, no només amb els dits.",
+      "Varia la resistència i la inclinació per orientar diferents grups musculars.",
+      "Mantén les espatlles relaxades i evita subjectar les nanses massa fort."
+    ]
+  },
+  "rowing": {
+    "description": "Un potent entrenament de cos sencer que combina condicionament cardiovascular amb desenvolupament de la força.",
+    "instructions": [
+      "Seu al seient i assegura els teus peus a les corretges.",
+      "La fase d'agarre: Inclina't lleugerament cap endavant amb els braços estirats i els genolls flexionats.",
+      "La fase d'impuls: Empeny amb les cames, després inclina't lleugerament enrere i tira de la maneta cap a les costelles baixes.",
+      "La finalització: Cames esteses, la nansa al pit i t'inclines lleugerament cap enrere.",
+      "La recuperació: Estira els braços, inclina't cap endavant i després doblega els genolls per tornar a la fase d'agarre."
+    ],
+    "tips": [
+      "Mantén el core fort i l'esquena plana durant tot el moviment.",
+      "La potència hauria de venir un 60% de les cames, un 20% del tronc i un 20% dels braços.",
+      "Centra't en un moviment suau i rítmic i evita sacsejar el mànec."
+    ]
+  },
+  "jumpRope": {
+    "description": "Un entrenament cardiovascular d'alta intensitat i portable que millora la coordinació i l'agilitat.",
+    "instructions": [
+      "Sosté les manetes amb una presa relaxada, colzes a prop dels costats.",
+      "Salta només uns centímetres del terra, just el suficient perquè la corda passi per sota.",
+      "Aterra suaument sobre les puntes dels peus.",
+      "Utilitza els canells per girar la corda, no tot el braç."
+    ],
+    "tips": [
+      "Mantén el teu core actiu i mantén les espatlles relaxades.",
+      "Comença amb intervals més curts i augmenta la durada gradualment.",
+      "Mantingues un ritme constant per a una millor eficiència."
+    ]
+  },
+  "stairClimber": {
+    "description": "Una manera eficaç de desenvolupar la força de la part inferior del cos i la resistència cardiovascular imitant pujar escales.",
+    "instructions": [
+      "Puja a la màquina i selecciona la velocitat o el programa desitjat.",
+      "Mantingues una postura erguida i evita recolzar-te fortament als passamans.",
+      "Recolza tot el peu i empeny amb els talons per activar els glutis.",
+      "Mantén el teu core actiu i realitza els moviments de manera controlada."
+    ],
+    "tips": [
+      "Varia l'altura del pas i la velocitat per desafiar diferents músculs.",
+      "Centra't en un ritme estable i sostenible.",
+      "Evita saltar esglaons llevat que estigui programat específicament per a entrenament avançat."
+    ]
+  },
+  "skiErgWork": {
+    "description": "Un potent entrenament de cos sencer que simula l'esquí de fons, desenvolupant resistència i força de la part superior del cos.",
+    "instructions": [
+      "Col·loca els peus a l'amplada de les espatlles i sosté les empunyadures per sobre del cap.",
+      "Tira de les nanses cap avall en direcció als malucs mentre, al mateix temps, t'inclines des dels malucs i doblegues els genolls.",
+      "Acaba la tirada amb els braços estirats més enllà de les cuixes.",
+      "Estira els malucs i els genolls mentre tornes les nanses a la posició inicial."
+    ],
+    "tips": [
+      "Utilitza el tronc i les cames per generar potència, no només els braços.",
+      "Mantingues l'esquena plana i el tronc activat durant tot el moviment.",
+      "Centra't en un ritme suau i continu."
+    ]
+  },
+  "airSquat": {
+    "description": "Un moviment bàsic amb el pes corporal que millora la força i la mobilitat de la part inferior del cos.",
+    "instructions": [
+      "Col·loca els peus a l'amplada de les espatlles, amb els dits lleugerament cap a fora.",
+      "Activa el teu core i mantén el pit aixecat mentre comences a seure cap enrere sobre els malucs.",
+      "Baixa el cos fins que les teves cuixes siguin almenys paral·leles al terra.",
+      "Empenya amb els talons per tornar a la posició inicial."
+    ],
+    "tips": [
+      "Mantén el pes sobre els talons, no sobre les puntes dels peus.",
+      "Assegura't que els genolls estiguin alineats amb els dits dels peus i no s'enfonsin cap a dins.",
+      "Mantingues la columna neutra durant tot el moviment."
+    ]
+  },
+  "gobletSquat": {
+    "description": "Mantenir un pes a l'altura del pit mentre fas esquats ajuda a millorar la tècnica i l'estabilitat del tronc.",
+    "instructions": [
+      "Sosté una pesa o kettlebell contra el pit amb ambdues mans.",
+      "Col·loca els peus una mica més amples que l'amplada de les espatlles.",
+      "Baixa els malucs cap enrere i cap avall, mantenint el pit amunt i el pes a prop del cos.",
+      "Empenya amb els talons per tornar a la posició inicial."
+    ],
+    "tips": [
+      "Mantén els colzes apuntant cap avall i cap a l'interior dels genolls a la part baixa de la gatzoneta.",
+      "Inhala mentre baixes i exhala mentre tornes a pujar.",
+      "Mantingues la columna neutra i evita corbar l'esquena."
+    ]
+  },
+  "barbellBackSquat": {
+    "description": "L'estàndard d'or per desenvolupar força de tot el cos i massa a les cames utilitzant una barra.",
+    "instructions": [
+      "Col·loca la barra a la part superior de l'esquena, recolzada sobre els trapezis.",
+      "Col·loca els peus a l'amplada de les espatlles, amb els dits dels peus lleugerament cap a fora.",
+      "Activa el core i baixa els malucs fins que els teus quàdriceps estiguin com a mínim paral·lels al terra.",
+      "Empenya amb els talons per tornar a una posició erguida."
+    ],
+    "tips": [
+      "Mantén el pit aixecat i mira lleugerament cap endavant durant tota l'execució.",
+      "Evita que els teus genolls s'enfonsin cap a dins.",
+      "Fes servir una gàbia de força i un ajudant per seguretat quan aixequis molt de pes."
+    ]
+  },
+  "barbellFrontSquat": {
+    "description": "Col·locar la barra a la part frontal de les espatlles fa que els quàdriceps i la part superior de l'esquena s'activen més intensament.",
+    "instructions": [
+      "Reposa la barra sobre la part frontal de les espatlles, utilitzant l'agafada 'clean' o l'agafada 'cross-arm'.",
+      "Mantén els colzes alts durant tot el moviment per estabilitzar la barra.",
+      "Baixa fent squat, empenyent els malucs cap enrere i doblegant els genolls.",
+      "Torna a la posició inicial impulsant, mantenint el tronc erguït."
+    ],
+    "tips": [
+      "La barra hauria de semblar que descansa sobre els deltoides, no sobre la clavícula.",
+      "Mantén el core contraigut per donar suport a la teva postura erguida.",
+      "Centra't en mantenir els talons a terra."
+    ]
+  },
+  "smithMachineSquat": {
+    "description": "Fer squats a la màquina Smith aporta estabilitat addicional, permetent-te centrar en l'impuls de les cames i la posició.",
+    "instructions": [
+      "Posiciona't sota la barra amb els peus lleugerament cap endavant i separats a l'amplada de les espatlles.",
+      "Desencaixa la barra i baixa els malucs fins que les teves cuixes estiguin paral·leles al terra.",
+      "Empenya amb els talons per tornar a la posició inicial.",
+      "Bloqueja la barra amb seguretat un cop hagis acabat les repeticions."
+    ],
+    "tips": [
+      "Mantén el pit aixecat i el core activat durant tot el moviment.",
+      "Experimenta amb la col·locació dels peus per posar èmfasi en diferents parts de les cames.",
+      "La trajectòria fixa de la màquina Smith redueix les exigències d'equilibri."
+    ]
+  },
+  "dumbbellSquat": {
+    "description": "Mantenir peses als costats mentre fas esquats és una manera accessible d'afegir resistència al moviment bàsic de l'esquat.",
+    "instructions": [
+      "Col·loca els peus a l'amplada de les espatlles i sosté una haltera a cada mà als costats.",
+      "Baixa els malucs cap enrere i cap avall com si t'asseguessis en una cadira, mantenint el pit elevat.",
+      "Adducció de maluc a màquina",
+      "Empenya amb els talons per tornar a la posició erguida."
+    ],
+    "tips": [
+      "Mantén les peses quietes als costats; no les deixis balancejar.",
+      "Mantingues la columna neutra i evita corbar les espatlles.",
+      "Ideal per a qui troba incòmode l'esquat amb barra."
+    ]
+  },
+  "legPress": {
+    "description": "Un press a màquina que permet una gran càrrega per a la part inferior del cos amb mínima tensió a l'esquena.",
+    "instructions": [
+      "Seu a la màquina amb l'esquena i el cap recolzats al suport encoixinat.",
+      "Col·loca els peus a la plataforma aproximadament a l'amplada de les espatlles.",
+      "Allibera les barres de seguretat i baixa la plataforma cap al pit flexionant els genolls.",
+      "Empeny la plataforma de tornada a la posició inicial sense bloquejar els genolls a dalt."
+    ],
+    "tips": [
+      "Evita aixecar la part baixa de l'esquena del seient.",
+      "Mantén els peus plans a la plataforma en tot moment.",
+      "Controla el pes tant en la fase de baixada com en la de empenta."
+    ]
+  },
+  "walkingLunge": {
+    "description": "Un moviment funcional que desenvolupa la força d'una sola cama, l'equilibri i la coordinació.",
+    "instructions": [
+      "Fes un pas endavant amb una cama, abaixant els malucs fins que ambdues genolls estiguin flexionades uns 90 graus.",
+      "Assegura't que el teu genoll frontal estigui directament sobre el turmell.",
+      "Empenya amb el taló davanter per aixecar-te i fer un pas endavant amb l'altra cama.",
+      "Continua alternant les cames mentre avances."
+    ],
+    "tips": [
+      "Mantén el tronc dret i el core activat.",
+      "No deixis que el teu genoll posterior toqui el terra amb impacte.",
+      "Extensió de tríceps per sobre del cap"
+    ]
+  },
+  "reverseLunge": {
+    "description": "Fes un pas enrere en una estocada per treballar glutis i isquiotibials amb menys pressió al genoll.",
+    "instructions": [
+      "Col·loca els peus a l'amplada dels malucs.",
+      "Fes un pas enrere amb un peu i abaixa els malucs fins que ambdues genolls estiguin flexionades a 90 graus.",
+      "Assegura't que el teu genoll frontal estigui alineat sobre el turmell.",
+      "Impulsa't amb el peu de darrere per tornar a la posició inicial."
+    ],
+    "tips": [
+      "Mantén el pes principalment sobre el peu davanter.",
+      "Mantingues una postura erguida durant tot el moviment.",
+      "Controla el descens per evitar que el teu genoll posterior toqui el terra."
+    ]
+  },
+  "bulgarianSplitSquat": {
+    "description": "Eleva el peu posterior per concentrar i intensificar l'estirament i la càrrega als quàdriceps i als glútis de la cama davantera.",
+    "instructions": [
+      "Col·loca't a pocs passos davant d'un banc i posa la part superior d'un peu sobre el banc darrere teu.",
+      "Baixa els malucs fins que la teva cuixa davantera estigui gairebé paral·lela al terra.",
+      "Assegura't que el teu genoll frontal es mantingui alineat amb el peu i no sobrepassi els dits.",
+      "Empenya amb el taló davanter per tornar a una posició erguida."
+    ],
+    "tips": [
+      "Centra't en mantenir el tronc erecte o amb una lleugera inclinació cap endavant.",
+      "Aquest exercici requereix un equilibri significatiu; comença amb el pes corporal abans d'afegir peses de mà.",
+      "Ajusta la teva distància respecte al banc per trobar la posició més còmoda i efectiva."
+    ]
+  },
+  "stepUp": {
+    "description": "Puja a una superfície elevada per desenvolupar glutis potents i millorar la força funcional de les cames.",
+    "instructions": [
+      "Col·loca un peu sobre un banc o caixó resistent.",
+      "Empenya amb el taló per alçar el cos sobre la plataforma.",
+      "Baixa primer amb l'altre peu, seguit pel peu de partida.",
+      "Alterna les cames o completa totes les repeticions d'un costat abans de canviar."
+    ],
+    "tips": [
+      "Mantén el teu core actiu i mantén el pit aixecat.",
+      "Intenta no impulsar-te amb el peu del darrere; deixa que la cama elevada faci la feina.",
+      "Fons de braços declinat"
+    ]
+  },
+  "legExtension": {
+    "description": "Un exercici d'aïllament que enfoca específicament i desenvolupa els músculs del quàdriceps.",
+    "instructions": [
+      "Seu-te a la màquina d'extensió de cames amb l'esquena recolzada contra el coixí.",
+      "Col·loca les tíbies darrere de la palanca acolxada.",
+      "Estira les cames fins que estiguin rectes, centrant-te en la contracció dels quàdriceps.",
+      "Baixa el pes lentament fins a la posició inicial."
+    ],
+    "tips": [
+      "Evita utilitzar impuls per aixecar el pes.",
+      "Pes mort romanès amb manuelles",
+      "Assegura't que la palanca acolxada estigui situada just per sobre dels teus turmells."
+    ]
+  },
+  "lyingLegCurl": {
+    "description": "Se centra en aïllar els isquiotibials per millorar la força i l'estabilitat del genoll.",
+    "instructions": [
+      "Estira't boca avall a la màquina de curl de cames amb les cames totalment esteses.",
+      "Col·loca la palanca encoixinada just per sobre dels talons.",
+      "Porta les cames cap amunt tant com sigui possible, estrenyent els isquiotibials a dalt.",
+      "Baixa el pes fins a la posició inicial de manera controlada."
+    ],
+    "tips": [
+      "Mantén els malucs pressionats contra el banc durant tot el moviment.",
+      "Centra't en una fase excèntrica (de descens) lenta i controlada.",
+      "Evita balancejar el pes."
+    ]
+  },
+  "seatedLegCurl": {
+    "description": "Aïlla els isquiotibials en posició asseguda per a una contracció màxima i guany muscular.",
+    "instructions": [
+      "Seu a la màquina i ajusta la coixineta del regaç perquè reposi fermament contra les teves cuixes.",
+      "Col·loca les cames sobre la palanca acolxada perquè quedi darrere dels turmells.",
+      "Start with your knees nearly straight, then curl your lower legs down and back as far as possible.",
+      "Retorna lentament la palanca a la posició inicial."
+    ],
+    "tips": [
+      "Mantén la part superior del cos estable i evita utilitzar els braços per ajudar a tirar.",
+      "Tensa els isquiotibials a la part baixa del moviment.",
+      "Mantén els peus flexionats durant tota la sèrie."
+    ]
+  },
+  "calfRaise": {
+    "description": "Enforteix i desenvolupa els músculs del bessó aixecant els talons del terra.",
+    "instructions": [
+      "Para't a la vora d'un graó o plataforma amb la part davantera dels peus.",
+      "Baixa els talons per sota del nivell del graó per estirar els bessons.",
+      "Empenya amb l'avantpeu per aixecar els talons tan alt com sigui possible.",
+      "Baixa l'esquena lentament fins a la posició inicial de l'estirament."
+    ],
+    "tips": [
+      "Agafa't a una paret o barana per mantenir l'equilibri si cal.",
+      "Fes una pausa d'un segon a la part superior per maximitzar la contracció.",
+      "Es pot fer amb una cama a la vegada per augmentar la dificultat."
+    ]
+  },
+  "hipThrust": {
+    "description": "Ampliament considerat el millor exercici per al desenvolupament i la força màxima dels glutis.",
+    "instructions": [
+      "Seu a terra amb la part superior de l'esquena recolzada contra un banc i una barra sobre els malucs.",
+      "Recolza fermament els peus a terra, separats aproximadament a l'amplada de les espatlles.",
+      "Empenya amb els talons per elevar els malucs cap al sostre fins que el teu cos formi una línia recta des de les espatlles fins als genolls.",
+      "Prem els teus glutis a la part alta, després baixa els malucs cap al terra amb control."
+    ],
+    "tips": [
+      "Utilitza un coixinet o una tovallola a la barra per comoditat.",
+      "Mantén la barbeta cap al pit i el core activat per protegir la zona lumbar.",
+      "Esquat amb manuelles"
+    ]
+  },
+  "gluteBridge": {
+    "description": "Un exercici de pes corporal al terra que activa els abdominals i millora l'extensió de maluc.",
+    "instructions": [
+      "Estira't d'esquena amb els genolls flexionats i els peus plans a terra.",
+      "Mantén els braços al costat amb les palmes cap avall.",
+      "Eleva els malucs del terra estrenyent els glutis i empenyent amb els talons.",
+      "Mantén la posició un segon a dalt, després baixa de nou."
+    ],
+    "tips": [
+      "Assegura't d'activar el teu core perquè la part baixa de l'esquena no s'arquee en excés.",
+      "Estirament d'isquiotibials",
+      "Per a un repte addicional, realitza el pont amb una cama estesa."
+    ]
+  },
+  "deadlift": {
+    "description": "Un exercici de força fonamental per a tot el cos, que treballa tota la cadena posterior.",
+    "instructions": [
+      "Col·loca la part mitjana del peu sota la barra.",
+      "Inclina't des del maluc i doblega els genolls per agafar la barra just fora de les cames.",
+      "Mantén l'esquena plana i el pit ben dret mentre t'impulses amb els talons per aixecar-te.",
+      "Mantén la barra a prop del teu cos durant tot el moviment i posa't completament dret."
+    ],
+    "tips": [
+      "No arquegis l'esquena; mantén la columna neutra.",
+      "Inhala i brida el teu tronc abans de tirar del pes.",
+      "Baixa la barra inclinant el tronc des de les maluc primer i després doblegant els genolls un cop la barra els hagi superat."
+    ]
+  },
+  "barbellRomanianDeadlift": {
+    "description": "Una variant del pes mort que posa èmfasi en l'estirament i la contracció dels isquiotibials.",
+    "instructions": [
+      "Posa't amb els peus a l'amplada de malucs, subjectant una barra davant de les teves cuixes.",
+      "Inclina't des del maluc i baixa la barra cap al terra mantenint les cames majoritàriament rectes (lleu flexió de genolls).",
+      "Baixa la barra fins que sentis un estirament als isquiotibials, mantenint l'esquena plana.",
+      "Empenta els malucs cap endavant per tornar a la posició inicial."
+    ],
+    "tips": [
+      "Mantén la barra molt a prop de les teves cames en tot moment.",
+      "Concentra't en empènyer els malucs cap enrere tan lluny com sigui possible.",
+      "Evita que les espatlles o la part baixa de l'esquena s'encorvin."
+    ]
+  },
+  "dumbbellRomanianDeadlift": {
+    "description": "Un moviment de flexió de maluc centrat en els isquiotibials amb manuelles, que permet un rang de moviment més natural.",
+    "instructions": [
+      "Col·loca els peus a l'amplada dels malucs i sosté una haltera a cada mà davant de les cuixes.",
+      "Inclina't des del maluc i baixa les peses cap als teus peus, mantenint l'esquena plana.",
+      "Abducció de maluc a màquina",
+      "Activa els teus glutis i isquiotibials per tornar a la posició dempeus."
+    ],
+    "tips": [
+      "Mantén les manuelles a prop de les teves cames durant tot el moviment.",
+      "Centra't en empenyer els malucs cap enrere en lloc d'intentar arribar al terra.",
+      "Mantén els genolls lleugerament flexionats."
+    ]
+  },
+  "machineGluteKickback": {
+    "description": "Un exercici amb màquina dirigit que aïlla els glutis mitjançant un moviment de patada cap enrere.",
+    "instructions": [
+      "Posiciona't dins la màquina i posa un peu a la plataforma.",
+      "Empeny la plataforma cap enrere i cap amunt estenent el maluc.",
+      "Estreny els glutis a la part superior del moviment.",
+      "Torna lentament a la posició inicial i repeteix."
+    ],
+    "tips": [
+      "Mantén la zona central estable i evita arquear l'esquena.",
+      "Mantén el moviment controlat i centra't en la contracció dels glutis.",
+      "No balancegis la cama; utilitza els teus músculs per moure el pes."
+    ]
+  },
+  "cableGluteKickback": {
+    "description": "Fa servir la resistència del cable per aïllar els glutis mitjançant un moviment de 'kickback' controlat, mantenint tensió constant durant tot el rang de moviment.",
+    "instructions": [
+      "Fixeu una corretja de turmell a la màquina de cables a la posició més baixa i lligueu-la al voltant d'un turmell.",
+      "Col·loca't de cara a la màquina i subjecta el bastidor per mantenir l'equilibri.",
+      "Mantén el tronc ferm i la cama de suport lleugerament flexionada, empeny la cama amb la corretja cap enrere i cap amunt estenent el maluc.",
+      "Estreny els glutis a la part superior del moviment i després torna lentament a la posició inicial."
+    ],
+    "tips": [
+      "Mantén el tronc dret i evita rotar els malucs.",
+      "Realitza tota l'amplitud d'extensió de maluc per maximitzar l'activació dels glutis.",
+      "Controla el pes en el retorn en lloc de deixar que el cable arrossegui la teva cama cap endavant."
+    ]
+  },
+  "machineHipAbduction": {
+    "description": "Actua sobre la part externa de la maluc i el glutis mitjà per millorar l'estabilitat i l'estètica del maluc.",
+    "instructions": [
+      "Seu a la màquina amb la part externa de les cuixes contra els coixins.",
+      "Empenya les cames cap a fora contra la resistència.",
+      "Fes una pausa d'un segon en el punt de màxima contracció.",
+      "Esquat a la màquina Smith"
+    ],
+    "tips": [
+      "Mantén l'esquena plana contra el seient.",
+      "Utilitza un ritme controlat tant en la fase d'obertura com en la de tancament.",
+      "Ajusta la posició inicial a un rang de moviment còmode."
+    ]
+  },
+  "machineHipAdduction": {
+    "description": "Enforteix els músculs interns de la cuixa (adductors) per millorar l'estabilitat de la cama.",
+    "instructions": [
+      "Seu a la màquina amb l'interior de les teves cuixes recolzat contra els coixins.",
+      "Estreny les cames contra la resistència.",
+      "Fes una pausa d'un segon en el punt de màxima contracció.",
+      "Press d'espatlles a la màquina Smith"
+    ],
+    "tips": [
+      "Mantén el tronc estable durant tota la sèrie.",
+      "Fons de braços amb alliberament de mans",
+      "No deixis que les peses xoquin entre elles al final de la repetició."
+    ]
+  },
+  "cableHipAbduction": {
+    "description": "Fa servir un cable i una corretja per al turmell per aïllar els laterals del maluc i el glutis mitjà, un costat cada vegada.",
+    "instructions": [
+      "Fixeu una corretja de turmell a la politja baixa del cable i assegureu-la al voltant de la cama exterior.",
+      "Col·loca't de costat respecte a la màquina i subjecta el bastidor per mantenir l'equilibri.",
+      "Obertures en màquina pec-deck",
+      "Fes una breu pausa, després torna amb control a la posició inicial."
+    ],
+    "tips": [
+      "Mantén el moviment petit i controlat en lloc de balancejar la cama.",
+      "Activa el core perquè el maluc faci la feina en lloc del tronc.",
+      "Press de banca inclinat a la màquina Smith"
+    ]
+  },
+  "cableHipAdduction": {
+    "description": "Fa servir un cable i una corretja per al turmell per enfortir els músculs interns de la cuixa, un costat cada vegada.",
+    "instructions": [
+      "Fixeu una corretja de turmell a la politja baixa del cable i assegureu-la al voltant de la cama interior.",
+      "Col·loca't de costat respecte a la màquina amb la cama que treballa més lluny de la pila i subjecta el bastidor per mantenir l'equilibri.",
+      "Fes passar la cama de treball per davant del cos contra la resistència.",
+      "Fes una breu pausa, després torna a la posició inicial amb control."
+    ],
+    "tips": [
+      "Mantén el tronc dret i evita rotar els malucs.",
+      "Mou-te lentament perquè la part interna de la cuixa controli ambdues direccions de la repetició.",
+      "Utilitza una càrrega lleu a moderada i concentra't en la contracció al final del recorregut."
+    ]
+  },
+  "boxJump": {
+    "description": "Un moviment explosiu que desenvolupa la potència de la part inferior del cos i millora la forma cardiovascular.",
+    "instructions": [
+      "Col·loca't davant d'una caixa resistent amb els peus a l'amplada dels malucs.",
+      "Inclina't des del maluc i balanceja els braços cap enrere, després salta explosivament sobre la caixa.",
+      "Aterra suaument en un esquat parcial amb ambdós peus completament sobre la caixa.",
+      "Posa't dempeus completament, després baixa un peu a la vegada."
+    ],
+    "tips": [
+      "Centra't en un aterratge silenciós per assegurar-te que estàs absorbint l'impacte.",
+      "Tria una alçada de caixa que permeti una tècnica d'aterratge correcta.",
+      "No saltis cap enrere; baixar pas a pas és més segur per a les articulacions."
+    ]
+  },
+  "pushUp": {
+    "description": "Un exercici clàssic amb el pes del cos que desenvolupa la força del pit, les espatlles i els tríceps.",
+    "instructions": [
+      "Comença en posició de planxa alta amb les mans una mica més separades que l'amplada de les espatlles.",
+      "Mantén el cos en línia recta del cap als talons.",
+      "Baixa el pit cap al terra mantenint els colzes a un angle de 45 graus.",
+      "Empenya amb les palmes de les mans per tornar a la posició inicial."
+    ],
+    "tips": [
+      "Rem inclinat amb manuelles",
+      "Centra't en un rang complet de moviment per a una millor activació muscular.",
+      "Inhala en baixar i exhala en empènyer cap amunt."
+    ]
+  },
+  "declinePushUp": {
+    "description": "Fes flexions amb els peus elevats sobre un banc per posar més èmfasi a la part superior del pit i les espatlles.",
+    "instructions": [
+      "Col·loca els peus sobre un banc pla i les mans a terra, una mica més separades que l'amplada d'espatlles.",
+      "Mantén una línia recta des del cap fins als talons, activant el tronc.",
+      "Baixa el pit cap al terra doblegant els colzes.",
+      "Empeny cap amunt fins a la posició inicial estenent els braços."
+    ],
+    "tips": [
+      "Mantén els colzes a un angle de 45 graus respecte al teu cos.",
+      "No deixis que els malucs s'ensorrin; mantén els glutis i el tronc tens.",
+      "Com més alta és la banca, més difícil és l'exercici."
+    ]
+  },
+  "barbellBenchPress": {
+    "description": "El moviment fonamental de la part superior del cos per desenvolupar la màxima potència de pit i braços.",
+    "instructions": [
+      "Estira't sobre el banc amb els peus ben plantats a terra.",
+      "Agafa la barra una mica més ampla que l'amplada de les espatlles.",
+      "Baixa la barra fins a la meitat del pit de manera controlada.",
+      "Empeny la barra cap amunt fins que els braços estiguin completament estirats."
+    ],
+    "tips": [
+      "Mantén les omòplats retraïdes (apretades entre si) durant tot l'aixecament.",
+      "Mantén una lleu curvatura a la zona lumbar, però mantén les natges sobre el banc.",
+      "Treballa amb un spotter, especialment quan aixequis pesos elevats."
+    ]
+  },
+  "dumbbellBenchPress": {
+    "description": "Pressionar manuelles estirat en un banc pla permet un major rang de moviment i millora la salut de l'espatlla.",
+    "instructions": [
+      "Estira't sobre un banc sostenint una manuella a cada mà a l'alçada del pit.",
+      "Empeny els pesos cap amunt fins que els braços estiguin completament estirats per sobre del pit.",
+      "Baixa les manuelles amb control fins que estiguin a l'alçada del pit.",
+      "Mantén el tronc estable i els peus plans a terra."
+    ],
+    "tips": [
+      "Centra't en apropar les peses a la part superior sense que es toquin.",
+      "Mantén els colzes a un angle de 45 graus respecte al tronc.",
+      "Les manuelles requereixen més estabilització que una barra."
+    ]
+  },
+  "smithMachineBenchPress": {
+    "description": "La màquina Smith proporciona un recorregut guiat per a la press de banca, fent-la més segura per a qui s'entrena sol i permetent un enfocament muscular intens.",
+    "instructions": [
+      "Estira't al banc i posiciona't de manera que la barra s'alinei amb el centre del teu pit.",
+      "Desenganxa la barra i baixa-la lentament fins al pit.",
+      "Empeny la barra cap amunt fins que els teus braços estiguin completament estesos.",
+      "Bloqueja la barra amb seguretat quan hagis acabat."
+    ],
+    "tips": [
+      "Assegura't que el banc estigui perfectament centrat sota la barra.",
+      "Centra't en la contracció del pit durant tot el moviment.",
+      "Una gran opció per aïllament i sèries descendents."
+    ]
+  },
+  "dumbbellInclineBenchPress": {
+    "description": "El press amb manuelles en banc inclinat posa l'accent en la part superior del pit mentre permet que cada braç es mogui de manera independent.",
+    "instructions": [
+      "Ajusta un banc ajustable a una inclinació de 30–45 graus.",
+      "Seu amb una manuella recolzada a cada cuixa i després recosta't contra el banc.",
+      "Empenya les manuelles cap amunt des de la part superior del pit fins que els braços estiguin estirats.",
+      "Baixa els pesos amb control fins a la posició inicial."
+    ],
+    "tips": [
+      "Mantén les omòplats retraïdes contra el banc.",
+      "Utilitza una inclinació moderada per mantenir l'accent en la part superior del pit.",
+      "Tracció de dorsals a la politja"
+    ]
+  },
+  "barbellInclineBenchPress": {
+    "description": "Pressionar una barra en un banc inclinat treballa la part superior del pit i les espatlles, permetent sovint càrregues més pesants.",
+    "instructions": [
+      "Ajusta el banc a una inclinació de 30–45 graus i col·loca't sota la barra.",
+      "Agafa la barra una mica més ampla que l'amplada de les espatlles.",
+      "Baixa la barra fins a la part superior del pit de manera controlada.",
+      "Empeny la barra cap amunt fins que els teus braços estiguin completament estesos."
+    ],
+    "tips": [
+      "Mantén els colzes lleugerament plegats, no totalment oberts cap als costats.",
+      "Assegura't que la barra toqui la part superior del pit, no el coll.",
+      "Utilitza un spotter per seguretat."
+    ]
+  },
+  "smithMachineInclineBenchPress": {
+    "description": "Un press inclinat guiat que aïlla la part superior del pit i permet entrenar de manera segura a prop del fallament.",
+    "instructions": [
+      "Ajusta el banc ajustable a una inclinació i centra'l sota la barra de la màquina Smith.",
+      "Estira't al banc i assegura't que la barra s'alinei amb la part superior del teu pit.",
+      "Desencaixa la barra i abaixa-la amb control cap al pit.",
+      "Empeny la barra cap a la posició inicial."
+    ],
+    "tips": [
+      "Centra't en un ritme suau i constant.",
+      "Ajusta la posició del banc per trobar la trajectòria de press més còmoda.",
+      "Excel·lent per acabar de treballar la part superior del pit."
+    ]
+  },
+  "barbellDeclineBenchPress": {
+    "description": "Pressionar en declivi apunta a la porció inferior del pit i sovint permet càrregues més pesants gràcies a l'avantatge mecànic.",
+    "instructions": [
+      "Col·loca els peus al banc declinat i recosta't.",
+      "Agafa la barra amb una presa d'amplada mitjana.",
+      "Baixa la barra cap a la part baixa del pit/part superior de l'abdomen.",
+      "Empeny la barra cap amunt fins a la posició inicial."
+    ],
+    "tips": [
+      "Demana a un company que t'ajudi a desenganxar i tornar a enganxar la barra.",
+      "Mantén el moviment controlat; no deixis que la barra reboti contra el pit.",
+      "Centra't en la contracció a la part baixa del pit."
+    ]
+  },
+  "dumbbellDeclineBenchPress": {
+    "description": "El press declinat amb manuelles proporciona un estirament profund del pectoral inferior i millora l'amplitud de moviment.",
+    "instructions": [
+      "Seu al final d'un banc declinat amb manuelles sobre les teves cuixes.",
+      "Estira't d'esquena mentre portes les peses a l'alçada del pit.",
+      "Empeny les manuelles cap amunt fins que els braços estiguin estesos.",
+      "Baixa-les de nou amb control."
+    ],
+    "tips": [
+      "Press de banca inclinat amb barra",
+      "Rull de martell",
+      "Mantén el teu core actiu."
+    ]
+  },
+  "smithMachineDeclineBenchPress": {
+    "description": "Un press declinat guiat que apunta de manera segura als músculs inferiors del pit.",
+    "instructions": [
+      "Col·loca un banc declinat sota la barra de la màquina Smith.",
+      "Estira't i assegura't que el recorregut de la barra estigui per sobre de la part baixa del pit.",
+      "Desenganxa la barra i baixa-la cap al pit amb control.",
+      "Empeny la barra cap a la posició inicial."
+    ],
+    "tips": [
+      "Assegura't que el banc estigui ben col·locat i centrat.",
+      "Mantén l'esquena plana contra el banc.",
+      "Ideal per a treball de pit d'alt volum."
+    ]
+  },
+  "chestPressMachine": {
+    "description": "Proporciona una manera estable i controlada de treballar els músculs del pit amb menys requisits d'equilibri.",
+    "instructions": [
+      "Ajusta l'altura del seient perquè les nanses quedin alineades amb la meitat del teu pit.",
+      "Seu amb l'esquena contra el coixí i agafa les empunyadures.",
+      "Empenya les manetes cap endavant fins que els braços estiguin completament estirats.",
+      "Retorna lentament les nanses a la posició inicial."
+    ],
+    "tips": [
+      "Mantén els colzes lleugerament per sota del nivell de les espatlles.",
+      "Press militar",
+      "Evita bloquejar els colzes a la part superior."
+    ]
+  },
+  "dumbbellChestFly": {
+    "description": "Un moviment d'aïllament que estira i defineix els músculs del pit.",
+    "instructions": [
+      "Estira't sobre un banc amb les manuelles sostenudes sobre el pit, amb les palmes enfrontades.",
+      "Baixa les peses cap als costats en un arc ampli, mantenint una lleu flexió als colzes.",
+      "Atura't quan notis un estirament al pit, després torna a unir les peses sobre el teu pit.",
+      "Prem els músculs del pit a la part alta."
+    ],
+    "tips": [
+      "Mantén el moviment lent i controlat.",
+      "No baixis massa si sents molèsties a l'espatlla.",
+      "Centra't en el moviment de 'abraçar un arbre'."
+    ]
+  },
+  "cableFly": {
+    "description": "Fa servir cables per proporcionar tensió constant als músculs del pit durant tot el rang de moviment.",
+    "instructions": [
+      "Col·loca't entre dues polies de cable amb les nanses a l'alçada del pit.",
+      "Fes un petit pas endavant i subjecta els agafadors amb els braços estirats als costats.",
+      "Acosta les manelles davant del pit mantenint una lleu flexió dels colzes.",
+      "Torna lentament a la posició inicial."
+    ],
+    "tips": [
+      "Centra't en la contracció al pit mentre juntes les mans.",
+      "Mantén una lleu inclinació cap endavant per a una millor estabilitat.",
+      "Mantén el teu core tens per evitar que el cos es balancegi."
+    ]
+  },
+  "cableCrunchPress": {
+    "description": "Un exercici abdominal agenollat amb cable que sobrecàrrega el patró de crunch per construir abdominals més forts i definits.",
+    "instructions": [
+      "Fixeu una corda a la politja alta i agenolleu-vos cara a la màquina de cables.",
+      "Sosté la corda al costat del cap i fixa els malucs perquè el moviment provingui del tronc.",
+      "Apropa la caixa toràcica a la pelvis mantenint els colzes a prop i l'abdomen totalment actiu.",
+      "Torna lentament a la posició inicial sense que la pila de pesos et faci incorporar d'un cop."
+    ],
+    "tips": [
+      "Pensa a enrotllar la columna vertebral vèrtebra a vèrtebra en comptes de tirar només amb els braços.",
+      "Mantén els malucs principalment fixes perquè treballin els abdominals i no els flexors del maluc.",
+      "Utilitza una càrrega controlada que et permeti contraure completament els abdominals a cada repetició."
+    ]
+  },
+  "highToLowCableFly": {
+    "description": "Col·locar les politges a dalt i estirar cap avall treballa les fibres inferiors del pit.",
+    "instructions": [
+      "Col·loca les politges del cable a la posició més alta.",
+      "Agafa les empunadures i fes un pas endavant amb un peu per estabilitat.",
+      "Tira de les nanses cap avall i junta-les davant de la cintura.",
+      "Torna lentament els braços a la posició alta inicial."
+    ],
+    "tips": [
+      "Estreny la part inferior del pit a la part baixa del moviment.",
+      "Mantén una lleu inclinació cap endavant.",
+      "Evita utilitzar el pes del teu cos per tirar dels cables."
+    ]
+  },
+  "lowToHighCableFly": {
+    "description": "Col·locar els cables a baix i tirar cap amunt apunta a la part superior del pit i als deltoides anteriors.",
+    "instructions": [
+      "Col·loca les politges del cable a la posició més baixa.",
+      "Agafa les empunadures i situa't al centre, fent un petit pas endavant.",
+      "Tira de les nanses cap amunt i junta-les davant de la part superior del pit.",
+      "Baixa lentament les nanses fins a la posició inicial baixa."
+    ],
+    "tips": [
+      "Centra't en la contracció de la part alta del pit.",
+      "Mantén una lleugera flexió als colzes al llarg de tot el moviment.",
+      "Controla el pes durant tot el moviment."
+    ]
+  },
+  "pecDeckFly": {
+    "description": "Un fly a màquina que proporciona tensió constant al pit per a un millor aïllament.",
+    "instructions": [
+      "Seu a la màquina i posa els avantbraços contra les palanques encoixinades.",
+      "Agafa les empunadures i uneix les palanques davant del pit.",
+      "Fes una pausa d'un segon en el punt de màxima contracció.",
+      "Torna lentament a la posició inicial."
+    ],
+    "tips": [
+      "Mantén l'esquena i el cap recolzats contra el seient.",
+      "Centra't a prémer amb el pit en lloc de tirar amb els braços.",
+      "Mantingues un ritme constant i controlat."
+    ]
+  },
+  "barbellOverheadPress": {
+    "description": "Una pressa vertical potent que construeix espatlles amples i estabilitat de la part superior del cos.",
+    "instructions": [
+      "Col·loca els peus a l'amplada de les espatlles i sosté una barra a l'altura de les espatlles amb agarre prono.",
+      "Activa el core i empeny la barra directament per sobre del cap fins que els braços estiguin completament estirats.",
+      "Estireu completament els colzes a la part superior i empenyeu lleugerament el cap cap endavant.",
+      "Baixa la barra de nou als teus espatlles amb control."
+    ],
+    "tips": [
+      "No facis servir les cames per ajudar a aixecar el pes (això és un push press).",
+      "Mantén el core i els glútis ferms per estabilitzar el tronc.",
+      "Centra't en una trajectòria vertical de la barra."
+    ]
+  },
+  "dumbbellOverheadPress": {
+    "description": "Pressionar manuelles per sobre del cap permet un rang de moviment natural i ajuda a corregir desequilibris musculars.",
+    "instructions": [
+      "Mantingues-te dret o assegut amb una haltera a cada mà a l'altura de les espatlles, amb les palmes cap endavant.",
+      "Empeny els pesos cap amunt fins que els braços estiguin completament estirats.",
+      "Baixa les manuelles amb control fins a l'alçada de les espatlles.",
+      "Mantén el teu core actiu per evitar arquejar l'esquena."
+    ],
+    "tips": [
+      "Centra't en un moviment de press suau i controlat.",
+      "Mantén una base estable tant si estàs assegut com dempeus.",
+      "Les manuelles ofereixen més llibertat per a l'articulació de l'espatlla que una barra."
+    ]
+  },
+  "smithMachineOverheadPress": {
+    "description": "Un pressa vertical guiat que et permet centrar-te purament en l'impuls de l'espatlla amb més seguretat.",
+    "instructions": [
+      "Col·loca un seient o posa't sota la barra de la màquina Smith.",
+      "Agafa la barra una mica més ampla que l'amplada de les espatlles.",
+      "Desencaixa la barra i empeny-la per sobre del cap fins que els braços estiguin estirats.",
+      "Baixa-ho de nou a l'altura de les espatlles i repeteix."
+    ],
+    "tips": [
+      "Assegura't que la teva posició permeti una trajectòria vertical segura de la barra.",
+      "Centra't a contreure els deltoides dalt.",
+      "Evita arquear en excés la part baixa de l'esquena."
+    ]
+  },
+  "arnoldPress": {
+    "description": "Una pressa d'espatlles amb component rotacional que incideix sobre els tres caps del deltoide.",
+    "instructions": [
+      "Seu o posa't dret amb manuelles davant de les espatlles, palmes mirant cap a tu.",
+      "Empeny les peses per sobre del cap mentre gires les palmes cap endavant.",
+      "Acaba amb els braços estirats per sobre del cap i les palmes mirant cap a fora.",
+      "Gira les palmes cap a tu mentre baixes les peses a la posició inicial."
+    ],
+    "tips": [
+      "Mantingues una rotació controlada durant tot el press.",
+      "Mantén l'esquena recta i el nucli actiu.",
+      "Evita utilitzar pesos excessivament pesats fins que domines la coordinació."
+    ]
+  },
+  "lateralRaise": {
+    "description": "L'exercici d'aïllament clau per incrementar l'amplada de les espatlles.",
+    "instructions": [
+      "Col·loca els peus a l'amplada dels malucs i sosté les halteres als costats del cos.",
+      "Eleva els braços cap als costats amb una lleugera flexió als colzes fins que estiguin a l'altura de les espatlles.",
+      "Fes una pausa d'un segon a la part superior, després baixa lentament les peses cap als costats."
+    ],
+    "tips": [
+      "No balancegis les peses ni facis servir la inèrcia.",
+      "Premsa de cames",
+      "Imagina que estàs abocant aigua d'una gerra al punt més alt del moviment."
+    ]
+  },
+  "cableLateralRaise": {
+    "description": "Una elevació lateral amb cable que proporciona tensió constant als deltoides laterals durant tot el moviment.",
+    "instructions": [
+      "Col·loca't de costat respecte a la màquina de cables amb la politja en la posició més baixa.",
+      "Agafa l'empunyadura amb la mà més allunyada i estira a través del cos, o amb la mà més propera darrere de l'esquena.",
+      "Eleva el braç cap al costat fins que estigui a l'alçada de l'espatlla, mantenint una lleugera flexió del colze.",
+      "Baixa lentament la nansa fins a la posició inicial."
+    ],
+    "tips": [
+      "Mantén una postura erguida i evita inclinar-te allunyant-te de la màquina.",
+      "Centra't en liderar amb el colze i mantén el moviment controlat.",
+      "El cable aporta tensió fins i tot al punt més baix de la repetició, a diferència de les manuelles."
+    ]
+  },
+  "frontRaise": {
+    "description": "Treballa la part frontal de les espatlles per millorar definició i força.",
+    "instructions": [
+      "Posa't amb halteres davant de les teves cuixes, palmes cap a tu.",
+      "Eleva les peses cap endavant i cap amunt fins que els teus braços estiguin paral·lels al terra.",
+      "Fes una pausa d'un segon, després baixa les peses amb control."
+    ],
+    "tips": [
+      "Mantén el teu core tens per evitar que el cos es balancegi.",
+      "Press de banca declinat amb manuelles",
+      "Es pot fer alternant els braços o amb tots dos alhora."
+    ]
+  },
+  "cableFrontRaise": {
+    "description": "Aïlla els deltoides anteriors utilitzant la resistència del cable per a una tensió suau i constant.",
+    "instructions": [
+      "Col·loca't d'esquena a una màquina de cables amb la polia a la posició més baixa.",
+      "Sosté la maneta (o un accessori de barra) entre les cames o al teu costat.",
+      "Eleva els braços cap endavant i cap amunt fins que estiguin a l'alçada de les espatlles.",
+      "Baixa lentament de nou a la posició inicial."
+    ],
+    "tips": [
+      "Mantén el teu core actiu per evitar que el tronc es balancegi.",
+      "Controla el pes durant tot el recorregut de moviment.",
+      "Evita utilitzar impuls per aixecar el pes."
+    ]
+  },
+  "cableRearDeltFly": {
+    "description": "Aïlla els deltoides posteriors amb cables, permetent un perfil de resistència constant.",
+    "instructions": [
+      "Situa't al centre d'una màquina de crossover amb les politges a l'alçada del cap.",
+      "Creua els braços i agafa l'empunyadura esquerra amb la mà dreta i l'empunyadura dreta amb la mà esquerra.",
+      "Tira de les nanses cap a fora i després cap enrere en un arc ample, estrenyent els deltoides posteriors.",
+      "Torna lentament a la posició inicial mantenint la tensió."
+    ],
+    "tips": [
+      "Mantén una lleugera flexió als colzes durant tot el moviment.",
+      "Concentra't en tirar amb les espatlles, no amb els músculs de l'esquena.",
+      "Mantingues-te dret i mantén la zona central contraïda."
+    ]
+  },
+  "cableUprightRow": {
+    "description": "Activa les espatlles i els trapezis en tirar d'un accessori de cable verticalment cap al mentó.",
+    "instructions": [
+      "Col·loca't davant d'una màquina de cables amb la polia en la posició més baixa i una barra recta acoblada.",
+      "Agafa la barra amb presa per sobre (palmes cap avall), mans aproximadament a l'amplada de les espatlles.",
+      "Tira de la barra verticalment cap al teu mentó, conduint el moviment amb els colzes.",
+      "Atura't quan la barra estigui a l'altura del pit i els teus colzes estiguin alts.",
+      "Baixa lentament la barra fins a la posició inicial."
+    ],
+    "tips": [
+      "Mantén la barra a prop del teu cos durant tot l'aixecament.",
+      "Evita encongir massa les espatlles; centra't en els deltoides.",
+      "Mantén una postura estable i erguida."
+    ]
+  },
+  "cableExternalRotation": {
+    "description": "Enforteix el manegot dels rotadors girant el braç cap a fora contra la resistència del cable.",
+    "instructions": [
+      "Col·loca't de costat respecte a la màquina de cables amb la politja a l'altura del colze.",
+      "Agafa l'empunyadura amb la mà més allunyada, mantenint el colze enganxat al costat en un angle de 90 graus.",
+      "Gira l'avantbraç cap a fora, allunyant-lo del cos, fins on et sigui còmode.",
+      "Torna lentament a la posició inicial."
+    ],
+    "tips": [
+      "Col·loca una tovallola entre el colze i el costat per assegurar que el braç es mantingui tancat.",
+      "Fes servir un pes molt lleuger; es tracta de la salut i estabilitat de les articulacions, no de la càrrega màxima.",
+      "Mou-te amb control i dins d'un rang de moviment còmode."
+    ]
+  },
+  "cableInternalRotation": {
+    "description": "Enforteix els rotadors interns de l'espatlla mitjançant una màquina de cables.",
+    "instructions": [
+      "Col·loca't de costat respecte a la màquina de cables amb la politja a l'altura del colze.",
+      "Agafa la nansa amb la mà més propera, mantenint el colze ajustat al costat amb un angle de 90°.",
+      "Gira l'avantbraç cap a dins, cap al cos.",
+      "Torna lentament a la posició inicial."
+    ],
+    "tips": [
+      "Mantén el colze apegat al costat del cos durant tota la sèrie.",
+      "Centra't en la qualitat del moviment més que en el pes.",
+      "Mantén una postura erguida i estable."
+    ]
+  },
+  "tricepsDip": {
+    "description": "Un exercici exigent amb el pes corporal que desenvolupa força considerable als tríceps i al pit.",
+    "instructions": [
+      "Agafa les barres paral·leles i impulsa't fins que els braços estiguin completament estesos.",
+      "Obertures per a deltoides posteriors a màquina",
+      "Empenta cap enrere fins a la posició inicial estenent els braços.",
+      "Mantén el tronc majoritàriament dret per centrar el treball als tríceps."
+    ],
+    "tips": [
+      "Evita que les teves espatlles s'encongeixin cap a les orelles.",
+      "Mantén els colzes a prop del cos.",
+      "Si fer fons amb el teu pes corporal és massa difícil, utilitza una màquina assistida per a dips o bandes elàstiques."
+    ]
+  },
+  "chestDip": {
+    "description": "Una variant de dips en què inclines el tronc cap endavant per desplaçar l'enfocament dels tríceps cap als músculs del pit.",
+    "instructions": [
+      "Agafa les barres paral·leles i empeny-te fins a la posició inicial.",
+      "Inclina el tronc cap endavant en un angle d'aproximadament 45 graus mentre baixes el cos.",
+      "Deixa que els teus colzes s'obrin lleugerament mentre baixes.",
+      "Empeny cap amunt fins a la posició inicial mantenint la inclinació cap endavant."
+    ],
+    "tips": [
+      "Prem el pit a la part alta del moviment.",
+      "Baixa't fins que les espatlles estiguin lleugerament per sota dels colzes.",
+      "Controla la baixada per evitar sobrecàrrega a les espatlles."
+    ]
+  },
+  "tricepsPushdown": {
+    "description": "Un exercici popular amb polea per a aïllar i desenvolupar els tríceps.",
+    "instructions": [
+      "Fixeu una barra o una corda a la politja alta de la màquina de cables.",
+      "Agafa l'accessori i tira cap avall fins que els colzes formin un angle de 90 graus.",
+      "Empenya l'accessori cap avall fins que els braços estiguin completament estirats, contraient els tríceps al final.",
+      "Torna lentament a la posició inicial de 90 graus."
+    ],
+    "tips": [
+      "Mantén els colzes pegats al cos durant tota la sèrie.",
+      "Evita utilitzar el pes del teu cos per empènyer el cable cap avall.",
+      "Mantén una lleu inclinació cap endavant i el core activat."
+    ]
+  },
+  "overheadTricepsExtension": {
+    "description": "Actua sobre el cap llarg del tríceps estenent el pes per sobre del cap.",
+    "instructions": [
+      "Seu o posa't dret, sostenint una manuella amb ambdues mans per sobre del cap.",
+      "Baixa el pes darrere del cap doblegant els colzes.",
+      "Estira els braços per aixecar el pes de tornada a la posició inicial per sobre del cap.",
+      "Mantén la part superior dels braços immòbil durant tot el moviment."
+    ],
+    "tips": [
+      "Mantén els colzes apuntant cap endavant en comptes de cap als costats.",
+      "Press de banca amb manuelles",
+      "Utilitza un ritme controlat per evitar colpejar-te el cap o el coll."
+    ]
+  },
+  "cableOverheadTricepsExtension": {
+    "description": "Una versió amb cable de l'extensió de tríceps per sobre del cap que manté tensió constant al cap llarg del tríceps durant tota l'amplitud de moviment.",
+    "instructions": [
+      "Fixeu una corda al cable baix o col·loqueu-vos de manera que el cable passi darrere del cap.",
+      "Col·loca't d'esquena a la màquina i porta la corda per sobre del cap amb els colzes plegats i apuntant cap endavant.",
+      "Estira els colzes fins que els braços estiguin rectes, contraient els tríceps a dalt.",
+      "Torna lentament a la posició inicial estirada sense deixar que els teus colzes s'obrin excessivament."
+    ],
+    "tips": [
+      "Mantén els colzes gairebé immòbils i deixa que només es moguin els avantbraços.",
+      "Activa el core perquè la part lumbar no s'arquegi durant la sèrie.",
+      "Utilitza un ritme suau i aprofita l'estirament a la part baixa del moviment."
+    ]
+  },
+  "ringDip": {
+    "description": "Una variant avançada de fons a les anelles que requereix estabilitat i força significatives.",
+    "instructions": [
+      "Suporta't als anells amb els braços totalment estirats.",
+      "Baixa el cos amb control, mantenint els anells a prop dels costats.",
+      "Impulsa't cap enrere fins a la posició inicial, fent èmfasi en estabilitzar els anells.",
+      "Gira els palmells lleugerament cap a fora a la part alta per a la màxima estabilitat."
+    ],
+    "tips": [
+      "Mantén el teu core molt tens per minimitzar el balanceig.",
+      "Comença sostenint-te als anells per desenvolupar l'estabilitat necessària abans d'intentar repeticions completes.",
+      "Assegura't que els anells estiguin a una altura adequada pel teu rang de moviment."
+    ]
+  },
+  "pullUp": {
+    "description": "Un moviment amb el pes corporal d'elit per desenvolupar una esquena ampla i poderosa i braços forts.",
+    "instructions": [
+      "Agafa la barra amb les palmes mirant cap a fora, una mica més ampla que l'amplada de les espatlles.",
+      "Penja't amb els braços completament estirats i amb el tronc activat.",
+      "Porta el pit cap a la barra dirigint els colzes cap avall en direcció als malucs.",
+      "Baixa't de nou a la posició inicial amb control."
+    ],
+    "tips": [
+      "Concentra't en tirar amb els músculs de l'esquena en lloc de només amb els braços.",
+      "Evita balancejar les cames o utilitzar impuls (kipping).",
+      "Si no pots fer una dominada completa, comença amb variants assistides o negatives."
+    ]
+  },
+  "chinUp": {
+    "description": "Una variant de dominada amb les palmes cap a tu, que fa èmfasi als bíceps i la part baixa del dorsal.",
+    "instructions": [
+      "Agafa la barra amb les palmes cap a tu, aproximadament a l'amplada de les espatlles.",
+      "Penja't amb els braços completament estirats.",
+      "Tira el mentó per sobre la barra empenyent els colzes cap avall.",
+      "Baixa't de nou a la posició inicial amb control."
+    ],
+    "tips": [
+      "Les dominades amb presa supinada generalment activen més els bíceps i el pit que les dominades amb presa prona.",
+      "Mantén el teu core tens per evitar que el cos es balancegi.",
+      "Assegura un rang complet de moviment des de la penjada morta fins que el mentó estigui per sobre de la barra."
+    ]
+  },
+  "latPulldown": {
+    "description": "Un exercici a màquina que et permet desenvolupar força de tirada vertical de manera controlada.",
+    "instructions": [
+      "Seu a la màquina i ajusta els coixins dels genolls perquè estiguis ben subjecte.",
+      "Agafa la barra més ampla que l'amplada de les espatlles i inclina't lleugerament enrere.",
+      "Tira de la barra cap a la part superior del pit, centrant-te a prémer les escàpules.",
+      "Retorna lentament la barra a la posició inicial."
+    ],
+    "tips": [
+      "No portis la barra darrere del coll; porta-la cap a la part superior del pit.",
+      "Esquat goblet",
+      "Pes mort"
+    ]
+  },
+  "cableLatPushdown": {
+    "description": "Un exercici de peu amb polea que treballa els dorsals mitjançant l'extensió de l'espatlla, mantenint els braços gairebé estesos.",
+    "instructions": [
+      "Col·loca una barra recta o una corda a la politja alta i situa't de cara a la màquina.",
+      "Agafa l'accessori amb una lleu flexió dels colzes, fes un pas enrere i inclina't lleugerament des del maluc cap endavant.",
+      "Mantenint els braços gairebé estesos, baixa l'accessori cap a les cuixes empenyent els braços superiors cap avall i cap enrere.",
+      "Fes una breu pausa, després torna amb control a la posició inicial sense elevar les espatlles."
+    ],
+    "tips": [
+      "Mantingues només una petita flexió fixa als colzes perquè siguin els dorsals, no els tríceps, els que facin la feina.",
+      "Mantén el pit alt i evita balancejar el tronc per moure la càrrega.",
+      "Fes servir un rang controlat que et permeti sentir els dorsals estirar-se a la part alta i contraure's a prop de les cuixes."
+    ]
+  },
+  "seatedCableRow": {
+    "description": "Treballa el gruix de l'esquena tirant els cables cap al tronc mentre estàs assegut.",
+    "instructions": [
+      "Press de banca a la màquina Smith",
+      "Agafa la nansa i seu dret amb els braços estirats.",
+      "Tira de la nansa cap a les teves costelles baixes, estrenyent les omòplats juntes.",
+      "Torna lentament a la posició inicial sense deixar que la pila de pesos colpegi."
+    ],
+    "tips": [
+      "Mantén l'esquena recta i evita balancejar el tronc endavant i enrere.",
+      "Concentra't a tirar amb els colzes en lloc de les mans.",
+      "Mantén el tronc estable durant tot el moviment."
+    ]
+  },
+  "seatedMachineRow": {
+    "description": "Un rem en màquina amb suport al pit que aïlla els músculs de l'esquena mentre protegeix la zona lumbar.",
+    "instructions": [
+      "Ajusta el seient i la coixineta per al pit perquè puguis arribar còmodament a les nanses amb els braços estirats.",
+      "Seu amb el pit recolzat contra el coixí i agafa les empunyadures.",
+      "Tira de les nanses cap a tu, centrant-te en la contracció de la part mitjana de l'esquena.",
+      "Retorna lentament les nanses a la posició inicial."
+    ],
+    "tips": [
+      "Mantén el pit pressionat fermament contra el recolzament per aïllar l'esquena.",
+      "Centra't a prémer les omòplats en el punt de màxima contracció.",
+      "Evita encongir les espatlles."
+    ]
+  },
+  "barbellBentOverRow": {
+    "description": "Un potent moviment compost que desenvolupa el gruix de l'esquena i la força general de la part superior del cos.",
+    "instructions": [
+      "Col·loca els peus a l'amplada de les espatlles i sosté una barra amb agarre prono.",
+      "Inclina't des del maluc i doblega lleugerament els genolls, mantenint l'esquena recta.",
+      "Tira de la barra cap a les teves costelles baixes, mantenint els colzes a prop del cos.",
+      "Torna la barra a la posició inicial amb control."
+    ],
+    "tips": [
+      "Mantingues la columna neutra i evita corbar l'esquena.",
+      "Mantén el teu core actiu per donar suport a la zona lumbar.",
+      "No facis servir la inèrcia per 'enganyar' l'aixecament del pes."
+    ]
+  },
+  "dumbbellBentOverRow": {
+    "description": "En inclinar-te i tirar les manuelles cap a la cintura, es treballen els músculs de l'esquena amb un rang de moviment més ampli.",
+    "instructions": [
+      "Col·loca els peus a l'amplada de les espatlles i sosté una haltera a cada mà.",
+      "Inclina't des del maluc fins que el tors estigui gairebé paral·lel al terra.",
+      "Tira de les manuelles cap als malucs, estrenyent les escàpules.",
+      "Baixa les peses de nou amb control."
+    ],
+    "tips": [
+      "Mantén l'esquena plana i el nucli actiu durant tot l'exercici.",
+      "Concentra't en tirar amb els colzes.",
+      "Les manuelles permeten que cada costat de l'esquena treballi de manera independent."
+    ]
+  },
+  "smithMachineBentOverRow": {
+    "description": "Una variant de rem guiada que permet càrregues pesades amb enfocament en la contracció de la part mitjana de l'esquena.",
+    "instructions": [
+      "Posiciona't en una postura inclinada sobre la barra de la màquina Smith.",
+      "Agafa la barra i desenganxa el dispositiu de seguretat.",
+      "Tira de la barra cap a les teves costelles baixes, mantenint l'esquena plana.",
+      "Baixa la barra de nou i repeteix."
+    ],
+    "tips": [
+      "Mantén la posició de flexió de maluc estable durant tota la sèrie.",
+      "La trajectòria fixa ajuda a aïllar els músculs objectiu.",
+      "Ajusta la teva distància respecte a la barra per comoditat."
+    ]
+  },
+  "singleArmDumbbellRow": {
+    "description": "Permet un rang de moviment més profund i ajuda a corregir desequilibris musculars a l'esquena.",
+    "instructions": [
+      "Col·loca un genoll i una mà sobre un banc per suport, mantenint l'esquena recta.",
+      "Sostén una pesa a l'altra mà amb el braç estès cap al terra.",
+      "Tira de la manuella cap al maluc, mantenint el colze a prop del costat.",
+      "Baixa lentament la manuella fins a la posició inicial."
+    ],
+    "tips": [
+      "Concentra't en tirar amb l'esquena i l'escàpula, no només amb el braç.",
+      "Mantén el tronc estable i evita girar el cos mentre tires.",
+      "Mantén el coll en una posició neutral."
+    ]
+  },
+  "facePull": {
+    "description": "Essencial per a la salut de l'espatlla, enfocant-se en els deltoides posteriors i els músculs de la part superior de l'esquena.",
+    "instructions": [
+      "Fixeu una corda a la politja del cable a l'altura de la part superior del pit o dels ulls.",
+      "Agafa els extrems de la corda amb els polzes apuntant cap enrere.",
+      "Tira de la corda cap al front, separant els extrems a mesura que s'acosta a la teva cara.",
+      "Centra't a contreure els deltoides posteriors i la part mitjana de l'esquena al final del moviment."
+    ],
+    "tips": [
+      "Mantén els colzes alts i oberts cap als costats.",
+      "Evita utilitzar la zona lumbar per tirar; mantén-te dret i estable.",
+      "Fes servir pesos més lleugers i centra't en la qualitat de la contracció."
+    ]
+  },
+  "rearDeltFly": {
+    "description": "Aïlla la part posterior de les espatlles per ajudar a crear una figura equilibrada.",
+    "instructions": [
+      "Seu a la vora d'un banc o d'un suport i inclina't cap endavant des dels malucs, mantenint l'esquena plana.",
+      "Sosté les peses amb les palmes una davant de l'altra i els braços estirats cap al terra.",
+      "Eleva les peses cap als costats fins que els braços estiguin a l'altura de les espatlles.",
+      "Baixa lentament les peses fins a la posició inicial."
+    ],
+    "tips": [
+      "Elevació de cames en suspensió",
+      "Mantén una lleugera flexió als colzes durant tot el moviment.",
+      "No balancegis les peses."
+    ]
+  },
+  "machineRearDeltFly": {
+    "description": "Aïlla els deltoides posteriors utilitzant una màquina per a resultats controlats i efectius.",
+    "instructions": [
+      "Seu-te davant de la màquina amb el pit recolzat fermament contra el coixí.",
+      "Agafa les empunadures amb els braços estirats davant teu.",
+      "Tira de les nanses cap enrere en un arc ampli fins que els braços estiguin alineats amb les espatlles.",
+      "Estreny els deltoides posteriors i després torna lentament a la posició inicial."
+    ],
+    "tips": [
+      "Mantén el pit contra el coixí per aïllar els deltoides posteriors.",
+      "Centra't en la contracció a la part posterior de les espatlles.",
+      "Mantingues un ritme constant i controlat."
+    ]
+  },
+  "bicepsCurl": {
+    "description": "L'exercici d'aïllament clàssic per desenvolupar i definir els bíceps.",
+    "instructions": [
+      "Col·loca els peus a l'amplada dels malucs i sosté les halteres als costats amb les palmes mirant cap endavant.",
+      "Eleva les peses cap a les espatlles flexionant els colzes.",
+      "Prem els bíceps al punt més alt i després baixa les peses lentament.",
+      "Mantén la part superior dels braços immòbil durant tot el moviment."
+    ],
+    "tips": [
+      "Evita balancejar el cos o fer servir impuls per aixecar les peses.",
+      "Mantén els colzes a prop del tronc.",
+      "Rang complet de moviment: estira completament els braços a la part baixa."
+    ]
+  },
+  "cableCurl": {
+    "description": "Un curl amb cable de peu que manté tensió constant als bíceps des de l'inici fins al final de cada repetició.",
+    "instructions": [
+      "Fixeu una empunyadura recta o tipus EZ a la politja baixa i poseu-vos de cara a la màquina.",
+      "Agafa la nansa amb les palmes cap amunt i mantén els colzes a prop del cos.",
+      "Arrossega la mànec cap a les espatlles mantenint els braços superiors gairebé immòbils.",
+      "Patada de glutis a màquina"
+    ],
+    "tips": [
+      "No deixis que les espatlles es moguin cap endavant mentre baixes el pes.",
+      "Mantén el tronc quiet i evita inclinar-te cap enrere per moure la càrrega.",
+      "Fes una breu pausa gairebé a la part superior per maximitzar la contracció del bíceps."
+    ]
+  },
+  "bayesianCableCurl": {
+    "description": "Un curl amb cable darrere del cos que allarga el bíceps a l'inici de la repetició i fa èmfasi en la posició d'estirament.",
+    "instructions": [
+      "Fixeu una empunyadura simple a la politja baixa i poseu-vos d'esquena a la màquina amb l'empunyadura en una mà per darrere del maluc.",
+      "Fes un pas endavant fins que el cable estiri lleugerament el teu braç de treball per darrere del tronc.",
+      "Arrossega la mànec cap a l'espatlla evitant que el colze s'avanci massa cap endavant.",
+      "Baixa l'esquena fins a la posició inicial estirada amb control abans de repetir."
+    ],
+    "tips": [
+      "Col·loca't a una distància suficient de la màquina per sentir un estirament al bíceps en la part baixa.",
+      "Mantén el pit dret i evita girar el tors mentre fas el curl.",
+      "Fes servir càrregues moderades i control total per treure el màxim partit de l'estirament."
+    ]
+  },
+  "hammerCurl": {
+    "description": "Un curl amb agafada neutral que treballa el bíceps i el braquial per aconseguir braços més grossos.",
+    "instructions": [
+      "Posa't amb halteres als costats, palmes cap al tors (presa neutra).",
+      "Eleva les peses mantenint la presa neutra.",
+      "Prem al punt més alt i baixa de nou amb control.",
+      "Mantén els colzes pegats al cos."
+    ],
+    "tips": [
+      "Centra't en la contracció als bíceps i avantbraços.",
+      "Mantingues una postura erguida i evita balancejar-te.",
+      "Es pot fer alternant els braços o amb tots dos alhora."
+    ]
+  },
+  "suspensionRow": {
+    "description": "Fa servir un entrenador de suspensió per fer rems amb el propi pes corporal, permetent ajustar la dificultat fàcilment segons l'angle del cos.",
+    "instructions": [
+      "Agafa les empunadures i inclina't cap enrere amb els braços estirats i els peus cap endavant.",
+      "Mantén una línia recta des del cap fins als talons.",
+      "Tira el pit cap a les nanses empenyent els colzes cap enrere.",
+      "Baixa't de nou a la posició inicial amb control."
+    ],
+    "tips": [
+      "Ajusta la dificultat canviant la posició dels peus (més a prop de l'ancoratge és més difícil).",
+      "Activa el core i els glutis per evitar que els malucs s'enfonsin.",
+      "Centra't en un moviment suau i controlat."
+    ]
+  },
+  "landmineRow": {
+    "description": "Un potent exercici d'esquena que consisteix a ancorar un extrem d'una barra i tirar l'extrem carregat cap al tronc.",
+    "instructions": [
+      "Ancla un extrem d'una barra en un accessori landmine o en una cantonada del terra.",
+      "Col·loqueu discs de pes a l'altre extrem i poseu-vos a cavall de la barra, amb l'esquena cap a l'ancoratge.",
+      "Inclina't des del maluc i doblega lleugerament els genolls, mantenint l'esquena plana.",
+      "Agafa la barra (utilitza una nansa en V si està disponible) i tira l'extrem amb pes cap a les teves costelles inferiors.",
+      "Baixa el pes de nou amb control, mantenint l'esquena plana."
+    ],
+    "tips": [
+      "Activa el core durant tot el moviment per protegir la zona lumbar.",
+      "Concentra't en tirar amb els colzes i prémer les escàpules juntes.",
+      "Mantingues una posició de flexió de maluc constant; evita 'rebotar' el pes cap amunt."
+    ]
+  },
+  "plank": {
+    "description": "Un exercici fonamental de core que desenvolupa força isomètrica i estabilitat a tota la zona mitjana.",
+    "instructions": [
+      "Col·loca els avantbraços a terra, amb els colzes alineats sota les espatlles.",
+      "Estira les cames enrere i equilibra't sobre els dits dels peus.",
+      "Mantén el cos en línia recta del cap als talons.",
+      "Activa el teu core i mantén la posició."
+    ],
+    "tips": [
+      "Evita que els teus malucs s'enfonsin o s'aixequin massa.",
+      "Mantingues una posició neutral del coll; mira cap al terra.",
+      "Respira de manera constant durant tota la postura."
+    ]
+  },
+  "sidePlank": {
+    "description": "Se centra en els oblics i l'estabilitat lateral del tronc per millorar l'equilibri i prevenir el mal d'esquena.",
+    "instructions": [
+      "Estira't de costat amb les cames estirades i col·loca els peus un sobre l'altre.",
+      "Sustenta la part superior del cos sobre l'avantbraç, amb el colze directament sota l'espatlla.",
+      "Eleva els malucs fins que el teu cos formi una línia recta del cap als peus.",
+      "Mantén la posició mantenint el core activat i els malucs alineats."
+    ],
+    "tips": [
+      "No deixis que els malucs s'ensorrin cap al sòl.",
+      "Mantén el coll en una posició neutral, mirant cap endavant.",
+      "Per a una variant més fàcil, fes la planxa amb els genolls a terra."
+    ]
+  },
+  "deadBug": {
+    "description": "Una manera segura i eficaç de desenvolupar estabilitat del core i coordinació sense forçar l'esquena.",
+    "instructions": [
+      "Estira't d'esquena amb els braços estesos cap al sostre i els genolls flexionats a 90 graus (posició tabletop).",
+      "Baixa lentament el braç dret darrere del cap mentre estires simultàniament la cama esquerra cap al terra.",
+      "Mantén la part baixa de l'esquena pressionada fermament contra el terra durant tot el moviment.",
+      "Torna a la posició inicial i repeteix amb el braç i la cama oposats."
+    ],
+    "tips": [
+      "La clau és mantenir l'esquena plana; si s'arqueja l'esquena, no baixis la cama tant.",
+      "Mou-te lentament i amb control.",
+      "Exhala mentre estires les extremitats."
+    ]
+  },
+  "birdDog": {
+    "description": "Millora l'equilibri i l'estabilitat espinal activant simultàniament el tronc, els glutis i les espatlles.",
+    "instructions": [
+      "Comença a quatre grapes amb les mans sota les espatlles i els genolls sota els malucs.",
+      "Estira lentament el braç dret cap endavant i la cama esquerra cap enrere fins que ambdós estiguin paral·lels al terra.",
+      "Mantén els malucs a nivell i el tronc activat per evitar que l'esquena s'arquegi.",
+      "Mantén durant un segon, després torna a la posició inicial i canvia de costat."
+    ],
+    "tips": [
+      "Imagina que hi ha un got d'aigua a l'esquena que no vols vessar.",
+      "Press militar amb manuelles",
+      "Mantén la mirada cap al terra per mantenir el coll neutre."
+    ]
+  },
+  "mountainClimber": {
+    "description": "Un exercici dinàmic que treballa la musculatura del tronc i alhora suposa un important repte cardiovascular.",
+    "instructions": [
+      "Comença en posició de planxa alta amb les mans sota les espatlles i el cos en línia recta.",
+      "Porta un genoll cap al pit i després canvia ràpidament les cames, com si corréssis al lloc en posició de planxa.",
+      "Mantén els malucs baixos i el tronc ferm.",
+      "Mantingues un ritme constant i ràpid."
+    ],
+    "tips": [
+      "Evita que els teus malucs saltin amunt i avall.",
+      "Centra't a empènyer els genolls recte cap endavant.",
+      "Mantén el pes centrat sobre les mans."
+    ]
+  },
+  "russianTwist": {
+    "description": "Treballa els oblicus amb un moviment rotacional que millora la potència i definició del tronc.",
+    "instructions": [
+      "Seu a terra amb els genolls flexionats i els peus lleugerament elevats.",
+      "Inclina't lleugerament cap enrere mantenint l'esquena recta i el core activat.",
+      "Gira el tòrax cap a un costat, portant les mans cap al terra al costat del maluc.",
+      "Gira de nou cap a l'altre costat de manera controlada."
+    ],
+    "tips": [
+      "Segueix les teves mans amb la mirada per assegurar-te que tot el tronc està girant.",
+      "Mantén els peus junts i tan immòbils com sigui possible.",
+      "Obertures a la politja d'alt a baix"
+    ]
+  },
+  "bicycleCrunch": {
+    "description": "Un excel·lent exercici de nucli complet que treballa els abdominals superiors, inferiors i els oblics.",
+    "instructions": [
+      "Estira't d'esquena amb les mans darrere del cap i els genolls en posició tabletop.",
+      "Acosta el colze dret cap al teu genoll esquerre mentre estires la cama dreta.",
+      "Canvia de costat, portant el colze esquerre cap al genoll dret i estenent la cama esquerra.",
+      "Continua alternant els costats amb un moviment de pedaleig."
+    ],
+    "tips": [
+      "Centra't a girar el tronc en lloc de només tirar dels colzes.",
+      "Mantén la part baixa de l'esquena pressionada contra el terra.",
+      "Mou-te amb control en comptes de velocitat per a una millor implicació muscular."
+    ]
+  },
+  "hangingLegRaise": {
+    "description": "Un exercici de core avançat que apunta específicament als abdominals inferiors i millora la força de la presa.",
+    "instructions": [
+      "Penja't amb els braços completament estesos.",
+      "Mantén les cames estirades (o lleugerament flexionades) i aixeca-les fins que siguin paral·leles al terra.",
+      "Baixa les cames cap avall lentament i amb control.",
+      "Evita balancejar el cos per agafar impuls."
+    ],
+    "tips": [
+      "Activa el core i els dorsals per estabilitzar el cos.",
+      "Centra't en la 'basculació' de la pelvis per activar els abdominals inferiors.",
+      "Si les elevacions de cames completes són massa difícils, comença amb elevacions de genolls penjades."
+    ]
+  },
+  "lyingLegRaise": {
+    "description": "Un exercici de core a terra que entrena els abdominals per controlar la pelvis mentre les cames es mouen amb flexió de maluc.",
+    "instructions": [
+      "Estira't d'esquena amb els braços al costat i les cames esteses.",
+      "Activa els abdominals i pressiona suaument la part baixa de l'esquena contra el terra.",
+      "Alça ambdues cames juntes fins que siguin gairebé verticals, mantenint-les esteses o lleugerament flexionades segons calgui.",
+      "Baixa les cames lentament només fins on puguis sense que la part baixa de l'esquena s'aixequi del terra."
+    ],
+    "tips": [
+      "No persegueixis l'amplitud de moviment; atura el descens tan aviat com la part baixa de l'esquena comenci a alçar-se.",
+      "Flexiona els genolls o fes tocs alternats amb els talons per fer l'exercici més fàcil.",
+      "Mou-te lentament i evita balancejar les cames perquè siguin els teus abdominals, no l'impuls, els que controlin el moviment."
+    ]
+  },
+  "cableWoodchop": {
+    "description": "Un moviment rotacional funcional que desenvolupa la potència del core i treballa els oblíquus amb resistència de cable.",
+    "instructions": [
+      "Col·loca't de costat respecte a la màquina de cables amb la nansa situada en posició alta o baixa.",
+      "Agafa la nansa amb ambdues mans i allunya't de la màquina.",
+      "Tira de la nansa a través del cos i cap avall (o cap amunt) en un moviment diagonal de tallar fusta, girant el tronc.",
+      "Torna lentament a la posició inicial."
+    ],
+    "tips": [
+      "Mantén els braços majoritàriament rectes i gira des del nucli.",
+      "Gira el peu posterior mentre gires per protegir els genolls.",
+      "Mantén una base estable amb els peus separats a l'amplada de les espatlles."
+    ]
+  },
+  "burpee": {
+    "description": "L'exercici de cos sencer definitiu per cremar greix i desenvolupar potència explosiva i resistència.",
+    "instructions": [
+      "Comença en posició dempeus.",
+      "Baixa en una posició de cuclilles i posa les mans a terra.",
+      "Salta amb els peus cap enrere fins a la posició de planxa i realitza una flexió.",
+      "Porta els peus cap enrere cap a les mans i salta de manera explosiva a l'aire amb els braços per sobre del cap."
+    ],
+    "tips": [
+      "Mantén el core contraigut durant tot el moviment.",
+      "Tracció de politja alta frontal",
+      "Es pot modificar fent un pas enrere en lloc de saltar per reduir l'impacte."
+    ]
+  },
+  "jumpingJacks": {
+    "description": "Un exercici clàssic d'escalfament i condicionament de tot el cos que millora la coordinació i la salut cardiovascular.",
+    "instructions": [
+      "Col·loca els peus junts i els braços als costats.",
+      "Salta a l'aire obrint les cames a l'amplada d'espatlles i balancejant els braços per sobre del cap.",
+      "Salta de nou per tornar a la posició inicial.",
+      "Repeteix de manera rítmica."
+    ],
+    "tips": [
+      "Aterra suaument sobre les puntes dels peus.",
+      "Mantén els genolls lleugerament flexionats.",
+      "Mantén el teu core actiu durant tot el moviment."
+    ]
+  },
+  "highKnees": {
+    "description": "Un exercici cardiovascular d'alta intensitat que enforteix les cames i el tronc mentre millora la tècnica de carrera.",
+    "instructions": [
+      "Col·loca els peus a l'amplada dels malucs.",
+      "Eleva el genoll dret cap al pit tan alt com puguis mentre balanceges el braç esquerre.",
+      "Canvia ràpidament de cama, aixecant el genoll esquerre i bombejant el braç dret.",
+      "Continua alternant a un ritme ràpid, mantenint-te amb la punta dels peus."
+    ],
+    "tips": [
+      "Centra't a elevar els genolls com a mínim fins a l'altura del maluc.",
+      "Mantén el tronc dret; no t'inclinis cap enrere.",
+      "Balanceja els braços per ajudar a mantenir l'impuls."
+    ]
+  },
+  "squatJump": {
+    "description": "Combina una esquat tradicional amb un salt explosiu per desenvolupar potència i augmentar la freqüència cardíaca.",
+    "instructions": [
+      "Col·loca els peus a l'amplada de les espatlles.",
+      "Baixa fins a una posició de squat fins que les teves cuixes siguin paral·leles al terra.",
+      "Salta de manera explosiva cap a l'aire, arribant tan alt com puguis.",
+      "Aterra suaument i baixa immediatament al següent esquat."
+    ],
+    "tips": [
+      "Absorbeix l'impacte atterant sobre les puntes dels peus i rodant cap als talons.",
+      "Assegura't que els teus genolls no s'enfonsin cap a dins durant la sortida o l'aterratge.",
+      "Extensió de tríceps a la politja"
+    ]
+  },
+  "butterflySitUp": {
+    "description": "Un exercici clàssic de core de Freeletics que utilitza una posició de cames en papallona per minimitzar la implicació dels flexors del maluc.",
+    "instructions": [
+      "Estira't d'esquena amb les plantes dels peus juntes i els genolls apuntant cap a fora.",
+      "Estira els braços per sobre del cap i toca el terra darrere teu.",
+      "Activa el teu core i incorpora't completament, tocant el terra davant dels teus dits dels peus.",
+      "Baixa't de nou amb control."
+    ],
+    "tips": [
+      "Utilitza els braços per donar impuls si cal, però centra't en utilitzar els abdominals.",
+      "Mantén la part baixa de l'esquena pressionada contra el terra durant la fase inicial del sit-up.",
+      "Exhala mentre t'incorpores."
+    ]
+  },
+  "sprawl": {
+    "description": "Un moviment 'down-and-up' similar a un burpee però sense la flexió ni el salt, enfocat en la velocitat i l'acondicionament metabòlic.",
+    "instructions": [
+      "Des de la posició dempeus, baixa en gatzoneta i posa les mans a terra.",
+      "Salta amb els peus cap enrere fins quedar en posició de planxa alta.",
+      "Salta immediatament amb els peus cap enrere en direcció a les teves mans.",
+      "Torna a la posició dempeus tan ràpid com sigui possible."
+    ],
+    "tips": [
+      "Mantén el teu core tens per evitar que els malucs s'enfonsin en la posició de planxa.",
+      "Centra't en transicions ràpides entre estar dempeus i la planxa.",
+      "Mantén un ritme constant."
+    ]
+  },
+  "pikePushUp": {
+    "description": "Una variant de flexió amb pes corporal realitzada en posició pike per treballar les espatlles i la part superior del pit.",
+    "instructions": [
+      "Comença en posició de planxa alta, després eleva els malucs fins que el teu cos formi una V invertida.",
+      "Mantén les cames i els braços rectes, amb el cap encaixat entre els braços.",
+      "Baixa la part superior del cap cap al terra doblegant els colzes.",
+      "Empeny cap amunt fins a la posició de pike inicial."
+    ],
+    "tips": [
+      "Com més a prop estiguin els teus peus de les teves mans, més difícil és l'exercici.",
+      "Mantingues el core activat i l'esquena recta.",
+      "Concentra't en empènyer amb les espatlles."
+    ]
+  },
+  "superman": {
+    "description": "Enforteix tota la cadena posterior, incloent la part baixa de l'esquena, els glutis i els isquiotibials.",
+    "instructions": [
+      "Estira't boca avall a terra amb els braços estesos per sobre del cap i les cames estirades.",
+      "Eleva simultàniament els braços, el pit i les cames del terra.",
+      "Mantén la posició durant un segon, pressionant els glutis i la part baixa de l'esquena.",
+      "Baixa l'esquena amb control."
+    ],
+    "tips": [
+      "No miris cap amunt; mantén el coll en posició neutra mirant al terra.",
+      "Centra't en la llargada més que en l'alçada.",
+      "Exhala mentre aixeques."
+    ]
+  },
+  "handReleasePushUp": {
+    "description": "Una variant de flexió on aixeques les mans del terra a la part baixa de cada repetició per assegurar un rang complet de moviment i desenvolupar potència explosiva.",
+    "instructions": [
+      "Comença en posició de planxa alta.",
+      "Baixa el pit completament fins al terra.",
+      "Eleva breument ambdues mans del terra i torna a col·locar-les.",
+      "Empeny explosivament cap amunt fins a la posició inicial de planxa."
+    ],
+    "tips": [
+      "Mantén el core tens per evitar el 'snaking' del sòl.",
+      "Mantén el cos en línia recta del cap als talons.",
+      "Concentra't en empènyer amb tota la palma de la mà."
+    ]
+  },
+  "climber": {
+    "description": "Similar als mountain climbers però amb els peus saltant fora de les mans, amb èmfasi en la mobilitat del maluc i la potència del core.",
+    "instructions": [
+      "Comença en posició de planxa alta.",
+      "Salta amb el peu dret cap endavant i col·loca'l fora de la teva mà dreta.",
+      "Canvia les cames de manera explosiva: salta portant el peu dret cap enrere mentre col·loques el peu esquerre a l'exterior de la teva mà esquerra.",
+      "Continua alternant a un ritme ràpid i rítmic."
+    ],
+    "tips": [
+      "Mantén els malucs tan baixos com sigui possible.",
+      "Centra't en un ampli rang de moviment per a les cames.",
+      "Mantén la part superior del cos forta i estable."
+    ]
+  },
+  "boxingBagWork": {
+    "description": "Els intervals d'alta intensitat al sac de boxa desenvolupen la resistència cardiovascular, la potència i la coordinació.",
+    "instructions": [
+      "Col·loca't en posició de boxa amb les mans amunt protegint la cara.",
+      "Realitza diversos cops (jab, cross, hook, uppercut) contra el sac de boxa.",
+      "Mantingues els peus lleugers i mou-te al voltant del sac.",
+      "Mantingues una alta intensitat durant tota la ronda."
+    ],
+    "tips": [
+      "Concentra't en la tècnica correcta del cop per evitar lesions de canell.",
+      "Exhala amb cada cop.",
+      "Mantén el teu core actiu per a més potència i estabilitat."
+    ]
+  },
+  "catCow": {
+    "description": "Un moviment suau de la columna que millora la flexibilitat i alleuja la tensió a l'esquena.",
+    "instructions": [
+      "Comença a quatre grapes amb les mans sota les espatlles i els genolls sota els malucs.",
+      "Vaca: Inspira mentre baixes la panxa cap a terra, aixeques el pit i mires cap amunt.",
+      "Gat: exhala mentre arqueges l'esquena cap al sostre, fica la barbeta i contreu el melic.",
+      "Mou-te suaument entre les dues posicions, seguint la teva respiració."
+    ],
+    "tips": [
+      "Concentra't en moure una vèrtebra a la vegada.",
+      "Realitza els moviments de manera suau i dins d'un rang de moviment còmode.",
+      "Obre els dits ben amples per a un millor suport."
+    ]
+  },
+  "hipFlexorStretch": {
+    "description": "Alleuja la rigidesa als malucs causada per estar assegut durant molt de temps o per entrenaments intensos.",
+    "instructions": [
+      "Rem amb landmine",
+      "Mantén el tronc dret i empeny suaument els malucs cap endavant.",
+      "Estreny el glutí de la cama que està agenollada per aprofundir l'estirament.",
+      "Mantén durant la durada desitjada i després canvia de cama."
+    ],
+    "tips": [
+      "Evita arquear la part baixa de l'esquena; mantén el core activat.",
+      "Press inclinat amb manuelles",
+      "Mantén una postura erguida durant tot l'estirament."
+    ]
+  },
+  "hamstringStretch": {
+    "description": "Millora la flexibilitat a la part posterior de les cames i ajuda a prevenir el dolor lumbar.",
+    "instructions": [
+      "Seu a terra amb una cama estesa i l'altre peu recolzat contra la cara interna de la cuixa.",
+      "Inclina't des del maluc i estira't cap als teus dits dels peus, mantenint l'esquena plana.",
+      "Mantén l'estirament quan notis tensió a la part posterior de la cama.",
+      "Repeteix per l'altre costat."
+    ],
+    "tips": [
+      "No rebotis; mantén un estirament suau i constant.",
+      "Centra't a arribar amb el pit en lloc del cap per mantenir l'esquena més recta.",
+      "Respira profundament i intenta relaxar-te a l'estirament."
+    ]
+  },
+  "thoracicRotation": {
+    "description": "Obre la part superior de l'esquena i millora la mobilitat rotacional per a una millor postura i rendiment.",
+    "instructions": [
+      "Comença a quatre grapes o en posició lateral amb els genolls flexionats.",
+      "Col·loca una mà darrere del cap.",
+      "Gira el colze i el tronc cap al sostre, seguint amb la mirada.",
+      "Torna lentament a la posició inicial."
+    ],
+    "tips": [
+      "Mantén els malucs quiets i centra la rotació a la part superior de l'esquena.",
+      "Exhala mentre gires cap amunt.",
+      "No forcis l'amplitud de moviment; mou-te dins la teva zona de confort."
+    ]
+  },
+  "shoulderMobilityFlow": {
+    "description": "Una seqüència de moviments dissenyada per millorar el rang de moviment i la salut de les articulacions de l'espatlla.",
+    "instructions": [
+      "Realitza una sèrie de moviments controlats d'espatlla, com cercles amb els braços, rotacions d'espatlla i 'wall slides'.",
+      "Realitza cada moviment lentament i en tota la seva amplitud de moviment.",
+      "Centra't en mantenir les espatlles relaxades i cap avall, lluny de les orelles.",
+      "Mantén un flux constant i rítmic."
+    ],
+    "tips": [
+      "Eviteu qualsevol moviment que provoqui dolor punxant.",
+      "Mantén el teu core actiu per estabilitzar el tronc durant els moviments dels braços.",
+      "Ideal com a escalfament per a qualsevol entrenament de la part superior del cos."
+    ]
+  },
+  "worldGreatestStretch": {
+    "description": "Un estirament dinàmic complet que treballa els malucs, els isquiotibials i la columna toràcica.",
+    "instructions": [
+      "Comença en posició de planxa alta.",
+      "Mou el peu dret cap endavant, fora de la teva mà dreta.",
+      "Eleva el braç dret i gira el tronc cap al sostre, mirant la teva mà.",
+      "Acosta el colze dret cap a la part interior del peu dret.",
+      "Empeny cap enrere per fer un estirament dels isquiotibials estirant la cama davantera i aixecant els dits del peu.",
+      "Torna a la planxa i repeteix per l'altre costat."
+    ],
+    "tips": [
+      "Passa per cada fase lentament i amb intenció.",
+      "Mantén la cama de darrere tan recta com sigui possible durant la rotació.",
+      "Concentra't a obrir el pit mentre gires."
+    ]
+  },
+  "pigeonPose": {
+    "description": "Una postura de ioga eficaç per obrir els malucs i alleujar la tensió als glutis.",
+    "instructions": [
+      "Des de la posició de gos cap avall o a quatre potes, porta el genoll dret cap endavant cap al teu canell dret.",
+      "Col·loca la teva tíbia dreta a terra, intentant que quedi paral·lela a la part frontal de la teva estora (o tan còmode com sigui).",
+      "Estira la cama esquerra cap enrere i mantén-la recta.",
+      "Mantén els malucs alineats i baixa lentament el tronc sobre la cama davantera.",
+      "Mantén la posició i respira dins de l'estirament, després canvia de costat."
+    ],
+    "tips": [
+      "No forcis que la teva espinilla quedi paral·lela si et causa dolor al genoll.",
+      "Utilitza un bloc o un coixí sota el maluc per suportar-te si cal.",
+      "Mantén el peu davanter flexionat per protegir el genoll."
+    ]
+  },
+  "cobraStretch": {
+    "description": "Una extensió suau de l'esquena que estira els músculs abdominals i millora la flexibilitat de la columna.",
+    "instructions": [
+      "Estira't boca avall a terra amb les cames estirades i el dors dels peus a terra.",
+      "Col·loca les mans sota les espatlles.",
+      "Inhala i estira lentament els braços per aixecar el tòrax del terra.",
+      "Mantén els malucs a terra i les espatlles allunyades de les orelles.",
+      "Mira lleugerament cap amunt i mantén l'estirament."
+    ],
+    "tips": [
+      "No forcis que els teus braços quedin totalment estesos si et fa mal a la part baixa de l'esquena.",
+      "Activa lleugerament els glutis per donar suport a la columna.",
+      "Centra't a allargar la part frontal del teu cos."
+    ]
+  },
+  "childsPose": {
+    "description": "Una postura de descans que estira suaument l'esquena, els malucs i les espatlles.",
+    "instructions": [
+      "Agenolla't a terra amb els dits grossos dels peus tocant-se i seu sobre els talons.",
+      "Separa els genolls aproximadament a l'amplada dels malucs.",
+      "Exhala i inclina't cap endavant, reposant el tors entre les cuixes.",
+      "Estira els braços cap endavant amb les palmes cap avall, o deixa'ls relaxats al costat del cos.",
+      "Reposa el front a terra i respira profundament."
+    ],
+    "tips": [
+      "Obre més els genolls, si cal, per fer més espai per al tronc.",
+      "Centra't a enviar la respiració a la part baixa de l'esquena.",
+      "Relaxa completament la mandíbula i les espatlles."
+    ]
+  },
+  "inchworm": {
+    "description": "Un moviment dinàmic que estira els isquiotibials mentre millora l'estabilitat del core i de les espatlles.",
+    "instructions": [
+      "Col·loca els peus a l'amplada dels malucs.",
+      "Flexiona els malucs i recolza les mans a terra (flexiona lleugerament els genolls si cal).",
+      "Camina amb les mans cap endavant fins arribar a la posició de planxa alta.",
+      "Fes una breu pausa, després camina amb els peus cap a les teves mans amb passos petits, mantenint les cames tan rectes com sigui possible.",
+      "Torna a posar-te de peu i repeteix."
+    ],
+    "tips": [
+      "Mantén el core contraigut per evitar que els malucs s'enfonsin durant la planxa.",
+      "Mantén les cames rectes el màxim de temps possible per maximitzar l'estirament dels isquiotibials.",
+      "Mou-te amb control, evitant la pressa."
+    ]
+  },
+  "armCircles": {
+    "description": "Un senzill exercici de mobilitat d'espatlla que escalfarà el manguito rotador i millora la salut de l'articulació.",
+    "instructions": [
+      "Col·loca els peus a l'amplada de les espatlles i estira els braços cap als costats a l'altura de les espatlles.",
+      "Realitza petits cercles controlats amb els braços en direcció cap endavant.",
+      "Després de la durada desitjada, inverteix la direcció per fer cercles cap enrere.",
+      "Augmenta gradualment la mida dels cercles a mesura que les espatlles s'escalfen."
+    ],
+    "tips": [
+      "Mantén les espatlles relaxades i cap avall, lluny de les orelles.",
+      "Mantén el tronc estable; no deixis que el teu cos es balancegi.",
+      "Respira de manera natural durant tot el moviment."
+    ]
+  },
+  "legSwings": {
+    "description": "Un estirament dinàmic que millora la mobilitat del maluc i prepara les cames per a l'entrenament.",
+    "instructions": [
+      "Col·loca't a prop d'una paret o d'un objecte robust per mantenir l'equilibri.",
+      "Balanceja una cama endavant i enrere amb un moviment controlat, augmentant l'amplitud progressivament.",
+      "Després de les repeticions desitjades, canvia a balancejos laterals que creuen el cos.",
+      "Canvia de cama i repeteix."
+    ],
+    "tips": [
+      "Mantén el tronc dret i el core activat; evita una curvatura excessiva de l'esquena.",
+      "No forcis l'amplitud de moviment; mantén-te en un estirament còmode.",
+      "Mantén un ritme constant i rítmic."
+    ]
+  },
+  "wristCircles": {
+    "description": "Millora la mobilitat de l'articulació del canell i ajuda a prevenir sobrecàrregues durant els exercicis de la part superior del cos.",
+    "instructions": [
+      "Estira els braços davant teu o mantén-los relaxats als costats.",
+      "Gira els canells en un moviment circular, movent-los per tot l'arc de moviment.",
+      "Realitza cercles tant en sentit horari com en sentit antihorari.",
+      "També pots entrellaçar els dits i girar els canells junts."
+    ],
+    "tips": [
+      "Mantén el moviment lent i concentrat.",
+      "Relaxa les mans i els dits.",
+      "Particularment útil abans d'exercicis com les flexions o el press de banca."
+    ]
+  },
+  "ankleCircles": {
+    "description": "Millora la mobilitat del turmell i prepara els peus per a activitats amb càrrega.",
+    "instructions": [
+      "Para't sobre una cama (utilitza la paret per equilibrar-te) o seu amb una cama estirada.",
+      "Gira el turmell en un moviment circular, traçant el cercle més gran possible amb els dits del peu.",
+      "Realitza cercles en ambdues direccions.",
+      "Canvia els peus i repeteix."
+    ],
+    "tips": [
+      "Concentra't en moure només el turmell, no tota la cama.",
+      "Mou-te lentament per assegurar-te que treballes cada part de la rotació.",
+      "Ideal per millorar la profunditat de l'esquat i la mecànica de la cursa."
+    ]
+  },
+  "deepSquatHold": {
+    "description": "Una retenció isomètrica a la part baixa d'un esquat per millorar la mobilitat de malucs, genolls i turmells.",
+    "instructions": [
+      "Col·loca els peus a l'amplada de les espatlles, amb els dits dels peus lleugerament cap a fora.",
+      "Baixa fins al squat més profund possible, mantenint els talons a terra.",
+      "Recolza els colzes a la part interna dels genolls per empènyer-los suaument cap enfora.",
+      "Mantén el pit tan dret com sigui possible.",
+      "Mantén la posició durant la durada desitjada, respirant profundament."
+    ],
+    "tips": [
+      "Si els talons s'aixequen, col·loca'ls sobre una petita elevació o agafa't a un objecte robust per mantenir l'equilibri.",
+      "Centra't a relaxar-te als malucs.",
+      "Desplaça suaument el teu pes d'un costat a l'altre per treballar diferents zones."
+    ]
+  },
+  "scapularCircles": {
+    "description": "Millora la mobilitat i la salut de les escàpules (omòplats), promovent una millor postura i mecànica de la part superior del cos.",
+    "instructions": [
+      "Mantingues-te dret o assegut amb els braços relaxats als costats.",
+      "Encongeix les espatlles cap a les orelles (elevació).",
+      "Tira-les cap enrere, estrenyent les omòplats juntes (retracció).",
+      "Baixa-les tant com sigui possible (depressió).",
+      "Empeny les omòplats cap endavant, arrodonint lleugerament la part superior de l'esquena (protracció).",
+      "Suavitza aquests moviments en un moviment circular, fent-los en ambdues direccions."
+    ],
+    "tips": [
+      "Mantén els braços rectes i immòbils; el moviment ha de venir dels omòplats.",
+      "Imagina dibuixar un cercle amb els punts de les teves espatlles.",
+      "Evita arquear la part baixa de l'esquena."
+    ]
+  },
+  "quadStretch": {
+    "description": "Un estirament clàssic per a la part frontal de la cuixa per millorar la flexibilitat i la salut del genoll.",
+    "instructions": [
+      "Para't sobre una cama, utilitzant una paret o una cadira per equilibrar-te si cal.",
+      "Flexiona l'altra cama i estira el braç cap enrere per agafar el peu o el turmell amb la mà del mateix costat.",
+      "Apropa suaument el taló cap als glutis.",
+      "Mantén els genolls junts i el tronc dret.",
+      "Mantén la posició i després canvia de cama."
+    ],
+    "tips": [
+      "Estreny els glutis de la cama que estàs estirant per aprofundir l'estirament del flexor del maluc.",
+      "Evita arquear la part baixa de l'esquena.",
+      "Assegura't d'estar dret, sense inclinar‑te cap endavant."
+    ]
+  },
+  "doorwayChestStretch": {
+    "description": "Fa servir un marc de porta per obrir el pit i la part frontal de les espatlles, contrarestant la postura corbada.",
+    "instructions": [
+      "Col·loca't en un marc de porta o a la cantonada d'una paret.",
+      "Col·loca el/els avantbraç(s) contra el marc de la porta amb el colze a l'altura de l'espatlla.",
+      "Inclina't o fes un pas endavant fins que sentis un estirament còmode al pit.",
+      "Mantén la posició, respirant profundament.",
+      "Pots ajustar l'alçada dels braços per apuntar a diferents parts del pit."
+    ],
+    "tips": [
+      "No t'inclinis massa; l'estirament ha de ser suau.",
+      "Mantén les espatlles baixes i allunyades de les orelles.",
+      "Mantén el teu core actiu per evitar arquejar la zona lumbar."
+    ]
+  },
+  "scorpions": {
+    "description": "Un estirament dinàmic per a malucs, zona lumbar i pit, realitzat estirat boca avall.",
+    "instructions": [
+      "Estira't boca avall a terra amb els braços estesos als costats en forma de 'T'.",
+      "Eleva la cama dreta i porta-la a través del teu cos cap a la teva mà esquerra, girant els malucs.",
+      "Intenta tocar el terra amb el peu dret mentre mantens el pit i els braços el més plans possible.",
+      "Torna al centre i repeteix amb la cama esquerra."
+    ],
+    "tips": [
+      "Mou-te lentament i amb control per protegir la part baixa de l'esquena.",
+      "Focalitza't en la rotació de la columna i en l'obertura dels malucs.",
+      "Arriba només fins on et sigui còmode; el teu peu no ha de tocar la teva mà."
+    ]
+  },
+  "threadTheNeedle": {
+    "description": "Una rotació suau per a la part superior de l'esquena i les espatlles que també estira el coll.",
+    "instructions": [
+      "Comença a quatre grapes amb les mans sota les espatlles i els genolls sota els malucs.",
+      "Porta el braç dret per sota del cos cap a l'esquerra, lliscant el dors de la mà pel terra.",
+      "Baixa l'espatlla dreta i l'orella cap al terra.",
+      "Mantén els malucs alineats i respira cap a l'estirament entre les omòplats.",
+      "Mantén la posició, torna al centre i repeteix a l'altra banda."
+    ],
+    "tips": [
+      "Flexió de cames",
+      "Utilitza la mà esquerra per prémer suaument el terra i aprofondir la rotació si et resulta còmode.",
+      "Relaxa completament el coll."
+    ]
+  },
+  "neckCircles": {
+    "description": "Allibera suaument la tensió al coll i millora la mobilitat cervical.",
+    "instructions": [
+      "Seu o posa't dret amb les espatlles relaxades.",
+      "Deixa caure suaument el mentó cap al pit.",
+      "Roda lentament el cap cap a una espatlla, després amb cura cap enrere i cap a l'altra espatlla.",
+      "Continua el moviment circular lentament i amb suavitat.",
+      "Inverteix la direcció després de la durada desitjada."
+    ],
+    "tips": [
+      "Eviteu moviments ràpids o bruscos.",
+      "Si sents algun dolor punyent o mareig, atura't immediatament.",
+      "Mantén les espatlles baixes i relaxades durant tot l'exercici."
+    ]
+  }
+}

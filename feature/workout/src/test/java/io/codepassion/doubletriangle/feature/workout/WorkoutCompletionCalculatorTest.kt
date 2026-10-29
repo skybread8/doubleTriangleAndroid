@@ -2,9 +2,12 @@ package io.codepassion.doubletriangle.feature.workout
 
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseSetStyle
+import io.codepassion.doubletriangle.core.model.RepRange
 import io.codepassion.doubletriangle.core.model.SetStyleParameters
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutBlockType
+import io.codepassion.doubletriangle.core.model.WorkoutBlockSummary
+import io.codepassion.doubletriangle.core.model.executionExercises
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -68,6 +71,16 @@ class WorkoutCompletionCalculatorTest {
             workout,
             mapOf(0 to ExerciseSessionStats(3, 24, 50.0, 1_200.0), 1 to ExerciseSessionStats(3, 27, 0.0, 0.0)),
             mapOf(0 to "CORRECTO", 1 to "CORRECTO"),
+        )
+        assertEquals(100.0, score, 0.01)
+    }
+
+    @Test fun emptyPerSetTargetsUseTypedRangeForCompletionScore() {
+        val exercise = ExerciseSummary("Press", sets = 3, reps = "20", restSeconds = 90,
+            targetRepsPerSet = emptyList(), repRange = RepRange(10, 12))
+        val session = workout.copy(exercises = listOf(exercise))
+        val score = WorkoutCompletionCalculator.score(
+            session, mapOf(0 to ExerciseSessionStats(3, 33, 0.0, 0.0)), mapOf(0 to "CORRECTO"),
         )
         assertEquals(100.0, score, 0.01)
     }
@@ -197,6 +210,46 @@ class WorkoutCompletionCalculatorTest {
             mapOf(0 to "CORRECTO"),
         )
         assertEquals(100.0, score, 0.01)
+    }
+
+    @Test fun timedScoreComparesAccumulatedDurationWithOneTargetLikeIos() {
+        val timedWorkout = workout.copy(
+            exercises = listOf(ExerciseSummary("Plancha", sets = 3, reps = "45 s", restSeconds = 0, targetDurationSeconds = 45)),
+        )
+        val score = WorkoutCompletionCalculator.score(
+            timedWorkout, mapOf(0 to ExerciseSessionStats(sets = 3, durationSeconds = 45)), mapOf(0 to "CORRECTO"),
+        )
+        assertEquals(100.0, score, 0.01)
+    }
+
+    @Test fun warmupFeedbackDoesNotChangeWorkoutScore() {
+        val warmup = ExerciseSummary("Calentamiento", sets = 1, reps = "10", restSeconds = 0, blockType = WorkoutBlockType.Warmup)
+        val sectioned = workout.copy(exercises = listOf(warmup, workout.exercises.first()))
+        val stats = mapOf(0 to ExerciseSessionStats(1, 10), 1 to ExerciseSessionStats(3, 24))
+        val score = WorkoutCompletionCalculator.score(sectioned, stats, mapOf(0 to "MUY FÁCIL", 1 to "CORRECTO"))
+        assertEquals(100.0, score, 0.01)
+    }
+
+    @Test fun supersetRoundsAreScoredAsTheOriginalExercises() {
+        val block = WorkoutBlockSummary(WorkoutBlockType.Superset, rounds = 3, exercises = listOf(
+            ExerciseSummary("Press", sets = 1, reps = "8", restSeconds = 0, targetRepsPerSet = listOf(8, 6, 4)),
+            ExerciseSummary("Row", sets = 1, reps = "10", restSeconds = 0, targetRepsPerSet = listOf(10, 10, 10)),
+        ))
+        val session = workout.copy(exercises = block.executionExercises())
+        val reps = listOf(8, 10, 6, 10, 4, 10)
+        val stats = reps.mapIndexed { index, count -> index to ExerciseSessionStats(sets = 1, totalReps = count) }.toMap()
+        assertEquals(100.0, WorkoutCompletionCalculator.score(session, stats, mapOf(5 to "CORRECTO")), 0.01)
+    }
+
+    @Test fun adjacentSupersetsWithTheSameLabelsRemainSeparate() {
+        fun block(name: String) = WorkoutBlockSummary(WorkoutBlockType.Superset, rounds = 2, exercises = listOf(
+            ExerciseSummary(name, sets = 1, reps = "10", restSeconds = 0, targetRepsPerSet = listOf(10, 10)),
+        ))
+        val session = workout.copy(exercises = block("First").executionExercises() + block("Second").executionExercises())
+        val stats = mapOf(0 to ExerciseSessionStats(1, 10), 1 to ExerciseSessionStats(1, 10))
+        val score = WorkoutCompletionCalculator.score(session, stats, emptyMap())
+        assertTrue(score < 60.0)
+        assertTrue(score > 40.0)
     }
 
     @Test fun zeroSecondRestAdvancesImmediatelyLikeIos() {

@@ -46,5 +46,18 @@ internal fun List<WorkoutPathBlock>.mainExercises(): List<WorkoutPathExercise> =
         if (block.type in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)) emptyList() else block.exercises
     }
 
+internal fun WorkoutPathBlock.skippedExecutionIndices(currentIndex: Int, wholeBlock: Boolean): Set<Int> =
+    if (wholeBlock) exercises.flatMap { it.executionIndices }.toSet()
+    else exercises.firstOrNull { currentIndex in it.executionIndices }?.executionIndices?.toSet() ?: setOf(currentIndex)
+
+internal fun nextUnskippedExecutionIndex(currentIndex: Int, count: Int, skipped: Set<Int>): Int? =
+    (currentIndex + 1 until count).firstOrNull { it !in skipped }
+
+internal fun firstUnskippedExecutionIndex(start: Int, count: Int, skipped: Set<Int>): Int? =
+    (start.coerceAtLeast(0) until count).firstOrNull { it !in skipped }
+
+internal fun List<WorkoutPathExercise>.skippedExerciseCount(skipped: Set<Int>): Int =
+    count { item -> item.executionIndices.any { it in skipped } }
+
 internal fun WorkoutPathExercise.isCompleted(workout: WorkoutDaySummary, completedSets: Map<Int, Int>, addedSets: Map<Int, Int> = emptyMap()): Boolean =
     executionIndices.all { index -> (completedSets[index] ?: 0) >= workout.exercises[index].sets + (addedSets[index] ?: 0) }

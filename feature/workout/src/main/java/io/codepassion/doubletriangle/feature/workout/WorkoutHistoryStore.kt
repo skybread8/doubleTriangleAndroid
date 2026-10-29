@@ -138,6 +138,9 @@ internal data class ExerciseHistoryEntry(
     val note: String? = null,
     val durationSeconds: Int = 0,
     val distanceKm: Double = 0.0,
+    val workoutId: String? = null,
+    val plannedExerciseId: String? = null,
+    val remoteResultId: String? = null,
 )
 
 data class ExerciseAnalyticsSummary(
@@ -172,6 +175,9 @@ data class RemoteExerciseHistoryEntry(
     val note: String?,
     val durationSeconds: Int,
     val distanceKm: Double,
+    val workoutId: String? = null,
+    val plannedExerciseId: String? = null,
+    val remoteResultId: String? = null,
 )
 
 internal fun ExerciseSummary.historyKey(): String = coachExerciseId?.trim()?.lowercase()?.takeIf(String::isNotBlank)
@@ -267,6 +273,9 @@ object WorkoutHistoryStore {
                 note = entry.note,
                 durationSeconds = entry.durationSeconds,
                 distanceKm = entry.distanceKm,
+                workoutId = entry.workoutId,
+                plannedExerciseId = entry.plannedExerciseId,
+                remoteResultId = entry.remoteResultId,
             )
         } }
     }
@@ -295,10 +304,14 @@ object WorkoutHistoryStore {
                     note = entry.note,
                     durationSeconds = entry.durationSeconds,
                     distanceKm = entry.distanceKm,
+                    workoutId = entry.workoutId,
+                    plannedExerciseId = entry.plannedExerciseId,
+                    remoteResultId = entry.remoteResultId,
                 )
             }
             val merged = (existing + importedHistory)
-                .distinctBy { it.timestampMillis }
+                .distinctBy { entry -> entry.plannedExerciseId?.let { "$it|${entry.timestampMillis}" }
+                    ?: entry.remoteResultId ?: "legacy|${entry.timestampMillis}" }
                 .sortedByDescending { it.timestampMillis }
                 .take(MAX_ENTRIES)
             preferences.edit().putString(key, historyJson(merged).toString()).apply()
@@ -340,6 +353,9 @@ object WorkoutHistoryStore {
                         note = item.optString("note").takeIf(String::isNotBlank),
                         durationSeconds = item.optInt("durationSeconds"),
                         distanceKm = item.optDouble("distanceKm", 0.0).takeIf(Double::isFinite) ?: 0.0,
+                        workoutId = item.optString("workoutId").takeIf { it.isNotBlank() && it != "null" },
+                        plannedExerciseId = item.optString("plannedExerciseId").takeIf { it.isNotBlank() && it != "null" },
+                        remoteResultId = item.optString("remoteResultId").takeIf { it.isNotBlank() && it != "null" },
                     ),
                 )
             }
@@ -359,7 +375,8 @@ object WorkoutHistoryStore {
                 .put("reps", entry.totalReps).put("maxWeightKg", entry.maxWeightKg).put("volumeKg", entry.volumeKg)
                 .put("setDetails", details).put("feedback", entry.feedback ?: JSONObject.NULL)
                 .put("note", entry.note ?: JSONObject.NULL).put("durationSeconds", entry.durationSeconds)
-                .put("distanceKm", entry.distanceKm))
+                .put("distanceKm", entry.distanceKm).put("workoutId", entry.workoutId ?: JSONObject.NULL)
+                .put("plannedExerciseId", entry.plannedExerciseId ?: JSONObject.NULL).put("remoteResultId", entry.remoteResultId ?: JSONObject.NULL))
         }
     }
 
@@ -372,12 +389,11 @@ object WorkoutHistoryStore {
         notesByExercise: Map<Int, String> = emptyMap(),
     ) {
         val timestamp = System.currentTimeMillis()
-        val completedExercises = workout.exercises.withIndex()
-            .filter { (index, _) -> (stats[index]?.sets ?: 0) > 0 }
-            .groupBy { (_, exercise) -> exercise.historyKey() }
-        completedExercises.values.forEach { occurrences ->
-            val exercise = occurrences.first().value
-            val exerciseIndices = occurrences.map { it.index }.toSet()
+        val completedExercises = workout.pathBlocks().flatMap { it.exercises }
+            .filter { item -> item.executionIndices.any { (stats[it]?.sets ?: 0) > 0 } }
+        completedExercises.forEach { occurrence ->
+            val exercise = occurrence.exercise
+            val exerciseIndices = occurrence.executionIndices.toSet()
             val results = exerciseIndices.mapNotNull(stats::get)
             val result = ExerciseSessionStats(
                 sets = results.sumOf { it.sets },
@@ -395,7 +411,7 @@ object WorkoutHistoryStore {
             val feedback = exerciseIndices.mapNotNull(feedbackByExercise::get).lastOrNull()?.trim()?.uppercase()?.takeIf(String::isNotBlank)
             val note = exerciseIndices.mapNotNull(notesByExercise::get).lastOrNull()?.trim()?.take(500)?.takeIf(String::isNotBlank)
             val entries = listOf(
-                ExerciseHistoryEntry(timestamp, result.sets, result.totalReps, result.maxWeightKg, result.volumeKg, details, feedback, note, result.durationSeconds, result.distanceKm),
+                ExerciseHistoryEntry(timestamp, result.sets, result.totalReps, result.maxWeightKg, result.volumeKg, details, feedback, note, result.durationSeconds, result.distanceKm, workout.id, exercise.plannedExerciseId),
             ) + history(context, exercise)
             val json = JSONArray().apply {
                 entries.take(MAX_ENTRIES).forEach { entry ->
@@ -414,7 +430,9 @@ object WorkoutHistoryStore {
                             .put("setDetails", detailsJson)
                             .put("feedback", entry.feedback ?: JSONObject.NULL)
                             .put("note", entry.note ?: JSONObject.NULL)
-                            .put("durationSeconds", entry.durationSeconds).put("distanceKm", entry.distanceKm),
+                            .put("durationSeconds", entry.durationSeconds).put("distanceKm", entry.distanceKm)
+                            .put("workoutId", entry.workoutId ?: JSONObject.NULL).put("plannedExerciseId", entry.plannedExerciseId ?: JSONObject.NULL)
+                            .put("remoteResultId", entry.remoteResultId ?: JSONObject.NULL),
                     )
                 }
             }

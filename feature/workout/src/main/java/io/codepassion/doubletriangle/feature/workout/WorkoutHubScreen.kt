@@ -68,7 +68,6 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.foundation.Image
-import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
@@ -101,7 +100,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.SportsGymnastics
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Hotel
@@ -165,6 +164,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -177,6 +178,7 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -245,6 +247,7 @@ fun WorkoutHubScreen(
     openFeedback: Boolean = false,
     onFeedbackOpened: () -> Unit = {},
     customAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null,
+    onCustomEditorVisibilityChanged: (Boolean) -> Unit = {},
 ) {
     var selectedDay by remember { mutableStateOf<DayOfWeek?>(null) }
     var mode by remember { mutableStateOf(WorkoutMode.Plan) }
@@ -258,6 +261,12 @@ fun WorkoutHubScreen(
     val coroutineScope = rememberCoroutineScope()
     var hubEntered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { hubEntered = true }
+    LaunchedEffect(editingCustomWorkout != null) {
+        onCustomEditorVisibilityChanged(editingCustomWorkout != null)
+    }
+    DisposableEffect(Unit) {
+        onDispose { onCustomEditorVisibilityChanged(false) }
+    }
 
     editingCustomWorkout?.let { draft ->
         Box(Modifier.fillMaxSize().padding(contentPadding)) {
@@ -309,9 +318,6 @@ fun WorkoutHubScreen(
                 }
             }
         }
-        if (requiresPlanRegeneration) {
-            ProfileChangedPlanBanner(onRecreatePlan)
-        }
         // iOS keeps this header deliberately quiet: identity and the week selector live
         // together on the secondary surface, while plan context starts below the mode picker.
         AnimatedVisibility(visible = hubEntered, enter = fadeIn(tween(320)) + slideInVertically(tween(320)) { -it / 18 }) {
@@ -358,6 +364,7 @@ fun WorkoutHubScreen(
                 onWorkoutSelected = onWorkoutSelected,
                 onMesocycleSelected = { showingMesocycleDetails = true },
                 onRecreatePlan = onRecreatePlan,
+                requiresPlanRegeneration = requiresPlanRegeneration,
                 canRegeneratePlan = canRegeneratePlan,
                 canGenerateNextPlan = canGenerateNextPlan,
                 onGenerateNextPlan = onGenerateNextPlan,
@@ -477,42 +484,6 @@ private fun PlanGenerationOverlay() {
 }
 
 @Composable
-private fun ProfileChangedPlanBanner(onRecreatePlan: () -> Unit) {
-    Column(
-        // Keep this as a quiet, full-width warning row. The iOS home puts the
-        // recreation prompt in an orange-tinted list row rather than in a
-        // floating glass card.
-        Modifier.fillMaxWidth()
-            .background(Color(0xFFFF9500).copy(alpha = 0.10f))
-            .padding(horizontal = 18.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Filled.Warning,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp),
-                tint = Color(0xFFFF9500),
-            )
-            Column {
-                Text("Perfil modificado", style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
-                Text(
-                    "Tu perfil de entrenamiento ha cambiado desde que se creó este plan. Recrea el plan para obtener mejores resultados.",
-                    style = MaterialTheme.typography.body2,
-                    color = WildforceThemeTokens.textSecondary,
-                )
-            }
-        }
-        Button(
-            onClick = onRecreatePlan,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF9500), contentColor = Color.White),
-            shape = RoundedCornerShape(8.dp),
-        ) { Text("Recrear plan", fontWeight = FontWeight.SemiBold) }
-    }
-}
-
-@Composable
 private fun WorkoutHeader(
     state: WorkoutHubState,
     planHistory: List<WorkoutHubState>,
@@ -567,7 +538,7 @@ private fun WorkoutHeader(
             }
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-            Text(state.user.name, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(state.user.name, fontFamily = FontFamily.Default, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     goalIcon(state.user.goal),
@@ -575,7 +546,7 @@ private fun WorkoutHeader(
                     modifier = Modifier.size(14.dp),
                     tint = WildforceThemeTokens.textSecondary,
                 )
-                Text(" ${state.user.goal}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(" ${state.user.goal}", fontFamily = FontFamily.Default, fontSize = 12.sp, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         Box(
@@ -592,21 +563,32 @@ private fun WorkoutHeader(
                 Modifier.heightIn(min = 48.dp).clip(RoundedCornerShape(12.dp)).clickable { showsStreakCalendar = true }.padding(horizontal = 3.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(Icons.Filled.LocalFireDepartment, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color(0xFFFF9500))
+                // The warning belongs to the flame, not the complete streak
+                // control: iOS layers it over the flame's bottom-right corner.
+                Box(Modifier.size(18.dp)) {
+                    Icon(
+                        Icons.Filled.LocalFireDepartment,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = Color(0xFFFF9500),
+                    )
+                    if (isWorkoutIncomplete) {
+                        Icon(
+                            Icons.Filled.Warning,
+                            contentDescription = null,
+                            modifier = Modifier.align(Alignment.BottomEnd).offset(x = 2.dp, y = 2.dp)
+                                .size(12.dp).background(Color.White, CircleShape).padding(1.dp),
+                            tint = Color(0xFFFF3B30),
+                        )
+                    }
+                }
                 Text(
                     state.user.currentStreak.toString(),
                     Modifier.padding(start = 4.dp),
+                    fontFamily = FontFamily.Default,
+                    fontSize = 17.sp,
                     color = WildforceThemeTokens.textPrimary,
                     fontWeight = FontWeight.Bold,
-                )
-            }
-            if (isWorkoutIncomplete) {
-                Icon(
-                    Icons.Filled.Warning,
-                    contentDescription = null,
-                    modifier = Modifier.align(Alignment.BottomEnd).size(12.dp)
-                        .background(Color.White, CircleShape).padding(1.dp),
-                    tint = Color(0xFFFF3B30),
                 )
             }
         }
@@ -651,7 +633,7 @@ private fun WorkoutHeader(
 
 internal fun goalIcon(goal: String): ImageVector = when {
     goal.contains("peso", ignoreCase = true) || goal.contains("loseweight", ignoreCase = true) -> Icons.Filled.Sync
-    goal.contains("músculo", ignoreCase = true) || goal.contains("muscle", ignoreCase = true) || goal.contains("buildmuscle", ignoreCase = true) -> Icons.Filled.SportsGymnastics
+    goal.contains("músculo", ignoreCase = true) || goal.contains("muscle", ignoreCase = true) || goal.contains("buildmuscle", ignoreCase = true) -> Icons.Filled.FitnessCenter
     goal.contains("fuerza", ignoreCase = true) || goal.contains("strength", ignoreCase = true) || goal.contains("gainstrength", ignoreCase = true) -> Icons.Filled.Bolt
     goal.contains("resistencia", ignoreCase = true) || goal.contains("endurance", ignoreCase = true) || goal.contains("improveendurance", ignoreCase = true) -> Icons.Filled.DirectionsWalk
     goal.contains("movilidad", ignoreCase = true) || goal.contains("mobility", ignoreCase = true) || goal.contains("improvemobility", ignoreCase = true) -> Icons.Filled.SelfImprovement
@@ -983,7 +965,9 @@ private fun WeekCalendar(
                     day.getDisplayName(TextStyle.SHORT, locale),
                     color = if (selected) MaterialTheme.colors.onPrimary
                     else if (date == today) WildforceThemeTokens.accent else WildforceThemeTokens.textPrimary,
-                    style = MaterialTheme.typography.subtitle1,
+                    fontFamily = FontFamily.Default,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                 )
                 Spacer(Modifier.height(6.dp))
@@ -1052,8 +1036,9 @@ private fun WorkoutModeSelector(
                     Text(
                         mode.label,
                         color = if (isSelected) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.textPrimary,
-                        style = MaterialTheme.typography.caption,
-                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = FontFamily.Default,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -1070,6 +1055,7 @@ private fun WorkoutPlan(
     onWorkoutSelected: (WorkoutDaySummary) -> Unit,
     onMesocycleSelected: () -> Unit,
     onRecreatePlan: () -> Unit,
+    requiresPlanRegeneration: Boolean,
     canRegeneratePlan: Boolean,
     canGenerateNextPlan: Boolean,
     onGenerateNextPlan: () -> Unit,
@@ -1113,6 +1099,11 @@ private fun WorkoutPlan(
                 )
             }
         }
+        if (requiresPlanRegeneration && showsAiCoach) {
+            item {
+                ProfileChangedPlanBanner(onRecreatePlan, appLanguage)
+            }
+        }
         item {
             MesocycleHeaderCard(state, onMesocycleSelected)
         }
@@ -1144,6 +1135,37 @@ private fun WorkoutPlan(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ProfileChangedPlanBanner(onRecreatePlan: () -> Unit, appLanguage: String) {
+    val title = localizedWorkoutCatalogText("570a0c02e699364e", "Profile Changed", appLanguage)
+    val description = localizedWorkoutCatalogText(
+        "4991d7c9a032c68d",
+        "Your training profile has changed since this plan was created. Recreate it for better results.",
+        appLanguage,
+    )
+    val action = localizedWorkoutCatalogText("03b2f5810f7fbed0", "Recreate Plan", appLanguage)
+    Column(
+        Modifier.fillMaxWidth()
+            .background(Color(0xFFFF9500).copy(alpha = 0.10f), RoundedCornerShape(8.dp))
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Filled.Warning, contentDescription = null, modifier = Modifier.size(20.dp), tint = Color(0xFFFF9500))
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(title, style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                Text(description, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
+            }
+        }
+        Button(
+            onClick = onRecreatePlan,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFFF9500), contentColor = Color.White),
+            shape = RoundedCornerShape(8.dp),
+        ) { Text(action, fontWeight = FontWeight.SemiBold) }
     }
 }
 
@@ -1185,7 +1207,7 @@ private fun CoachPlanUnavailableCard(appLanguage: String) {
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Icon(
-            Icons.Filled.SportsGymnastics,
+            Icons.Filled.FitnessCenter,
             contentDescription = null,
             modifier = Modifier.size(48.dp),
             tint = WildforceThemeTokens.textSecondary,
@@ -1220,8 +1242,8 @@ private fun NextPhasePlanCard(appLanguage: String, onGenerate: () -> Unit) {
     ) {
         Row(verticalAlignment = Alignment.Top) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(title.uppercase(), fontFamily = AntonFontFamily, fontSize = 30.sp, color = WildforceThemeTokens.primaryButtonText)
-                Text(description, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.primaryButtonText.copy(alpha = .9f), maxLines = 3, overflow = TextOverflow.Ellipsis)
+                Text(title.uppercase(), fontFamily = AntonFontFamily, fontSize = 32.sp, color = WildforceThemeTokens.primaryButtonText)
+                Text(description, fontFamily = FontFamily.Default, fontSize = 15.sp, color = WildforceThemeTokens.primaryButtonText.copy(alpha = .9f), maxLines = 3, overflow = TextOverflow.Ellipsis)
             }
             Box(Modifier.size(60.dp).clip(CircleShape).background(Color.White.copy(alpha = .2f)), contentAlignment = Alignment.Center) {
                 Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(28.dp), tint = WildforceThemeTokens.primaryButtonText)
@@ -1233,7 +1255,7 @@ private fun NextPhasePlanCard(appLanguage: String, onGenerate: () -> Unit) {
             shape = RoundedCornerShape(50.dp),
             modifier = Modifier.semantics { contentDescription = action },
         ) {
-            Text(action, fontWeight = FontWeight.Bold)
+            Text(action, fontFamily = FontFamily.Default, fontSize = 17.sp, fontWeight = FontWeight.Bold)
             Icon(Icons.Filled.ArrowForward, contentDescription = null, modifier = Modifier.padding(start = 6.dp).size(18.dp))
         }
     }
@@ -1260,7 +1282,8 @@ private fun MesocycleHeaderCard(state: WorkoutHubState, onClick: () -> Unit) {
                 Text(
                     "MESOCICLO ${state.mesocycleIndex}",
                     fontFamily = Exo2FontFamily,
-                    style = MaterialTheme.typography.h5,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Normal,
                     color = WildforceThemeTokens.textPrimary,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1298,8 +1321,11 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> U
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("ESTA SEMANA", Modifier.weight(1f), style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
+        Row(verticalAlignment = Alignment.Top) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text("ESTA SEMANA", fontFamily = FontFamily.Default, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
+                Text(state.planName, fontFamily = Exo2FontFamily, fontSize = 22.sp, fontWeight = FontWeight.Normal, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
                 if (isCompleted) {
                     StatusBadge("COMPLETADO", Color(0xFF26A269))
                 } else if (planNotes != null || canRegeneratePlan) {
@@ -1311,7 +1337,12 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> U
                                 .clickable { showsPlanMenu = true },
                             contentAlignment = Alignment.Center,
                         ) {
-                            Icon(Icons.Filled.MoreHoriz, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.textSecondary)
+                            Box(
+                                Modifier.size(34.dp).liquidGlass(CircleShape),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(Icons.Filled.MoreHoriz, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.textSecondary)
+                            }
                         }
                         DropdownMenu(expanded = showsPlanMenu, onDismissRequest = { showsPlanMenu = false }) {
                             if (planNotes != null) {
@@ -1337,16 +1368,30 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> U
                     }
                 }
         }
-        Text(state.planName, fontFamily = Exo2FontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
         ContextPill(planGoalLabel, goalIcon(planGoal))
         if (state.workouts.isNotEmpty()) {
-            Text("$finalized de ${state.workouts.size} sesiones finalizadas", style = MaterialTheme.typography.body2, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
-            LinearProgressIndicator(
-                progress = finalized.toFloat() / state.workouts.size,
-                modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(4.dp)),
-                color = WildforceThemeTokens.textPrimary,
-                backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.20f),
-            )
+            Text("$finalized de ${state.workouts.size} sesiones finalizadas", fontFamily = FontFamily.Default, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                repeat(state.workouts.size) { index ->
+                    val filled = index < finalized
+                    val current = index == finalized - 1
+                    Box(
+                        Modifier.weight(1f)
+                            .height(if (current) 10.dp else 8.dp)
+                            .graphicsLayer {
+                                val scale = if (current) 1.05f else if (filled) 1.02f else 1f
+                                scaleX = scale
+                                scaleY = scale
+                            }
+                            .clip(CircleShape)
+                            .background(if (filled) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary.copy(alpha = 0.4f)),
+                    )
+                }
+            }
         }
     }
     if (showsPlanNotes && planNotes != null) {
@@ -1457,21 +1502,21 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage:
         shape = RoundedCornerShape(14.dp),
         elevation = 0.dp,
     ) {
-        BoxWithConstraints(Modifier.fillMaxWidth().height(180.dp)) {
-            val density = LocalDensity.current
-            val cardWidthPx = with(density) { maxWidth.toPx() }
-            val cardHeightPx = with(density) { maxHeight.toPx() }
+        var cardSize by remember { mutableStateOf(IntSize.Zero) }
+        BoxWithConstraints(Modifier.fillMaxWidth().heightIn(min = 180.dp).onSizeChanged { cardSize = it }, propagateMinConstraints = true) {
+            val cardWidthPx = cardSize.width.toFloat()
+            val cardHeightPx = cardSize.height.toFloat()
             RemoteTrainingImage(
                 url = workoutCoverUrl(workout.focus, gender, workout.id),
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.matchParentSize(),
             )
             // Match WorkoutDayHeaderView on iOS: the fades run from the
             // bottom/leading edges to the card midpoint. These must use the
             // measured size, not fixed pixels, so density does not change the
             // apparent strength of the dark treatment.
             Box(
-                Modifier.fillMaxSize().background(
+                Modifier.matchParentSize().background(
                     Brush.verticalGradient(
                         listOf(Color.Black.copy(alpha = 0.80f), Color.Transparent),
                         startY = cardHeightPx,
@@ -1480,7 +1525,7 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage:
                 ),
             )
             Box(
-                Modifier.fillMaxSize().background(
+                Modifier.matchParentSize().background(
                     Brush.horizontalGradient(
                         listOf(Color.Black.copy(alpha = 0.30f), Color.Transparent),
                         startX = 0f,
@@ -1489,8 +1534,8 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage:
                 ),
             )
             Column(
-                Modifier.fillMaxSize()
-                    .padding(start = 12.dp, top = 6.dp, end = 12.dp),
+                Modifier.fillMaxWidth()
+                    .padding(start = 12.dp, top = 6.dp, end = 12.dp, bottom = 10.dp),
             ) {
                 Text(
                     "DÍA ${workout.order}",
@@ -1503,7 +1548,7 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage:
                 // axis, between the day label and title. Planned days reserve
                 // the same visual space without rendering a badge.
                 val status = workoutCardStatus(workout.status, isInProgress)
-                Spacer(Modifier.height(if (status == null) 56.dp else 18.dp))
+                Spacer(Modifier.weight(1f, fill = true).heightIn(min = 18.dp))
                 status?.let { (label, color) -> StatusBadge(label, color) }
 
                 Text(
@@ -1514,8 +1559,7 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage:
                     lineHeight = 22.sp,
                     color = Color.White,
                     // WorkoutDayHeaderView on iOS does not force the title
-                    // into one line; long workout names wrap in the fixed
-                    // 180 pt header instead of being visually truncated.
+                    // into one line; long workout names can wrap.
                     maxLines = 2,
                 )
                 Row(
@@ -1766,13 +1810,13 @@ private fun workoutFocusIcon(focus: String): ImageVector = when (focus.lowercase
 
 private fun workoutDayTypeIcon(dayType: String): ImageVector = when (dayType.lowercase(Locale.ROOT)) {
     "fuerza", "strength" -> Icons.Filled.Bolt // iOS bolt.fill
-    "hipertrofia", "hypertrophy" -> Icons.Filled.SportsGymnastics
+    "hipertrofia", "hypertrophy" -> Icons.Filled.FitnessCenter
     "técnica", "tecnica", "technique" -> Icons.Filled.CenterFocusStrong // iOS scope
     "volumen", "volume" -> Icons.Filled.Layers
     "descarga", "deload" -> Icons.Filled.ArrowCircleDown
     "recuperación", "recuperacion", "recovery" -> Icons.Filled.Favorite
     "acondicionamiento", "conditioning" -> Icons.Filled.Timeline
-    else -> Icons.Filled.SportsGymnastics
+    else -> Icons.Filled.FitnessCenter
 }
 
 @Composable
@@ -2131,14 +2175,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                     Column(Modifier.padding(horizontal = 12.dp)) { WorkoutInformationTab(workout, appLanguage) }
                 } else {
                 Column(Modifier.padding(horizontal = 12.dp)) {
-                // Keep the target-muscle images and effective-set involvement visible
-                // before the planned exercises, as requested for the pre-workout view.
-                WorkoutMuscleEffort(workout)
-                Spacer(Modifier.height(24.dp))
-                // Mirrors iOS WorkoutEquipmentScroll with the canonical equipment
-                // artwork rather than the former emoji-only Android treatment.
-                WorkoutEquipment(workout)
-                Spacer(Modifier.height(16.dp))
+
                 workout.displayBlocks().forEachIndexed { blockIndex, block ->
                     val collapsible = block.type == WorkoutBlockType.Warmup || block.type == WorkoutBlockType.Cooldown
                     val collapsed = blockIndex in collapsedBlocks
@@ -2273,17 +2310,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                     cancelWorkoutSession(detailContext, workout.id)
                     hasSavedSession = false
                     onWorkoutUpdated(
-                        workout.copy(
-                            status = WorkoutStatus.Planned,
-                            startedAt = null,
-                            completedAt = null,
-                            didCountTowardStreak = false,
-                            activeDurationSeconds = null,
-                            activeCaloriesBurned = null,
-                            averageHeartRate = null,
-                            maximumHeartRate = null,
-                            totalVolumeKg = null,
-                        ),
+                        workout.resetCancelledWorkout(),
                     )
                     showCancelConfirmation = false
                 }) { Text("CANCELAR ENTRENAMIENTO", color = Color(0xFFC62828)) }
@@ -2607,8 +2634,10 @@ private fun WorkoutInformationTab(workout: WorkoutDaySummary, appLanguage: Strin
     // Keep this companion location in sync with iOS's Information tab as well.
     WorkoutMuscleEffort(workout)
     Spacer(Modifier.height(24.dp))
-    WorkoutEquipment(workout)
-    Spacer(Modifier.height(24.dp))
+    if (workout.displayBlocks().flatMap { it.exercises }.any { ExerciseVisualCatalog.equipmentVisualsFor(it.imageKey).isNotEmpty() }) {
+        WorkoutEquipment(workout)
+        Spacer(Modifier.height(24.dp))
+    }
     workout.notes?.trim()?.takeIf { it.isNotBlank() }?.let { notes ->
         Text("NOTAS", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
         Text(notes, Modifier.padding(top = 9.dp), color = WildforceThemeTokens.textSecondary)
@@ -2714,7 +2743,9 @@ fun ActiveWorkoutScreen(
     // process recreation just like the set progress does.
     val restored = remember(initialWorkout.id) { WorkoutSessionStore.load(context, initialWorkout.id) }
     var workout by remember(initialWorkout.id) {
-        mutableStateOf(restored?.editableBlocks?.let(initialWorkout::withEditableBlocks) ?: initialWorkout)
+        mutableStateOf(restored?.editableBlocks?.let { local ->
+            initialWorkout.withEditableBlocks(reconcileImportedSkips(local, initialWorkout.editableBlocks()))
+        } ?: initialWorkout)
     }
     LaunchedEffect(workout) { onWorkoutChanged(workout) }
     DisposableEffect(workout.id) {
@@ -2749,16 +2780,23 @@ fun ActiveWorkoutScreen(
             WildforceWatchLocalBridge.stop(context)
         }
     }
-    var exerciseIndex by remember(workout.id) { mutableStateOf((restored?.exerciseIndex ?: 0).coerceIn(0, workout.exercises.lastIndex.coerceAtLeast(0))) }
+    val initialSkipped = remember(workout.id) {
+        workout.exercises.indices.filter { workout.exercises[it].skippedAt != null }.toSet() + restored?.skippedExerciseIndices.orEmpty()
+    }
+    val initialDiscardedRecords = remember(workout.id) { restored?.completedSetRecords.orEmpty().filter { it.exerciseIndex in initialSkipped } }
+    val restoredStart = (restored?.exerciseIndex ?: 0).coerceIn(0, workout.exercises.lastIndex.coerceAtLeast(0))
+    val firstUnskipped = remember(workout.id) { firstUnskippedExecutionIndex(restoredStart, workout.exercises.size, initialSkipped) }
+    val movedPastSkipped = restored != null && firstUnskipped != restoredStart
+    var exerciseIndex by remember(workout.id) { mutableStateOf(firstUnskipped ?: 0) }
     var hapticExerciseIndex by remember(workout.id) { mutableStateOf(exerciseIndex) }
-    var completedByExercise by remember(workout.id) { mutableStateOf(restored?.completedByExercise ?: emptyMap()) }
+    var completedByExercise by remember(workout.id) { mutableStateOf(restored?.completedByExercise.orEmpty().filterKeys { it !in initialSkipped }) }
     var reps by remember(workout.id) {
-        mutableStateOf(restored?.reps ?: workout.exercises.firstOrNull()?.targetRepsPerSet?.firstOrNull() ?: targetReps(workout.exercises.firstOrNull()?.reps))
+        mutableStateOf(restored?.reps?.takeUnless { movedPastSkipped } ?: workout.exercises.getOrNull(exerciseIndex)?.targetRepsPerSet?.firstOrNull() ?: targetReps(workout.exercises.getOrNull(exerciseIndex)?.reps))
     }
     var weightKg by remember(workout.id) {
-        mutableStateOf(restored?.weightKg ?: workout.exercises.firstOrNull()?.targetWeightsKg?.firstOrNull() ?: workout.exercises.firstOrNull()?.targetWeightKg ?: 0.0)
+        mutableStateOf(restored?.weightKg?.takeUnless { movedPastSkipped } ?: workout.exercises.getOrNull(exerciseIndex)?.targetWeightsKg?.firstOrNull() ?: workout.exercises.getOrNull(exerciseIndex)?.targetWeightKg ?: 0.0)
     }
-    var restRemaining by remember(workout.id) { mutableStateOf(restored?.restRemaining) }
+    var restRemaining by remember(workout.id) { mutableStateOf(restored?.restRemaining?.takeUnless { movedPastSkipped }) }
     var restTimerPaused by remember(workout.id) { mutableStateOf(false) }
     var restEndsAtMillis by remember(workout.id) { mutableStateOf(restored?.restRemaining?.let { System.currentTimeMillis() + it * 1_000L }) }
     var restInitialSeconds by remember(workout.id) { mutableStateOf(restored?.restInitialSeconds ?: 1) }
@@ -2769,20 +2807,20 @@ fun ActiveWorkoutScreen(
         })
     }
     var elapsedSeconds by remember(workout.id) { mutableStateOf(restored?.elapsedSeconds ?: 0) }
-    var totalCompletedSets by remember(workout.id) { mutableStateOf(restored?.totalCompletedSets ?: 0) }
-    var totalVolumeKg by remember(workout.id) { mutableStateOf(restored?.totalVolumeKg ?: 0.0) }
-    var showsSummary by remember(workout.id) { mutableStateOf(restored?.showsSummary ?: false) }
+    var totalCompletedSets by remember(workout.id) { mutableStateOf(((restored?.totalCompletedSets ?: 0) - initialDiscardedRecords.size).coerceAtLeast(0)) }
+    var totalVolumeKg by remember(workout.id) { mutableStateOf(((restored?.totalVolumeKg ?: 0.0) - initialDiscardedRecords.sumOf { it.reps * it.weightKg }).coerceAtLeast(0.0)) }
+    var showsSummary by remember(workout.id) { mutableStateOf(restored?.showsSummary == true || (workout.exercises.isNotEmpty() && firstUnskipped == null)) }
     var completedOn by remember(workout.id) { mutableStateOf<LocalDate?>(null) }
     var completionCommitted by remember(workout.id) { mutableStateOf(false) }
     var pendingFeedback by remember(workout.id) { mutableStateOf(restored?.pendingFeedback ?: false) }
     var selectedFeedback by remember(workout.id) { mutableStateOf(restored?.selectedFeedback ?: "JUSTO") }
     var pendingNote by remember(workout.id) { mutableStateOf(restored?.pendingNote.orEmpty()) }
-    var exerciseStats by remember(workout.id) { mutableStateOf(restored?.exerciseStats ?: emptyMap()) }
-    var feedbackByExercise by remember(workout.id) { mutableStateOf(restored?.feedbackByExercise ?: emptyMap()) }
-    var notesByExercise by remember(workout.id) { mutableStateOf(restored?.notesByExercise ?: emptyMap()) }
-    var completedSetRecords by remember(workout.id) { mutableStateOf(restored?.completedSetRecords ?: emptyList()) }
-    var skippedExerciseIndices by remember(workout.id) { mutableStateOf(restored?.skippedExerciseIndices ?: emptySet()) }
-    val initialExerciseDuration = workout.exercises.firstOrNull()?.resolvedTargetDurationSeconds()
+    var exerciseStats by remember(workout.id) { mutableStateOf(restored?.exerciseStats.orEmpty().filterKeys { it !in initialSkipped }) }
+    var feedbackByExercise by remember(workout.id) { mutableStateOf(restored?.feedbackByExercise.orEmpty().filterKeys { it !in initialSkipped }) }
+    var notesByExercise by remember(workout.id) { mutableStateOf(restored?.notesByExercise.orEmpty().filterKeys { it !in initialSkipped }) }
+    var completedSetRecords by remember(workout.id) { mutableStateOf(restored?.completedSetRecords.orEmpty().filterNot { it.exerciseIndex in initialSkipped }) }
+    var skippedExerciseIndices by remember(workout.id) { mutableStateOf(initialSkipped) }
+    val initialExerciseDuration = workout.exercises.getOrNull(exerciseIndex)?.resolvedTargetDurationSeconds()
     var exerciseTimeRemaining by remember(workout.id) { mutableStateOf(restored?.exerciseTimeRemaining ?: initialExerciseDuration) }
     var exerciseTimeInitial by remember(workout.id) { mutableStateOf(restored?.exerciseTimeInitial?.takeIf { it > 0 } ?: (initialExerciseDuration ?: 0)) }
     var exerciseTimerRunning by remember(workout.id) { mutableStateOf(restored?.exerciseTimerRunning ?: (initialExerciseDuration != null)) }
@@ -2805,7 +2843,7 @@ fun ActiveWorkoutScreen(
     val featureOnboardingStore = remember { WorkoutFeatureOnboardingStore(context) }
     var activeFeatureOnboarding by remember(workout.id) { mutableStateOf<WorkoutFeatureOnboarding?>(null) }
     var featureOnboardingRevision by remember(workout.id) { mutableStateOf(0) }
-    var initializedExerciseIndex by remember(workout.id) { mutableStateOf(restored?.exerciseIndex ?: -1) }
+    var initializedExerciseIndex by remember(workout.id) { mutableStateOf(restored?.exerciseIndex?.takeUnless { movedPastSkipped } ?: -1) }
     BackHandler {
         when {
             exercisePickerMode != null -> {
@@ -2851,6 +2889,27 @@ fun ActiveWorkoutScreen(
     val logicalExercises = remember(structuredPathBlocks) { structuredPathBlocks.flatMap { it.exercises } }
     val logicalExerciseIndex = logicalExercises.indexOfFirst { exerciseIndex in it.executionIndices }.coerceAtLeast(0)
     val currentPathBlock = structuredPathBlocks.firstOrNull { block -> block.exercises.any { exerciseIndex in it.executionIndices } }
+    fun applyReindexedBlocks(oldBlocks: List<WorkoutBlockSummary>, newBlocks: List<WorkoutBlockSummary>, nextOldIndex: Int = exerciseIndex, sourceOverrides: Map<Int, Int> = emptyMap()) {
+        val oldCurrent = exerciseIndex
+        val mapping = executionIndexRemap(oldBlocks, newBlocks, sourceOverrides)
+        completedByExercise = completedByExercise.sumRemappedExecutionIndices(mapping)
+        exerciseStats = exerciseStats.remapAndCombineStats(mapping)
+        feedbackByExercise = feedbackByExercise.remapExecutionIndices(mapping)
+        notesByExercise = notesByExercise.remapExecutionIndices(mapping)
+        addedSetsByExercise = addedSetsByExercise.sumRemappedExecutionIndices(mapping)
+        skippedExerciseIndices = skippedExerciseIndices.mapNotNull(mapping::get).toSet()
+        val removedRecords = completedSetRecords.filter { it.exerciseIndex !in mapping }
+        completedSetRecords = completedSetRecords.remapSetRecords(mapping)
+        val updatedWorkout = workout.withEditableBlocks(newBlocks)
+        val nextIndex = mapping[nextOldIndex]
+            ?: (nextOldIndex until workout.exercises.size).firstNotNullOfOrNull(mapping::get)
+            ?: updatedWorkout.exercises.lastIndex.coerceAtLeast(0)
+        workout = updatedWorkout
+        exerciseIndex = nextIndex
+        initializedExerciseIndex = if (nextOldIndex == oldCurrent && mapping[oldCurrent] == nextIndex) nextIndex else -1
+        totalCompletedSets = (totalCompletedSets - removedRecords.size).coerceAtLeast(0)
+        totalVolumeKg = (totalVolumeKg - removedRecords.sumOf { it.reps * it.weightKg }).coerceAtLeast(0.0)
+    }
     fun rewriteExercises(transform: (MutableList<ExerciseSummary>, List<WorkoutBlockSummary>) -> Unit) {
         val sourceBlocks = workout.editableBlocks()
         val all = sourceBlocks.flatMap { it.exercises }.toMutableList()
@@ -2880,13 +2939,15 @@ fun ActiveWorkoutScreen(
         val selectedExercise = choice.toExerciseSummary()
         if (replace) {
             currentSourceIndex()?.let { sourceIndex ->
-                rewriteExercises { all, _ -> if (sourceIndex in all.indices) all[sourceIndex] = selectedExercise }
+                rewriteExercises { all, _ -> if (sourceIndex in all.indices) all[sourceIndex] = all[sourceIndex].swappedTo(choice) }
+                initializedExerciseIndex = -1
             }
         } else {
             // iOS's Add Exercise sheet is anchored to the selected exercise,
             // not the end of the workout. Keep that placement even when the
             // selected item is one round of a superset.
-            val updated = workout.editableBlocks().toMutableList()
+            val oldBlocks = workout.editableBlocks()
+            val updated = oldBlocks.toMutableList()
             var executionCursor = 0
             val blockIndex = targetBlockIndex ?: updated.indexOfFirst { block ->
                 val containsCurrent = exerciseIndex in executionCursor until (executionCursor + block.executionExercises().size)
@@ -2897,11 +2958,11 @@ fun ActiveWorkoutScreen(
                 val block = updated[blockIndex]
                 val executionStart = updated.take(blockIndex).sumOf { it.executionExercises().size }
                 val itemIndex = if (targetBlockIndex != null) block.exercises.lastIndex else ((exerciseIndex - executionStart) % block.exercises.size.coerceAtLeast(1)).coerceIn(0, block.exercises.lastIndex.coerceAtLeast(0))
-                updated[blockIndex] = block.copy(exercises = block.exercises.toMutableList().apply { add(itemIndex + 1, selectedExercise) })
+                applyReindexedBlocks(oldBlocks, updated.insertExerciseAfter(blockIndex, itemIndex, selectedExercise))
             } else {
                 updated += WorkoutBlockSummary(WorkoutBlockType.Standard, exercises = listOf(selectedExercise))
+                applyReindexedBlocks(oldBlocks, updated)
             }
-            workout = workout.withEditableBlocks(updated)
         }
         exercisePickerMode = null
         addTargetBlockIndex = null
@@ -2940,67 +3001,56 @@ fun ActiveWorkoutScreen(
         val section = currentSectionSourceIndices()
         val position = section.indexOf(current)
         val destination = section.getOrNull(position + direction) ?: return
-        rewriteExercises { all, _ ->
-            val item = all[current]
-            all[current] = all[destination]
-            all[destination] = item
-        }
+        val oldBlocks = workout.editableBlocks()
+        val all = oldBlocks.flatMap { it.exercises }.toMutableList()
+        val item = all[current]
+        all[current] = all[destination]
+        all[destination] = item
+        var cursor = 0
+        val updated = oldBlocks.map { block -> block.copy(exercises = block.exercises.map { all[cursor++] }) }
+        applyReindexedBlocks(oldBlocks, updated, (exerciseIndex + 1).coerceAtMost(workout.exercises.lastIndex))
     }
     fun removeCurrentExercise() {
         val sourceBlocks = workout.editableBlocks()
+        val removedSourceIndex = currentSourceIndex() ?: return
         var cursor = 0
         val updatedBlocks = sourceBlocks.mapNotNull { block ->
             val exercises = block.exercises.filter {
-                val keep = cursor != exerciseIndex
+                val keep = cursor != removedSourceIndex
                 cursor++
                 keep
             }
-            block.copy(exercises = exercises).takeIf { it.exercises.isNotEmpty() }
+            when {
+                exercises.isEmpty() -> null
+                block.type == WorkoutBlockType.Superset && exercises.size == 1 ->
+                    WorkoutBlockSummary(WorkoutBlockType.Standard, exercises = exercises)
+                else -> block.copy(exercises = exercises)
+            }
         }
-        workout = workout.withEditableBlocks(updatedBlocks)
-        exerciseIndex = exerciseIndex.coerceAtMost(workout.exercises.lastIndex.coerceAtLeast(0))
+        applyReindexedBlocks(sourceBlocks, updatedBlocks, exerciseIndex + 1)
     }
     fun removeActiveSuperset() {
         val sourceBlocks = workout.editableBlocks()
-        var cursor = 0
-        val updatedBlocks = sourceBlocks.flatMap { block ->
-            if (block.type != WorkoutBlockType.Superset || exerciseIndex !in cursor..(cursor + block.exercises.lastIndex)) {
-                cursor += block.exercises.size
-                listOf(block)
-            } else {
-                cursor += block.exercises.size
-                block.exercises.map { item -> WorkoutBlockSummary(WorkoutBlockType.Standard, exercises = listOf(item)) }
-            }
-        }
-        workout = workout.withEditableBlocks(updatedBlocks)
+        val blockIndex = sourceBlocks.blockIndexForExecution(exerciseIndex) ?: return
+        if (sourceBlocks[blockIndex].type != WorkoutBlockType.Superset) return
+        val startSource = sourceBlocks.take(blockIndex).sumOf { it.exercises.size }
+        val overrides = sourceBlocks[blockIndex].exercises.indices.associate { (startSource + it) to (startSource + it) }
+        applyReindexedBlocks(sourceBlocks, sourceBlocks.splitActiveSuperset(blockIndex), sourceOverrides = overrides)
     }
     fun updateActiveSuperset(roundsDelta: Int = 0, restDelta: Int = 0) {
         val sourceBlocks = workout.editableBlocks()
-        var cursor = 0
-        val updatedBlocks = sourceBlocks.map { block ->
-            val containsCurrent = exerciseIndex in cursor..(cursor + block.exercises.lastIndex)
-            cursor += block.exercises.size
-            if (containsCurrent && block.type == WorkoutBlockType.Superset) {
+        val currentBlockIndex = sourceBlocks.blockIndexForExecution(exerciseIndex)
+        val updatedBlocks = sourceBlocks.mapIndexed { index, block ->
+            if (index == currentBlockIndex && block.type == WorkoutBlockType.Superset) {
                 block.copy(rounds = (block.rounds + roundsDelta).coerceAtLeast(1), restAfterBlockSeconds = ((block.restAfterBlockSeconds ?: 0) + restDelta).coerceAtLeast(0))
             } else block
         }
-        workout = workout.withEditableBlocks(updatedBlocks)
+        applyReindexedBlocks(sourceBlocks, updatedBlocks)
     }
     fun createActiveSuperset() {
-        val sourceBlocks = workout.editableBlocks().toMutableList()
-        var cursor = 0
-        val blockIndex = sourceBlocks.indexOfFirst { block ->
-            val found = exerciseIndex in cursor..(cursor + block.exercises.lastIndex)
-            cursor += block.exercises.size
-            found
-        }
-        if (blockIndex !in sourceBlocks.indices || blockIndex >= sourceBlocks.lastIndex) return
-        val first = sourceBlocks[blockIndex]
-        val second = sourceBlocks[blockIndex + 1]
-        if (first.type != WorkoutBlockType.Standard || second.type != WorkoutBlockType.Standard) return
-        sourceBlocks[blockIndex] = WorkoutBlockSummary(WorkoutBlockType.Superset, exercises = first.exercises + second.exercises, rounds = 1)
-        sourceBlocks.removeAt(blockIndex + 1)
-        workout = workout.withEditableBlocks(sourceBlocks)
+        val oldBlocks = workout.editableBlocks()
+        if (!oldBlocks.canCreateActiveSuperset(exerciseIndex)) return
+        applyReindexedBlocks(oldBlocks, oldBlocks.createActiveSuperset(exerciseIndex))
     }
     var notificationArtwork by remember(workout.id) { mutableStateOf<android.graphics.Bitmap?>(null) }
     LaunchedEffect(exercise?.imageKey, gender) {
@@ -3008,20 +3058,25 @@ fun ActiveWorkoutScreen(
         notificationArtwork = url?.let { loadTrainingBitmap(context, it) }
     }
     fun advanceFromExercise(restSeconds: Int) {
-        if (exerciseIndex < workout.exercises.lastIndex) {
-            val nextRestContext = if (exercise?.blockType == WorkoutBlockType.Superset && exercise.blockRound < exercise.blockRounds) {
+        val nextIndex = nextUnskippedExecutionIndex(exerciseIndex, workout.exercises.size, skippedExerciseIndices)
+        if (nextIndex != null) {
+            val nextExercise = workout.exercises[nextIndex]
+            val staysInBlock = currentPathBlock?.exercises?.any { nextIndex in it.executionIndices } == true
+            val crossesRound = exercise?.blockType == WorkoutBlockType.Superset && staysInBlock && nextExercise.blockRound > exercise.blockRound
+            val nextRestContext = if (crossesRound) {
                 WorkoutRestContext.BetweenRounds
             } else {
                 WorkoutRestContext.BeforeNextBlock
             }
-            exerciseIndex++
-            if (!skipRestPeriods && restSeconds > 0) {
-                restInitialSeconds = restSeconds
+            val transitionSeconds = if (crossesRound) currentPathBlock?.restAfterBlockSeconds ?: restSeconds else restSeconds
+            exerciseIndex = nextIndex
+            if (!skipRestPeriods && transitionSeconds > 0) {
+                restInitialSeconds = transitionSeconds
                 restBetweenExercises = true
                 restContext = nextRestContext
-                restRemaining = restSeconds
+                restRemaining = transitionSeconds
                 restTimerPaused = false
-                restEndsAtMillis = System.currentTimeMillis() + restSeconds * 1_000L
+                restEndsAtMillis = System.currentTimeMillis() + transitionSeconds * 1_000L
             } else {
                 restRemaining = null
                 restContext = null
@@ -3110,7 +3165,11 @@ fun ActiveWorkoutScreen(
                     restEndsAtMillis = System.currentTimeMillis() + restSeconds * 1_000L
                 }
             } else {
-                if (shouldRequestExerciseFeedback(activeExercise)) {
+                val isLastUnskippedInBlock = currentPathBlock?.exercises
+                    ?.flatMap { it.executionIndices }
+                    ?.none { it > exerciseIndex && it !in skippedExerciseIndices }
+                    ?: activeExercise.isLastInBlock
+                if (shouldRequestExerciseFeedback(activeExercise.copy(isLastInBlock = isLastUnskippedInBlock))) {
                     pendingFeedback = true
                 } else {
                     val transitionRest = if (activeExercise.isLastInBlock) activeExercise.restAfterBlockSeconds ?: 0 else 0
@@ -3365,7 +3424,7 @@ fun ActiveWorkoutScreen(
             }
         }
     }
-    LaunchedEffect(exerciseIndex) {
+    LaunchedEffect(exerciseIndex, initializedExerciseIndex) {
         if (hapticExerciseIndex != exerciseIndex) {
             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
             hapticExerciseIndex = exerciseIndex
@@ -3582,11 +3641,29 @@ fun ActiveWorkoutScreen(
         onConfirmSkip = {
             showsSkipExerciseConfirmation = false
             val skipsWholeBlock = exercise?.blockType in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)
-            val nextIndex = if (skipsWholeBlock) currentPathBlock?.exercises?.flatMap { it.executionIndices }?.maxOrNull()?.plus(1) else exerciseIndex + 1
-            val skippedNow = if (skipsWholeBlock) currentPathBlock?.exercises?.flatMap { it.executionIndices }?.toSet().orEmpty() else setOf(exerciseIndex)
+            val skippedNow = currentPathBlock?.skippedExecutionIndices(exerciseIndex, skipsWholeBlock) ?: setOf(exerciseIndex)
             skippedExerciseIndices = skippedExerciseIndices + skippedNow
+            val blockIndex = workout.editableBlocks().blockIndexForExecution(exerciseIndex)
+            val sourceIndex = currentSourceIndex()
+            val skippedAt = java.time.Instant.now().toString()
+            rewriteExercises { all, blocks ->
+                val first = blocks.take(blockIndex ?: 0).sumOf { it.exercises.size }
+                val affected = if (skipsWholeBlock && blockIndex != null) first until first + blocks[blockIndex].exercises.size
+                    else listOfNotNull(sourceIndex)
+                affected.forEach { index -> if (index in all.indices) all[index] = all[index].copy(skippedAt = skippedAt) }
+            }
+            val discardedRecords = completedSetRecords.filter { it.exerciseIndex in skippedNow }
+            completedSetRecords = completedSetRecords.filterNot { it.exerciseIndex in skippedNow }
+            completedByExercise = completedByExercise.filterKeys { it !in skippedNow }
+            exerciseStats = exerciseStats.filterKeys { it !in skippedNow }
+            feedbackByExercise = feedbackByExercise.filterKeys { it !in skippedNow }
+            notesByExercise = notesByExercise.filterKeys { it !in skippedNow }
+            totalCompletedSets = (totalCompletedSets - discardedRecords.size).coerceAtLeast(0)
+            totalVolumeKg = (totalVolumeKg - discardedRecords.sumOf { it.reps * it.weightKg }).coerceAtLeast(0.0)
             restRemaining = null
-            if (nextIndex == null || nextIndex > workout.exercises.lastIndex) {
+            exerciseTimerRunning = false
+            val nextIndex = nextUnskippedExecutionIndex(exerciseIndex, workout.exercises.size, skippedExerciseIndices)
+            if (nextIndex == null) {
                 completedOn = completedOn ?: LocalDate.now()
                 showsSummary = true
             } else exerciseIndex = nextIndex
@@ -3594,7 +3671,7 @@ fun ActiveWorkoutScreen(
         onDismissRemove = { showsRemoveExerciseConfirmation = false },
         onConfirmRemove = { showsRemoveExerciseConfirmation = false; removeCurrentExercise() },
         onDismissCancel = { showsCancelWorkoutConfirmation = false },
-        onConfirmCancel = { showsCancelWorkoutConfirmation = false; cancelWorkoutSession(context, workout.id); onExit() },
+        onConfirmCancel = { showsCancelWorkoutConfirmation = false; cancelWorkoutSession(context, workout.id); onWorkoutChanged(workout.resetCancelledWorkout()); onExit() },
     )
 
     /*
@@ -3711,6 +3788,7 @@ fun ActiveWorkoutScreen(
             onGenerateNextPlan()
         }, onCancelWorkout = {
             cancelWorkoutSession(context, workout.id)
+            onWorkoutChanged(workout.resetCancelledWorkout())
             onExit()
         }, onDone = { finishCompletedSession(completionProgress) })
         return
@@ -4392,7 +4470,7 @@ private fun ActiveWorkoutHeroHeader(
             onDismissRequest = onDismissExerciseMenu,
             modifier = Modifier.background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(18.dp)),
         ) {
-            val canCreateSuperset = currentPathBlock?.type == WorkoutBlockType.Standard && exerciseIndex < workout.exercises.lastIndex
+            val canCreateSuperset = workout.editableBlocks().canCreateActiveSuperset(exerciseIndex)
             val canEditSuperset = currentPathBlock?.type == WorkoutBlockType.Superset
             ActiveWorkoutMenuItem("＋", "Añadir ejercicio", onClick = onAddExercise)
             ActiveWorkoutMenuItem("↔", "Sustituir ejercicio", onClick = onReplaceExercise)

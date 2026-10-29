@@ -12,6 +12,33 @@ class NutritionCalendarTest {
     private val today = LocalDate.of(2026, 10, 20)
 
     @Test
+    fun calendarCoversThreeWeeksAndExpandsToIncludeThePlan() {
+        assertEquals(LocalDate.of(2026, 10, 12) to LocalDate.of(2026, 11, 1), nutritionCalendarWindow(today, emptyList()))
+        assertEquals(today.minusDays(20) to today.plusDays(30), nutritionCalendarWindow(today, listOf(today.minusDays(20), today.plusDays(30))))
+    }
+
+    @Test
+    fun calendarProgressHandlesZeroTargets() {
+        assertEquals(0f, nutritionCalendarProgress(500, 0), 0f)
+        assertEquals(1.2f, nutritionCalendarProgress(2400, 2000), 0.001f)
+    }
+
+    @Test
+    fun selectedTodayFollowsTheCalendarButPinnedDaysDoNot() {
+        val tomorrow = today.plusDays(1)
+        assertEquals(tomorrow, nutritionSelectionAfterDateChange(today, today, tomorrow))
+        assertEquals(today.minusDays(1), nutritionSelectionAfterDateChange(today.minusDays(1), today, tomorrow))
+    }
+
+    @Test
+    fun replacingPlanClearsASelectionThatNoLongerExists() {
+        val pinned = today.minusDays(1)
+        assertEquals(pinned, nutritionSelectionAfterPlanChange(pinned, today, listOf(pinned, today)))
+        assertEquals(today, nutritionSelectionAfterPlanChange(pinned, today, listOf(today)))
+        assertEquals(today, nutritionSelectionAfterPlanChange(today, today, emptyList()))
+    }
+
+    @Test
     fun calorieRingIsShownForEveryPlannedPastOrCurrentDay() {
         assertTrue(shouldShowCalendarCalorieRing(today.minusDays(1), today, 1_500))
         assertTrue(shouldShowCalendarCalorieRing(today, today, 1_500))

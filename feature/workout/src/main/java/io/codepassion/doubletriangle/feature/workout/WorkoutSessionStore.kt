@@ -218,6 +218,8 @@ object WorkoutSessionStore {
                 put("name", exercise.name)
                 put("imageKey", exercise.imageKey ?: JSONObject.NULL)
                 put("coachExerciseId", exercise.coachExerciseId ?: JSONObject.NULL)
+                put("skippedAt", exercise.skippedAt ?: JSONObject.NULL)
+                put("plannedExerciseId", exercise.plannedExerciseId ?: JSONObject.NULL)
                 put("sets", exercise.sets)
                 put("reps", exercise.reps)
                 put("restSeconds", exercise.restSeconds)
@@ -272,6 +274,12 @@ object WorkoutSessionStore {
     private fun decodeExercises(array: org.json.JSONArray): List<ExerciseSummary> = buildList {
         for (index in 0 until array.length()) {
             val item = array.optJSONObject(index) ?: continue
+            val name = item.optString("name")
+            val storedImageKey = item.optString("imageKey").trim()
+                .takeIf(String::isNotBlank)
+                // Older sync payloads serialized a JSON null as `coach:null`.
+                // Recover the catalog key from the persisted exercise name.
+                ?.takeUnless { it.equals("coach:null", ignoreCase = true) }
             val targetReps = item.optJSONArray("targetRepsPerSet")?.let(::decodeInts)
             val targetWeights = item.optJSONArray("targetWeightsKg")?.let(::decodeDoubles)
             val repRange = item.optJSONObject("repRange")?.let { RepRange(it.optInt("minimum", 1), it.optInt("maximum", 1)) }
@@ -289,8 +297,8 @@ object WorkoutSessionStore {
             } ?: SetStyleParameters()
             add(
                 ExerciseSummary(
-                    name = item.optString("name"),
-                    imageKey = item.optString("imageKey").takeIf(String::isNotBlank),
+                    name = name,
+                    imageKey = canonicalExerciseMediaKey(storedImageKey ?: name),
                     sets = item.optInt("sets", 1).coerceAtLeast(1),
                     reps = item.optString("reps", "10"),
                     restSeconds = item.optInt("restSeconds", 0).coerceAtLeast(0),
@@ -306,7 +314,12 @@ object WorkoutSessionStore {
                     isPerSideLoad = item.optBoolean("isPerSideLoad"),
                     trackingMode = runCatching { ExerciseTrackingMode.valueOf(item.optString("trackingMode")) }.getOrDefault(ExerciseTrackingMode.Repetitions),
                     repRange = repRange,
-                    coachExerciseId = item.optString("coachExerciseId").takeIf(String::isNotBlank),
+                    coachExerciseId = item.optString("coachExerciseId").trim()
+                        .takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) },
+                    skippedAt = item.optString("skippedAt").trim()
+                        .takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) },
+                    plannedExerciseId = item.optString("plannedExerciseId").trim()
+                        .takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) },
                 ),
             )
         }

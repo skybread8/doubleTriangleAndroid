@@ -32,8 +32,8 @@
             android:paddingVertical="3dp">
 
             <FrameLayout
-                android:layout_width="16dp"
-                android:layout_height="16dp">
+                android:layout_width="14dp"
+                android:layout_height="14dp">
 
                 <ImageView
                     android:id="@+id/widget_streak_icon"
@@ -47,6 +47,7 @@
                     android:layout_width="8dp"
                     android:layout_height="8dp"
                     android:layout_gravity="bottom|end"
+                    android:background="@drawable/bg_widget_streak_warning"
                     android:contentDescription="Entrenamiento pendiente"
                     android:src="@drawable/ic_widget_warning"
                     android:visibility="gone" />

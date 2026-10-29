@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import android.content.Context
+import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import kotlin.math.roundToInt
@@ -40,21 +41,67 @@ internal object WorkoutCompletionCalculator {
     const val PLAN_XP = 50
     const val MESOCYCLE_XP = 100
 
+    private data class ScoredExercise(val exercise: ExerciseSummary, val indices: List<Int>, val feedbackIndices: List<Int>)
+
+    /** Execution expands a superset into rounds; iOS scores its original exercises. */
+    private fun scoredExercises(workout: WorkoutDaySummary): List<ScoredExercise> {
+        val result = mutableListOf<ScoredExercise>()
+        var index = 0
+        while (index < workout.exercises.size) {
+            val exercise = workout.exercises[index]
+            if (exercise.blockType == WorkoutBlockType.Superset && exercise.blockLabel != null) {
+                val blockIndices = mutableListOf<Int>()
+                while (index < workout.exercises.size) {
+                    val item = workout.exercises[index]
+                    if (item.blockType != WorkoutBlockType.Superset || item.blockLabel == null) break
+                    blockIndices += index++
+                    if (item.isLastInBlock && item.blockRound >= item.blockRounds) break
+                }
+                blockIndices.groupBy { workout.exercises[it].blockLabel }.values.forEach { indices ->
+                    result += ScoredExercise(workout.exercises[indices.first()], indices, blockIndices)
+                }
+            } else {
+                if (exercise.blockType !in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)) {
+                    result += ScoredExercise(exercise, listOf(index), listOf(index))
+                }
+                index++
+            }
+        }
+        return result
+    }
+
+    private fun aggregateStats(indices: List<Int>, stats: Map<Int, ExerciseSessionStats>): ExerciseSessionStats? {
+        val values = indices.mapNotNull(stats::get)
+        if (values.isEmpty()) return null
+        val weightedValues = values.filter { it.averageWeightKg > 0 && it.sets > 0 }
+        val weightedSets = weightedValues.sumOf { it.sets }
+        return ExerciseSessionStats(
+            sets = values.sumOf { it.sets }, totalReps = values.sumOf { it.totalReps },
+            maxWeightKg = values.maxOf { it.maxWeightKg }, volumeKg = values.sumOf { it.volumeKg },
+            durationSeconds = values.sumOf { it.durationSeconds }, distanceKm = values.sumOf { it.distanceKm },
+            averageWeightKg = if (weightedSets > 0) weightedValues.sumOf { it.averageWeightKg * it.sets } / weightedSets else 0.0,
+        )
+    }
+
     fun score(workout: WorkoutDaySummary, stats: Map<Int, ExerciseSessionStats>, feedback: Map<Int, String>, userAgeYears: Int = 30): Double {
-        val scoredExercises = workout.exercises.withIndex().filter { it.value.blockType !in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown) }
+        val scoredExercises = scoredExercises(workout)
         if (scoredExercises.isEmpty()) return 0.0
-        val completion = scoredExercises.count { (stats[it.index]?.sets ?: 0) > 0 }.toDouble() / scoredExercises.size
-        val adherence = scoredExercises.map { (index, exercise) ->
-            val result = stats[index] ?: return@map 0.0
+        val completion = scoredExercises.count { (aggregateStats(it.indices, stats)?.sets ?: 0) > 0 }.toDouble() / scoredExercises.size
+        val adherence = scoredExercises.map { scored ->
+            val exercise = scored.exercise
+            val result = aggregateStats(scored.indices, stats) ?: return@map 0.0
             val setScore = ratio(result.sets.toDouble(), exercise.sets.coerceAtLeast(1).toDouble())
             val metricScores = mutableListOf(setScore)
             val targetDuration = exercise.resolvedTargetDurationSeconds()
             if (targetDuration != null) {
-                metricScores += ratio(result.durationSeconds.toDouble(), (targetDuration * exercise.sets.coerceAtLeast(1)).toDouble())
+                metricScores += ratio(result.durationSeconds.toDouble(), targetDuration.toDouble())
             } else {
-                val prescribedRepetitions = exercise.targetRepsPerSet?.sum()
-                    ?: targetReps(exercise.reps) * exercise.sets.coerceAtLeast(1)
-                metricScores += ratio(result.totalReps.toDouble(), prescribedRepetitions.toDouble())
+                val prescribedRepetitions = exercise.targetRepsPerSet?.takeIf { it.isNotEmpty() }?.sum()
+                    ?: exercise.repRange?.let { ((it.minimum + it.maximum) / 2.0).roundToInt() * exercise.sets.coerceAtLeast(1) }
+                    ?: exercise.reps.takeIf { it.isNotBlank() }?.let { targetReps(it) * exercise.sets.coerceAtLeast(1) }
+                if (prescribedRepetitions != null) {
+                    metricScores += ratio(result.totalReps.toDouble(), prescribedRepetitions.coerceAtLeast(1).toDouble())
+                }
             }
             exercise.targetDistanceKm?.takeIf { it > 0 }?.let { metricScores += ratio(result.distanceKm, it) }
             val plannedAverageWeight = exercise.targetWeightsKg?.filter { it > 0 }?.takeIf { it.isNotEmpty() }?.average()
@@ -64,7 +111,11 @@ internal object WorkoutCompletionCalculator {
             }
             metricScores.average()
         }.average()
-        val effortValues = feedback.values.map {
+        val effortValues = scoredExercises.mapNotNull { scored ->
+            if (aggregateStats(scored.indices, stats) == null) null
+            else scored.indices.asReversed().firstNotNullOfOrNull(feedback::get)
+                ?: scored.feedbackIndices.asReversed().firstNotNullOfOrNull(feedback::get)
+        }.map {
             when (it) {
                 "MUY FÁCIL" -> 0.55
                 "FÁCIL" -> 0.70

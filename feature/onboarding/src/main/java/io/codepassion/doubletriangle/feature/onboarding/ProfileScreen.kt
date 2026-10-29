@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.res.Configuration
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.widget.NumberPicker
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Canvas
@@ -40,6 +41,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
@@ -65,6 +67,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.BackHandler
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.platform.LocalContext
@@ -87,6 +90,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -95,6 +99,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Chair
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
@@ -113,7 +118,6 @@ import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.SportsGymnastics
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.WorkspacePremium
 import androidx.compose.material.icons.filled.Help
@@ -128,6 +132,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
@@ -140,6 +145,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.viewinterop.AndroidView
 import java.time.Year
 import java.time.Month
 import java.time.LocalDate
@@ -182,6 +188,7 @@ fun ProfileScreen(
     experienceProgress: Float = 0f,
     avatarPath: String? = null,
     avatarRevision: Int = 0,
+    gymMembershipRevision: Int = 0,
     onRequestHealthConnect: (((Boolean, Int?, Double?, Double?, Double?) -> Unit) -> Unit) = { _ -> },
     onSyncHealthConnect: (((Boolean, List<ImportedBodyMetric>) -> Unit) -> Unit) = { result -> result(false, emptyList()) },
     onBodyMetricSaved: (String, Double) -> Unit = { _, _ -> },
@@ -266,6 +273,10 @@ fun ProfileScreen(
     var nutritionTextEditor by remember { mutableStateOf<NutritionTextField?>(null) }
     var settingsPicker by remember { mutableStateOf<SettingsPicker?>(null) }
     var selectedSection by remember { mutableStateOf<ProfileSection?>(null) }
+    var showsPlannerNotesEditor by remember { mutableStateOf(false) }
+    var plannerNotesInput by remember(initial) { mutableStateOf(initial.workoutPlannerNotes.orEmpty()) }
+    var showHeightPicker by remember { mutableStateOf(false) }
+    var selectedHeight by remember { mutableStateOf(0) }
     var sectionEntered by remember { mutableStateOf(false) }
     var accountRevision by remember { mutableStateOf(0) }
     val currentAccount = remember(accountRevision) { currentWildforceAccount(profileContext) }
@@ -345,18 +356,25 @@ fun ProfileScreen(
             onBodyMetricsOpened()
         }
     }
-    LaunchedEffect(currentAccount, accountRevision) {
+    LaunchedEffect(currentAccount, accountRevision, gymMembershipRevision) {
         if (currentAccount == null) {
             coaches = emptyList()
             gymMemberships = emptyList()
         } else {
             coaches = currentWildforceCoaches(profileContext)
-            gymMemberships = currentWildforceGymMemberships(profileContext)
+            currentWildforceGymMemberships(profileContext)?.let { gymMemberships = it }
         }
     }
     LaunchedEffect(selectedSection) {
         sectionEntered = false
         if (selectedSection != null) sectionEntered = true
+    }
+    fun closePlannerNotesEditor() {
+        draft = draft.copy(workoutPlannerNotes = plannerNotesInput.trim())
+        showsPlannerNotesEditor = false
+    }
+    BackHandler(enabled = showsPlannerNotesEditor) {
+        closePlannerNotesEditor()
     }
     LaunchedEffect(draft, heightInput, weightInput, durationInput, birthDayInput, birthYearInput) {
         if (profilePersistencePrimed) {
@@ -384,10 +402,12 @@ fun ProfileScreen(
         if (selectedSection != null) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Box(Modifier.size(48.dp).clip(CircleShape).background(WildforceThemeTokens.surfaceElevated).clickable { selectedSection = null }, contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(48.dp).clip(CircleShape).background(WildforceThemeTokens.surfaceElevated).clickable {
+                        if (showsPlannerNotesEditor) closePlannerNotesEditor() else selectedSection = null
+                    }, contentAlignment = Alignment.Center) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(22.dp))
                     }
-                    Text(selectedSection?.title.orEmpty(), fontFamily = Exo2FontFamily, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                    Text(if (showsPlannerNotesEditor) "Notas para el planificador" else selectedSection?.title.orEmpty(), fontFamily = Exo2FontFamily, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                 }
             }
         }
@@ -475,10 +495,28 @@ fun ProfileScreen(
         // hierarchy and pushes the four profile destinations below the fold.
         if (selectedSection == ProfileSection.Body) { item { ProfileEntrance(sectionEntered, 105) { Section("Cuerpo") {
                 ChoiceButton("Sexo", draft.gender.title, icon = Icons.Filled.Person) { picker = Picker.Gender }
-                ChoiceButton("Fecha de nacimiento", "$birthDayInput de ${monthName(draft.birthMonth)} $birthYearInput", icon = Icons.Filled.Person) { picker = Picker.BirthMonth }
-                NumberField("Día de nacimiento", birthDayInput, { birthDayInput = it.filter(Char::isDigit).take(2) }, Modifier.fillMaxWidth())
-                NumberField("Año de nacimiento", birthYearInput, { birthYearInput = it.filter(Char::isDigit).take(4) }, Modifier.fillMaxWidth())
-                NumberField(if (draft.metricSystem == MetricSystem.Imperial) "Altura (in)" else "Altura (cm)", heightInput, { heightInput = it.filter(Char::isDigit).take(3) }, Modifier.fillMaxWidth())
+                ChoiceButton("Fecha de nacimiento", "$birthDayInput de ${monthName(draft.birthMonth)} $birthYearInput", icon = Icons.Filled.CalendarMonth) {
+                    val validProfile = validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput, birthDayInput)
+                    android.app.DatePickerDialog(
+                        profileContext,
+                        { _, year, month, day ->
+                            draft = draft.copy(birthMonth = month + 1)
+                            birthDayInput = day.toString()
+                            birthYearInput = year.toString()
+                        },
+                        validProfile.birthYear,
+                        validProfile.birthMonth - 1,
+                        validProfile.birthDay,
+                    ).show()
+                }
+                ChoiceButton(
+                    "Altura",
+                    formatHeightChoice(heightInput, draft.metricSystem),
+                    icon = Icons.Filled.Straighten,
+                ) {
+                    selectedHeight = heightInput.toIntOrNull() ?: displayHeight(draft.heightCm, draft.metricSystem).toInt()
+                    showHeightPicker = true
+                }
                 // The profile weight is the canonical current value, just like iOS.
                 // The body-metrics collection is history and can legitimately lag
                 // behind when the profile is edited from another entry point.
@@ -495,13 +533,30 @@ fun ProfileScreen(
                 measurements = bodyComposition,
             )
         } }
-        if (selectedSection == ProfileSection.Fitness) { item { ProfileEntrance(sectionEntered, 105) { Section("Entrenamiento") {
+        if (selectedSection == ProfileSection.Fitness && showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 105) {
+            Section("Notas para el planificador") {
+                OutlinedTextField(
+                    value = plannerNotesInput,
+                    onValueChange = { plannerNotesInput = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Añade contexto útil para tus planes de entrenamiento") },
+                    minLines = 5,
+                    maxLines = 10,
+                )
+                Text(
+                    "Las notas deben ser específicas para tus entrenamientos. Se usarán para adaptar el plan y no pueden sustituir ajustes como el equipamiento o las restricciones.",
+                    style = MaterialTheme.typography.caption,
+                    color = WildforceThemeTokens.textSecondary,
+                )
+            }
+        } } }
+        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 105) { Section("Entrenamiento") {
                 ChoiceButton("Objetivo", draft.goal.title, icon = profileGoalIcon(draft.goal)) { picker = Picker.Goal }
                 ChoiceButton("Estilo de vida", draft.lifestyle.title, draft.lifestyle.description, profileLifestyleIcon(draft.lifestyle)) { picker = Picker.Lifestyle }
-                ChoiceButton("Nivel de entrenamiento", draft.trainingLevel.title, draft.trainingLevel.description, Icons.Filled.SportsGymnastics) { picker = Picker.Level }
+                ChoiceButton("Nivel de entrenamiento", draft.trainingLevel.title, draft.trainingLevel.description, Icons.Filled.FitnessCenter) { picker = Picker.Level }
                 if (draft.goal.supportsBodyComposition && draft.trainingLevel.supportsBodyComposition) ChoiceButton("Intención de composición corporal", draft.bodyCompositionPhase?.title ?: "Automático", icon = Icons.Filled.Scale) { picker = Picker.Body }
             } } } }
-        if (selectedSection == ProfileSection.Fitness) { item { ProfileEntrance(sectionEntered, 155) { Section("Configuración de entrenamiento") {
+        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 155) { Section("Configuración de entrenamiento") {
                 ChoiceButton("Configuración", draft.trainingSplitPreference.title, icon = Icons.Filled.GridView) { picker = Picker.Split }
                 Text("Días de entrenamiento", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 draft.workoutDays.toList().let { days ->
@@ -536,16 +591,39 @@ fun ProfileScreen(
                         }
                     }
                 }
-                NumberField("Duración preferida (min)", durationInput, { durationInput = it.filter(Char::isDigit).take(3) }, Modifier.fillMaxWidth(), leadingIcon = Icons.Filled.Timer)
+                val durationValue = durationInput.toIntOrNull()?.coerceIn(15, 180) ?: draft.preferredWorkoutDurationMinutes.coerceIn(15, 180)
+                Row(Modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("Duración preferida", Modifier.weight(1f), color = WildforceThemeTokens.textPrimary)
+                    IconButton(
+                        onClick = { durationInput = (durationValue - 5).coerceAtLeast(15).toString() },
+                        enabled = durationValue > 15,
+                        modifier = Modifier.semantics { contentDescription = "Reducir duración preferida" },
+                    ) { Icon(Icons.Filled.Remove, contentDescription = null, tint = WildforceThemeTokens.textPrimary) }
+                    Text("$durationValue min", Modifier.width(64.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+                    IconButton(
+                        onClick = { durationInput = (durationValue + 5).coerceAtMost(180).toString() },
+                        enabled = durationValue < 180,
+                        modifier = Modifier.semantics { contentDescription = "Aumentar duración preferida" },
+                    ) { Icon(Icons.Filled.Add, contentDescription = null, tint = WildforceThemeTokens.textPrimary) }
+                }
                 draft.workoutDays.sortedBy { it.ordinal }.forEach { day ->
                     if (draft.trainingSplitPreference == TrainingSplitPreference.Custom) ChoiceButton(day.title, draft.customWorkoutFocuses[day]?.title ?: "Seleccionar foco") { picker = Picker.Focus(day) }
                 }
                 TogglePreference("Omitir calentamientos", "Oculta los bloques de activación y ajusta la duración objetivo.", draft.skipsWarmups, Icons.Filled.FastForward) { draft = draft.copy(skipsWarmups = !draft.skipsWarmups) }
                 TogglePreference("Omitir enfriamientos", "Oculta los bloques finales y mantiene el plan dentro de la duración objetivo.", draft.skipsCooldowns, Icons.Filled.DirectionsWalk) { draft = draft.copy(skipsCooldowns = !draft.skipsCooldowns) }
                 TogglePreference("Omitir periodos de descanso", "Salta directamente a la siguiente serie o ejercicio durante el entrenamiento.", draft.skipsRestPeriods, Icons.Filled.SkipNext) { draft = draft.copy(skipsRestPeriods = !draft.skipsRestPeriods) }
-                OutlinedTextField(draft.workoutPlannerNotes.takeUnless { it.equals("null", ignoreCase = true) } ?: "", { draft = draft.copy(workoutPlannerNotes = it.take(500)) }, Modifier.fillMaxWidth(), label = { Text("Notas para el planificador") }, placeholder = { Text("Ninguna") }, leadingIcon = { Icon(Icons.Filled.Notes, contentDescription = null) }, minLines = 2, maxLines = 4)
+                val plannerNotes = draft.workoutPlannerNotes.takeUnless { it.equals("null", ignoreCase = true) }
+                ChoiceButton(
+                    "Notas para el planificador",
+                    plannerNotes ?: "Ninguna",
+                    description = plannerNotes?.takeIf { it.isNotBlank() },
+                    icon = Icons.Filled.Notes,
+                ) {
+                    plannerNotesInput = plannerNotes.orEmpty()
+                    showsPlannerNotesEditor = true
+                }
             } } } }
-        if (selectedSection == ProfileSection.Fitness) { item { ProfileEntrance(sectionEntered, 205) { Section("Entorno") {
+        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 205) { Section("Entorno") {
                 ChoiceButton("Tipo de gimnasio", draft.gymType.title, icon = profileGymTypeIcon(draft.gymType)) { picker = Picker.Gym }
                 ChoiceButton("Ubicaciones de entrenamiento", draft.effectiveTrainingLocations().joinToString(" · ") { if (it.isDefault) "${it.name} (principal)" else it.name }, icon = Icons.Filled.Home) { showsTrainingLocations = true }
                 ChoiceButton("Equipamiento disponible", "${draft.availableEquipment.size} seleccionado(s)", icon = Icons.Filled.FitnessCenter) { picker = Picker.Equipment }
@@ -749,6 +827,39 @@ fun ProfileScreen(
                 picker = null
             }
         }
+    }
+    if (showHeightPicker) {
+        val minimum = if (draft.metricSystem == MetricSystem.Imperial) 47 else 120
+        val maximum = if (draft.metricSystem == MetricSystem.Imperial) 91 else 230
+        androidx.compose.material.AlertDialog(
+            onDismissRequest = { showHeightPicker = false },
+            title = { Text("Altura", fontFamily = AntonFontFamily) },
+            text = {
+                AndroidView(
+                    factory = { viewContext ->
+                        NumberPicker(viewContext).apply {
+                            minValue = minimum
+                            maxValue = maximum
+                            displayedValues = (minimum..maximum).map { formatHeightChoice(it.toString(), draft.metricSystem) }.toTypedArray()
+                            wrapSelectorWheel = false
+                            value = selectedHeight.coerceIn(minimum, maximum)
+                        }
+                    },
+                    update = { pickerView ->
+                        pickerView.minValue = minimum
+                        pickerView.maxValue = maximum
+                        pickerView.displayedValues = (minimum..maximum).map { formatHeightChoice(it.toString(), draft.metricSystem) }.toTypedArray()
+                        if (pickerView.value != selectedHeight) pickerView.value = selectedHeight.coerceIn(minimum, maximum)
+                        pickerView.setOnValueChangedListener { _, _, newValue -> selectedHeight = newValue }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(180.dp),
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { heightInput = selectedHeight.toString(); showHeightPicker = false }) { Text("GUARDAR") }
+            },
+            dismissButton = { TextButton(onClick = { showHeightPicker = false }) { Text("CANCELAR") } },
+        )
     }
     nutritionPicker?.let { current ->
         ProfileOptionPickerDialog(current.title, current.options, onDismiss = { nutritionPicker = null }) { selected ->
@@ -979,7 +1090,7 @@ internal enum class BodyMetricKind(val title: String, val unit: String, val icon
     // Keep the same order and symbol hierarchy as iOS BodyMetricType.allCases.
     Weight("Peso", "kg", Icons.Filled.Scale),
     BodyFat("Grasa corporal", "%", Icons.Filled.Percent),
-    LeanBodyMass("Masa corporal magra", "kg", Icons.Filled.SportsGymnastics),
+    LeanBodyMass("Masa corporal magra", "kg", Icons.Filled.FitnessCenter),
     Waist("Cintura", "cm", Icons.Filled.Straighten),
     Neck("Cuello", "cm", Icons.Filled.Person),
     Hip("Cadera", "cm", Icons.Filled.Straighten),
@@ -1094,11 +1205,23 @@ private fun BodyMetricsScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Box(Modifier.size(48.dp).clip(CircleShape).background(WildforceThemeTokens.backgroundSecondary).clickable(onClick = onClose), contentAlignment = Alignment.Center) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(22.dp))
                     }
-                    Text("MÉTRICAS CORPORALES", fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    // Keep the title flexible: before this had its intrinsic width,
+                    // which pushed the import and add actions past the right edge on
+                    // narrower devices. iOS reserves this trailing toolbar space.
+                    Text(
+                        "MÉTRICAS CORPORALES",
+                        modifier = Modifier.weight(1f),
+                        fontFamily = Exo2FontFamily,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = WildforceThemeTokens.textPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Box(
@@ -1139,7 +1262,10 @@ private fun BodyMetricsScreen(
                             .size(48.dp)
                             .clip(CircleShape)
                             .clickable {
-                                quickLogInput = input
+                                // Match iOS's NumericInputSheet: an add action starts
+                                // with a fresh value rather than silently suggesting the
+                                // prior measurement.
+                                quickLogInput = ""
                                 quickLogVisible = true
                             },
                         contentAlignment = Alignment.Center,
@@ -1608,39 +1734,96 @@ private fun ProfileBodyMetrics(
 ) {
     val currentYear = Year.now().value
     val safeBirthYear = profile.birthYear.coerceIn(1900, currentYear)
-    val age = ageInYears(safeBirthYear, profile.birthMonth, LocalDate.now()).coerceIn(0, 120)
+    val age = ageInYears(safeBirthYear, profile.birthMonth, profile.birthDay, LocalDate.now()).coerceIn(0, 120)
     val safeHeightCm = profile.heightCm.coerceIn(80, 260)
     val safeWeightKg = profile.weightKg.takeIf { it.isFinite() && it > 0.0 } ?: 70.0
     val basalMetabolicRate = when (profile.gender.storedValue) {
         "female" -> 10 * safeWeightKg + 6.25 * safeHeightCm - 5 * age - 161
         else -> 10 * safeWeightKg + 6.25 * safeHeightCm - 5 * age + 5
-    }.roundToInt()
+    }
     val activityFactor = when (profile.lifestyle) {
         LifestyleLevel.Sedentary -> 1.2
         LifestyleLevel.LightlyActive -> 1.375
         LifestyleLevel.ModeratelyActive -> 1.55
         LifestyleLevel.VeryActive -> 1.725
     }
+    val displayedBasalMetabolicRate = basalMetabolicRate.roundToInt()
     val activeMetabolicRate = (basalMetabolicRate * activityFactor).roundToInt()
     Section("TMB") {
-        ReadOnlyProfileRow("Metabolismo basal", "$basalMetabolicRate kcal", "Calorías que quema tu cuerpo en reposo absoluto según altura, peso, edad y sexo.")
+        ReadOnlyProfileRow("Metabolismo basal", "$displayedBasalMetabolicRate kcal", "Calorías que quema tu cuerpo en reposo absoluto según altura, peso, edad y sexo.")
         ReadOnlyProfileRow("Metabolismo activo", "$activeMetabolicRate kcal", "TMB ajustada a tu estilo de vida ${profile.lifestyle.title.lowercase()}.")
     }
     Section("Composición corporal") {
         val waistToHeight = measurements.waistCm?.div(safeHeightCm)
         if (waistToHeight != null) {
             val zone = waistToHeightZone(waistToHeight)
-            ReadOnlyProfileRow("Relación cintura-altura", "%.2f".format(waistToHeight), zone)
+            val zoneColor = when {
+                waistToHeight < .40 -> WildforceThemeTokens.textSecondary
+                waistToHeight < .50 -> Color(0xFF4CAF50)
+                waistToHeight < .60 -> Color(0xFFFF9800)
+                else -> Color(0xFFF44336)
+            }
+            ZoneMetricRow(
+                title = "Relación cintura-altura",
+                value = "%.2f".format(waistToHeight),
+                zone = zone,
+                zoneColor = zoneColor,
+                progress = ((waistToHeight - .30) / (.70 - .30)).toFloat(),
+                segmentFractions = listOf(.25f, .25f, .25f, .25f),
+                boundaryLabels = listOf("0.40", "0.50", "0.60"),
+                segmentColors = listOf(
+                    WildforceThemeTokens.textSecondary.copy(alpha = .4f),
+                    Color(0xFF4CAF50).copy(alpha = .75f),
+                    Color(0xFFFF9800).copy(alpha = .75f),
+                    Color(0xFFF44336).copy(alpha = .75f),
+                ),
+            )
         } else ReadOnlyProfileRow("Relación cintura-altura", "—", "Registra la cintura para ver este dato.")
         val bodyFat = navyBodyFat(profile.gender, safeHeightCm.toDouble(), measurements)
         if (bodyFat != null) {
-            val zone = when {
-                bodyFat < 14 -> "Atlético"
-                bodyFat < 21 -> "En forma"
-                bodyFat < 30 -> "Promedio"
-                else -> "Elevado"
+            val isFemale = profile.gender.storedValue == "female"
+            val zone = if (isFemale) {
+                when {
+                    bodyFat < 21 -> "Atlético"
+                    bodyFat < 25 -> "En forma"
+                    bodyFat < 32 -> "Promedio"
+                    else -> "Elevado"
+                }
+            } else {
+                when {
+                    bodyFat < 14 -> "Atlético"
+                    bodyFat < 18 -> "En forma"
+                    bodyFat < 25 -> "Promedio"
+                    else -> "Elevado"
+                }
             }
-            ReadOnlyProfileRow("Grasa corporal estimada", "%.1f%%".format(bodyFat), "$zone · Fórmula de la Marina de EE. UU.")
+            val lowerBoundaries = if (isFemale) listOf(21.0, 25.0, 32.0) else listOf(14.0, 18.0, 25.0)
+            val barMin = if (isFemale) 10.0 else 3.0
+            val barMax = if (isFemale) 50.0 else 40.0
+            val edges = listOf(barMin) + lowerBoundaries + barMax
+            val fractions = edges.zipWithNext { start, end -> ((end - start) / (barMax - barMin)).toFloat() }
+            val zoneColor = when {
+                bodyFat < lowerBoundaries[0] -> Color(0xFF2196F3)
+                bodyFat < lowerBoundaries[1] -> Color(0xFF4CAF50)
+                bodyFat < lowerBoundaries[2] -> Color(0xFFFF9800)
+                else -> Color(0xFFF44336)
+            }
+            ZoneMetricRow(
+                title = "Grasa corporal estimada",
+                value = "%.1f%%".format(bodyFat),
+                zone = zone,
+                zoneColor = zoneColor,
+                progress = ((bodyFat - barMin) / (barMax - barMin)).toFloat(),
+                segmentFractions = fractions,
+                boundaryLabels = lowerBoundaries.map { it.toInt().toString() + "%" },
+                segmentColors = listOf(
+                    Color(0xFF2196F3).copy(alpha = .6f),
+                    Color(0xFF4CAF50).copy(alpha = .75f),
+                    Color(0xFFFF9800).copy(alpha = .75f),
+                    Color(0xFFF44336).copy(alpha = .75f),
+                ),
+                description = "Estimación mediante la fórmula de la Marina de EE. UU. usando cintura${if (isFemale) ", cadera" else ""} y cuello.",
+            )
         } else ReadOnlyProfileRow("Grasa corporal estimada", "—", if (profile.gender.storedValue == "female") "Registra cintura, cuello y cadera para verla." else "Registra cintura y cuello para verla.")
     }
 }
@@ -1653,6 +1836,63 @@ private fun ReadOnlyProfileRow(label: String, value: String, description: String
             Text(value, color = WildforceThemeTokens.textSecondary)
         }
         description?.let { Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+    }
+}
+
+@Composable
+private fun ZoneMetricRow(
+    title: String,
+    value: String,
+    zone: String,
+    zoneColor: Color,
+    progress: Float,
+    segmentFractions: List<Float>,
+    boundaryLabels: List<String>,
+    segmentColors: List<Color>,
+    description: String? = null,
+) {
+    Column(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(title, Modifier.weight(1f), color = WildforceThemeTokens.textPrimary)
+            Text(value, color = WildforceThemeTokens.textSecondary)
+        }
+        Text(zone, style = MaterialTheme.typography.caption, color = zoneColor)
+        ZoneRangeBar(progress, segmentFractions, boundaryLabels, segmentColors)
+        description?.let { Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+    }
+}
+
+@Composable
+private fun ZoneRangeBar(progress: Float, segmentFractions: List<Float>, boundaryLabels: List<String>, segmentColors: List<Color>) {
+    BoxWithConstraints(Modifier.fillMaxWidth().height(36.dp)) {
+        val clampedProgress = progress.coerceIn(0f, 1f)
+        Row(
+            Modifier.fillMaxWidth().align(Alignment.TopCenter).padding(top = 14.dp).height(8.dp).clip(CircleShape),
+            horizontalArrangement = Arrangement.spacedBy(1.dp),
+        ) {
+            segmentFractions.forEachIndexed { index, fraction ->
+                Box(Modifier.weight(fraction).fillMaxHeight().background(segmentColors[index]))
+            }
+        }
+        Box(
+            Modifier.offset(x = maxWidth * clampedProgress - 7.dp, y = 11.dp)
+                .size(14.dp)
+                .background(Color.White, CircleShape)
+                .border(1.5.dp, WildforceThemeTokens.textPrimary.copy(alpha = .5f), CircleShape)
+                .clip(CircleShape),
+        )
+        var cumulative = 0f
+        boundaryLabels.forEachIndexed { index, label ->
+            cumulative += segmentFractions[index]
+            Text(
+                label,
+                Modifier.offset(x = maxWidth * cumulative - 20.dp, y = 20.dp).width(40.dp),
+                style = MaterialTheme.typography.overline,
+                color = WildforceThemeTokens.textSecondary,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+            )
+        }
     }
 }
 
@@ -1669,7 +1909,13 @@ internal fun waistToHeightZone(ratio: Double): String = when {
 
 internal fun ageInYears(birthYear: Int, birthMonth: Int, today: LocalDate): Int {
     val safeMonth = birthMonth.coerceIn(1, 12)
-    return java.time.Period.between(LocalDate.of(birthYear, safeMonth, 1), today).years.coerceAtLeast(0)
+    return ageInYears(birthYear, safeMonth, 1, today)
+}
+
+internal fun ageInYears(birthYear: Int, birthMonth: Int, birthDay: Int, today: LocalDate): Int {
+    val safeMonth = birthMonth.coerceIn(1, 12)
+    val safeDay = birthDay.coerceIn(1, daysInBirthMonth(birthYear, safeMonth))
+    return java.time.Period.between(LocalDate.of(birthYear, safeMonth, safeDay), today).years.coerceAtLeast(0)
 }
 
 internal fun navyBodyFatEstimate(
@@ -1681,21 +1927,22 @@ internal fun navyBodyFatEstimate(
 ): Double? {
     val waist = waistCm ?: return null
     val neck = neckCm ?: return null
+    if (!heightCm.isFinite() || heightCm <= 0 || !waist.isFinite() || waist <= 0 || !neck.isFinite() || neck <= 0) return null
     val centimetersPerInch = 2.54
     val heightInches = heightCm / centimetersPerInch
     val waistInches = waist / centimetersPerInch
     val neckInches = neck / centimetersPerInch
-    val denominator = if (gender.storedValue == "female") {
+    val bodyFat = if (gender.storedValue == "female") {
         val hipInches = (hipCm ?: return null) / centimetersPerInch
         val circumference = waistInches + hipInches - neckInches
-        if (circumference <= 0) return null
-        1.0324 - 0.19077 * log10(circumference) + 0.15456 * log10(heightInches)
+        if (!hipInches.isFinite() || hipInches <= 0 || circumference <= 0) return null
+        163.205 * log10(circumference) - 97.684 * log10(heightInches) - 78.387
     } else {
         val circumference = waistInches - neckInches
         if (circumference <= 0) return null
-        1.0324 - 0.19077 * log10(circumference) + 0.15456 * log10(heightInches)
+        86.010 * log10(circumference) - 70.041 * log10(heightInches) + 36.76
     }
-    return (495 / denominator - 450).takeIf { it.isFinite() && it in 2.0..70.0 }
+    return bodyFat.takeIf { it.isFinite() && it > 0 }
 }
 
 @Composable
@@ -1738,7 +1985,7 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = AntonFontFamily, fontSize = 28.sp, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.heightIn(min = 48.dp).clickable(onClick = onEditName))
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Icon(Icons.Filled.SportsGymnastics, contentDescription = null, modifier = Modifier.size(15.dp), tint = WildforceThemeTokens.textSecondary)
+                            Icon(Icons.Filled.FitnessCenter, contentDescription = null, modifier = Modifier.size(15.dp), tint = WildforceThemeTokens.textSecondary)
                             Text("${profile.goal.title} • ${profile.trainingLevel.title}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
@@ -1990,7 +2237,7 @@ private fun String.profileDouble(): Double? = replace(',', '.').toDoubleOrNull()
 /** Filled Material counterparts for the SF Symbols used by iOS profile rows. */
 private fun profileGoalIcon(goal: FitnessGoal): ImageVector = when (goal) {
     FitnessGoal.LoseWeight -> Icons.Filled.Sync
-    FitnessGoal.BuildMuscle -> Icons.Filled.SportsGymnastics
+    FitnessGoal.BuildMuscle -> Icons.Filled.FitnessCenter
     FitnessGoal.GainStrength -> Icons.Filled.Bolt
     FitnessGoal.ImproveEndurance -> Icons.Filled.DirectionsRun
     FitnessGoal.ImproveMobility -> Icons.Filled.SelfImprovement
@@ -2013,7 +2260,7 @@ private fun profileLifestyleIcon(lifestyle: LifestyleLevel): ImageVector = when 
     LifestyleLevel.VeryActive -> Icons.Filled.DirectionsRun
 }
 
-private sealed class Picker { data object Goal : Picker(); data object Level : Picker(); data object Lifestyle : Picker(); data object Split : Picker(); data object Body : Picker(); data object Gym : Picker(); data object Gender : Picker(); data object Metric : Picker(); data object Equipment : Picker(); data object Restrictions : Picker(); data object BirthMonth : Picker(); data class Focus(val day: WorkoutWeekday) : Picker() }
+private sealed class Picker { data object Goal : Picker(); data object Level : Picker(); data object Lifestyle : Picker(); data object Split : Picker(); data object Body : Picker(); data object Gym : Picker(); data object Gender : Picker(); data object Metric : Picker(); data object Equipment : Picker(); data object Restrictions : Picker(); data class Focus(val day: WorkoutWeekday) : Picker() }
 
 @Composable private fun PickerDialog(picker: Picker, profile: OnboardingProfile, onSelect: (OnboardingProfile) -> Unit) {
     val title: String
@@ -2030,7 +2277,6 @@ private sealed class Picker { data object Goal : Picker(); data object Level : P
         } } }
         Picker.Gender -> { title = "Sexo"; values = Gender.entries.map { it.title to { p: OnboardingProfile -> p.copy(gender = it) } } }
         Picker.Metric -> { title = "Unidades"; values = MetricSystem.entries.map { it.title to { p: OnboardingProfile -> p.copy(metricSystem = it) } } }
-        Picker.BirthMonth -> { title = "Mes de nacimiento"; values = (1..12).map { month -> monthName(month) to { p: OnboardingProfile -> p.copy(birthMonth = month) } } }
         Picker.Equipment, Picker.Restrictions -> { title = ""; values = emptyList() }
         is Picker.Focus -> { title = "Foco de ${picker.day.title}"; values = WorkoutFocus.customSelectionCases.map { it.title to { p: OnboardingProfile -> p.copy(customWorkoutFocuses = p.customWorkoutFocuses + (picker.day to it)) } } }
     }
@@ -2055,6 +2301,7 @@ private fun TrainingLocationsDialog(
     onSave: (List<TrainingLocationProfile>) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val context = LocalContext.current
     var locations by remember(initial) { mutableStateOf(initial) }
     var editingIndex by remember { mutableStateOf<Int?>(null) }
     var editorName by remember { mutableStateOf("") }
@@ -2062,12 +2309,17 @@ private fun TrainingLocationsDialog(
     var editorAddress by remember { mutableStateOf("") }
     var editorLatitude by remember { mutableStateOf("") }
     var editorLongitude by remember { mutableStateOf("") }
+    var editorPhotoPath by remember { mutableStateOf<String?>(null) }
+    val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { TrainingLocationPhotoStore.import(context, it) }?.let { editorPhotoPath = it }
+    }
     val editing = editingIndex?.let(locations::getOrNull)
+    val isEditing = editingIndex != null
     androidx.compose.material.AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (editing == null) "UBICACIONES" else "EDITAR UBICACIÓN", fontFamily = AntonFontFamily) },
+        title = { Text(if (!isEditing) "UBICACIONES" else if (editing == null) "AÑADIR UBICACIÓN" else "EDITAR UBICACIÓN", fontFamily = AntonFontFamily) },
         text = {
-            if (editing == null) {
+            if (!isEditing) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     LazyColumn(Modifier.height(250.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         itemsIndexed(locations) { index, location ->
@@ -2085,6 +2337,7 @@ private fun TrainingLocationsDialog(
                                     editorAddress = location.displayAddress.orEmpty()
                                     editorLatitude = location.latitude?.toString().orEmpty()
                                     editorLongitude = location.longitude?.toString().orEmpty()
+                                    editorPhotoPath = location.photoPath
                                 }.padding(6.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accent)
                             }
                         }
@@ -2096,6 +2349,7 @@ private fun TrainingLocationsDialog(
                         editorAddress = ""
                         editorLatitude = ""
                         editorLongitude = ""
+                        editorPhotoPath = null
                     }.padding(10.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
                         Text("AÑADIR UBICACIÓN", Modifier.padding(start = 6.dp), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
@@ -2110,6 +2364,10 @@ private fun TrainingLocationsDialog(
                         OutlinedTextField(editorLatitude, { editorLatitude = it.take(20) }, Modifier.weight(1f), label = { Text("Latitud") }, singleLine = true)
                         OutlinedTextField(editorLongitude, { editorLongitude = it.take(20) }, Modifier.weight(1f), label = { Text("Longitud") }, singleLine = true)
                     }
+                    TextButton(onClick = { photoPicker.launch("image/*") }) {
+                        Icon(Icons.Filled.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Text(if (editorPhotoPath == null) "AÑADIR FOTO DEL LUGAR" else "CAMBIAR FOTO DEL LUGAR", Modifier.padding(start = 8.dp))
+                    }
                     LazyColumn(Modifier.height(280.dp)) {
                         items(Equipment.entries) { equipment ->
                             TogglePickerRow(equipment.title, equipment in editorEquipment) {
@@ -2117,7 +2375,7 @@ private fun TrainingLocationsDialog(
                             }
                         }
                     }
-                    if (locations.size > 1) {
+                    if (editing != null && locations.size > 1) {
                         Text("ELIMINAR UBICACIÓN", Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable {
                             val removedIndex = editingIndex ?: return@clickable
                             val remaining = locations.filterIndexed { index, _ -> index != removedIndex }
@@ -2130,27 +2388,27 @@ private fun TrainingLocationsDialog(
         },
         confirmButton = {
             Button(onClick = {
-                if (editing == null) onSave(locations)
+                if (!isEditing) onSave(locations)
                 else {
                     val updated = TrainingLocationProfile(
                         name = editorName.trim().ifBlank { "Ubicación ${locations.size + 1}" },
                         equipment = editorEquipment.ifEmpty { setOf(Equipment.Bodyweight) },
-                        isDefault = editing.isDefault || locations.isEmpty(),
+                        isDefault = editing?.isDefault == true || locations.isEmpty(),
                         displayAddress = editorAddress.trim().ifBlank { null },
                         latitude = editorLatitude.replace(',', '.').toDoubleOrNull()?.takeIf { it in -90.0..90.0 },
                         longitude = editorLongitude.replace(',', '.').toDoubleOrNull()?.takeIf { it in -180.0..180.0 },
-                        photoPath = editing.photoPath,
+                        photoPath = editorPhotoPath,
                     )
                     locations = if (editingIndex == -1) {
                         if (locations.any { it.isDefault }) locations + updated else locations + updated.copy(isDefault = true)
                     } else locations.mapIndexed { index, location -> if (index == editingIndex) updated else location }
                     editingIndex = null
                 }
-            }) { Text(if (editing == null) "GUARDAR" else "LISTO") }
+            }) { Text(if (!isEditing) "GUARDAR" else "LISTO") }
         },
         dismissButton = {
-            Text(if (editing == null) "CANCELAR" else "VOLVER", Modifier.heightIn(min = 48.dp).clickable {
-                if (editing == null) onDismiss() else editingIndex = null
+            Text(if (!isEditing) "CANCELAR" else "VOLVER", Modifier.heightIn(min = 48.dp).clickable {
+                if (!isEditing) onDismiss() else editingIndex = null
             }.padding(12.dp), color = WildforceThemeTokens.textSecondary)
         },
     )
@@ -2221,12 +2479,27 @@ private fun displayHeight(heightCm: Int, system: MetricSystem): String = when (s
     MetricSystem.Imperial -> (heightCm / 2.54).roundToInt().toString()
 }
 
+private fun formatHeightChoice(value: String, system: MetricSystem): String {
+    val displayed = value.toIntOrNull() ?: return value
+    return when (system) {
+        MetricSystem.Metric -> "$displayed cm"
+        MetricSystem.Imperial -> "${displayed / 12}′ ${displayed % 12}″"
+    }
+}
+
 private fun displayWeight(weightKg: Double, system: MetricSystem): String = when (system) {
     MetricSystem.Metric -> "%.1f".format(Locale.US, weightKg)
     MetricSystem.Imperial -> "%.1f".format(Locale.US, weightKg * PoundsPerKilogram)
 }
 
-private fun validatedProfile(draft: OnboardingProfile, height: String, weight: String, duration: String, birthYear: String = draft.birthYear.toString(), birthDay: String = draft.birthDay.toString()): OnboardingProfile = draft.copy(
+private fun validatedProfile(draft: OnboardingProfile, height: String, weight: String, duration: String, birthYear: String = draft.birthYear.toString(), birthDay: String = draft.birthDay.toString()): OnboardingProfile {
+    val validBirthYear = birthYear.toIntOrNull()
+        ?.takeIf { it in 1920..Year.now().value }
+        ?: draft.birthYear
+    val validBirthDay = birthDay.toIntOrNull()
+        ?.takeIf { it in 1..daysInBirthMonth(validBirthYear, draft.birthMonth) }
+        ?: draft.birthDay
+    return draft.copy(
     // These fields are persisted while the user types. Do not coerce a partial
     // value to a boundary: deleting a digit from 1995 previously saved 1920,
     // and deleting from weight/height could likewise save their minimums.
@@ -2242,12 +2515,9 @@ private fun validatedProfile(draft: OnboardingProfile, height: String, weight: S
     preferredWorkoutDurationMinutes = duration.toIntOrNull()
         ?.takeIf { it in 15..180 }
         ?: draft.preferredWorkoutDurationMinutes,
-    birthYear = birthYear.toIntOrNull()
-        ?.takeIf { it in 1920..Year.now().value }
-        ?: draft.birthYear,
-    birthDay = birthDay.toIntOrNull()
-        ?.takeIf { it in 1..daysInBirthMonth(draft.birthYear, draft.birthMonth) }
-        ?: draft.birthDay,
-)
+    birthYear = validBirthYear,
+    birthDay = validBirthDay,
+    )
+}
 
 private fun monthName(month: Int): String = Month.of(month.coerceIn(1, 12)).getDisplayName(TextStyle.FULL, Locale.forLanguageTag("es-ES")).replaceFirstChar { it.titlecase(Locale.forLanguageTag("es-ES")) }
