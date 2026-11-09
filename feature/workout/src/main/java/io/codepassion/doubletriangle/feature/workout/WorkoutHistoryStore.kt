@@ -141,7 +141,50 @@ internal data class ExerciseHistoryEntry(
     val workoutId: String? = null,
     val plannedExerciseId: String? = null,
     val remoteResultId: String? = null,
+    val pendingEditAt: Long = 0,
+    val pendingEditKind: String? = null,
+    val updatedAtMillis: Long = 0,
+    val paceSecondsPerKm: Int? = null,
 )
+
+/** Refresh imported results by identity while preserving local-only sessions. */
+internal fun mergeExerciseHistory(
+    existing: List<ExerciseHistoryEntry>,
+    imported: List<ExerciseHistoryEntry>,
+    limit: Int,
+): List<ExerciseHistoryEntry> {
+    val merged = existing.toMutableList()
+    imported.forEach { incoming ->
+        val matches = merged.indices.filter { index ->
+            val current = merged[index]
+            when {
+                incoming.remoteResultId != null && current.remoteResultId != null -> incoming.remoteResultId == current.remoteResultId
+                incoming.plannedExerciseId != null && current.plannedExerciseId != null ->
+                    incoming.plannedExerciseId == current.plannedExerciseId && incoming.timestampMillis == current.timestampMillis
+                else -> false
+            }
+        }
+        if (matches.size == 1) {
+            val index = matches.single()
+            if (merged[index].pendingEditAt == 0L || incoming.updatedAtMillis > merged[index].pendingEditAt) merged[index] = incoming
+            else if (merged[index].remoteResultId == null && incoming.remoteResultId != null) {
+                merged[index] = merged[index].copy(remoteResultId = incoming.remoteResultId)
+            }
+        } else if (matches.isEmpty()) merged += incoming
+    }
+    return merged.sortedByDescending(ExerciseHistoryEntry::timestampMillis).take(limit)
+}
+
+internal fun claimUploadedHistory(entries: List<ExerciseHistoryEntry>, entry: RemoteExerciseHistoryEntry, id: String, plannedId: String): List<ExerciseHistoryEntry> {
+    val matches = entries.indices.filter { index ->
+        val current = entries[index]
+        current.remoteResultId == null && current.timestampMillis == entry.timestampMillis &&
+            current.workoutId == entry.workoutId && current.plannedExerciseId == entry.plannedExerciseId
+    }
+    if (matches.size != 1) return entries
+    val index = matches.single()
+    return entries.toMutableList().also { it[index] = it[index].copy(remoteResultId = id, plannedExerciseId = plannedId) }
+}
 
 data class ExerciseAnalyticsSummary(
     val exercise: ExerciseSummary,
@@ -160,6 +203,9 @@ data class ExerciseAnalyticsPoint(
     val feedback: String?,
     val durationSeconds: Int = 0,
     val distanceKm: Double = 0.0,
+    val resultId: String? = null,
+    val workoutId: String? = null,
+    val plannedExerciseId: String? = null,
 )
 
 /** Stable, UI-independent history snapshot exposed to the account synchronizer. */
@@ -178,6 +224,10 @@ data class RemoteExerciseHistoryEntry(
     val workoutId: String? = null,
     val plannedExerciseId: String? = null,
     val remoteResultId: String? = null,
+    val pendingEditAt: Long = 0,
+    val pendingEditKind: String? = null,
+    val updatedAtMillis: Long = 0,
+    val paceSecondsPerKm: Int? = null,
 )
 
 internal fun ExerciseSummary.historyKey(): String = coachExerciseId?.trim()?.lowercase()?.takeIf(String::isNotBlank)
@@ -187,7 +237,7 @@ internal fun ExerciseSummary.historyKey(): String = coachExerciseId?.trim()?.low
 
 /** iOS-equivalent progression metrics shown before the session list. */
 internal enum class ExerciseHistoryChartMetric(val title: String) {
-    Volume("Volumen"), Weight("Peso"), Reps("Repeticiones"), Distance("Distancia"), Duration("Duración"),
+    Volume("Volumen"), Weight("Peso"), Reps("Repeticiones"), Distance("Distancia"), Pace("Ritmo"), Duration("Duración"),
 }
 
 internal data class ExerciseHistoryChartPoint(val timestampMillis: Long, val value: Double)
@@ -200,6 +250,10 @@ internal fun ExerciseHistoryChartMetric.displayValue(value: Double, useImperial:
     }
     ExerciseHistoryChartMetric.Reps -> "${value.toInt()} reps"
     ExerciseHistoryChartMetric.Distance -> String.format(java.util.Locale.getDefault(), "%.2f %s", if (useImperial) value * .621371192 else value, if (useImperial) "mi" else "km")
+    ExerciseHistoryChartMetric.Pace -> {
+        val seconds = (value * if (useImperial) 1.609344 else 1.0).roundToInt()
+        "${seconds / 60}:${(seconds % 60).toString().padStart(2, '0')} ${if (useImperial) "min/mi" else "min/km"}"
+    }
     ExerciseHistoryChartMetric.Duration -> {
         val seconds = value.toInt()
         if (seconds < 60) "$seconds s" else "${seconds / 60}:${(seconds % 60).toString().padStart(2, '0')}"
@@ -211,7 +265,7 @@ internal fun exerciseHistoryChartSeries(
     history: List<ExerciseHistoryEntry>,
 ): List<ExerciseHistoryChartSeries> {
     val metrics = when (exercise.trackingMode) {
-        ExerciseTrackingMode.DurationAndDistance -> listOf(ExerciseHistoryChartMetric.Distance, ExerciseHistoryChartMetric.Duration)
+        ExerciseTrackingMode.DurationAndDistance -> listOf(ExerciseHistoryChartMetric.Distance, ExerciseHistoryChartMetric.Pace, ExerciseHistoryChartMetric.Duration)
         ExerciseTrackingMode.Duration -> listOf(ExerciseHistoryChartMetric.Duration, ExerciseHistoryChartMetric.Reps)
         ExerciseTrackingMode.Repetitions -> listOf(ExerciseHistoryChartMetric.Volume, ExerciseHistoryChartMetric.Weight, ExerciseHistoryChartMetric.Reps)
     }
@@ -220,9 +274,9 @@ internal fun exerciseHistoryChartSeries(
             val value = when (metric) {
                 ExerciseHistoryChartMetric.Volume -> entry.volumeKg.takeIf { it > 0.0 }
                 ExerciseHistoryChartMetric.Weight -> entry.maxWeightKg.takeIf { it > 0.0 }
-                ExerciseHistoryChartMetric.Reps -> (entry.totalReps.takeIf { it > 0 }
-                    ?: entry.setDetails.sumOf(SetPerformance::reps).takeIf { it > 0 })?.toDouble()
+                ExerciseHistoryChartMetric.Reps -> (if (entry.setDetails.isNotEmpty()) entry.setDetails.sumOf(SetPerformance::reps) else entry.totalReps).takeIf { it > 0 }?.toDouble()
                 ExerciseHistoryChartMetric.Distance -> entry.distanceKm.takeIf { it > 0.0 }
+                ExerciseHistoryChartMetric.Pace -> (entry.paceSecondsPerKm?.takeIf { it > 0 } ?: if (entry.durationSeconds > 0 && entry.distanceKm > 0) (entry.durationSeconds / entry.distanceKm).roundToInt() else null)?.toDouble()
                 ExerciseHistoryChartMetric.Duration -> entry.durationSeconds.takeIf { it > 0 }?.toDouble()
             } ?: return@mapNotNull null
             ExerciseHistoryChartPoint(entry.timestampMillis, value)
@@ -276,6 +330,10 @@ object WorkoutHistoryStore {
                 workoutId = entry.workoutId,
                 plannedExerciseId = entry.plannedExerciseId,
                 remoteResultId = entry.remoteResultId,
+                pendingEditAt = entry.pendingEditAt,
+                pendingEditKind = entry.pendingEditKind,
+                updatedAtMillis = entry.updatedAtMillis,
+                paceSecondsPerKm = entry.paceSecondsPerKm,
             )
         } }
     }
@@ -290,8 +348,8 @@ object WorkoutHistoryStore {
         importedByKey.forEach { (key, imported) ->
             val existing = historyForKey(context, key)
             val importedHistory = imported.map { entry ->
-                val details = entry.setReps.mapIndexed { index, reps ->
-                    SetPerformance(index + 1, reps, entry.setWeightsKg.getOrElse(index) { entry.maxWeightKg }, ExerciseSetStyle.Straight)
+                val details = (0 until maxOf(entry.sets, entry.setReps.size, entry.setWeightsKg.size)).map { index ->
+                    SetPerformance(index + 1, entry.setReps.getOrElse(index) { entry.totalReps }, entry.setWeightsKg.getOrElse(index) { entry.maxWeightKg }, ExerciseSetStyle.Straight)
                 }
                 ExerciseHistoryEntry(
                     timestampMillis = entry.timestampMillis,
@@ -307,13 +365,11 @@ object WorkoutHistoryStore {
                     workoutId = entry.workoutId,
                     plannedExerciseId = entry.plannedExerciseId,
                     remoteResultId = entry.remoteResultId,
+                    updatedAtMillis = entry.updatedAtMillis,
+                    paceSecondsPerKm = entry.paceSecondsPerKm,
                 )
             }
-            val merged = (existing + importedHistory)
-                .distinctBy { entry -> entry.plannedExerciseId?.let { "$it|${entry.timestampMillis}" }
-                    ?: entry.remoteResultId ?: "legacy|${entry.timestampMillis}" }
-                .sortedByDescending { it.timestampMillis }
-                .take(MAX_ENTRIES)
+            val merged = mergeExerciseHistory(existing, importedHistory, MAX_ENTRIES)
             preferences.edit().putString(key, historyJson(merged).toString()).apply()
             keys += key
         }
@@ -356,6 +412,10 @@ object WorkoutHistoryStore {
                         workoutId = item.optString("workoutId").takeIf { it.isNotBlank() && it != "null" },
                         plannedExerciseId = item.optString("plannedExerciseId").takeIf { it.isNotBlank() && it != "null" },
                         remoteResultId = item.optString("remoteResultId").takeIf { it.isNotBlank() && it != "null" },
+                        pendingEditAt = item.optLong("pendingEditAt"),
+                        pendingEditKind = item.optString("pendingEditKind").takeIf { it.isNotBlank() && it != "null" },
+                        updatedAtMillis = item.optLong("updatedAtMillis"),
+                        paceSecondsPerKm = item.optInt("paceSecondsPerKm").takeIf { it > 0 },
                     ),
                 )
             }
@@ -376,8 +436,36 @@ object WorkoutHistoryStore {
                 .put("setDetails", details).put("feedback", entry.feedback ?: JSONObject.NULL)
                 .put("note", entry.note ?: JSONObject.NULL).put("durationSeconds", entry.durationSeconds)
                 .put("distanceKm", entry.distanceKm).put("workoutId", entry.workoutId ?: JSONObject.NULL)
-                .put("plannedExerciseId", entry.plannedExerciseId ?: JSONObject.NULL).put("remoteResultId", entry.remoteResultId ?: JSONObject.NULL))
+                .put("plannedExerciseId", entry.plannedExerciseId ?: JSONObject.NULL).put("remoteResultId", entry.remoteResultId ?: JSONObject.NULL)
+                .put("pendingEditAt", entry.pendingEditAt).put("pendingEditKind", entry.pendingEditKind ?: JSONObject.NULL)
+                .put("updatedAtMillis", entry.updatedAtMillis).put("paceSecondsPerKm", entry.paceSecondsPerKm ?: JSONObject.NULL))
         }
+    }
+
+    internal fun saveEdit(context: Context, exercise: ExerciseSummary, original: ExerciseHistoryEntry, edited: ExerciseHistoryEntry, kind: String): Boolean {
+        val key = exercise.historyKey()
+        val entries = historyForKey(context, key).toMutableList()
+        val matches = entries.indices.filter { entries[it] == original }
+        if (matches.size != 1) return false
+        entries[matches.single()] = edited.copy(pendingEditAt = maxOf(System.currentTimeMillis(), original.pendingEditAt + 1), pendingEditKind = kind)
+        context.getSharedPreferences(PREFERENCES, 0).edit().putString(key, historyJson(entries).toString()).apply()
+        io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker.mark(context, "exercise-results")
+        return true
+    }
+
+    /** Associate a successfully uploaded local result with its stable server ID. */
+    fun claimUploadedResult(context: Context, entry: RemoteExerciseHistoryEntry, id: String, plannedId: String) {
+        val existing = historyForKey(context, entry.exerciseKey)
+        val updated = claimUploadedHistory(existing, entry, id, plannedId)
+        if (updated != existing) context.getSharedPreferences(PREFERENCES, 0).edit().putString(entry.exerciseKey, historyJson(updated).toString()).apply()
+    }
+
+    fun acknowledgeEdit(context: Context, entry: RemoteExerciseHistoryEntry) {
+        val entries = historyForKey(context, entry.exerciseKey).toMutableList()
+        val index = entries.indexOfFirst { it.remoteResultId == entry.remoteResultId && it.pendingEditAt == entry.pendingEditAt }
+        if (index < 0) return
+        entries[index] = entries[index].copy(pendingEditAt = 0, pendingEditKind = null)
+        context.getSharedPreferences(PREFERENCES, 0).edit().putString(entry.exerciseKey, historyJson(entries).toString()).apply()
     }
 
     internal fun record(
@@ -506,13 +594,10 @@ object WorkoutAnalyticsStore {
             entries.any { it.durationSeconds > 0 } -> ExerciseTrackingMode.Duration
             else -> ExerciseTrackingMode.Repetitions
         }
-        return ExerciseSummary(
-            name = exerciseDisplayName(key, key),
-            imageKey = key,
-            sets = 1,
-            reps = "1",
-            restSeconds = 0,
-            trackingMode = trackingMode,
+        val catalogChoice = CustomExerciseCatalog.load(context).firstOrNull { it.imageKey.equals(key, ignoreCase = true) }
+            ?: catalogExerciseChoice(exerciseDisplayName(key, key), key)
+        return catalogChoice.toExerciseSummary().copy(
+            trackingMode = if (catalogChoice.trackingMode != ExerciseTrackingMode.Repetitions) catalogChoice.trackingMode else trackingMode,
         )
     }
 
@@ -527,6 +612,9 @@ object WorkoutAnalyticsStore {
                 feedback = it.feedback,
                 durationSeconds = it.durationSeconds,
                 distanceKm = it.distanceKm,
+                resultId = it.remoteResultId,
+                workoutId = it.workoutId,
+                plannedExerciseId = it.plannedExerciseId,
             )
         }
 }

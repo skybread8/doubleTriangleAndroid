@@ -20,6 +20,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.animation.AnimatedVisibility
@@ -552,7 +555,7 @@ fun NutritionScreen(
         )
     }
     if (generatingPlan) NutritionPlanGenerationSheet()
-    generationError?.let { message -> AlertDialog(onDismissRequest = { generationError = null }, title = { Text("NO SE PUDO GENERAR EL PLAN", fontFamily = AntonFontFamily) }, text = { Text(message, color = WildforceThemeTokens.textSecondary) }, confirmButton = { TextButton(onClick = { generationError = null; showMoreActions = true }) { Text("REINTENTAR", color = NutritionCoral) } }, dismissButton = { TextButton(onClick = { generationError = null }) { Text("CERRAR") } }) }
+    generationError?.let { message -> AlertDialog(onDismissRequest = { generationError = null }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_1526b89a9937b9c7), fontFamily = AntonFontFamily) }, text = { Text(message, color = WildforceThemeTokens.textSecondary) }, confirmButton = { TextButton(onClick = { generationError = null; showMoreActions = true }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase(), color = NutritionCoral) } }, dismissButton = { TextButton(onClick = { generationError = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase()) } }) }
     if (showNutritionPaywall) {
         SubscriptionPaywall(
             accountId = accountPreferences.getString("id", null),
@@ -765,7 +768,7 @@ private fun NutritionEmptyPlanState(showsAiCoach: Boolean) {
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Icon(Icons.Filled.Eco, null, tint = NutritionCoral, modifier = Modifier.size(42.dp))
-        Text("Aún no hay plan nutricional", fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_nutrition_plan_yet), fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
         Text(
             if (showsAiCoach) "Genera un plan nutricional semanal para ver calorías, macros y orientación personalizada."
             else "Tu coach compartirá aquí tu plan nutricional.",
@@ -789,7 +792,7 @@ private fun NutritionPlanSummaryCard(plan: List<NutritionDayPlan>, profile: Onbo
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            Text("Plan de 7 días", fontFamily = Exo2FontFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_7_day_plan), fontFamily = Exo2FontFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 goal?.let { CompactPlanMetric(nutritionGoalIcon(effectiveGoal), it) }
                 effectivePhase?.let { CompactPlanMetric(bodyCompositionPhaseIcon(it), it.title) }
@@ -800,7 +803,7 @@ private fun NutritionPlanSummaryCard(plan: List<NutritionDayPlan>, profile: Onbo
                 Text(averageCalories.toString(), style = MaterialTheme.typography.body2, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 Text("kcal", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
             }
-            Text("media diaria", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.daily_average), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
         Icon(Icons.Filled.ChevronRight, "Abrir plan", tint = WildforceThemeTokens.textSecondary, modifier = Modifier.size(22.dp))
     }
@@ -819,7 +822,7 @@ private fun nutritionGoalIcon(goal: FitnessGoal?): ImageVector = when (goal) {
     FitnessGoal.LoseWeight -> Icons.Filled.Sync
     FitnessGoal.BuildMuscle -> Icons.Filled.FitnessCenter
     FitnessGoal.GainStrength -> Icons.Filled.Bolt
-    FitnessGoal.ImproveEndurance -> Icons.Filled.DirectionsRun
+    FitnessGoal.ImproveEndurance -> Icons.AutoMirrored.Filled.DirectionsRun
     FitnessGoal.ImproveMobility -> Icons.Filled.SelfImprovement
     FitnessGoal.BodyRecomposition -> Icons.Filled.AccessibilityNew
     FitnessGoal.GeneralFitness -> Icons.Filled.Favorite
@@ -851,25 +854,25 @@ private fun NutritionPlanTimeline(plan: List<NutritionDayPlan>, onDay: (Nutritio
                 Column(Modifier.weight(1f).padding(start = 10.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                     Row(verticalAlignment = Alignment.Top) {
                         Column(Modifier.width(64.dp)) {
-                            Text(if (day.date == today) "HOY" else day.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("es")).replaceFirstChar { it.uppercase() }, fontWeight = FontWeight.SemiBold, color = if (day.date == today) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary)
-                            Text(day.date.format(DateTimeFormatter.ofPattern("d MMM", Locale("es"))), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
+                            Text(if (day.date == today) "HOY" else day.date.dayOfWeek.getDisplayName(TextStyle.SHORT, androidx.compose.ui.platform.LocalConfiguration.current.locales[0]).replaceFirstChar { it.uppercase() }, fontWeight = FontWeight.SemiBold, color = if (day.date == today) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary)
+                            Text(day.date.format(DateTimeFormatter.ofPattern("d MMM", androidx.compose.ui.platform.LocalConfiguration.current.locales[0])), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
                         }
                         val workoutTitle = day.safeWorkoutTitle()
                         Column(Modifier.weight(1f)) {
                             Text(workoutTitle.ifBlank { day.type.title }, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
                             if (workoutTitle.isNotBlank() && day.type.title != workoutTitle) Text(day.type.title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                         }
-                        Text("${day.targets.calories} kcal", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_84744cf2ee7e93cc, day.targets.calories), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                         Icon(Icons.Filled.ChevronRight, null, tint = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(start = 4.dp, top = 4.dp).size(16.dp))
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(7.dp), verticalAlignment = Alignment.CenterVertically) {
-                        NutritionMacroSymbol(NutritionMacroIcon.Protein, WildforceThemeTokens.textSecondary, Modifier.size(12.dp)); Text("${day.targets.protein} g", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
-                        NutritionMacroSymbol(NutritionMacroIcon.Carbs, WildforceThemeTokens.textSecondary, Modifier.size(12.dp)); Text("${day.targets.carbs} g", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
-                        NutritionMacroSymbol(NutritionMacroIcon.Fat, WildforceThemeTokens.textSecondary, Modifier.size(12.dp)); Text("${day.targets.fat} g", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
+                        NutritionMacroSymbol(NutritionMacroIcon.Protein, WildforceThemeTokens.textSecondary, Modifier.size(12.dp)); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_dcd86bc975fc4e85, day.targets.protein), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
+                        NutritionMacroSymbol(NutritionMacroIcon.Carbs, WildforceThemeTokens.textSecondary, Modifier.size(12.dp)); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_dcd86bc975fc4e85, day.targets.carbs), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
+                        NutritionMacroSymbol(NutritionMacroIcon.Fat, WildforceThemeTokens.textSecondary, Modifier.size(12.dp)); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_dcd86bc975fc4e85, day.targets.fat), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
                     }
                     if (isPastOrToday) {
                         LinearProgressIndicator((loggedCalories.toFloat() / day.targets.calories.coerceAtLeast(1)).coerceIn(0f, 1f), Modifier.fillMaxWidth().height(5.dp), color = if (day.date == today) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = .5f), backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = .16f))
-                        Text("$loggedCalories / ${day.targets.calories} kcal", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_a1c85981ac49db92, loggedCalories, day.targets.calories), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
                     }
                 }
             }
@@ -909,7 +912,7 @@ private fun NutritionPlanOverview(
             // Resume/navigation overlay; its list keeps trailing scroll space.
     ) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, "Atrás", tint = WildforceThemeTokens.textPrimary) }
+            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atrás", tint = WildforceThemeTokens.textPrimary) }
             // The SwiftUI destination has no navigation title; only the
             // back affordance and trailing plan menu are visible.
             Spacer(Modifier.weight(1f))
@@ -920,9 +923,9 @@ private fun NutritionPlanOverview(
                     // color and marks only the destructive redo action in red.
                     // NutritionCoral here made every plan action look like an
                     // accent CTA, unlike NutritionPlanOverviewView on iOS.
-                    if (!notes.isNullOrBlank()) DropdownMenuItem(onClick = { menuOpen = false; showNotes = true }) { Icon(Icons.Filled.Notes, null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(18.dp)); Text("Ver notas", Modifier.padding(start = 12.dp)) }
-                    if (plan.any { it.meals.isNotEmpty() }) DropdownMenuItem(onClick = { menuOpen = false; onGrocery() }) { Icon(Icons.Filled.ShoppingBasket, null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(18.dp)); Text("Lista de la compra", Modifier.padding(start = 12.dp)) }
-                    DropdownMenuItem(onClick = { menuOpen = false; showRedoConfirmation = true }) { Icon(Icons.Filled.Delete, null, tint = MaterialTheme.colors.error, modifier = Modifier.size(18.dp)); Text("Rehacer plan", Modifier.padding(start = 12.dp), color = MaterialTheme.colors.error) }
+                    if (!notes.isNullOrBlank()) DropdownMenuItem(onClick = { menuOpen = false; showNotes = true }) { Icon(Icons.AutoMirrored.Filled.Notes, null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(18.dp)); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.view_notes), Modifier.padding(start = 12.dp)) }
+                    if (plan.any { it.meals.isNotEmpty() }) DropdownMenuItem(onClick = { menuOpen = false; onGrocery() }) { Icon(Icons.Filled.ShoppingBasket, null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(18.dp)); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.grocery_list), Modifier.padding(start = 12.dp)) }
+                    DropdownMenuItem(onClick = { menuOpen = false; showRedoConfirmation = true }) { Icon(Icons.Filled.Delete, null, tint = MaterialTheme.colors.error, modifier = Modifier.size(18.dp)); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.redo_plan), Modifier.padding(start = 12.dp), color = MaterialTheme.colors.error) }
                 }
             }
         }
@@ -935,18 +938,18 @@ private fun NutritionPlanOverview(
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp)).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Row(verticalAlignment = Alignment.Top) {
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text("PLAN ACTUAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.current_plan).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                             Text(if (phase.isNullOrBlank()) "Plan de 7 días" else "Plan de 7 días • $phase", fontFamily = Exo2FontFamily, fontSize = 25.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                         }
                         Column(horizontalAlignment = Alignment.End) {
-                            Text("$averageCalories kcal", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                            Text("media diaria", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_84744cf2ee7e93cc, averageCalories), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.daily_average), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                         }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         goal?.let { CompactPlanMetric(nutritionGoalIcon(effectiveGoal), it) }
                         effectivePhase?.let { CompactPlanMetric(bodyCompositionPhaseIcon(it), it.title) }
-                        startDate?.let { CompactPlanMetric(Icons.Filled.CalendarToday, it.format(DateTimeFormatter.ofPattern("d MMM", Locale("es")))) }
+                        startDate?.let { CompactPlanMetric(Icons.Filled.CalendarToday, it.format(DateTimeFormatter.ofPattern("d MMM", androidx.compose.ui.platform.LocalConfiguration.current.locales[0]))) }
                     }
                     // iOS keeps plan notes behind the header's "View notes"
                     // menu action; they are not rendered inline in the card.
@@ -961,23 +964,23 @@ private fun NutritionPlanOverview(
     )
     if (showRedoConfirmation) AlertDialog(
         onDismissRequest = { showRedoConfirmation = false },
-        title = { Text("REHACER PLAN", fontFamily = AntonFontFamily) },
-        text = { Text("El plan actual se sustituirá cuando guardes el nuevo plan.", color = WildforceThemeTokens.textSecondary) },
+        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.redo_plan).uppercase(), fontFamily = AntonFontFamily) },
+        text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_bef6848538ac5135), color = WildforceThemeTokens.textSecondary) },
         confirmButton = {
             TextButton(onClick = { showRedoConfirmation = false; onRegenerate() }) {
-                Text("REHACER PLAN", color = MaterialTheme.colors.error)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.redo_plan).uppercase(), color = MaterialTheme.colors.error)
             }
         },
         dismissButton = {
             TextButton(onClick = { showRedoConfirmation = false }) {
-                Text("MANTENER PLAN ACTUAL", color = WildforceThemeTokens.textSecondary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.keep_current_plan).uppercase(), color = WildforceThemeTokens.textSecondary)
             }
         },
     )
 }
 
 /** Mirrors the iOS hub: the current day's meal timeline comes before the compact plan link. */
-internal fun nutritionMealsSectionTitle(selectedDate: LocalDate, today: LocalDate, locale: Locale = Locale("es")): String =
+internal fun nutritionMealsSectionTitle(selectedDate: LocalDate, today: LocalDate, locale: Locale = Locale.forLanguageTag("es")): String =
     if (selectedDate == today) "Comidas de hoy"
     else "Comidas del ${selectedDate.format(DateTimeFormatter.ofPattern("d MMM", locale))}"
 
@@ -1017,7 +1020,13 @@ private fun DayMealsPreview(
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                nutritionMealsSectionTitle(selectedDate, today),
+                if (selectedDate == today) {
+                    androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.today_s_meals)
+                } else {
+                    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+                    val date = selectedDate.format(DateTimeFormatter.ofPattern("EEE d MMM", locale))
+                    androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.___meals, date)
+                },
                 fontFamily = Exo2FontFamily,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Normal,
@@ -1110,7 +1119,7 @@ private fun HubPlannedMealRow(
             Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(meal.title, fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
-                    Text("Sugerida · ${meal.type.title}", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary, modifier = Modifier.background(mealTint.copy(alpha = .12f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 2.dp))
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_d4e40e04e8a03696, meal.type.title), style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary, modifier = Modifier.background(mealTint.copy(alpha = .12f), RoundedCornerShape(8.dp)).padding(horizontal = 6.dp, vertical = 2.dp))
                 }
                 if (canLog) {
                     Box {
@@ -1121,19 +1130,19 @@ private fun HubPlannedMealRow(
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                             colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText),
                             elevation = ButtonDefaults.elevation(defaultElevation = 0.dp),
-                        ) { Text("Registrar", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold) }
+                        ) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold) }
                         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                             DropdownMenuItem(onClick = { menuOpen = false; onAction(meal, LogMethod.Manual) }) {
                                 Icon(Icons.Filled.CheckCircle, null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(18.dp))
-                                Text("Registrar como sugerida", Modifier.padding(start = 10.dp))
+                                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_as_suggested), Modifier.padding(start = 10.dp))
                             }
                             DropdownMenuItem(onClick = { menuOpen = false; onLogSomethingElse() }) {
                                 Icon(Icons.Filled.Edit, null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(18.dp))
-                                Text("Registrar otra cosa", Modifier.padding(start = 10.dp))
+                                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_something_else), Modifier.padding(start = 10.dp))
                             }
                             DropdownMenuItem(onClick = { menuOpen = false; onDiscard(meal) }) {
                                 Icon(Icons.Filled.Close, null, tint = NutritionRed, modifier = Modifier.size(18.dp))
-                                Text("Descartar", Modifier.padding(start = 10.dp), color = NutritionRed)
+                                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.discard), Modifier.padding(start = 10.dp), color = NutritionRed)
                             }
                         }
                     }
@@ -1234,19 +1243,19 @@ private fun HubMealRow(entry: MealLog, onBookmark: (MealLog, String?) -> Unit) {
     if (confirmRemoveBookmark) {
         AlertDialog(
             onDismissRequest = { confirmRemoveBookmark = false },
-            title = { Text("¿Quitar de guardadas?") },
-            text = { Text("Esta comida dejará de aparecer en tus comidas guardadas.") },
-            confirmButton = { TextButton(onClick = { confirmRemoveBookmark = false; onBookmark(entry, null) }) { Text("QUITAR", color = NutritionRed) } },
-            dismissButton = { TextButton(onClick = { confirmRemoveBookmark = false }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.remove_bookmark_)) },
+            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_meal_will_no_longer_appear_in_your_bookmarks_)) },
+            confirmButton = { TextButton(onClick = { confirmRemoveBookmark = false; onBookmark(entry, null) }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.remove).uppercase(), color = NutritionRed) } },
+            dismissButton = { TextButton(onClick = { confirmRemoveBookmark = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
     if (showBookmarkName) {
         AlertDialog(
             onDismissRequest = { showBookmarkName = false },
-            title = { Text("Guardar comida") },
-            text = { OutlinedTextField(bookmarkName, { bookmarkName = it.take(80) }, label = { Text("Nombre") }, singleLine = true) },
-            confirmButton = { TextButton(onClick = { showBookmarkName = false; onBookmark(entry, bookmarkName.trim().ifBlank { entry.name }) }) { Text("GUARDAR", color = NutritionCoral) } },
-            dismissButton = { TextButton(onClick = { showBookmarkName = false }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_fc0eb916b51fbc32)) },
+            text = { OutlinedTextField(bookmarkName, { bookmarkName = it.take(80) }, label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.name)) }, singleLine = true) },
+            confirmButton = { TextButton(onClick = { showBookmarkName = false; onBookmark(entry, bookmarkName.trim().ifBlank { entry.name }) }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase(), color = NutritionCoral) } },
+            dismissButton = { TextButton(onClick = { showBookmarkName = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
 }
@@ -1256,7 +1265,7 @@ internal fun mealTypeIcon(type: MealType): ImageVector = when (type) {
     MealType.Lunch -> Icons.Filled.WbCloudy          // iOS `sun.haze.fill`
     MealType.Dinner -> Icons.Filled.Nightlight      // iOS `moon.stars.fill`
     MealType.Snack -> Icons.Filled.LocalCafe        // iOS `takeoutbag.and.cup.and.straw.fill`
-    MealType.PreWorkout -> Icons.Filled.DirectionsRun // iOS `figure.run`
+    MealType.PreWorkout -> Icons.AutoMirrored.Filled.DirectionsRun // iOS `figure.run`
     MealType.PostWorkout -> Icons.Filled.Favorite   // iOS `bolt.heart.fill`
 }
 
@@ -1279,8 +1288,8 @@ private fun NutritionPlanHero(onGenerate: () -> Unit, hasGeneratedPlan: Boolean,
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(verticalAlignment = Alignment.Top) {
                 Column(Modifier.weight(1f)) {
-                    Text("ACTIVA TU SEMANA", fontFamily = AntonFontFamily, fontSize = 32.sp, color = Color.White)
-                    Text("Crea un plan día a día adaptado a tus entrenamientos, objetivos y preferencias.", fontSize = 15.sp, color = Color.White.copy(alpha = .9f), modifier = Modifier.padding(top = 8.dp))
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_50d6ddbfbb166e2e), fontFamily = AntonFontFamily, fontSize = 32.sp, color = Color.White)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.build_a_day_by_day_nutrition_plan_aligned_with_your_training__goals__and_food_preferences_), fontSize = 15.sp, color = Color.White.copy(alpha = .9f), modifier = Modifier.padding(top = 8.dp))
                 }
                 Box(Modifier.size(54.dp).background(Color.White.copy(alpha = .18f), CircleShape), contentAlignment = Alignment.Center) {
                     NutritionCarrotIcon(Color.White, Modifier.size(28.dp))
@@ -1355,7 +1364,7 @@ private fun NutritionCalendar(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(5.dp),
             ) {
-                Text(date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("es")).uppercase(), style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = if (isSelected) WildforceThemeTokens.primaryButtonText else if (date == today) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary)
+                Text(date.dayOfWeek.getDisplayName(TextStyle.SHORT, androidx.compose.ui.platform.LocalConfiguration.current.locales[0]).uppercase(), style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = if (isSelected) WildforceThemeTokens.primaryButtonText else if (date == today) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary)
                 Text(date.dayOfMonth.toString(), style = MaterialTheme.typography.h6, color = if (isSelected) WildforceThemeTokens.primaryButtonText else if (isSelectable) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textSecondary)
                 val consumed = caloriesForDate(date)
                 if (day != null && shouldShowCalendarCalorieRing(date, today, consumed)) {
@@ -1399,9 +1408,9 @@ private fun CalendarCalorieRing(progress: Float, color: Color, isSelected: Boole
 @Composable
 private fun IntakeActions(date: LocalDate, today: LocalDate, onToday: () -> Unit, onLog: () -> Unit, onIdeas: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(if (date == today) "Ingesta de hoy" else "Ingesta del ${date.format(DateTimeFormatter.ofPattern("EEE d MMM", Locale("es")))}", fontFamily = Exo2FontFamily, fontSize = 18.sp, color = WildforceThemeTokens.textPrimary)
+        Text(if (date == today) "Ingesta de hoy" else "Ingesta del ${date.format(DateTimeFormatter.ofPattern("EEE d MMM", androidx.compose.ui.platform.LocalConfiguration.current.locales[0]))}", fontFamily = Exo2FontFamily, fontSize = 18.sp, color = WildforceThemeTokens.textPrimary)
         Spacer(Modifier.weight(1f))
-        if (date != today) TextButton(onClick = onToday) { Text("Hoy", color = NutritionActionColor) }
+        if (date != today) TextButton(onClick = onToday) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.today), color = NutritionActionColor) }
         else {
             IconButton(onClick = onLog, Modifier.semantics { contentDescription = "Registrar ingesta" }) { Icon(Icons.Filled.AddCircle, "Registrar ingesta", tint = NutritionActionColor, modifier = Modifier.size(30.dp)) }
             IconButton(onClick = onIdeas) { Icon(Icons.Filled.MoreHoriz, "Más opciones", tint = WildforceThemeTokens.textSecondary) }
@@ -1424,7 +1433,7 @@ private fun DailyProgressCard(date: LocalDate, current: NutritionTargets, target
                     Text(" / ${formatNutritionInteger(target.calories)} kcal", style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(bottom = 4.dp))
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("${formatNutritionInteger(target.calories - current.calories)} kcal restantes", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_34179e7bbd699808, formatNutritionInteger(target.calories - current.calories)), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 }
             }
             ProgressRing(animatedProgress)
@@ -1475,7 +1484,7 @@ private fun MacroProgress(title: String, current: Int, target: Int, color: Color
             if (nutritionTargetExceeded(current, target)) {
                 Icon(Icons.Filled.WarningAmber, null, tint = NutritionOrange, modifier = Modifier.size(14.dp))
             }
-            Text("${formatNutritionInteger(animatedCurrent)} / ${formatNutritionInteger(target)} g", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(start = 3.dp))
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_4f08c4860c67da6d, formatNutritionInteger(animatedCurrent), formatNutritionInteger(target)), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(start = 3.dp))
         }
         Box(Modifier.fillMaxWidth().height(10.dp).clip(CircleShape).background(WildforceThemeTokens.textSecondary.copy(alpha = .12f))) {
             Box(Modifier.fillMaxWidth(animatedFraction.coerceIn(0f, 1f)).fillMaxHeight().background(color))
@@ -1500,8 +1509,8 @@ private fun WeeklyBalanceCard(energyHistory: Map<LocalDate, NutritionEnergyPoint
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("Balance energético", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
-                Text(inspectedDate?.format(DateTimeFormatter.ofPattern("EEEE, d MMM", Locale("es"))) ?: "Últimos 15 días", style = MaterialTheme.typography.caption, color = if (inspectedDate != null) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.energy_balance), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                Text(inspectedDate?.format(DateTimeFormatter.ofPattern("EEEE, d MMM", androidx.compose.ui.platform.LocalConfiguration.current.locales[0])) ?: "Últimos 15 días", style = MaterialTheme.typography.caption, color = if (inspectedDate != null) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary)
             }
         }
         val historicalIndexes = dates.indices.filter { dates[it] != LocalDate.now() }
@@ -1694,8 +1703,8 @@ private fun WeeklyBalanceCard(energyHistory: Map<LocalDate, NutritionEnergyPoint
                           .padding(horizontal = 8.dp, vertical = 4.dp),
                       verticalArrangement = Arrangement.spacedBy(2.dp),
                   ) {
-                      Text("${selectedY.toInt()} kcal", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                      Text(selectedDateValue.format(DateTimeFormatter.ofPattern("EEEE, d MMM", Locale("es"))), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary, maxLines = 1)
+                      Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_84744cf2ee7e93cc, selectedY.toInt()), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                      Text(selectedDateValue.format(DateTimeFormatter.ofPattern("EEEE, d MMM", androidx.compose.ui.platform.LocalConfiguration.current.locales[0])), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary, maxLines = 1)
                   }
               }
           }
@@ -1703,7 +1712,7 @@ private fun WeeklyBalanceCard(energyHistory: Map<LocalDate, NutritionEnergyPoint
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             dates.filterIndexed { index, _ -> index % 4 == 0 || index == dates.lastIndex }.forEach { date ->
-                Text(date.format(DateTimeFormatter.ofPattern("d MMM", Locale("es"))), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
+                Text(date.format(DateTimeFormatter.ofPattern("d MMM", androidx.compose.ui.platform.LocalConfiguration.current.locales[0])), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) { BalanceLegend(EnergyBalanceBarColor.copy(alpha = .5f), "Estándar"); BalanceLegend(EnergyBalanceBarColor, "Activa"); BalanceLegend(WildforceThemeTokens.textPrimary, "Ingerida") }
@@ -1728,15 +1737,15 @@ private fun PlanHeader(
     var showNotes by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(16.dp), verticalArrangement = Arrangement.spacedBy(15.dp)) {
         Row(verticalAlignment = Alignment.Top) {
-            Column(Modifier.weight(1f)) { Text("PLAN ACTUAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); Text("Plan nutricional semanal", fontSize = 25.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 2) }
-            Column(Modifier.width(76.dp), horizontalAlignment = Alignment.End) { Text(average.toString(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1); Text("kcal/día", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1) }
+            Column(Modifier.weight(1f)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.current_plan).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_7_day_nutrition_plan), fontSize = 25.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 2) }
+            Column(Modifier.width(76.dp), horizontalAlignment = Alignment.End) { Text(average.toString(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_ed18234e852474e0), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1) }
             Box {
                 IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreHoriz, "Opciones del plan", tint = WildforceThemeTokens.textSecondary) }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    if (notes != null) DropdownMenuItem(onClick = { menuOpen = false; showNotes = true }) { Icon(Icons.Filled.Notes, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text("Ver notas", Modifier.padding(start = 12.dp)) }
-                    DropdownMenuItem(onClick = { menuOpen = false; onEditPlan() }) { Icon(Icons.Filled.Tune, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text("Editar objetivos", Modifier.padding(start = 12.dp)) }
-                    DropdownMenuItem(onClick = { menuOpen = false; onGrocery() }) { Icon(Icons.Filled.ShoppingBasket, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text("Lista de la compra", Modifier.padding(start = 12.dp)) }
-                    DropdownMenuItem(onClick = { menuOpen = false; onRegenerate() }) { Icon(Icons.Filled.Refresh, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text("Regenerar plan", Modifier.padding(start = 12.dp)) }
+                    if (notes != null) DropdownMenuItem(onClick = { menuOpen = false; showNotes = true }) { Icon(Icons.AutoMirrored.Filled.Notes, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.view_notes), Modifier.padding(start = 12.dp)) }
+                    DropdownMenuItem(onClick = { menuOpen = false; onEditPlan() }) { Icon(Icons.Filled.Tune, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_9e2a24e11f081d89), Modifier.padding(start = 12.dp)) }
+                    DropdownMenuItem(onClick = { menuOpen = false; onGrocery() }) { Icon(Icons.Filled.ShoppingBasket, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.grocery_list), Modifier.padding(start = 12.dp)) }
+                    DropdownMenuItem(onClick = { menuOpen = false; onRegenerate() }) { Icon(Icons.Filled.Refresh, null, tint = NutritionCoral, modifier = Modifier.size(18.dp)); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.regenerate_plan), Modifier.padding(start = 12.dp)) }
                 }
             }
         }
@@ -1751,7 +1760,7 @@ private fun PlanHeader(
             PlanMetric(Icons.Filled.Lightbulb, "Sugerencias", if (preferences.wantsSuggestions) "Activadas" else "Desactivadas", onEditPreferences)
         }
         Divider(color = WildforceThemeTokens.textSecondary.copy(alpha = .12f))
-        Text("Las calorías y macros cambian según la demanda de cada entrenamiento.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_b2a9947912be8b9d), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
     if (showNotes && notes != null) NutritionPlanNotesDialog(
         notes = notes,
@@ -1814,6 +1823,7 @@ private fun PlanMetric(icon: ImageVector, title: String, value: String, onClick:
 
 @Composable
 internal fun NutritionDayHeader(day: NutritionDayPlan, logged: NutritionTargets, isToday: Boolean, onClick: () -> Unit) {
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     val gradient = when (day.energyDemand) { EnergyDemand.High -> listOf(NutritionOrange, NutritionRed); EnergyDemand.Medium -> listOf(NutritionCoral, NutritionOrange); EnergyDemand.Low -> listOf(NutritionGreen, NutritionCoral) }
     val dayTypeColor = nutritionDayTypeColor(day.type)
     var typeBadgeAppeared by remember(day.date, day.type) { mutableStateOf(false) }
@@ -1825,13 +1835,13 @@ internal fun NutritionDayHeader(day: NutritionDayPlan, logged: NutritionTargets,
     )
     Column(
         Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(24.dp)).background(Brush.linearGradient(gradient)).clickable(onClick = onClick).clearAndSetSemantics {
-            contentDescription = nutritionDayAccessibilityLabel(day, logged, isToday)
+            contentDescription = nutritionDayAccessibilityLabel(day, logged, isToday, locale)
         }.padding(16.dp),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Row {
-            Column { Text(day.date.format(DateTimeFormatter.ofPattern("d MMMM", Locale("es"))), style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = .82f)); Text(if (isToday) "HOY" else day.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es")).uppercase(), fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = Color.White) }
-            Spacer(Modifier.weight(1f)); Column(horizontalAlignment = Alignment.End) { Text(day.type.title.uppercase(), style = MaterialTheme.typography.caption, color = Color.White, modifier = Modifier.graphicsLayer { scaleX = typeBadgeScale; scaleY = typeBadgeScale; alpha = if (typeBadgeAppeared) 1f else 0f }.background(dayTypeColor.copy(alpha = .62f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp)); Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) { NutritionMacroSymbol(NutritionMacroIcon.Calories, Color.White, Modifier.size(15.dp)); Text("${day.targets.calories} kcal", Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold, color = Color.White) } }
+            Column { Text(day.date.format(DateTimeFormatter.ofPattern("d MMMM", androidx.compose.ui.platform.LocalConfiguration.current.locales[0])), style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = .82f)); Text(if (isToday) "HOY" else day.date.dayOfWeek.getDisplayName(TextStyle.FULL, androidx.compose.ui.platform.LocalConfiguration.current.locales[0]).uppercase(), fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = Color.White) }
+            Spacer(Modifier.weight(1f)); Column(horizontalAlignment = Alignment.End) { Text(day.type.title.uppercase(), style = MaterialTheme.typography.caption, color = Color.White, modifier = Modifier.graphicsLayer { scaleX = typeBadgeScale; scaleY = typeBadgeScale; alpha = if (typeBadgeAppeared) 1f else 0f }.background(dayTypeColor.copy(alpha = .62f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp)); Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.CenterVertically) { NutritionMacroSymbol(NutritionMacroIcon.Calories, Color.White, Modifier.size(15.dp)); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_84744cf2ee7e93cc, day.targets.calories), Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold, color = Color.White) } }
         }
         Row(Modifier.background(Color.White.copy(alpha = .12f), CircleShape).padding(horizontal = 9.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.FitnessCenter, null, tint = Color.White, modifier = Modifier.size(14.dp)); Text(day.safeWorkoutTitle().ifBlank { day.type.title }.uppercase(), Modifier.padding(start = 5.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White) }
         Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
@@ -1840,9 +1850,9 @@ internal fun NutritionDayHeader(day: NutritionDayPlan, logged: NutritionTargets,
     }
 }
 
-private fun nutritionDayAccessibilityLabel(day: NutritionDayPlan, logged: NutritionTargets, isToday: Boolean): String {
-    val dayName = if (isToday) "Hoy" else day.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale("es"))
-    val date = day.date.format(DateTimeFormatter.ofPattern("d MMMM", Locale("es")))
+private fun nutritionDayAccessibilityLabel(day: NutritionDayPlan, logged: NutritionTargets, isToday: Boolean, locale: Locale): String {
+    val dayName = if (isToday) "Hoy" else day.date.dayOfWeek.getDisplayName(TextStyle.FULL, locale)
+    val date = day.date.format(DateTimeFormatter.ofPattern("d MMMM", locale))
     return listOf(
         "$dayName, $date",
         "${day.type.title}: ${day.safeWorkoutTitle().ifBlank { day.type.title }}",
@@ -1870,7 +1880,7 @@ private fun HeaderMacroPill(icon: NutritionMacroIcon, logged: Int, target: Int) 
             }
             NutritionMacroSymbol(icon, Color.White, Modifier.size(8.dp))
         }
-        Text("$target g", Modifier.padding(start = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_dcd86bc975fc4e85, target), Modifier.padding(start = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color.White)
     }
 }
 

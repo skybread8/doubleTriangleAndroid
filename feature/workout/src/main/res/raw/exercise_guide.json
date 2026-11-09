@@ -1888,5 +1888,61 @@
       "If you feel any sharp pain or dizziness, stop immediately.",
       "Keep your shoulders down and relaxed throughout."
     ]
+  },
+  "ezBarSkullCrusher": {
+    "description": "A lying EZ-bar triceps extension that emphasizes the triceps through a deep elbow-flexion range.",
+    "instructions": [
+      "Lie flat on a bench holding an EZ bar above your chest with a narrow overhand grip.",
+      "Keep your upper arms mostly vertical as you bend your elbows to lower the bar toward your forehead or just behind it.",
+      "Extend your elbows to return the bar to the starting position without moving your shoulders excessively.",
+      "Keep your wrists neutral and control the lowering phase."
+    ],
+    "tips": [
+      "Use the angled grips of the EZ bar to keep your wrists comfortable.",
+      "Let the elbows travel back only slightly; do not turn the movement into a pullover.",
+      "Use a spotter or safety setup when loading heavily."
+    ]
+  },
+  "closeGripDumbbellBenchPress": {
+    "description": "A dumbbell bench press with the weights held close together to increase the triceps contribution.",
+    "instructions": [
+      "Lie flat on a bench with a dumbbell in each hand held above the center of your chest.",
+      "Keep the dumbbells close together with your palms facing each other or slightly inward.",
+      "Lower the weights with your elbows tracking close to your torso.",
+      "Press back up while keeping the dumbbells close and your shoulders stable against the bench."
+    ],
+    "tips": [
+      "Do not force the dumbbells to touch if that irritates your wrists.",
+      "Keep your elbows tucked enough to feel the triceps, without pinning them painfully against your sides.",
+      "Use a controlled descent and avoid bouncing the dumbbells at the bottom."
+    ]
+  },
+  "lyingCableCurl": {
+    "description": "A supine cable curl performed with a straight or EZ-style cable bar to load the biceps through elbow flexion.",
+    "instructions": [
+      "Place a flat bench in front of a low cable pulley and lie on your back with your feet toward the machine.",
+      "Hold a straight or EZ-style cable bar with palms facing up and your arms extended toward the pulley.",
+      "Keep your upper arms mostly fixed as you curl the bar toward your forehead or upper chest.",
+      "Lower the bar slowly until your elbows are extended again while keeping tension on the cable."
+    ],
+    "tips": [
+      "Set the bench far enough from the pulley that the cable stays taut at the bottom.",
+      "Keep your elbows stable instead of pulling them toward your ribs.",
+      "Use smooth, controlled repetitions to avoid the cable stack pulling you out of position."
+    ]
+  },
+  "smithMachineCalfRaise": {
+    "description": "A standing calf raise under the guided bar of a Smith machine for stable, progressively loaded calf training.",
+    "instructions": [
+      "Stand under the Smith bar with it resting across your upper back and the balls of your feet on a stable raised surface if available.",
+      "Unlock the bar and lower your heels under control to stretch your calves.",
+      "Press through the balls of your feet to raise your heels as high as possible.",
+      "Pause briefly at the top, then lower slowly without bouncing."
+    ],
+    "tips": [
+      "Keep your knees softly unlocked and your torso upright.",
+      "Use a stable step or platform only if it fits safely inside the Smith machine.",
+      "Prioritize full range of motion over adding load."
+    ]
   }
 }

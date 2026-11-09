@@ -51,7 +51,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.DirectionsRun
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Favorite
@@ -260,13 +260,13 @@ private fun DurationWarning(onCancel: () -> Unit, onContinue: () -> Unit) {
         verticalArrangement = Arrangement.Center,
     ) {
         Icon(Icons.Filled.WarningAmber, contentDescription = null, modifier = Modifier.size(64.dp), tint = WildforceThemeTokens.accentGold)
-        Text("LA DURACIÓN NO PARECE CORRECTA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
-        Text("Has terminado mucho antes de lo previsto. ¿Quieres cancelar el entrenamiento?", Modifier.padding(top = 10.dp, bottom = 28.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.the_duration_doesn_t_seem_right).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_5441cb400ad25e80), Modifier.padding(top = 10.dp, bottom = 28.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
         Button(onClick = onCancel, modifier = Modifier.fillMaxWidth().height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFC62828), contentColor = Color.White)) {
-            Text("CANCELAR ENTRENAMIENTO", fontWeight = FontWeight.Bold)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), fontWeight = FontWeight.Bold)
         }
         Button(onClick = onContinue, modifier = Modifier.fillMaxWidth().padding(top = 10.dp).height(54.dp), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) {
-            Text("CONTINUAR", fontWeight = FontWeight.Bold)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_continue).uppercase(), fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -285,7 +285,7 @@ private fun RecordsCelebration(records: List<ExerciseRecordEvent>, onContinue: (
         }
     }
             Icon(Icons.Filled.EmojiEvents, contentDescription = null, modifier = Modifier.size(64.dp), tint = WildforceThemeTokens.accent)
-            Text(if (records.size == 1) "NUEVO RÉCORD" else "NUEVOS RÉCORDS", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+            Text(if (records.size == 1) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.new_record).uppercase() else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_e34b6abaeaebfa07), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
             Column(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(top = 18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 records.forEachIndexed { index, record ->
                     AnimatedVisibility(
@@ -320,8 +320,8 @@ private fun CompletionSummary(
     val shareId = remember(workout.id) { completedWorkoutShareId(context, workout.id) }
     val locale = LocalLocale.current.platformLocale
     Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.size(76.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.12f), CircleShape).padding(12.dp), tint = WildforceThemeTokens.accent)
-    Text("¡GRAN TRABAJO!", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-    Text("Has completado ${workout.title}.", color = WildforceThemeTokens.textSecondary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.great_job_).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_228a7432c23d5256, workout.title), color = WildforceThemeTokens.textSecondary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, textAlign = TextAlign.Center)
     val mainExercises = workout.pathBlocks().mainExercises()
     val mainIndices = mainExercises.flatMap { it.executionIndices }.toSet()
     val mainStats = stats.filterKeys { it in mainIndices }.values
@@ -378,7 +378,7 @@ private fun CompletionSummary(
             }, "Compartir entrenamiento"))
         },
         modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-    ) { Text("COMPARTIR ENTRENAMIENTO") }
+    ) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.share_workout).uppercase()) }
 }
 
 @Composable
@@ -401,7 +401,7 @@ private fun ScoreCelebration(
         score >= 65 -> "SESIÓN SÓLIDA" to "Buena constancia. Un poco más de precisión elevará la puntuación."
         else -> "BUEN TRABAJO" to "Lo has completado. Sigue acumulando sesiones."
     }
-    Text("PUNTUACIÓN DEL ENTRENAMIENTO", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_score).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     Text(tier.first, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text(tier.second, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Box(Modifier.padding(24.dp).size(230.dp), contentAlignment = Alignment.Center) {
@@ -410,7 +410,7 @@ private fun ScoreCelebration(
     }
     val highlights = buildList {
         add(CompletionMetric("EJERCICIOS", "$completedExercises/$totalExercises", Icons.Filled.FitnessCenter))
-        add(CompletionMetric("ESFUERZO", effort, Icons.Filled.DirectionsRun))
+        add(CompletionMetric("ESFUERZO", effort, Icons.AutoMirrored.Filled.DirectionsRun))
         averageHeartRate?.takeIf { it > 0 }?.let { average ->
             add(CompletionMetric("FC MEDIA", String.format(LocalLocale.current.platformLocale, "%.0f", average), Icons.Filled.Favorite))
         } ?: run {
@@ -439,7 +439,7 @@ private fun StreakCelebration(streak: Int, onContinue: () -> Unit) = Celebration
     val flameScale by transition.animateFloat(1f, 1.10f, infiniteRepeatable(tween(100), RepeatMode.Reverse), label = "streak-flame-scale")
     Icon(Icons.Filled.LocalFireDepartment, contentDescription = null, modifier = Modifier.size(76.dp).graphicsLayer { scaleX = flameScale; scaleY = flameScale }, tint = Color(0xFFF07818))
     Text(displayedStreak.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
-    Text(if (streak == 1) "DÍA DE RACHA" else "DÍAS DE RACHA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color(0xFFF07818))
+    Text(if (streak == 1) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_4a9232af2bc6e80d) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_e1855ede78c165c8), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = Color(0xFFF07818))
     val streakMessage = when {
         streak == 1 -> "¡El primer paso es el más importante!"
         streak % 7 == 0 -> "¡Una semana completa! Tu constancia marca la diferencia."
@@ -455,11 +455,11 @@ private fun XpCelebration(xpBefore: Int, xpAfter: Int, levelBefore: Int, gainedL
     LaunchedEffect(Unit) { revealXp = true }
     Spacer(Modifier.weight(1f))
     Icon(Icons.Filled.Bolt, contentDescription = null, modifier = Modifier.size(76.dp), tint = Color(0xFFFFC107))
-    Text("XP TOTAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.total_xp).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     Text(gainedLabel, fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
     val displayedXp by animateIntAsState(if (revealXp) xpAfter else xpBefore, animationSpec = tween(850, delayMillis = 140))
     Text(displayedXp.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
-    Text("Nivel $levelBefore", color = WildforceThemeTokens.textSecondary)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_11a14b6a6f7a431f, levelBefore), color = WildforceThemeTokens.textSecondary)
     val levelStart = WorkoutCompletionCalculator.minimumXp(levelBefore)
     val levelEnd = WorkoutCompletionCalculator.minimumXp(levelBefore + 1)
     val xpBeforeProgress = ((xpBefore - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f)
@@ -467,9 +467,9 @@ private fun XpCelebration(xpBefore: Int, xpAfter: Int, levelBefore: Int, gainedL
     val animatedXpProgress by animateFloatAsState(if (revealXp) xpAfterProgress else xpBeforeProgress, animationSpec = tween(950, delayMillis = 150))
     RoundedCompletionProgress(animatedXpProgress, Modifier.fillMaxWidth().padding(horizontal = 20.dp).height(14.dp))
     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-        Text("$xpBefore XP", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_452c2b03d5053d8a, xpBefore), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Spacer(Modifier.weight(1f))
-        Text("+${xpAfter - xpBefore} XP", color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f9af631634ddf30d, xpAfter - xpBefore), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
     }
     Spacer(Modifier.weight(1f))
 }
@@ -481,11 +481,11 @@ private fun LevelUpCelebration(level: Int, onContinue: () -> Unit) = Celebration
     val displayedLevel by animateIntAsState(if (revealLevel) level else (level - 1).coerceAtLeast(1), animationSpec = tween(750, delayMillis = 150))
     Spacer(Modifier.weight(1f))
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("LEVEL", fontFamily = AntonFontFamily, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.level).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Text(displayedLevel.toString(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h1, color = WildforceThemeTokens.textPrimary)
     }
-    Text("LEVEL UP!", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-    Text("Has alcanzado el nivel $level", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.level_up_).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.you_reached_level__d_, level), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
 
@@ -498,7 +498,7 @@ private fun PlanCompletedCelebration(planName: String, completedWorkouts: Int, t
     ) {
         Icon(Icons.Filled.EmojiEvents, contentDescription = null, modifier = Modifier.size(60.dp), tint = WildforceThemeTokens.accent)
     }
-    Text("PLAN COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.plan_completed_).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text(planName, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Row(Modifier.fillMaxWidth().padding(top = 24.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         CompletionStat("ENTRENAMIENTOS", completedWorkouts.toString(), Modifier.weight(1f), Icons.Filled.CalendarMonth)
@@ -515,7 +515,7 @@ private fun MesocycleCompletedCelebration(mesocycleIndex: Int, cycleLength: Int,
         Icon(Icons.Filled.Star, contentDescription = null, modifier = Modifier.size(38.dp), tint = Color.Yellow)
         Icon(Icons.Filled.AutoAwesome, contentDescription = null, modifier = Modifier.size(54.dp), tint = WildforceThemeTokens.textPrimary)
     }
-    Text("MESOCICLO COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.mesocycle_complete).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
     Text(
         if (mesocycleIndex > 0) "Mesociclo $mesocycleIndex completado" else "Mesociclo completado",
         color = WildforceThemeTokens.textSecondary,
@@ -525,7 +525,7 @@ private fun MesocycleCompletedCelebration(mesocycleIndex: Int, cycleLength: Int,
         CompletionStat("MESOCICLO", if (mesocycleIndex > 0) mesocycleIndex.toString() else "—", Modifier.weight(1f), Icons.Filled.Repeat)
         CompletionStat("PLANES", if (cycleLength > 0) cycleLength.toString() else "—", Modifier.weight(1f), Icons.Filled.CalendarMonth)
     }
-    Text("Has completado todas las semanas del ciclo. Tu progresión está lista para el siguiente bloque.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_4514362231b4ebda), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
 
@@ -538,8 +538,8 @@ private fun PlanGeneratorCelebration(onDone: () -> Unit, onGenerateNextPlan: () 
 ) {
     Spacer(Modifier.weight(1f))
     Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(76.dp), tint = WildforceThemeTokens.accent)
-    Text("SIGUIENTE PLAN", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-    Text("Genera la siguiente semana manteniendo tu progresión, historial y feedback.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_e43262c17207504d), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_d67126ae53afa3cf), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
 
@@ -561,8 +561,8 @@ private fun NotificationEducationCelebration(context: Context, onContinue: () ->
 ) {
     Spacer(Modifier.weight(1f))
     NotificationStackMockup()
-    Text("MANTÉN LA CONSTANCIA", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-    Text("Activa recordatorios antes de tus entrenamientos y avisos cuando termine un descanso.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.stay_consistent).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_006a2c0894258f2d), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
 
@@ -586,8 +586,8 @@ private fun NotificationStackMockup() {
             ) {
                 Icon(Icons.Filled.Notifications, contentDescription = null, modifier = Modifier.size(24.dp), tint = WildforceThemeTokens.accent)
                 Column(Modifier.padding(start = 30.dp)) {
-                    Text("Hora de entrenar", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption)
-                    Text("Tu yo futuro te lo agradecerá.", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption, maxLines = 1)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_697e0b6bbef69f5c), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_future_self_will_thank_you_), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption, maxLines = 1)
                 }
             }
         }
@@ -634,8 +634,8 @@ private fun RateAppCelebration(context: Context, onContinue: () -> Unit) = Celeb
 ) {
     Spacer(Modifier.weight(1f))
     Icon(Icons.Filled.Favorite, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color(0xFFE53935))
-    Text("¿TE GUSTA TU PROGRESO?", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-    Text("Si disfrutas Double Triangle, dedica un momento a valorarla en Google Play.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_03812c2ff805ac31), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_17c4d9381ad5aa89), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
 }
 

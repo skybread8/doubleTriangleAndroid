@@ -29,4 +29,18 @@ class ExerciseHistoryChartSeriesTest {
         val exercise = ExerciseSummary("Bike", "stationaryBike", 1, "", 0, trackingMode = ExerciseTrackingMode.DurationAndDistance)
         assertEquals(emptyList<ExerciseHistoryChartSeries>(), exerciseHistoryChartSeries(exercise, listOf(ExerciseHistoryEntry(1L, 1, 0, 0.0, 0.0, durationSeconds = 600, distanceKm = 2.0))))
     }
+
+    @Test
+    fun cardioIncludesStoredAndDerivedPace() {
+        val exercise = ExerciseSummary("Bike", "stationaryBike", 1, "", 0, trackingMode = ExerciseTrackingMode.DurationAndDistance)
+        val history = listOf(
+            ExerciseHistoryEntry(2L, 1, 0, 0.0, 0.0, durationSeconds = 600, distanceKm = 2.0, paceSecondsPerKm = 310),
+            ExerciseHistoryEntry(1L, 1, 0, 0.0, 0.0, durationSeconds = 600, distanceKm = 2.0),
+        )
+        val series = exerciseHistoryChartSeries(exercise, history)
+        assertEquals(listOf(ExerciseHistoryChartMetric.Distance, ExerciseHistoryChartMetric.Pace, ExerciseHistoryChartMetric.Duration), series.map { it.metric })
+        assertEquals(listOf(300.0, 310.0), series[1].points.map { it.value })
+        assertEquals("5:00 min/km", ExerciseHistoryChartMetric.Pace.displayValue(300.0))
+        assertEquals("8:03 min/mi", ExerciseHistoryChartMetric.Pace.displayValue(300.0, true))
+    }
 }

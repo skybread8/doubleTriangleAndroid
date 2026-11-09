@@ -1888,5 +1888,61 @@
       "Se sentir alguma dor aguda ou tontura, pare imediatamente.",
       "Mantenha os ombros baixos e relaxados durante todo o exercício."
     ]
+  },
+  "ezBarSkullCrusher": {
+    "description": "Uma extensão de tríceps deitado com barra EZ, que trabalha os tríceps numa grande amplitude com flexão profunda dos cotovelos.",
+    "instructions": [
+      "Deite-se num banco e segure uma barra EZ sobre o peito com uma pega pronada e fechada.",
+      "Mantenha os braços quase verticais enquanto dobra os cotovelos para baixar a barra em direção à testa ou ligeiramente atrás.",
+      "Estenda os cotovelos para voltar a barra à posição inicial sem mexer demasiado os ombros.",
+      "Mantenha os pulsos numa posição neutra e controle a fase de descida."
+    ],
+    "tips": [
+      "Use as pegas anguladas da barra EZ para manter os pulsos confortáveis.",
+      "Deixe os cotovelos recuarem apenas ligeiramente; não transforme o movimento num pullover.",
+      "Peça ajuda a um parceiro ou use um sistema de segurança ao treinar com cargas elevadas."
+    ]
+  },
+  "closeGripDumbbellBenchPress": {
+    "description": "Uma variante do supino com halteres em que os pesos são mantidos juntos para aumentar o trabalho dos tríceps.",
+    "instructions": [
+      "Deite-se num banco com um haltere em cada mão, acima do centro do peito.",
+      "Mantenha os halteres juntos, com as palmas das mãos viradas uma para a outra ou ligeiramente para dentro.",
+      "Baixe os pesos mantendo os cotovelos junto ao tronco.",
+      "Empurre os pesos para cima, mantendo os halteres juntos e os ombros estáveis contra o banco."
+    ],
+    "tips": [
+      "Não force os halteres a tocarem-se se isso causar desconforto nos pulsos.",
+      "Mantenha os cotovelos suficientemente junto ao corpo para sentir os tríceps, sem os pressionar dolorosamente contra os lados.",
+      "Controle a descida e evite que os halteres ressaltem na posição inferior."
+    ]
+  },
+  "lyingCableCurl": {
+    "description": "Uma rosca de bíceps deitado na polia, feita com uma barra reta ou tipo EZ, que trabalha os bíceps através da flexão dos cotovelos.",
+    "instructions": [
+      "Coloque um banco plano em frente a uma polia baixa e deite-se de costas com os pés voltados para a máquina.",
+      "Segure uma barra reta ou uma barra EZ para polia com as palmas das mãos voltadas para cima e os braços estendidos em direção à polia.",
+      "Mantenha a parte superior dos braços quase imóvel enquanto flexiona os cotovelos para levar a barra em direção à testa ou à parte superior do peito.",
+      "Baixe a barra lentamente até voltar a estender os cotovelos, mantendo o cabo sob tensão."
+    ],
+    "tips": [
+      "Coloque o banco suficientemente afastado da polia para que o cabo permaneça tenso na posição inferior.",
+      "Mantenha os cotovelos estáveis em vez de os puxar em direção às costelas.",
+      "Faça repetições suaves e controladas para evitar que a polia o tire da posição."
+    ]
+  },
+  "smithMachineCalfRaise": {
+    "description": "Um exercício de elevação de gémeos em pé sob a barra guiada de uma máquina Smith, para treinar os gémeos com estabilidade e aumentar a carga progressivamente.",
+    "instructions": [
+      "Posicione-se sob a barra da máquina Smith, apoiada na parte superior das costas, e coloque a parte da frente dos pés numa superfície elevada e estável, se disponível.",
+      "Desbloqueie a barra e baixe os calcanhares de forma controlada para alongar os gémeos.",
+      "Empurre com a parte da frente dos pés para elevar os calcanhares o mais alto possível.",
+      "Faça uma breve pausa no topo e depois baixe lentamente, sem dar impulso."
+    ],
+    "tips": [
+      "Mantenha os joelhos ligeiramente flexionados e o tronco direito.",
+      "Utilize um degrau ou uma plataforma estável apenas se couber com segurança dentro da máquina Smith.",
+      "Dê prioridade à amplitude total do movimento em vez de aumentar a carga."
+    ]
   }
 }

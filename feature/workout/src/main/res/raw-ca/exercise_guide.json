@@ -1888,5 +1888,61 @@
       "Si sents algun dolor punyent o mareig, atura't immediatament.",
       "Mantén les espatlles baixes i relaxades durant tot l'exercici."
     ]
+  },
+  "ezBarSkullCrusher": {
+    "description": "Una extensió de tríceps estirat amb barra EZ que treballa el tríceps en un recorregut ampli amb una flexió profunda del colze.",
+    "instructions": [
+      "Estira’t en un banc i subjecta una barra EZ damunt del pit amb una presa prona i tancada.",
+      "Mantén els braços gairebé verticals mentre flexiones els colzes per baixar la barra cap al front o just darrere.",
+      "Estén els colzes per tornar la barra a la posició inicial sense moure massa les espatlles.",
+      "Mantén els canells en posició neutra i controla la fase de baixada."
+    ],
+    "tips": [
+      "Fes servir les nanses inclinades de la barra EZ per mantenir els canells còmodes.",
+      "Deixa que els colzes es desplacin lleugerament cap enrere; no converteixis el moviment en un pullover.",
+      "Fes servir l’ajuda d’un company o un sistema de seguretat si treballes amb molt de pes."
+    ]
+  },
+  "closeGripDumbbellBenchPress": {
+    "description": "Una variant del press de banca amb manuelles en què es mantenen els pesos molt junts per augmentar la participació dels tríceps.",
+    "instructions": [
+      "Estira’t en un banc amb una manuella a cada mà, damunt del centre del pit.",
+      "Mantén les manuelles juntes, amb els palmells encarats o lleugerament girats cap endins.",
+      "Baixa els pesos mantenint els colzes a prop del tors.",
+      "Torna a empènyer els pesos cap amunt mantenint les manuelles juntes i les espatlles estables contra el banc."
+    ],
+    "tips": [
+      "No forcis que les manuelles es toquin si això et molesta els canells.",
+      "Mantén els colzes prou a prop del cos per notar els tríceps, però sense prémer-los dolorosament contra els costats.",
+      "Controla la baixada i evita que les manuelles rebotin a baix."
+    ]
+  },
+  "lyingCableCurl": {
+    "description": "Un curl de bíceps estirat a la politja amb una barra recta o tipus EZ que treballa els bíceps mitjançant la flexió dels colzes.",
+    "instructions": [
+      "Col·loca un banc pla davant d'una politja baixa i estira't de panxa enlaire amb els peus orientats cap a la màquina.",
+      "Agafa una barra recta o una barra EZ per a politja amb els palmells cap amunt i els braços estirats cap a la politja.",
+      "Mantén la part superior dels braços gairebé immòbil mentre flexiones els colzes per acostar la barra al front o a la part superior del pit.",
+      "Baixa la barra lentament fins que tornis a tenir els colzes estirats, mantenint el cable tens."
+    ],
+    "tips": [
+      "Col·loca el banc prou lluny de la politja perquè el cable es mantingui tens a la posició més baixa.",
+      "Mantén els colzes estables en lloc d'acostar-los a les costelles.",
+      "Fes les repeticions de manera fluida i controlada per evitar que la politja et tregui de la posició."
+    ]
+  },
+  "smithMachineCalfRaise": {
+    "description": "Elevació de bessons dempeus sota la barra guiada d'una màquina Smith per entrenar els bessons amb estabilitat i augmentar la càrrega progressivament.",
+    "instructions": [
+      "Col·loca't sota la barra de la màquina Smith, recolzada sobre la part superior de l'esquena, i posa la part davantera dels peus sobre una superfície elevada i estable, si n'hi ha.",
+      "Desbloqueja la barra i abaixa els talons de manera controlada per estirar els bessons.",
+      "Empeny amb la part davantera dels peus per aixecar els talons tant com puguis.",
+      "Fes una breu pausa a dalt i després baixa lentament, sense rebotar."
+    ],
+    "tips": [
+      "Mantén els genolls lleugerament flexionats i el tronc recte.",
+      "Fes servir un esglaó o una plataforma estable només si cap amb seguretat dins la màquina Smith.",
+      "Dona prioritat a completar tot el recorregut del moviment abans que a afegir càrrega."
+    ]
   }
 }

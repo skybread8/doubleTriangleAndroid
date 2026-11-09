@@ -243,20 +243,20 @@ private fun SetStyleOnboarding(exercise: ExerciseSummary, onDismiss: () -> Unit)
 private fun SupersetOnboarding(item: WorkoutFeatureOnboarding.Superset, gender: String, onDismiss: () -> Unit) {
     var step by remember { mutableIntStateOf(0) }
     val names = item.exercises.take(2).map { tutorialExerciseName(it.imageKey, it.name) }
-    val intro = if (names.isEmpty()) tutorialText("This block pairs exercises together so you can move through them as one connected round.") else tutorialText("This block pairs %@ into one flow for %d rounds.").replace("%@", names.joinToString(" & ")).replace("%d", item.rounds.toString())
+    val intro = if (names.isEmpty()) tutorialText("This block pairs exercises together so you can move through them as one connected round.") else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_block_pairs____into_one_flow_for__d_rounds_, names.joinToString(" & "), item.rounds)
     val rest = item.restSeconds ?: 0
-    val restLabel = if (rest > 0) tutorialText("Rest %d sec after each round").replace("%d", rest.toString()) else tutorialText("Rest after each round")
-    val restDetail = if (rest > 0) tutorialText("After both exercises, take %d seconds before repeating the block.").replace("%d", rest.toString()) else tutorialText("After both exercises, take the planned block rest before repeating.")
+    val restLabel = if (rest > 0) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.rest__d_sec_after_each_round, rest) else tutorialText("Rest after each round")
+    val restDetail = if (rest > 0) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.after_both_exercises__take__d_seconds_before_repeating_the_block_, rest) else tutorialText("After both exercises, take the planned block rest before repeating.")
     OnboardingScaffold(2, step, tutorialText(if (step == 0) "New workout flow" else "How it runs"), tutorialText(if (step == 0) "Superset" else "Move exercise to exercise"), if (step == 0) intro else tutorialText("You will complete each exercise in order before the round resets."), { HeroIcon { Icon(Icons.Filled.Repeat, null, tint = WildforceThemeTokens.primaryButtonText) } }, { _ ->
         if (step == 0) Column(Modifier.padding(top = 28.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             item.exercises.take(2).forEachIndexed { index, exercise ->
                 val displayName = names[index]
                 Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.textPrimary.copy(alpha = .08f)).padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
                     RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), displayName, Modifier.size(width = 56.dp, height = 68.dp).clip(RoundedCornerShape(10.dp)))
-                    Column(Modifier.padding(start = 12.dp)) { Text("A${index + 1}", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption); Text(displayName, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold) }
+                    Column(Modifier.padding(start = 12.dp)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_938dcead4d66655b, index + 1), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption); Text(displayName, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold) }
                 }
             }
-            Pill(tutorialText("Repeat for %d rounds").replace("%d", item.rounds.toString()))
+            Pill(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.repeat_for__d_rounds, item.rounds))
             Pill(restLabel)
         } else Column(Modifier.padding(top = 44.dp), verticalArrangement = Arrangement.spacedBy(30.dp)) {
             Tip(tutorialText("Stay moving"), tutorialText("Transition to the next exercise without losing setup focus."))

@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">Wildforce</string><string name="destination_workout">训练</string><string name="destination_nutrition">营养</string><string name="destination_analytics">分析</string><string name="destination_profile">个人资料</string><string name="preview_new_plan">预览新计划</string><string name="plan_progress">计划 %1$d · 中周期 %2$d · 第 %3$d/%4$d 周</string><string name="plan_preview_workout">• %1$s：%2$s · %3$d 个动作 · %4$d 分钟</string><string name="use_this_plan">使用此计划</string><string name="cancel">取消</string><string name="coming_soon">%1$s\n即将推出</string><string name="creating_next_plan">正在创建你的下一个计划</string><string name="exit_app_title">退出应用？</string><string name="exit_app_message">确定要退出 Wildforce 吗？</string><string name="exit">退出</string>
+    <string name="app_name">Wildforce</string><string name="destination_workout">训练</string><string name="destination_nutrition">营养</string><string name="destination_analytics">分析</string><string name="destination_profile">个人资料</string><string name="preview_new_plan">预览新计划</string><string name="plan_progress">计划 %1$d · 中周期 %2$d · 第 %3$d/%4$d 周</string><string name="plan_preview_workout">• %1$s：%2$s · %3$d 个动作 · %4$d 分钟</string><string name="use_this_plan">使用此计划</string><string name="coming_soon">%1$s\n即将推出</string><string name="creating_next_plan">正在创建你的下一个计划</string><string name="exit_app_title">退出应用？</string><string name="exit_app_message">确定要退出 Wildforce 吗？</string><string name="exit">退出</string>
+    <string name="widget_workout_description">查看今天的训练和连续记录。</string>
+    <string name="widget_nutrition_description">记录今天的热量和宏量营养素。</string>
+    <string name="workout_reminder_body">你的训练「%1$s」将在30分钟后开始。</string>
+    <string-array name="workout_reminder_titles"><item>该训练了！</item></string-array>
 </resources>

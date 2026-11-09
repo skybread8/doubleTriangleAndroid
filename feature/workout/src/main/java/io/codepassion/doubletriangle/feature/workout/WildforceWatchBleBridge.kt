@@ -128,8 +128,12 @@ internal object WildforceWatchBridge {
         }
     }
 
-    fun dispatch(command: Command) {
-        Handler(Looper.getMainLooper()).post { commandListener?.invoke(command) }
+    fun dispatch(context: Context, command: Command) {
+        WildforceWatchLocalBridge.dispatch(context, WildforceWatchLocalBridge.Command(
+            operation = command.operation, reps = command.reps, weightKg = command.weightKg,
+            feedback = command.feedback, durationMinutes = command.durationMinutes,
+            distanceKm = command.distanceKm, motion = command.motion,
+        ))
     }
 
     fun hasBluetoothPermissions(context: Context): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
@@ -192,7 +196,7 @@ internal class WildforceWatchBleService : Service() {
         ) {
             Log.d(LOG_TAG, "write uuid=${characteristic.uuid} offset=$offset bytes=${value.size}")
             val result = if (characteristic.uuid == COMMAND_UUID && offset == 0 && !preparedWrite) {
-                parseCommand(value)?.also(WildforceWatchBridge::dispatch)
+                parseCommand(value)?.also { WildforceWatchBridge.dispatch(applicationContext, it) }
                 BluetoothGatt.GATT_SUCCESS
             } else BluetoothGatt.GATT_FAILURE
             if (responseNeeded) gattServer?.sendResponse(device, requestId, result, offset, null)

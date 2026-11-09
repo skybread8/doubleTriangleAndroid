@@ -21,16 +21,16 @@ import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PauseCircleOutline
 import androidx.compose.material.icons.filled.Terrain
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.TrendingDown
-import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,8 +63,8 @@ internal fun setStyleIcon(style: ExerciseSetStyle): ImageVector = when (style) {
     ExerciseSetStyle.Warmup -> Icons.Filled.LocalFireDepartment
     ExerciseSetStyle.Straight -> Icons.Filled.Equalizer
     ExerciseSetStyle.TopSetBackoff -> Icons.Filled.Terrain
-    ExerciseSetStyle.AscendingPyramid -> Icons.Filled.TrendingUp
-    ExerciseSetStyle.DropSet -> Icons.Filled.TrendingDown
+    ExerciseSetStyle.AscendingPyramid -> Icons.AutoMirrored.Filled.TrendingUp
+    ExerciseSetStyle.DropSet -> Icons.AutoMirrored.Filled.TrendingDown
     ExerciseSetStyle.RestPause -> Icons.Filled.PauseCircleOutline
     ExerciseSetStyle.Intervals -> Icons.Filled.Timer
     ExerciseSetStyle.Tempo -> Icons.Filled.MusicNote
@@ -96,10 +96,10 @@ internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, paramet
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 18.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Row(Modifier.weight(1f).heightIn(min = 48.dp).semantics { contentDescription = "Volver" }.clickable(onClick = onBack).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
-                Text("VOLVER", color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.go_back).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
             }
-            Text("TIPO DE SERIE", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.set_style).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
         }
         Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             SetStyleGlyph(style, Modifier.size(52.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.14f), RoundedCornerShape(14.dp)).padding(14.dp), WildforceThemeTokens.textPrimary)
@@ -112,7 +112,7 @@ internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, paramet
         }
         val planDetails = styleParameterDetails(style, parameters)
         if (planDetails.isNotEmpty()) {
-            Text("DETALLES DE TU PLAN", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 8.dp, bottom = 6.dp))
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_plan_details).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 8.dp, bottom = 6.dp))
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 planDetails.forEach { detail ->
                     Column(
@@ -140,7 +140,7 @@ internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, paramet
             InfoSection("QUÉ SIGNIFICA", copy.meaning)
             InfoSection("CÓMO FUNCIONA", copy.operation)
             SetStyleMiniDiagram(style, totalSets, parameters)
-            Text("BENEFICIOS", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 12.dp, bottom = 8.dp))
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_22447c9c12d49c89), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 12.dp, bottom = 8.dp))
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 copy.benefits.chunked(2).forEach { rowBenefits ->
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -196,7 +196,7 @@ private fun SetStyleMiniDiagram(style: ExerciseSetStyle, totalSets: Int, paramet
                 fontWeight = FontWeight.Bold,
             )
             if (index < items.lastIndex && style in setOf(ExerciseSetStyle.DropSet, ExerciseSetStyle.RestPause, ExerciseSetStyle.Intervals)) {
-                Icon(Icons.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.textSecondary)
+                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.textSecondary)
             }
         }
     }

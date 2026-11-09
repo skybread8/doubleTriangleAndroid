@@ -39,7 +39,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Business
@@ -248,7 +248,7 @@ internal fun CustomWorkoutsScreen(
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text(focusLabel, style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = 0.84f))
-                            Text("${workout.estimatedMinutes} min", style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = 0.84f))
+                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_min, workout.estimatedMinutes), style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = 0.84f))
                         }
                     }
                     Box(Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp)) {
@@ -315,7 +315,7 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(48.dp).clip(CircleShape).background(WildforceThemeTokens.textPrimary).semantics { contentDescription = "Cerrar" }.clickable { onCancel(editorSnapshot()) }, contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.workout_close), tint = WildforceThemeTokens.backgroundSecondary, modifier = Modifier.size(22.dp))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.workout_close), tint = WildforceThemeTokens.backgroundSecondary, modifier = Modifier.size(22.dp))
             }
             Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
                 Text(
@@ -352,13 +352,13 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
                 value = workout.title, onValueChange = { workout = workout.copy(title = it) }, modifier = Modifier.fillMaxWidth(),
                 label = { Text(stringResource(R.string.workout_title_label)) }, singleLine = true,
             )
-            Text(stringResource(R.string.workout_focus), Modifier.padding(top = 18.dp, bottom = 8.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+            Text(stringResource(R.string.workout_editor_focus).uppercase(), Modifier.padding(top = 18.dp, bottom = 8.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Box {
                 Row(
                     Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.08f)).semantics { contentDescription = "Enfoque: $focusLabel" }.clickable { focusMenuExpanded = true }.padding(horizontal = 14.dp, vertical = 13.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("Enfoque", Modifier.weight(1f), color = WildforceThemeTokens.textSecondary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.focus), Modifier.weight(1f), color = WildforceThemeTokens.textSecondary)
                     Text(focusLabel, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
                     Icon(Icons.Filled.ExpandMore, contentDescription = "Abrir opciones", modifier = Modifier.padding(start = 10.dp), tint = WildforceThemeTokens.textSecondary)
                 }
@@ -628,7 +628,7 @@ internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, equipmentPr
                         goals.forEach { goal -> DropdownMenuItem(onClick = { selectedGoal = goal; goalMenuExpanded = false }) { Text(goal) } }
                     }
                 }
-                Text("ENFOQUE", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.focus).uppercase(), style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(focuses) { option ->
                         val selected = option in selectedFocuses
@@ -708,7 +708,7 @@ internal fun ExercisePickerScreen(
     val visibleSections = remember(search, catalog, replacementSections) {
         val source = replacementSections ?: ExerciseReplacementSections(emptyList(), emptyList(), catalog)
         fun filtered(choices: List<ExerciseChoice>) = choices.filter {
-            it.name.contains(search, ignoreCase = true) || it.imageKey.contains(search, ignoreCase = true)
+            exerciseMatchesSearch(context, it.imageKey, it.name, search)
         }
         ExerciseReplacementSections(filtered(source.recommendedSubstitutes), filtered(source.sameMuscleGroup), filtered(source.allOtherExercises))
     }
@@ -722,9 +722,10 @@ internal fun ExercisePickerScreen(
         LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             fun androidx.compose.foundation.lazy.LazyListScope.exerciseRows(choices: List<ExerciseChoice>) {
                 items(choices, key = { it.imageKey }) { choice ->
-                    Row(Modifier.fillMaxWidth().semantics { contentDescription = exerciseDisplayName(choice.imageKey, choice.name) }.clickable { onSelect(choice) }.padding(7.dp), verticalAlignment = Alignment.CenterVertically) {
-                        RemoteTrainingImage(choice.imageUrl ?: exerciseImageUrl(choice.imageKey, gender), exerciseDisplayName(choice.imageKey, choice.name), Modifier.size(width = 50.dp, height = 60.dp).clip(RoundedCornerShape(6.dp)))
-                        Text(exerciseDisplayName(choice.imageKey, choice.name), Modifier.weight(1f).padding(horizontal = 12.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
+                    val displayName = tutorialExerciseName(choice.imageKey, choice.name)
+                    Row(Modifier.fillMaxWidth().semantics { contentDescription = displayName }.clickable { onSelect(choice.copy(name = displayName)) }.padding(7.dp), verticalAlignment = Alignment.CenterVertically) {
+                        RemoteTrainingImage(choice.imageUrl ?: exerciseImageUrl(choice.imageKey, gender), displayName, Modifier.size(width = 50.dp, height = 60.dp).clip(RoundedCornerShape(6.dp)))
+                        Text(displayName, Modifier.weight(1f).padding(horizontal = 12.dp), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
                         Icon(Icons.Filled.ChevronRight, contentDescription = null, modifier = Modifier.size(20.dp), tint = WildforceThemeTokens.textSecondary)
                     }
                 }

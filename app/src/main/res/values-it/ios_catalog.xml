@@ -267,6 +267,8 @@
     <string name="ios_catalog_6a28866fa9274eab" formatted="false">Una variante della flessione a corpo libero eseguita in posizione pike per mirare le spalle e la parte superiore del petto.</string>
     <!-- iOS key: A cable version of the overhead triceps extension that keeps constant tension on the long head of the triceps through the full range of motion. -->
     <string name="ios_catalog_8f020bc6ae741ae5" formatted="false">Una versione al cavo dell\'estensione tricipiti sopra la testa che mantiene una tensione costante sul capo lungo del tricipite per tutta l\'escursione del movimento.</string>
+    <!-- iOS key: A chest-supported curl performed face down on an incline bench to isolate the biceps and limit momentum. -->
+    <string name="ios_catalog_017ed5dcc00573db" formatted="false">Un curl con il petto appoggiato, eseguito prono su una panca inclinata per isolare i bicipiti e limitare lo slancio.</string>
     <!-- iOS key: A chest-supported machine row that isolates the back muscles while protecting the lower back. -->
     <string name="ios_catalog_35e74dcfe361c885" formatted="false">Un rematore in macchina con appoggio sul petto che isola i muscoli della schiena proteggendo la zona lombare.</string>
     <!-- iOS key: A classic bodyweight exercise that builds chest, shoulder, and triceps strength. -->
@@ -287,6 +289,8 @@
     <string name="ios_catalog_ec769cd71b209edd" formatted="false">Un esercizio a corpo libero impegnativo che sviluppa notevole potenza nei tricipiti e nel petto.</string>
     <!-- iOS key: A dip variation where you lean your torso forward to shift the focus from the triceps to the chest muscles. -->
     <string name="ios_catalog_5f076d407a053e25" formatted="false">Una variante delle dip in cui inclini il busto in avanti per spostare l\'enfasi dai tricipiti ai muscoli pettorali.</string>
+    <!-- iOS key: A dumbbell bench press with the weights held close together to increase the triceps contribution. -->
+    <string name="ios_catalog_c18a7d105ca4a934" formatted="false">Una variante della panca con manubri in cui i pesi restano ravvicinati per aumentare il coinvolgimento dei tricipiti.</string>
     <!-- iOS key: A dynamic exercise that targets the core while providing a significant cardiovascular challenge. -->
     <string name="ios_catalog_35d37666de4386af" formatted="false">Un esercizio dinamico che coinvolge il core e al contempo rappresenta una sfida cardiovascolare significativa.</string>
     <!-- iOS key: A dynamic movement that stretches the hamstrings while building core and shoulder stability. -->
@@ -321,10 +325,14 @@
     <string name="ios_catalog_281c170d705baddc" formatted="false">Un\'ottima opzione per l\'isolamento e le serie a scalare.</string>
     <!-- iOS key: A guided decline press that safely targets the lower chest muscles. -->
     <string name="ios_catalog_5e3b59d4982ba943" formatted="false">Una pressa declinata guidata che mira in sicurezza ai muscoli inferiori del torace.</string>
+    <!-- iOS key: A guided hip thrust machine that loads the glutes directly while providing a stable and comfortable setup. -->
+    <string name="ios_catalog_c85c5454c73a6d54" formatted="false">Una macchina guidata per l\'hip thrust che sollecita direttamente i glutei e offre un assetto stabile e confortevole.</string>
     <!-- iOS key: A guided incline press that isolates the upper chest and allows for safe training near failure. -->
     <string name="ios_catalog_fdd96713d4857658" formatted="false">Una pressa inclinata guidata che isola la parte superiore del petto e permette di allenarsi in sicurezza vicino al cedimento.</string>
     <!-- iOS key: A guided row variation that allows for heavy loading with a focus on mid-back contraction. -->
     <string name="ios_catalog_d88ff50345f87b23" formatted="false">Una variante di rematore guidata che consente carichi elevati con focus sulla contrazione della parte centrale della schiena.</string>
+    <!-- iOS key: A guided squat machine that lets you train the quads and glutes with high stability and minimal balance demand. -->
+    <string name="ios_catalog_0c3e05c2c5f9ab5d" formatted="false">Una macchina guidata per lo squat che permette di allenare quadricipiti e glutei con elevata stabilità e una minima richiesta di equilibrio.</string>
     <!-- iOS key: A guided vertical press that allows you to focus purely on shoulder drive with added safety. -->
     <string name="ios_catalog_f67c51b4dec48040" formatted="false">Una pressa verticale guidata che ti permette di concentrarti esclusivamente sulla spinta delle spalle, con maggiore sicurezza.</string>
     <!-- iOS key: A hamstring-focused hinge using dumbbells, which allows for a more natural range of motion. -->
@@ -339,6 +347,8 @@
     <string name="ios_catalog_e9e3a1da33c4dbd7" formatted="false">Un\'alzata laterale con cavo che fornisce tensione costante sui deltoidi laterali per tutto il movimento.</string>
     <!-- iOS key: A low-impact cardio option that targets the lower body while being easy on the joints. -->
     <string name="ios_catalog_ed13ed5df65a425e" formatted="false">Un\'opzione cardio a basso impatto che mira alla parte inferiore del corpo ed è facile per le articolazioni.</string>
+    <!-- iOS key: A lying EZ-bar triceps extension that emphasizes the triceps through a deep elbow-flexion range. -->
+    <string name="ios_catalog_0fd5bcae2a41e05e" formatted="false">Un\'estensione dei tricipiti da sdraiati con bilanciere EZ, che sollecita i tricipiti con un\'ampia flessione del gomito.</string>
     <!-- iOS key: A machine-based exercise that allows you to build vertical pulling strength in a controlled way. -->
     <string name="ios_catalog_f28dcfbd496c2a57" formatted="false">Un esercizio su macchina che ti permette di sviluppare la forza di trazione verticale in modo controllato.</string>
     <!-- iOS key: A machine-based fly that provides consistent tension on the chest for better isolation. -->
@@ -371,6 +381,10 @@
     <string name="ios_catalog_663fe57960d76c41" formatted="false">Una variante della flessione in cui sollevi le mani da terra nella fase bassa di ogni ripetizione per garantire un pieno range di movimento e sviluppare potenza esplosiva.</string>
     <!-- iOS key: A restful pose that gently stretches the back, hips, and shoulders. -->
     <string name="ios_catalog_e745e858869dcd35" formatted="false">Una posizione di riposo che allunga delicatamente la schiena, i fianchi e le spalle.</string>
+    <!-- iOS key: A reverse fly performed on a pec deck machine to isolate the rear deltoids and upper back. -->
+    <string name="ios_catalog_74fa5b2d6c983843" formatted="false">Un esercizio di aperture inverse alla pec deck per isolare i deltoidi posteriori e la parte alta della schiena.</string>
+    <!-- iOS key: A rope cable pushdown that isolates the triceps and allows a strong contraction at the bottom of each rep. -->
+    <string name="ios_catalog_f9a8d8ffd999cbdc" formatted="false">Un push-down per tricipiti ai cavi con corda che isola i tricipiti e permette una contrazione intensa alla fine di ogni ripetizione.</string>
     <!-- iOS key: A safe and effective way to build core stability and coordination without straining the back. -->
     <string name="ios_catalog_df8c4c955438504e" formatted="false">Un modo sicuro ed efficace per sviluppare la stabilità del core e la coordinazione senza sforzare la schiena.</string>
     <!-- iOS key: A sequence of movements designed to improve range of motion and health in the shoulder joints. -->
@@ -383,6 +397,12 @@
     <string name="ios_catalog_77b34ccf0702495c" formatted="false">Un curl ai cavi in piedi che mantiene la tensione costante sui bicipiti dall\'inizio alla fine di ogni ripetizione.</string>
     <!-- iOS key: A standing cable exercise that trains the lats through shoulder extension while keeping the arms nearly straight. -->
     <string name="ios_catalog_091df3a57284cdf9" formatted="false">Un esercizio in piedi al cavo che allena i dorsali tramite estensione della spalla, mantenendo le braccia quasi dritte.</string>
+    <!-- iOS key: A standing calf raise under the guided bar of a Smith machine for stable, progressively loaded calf training. -->
+    <string name="ios_catalog_fa7f63814a3e4780" formatted="false">Un esercizio per i polpacci in piedi sotto il bilanciere guidato di una macchina Smith, per allenarli in modo stabile aumentando gradualmente il carico.</string>
+    <!-- iOS key: A supine cable curl performed with a straight or EZ-style cable bar to load the biceps through elbow flexion. -->
+    <string name="ios_catalog_9424e943055014d0" formatted="false">Un curl per i bicipiti ai cavi da sdraiato, eseguito con una barra dritta o tipo EZ, che sollecita i bicipiti flettendo i gomiti.</string>
+    <!-- iOS key: A supported curl that keeps the upper arms fixed to isolate the biceps through a controlled range of motion. -->
+    <string name="ios_catalog_6bb06413098aafb3" formatted="false">Un curl con supporto che mantiene fermi i bracci per isolare i bicipiti attraverso un arco di movimento controllato.</string>
     <!-- iOS key: A targeted machine exercise that isolates the glutes through a kickback motion. -->
     <string name="ios_catalog_ed6d615f4486d162" formatted="false">Un esercizio mirato alla macchina che isola i glutei tramite un movimento di kickback.</string>
     <!-- iOS key: About You -->
@@ -391,6 +411,8 @@
     <string name="ios_catalog_ef68818cc22e3cbb" formatted="false">Addominali</string>
     <!-- iOS key: Absorb the impact by landing on the balls of your feet and rolling to your heels. -->
     <string name="ios_catalog_898fdcb0f9e00781" formatted="false">Assorbi l\'impatto atterrando sulle punte dei piedi e rotolando fino ai talloni.</string>
+    <!-- iOS key: Accessory -->
+    <string name="ios_catalog_adf7651801aea461" formatted="false">Complementare</string>
     <!-- iOS key: Account -->
     <string name="ios_catalog_7e1b0d5641f2640c" formatted="false">Account</string>
     <!-- iOS key: Achievements -->
@@ -477,6 +499,8 @@
     <string name="ios_catalog_cd3ee86b383cfae2" formatted="false">Aggiunge 15 secondi al cronometro</string>
     <!-- iOS key: Adjust speed and incline as needed to match your fitness level. -->
     <string name="ios_catalog_80b4db767ee477a0" formatted="false">Regola velocità e inclinazione secondo necessità per adattarle al tuo livello di forma fisica.</string>
+    <!-- iOS key: Adjust the back pad and belt or hip pad so it rests securely across your hips. -->
+    <string name="ios_catalog_e6adc270c861eb8b" formatted="false">Regola lo schienale e la cintura o il cuscinetto per i fianchi in modo che poggi saldamente sui fianchi.</string>
     <!-- iOS key: Adjust the bench position to find the most comfortable pressing line. -->
     <string name="ios_catalog_b76cab5157d46439" formatted="false">Regola la posizione della panca per trovare la traiettoria di spinta più confortevole.</string>
     <!-- iOS key: Adjust the difficulty by changing your foot position (closer to the anchor is harder). -->
@@ -633,6 +657,8 @@
     <string name="ios_catalog_49fd36734ad52d2a" formatted="false">Te ne vai?</string>
     <!-- iOS key: Are you sure you want to cancel this workout? All progress will be deleted. -->
     <string name="ios_catalog_a4a589f8355df9ba" formatted="false">Sei sicuro di voler annullare questo allenamento? Tutti i progressi verranno eliminati.</string>
+    <!-- iOS key: Are you sure you want to redo this plan? A replacement will be generated in the same training cycle, while completed workouts and results are kept. -->
+    <string name="ios_catalog_0f70a67a67c9e498" formatted="false">Vuoi davvero rifare questo piano? Ne verrà generato uno sostitutivo nello stesso ciclo di allenamento, mentre gli allenamenti completati e i risultati verranno mantenuti.</string>
     <!-- iOS key: Are you sure you want to redo this plan? The current plan will be deleted and a new one will be generated. -->
     <string name="ios_catalog_7e2442d03e31cf5d" formatted="false">Sei sicuro di voler rifare questo piano? Il piano attuale verrà eliminato e ne verrà generato uno nuovo.</string>
     <!-- iOS key: Are you sure you want to redo this plan? The current plan will be deleted and a new plan will be generated. -->
@@ -657,6 +683,8 @@
     <string name="ios_catalog_915d804bfdb98f93" formatted="false">Fissare una barra o una corda alla puleggia alta della macchina a cavi.</string>
     <!-- iOS key: Attach a rope to a cable pulley at upper-chest or eye level. -->
     <string name="ios_catalog_b2f50e7dc776909e" formatted="false">Fissare una corda a una puleggia del cavo all\'altezza del petto superiore o degli occhi.</string>
+    <!-- iOS key: Attach a rope to a high cable pulley and stand facing the machine. -->
+    <string name="ios_catalog_2be8c739129c09d7" formatted="false">Fissa una corda a una carrucola alta e mettiti in piedi di fronte alla macchina.</string>
     <!-- iOS key: Attach a rope to a high pulley and kneel facing the cable machine. -->
     <string name="ios_catalog_757039f898a1fb69" formatted="false">Fissare una corda alla puleggia alta e inginocchiarsi di fronte alla macchina a cavi.</string>
     <!-- iOS key: Attach a rope to a low cable or position yourself so the cable tracks behind your head. -->
@@ -739,6 +767,8 @@
     <string name="ios_catalog_d7ea4898146efecc" formatted="false">Evita di inarcare eccessivamente la parte bassa della schiena.</string>
     <!-- iOS key: Avoid going too deep if you feel any shoulder discomfort. -->
     <string name="ios_catalog_8c09e27eec3655f9" formatted="false">Non scendere troppo se avverti fastidio alla spalla.</string>
+    <!-- iOS key: Avoid leaning your body weight into the cable to move the load. -->
+    <string name="ios_catalog_f27855c4614e8f44" formatted="false">Evita di inclinarti sul cavo per spostare il carico usando il peso del corpo.</string>
     <!-- iOS key: Avoid letting your hips bounce up and down. -->
     <string name="ios_catalog_e239d2faf9aa5482" formatted="false">Evita che i fianchi rimbalzino su e giù.</string>
     <!-- iOS key: Avoid letting your hips sag or hike up too high. -->
@@ -795,12 +825,18 @@
     <string name="ios_catalog_dd917d6b7b30be37" formatted="false">Squat con bilanciere</string>
     <!-- iOS key: Barbell Bench Press -->
     <string name="ios_catalog_9903dbd0d62cfc8f" formatted="false">Panca piana</string>
+    <!-- iOS key: Barbell Bent-Over Row -->
+    <string name="ios_catalog_14213549f94ae76a" formatted="false">Rematore con bilanciere a busto inclinato</string>
     <!-- iOS key: Barbell Decline Bench Press -->
     <string name="ios_catalog_9c65bd831e1381c7" formatted="false">Panca declinata con bilanciere</string>
     <!-- iOS key: Barbell Front Squat -->
     <string name="ios_catalog_7b978ea5873388ba" formatted="false">Front squat con bilanciere</string>
     <!-- iOS key: Barbell Incline Bench Press -->
     <string name="ios_catalog_83edb6bf19b44ccb" formatted="false">Panca inclinata con bilanciere</string>
+    <!-- iOS key: Barbell Overhead Press -->
+    <string name="ios_catalog_ff45e806225bdd26" formatted="false">Military press con bilanciere</string>
+    <!-- iOS key: Barbell Romanian Deadlift -->
+    <string name="ios_catalog_062bde1a757533ec" formatted="false">Stacco rumeno</string>
     <!-- iOS key: Barcode -->
     <string name="ios_catalog_a401f372102d06f4" formatted="false">Codice a barre</string>
     <!-- iOS key: Basal metabolic rate -->
@@ -1193,6 +1229,8 @@
     <string name="ios_catalog_7d9eb7acb13e2462" formatted="false">Close</string>
     <!-- iOS key: Close this sheet and tap \'See future\' to retry the generation. -->
     <string name="ios_catalog_85c8376add6cc5e3" formatted="false">Chiudi questo foglio e tocca \'See future\' per riprovare la generazione.</string>
+    <!-- iOS key: Close-Grip Dumbbell Bench Press -->
+    <string name="ios_catalog_cc60073797181ec0" formatted="false">Panca stretta con manubri</string>
     <!-- iOS key: cm -->
     <string name="ios_catalog_b5039c325d7107d6" formatted="false">cm</string>
     <!-- iOS key: Coach notes -->
@@ -1253,6 +1291,8 @@
     <string name="ios_catalog_04d0050f6bacac0f" formatted="false">Completed workouts</string>
     <!-- iOS key: Completed workouts by weekday -->
     <string name="ios_catalog_cdd0797d529ac6cb" formatted="false">Allenamenti completati per giorno della settimana</string>
+    <!-- iOS key: Compound -->
+    <string name="ios_catalog_b13b4bbd622c432d" formatted="false">Composto</string>
     <!-- iOS key: Configure -->
     <string name="ios_catalog_6defafa2caa65304" formatted="false">Configurare</string>
     <!-- iOS key: Confirm reservation -->
@@ -1315,6 +1355,8 @@
     <string name="ios_catalog_52c681814029348a" formatted="false">Controllare il ritmo</string>
     <!-- iOS key: Control speed -->
     <string name="ios_catalog_bf431d964505b2fe" formatted="false">Controllare la velocità</string>
+    <!-- iOS key: Control the bottom position and use the safety stops at an appropriate depth. -->
+    <string name="ios_catalog_62b0cefbe4852eae" formatted="false">Controlla la posizione più bassa e usa i fermi di sicurezza a una profondità adeguata.</string>
     <!-- iOS key: Control the descent to avoid banging your back knee on the floor. -->
     <string name="ios_catalog_b6b53f903109c4ec" formatted="false">Controlla la discesa per evitare che il ginocchio posteriore sbatta a terra.</string>
     <!-- iOS key: Control the descent to avoid shoulder strain. -->
@@ -1419,10 +1461,14 @@
     <string name="ios_catalog_c09d8c3179ea4a12" formatted="false">Incrocia le braccia e afferra la maniglia sinistra con la mano destra e la maniglia destra con la mano sinistra.</string>
     <!-- iOS key: Crunch your ribcage down toward your pelvis while keeping your elbows close and abs fully engaged. -->
     <string name="ios_catalog_1b337c868f49053b" formatted="false">Avvicina la gabbia toracica al bacino mantenendo i gomiti vicini e gli addominali completamente attivati.</string>
+    <!-- iOS key: Curl the bar toward your shoulders while keeping your upper arms against the support. -->
+    <string name="ios_catalog_a98f8ba9df0801cd" formatted="false">Fletti le braccia e porta il bilanciere verso le spalle mantenendo i bracci appoggiati al supporto.</string>
     <!-- iOS key: Curl the handle toward your shoulder while keeping your elbow from drifting too far forward. -->
     <string name="ios_catalog_cd320a92bbedbecb" formatted="false">Avvicina la maniglia alla spalla evitando che il gomito scivoli troppo in avanti.</string>
     <!-- iOS key: Curl the handle toward your shoulders while keeping your upper arms mostly still. -->
     <string name="ios_catalog_bc731288de1dde83" formatted="false">Avvicina la maniglia alle spalle mantenendo le braccia superiori quasi ferme.</string>
+    <!-- iOS key: Curl the weights toward your shoulders without letting your elbows travel forward. -->
+    <string name="ios_catalog_f64a0c3805732f30" formatted="false">Fletti le braccia e porta i pesi verso le spalle senza spostare i gomiti in avanti.</string>
     <!-- iOS key: Curl the weights up toward your shoulders by bending your elbows. -->
     <string name="ios_catalog_f306709a1d347689" formatted="false">Solleva i pesi verso le spalle flettendo i gomiti.</string>
     <!-- iOS key: Curl the weights up while maintaining the neutral grip. -->
@@ -1559,8 +1605,12 @@
     <string name="ios_catalog_2b8a0dd062787d18" formatted="false">Distance (km)</string>
     <!-- iOS key: Distance (mi) -->
     <string name="ios_catalog_b073fb73277c8315" formatted="false">Distance (mi)</string>
+    <!-- iOS key: Do not bounce the bar from the bottom position. -->
+    <string name="ios_catalog_e216a4886bdb18ec" formatted="false">Non far rimbalzare il bilanciere nella posizione più bassa.</string>
     <!-- iOS key: Do not chase range of motion; stop the descent as soon as your lower back starts to lift. -->
     <string name="ios_catalog_3ddc13cf59d3aa57" formatted="false">Non inseguire l\'ampiezza di movimento; interrompi la discesa non appena la parte bassa della schiena comincia a sollevarsi.</string>
+    <!-- iOS key: Do not force the dumbbells to touch if that irritates your wrists. -->
+    <string name="ios_catalog_b4ab8422c7946e18" formatted="false">Non forzare il contatto tra i manubri se ti dà fastidio ai polsi.</string>
     <!-- iOS key: Do not let your shoulders roll forward as the weight lowers. -->
     <string name="ios_catalog_4297595be0e6890d" formatted="false">Non lasciare che le spalle rotolino in avanti mentre il peso scende.</string>
     <!-- iOS key: Do you have any injury or mobility restriction? -->
@@ -1665,12 +1715,16 @@
     <string name="ios_catalog_866c0d61159338fa" formatted="false">Spingi con il tallone anteriore per tornare in posizione eretta.</string>
     <!-- iOS key: Drive through the front heel to stand up and step forward with the other leg. -->
     <string name="ios_catalog_cea5e2fde54a074c" formatted="false">Spingi con il tallone anteriore per alzarti e fare un passo in avanti con l\'altra gamba.</string>
+    <!-- iOS key: Drive through your heels to extend your hips until your torso and thighs form a straight line. -->
+    <string name="ios_catalog_3c95fb1f5488be11" formatted="false">Spingi con i talloni ed estendi le anche finché il busto e le cosce non formano una linea retta.</string>
     <!-- iOS key: Drive through your heels to lift your hips toward the ceiling until your body forms a straight line from shoulders to knees. -->
     <string name="ios_catalog_b98ba75911391d6d" formatted="false">Spingi con i talloni per sollevare i fianchi verso il soffitto fino a quando il corpo forma una linea retta dalle spalle alle ginocchia.</string>
     <!-- iOS key: Drive through your heels to return to an upright position. -->
     <string name="ios_catalog_d4fa17c8d3a27d6c" formatted="false">Spingi con i talloni per tornare in posizione eretta.</string>
     <!-- iOS key: Drive through your heels to return to the starting position. -->
     <string name="ios_catalog_b970afeca9e44e64" formatted="false">Spingi con i talloni per tornare alla posizione di partenza.</string>
+    <!-- iOS key: Drive through your whole feet to return to the start without forcefully locking your knees. -->
+    <string name="ios_catalog_89bb253a0359a029" formatted="false">Spingi con tutta la pianta dei piedi per tornare alla posizione iniziale, senza bloccare bruscamente le ginocchia.</string>
     <!-- iOS key: Drive your hips forward to return to the starting position. -->
     <string name="ios_catalog_6030c94d2a479363" formatted="false">Spingi i fianchi in avanti per tornare alla posizione di partenza.</string>
     <!-- iOS key: Drop %d -->
@@ -2005,6 +2059,8 @@
     <string name="ios_catalog_b1dc5718a58ae45f" formatted="false">Estendi le braccia sopra la testa e tocca il pavimento dietro di te.</string>
     <!-- iOS key: Extend your arms to lift the weight back to the starting position overhead. -->
     <string name="ios_catalog_c9e0d7387a85fa72" formatted="false">Estendi le braccia per riportare il peso alla posizione iniziale sopra la testa.</string>
+    <!-- iOS key: Extend your elbows to return the bar to the starting position without moving your shoulders excessively. -->
+    <string name="ios_catalog_feb0b4558ce1db67" formatted="false">Estendi i gomiti per riportare il bilanciere alla posizione iniziale senza muovere eccessivamente le spalle.</string>
     <!-- iOS key: Extend your elbows until your arms are straight, squeezing the triceps at the top. -->
     <string name="ios_catalog_16ef4f49c374a40c" formatted="false">Estendi i gomiti fino a portare le braccia dritte, contraendo i tricipiti in alto.</string>
     <!-- iOS key: Extend your hips and knees while returning the handles to the starting position. -->
@@ -2025,6 +2081,8 @@
     <string name="ios_catalog_a39e9d9816a99fc0" formatted="false">Occhi</string>
     <!-- iOS key: Ez Bar -->
     <string name="ios_catalog_0cc8aef20a135088" formatted="false">Barra EZ</string>
+    <!-- iOS key: EZ Bar Skull Crusher -->
+    <string name="ios_catalog_2204dbe2e95ee1b2" formatted="false">French press con bilanciere EZ</string>
     <!-- iOS key: Face away from the machine and bring the rope overhead with elbows bent and pointed forward. -->
     <string name="ios_catalog_817a2df5aba03173" formatted="false">Mettiti di spalle alla macchina e porta la corda sopra la testa con i gomiti piegati e rivolti in avanti.</string>
     <!-- iOS key: Face ID or passcode isn’t available right now. -->
@@ -2485,12 +2543,16 @@
     <string name="ios_catalog_3e251b9ac009bd65" formatted="false">Afferra le impugnature e posizionati al centro, facendo un piccolo passo in avanti.</string>
     <!-- iOS key: Grip the handles and step forward with one foot for stability. -->
     <string name="ios_catalog_bb84ff6a957f0807" formatted="false">Afferra le impugnature e fai un passo avanti con un piede per maggiore stabilità.</string>
+    <!-- iOS key: Grip the handles with your arms extended in front of you at shoulder height. -->
+    <string name="ios_catalog_1d42217304a0678e" formatted="false">Afferra le impugnature con le braccia distese davanti a te all’altezza delle spalle.</string>
     <!-- iOS key: Grip the handles with your arms extended in front of you. -->
     <string name="ios_catalog_5b39851e42e93507" formatted="false">Afferra le impugnature con le braccia distese davanti a te.</string>
     <!-- iOS key: Grip the parallel bars and push yourself up to the starting position. -->
     <string name="ios_catalog_3a7da6db9259ea07" formatted="false">Afferra le parallele e spingiti fino alla posizione di partenza.</string>
     <!-- iOS key: Grip the parallel bars and push yourself up until your arms are fully extended. -->
     <string name="ios_catalog_eebedd934c104c0a" formatted="false">Afferra le parallele e spingiti fino a che le braccia siano completamente estese.</string>
+    <!-- iOS key: Grip the rope ends with a neutral grip and keep your elbows close to your sides. -->
+    <string name="ios_catalog_c4ffd94fa5157440" formatted="false">Afferra le estremità della corda con una presa neutra e tieni i gomiti vicini ai fianchi.</string>
     <!-- iOS key: Grocery List -->
     <string name="ios_catalog_987ad8269cf37b3f" formatted="false">Lista della spesa</string>
     <!-- iOS key: Grocery List (%d persons) -->
@@ -2503,6 +2565,10 @@
     <string name="ios_catalog_7904c0e4edce8fd5" formatted="false">Gym setup</string>
     <!-- iOS key: Gymnastic Rings -->
     <string name="ios_catalog_44f003bcd129f00c" formatted="false">Anelli da ginnastica</string>
+    <!-- iOS key: Hack Squat -->
+    <string name="ios_catalog_390440166430f19f" formatted="false">Hack squat</string>
+    <!-- iOS key: Hack Squat Machine -->
+    <string name="ios_catalog_d0a9cd8fc1161c8d" formatted="false">Macchina per hack squat</string>
     <!-- iOS key: Hammer Curl -->
     <string name="ios_catalog_92273d6425571258" formatted="false">Curl a martello</string>
     <!-- iOS key: Hamstring Curl -->
@@ -2589,6 +2655,8 @@
     <string name="ios_catalog_09b6ab1e5dd11dbf" formatted="false">Dolore all\'anca</string>
     <!-- iOS key: Hip Thrust -->
     <string name="ios_catalog_778bff28d318ee01" formatted="false">Sollevamento del bacino</string>
+    <!-- iOS key: Hip Thrust Machine -->
+    <string name="ios_catalog_a5996633f5784abf" formatted="false">Macchina per hip thrust</string>
     <!-- iOS key: Hips -->
     <string name="ios_catalog_b004098c1134baf8" formatted="false">Fianchi</string>
     <!-- iOS key: History -->
@@ -2597,6 +2665,10 @@
     <string name="ios_catalog_c83f6448d6209058" formatted="false">Tieni un manubrio nell\'altra mano con il braccio esteso verso il pavimento.</string>
     <!-- iOS key: Hold a dumbbell or kettlebell against your chest with both hands. -->
     <string name="ios_catalog_6760b184af6537fe" formatted="false">Tieni un manubrio o una kettlebell contro il petto con entrambe le mani.</string>
+    <!-- iOS key: Hold a straight or EZ-style cable bar with palms facing up and your arms extended toward the pulley. -->
+    <string name="ios_catalog_5e9280acab8e926e" formatted="false">Afferra una barra dritta o una barra EZ per cavi con i palmi rivolti verso l\'alto e le braccia distese verso la carrucola.</string>
+    <!-- iOS key: Hold an EZ bar with an underhand grip and begin with your arms almost fully extended. -->
+    <string name="ios_catalog_c9730880765d2b16" formatted="false">Impugna una barra EZ con presa supina e inizia con le braccia quasi completamente distese.</string>
     <!-- iOS key: Hold and breathe into the stretch, then switch sides. -->
     <string name="ios_catalog_376c41d6ea74bf6e" formatted="false">Mantieni la posizione e respira nell\'allungamento, poi cambia lato.</string>
     <!-- iOS key: Hold and then switch legs. -->
@@ -2781,6 +2853,8 @@
     <string name="ios_catalog_112b3b0b196d00b6" formatted="false">Isola i deltoidi posteriori usando cavi, permettendo un profilo di resistenza costante.</string>
     <!-- iOS key: Isolates the rear part of the shoulders to help create a well-rounded physique. -->
     <string name="ios_catalog_9da1e451fda8839e" formatted="false">Isola la parte posteriore delle spalle per contribuire a un fisico equilibrato.</string>
+    <!-- iOS key: Isolation -->
+    <string name="ios_catalog_45c4fc064e525974" formatted="false">Isolamento</string>
     <!-- iOS key: It doesn’t need to be exact here. You’ll be able to move and adjust the photo before saving. -->
     <string name="ios_catalog_e24b064a5b154bae" formatted="false">Non deve essere preciso qui. Potrai spostare e regolare la foto prima di salvarla.</string>
     <!-- iOS key: It\'s okay to reset. Tomorrow is a new opportunity. -->
@@ -2865,6 +2939,8 @@
     <string name="ios_catalog_64480070123466f7" formatted="false">Tieni la barra molto vicino alle tue gambe in ogni momento.</string>
     <!-- iOS key: Keep the dumbbells close to your legs throughout the movement. -->
     <string name="ios_catalog_90acead64187deee" formatted="false">Tieni i manubri vicino alle gambe per tutto il movimento.</string>
+    <!-- iOS key: Keep the dumbbells close together with your palms facing each other or slightly inward. -->
+    <string name="ios_catalog_c044a2fab6490a68" formatted="false">Tieni i manubri vicini, con i palmi rivolti l\'uno verso l\'altro o leggermente verso l\'interno.</string>
     <!-- iOS key: Keep the movement controlled and focus on the glute contraction. -->
     <string name="ios_catalog_585654ade860eb4a" formatted="false">Mantieni il movimento controllato e concentrati sulla contrazione dei glutei.</string>
     <!-- iOS key: Keep the movement controlled; don\'t bounce the bar off your chest. -->
@@ -2911,6 +2987,8 @@
     <string name="ios_catalog_df09af27f9cc414f" formatted="false">Mantieni il petto contro il cuscinetto per isolare i deltoidi posteriori.</string>
     <!-- iOS key: Keep your chest as upright as possible. -->
     <string name="ios_catalog_de10c40be40acd32" formatted="false">Mantieni il petto il più eretto possibile.</string>
+    <!-- iOS key: Keep your chest firmly against the pad throughout the set. -->
+    <string name="ios_catalog_ba4399ace21b5c6d" formatted="false">Tieni il petto ben appoggiato al cuscino per tutta la serie.</string>
     <!-- iOS key: Keep your chest pressed firmly against the pad to isolate your back. -->
     <string name="ios_catalog_a89ffd7d9997daff" formatted="false">Tieni il petto premuto saldamente contro il cuscinetto per isolare la schiena.</string>
     <!-- iOS key: Keep your chest tall and avoid swinging your torso to move the load. -->
@@ -2989,6 +3067,10 @@
     <string name="ios_catalog_78cb0d44a7a8e9ae" formatted="false">Tieni i gomiti rivolti in avanti invece che verso i lati.</string>
     <!-- iOS key: Keep your elbows slightly below your shoulder level. -->
     <string name="ios_catalog_b192cb2681aa33ac" formatted="false">Tieni i gomiti leggermente sotto il livello delle spalle.</string>
+    <!-- iOS key: Keep your elbows stable instead of pulling them toward your ribs. -->
+    <string name="ios_catalog_cca10b380f98c2fa" formatted="false">Tieni i gomiti fermi invece di portarli verso le costole.</string>
+    <!-- iOS key: Keep your elbows tucked enough to feel the triceps, without pinning them painfully against your sides. -->
+    <string name="ios_catalog_65d164925fa6037a" formatted="false">Tieni i gomiti abbastanza vicini al corpo da sentire i tricipiti, senza premerli dolorosamente contro i fianchi.</string>
     <!-- iOS key: Keep your elbows tucked in close to your body. -->
     <string name="ios_catalog_30e0d132f75e4a01" formatted="false">Tieni i gomiti aderenti al corpo.</string>
     <!-- iOS key: Keep your elbows tucked in close to your torso. -->
@@ -3027,12 +3109,16 @@
     <string name="ios_catalog_5c1da279ef4ebb8b" formatted="false">Mantieni i fianchi allineati e abbassa lentamente il busto sulla gamba anteriore.</string>
     <!-- iOS key: Keep your hips still and focus the rotation in your upper back. -->
     <string name="ios_catalog_06831e880482b7e1" formatted="false">Mantieni i fianchi fermi e concentra la rotazione nella parte alta della schiena.</string>
+    <!-- iOS key: Keep your knees softly unlocked and your torso upright. -->
+    <string name="ios_catalog_349f3fe532cefe52" formatted="false">Tieni le ginocchia leggermente flesse e il busto eretto.</string>
     <!-- iOS key: Keep your knees together and your torso upright. -->
     <string name="ios_catalog_484a7eac4f69c3d9" formatted="false">Mantieni le ginocchia unite e il busto eretto.</string>
     <!-- iOS key: Keep your legs and arms straight, with your head tucked between your arms. -->
     <string name="ios_catalog_07d234559a5299ed" formatted="false">Mantieni gambe e braccia dritte, con la testa infilata tra le braccia.</string>
     <!-- iOS key: Keep your legs straight as long as possible to maximize the hamstring stretch. -->
     <string name="ios_catalog_ff3bcc7a46be2a19" formatted="false">Mantieni le gambe dritte il più a lungo possibile per massimizzare lo stiramento dei muscoli posteriori della coscia.</string>
+    <!-- iOS key: Keep your lower back in contact with the pad throughout the movement. -->
+    <string name="ios_catalog_f56d8efcdf970bf4" formatted="false">Mantieni la zona lombare a contatto con lo schienale durante tutto il movimento.</string>
     <!-- iOS key: Keep your lower back pressed firmly into the floor throughout the movement. -->
     <string name="ios_catalog_f28ee1f4216859c7" formatted="false">Tieni la parte bassa della schiena saldamente a contatto con il pavimento per tutta la durata del movimento.</string>
     <!-- iOS key: Keep your lower back pressed into the floor during the initial phase of the sit-up. -->
@@ -3047,6 +3133,8 @@
     <string name="ios_catalog_f600307ce7207b8f" formatted="false">Mantieni il collo in posizione neutra.</string>
     <!-- iOS key: Keep your progress photos as consistent as possible so changes are easier to judge over time. -->
     <string name="ios_catalog_a2edfba27b3993f9" formatted="false">Mantieni le foto dei tuoi progressi il più coerenti possibile, così i cambiamenti saranno più facili da valutare nel tempo.</string>
+    <!-- iOS key: Keep your ribs down and avoid overextending your lower back at the top. -->
+    <string name="ios_catalog_648f253cf3ea2e48" formatted="false">Tieni le costole abbassate ed evita di iperestendere la zona lombare in alto.</string>
     <!-- iOS key: Keep your shoulder blades retracted (squeezed together) throughout the lift. -->
     <string name="ios_catalog_9548ab8a146224a6" formatted="false">Mantieni le scapole retratte (avvicinate tra loro) durante tutta la fase di sollevamento.</string>
     <!-- iOS key: Keep your shoulder blades retracted against the bench. -->
@@ -3055,6 +3143,8 @@
     <string name="ios_catalog_93d6e5da0193343c" formatted="false">Tieni le spalle basse e lontane dalle orecchie.</string>
     <!-- iOS key: Keep your shoulders down and relaxed throughout. -->
     <string name="ios_catalog_c75f121cbdd76bf0" formatted="false">Tieni le spalle basse e rilassate per tutta la durata dell\'esercizio.</string>
+    <!-- iOS key: Keep your shoulders down and your upper arms still throughout the movement. -->
+    <string name="ios_catalog_5264891d22bfd4f4" formatted="false">Tieni le spalle basse e le braccia ferme per tutta la durata del movimento.</string>
     <!-- iOS key: Keep your shoulders relaxed and avoid gripping the handles too tightly. -->
     <string name="ios_catalog_7508df9b038c01fa" formatted="false">Tieni le spalle rilassate ed evita di stringere troppo le maniglie.</string>
     <!-- iOS key: Keep your shoulders relaxed and down away from your ears. -->
@@ -3073,6 +3163,12 @@
     <string name="ios_catalog_8cda174a3be8345c" formatted="false">Mantieni il busto eretto e il core attivo.</string>
     <!-- iOS key: Keep your torso upright; don\'t lean back. -->
     <string name="ios_catalog_714223da56b61f69" formatted="false">Mantieni il busto eretto; non inclinarti all\'indietro.</string>
+    <!-- iOS key: Keep your upper arms mostly fixed as you curl the bar toward your forehead or upper chest. -->
+    <string name="ios_catalog_f44e21132e4f9f47" formatted="false">Tieni la parte superiore delle braccia quasi ferma mentre fletti i gomiti per portare la barra verso la fronte o la parte alta del petto.</string>
+    <!-- iOS key: Keep your upper arms mostly vertical as you bend your elbows to lower the bar toward your forehead or just behind it. -->
+    <string name="ios_catalog_85aaae4b8c6c21ed" formatted="false">Mantieni le braccia quasi verticali mentre pieghi i gomiti e abbassi il bilanciere verso la fronte o appena dietro.</string>
+    <!-- iOS key: Keep your upper arms perpendicular to the floor throughout the movement. -->
+    <string name="ios_catalog_f157d6a1ddfc5cff" formatted="false">Mantieni le braccia perpendicolari al pavimento per tutta la durata del movimento.</string>
     <!-- iOS key: Keep your upper arms stationary throughout the movement. -->
     <string name="ios_catalog_406dfc93a765a8c8" formatted="false">Mantieni la parte superiore delle braccia immobile durante tutto il movimento.</string>
     <!-- iOS key: Keep your upper body stable throughout the set. -->
@@ -3083,6 +3179,10 @@
     <string name="ios_catalog_b57eb7f3b2c89a12" formatted="false">Mantieni il peso sui talloni, non sulle punte dei piedi.</string>
     <!-- iOS key: Keep your weight primarily on the front foot. -->
     <string name="ios_catalog_49c99126389f3aab" formatted="false">Mantieni il peso principalmente sul piede anteriore.</string>
+    <!-- iOS key: Keep your wrists neutral and avoid bending them back under load. -->
+    <string name="ios_catalog_eb9a5c34ec487433" formatted="false">Mantieni i polsi in posizione neutra ed evita di piegarli all\'indietro sotto carico.</string>
+    <!-- iOS key: Keep your wrists neutral and control the lowering phase. -->
+    <string name="ios_catalog_ff8aba018b5f8f23" formatted="false">Mantieni i polsi in posizione neutra e controlla la fase di discesa.</string>
     <!-- iOS key: Keep your wrists stacked over your elbows throughout the press. -->
     <string name="ios_catalog_de6b1b059ec6677f" formatted="false">Mantieni i polsi allineati sopra i gomiti per tutta la fase di spinta.</string>
     <!-- iOS key: Keeping your arms nearly straight, pull the attachment down toward your thighs by driving your upper arms down and back. -->
@@ -3153,6 +3253,8 @@
     <string name="ios_catalog_b4f25f32b9bd807e" formatted="false">Avvia l\'allenamento companion sull\'orologio quando inizi su iPhone.</string>
     <!-- iOS key: lb -->
     <string name="ios_catalog_fd26db45a8b53034" formatted="false">lb</string>
+    <!-- iOS key: Lead with your elbows and avoid shrugging your shoulders upward. -->
+    <string name="ios_catalog_b10239049b708989" formatted="false">Guida il movimento con i gomiti ed evita di sollevare le spalle.</string>
     <!-- iOS key: Lead with your elbows, not your wrists. -->
     <string name="ios_catalog_9b5cf19f233bbf6d" formatted="false">Guida il movimento con i gomiti, non con i polsi.</string>
     <!-- iOS key: Lean back slightly, keeping your back straight and core engaged. -->
@@ -3181,8 +3283,12 @@
     <string name="ios_catalog_38557594d0fce7fe" formatted="false">Gambe</string>
     <!-- iOS key: Less -->
     <string name="ios_catalog_ae5239ec63f28cd4" formatted="false">Meno</string>
+    <!-- iOS key: Let the elbows travel back only slightly; do not turn the movement into a pullover. -->
+    <string name="ios_catalog_00fe7ade18ad30a9" formatted="false">Lascia che i gomiti arretrino solo leggermente; non trasformare il movimento in un pullover.</string>
     <!-- iOS key: Let us know about any movement limits or areas to be careful with. -->
     <string name="ios_catalog_3f5ae9179ffc2259" formatted="false">Faccelo sapere se hai limitazioni nei movimenti o zone di cui bisogna fare attenzione.</string>
+    <!-- iOS key: Let your arms hang straight toward the floor while holding dumbbells with palms facing forward. -->
+    <string name="ios_catalog_7b81c767669e23ef" formatted="false">Lascia che le braccia pendano dritte verso il pavimento mentre impugni i manubri con i palmi rivolti in avanti.</string>
     <!-- iOS key: Let your watch count your reps automatically while you focus on the movement. -->
     <string name="ios_catalog_ecddda7b058fe648" formatted="false">Lascia che il tuo orologio conti automaticamente le ripetizioni mentre ti concentri sul movimento.</string>
     <!-- iOS key: Let\'s get moving! -->
@@ -3215,6 +3321,10 @@
     <string name="ios_catalog_10cc928db9e9fa53" formatted="false">Sdraiati a pancia in giù sulla macchina per leg curl con le gambe completamente distese.</string>
     <!-- iOS key: Lie flat on a bench holding a dumbbell in each hand at chest level. -->
     <string name="ios_catalog_b6643cbec43ecc5d" formatted="false">Sdraiati su una panca tenendo un manubrio in ogni mano all\'altezza del petto.</string>
+    <!-- iOS key: Lie flat on a bench holding an EZ bar above your chest with a narrow overhand grip. -->
+    <string name="ios_catalog_a68412a31a66c516" formatted="false">Sdraiati su una panca e tieni un bilanciere EZ sopra il petto con una presa prona e stretta.</string>
+    <!-- iOS key: Lie flat on a bench with a dumbbell in each hand held above the center of your chest. -->
+    <string name="ios_catalog_a90bc33919e9c7dd" formatted="false">Sdraiati su una panca con un manubrio in ogni mano, sopra il centro del petto.</string>
     <!-- iOS key: Lie flat on a bench with dumbbells held over your chest, palms facing each other. -->
     <string name="ios_catalog_8132a93b517fe61e" formatted="false">Sdraiati su una panca con i manubri tenuti sopra il petto, i palmi rivolti l\'uno verso l\'altro.</string>
     <!-- iOS key: Lie flat on the bench with your feet firmly planted on the floor. -->
@@ -3383,6 +3493,10 @@
     <string name="ios_catalog_41771e7a7fc074d0" formatted="false">Riporta la barra alle spalle con controllo.</string>
     <!-- iOS key: Lower the bar by hinging at the hips first, then bending your knees once the bar clears them. -->
     <string name="ios_catalog_11568682beec8e70" formatted="false">Abbassa il bilanciere piegando prima le anche e poi le ginocchia una volta che il bilanciere le supera.</string>
+    <!-- iOS key: Lower the bar slowly until you feel a stretch in your biceps without forcing your elbows straight. -->
+    <string name="ios_catalog_1dfd255456ae8eff" formatted="false">Abbassa lentamente il bilanciere finché senti allungare i bicipiti, senza forzare l\'estensione dei gomiti.</string>
+    <!-- iOS key: Lower the bar slowly until your elbows are extended again while keeping tension on the cable. -->
+    <string name="ios_catalog_6011ac8e063d9a98" formatted="false">Abbassa lentamente la barra finché i gomiti non sono di nuovo estesi, mantenendo il cavo in tensione.</string>
     <!-- iOS key: Lower the bar to your lower chest/upper abs area. -->
     <string name="ios_catalog_5af56471d80b3deb" formatted="false">Abbassa il bilanciere verso la parte inferiore del petto/parte superiore degli addominali.</string>
     <!-- iOS key: Lower the bar to your mid-chest in a controlled manner. -->
@@ -3393,6 +3507,8 @@
     <string name="ios_catalog_47c4568afd8b0338" formatted="false">Abbassa il bilanciere fino a sentire un allungamento nei femorali, mantenendo la schiena piatta.</string>
     <!-- iOS key: Lower the dumbbells back to shoulder height with control. -->
     <string name="ios_catalog_55a079ae1a8c1e0b" formatted="false">Abbassa i manubri in modo controllato fino all\'altezza delle spalle.</string>
+    <!-- iOS key: Lower the dumbbells slowly until your arms are fully extended again. -->
+    <string name="ios_catalog_26b2af44eef43de2" formatted="false">Abbassa lentamente i manubri finché le braccia non sono di nuovo completamente distese.</string>
     <!-- iOS key: Lower the dumbbells with control until they are level with your chest. -->
     <string name="ios_catalog_575b16dd41e70034" formatted="false">Abbassa i manubri in modo controllato fino a portarli all\'altezza del petto.</string>
     <!-- iOS key: Lower the top of your head toward the floor by bending your elbows. -->
@@ -3415,6 +3531,8 @@
     <string name="ios_catalog_6ffd486dffea4414" formatted="false">Riporta i pesi alla posizione di partenza con controllo.</string>
     <!-- iOS key: Lower the weights out to the sides in a wide arc, keeping a slight bend in your elbows. -->
     <string name="ios_catalog_9c32e482e74487c3" formatted="false">Abbassa i pesi verso i lati con un ampio arco, mantenendo una leggera flessione dei gomiti.</string>
+    <!-- iOS key: Lower the weights with your elbows tracking close to your torso. -->
+    <string name="ios_catalog_090828f41226e816" formatted="false">Abbassa i pesi mantenendo i gomiti vicini al busto.</string>
     <!-- iOS key: Lower them back down with control. -->
     <string name="ios_catalog_589f8a541e9d3844" formatted="false">Abbassali di nuovo con controllo.</string>
     <!-- iOS key: Lower until you feel a good stretch in your hamstrings. -->
@@ -3457,6 +3575,8 @@
     <string name="ios_catalog_74b7de10d8791d7b" formatted="false">Pranzo</string>
     <!-- iOS key: Lunge -->
     <string name="ios_catalog_12dbd5aa23e8edaa" formatted="false">Affondo</string>
+    <!-- iOS key: Lying Cable Curl -->
+    <string name="ios_catalog_c3080eb1afc50d31" formatted="false">Curl ai cavi da sdraiato</string>
     <!-- iOS key: Lying Leg Raise -->
     <string name="ios_catalog_88ee99cff56f5a3c" formatted="false">Sollevamento gambe da sdraiato</string>
     <!-- iOS key: Machine Glute Kickback -->
@@ -3465,6 +3585,8 @@
     <string name="ios_catalog_f66b618ae497cd0a" formatted="false">Abduzione dell\'anca (macchina)</string>
     <!-- iOS key: Machine Hip Adduction -->
     <string name="ios_catalog_c44b41aaa0622dad" formatted="false">Adduzione dell\'anca (macchina)</string>
+    <!-- iOS key: Machine Hip Thrust -->
+    <string name="ios_catalog_e94f2758a9aa986c" formatted="false">Hip thrust alla macchina</string>
     <!-- iOS key: Machine Rear Delt Fly -->
     <string name="ios_catalog_23fc157d88366ddc" formatted="false">Apertura deltoide posteriore (macchina)</string>
     <!-- iOS key: Macro fields are per 100 g. Saved totals are calculated for %@ g consumed. -->
@@ -3593,6 +3715,8 @@
     <string name="ios_catalog_03f8c1273e3da99b" formatted="false">Male</string>
     <!-- iOS key: Manage fatigue -->
     <string name="ios_catalog_fb1ddf89e189ce51" formatted="false">Gestire l\'affaticamento</string>
+    <!-- iOS key: Managed by your gym -->
+    <string name="ios_catalog_c6414b199b116853" formatted="false">Gestito dalla tua palestra</string>
     <!-- iOS key: Manual -->
     <string name="ios_catalog_b0b9fe24ffa96291" formatted="false">Manuale</string>
     <!-- iOS key: Manual fallback -->
@@ -3645,6 +3769,8 @@
     <string name="ios_catalog_6b2598d91a124e3f" formatted="false">Pasti</string>
     <!-- iOS key: Meals per day -->
     <string name="ios_catalog_daa3eadd18c18e8e" formatted="false">Pasti al giorno</string>
+    <!-- iOS key: Mechanic -->
+    <string name="ios_catalog_57d04c6969ddd750" formatted="false">Meccanica</string>
     <!-- iOS key: Medicine Ball -->
     <string name="ios_catalog_e864f18b939a4743" formatted="false">Palla medica</string>
     <!-- iOS key: Medium -->
@@ -3997,6 +4123,8 @@
     <string name="ios_catalog_f8b383fa873c9668" formatted="false">È disponibile solo la foto di profilo, quindi la stima si baserà su quest’unica angolazione.</string>
     <!-- iOS key: Open Settings -->
     <string name="ios_catalog_3f940108cb1ecd9c" formatted="false">Apri impostazioni</string>
+    <!-- iOS key: Open your arms in a wide arc until they are in line with your torso. -->
+    <string name="ios_catalog_1d4dc69a02607242" formatted="false">Apri le braccia formando un ampio arco finché non sono allineate con il busto.</string>
     <!-- iOS key: Opens menu with feedback and help options -->
     <string name="ios_catalog_452e9b5c6d088381" formatted="false">Apre un menu con opzioni di feedback e aiuto</string>
     <!-- iOS key: Opens the mesocycle timeline and history -->
@@ -4051,6 +4179,10 @@
     <string name="ios_catalog_e7cf3ef4f17c3999" formatted="false">Password</string>
     <!-- iOS key: Pause -->
     <string name="ios_catalog_858e4ba7a29fd38b" formatted="false">Pausa</string>
+    <!-- iOS key: Pause briefly at the top without lifting your chest from the bench. -->
+    <string name="ios_catalog_5a4b0d1f0b086fea" formatted="false">Fai una breve pausa nella posizione alta senza sollevare il petto dalla panca.</string>
+    <!-- iOS key: Pause briefly at the top, then lower slowly without bouncing. -->
+    <string name="ios_catalog_4b0be405f8b30717" formatted="false">Fai una breve pausa in alto, poi abbassa lentamente senza rimbalzare.</string>
     <!-- iOS key: Pause briefly near the top to maximize the biceps contraction. -->
     <string name="ios_catalog_ed0642cade902a16" formatted="false">Fai una breve pausa vicino al punto più alto per massimizzare la contrazione del bicipite.</string>
     <!-- iOS key: Pause briefly, then return to the starting position with control without letting your shoulders shrug. -->
@@ -4141,6 +4273,8 @@
     <string name="ios_catalog_576ee8b2d01d8e09" formatted="false">Flessione in pike</string>
     <!-- iOS key: Pivot your back foot as you rotate to protect your knees. -->
     <string name="ios_catalog_6840b143cc33c1f3" formatted="false">Ruota il piede posteriore mentre ruoti per proteggere le ginocchia.</string>
+    <!-- iOS key: Place a flat bench in front of a low cable pulley and lie on your back with your feet toward the machine. -->
+    <string name="ios_catalog_afeebeb9059ddc22" formatted="false">Posiziona una panca piana davanti a una carrucola bassa e sdraiati sulla schiena con i piedi rivolti verso la macchina.</string>
     <!-- iOS key: Place a towel between your elbow and your side to ensure your arm stays tucked. -->
     <string name="ios_catalog_28a39f55e4f0e433" formatted="false">Posiziona un asciugamano tra il gomito e il fianco per assicurarti che il braccio rimanga aderente.</string>
     <!-- iOS key: Place one foot on a sturdy bench or box. -->
@@ -4153,6 +4287,8 @@
     <string name="ios_catalog_bf814fa53bac0319" formatted="false">Posiziona i piedi su una panca piana e le mani a terra, leggermente più larghe della larghezza delle spalle.</string>
     <!-- iOS key: Place your feet on the platform about shoulder-width apart. -->
     <string name="ios_catalog_db3f3fcc3b729896" formatted="false">Posiziona i piedi sulla piattaforma a circa la larghezza delle spalle.</string>
+    <!-- iOS key: Place your feet shoulder-width apart on the platform, slightly forward of your hips. -->
+    <string name="ios_catalog_40e865ab369f941e" formatted="false">Posiziona i piedi sulla pedana alla larghezza delle spalle, leggermente più avanti rispetto ai fianchi.</string>
     <!-- iOS key: Place your forearm(s) against the doorframe with the elbow at shoulder height. -->
     <string name="ios_catalog_1882d86ca12ebbed" formatted="false">Appoggia il/i avambraccio(i) contro il telaio della porta, con il gomito all\'altezza della spalla.</string>
     <!-- iOS key: Place your forearms on the floor, elbows aligned under your shoulders. -->
@@ -4197,6 +4333,8 @@
     <string name="ios_catalog_dfe8b2f0de26bb87" formatted="false">Piani</string>
     <!-- iOS key: Plans that adapt to your goals and progress. -->
     <string name="ios_catalog_0af43ff586a88a46" formatted="false">Piani Che Si Adattano Ai Tuoi Obiettivi E Ai Tuoi Progressi.</string>
+    <!-- iOS key: Plant your feet about shoulder-width apart with your knees bent at roughly 90 degrees at the top. -->
+    <string name="ios_catalog_f3afbbe20c055668" formatted="false">Posiziona i piedi a circa la larghezza delle spalle. In alto, le ginocchia dovrebbero essere piegate a circa 90 gradi.</string>
     <!-- iOS key: Plant your feet firmly on the ground, about shoulder-width apart. -->
     <string name="ios_catalog_241bc1a4b6a051b7" formatted="false">Posiziona i piedi saldamente a terra, a circa larghezza delle spalle.</string>
     <!-- iOS key: plate -->
@@ -4225,6 +4363,8 @@
     <string name="ios_catalog_a0e2b4d56d37ceba" formatted="false">Posiziona il bilanciere sulla parte superiore della schiena, appoggiato sui trapezi.</string>
     <!-- iOS key: Position the padded lever just above your heels. -->
     <string name="ios_catalog_8b70ce4b0aa36cbd" formatted="false">Posiziona la leva imbottita appena sopra i talloni.</string>
+    <!-- iOS key: Position your feet so you feel the movement primarily in your glutes rather than your hamstrings. -->
+    <string name="ios_catalog_096e5267a9c58919" formatted="false">Posiziona i piedi in modo da sentire il movimento soprattutto nei glutei e non nei muscoli posteriori della coscia.</string>
     <!-- iOS key: Position yourself in a bent-over stance over the Smith machine bar. -->
     <string name="ios_catalog_7cf427d138995e42" formatted="false">Posizionati con il busto piegato sopra la barra della macchina Smith.</string>
     <!-- iOS key: Position yourself in the machine and place one foot on the platform. -->
@@ -4239,6 +4379,8 @@
     <string name="ios_catalog_591ece70ba2b7aae" formatted="false">Allenare la tecnica</string>
     <!-- iOS key: Pre-workout -->
     <string name="ios_catalog_7631d19b828a0852" formatted="false">Pre-allenamento</string>
+    <!-- iOS key: Preacher Curl -->
+    <string name="ios_catalog_94eef836e81dcb9f" formatted="false">Curl alla panca Scott</string>
     <!-- iOS key: Prefer a body-part split for advanced hypertrophy-focused structure when the user\'s frequency and recovery capacity support it. Avoid using it if the schedule is too limited. -->
     <string name="ios_catalog_7a91aa26aabcd576" formatted="false">Prefer a body-part split for advanced hypertrophy-focused structure when the user\'s frequency and recovery capacity support it. Avoid using it if the schedule is too limited.</string>
     <!-- iOS key: Prefer a push/pull/legs split when the weekly schedule supports it. If the user has fewer than 3 weekly sessions, fall back to the closest practical structure. -->
@@ -4267,6 +4409,8 @@
     <string name="ios_catalog_5d1fa38bcf0d88ca" formatted="false">Preparing…</string>
     <!-- iOS key: Prescription -->
     <string name="ios_catalog_9bc867e65b8fa05c" formatted="false">Prescrizione</string>
+    <!-- iOS key: Press back up while keeping the dumbbells close and your shoulders stable against the bench. -->
+    <string name="ios_catalog_7d4e4b007277aa78" formatted="false">Spingi di nuovo i pesi verso l\'alto, tenendo i manubri vicini e le spalle stabili contro la panca.</string>
     <!-- iOS key: Press the bar back to the starting position. -->
     <string name="ios_catalog_dcbe88f3ab8eab0a" formatted="false">Riporta la barra nella posizione iniziale.</string>
     <!-- iOS key: Press the bar back up to the starting position. -->
@@ -4279,12 +4423,16 @@
     <string name="ios_catalog_99d32ff209f0880f" formatted="false">Spingi i manubri verso l\'alto partendo dalla parte superiore del petto fino a quando le braccia sono completamente estese.</string>
     <!-- iOS key: Press the dumbbells upward until arms are extended. -->
     <string name="ios_catalog_4d841945212eceb9" formatted="false">Spingi i manubri verso l\'alto fino a quando le braccia non sono estese.</string>
+    <!-- iOS key: Press the rope down until your elbows are fully extended, separating the rope ends slightly at the bottom. -->
+    <string name="ios_catalog_8057d119757b0d8e" formatted="false">Spingi la corda verso il basso fino a distendere completamente i gomiti e divarica leggermente le estremità nella parte finale del movimento.</string>
     <!-- iOS key: Press the weights overhead while rotating your palms forward. -->
     <string name="ios_catalog_2d6c2b4345d13eb8" formatted="false">Spingi i pesi sopra la testa ruotando i palmi in avanti.</string>
     <!-- iOS key: Press the weights upward until your arms are fully extended over your chest. -->
     <string name="ios_catalog_f1dc4ed8a1c8b55b" formatted="false">Solleva i pesi verso l\'alto fino a che le braccia siano completamente estese sopra il petto.</string>
     <!-- iOS key: Press the weights upward until your arms are fully extended. -->
     <string name="ios_catalog_93e7354e37f14329" formatted="false">Solleva i pesi verso l\'alto fino a che le braccia sono completamente estese.</string>
+    <!-- iOS key: Press through the balls of your feet to raise your heels as high as possible. -->
+    <string name="ios_catalog_4a6c41afff246f2c" formatted="false">Spingi sugli avampiedi per sollevare i talloni il più possibile.</string>
     <!-- iOS key: Pressing a barbell on an incline bench targets the upper chest and shoulders while allowing for heavier loads. -->
     <string name="ios_catalog_2801707f7768fed8" formatted="false">Spingere un bilanciere su una panca inclinata coinvolge la parte superiore del petto e le spalle, permettendo carichi più elevati.</string>
     <!-- iOS key: Pressing dumbbells on an incline bench emphasizes the upper chest while allowing each arm to move independently. -->
@@ -4311,6 +4459,8 @@
     <string name="ios_catalog_efe10c80ec8a9f38" formatted="false">Principale</string>
     <!-- iOS key: Primary muscles: %@ -->
     <string name="ios_catalog_9f7e6dadba4d354b" formatted="false">Muscoli principali: %@</string>
+    <!-- iOS key: Prioritize full range of motion over adding load. -->
+    <string name="ios_catalog_664548c1c72cb9fa" formatted="false">Dai la priorità all\'intero arco di movimento piuttosto che ad aggiungere carico.</string>
     <!-- iOS key: Privacy -->
     <string name="ios_catalog_54a57c3147c49f33" formatted="false">Privacy</string>
     <!-- iOS key: Product details -->
@@ -4653,6 +4803,8 @@
     <string name="ios_catalog_657d13eb83b33181" formatted="false">Scatta di nuovo la foto</string>
     <!-- iOS key: Retry -->
     <string name="ios_catalog_942087cc2d41e013" formatted="false">Riprova</string>
+    <!-- iOS key: Return the rope under control until your forearms are just above parallel to the floor. -->
+    <string name="ios_catalog_152a1d6d416ab938" formatted="false">Riporta la corda in modo controllato finché gli avambracci non sono appena sopra la posizione orizzontale.</string>
     <!-- iOS key: Return to a standing position and repeat. -->
     <string name="ios_catalog_363c1cdc61a5d9fe" formatted="false">Torna in posizione eretta e ripeti.</string>
     <!-- iOS key: Return to a standing position as quickly as possible. -->
@@ -4667,6 +4819,8 @@
     <string name="ios_catalog_aac0edbe06c62a98" formatted="false">Inverti la direzione dopo la durata desiderata.</string>
     <!-- iOS key: Reverse Lunge -->
     <string name="ios_catalog_9a9b95321e6fcf8b" formatted="false">Affondo inverso</string>
+    <!-- iOS key: Reverse Pec Deck -->
+    <string name="ios_catalog_f77587cd28e9b50d" formatted="false">Aperture inverse alla pec deck</string>
     <!-- iOS key: Review -->
     <string name="ios_catalog_aff0766a5290e117" formatted="false">Review</string>
     <!-- iOS key: Review %d meals -->
@@ -4699,10 +4853,10 @@
     <string name="ios_catalog_2e33d39c6d1e08f6" formatted="false">ROM</string>
     <!-- iOS key: ROM drop -->
     <string name="ios_catalog_7e7738f6b6c46bc5" formatted="false">Riduzione del ROM</string>
-    <!-- iOS key: Romanian Deadlift -->
-    <string name="ios_catalog_2bb05dd30ce45cf9" formatted="false">Stacco rumeno</string>
     <!-- iOS key: Room -->
     <string name="ios_catalog_911ea89c43d9dbb8" formatted="false">Sala</string>
+    <!-- iOS key: Rope Triceps Pushdown -->
+    <string name="ios_catalog_e6996e5b489f9dc5" formatted="false">Push-down per tricipiti ai cavi con corda</string>
     <!-- iOS key: Rotate your ankle in a circular motion, drawing the largest circle possible with your toes. -->
     <string name="ios_catalog_97b4d15a8a1ee22b" formatted="false">Ruota la caviglia in un movimento circolare, disegnando il cerchio più grande possibile con le dita dei piedi.</string>
     <!-- iOS key: Rotate your elbow and torso toward the ceiling, following with your eyes. -->
@@ -4879,6 +5033,8 @@
     <string name="ios_catalog_80177b22fa2042b5" formatted="false">Serie 1: %@</string>
     <!-- iOS key: Set an adjustable bench to a 30-45 degree incline. -->
     <string name="ios_catalog_2c66a1b32baedf1c" formatted="false">Regola una panca regolabile su un\'inclinazione di 30–45 gradi.</string>
+    <!-- iOS key: Set an adjustable bench to a steep incline and lie face down with your chest against the pad. -->
+    <string name="ios_catalog_2a1afc5e3249481d" formatted="false">Imposta una panca regolabile con un\'inclinazione ripida e sdraiati a pancia in giù con il petto appoggiato al supporto.</string>
     <!-- iOS key: Set Analysis -->
     <string name="ios_catalog_7d2551b06b6b8650" formatted="false">Analisi della serie</string>
     <!-- iOS key: Set as default -->
@@ -4891,16 +5047,24 @@
     <string name="ios_catalog_92804afed402509e" formatted="false">Tipo di serie</string>
     <!-- iOS key: Set the adjustable bench to an incline and center it under the Smith machine bar. -->
     <string name="ios_catalog_32211102e93306b4" formatted="false">Regola la panca inclinabile e posizionala centrata sotto la barra della Smith.</string>
+    <!-- iOS key: Set the bench far enough from the pulley that the cable stays taut at the bottom. -->
+    <string name="ios_catalog_1da96c130f02395a" formatted="false">Posiziona la panca abbastanza lontano dalla carrucola affinché il cavo resti teso nella posizione più bassa.</string>
     <!-- iOS key: Set the bench to a 30-45 degree incline and position yourself under the bar. -->
     <string name="ios_catalog_016cf1dafec466d8" formatted="false">Regola la panca su un\'inclinazione di 30–45 gradi e posizionati sotto la barra.</string>
     <!-- iOS key: Set the cable pulleys to the highest position. -->
     <string name="ios_catalog_1c1df3449388df32" formatted="false">Posiziona le carrucole del cavo nella posizione più alta.</string>
     <!-- iOS key: Set the cable pulleys to the lowest position. -->
     <string name="ios_catalog_2625ae5c274ba395" formatted="false">Posiziona le carrucole del cavo nella posizione più bassa.</string>
+    <!-- iOS key: Set the pec deck arms behind you and sit facing the pad with your chest supported. -->
+    <string name="ios_catalog_9313b623a29dc8eb" formatted="false">Posiziona i bracci della pec deck dietro di te e siediti rivolto verso il supporto, con il petto appoggiato al cuscino.</string>
     <!-- iOS key: Set the session length you want us to optimize for. -->
     <string name="ios_catalog_86ceafaebd433e0c" formatted="false">Imposta la durata della sessione per cui vogliamo ottimizzare.</string>
+    <!-- iOS key: Set the shoulder pads so you can stand tall with your back supported against the pad. -->
+    <string name="ios_catalog_2003361622ac9460" formatted="false">Regola i cuscinetti per le spalle in modo da poter stare in posizione eretta con la schiena appoggiata allo schienale.</string>
     <!-- iOS key: Set up a consistent check-in -->
     <string name="ios_catalog_399f59efecca600c" formatted="false">Imposta un check-in coerente</string>
+    <!-- iOS key: Set up an angled preacher support or an adjustable bench so your upper arms rest securely on the pad. -->
+    <string name="ios_catalog_611c38152fde5c7a" formatted="false">Posiziona una panca Scott o una panca regolabile in modo che le braccia siano ben appoggiate sul supporto.</string>
     <!-- iOS key: Set up category blocking before your next workout starts. -->
     <string name="ios_catalog_74c6e5d76134d9ac" formatted="false">Imposta il blocco delle categorie prima che inizi il tuo prossimo allenamento.</string>
     <!-- iOS key: Set up device authentication in Settings to protect your progress photos. -->
@@ -5121,6 +5285,8 @@
     <string name="ios_catalog_54af1ecf70a211f6" formatted="false">Panca piana con Smith</string>
     <!-- iOS key: Smith Machine Bent-Over Row -->
     <string name="ios_catalog_b56e71cce45dab82" formatted="false">Rematore inclinato con Smith</string>
+    <!-- iOS key: Smith Machine Calf Raise -->
+    <string name="ios_catalog_fdd61578b96f0890" formatted="false">Calf raise alla macchina Smith</string>
     <!-- iOS key: Smith Machine Decline Bench Press -->
     <string name="ios_catalog_010a955c6490a13d" formatted="false">Panca declinata con Smith</string>
     <!-- iOS key: Smith Machine Incline Bench Press -->
@@ -5159,6 +5325,8 @@
     <string name="ios_catalog_7e0d84cd6bcaae37" formatted="false">Trascorri la maggior parte della giornata svolgendo lavoro fisico (es. edilizia, atleta).</string>
     <!-- iOS key: Spend most of the day sitting (e.g., office job, desk work). -->
     <string name="ios_catalog_5e2b74030767b55b" formatted="false">Trascorri la maggior parte della giornata seduto (es. lavoro d\'ufficio, lavoro alla scrivania).</string>
+    <!-- iOS key: Spider Curl -->
+    <string name="ios_catalog_130777d22cb1f0b4" formatted="false">Spider curl</string>
     <!-- iOS key: Sprawl -->
     <string name="ios_catalog_6190fdae93a2fea9" formatted="false">Sprawl</string>
     <!-- iOS key: Spread your fingers wide for better support. -->
@@ -5187,6 +5355,8 @@
     <string name="ios_catalog_3329e92254f5ad82" formatted="false">Contrai i glutei nella parte alta del movimento, poi torna lentamente alla posizione di partenza.</string>
     <!-- iOS key: Squeeze your glutes at the top of the movement. -->
     <string name="ios_catalog_02f7f0a3a9a99497" formatted="false">Contrae i glutei nella parte alta del movimento.</string>
+    <!-- iOS key: Squeeze your glutes at the top, then lower the load under control. -->
+    <string name="ios_catalog_df5d1f9bf086b970" formatted="false">Contrai i glutei in alto, poi abbassa il carico in modo controllato.</string>
     <!-- iOS key: Squeeze your glutes at the top, then lower your hips back toward the floor. -->
     <string name="ios_catalog_8ea72526f0d7604c" formatted="false">Contrai i glutei nella parte alta, poi abbassa i fianchi verso il pavimento con controllo.</string>
     <!-- iOS key: Squeeze your glutes of the stretching leg to deepen the stretch in the hip flexor. -->
@@ -5197,6 +5367,8 @@
     <string name="ios_catalog_dc24051159e2d2c3" formatted="false">Stringi le gambe insieme contro la resistenza.</string>
     <!-- iOS key: Squeeze your lower chest at the bottom of the movement. -->
     <string name="ios_catalog_17b1667402c1561e" formatted="false">Contrai la parte inferiore del petto nella fase bassa del movimento.</string>
+    <!-- iOS key: Squeeze your rear delts, then return slowly to the starting position. -->
+    <string name="ios_catalog_295cb0d6ce80bd4f" formatted="false">Contrai i deltoidi posteriori, poi torna lentamente alla posizione iniziale.</string>
     <!-- iOS key: Squeeze your rear delts, then slowly return to the starting position. -->
     <string name="ios_catalog_8057d4716a4ab3ec" formatted="false">Contrai i deltoidi posteriori, poi torna lentamente alla posizione di partenza.</string>
     <!-- iOS key: Stacked bars show standard calories on the bottom and active calories on top. The line shows eaten calories. -->
@@ -5251,6 +5423,8 @@
     <string name="ios_catalog_8c1b194c6f53d8c6" formatted="false">Mettiti di lato, mantieni tutto il corpo inquadrato e allinea la testa con la guida.</string>
     <!-- iOS key: Stand tall and keep your core tight. -->
     <string name="ios_catalog_65d993dc745a9699" formatted="false">Stai dritto e mantieni il core contratto.</string>
+    <!-- iOS key: Stand under the Smith bar with it resting across your upper back and the balls of your feet on a stable raised surface if available. -->
+    <string name="ios_catalog_0a2f68d8d7d643f2" formatted="false">Posizionati sotto il bilanciere della macchina Smith, appoggiato sulla parte alta della schiena, e metti gli avampiedi su una superficie rialzata e stabile, se disponibile.</string>
     <!-- iOS key: Stand up fully, then step back down one foot at a time. -->
     <string name="ios_catalog_c0aab60dda4492fb" formatted="false">Alzati completamente, poi scendi indietro un piede alla volta.</string>
     <!-- iOS key: Stand with dumbbells at your sides, palms facing your torso (neutral grip). -->
@@ -5515,6 +5689,8 @@
     <string name="ios_catalog_c85e2a036bb62829" formatted="false">Scatta le tue prime foto dei progressi</string>
     <!-- iOS key: Tap to reveal -->
     <string name="ios_catalog_4efdce880cdc224e" formatted="false">Tocca per rivelare</string>
+    <!-- iOS key: Tap value to edit it -->
+    <string name="ios_catalog_7ca905bd8badf9b1" formatted="false">Tocca il valore per modificarlo</string>
     <!-- iOS key: Target -->
     <string name="ios_catalog_978354db0c00fc78" formatted="false">Obiettivo</string>
     <!-- iOS key: Target %@ reps -->
@@ -5947,6 +6123,10 @@
     <string name="ios_catalog_1548d40606f16912" formatted="false">Sblocca approfondimenti avanzati e il tracciamento automatico con il tuo Apple Watch.</string>
     <!-- iOS key: Unlock progress photos -->
     <string name="ios_catalog_e70d5d3b5c0725e3" formatted="false">Sbloccare le foto dei progressi</string>
+    <!-- iOS key: Unlock the bar and lower your heels under control to stretch your calves. -->
+    <string name="ios_catalog_543e909d477e9048" formatted="false">Sblocca il bilanciere e abbassa i talloni in modo controllato per allungare i polpacci.</string>
+    <!-- iOS key: Unlock the safety handles and lower under control by bending your knees and hips. -->
+    <string name="ios_catalog_b1f8b884a71c6556" formatted="false">Sblocca le leve di sicurezza e scendi in modo controllato piegando le ginocchia e le anche.</string>
     <!-- iOS key: Unlock with Face ID -->
     <string name="ios_catalog_3957d339a6308816" formatted="false">Sblocca con Face ID</string>
     <!-- iOS key: Unlock with Optic ID -->
@@ -5985,14 +6165,24 @@
     <string name="ios_catalog_d7eb02c2c0fb6903" formatted="false">Upper/Lower</string>
     <!-- iOS key: Use a block or cushion under your hip for support if needed. -->
     <string name="ios_catalog_338408991162ecc5" formatted="false">Usa un blocco o un cuscino sotto il fianco come supporto se necessario.</string>
+    <!-- iOS key: Use a controlled descent and avoid bouncing the dumbbells at the bottom. -->
+    <string name="ios_catalog_0004983970e628f3" formatted="false">Controlla la discesa ed evita di far rimbalzare i manubri nella posizione più bassa.</string>
     <!-- iOS key: Use a controlled load that lets you fully shorten the abs on every rep. -->
     <string name="ios_catalog_39c9820251460400" formatted="false">Usa un carico controllato che ti permetta di contrarre completamente gli addominali a ogni ripetizione.</string>
+    <!-- iOS key: Use a controlled range and stop short of painful elbow extension. -->
+    <string name="ios_catalog_bfee8ad20a5c1acf" formatted="false">Controlla l\'arco di movimento e fermati prima di estendere i gomiti fino a provare dolore.</string>
     <!-- iOS key: Use a controlled range that lets you feel your lats stretch at the top and contract near your thighs. -->
     <string name="ios_catalog_a8b1742cbdc89908" formatted="false">Usa un range controllato che ti permetta di sentire i dorsali allungarsi in alto e contrarsi vicino alle cosce.</string>
+    <!-- iOS key: Use a controlled tempo and avoid letting the weight stack touch between reps. -->
+    <string name="ios_catalog_1b2fe4f809bb341f" formatted="false">Mantieni un ritmo controllato ed evita che i pacchi pesi si tocchino tra una ripetizione e l’altra.</string>
     <!-- iOS key: Use a controlled tempo for both the opening and closing phases. -->
     <string name="ios_catalog_fb4273602eee0982" formatted="false">Usa un tempo controllato sia nella fase di apertura che in quella di chiusura.</string>
     <!-- iOS key: Use a controlled tempo to avoid hitting your head or neck. -->
     <string name="ios_catalog_78f995817dd3ec85" formatted="false">Usa un tempo controllato per evitare di colpire la testa o il collo.</string>
+    <!-- iOS key: Use a foot position that lets your knees track comfortably in line with your toes. -->
+    <string name="ios_catalog_502f9962c2cd67b4" formatted="false">Posiziona i piedi in modo che le ginocchia seguano comodamente la direzione delle dita.</string>
+    <!-- iOS key: Use a full but controlled range of motion without locking the elbows aggressively. -->
+    <string name="ios_catalog_29f42d59ab5a51f7" formatted="false">Esegui il movimento con un’ampiezza completa ma controllata, senza bloccare bruscamente i gomiti.</string>
     <!-- iOS key: Use a light to moderate load and focus on the squeeze at the end range. -->
     <string name="ios_catalog_f6909e34f951c138" formatted="false">Usa un carico da leggero a moderato e concentrati sulla contrazione al termine dell\'escursione.</string>
     <!-- iOS key: Use a moderate incline to keep the emphasis on your upper chest. -->
@@ -6007,10 +6197,14 @@
     <string name="ios_catalog_0044af9dc93e634b" formatted="false">Usa un ritmo fluido e sfrutta l\'allungamento nella parte bassa del movimento.</string>
     <!-- iOS key: Use a spotter for safety. -->
     <string name="ios_catalog_4bc37862fdc79970" formatted="false">Usa uno spotter per sicurezza.</string>
+    <!-- iOS key: Use a spotter or safety setup when loading heavily. -->
+    <string name="ios_catalog_0445982d0957bcff" formatted="false">Usa l\'assistenza di un compagno o un sistema di sicurezza quando sollevi carichi pesanti.</string>
     <!-- iOS key: Use a spotter, especially when lifting heavy weights. -->
     <string name="ios_catalog_d951a4b6b61ac3e4" formatted="false">Allenati con uno spotter, specialmente quando sollevi pesi elevati.</string>
     <!-- iOS key: Use a squat rack and a spotter for safety when lifting heavy. -->
     <string name="ios_catalog_3ae1a577926c887e" formatted="false">Usa un rack per squat e uno spotter per sicurezza quando sollevi carichi pesanti.</string>
+    <!-- iOS key: Use a stable step or platform only if it fits safely inside the Smith machine. -->
+    <string name="ios_catalog_ecfa05e8a656ef25" formatted="false">Usa un gradino o una piattaforma stabile solo se entra in sicurezza nella macchina Smith.</string>
     <!-- iOS key: Use a very light weight; this is about joint health and stability, not maximum load. -->
     <string name="ios_catalog_0b312447f4a3f275" formatted="false">Usa un carico molto leggero; si tratta della salute e della stabilità articolare, non del carico massimo.</string>
     <!-- iOS key: Use commas for foods you would rather keep out of meal guidance. -->
@@ -6027,6 +6221,8 @@
     <string name="ios_catalog_4f9849f4fb530735" formatted="false">Usa Face ID o il tuo codice per visualizzare i tuoi check-in e confronti salvati.</string>
     <!-- iOS key: Use ghost mode -->
     <string name="ios_catalog_f19d177de46f7924" formatted="false">Usare la modalità fantasma</string>
+    <!-- iOS key: Use lighter loads than in standing curls to keep the movement strict. -->
+    <string name="ios_catalog_a92a3dc4328e0f94" formatted="false">Usa un carico più leggero rispetto ai curl in piedi per mantenere un\'esecuzione rigorosa.</string>
     <!-- iOS key: Use lighter weights and focus on the quality of the contraction. -->
     <string name="ios_catalog_c30af167c24f1786" formatted="false">Usa pesi più leggeri e concentrati sulla qualità della contrazione.</string>
     <!-- iOS key: Use moderate loads and full control to get the most from the stretch. -->
@@ -6039,6 +6235,10 @@
     <string name="ios_catalog_b14b77ad8313b67c" formatted="false">Usa un\'illuminazione simile</string>
     <!-- iOS key: Use similar lighting each time -->
     <string name="ios_catalog_71f165a7fc0a1775" formatted="false">Usa un\'illuminazione simile ogni volta</string>
+    <!-- iOS key: Use smooth, controlled repetitions to avoid the cable stack pulling you out of position. -->
+    <string name="ios_catalog_12cefd52fdd192cd" formatted="false">Esegui le ripetizioni con un movimento fluido e controllato per evitare che il pacco pesi ti faccia perdere la posizione.</string>
+    <!-- iOS key: Use the angled grips of the EZ bar to keep your wrists comfortable. -->
+    <string name="ios_catalog_a63eab14ddd8cae3" formatted="false">Usa le impugnature angolate del bilanciere EZ per mantenere i polsi comodi.</string>
     <!-- iOS key: Use the available tools to master these habits. -->
     <string name="ios_catalog_8f743109ef51b716" formatted="false">Usa gli strumenti disponibili per padroneggiare queste abitudini.</string>
     <!-- iOS key: Use the ghost and overlay to match your body. -->
@@ -6047,6 +6247,8 @@
     <string name="ios_catalog_e71ecdfef2ddfa2d" formatted="false">Usa le maniglie per coinvolgere la parte superiore del corpo e aumentare il dispendio calorico totale.</string>
     <!-- iOS key: Use the incline feature to simulate outdoor walking and increase intensity. -->
     <string name="ios_catalog_5f8d31d5120856b8" formatted="false">Usa la funzione inclinazione per simulare la camminata all\'aperto e aumentare l\'intensità.</string>
+    <!-- iOS key: Use the machine\'s safety stops before loading the movement heavily. -->
+    <string name="ios_catalog_555d85ad7bda54be" formatted="false">Usa i fermi di sicurezza della macchina prima di caricare molto peso.</string>
     <!-- iOS key: Use the planned rep speed of %@ for every rep. That tempo tells you how controlled the lowering, pause, and lifting phases should be so the set is driven by movement quality, not just by load. -->
     <string name="ios_catalog_fcbc4613b014818c" formatted="false">Usa la velocità di ripetizione programmata di %@ per ogni ripetizione. Quel tempo ti indica quanto devono essere controllate le fasi di discesa, la pausa e la risalita, in modo che la serie sia guidata dalla qualità del movimento e non solo dal carico.</string>
     <!-- iOS key: Use the same working weight and a similar effort target across your sets. Each set should feel consistent, which makes it easier to track performance and notice when you\'re getting stronger. -->
@@ -6441,6 +6643,8 @@
     <string name="ios_catalog_967cf04e46387416" formatted="false">Your completed main exercises will appear here once you finish a workout.</string>
     <!-- iOS key: Your current place in the active cycle. -->
     <string name="ios_catalog_7464117beeadcca5" formatted="false">La tua posizione attuale nel ciclo attivo.</string>
+    <!-- iOS key: Your default location is your gym, so its staff keep this equipment up to date. -->
+    <string name="ios_catalog_823365d24416d63c" formatted="false">La tua posizione predefinita è la tua palestra, quindi il suo staff mantiene aggiornata questa attrezzatura.</string>
     <!-- iOS key: Your feedback has been sent successfully. We appreciate your input! -->
     <string name="ios_catalog_62670ac87e1232b5" formatted="false">Il tuo feedback è stato inviato con successo. Apprezziamo il tuo contributo!</string>
     <!-- iOS key: Your feedback helps us understand what to improve next. -->

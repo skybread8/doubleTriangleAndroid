@@ -19,7 +19,7 @@ android {
         applicationId = "io.codepassion.wildforce.android"
         minSdk = 28
         targetSdk = 37
-        versionCode = 11
+        versionCode = 15
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -30,6 +30,16 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
     }
     lint {
         // Localization is reconciled in a separate workstream; keep code and

@@ -11,7 +11,7 @@ import androidx.compose.material.Icon
 import io.codepassion.wildforce.android.R
 
 /** Platform-neutral replicas of iOS's fish, leaf, drop and flame SF Symbols. */
-internal enum class NutritionMacroIcon(@DrawableRes val resourceId: Int) {
+internal enum class NutritionMacroIcon(@param:DrawableRes val resourceId: Int) {
     Calories(R.drawable.ic_macro_calories),
     Protein(R.drawable.ic_macro_protein),
     Carbs(R.drawable.ic_macro_carbs),

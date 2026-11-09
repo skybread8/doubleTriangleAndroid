@@ -1888,5 +1888,61 @@
       "Si vous ressentez une douleur aiguë ou des étourdissements, arrêtez immédiatement.",
       "Gardez les épaules basses et détendues tout au long de l'exercice."
     ]
+  },
+  "ezBarSkullCrusher": {
+    "description": "Une extension des triceps allongé avec une barre EZ, qui sollicite les triceps sur une grande amplitude avec une flexion profonde des coudes.",
+    "instructions": [
+      "Allongez-vous sur un banc et tenez une barre EZ au-dessus de la poitrine avec une prise en pronation rapprochée.",
+      "Gardez les bras presque verticaux en pliant les coudes pour abaisser la barre vers le front ou juste derrière.",
+      "Tendez les coudes pour ramener la barre à la position de départ sans trop bouger les épaules.",
+      "Gardez les poignets en position neutre et contrôlez la phase de descente."
+    ],
+    "tips": [
+      "Utilisez les poignées coudées de la barre EZ pour préserver le confort des poignets.",
+      "Laissez les coudes reculer légèrement seulement ; ne transformez pas le mouvement en pull-over.",
+      "Faites-vous assister ou utilisez un dispositif de sécurité si vous soulevez lourd."
+    ]
+  },
+  "closeGripDumbbellBenchPress": {
+    "description": "Une variante du développé couché avec haltères où les poids sont rapprochés pour solliciter davantage les triceps.",
+    "instructions": [
+      "Allongez-vous sur un banc avec un haltère dans chaque main, au-dessus du centre de la poitrine.",
+      "Gardez les haltères rapprochés, paumes face à face ou légèrement tournées vers l'intérieur.",
+      "Abaissez les haltères en gardant les coudes près du torse.",
+      "Repoussez les haltères vers le haut en les gardant rapprochés et en maintenant les épaules stables contre le banc."
+    ],
+    "tips": [
+      "Ne forcez pas le contact entre les haltères si cela irrite vos poignets.",
+      "Gardez les coudes suffisamment près du corps pour sentir les triceps, sans les plaquer douloureusement contre les flancs.",
+      "Contrôlez la descente et évitez de faire rebondir les haltères en bas du mouvement."
+    ]
+  },
+  "lyingCableCurl": {
+    "description": "Un curl des biceps allongé à la poulie, avec une barre droite ou de type EZ, qui sollicite les biceps par la flexion des coudes.",
+    "instructions": [
+      "Place un banc plat devant une poulie basse et allonge-toi sur le dos, les pieds tournés vers la machine.",
+      "Saisis une barre droite ou une barre EZ pour poulie, les paumes vers le haut et les bras tendus vers la poulie.",
+      "Garde le haut des bras presque immobile et fléchis les coudes pour ramener la barre vers ton front ou le haut de ta poitrine.",
+      "Abaisse lentement la barre jusqu'à ce que tes coudes soient de nouveau tendus, tout en maintenant le câble sous tension."
+    ],
+    "tips": [
+      "Place le banc suffisamment loin de la poulie pour que le câble reste tendu en position basse.",
+      "Garde les coudes stables au lieu de les ramener vers tes côtes.",
+      "Effectue des répétitions fluides et contrôlées pour éviter que la poulie ne te déstabilise."
+    ]
+  },
+  "smithMachineCalfRaise": {
+    "description": "Un exercice de mollets debout sous la barre guidée d'une machine Smith, pour un entraînement stable avec une charge progressivement croissante.",
+    "instructions": [
+      "Place-toi sous la barre de la machine Smith, posée sur le haut de ton dos, et pose l'avant de tes pieds sur une surface surélevée et stable, si tu en as une.",
+      "Déverrouille la barre et abaisse les talons de manière contrôlée pour étirer tes mollets.",
+      "Pousse sur l'avant de tes pieds pour lever les talons aussi haut que possible.",
+      "Marque une courte pause en haut, puis redescends lentement sans rebondir."
+    ],
+    "tips": [
+      "Garde les genoux légèrement fléchis et le buste droit.",
+      "Utilise une marche ou une plateforme stable uniquement si elle tient en toute sécurité dans la machine Smith.",
+      "Privilégie une amplitude de mouvement complète plutôt que d'ajouter de la charge."
+    ]
   }
 }

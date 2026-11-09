@@ -9,6 +9,7 @@ import org.json.JSONObject
 /** Text and exercise names exported from the shared iOS string catalog. */
 @Composable
 internal fun tutorialText(key: String): String {
+    sharedTutorialTextResources[key]?.let { return androidx.compose.ui.res.stringResource(it) }
     val catalog = tutorialCatalog()
     val value = catalog.optJSONObject("texts")?.optString(key)?.takeIf { it.isNotBlank() } ?: key
     // Xcode uses positional object placeholders (e.g. %1$@), while the
@@ -38,6 +39,9 @@ internal fun tutorialMuscleName(muscle: MuscleVisual): String = tutorialText(whe
 
 @Composable
 internal fun tutorialEquipmentName(label: String): String = tutorialText(when (label) {
+    "Banco plano" -> "Flat Bench"
+    "Barra EZ" -> "EZ Bar"
+    "Máquina Smith" -> "Smith Machine"
     "Banco ajustable" -> "Adjustable Bench"
     "Mancuernas" -> "Dumbbells"
     "Máquina de poleas" -> "Cable Machine"

@@ -1888,5 +1888,61 @@
       "Si sientes algún dolor agudo o mareo, detente inmediatamente.",
       "Mantén los hombros bajos y relajados durante todo el ejercicio."
     ]
+  },
+  "ezBarSkullCrusher": {
+    "description": "Una extensión de tríceps tumbado con barra EZ que trabaja el tríceps en un amplio recorrido con una flexión profunda del codo.",
+    "instructions": [
+      "Túmbate en un banco y sujeta una barra EZ sobre el pecho con un agarre prono y cerrado.",
+      "Mantén los brazos casi verticales mientras flexionas los codos para bajar la barra hacia la frente o justo detrás.",
+      "Extiende los codos para devolver la barra a la posición inicial sin mover demasiado los hombros.",
+      "Mantén las muñecas en posición neutra y controla la fase de descenso."
+    ],
+    "tips": [
+      "Usa los agarres angulados de la barra EZ para mantener las muñecas cómodas.",
+      "Deja que los codos se desplacen hacia atrás solo un poco; no conviertas el movimiento en un pullover.",
+      "Usa la ayuda de un compañero o un sistema de seguridad si trabajas con mucho peso."
+    ]
+  },
+  "closeGripDumbbellBenchPress": {
+    "description": "Una variante del press de banca con mancuernas en la que se mantienen las pesas muy juntas para aumentar la participación de los tríceps.",
+    "instructions": [
+      "Túmbate en un banco con una mancuerna en cada mano, por encima del centro del pecho.",
+      "Mantén las mancuernas juntas, con las palmas enfrentadas o ligeramente giradas hacia dentro.",
+      "Baja las pesas manteniendo los codos cerca del torso.",
+      "Vuelve a empujar las pesas hacia arriba manteniendo las mancuernas juntas y los hombros estables contra el banco."
+    ],
+    "tips": [
+      "No fuerces el contacto entre las mancuernas si te molesta las muñecas.",
+      "Mantén los codos lo bastante cerca del cuerpo para notar los tríceps, pero sin apretarlos dolorosamente contra los costados.",
+      "Controla la bajada y evita que las mancuernas reboten abajo."
+    ]
+  },
+  "lyingCableCurl": {
+    "description": "Un curl de bíceps tumbado en polea con una barra recta o tipo EZ que trabaja los bíceps mediante la flexión de los codos.",
+    "instructions": [
+      "Coloca un banco plano delante de una polea baja y túmbate boca arriba con los pies orientados hacia la máquina.",
+      "Sujeta una barra recta o una barra EZ para polea con las palmas hacia arriba y los brazos extendidos hacia la polea.",
+      "Mantén los brazos inmóviles en su mayor parte mientras flexionas los codos para llevar la barra hacia la frente o la parte superior del pecho.",
+      "Baja la barra lentamente hasta volver a extender los codos, manteniendo el cable en tensión."
+    ],
+    "tips": [
+      "Coloca el banco lo bastante lejos de la polea para que el cable permanezca tenso en la posición inferior.",
+      "Mantén los codos estables en lugar de llevarlos hacia las costillas.",
+      "Realiza las repeticiones de forma fluida y controlada para evitar que la polea te saque de la posición."
+    ]
+  },
+  "smithMachineCalfRaise": {
+    "description": "Elevación de gemelos de pie bajo la barra guiada de una máquina Smith para entrenar las pantorrillas con estabilidad y aumentar la carga progresivamente.",
+    "instructions": [
+      "Colócate bajo la barra de la máquina Smith, apoyada sobre la parte superior de la espalda, y pon las almohadillas de los pies sobre una superficie elevada y estable, si la hay.",
+      "Desbloquea la barra y baja los talones de forma controlada para estirar los gemelos.",
+      "Empuja con la parte delantera de los pies para elevar los talones lo más alto posible.",
+      "Haz una breve pausa arriba y luego baja lentamente sin rebotar."
+    ],
+    "tips": [
+      "Mantén las rodillas ligeramente flexionadas y el torso erguido.",
+      "Utiliza un escalón o una plataforma estable solo si cabe de forma segura dentro de la máquina Smith.",
+      "Da prioridad a completar todo el recorrido del movimiento antes que a añadir carga."
+    ]
   }
 }

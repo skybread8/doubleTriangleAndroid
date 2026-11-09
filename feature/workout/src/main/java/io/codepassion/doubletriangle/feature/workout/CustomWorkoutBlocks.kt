@@ -52,6 +52,7 @@ internal fun reconcileImportedSkips(local: List<WorkoutBlockSummary>, imported: 
                 else if (id == null && sameStructure && identity != null && keyCounts[identity] == 1) imported[blockIndex].exercises[index]
                 else null
             if (importedExercise == null) exercise else exercise.copy(
+                role = importedExercise.role ?: exercise.role,
                 skippedAt = exercise.skippedAt ?: importedExercise.skippedAt,
                 plannedExerciseId = exercise.plannedExerciseId ?: importedExercise.plannedExerciseId,
             )

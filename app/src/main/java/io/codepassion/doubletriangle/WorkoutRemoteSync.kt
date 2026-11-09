@@ -206,6 +206,7 @@ internal object WorkoutRemoteSync {
             val shouldPullRemote = true
             val resourcesToPush = dirtyResources(context, preferences, importingExistingAccount)
                 .let { dirty -> resourcesOnly?.let { allowed -> dirty.filterTo(mutableSetOf()) { it in allowed } } ?: dirty }
+                .let { selected -> if ("nutrition-log-entries" in selected) selected + "nutrition-log-media" else selected }
             hadPendingProfile = !importingExistingAccount && dirtyResources(context, preferences, false).any { it in profileResources }
             val pushGenerations = resourcesToPush.associateWith { RemoteSyncChangeTracker.generation(context, it) }
             val shouldPushLocal = resourcesToPush.isNotEmpty()
@@ -319,16 +320,18 @@ internal object WorkoutRemoteSync {
                 // equipment. Persist that effective default as a first-class
                 // location so iOS and the backend receive the same context.
                 profileToSync.effectiveTrainingLocations().forEachIndexed { index, location -> {
-                    val id = remoteLocationIds.optString(index).takeIf(::isUuid) ?: stableId("$userId:location:$index")
-                    put(recordFromRemoteProjection(context, "training-locations", id, now)
-                    .put("name", location.name).put("is_default", location.isDefault).put("sort_order", index)
-                    .put("equipment", JSONArray(location.equipment.map { it.storedValue }))
-                    .put("display_address", location.displayAddress ?: JSONObject.NULL)
-                    .put("latitude", location.latitude ?: JSONObject.NULL)
-                    .put("longitude", location.longitude ?: JSONObject.NULL)
-                    .put("photo_path", location.photoPath?.substringAfterLast('/') ?: JSONObject.NULL))
-                    TrainingLocationPhotoStore.file(context, location.photoPath)?.takeIf(File::isFile)
-                        ?.let { locationPhotoUploads += id to it }
+                    val id = location.id?.takeIf(::isUuid) ?: remoteLocationIds.optString(index).takeIf(::isUuid) ?: stableId("$userId:location:$index")
+                    val record = recordFromRemoteProjection(context, "training-locations", id, now)
+                        .put("is_default", location.isDefault).put("sort_order", index)
+                    if (location.gymId == null) {
+                        record.put("name", location.name).put("equipment", JSONArray(location.equipment.map { it.storedValue }))
+                            .put("display_address", location.displayAddress ?: JSONObject.NULL)
+                            .put("latitude", location.latitude ?: JSONObject.NULL).put("longitude", location.longitude ?: JSONObject.NULL)
+                            .put("photo_path", location.photoPath?.substringAfterLast('/') ?: JSONObject.NULL)
+                        TrainingLocationPhotoStore.file(context, location.photoPath)?.takeIf(File::isFile)
+                            ?.let { locationPhotoUploads += id to it }
+                    }
+                    put(record)
                 } }
             })
             synchronizeTrainingLocationPhotos(context, token, locationPhotoUploads)
@@ -371,6 +374,17 @@ internal object WorkoutRemoteSync {
             synchronizeNutrition(token, userId, profileToSync, now, context)
             preferences.getString("workout_plan_json", null)?.let { rawPlan ->
                 synchronizeWorkoutPlan(token, userId, profileToSync, now, context, preferences, JSONObject(rawPlan))
+            }
+            if ("exercise-results" in resourcesToPush) {
+                try {
+                    synchronizeEditedExerciseResults(context, token, now)
+                    if (WorkoutHistoryStore.remoteEntries(context).any { it.pendingEditAt > 0 }) {
+                        RemoteSyncChangeTracker.mark(context, "exercise-results")
+                    }
+                } catch (error: Exception) {
+                    RemoteSyncChangeTracker.mark(context, "exercise-results")
+                    throw error
+                }
             }
             activePushResources = emptySet()
             activePushGenerations = emptyMap()
@@ -426,6 +440,8 @@ internal object WorkoutRemoteSync {
                     latitude = location.optDouble("latitude").takeUnless { it.isNaN() }?.takeIf { it in -90.0..90.0 },
                     longitude = location.optDouble("longitude").takeUnless { it.isNaN() }?.takeIf { it in -180.0..180.0 },
                     photoPath = location.optString("photo_path").takeIf(String::isNotBlank),
+                    id = location.optString("id").takeIf(::isUuid),
+                    gymId = location.optString("gym_id").takeIf(::isUuid),
                 )
             }
         val locationIds = remoteLocations.map { it.optString("id") }
@@ -897,7 +913,6 @@ internal object WorkoutRemoteSync {
             mediaId?.let { id ->
                 media.put(record(id, now)
                     .put("source", if (remoteMediaUrl != null) "remoteURL" else "localPhoto")
-                    .put("local_relative_path", JSONObject.NULL)
                     .put("remote_url", remoteMediaUrl ?: JSONObject.NULL))
             }
             val entryRecord = recordFromRemoteProjection(context, "nutrition-log-entries", entryId, now)
@@ -920,7 +935,9 @@ internal object WorkoutRemoteSync {
             }
         }
         ids.edit().putString(nutritionEntryIDsKey, entryIDs.toString()).putString(nutritionItemIDsKey, itemIDs.toString()).apply()
-        push(token, "nutrition-log-media", media)
+        // The local push baseline can outlive a missing server row. Re-send
+        // parents before entries even when their local fingerprint is unchanged.
+        push(token, "nutrition-log-media", media, forceCurrent = "nutrition-log-entries" in activePushResources)
         push(token, "nutrition-log-entries", entries)
         push(token, "nutrition-log-items", items)
         // iOS stores meal photos separately from the sync graph and uploads
@@ -1335,11 +1352,14 @@ internal object WorkoutRemoteSync {
                             sets = result.optInt("completed_sets", reps.size), totalReps = result.optInt("completed_reps", reps.sum()),
                             maxWeightKg = result.optDouble("completed_weight", weights.maxOrNull() ?: 0.0),
                             setReps = reps, setWeightsKg = weights, feedback = result.optString("feedback").takeIf(String::isNotBlank),
-                            note = result.optString("notes").takeIf(String::isNotBlank), durationSeconds = result.optInt("completed_duration_seconds"),
+                            note = result.optString("notes").takeIf(String::isNotBlank), durationSeconds = result.optInt("completed_duration_seconds").takeIf { it > 0 }
+                                ?: (result.optInt("completed_duration_minutes").coerceAtLeast(0) * 60),
                             distanceKm = result.optDouble("completed_distance_km", 0.0).takeIf(Double::isFinite) ?: 0.0,
                             workoutId = day.optString("id").nullableRemoteIdentifier(),
                             plannedExerciseId = exercise.optString("id").nullableRemoteIdentifier(),
                             remoteResultId = result.optString("id").nullableRemoteIdentifier(),
+                            updatedAtMillis = runCatching { java.time.Instant.parse(result.optString("updated_at")).toEpochMilli() }.getOrDefault(0),
+                            paceSecondsPerKm = result.optInt("completed_pace_seconds_per_km").takeIf { it > 0 },
                         )
                         exerciseEntries += entry; results += entry
                     }
@@ -1367,6 +1387,7 @@ internal object WorkoutRemoteSync {
             val imageKey = coachId?.let { "coach:$it" } ?: exerciseCatalogId.orEmpty()
             val name = coach?.name ?: exerciseCatalogId ?: "Ejercicio"
             put(JSONObject().put("remoteId", exercise.optString("id")).put("name", name).put("imageKey", imageKey)
+                .put("role", exercise.opt("role"))
                 .put("coachExerciseId", coachId)
                 .put("sets", exercise.optInt("sets", 1)).put("repsMin", min).put("repsMax", max)
                 .put("reps", if (min is Number && max is Number) "${min.toInt()}-${max.toInt()}" else "")
@@ -1551,8 +1572,10 @@ internal object WorkoutRemoteSync {
                     val record = record(exerciseId, now).put("workout_day_id", dayId).put("workout_block_id", blockId)
                         .put("exercise", if (coachExerciseId == null) exerciseCatalogId else JSONObject.NULL)
                         .put("coach_exercise_id", coachExerciseId ?: JSONObject.NULL)
+                        .put("role", item.opt("role") ?: JSONObject.NULL)
                         .put("skipped_at", item.opt("skippedAt") ?: JSONObject.NULL)
                         .put("order_index", exerciseIndex).put("sets", item.optInt("sets", 1)).put("reps_min", item.opt("repsMin")).put("reps_max", item.opt("repsMax")).put("target_reps", item.opt("targetReps")).put("target_weight_kg", item.opt("targetWeightKg")).put("target_weights_kg", item.opt("targetWeightsKg")).put("target_duration_minutes", item.opt("targetDurationMinutes")).put("target_duration_seconds", item.opt("targetDurationSeconds")).put("target_distance_km", item.opt("targetDistanceKm")).put("target_pace_seconds_per_km", item.opt("targetPaceSecondsPerKm")).put("rest_seconds", item.optInt("restSeconds", 0)).put("set_style_configuration", backendSetStyleConfiguration(item))
+                    item.optString("role").takeIf { it == "main" || it == "accessory" }?.let { record.put("role", it) }
                     skippedKeys.mapNotNull(skippedExercises::get).minOrNull()?.let { timestamp ->
                         record.put("skipped_at", java.time.Instant.ofEpochMilli(timestamp).toString())
                         uploadedSkippedExerciseKeys += skippedKeys.filter(skippedExercises::containsKey)
@@ -1565,21 +1588,74 @@ internal object WorkoutRemoteSync {
         push(token, "workout-days", dayRecords); push(token, "workout-blocks", blocks); push(token, "planned-exercises", exercises)
         if (uploadedSkippedExerciseKeys.isNotEmpty()) clearSkippedExercises(context, uploadedSkippedExerciseKeys)
         val results = JSONArray()
+        val uploadedLocalEdits = mutableListOf<Triple<io.codepassion.doubletriangle.feature.workout.RemoteExerciseHistoryEntry, String, String>>()
         WorkoutHistoryStore.remoteEntries(context = context).forEach { entry ->
             if (entry.remoteResultId != null) return@forEach
             val plannedExerciseId = resolvePlannedExerciseId(entry.workoutId, entry.exerciseKey, entry.plannedExerciseId, plannedExerciseReferences) ?: return@forEach
-            results.put(record(stableId("$plannedExerciseId:${entry.timestampMillis}"), now)
+            val resultId = stableId("$plannedExerciseId:${entry.timestampMillis}")
+            if (entry.pendingEditAt > 0) uploadedLocalEdits += Triple(entry, resultId, plannedExerciseId)
+            val result = record(resultId, now)
                 .put("planned_exercise_id", plannedExerciseId).put("feedback", backendExerciseFeedback(entry.feedback))
                 .put("completed_at", java.time.Instant.ofEpochMilli(entry.timestampMillis).toString())
                 .put("completed_sets", entry.sets).put("completed_reps", entry.totalReps).put("completed_weight", entry.maxWeightKg.finiteOrZero())
                 .put("per_set_reps", JSONArray(entry.setReps)).put("per_set_weights_kg", JSONArray(entry.setWeightsKg.map { it.finiteOrZero() }))
                 .put("completed_duration_seconds", entry.durationSeconds).put("completed_duration_minutes", entry.durationSeconds / 60)
-                .put("completed_distance_km", entry.distanceKm.finiteOrZero()).put("notes", entry.note ?: JSONObject.NULL))
+                .put("completed_distance_km", entry.distanceKm.finiteOrZero()).put("notes", entry.note ?: JSONObject.NULL)
+            if (entry.pendingEditAt > 0) {
+                result.put("created_at", java.time.Instant.ofEpochMilli(entry.timestampMillis).toString())
+                    .put("updated_at", java.time.Instant.ofEpochMilli(entry.pendingEditAt).toString())
+                applyExerciseResultEdit(result, entry)
+            }
+            results.put(result)
         }
         push(token, "exercise-results", results)
+        if ("exercise-results" in activePushResources) {
+            uploadedLocalEdits.forEach { (entry, id, plannedId) -> WorkoutHistoryStore.claimUploadedResult(context, entry, id, plannedId) }
+        }
     }
 
     private fun record(id: String, now: String) = JSONObject().put("id", id).put("created_at", now).put("updated_at", now)
+
+    private fun synchronizeEditedExerciseResults(context: Context, token: String, now: String) {
+        val edits = WorkoutHistoryStore.remoteEntries(context).filter { it.pendingEditAt > 0 && it.remoteResultId != null && it.plannedExerciseId != null }
+        edits.forEach { entry ->
+            val id = requireNotNull(entry.remoteResultId)
+            val payload = recordFromRemoteProjection(context, "exercise-results", id, now)
+                .put("planned_exercise_id", entry.plannedExerciseId)
+                .put("updated_at", java.time.Instant.ofEpochMilli(entry.pendingEditAt).toString())
+            if (!applyExerciseResultEdit(payload, entry)) return@forEach
+            val response = pushBatchWithResponse(token, "exercise-results", JSONArray().put(payload))
+            val serverRecord = response.optJSONArray("data")?.optJSONObject(0)
+                ?: error("No se recibió el resultado sincronizado.")
+            if (!serverRecord.optString("id").equals(id, ignoreCase = true)) error("La respuesta no corresponde al resultado editado.")
+            val serverUpdatedAt = runCatching { java.time.Instant.parse(serverRecord.optString("updated_at")).toEpochMilli() }.getOrNull()
+                ?: error("El resultado sincronizado no tiene fecha válida.")
+            if (serverUpdatedAt > entry.pendingEditAt) error("El resultado se ha actualizado en otro dispositivo.")
+            updateRemoteProjectionAfterPush("exercise-results", JSONObject().put(id, payload), JSONObject(), now)
+            WorkoutHistoryStore.acknowledgeEdit(context, entry)
+        }
+    }
+
+    private fun applyExerciseResultEdit(payload: JSONObject, entry: io.codepassion.doubletriangle.feature.workout.RemoteExerciseHistoryEntry): Boolean {
+            when (entry.pendingEditKind) {
+                "reps", "weightedReps" -> payload.put("completed_sets", entry.sets)
+                    .put("per_set_reps", JSONArray(entry.setReps))
+                    .put("completed_reps", entry.setReps.lastOrNull() ?: JSONObject.NULL)
+                    .put("per_set_weights_kg", if (entry.pendingEditKind == "weightedReps") JSONArray(entry.setWeightsKg) else JSONObject.NULL)
+                    .put("completed_weight", if (entry.pendingEditKind == "weightedReps") entry.setWeightsKg.lastOrNull() ?: JSONObject.NULL else JSONObject.NULL)
+                "seconds" -> payload.put("completed_duration_seconds", entry.durationSeconds.takeIf { it > 0 } ?: JSONObject.NULL)
+                "minutes", "distance" -> {
+                    val minutes = entry.durationSeconds / 60
+                    payload.put("completed_duration_minutes", minutes.takeIf { it > 0 } ?: JSONObject.NULL)
+                    if (entry.pendingEditKind == "distance") {
+                        payload.put("completed_distance_km", entry.distanceKm.takeIf { it > 0 } ?: JSONObject.NULL)
+                        payload.put("completed_pace_seconds_per_km", if (minutes > 0 && entry.distanceKm > 0) kotlin.math.round(minutes * 60 / entry.distanceKm).toInt() else JSONObject.NULL)
+                    }
+                }
+                else -> return false
+            }
+            return true
+    }
 
     /** Uses the same Codable values as iOS and the backend ExerciseFeedback enum. */
     private fun backendExerciseFeedback(value: String?): String = when (value.orEmpty().trim().lowercase()
@@ -1611,7 +1687,7 @@ internal object WorkoutRemoteSync {
     }
     private fun stableId(value: String) = UUID.nameUUIDFromBytes(value.toByteArray()).toString()
     /** The shared API accepts at most 100 generic records per request, like iOS. */
-    private fun push(token: String, resource: String, records: JSONArray) {
+    private fun push(token: String, resource: String, records: JSONArray, forceCurrent: Boolean = false) {
         if (resource !in activePushResources) return
         val state = activePushContext?.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
             ?: return
@@ -1624,8 +1700,17 @@ internal object WorkoutRemoteSync {
             val id = record.optString("id").takeIf(String::isNotBlank) ?: continue
             current.put(id, record)
             val previousRecord = previous.optJSONObject(id)
-            if (previousRecord == null || syncFingerprint(previousRecord) != syncFingerprint(record)) {
+            if (forceCurrent || previousRecord == null || syncFingerprint(previousRecord) != syncFingerprint(record)) {
                 changes.put(record)
+            }
+        }
+        // A result imported after its first upload is no longer emitted as a
+        // local creation. Its disappearance from that list is not a deletion.
+        if (resource == "exercise-results") {
+            val importedIds = WorkoutHistoryStore.remoteEntries(requireNotNull(activePushContext))
+                .mapNotNull { it.remoteResultId }.toSet()
+            previous.keys().forEach { id ->
+                if (!current.has(id) && id in importedIds) previous.optJSONObject(id)?.let { current.put(id, it) }
             }
         }
         // Android projections do not retain deleted rows. Preserve their last
@@ -1695,6 +1780,10 @@ internal object WorkoutRemoteSync {
     }.toString()
 
     private fun pushBatch(token: String, resource: String, records: JSONArray) {
+        pushBatchWithResponse(token, resource, records)
+    }
+
+    private fun pushBatchWithResponse(token: String, resource: String, records: JSONArray): JSONObject {
         val connection = (URL(WildforceApiEnvironment.apiUrl("sync/push")).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"; doOutput = true; connectTimeout = 15_000; readTimeout = 15_000
             setRequestProperty("Accept", "application/json"); setRequestProperty("Content-Type", "application/json"); setRequestProperty("Authorization", "Bearer $token")
@@ -1707,6 +1796,7 @@ internal object WorkoutRemoteSync {
             Log.w("WorkoutRemoteSync", "Sync resource $resource rejected with HTTP ${connection.responseCode}: ${error.message}")
             throw error
         }
+        return JSONObject(response)
     }
 
     private fun get(token: String, url: String): JSONObject {

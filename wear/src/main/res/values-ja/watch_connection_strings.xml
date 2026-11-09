@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android Wear connection states; no matching shared Sheet keys. -->
+<resources>
+    <string name="watch_tap_connect">接続をタップして開始</string>
+    <string name="watch_scan_failed">時計を検索できませんでした（%1$d）</string>
+    <string name="watch_bluetooth_unavailable">Bluetoothを利用できません</string>
+    <string name="watch_searching_phone">スマートフォンを検索中…</string>
+    <string name="watch_phone_not_found">スマートフォンが見つかりません</string>
+    <string name="watch_connecting">接続中…</string>
+    <string name="watch_connected">接続済み</string>
+    <string name="watch_disconnected">切断されました</string>
+    <string name="watch_incompatible">接続に互換性がありません</string>
+</resources>

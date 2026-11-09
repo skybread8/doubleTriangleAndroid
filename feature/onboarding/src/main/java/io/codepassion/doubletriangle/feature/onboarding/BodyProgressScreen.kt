@@ -24,6 +24,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -62,6 +63,8 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -81,16 +84,6 @@ internal fun BodyProgressScreen(
     var screen by remember { mutableStateOf<Screen>(Screen.Gallery) }
     val preferences = remember(context) { context.getSharedPreferences("wildforce_body_progress", 0) }
     var showGalleryTutorial by remember { mutableStateOf(!preferences.getBoolean("gallery_tutorial_v1", false)) }
-    if (showGalleryTutorial) {
-        BodyProgressTutorial(
-            onFinish = {
-                preferences.edit().putBoolean("gallery_tutorial_v1", true).apply()
-                showGalleryTutorial = false
-            },
-            onClose = onClose,
-        )
-        return
-    }
     // The iOS capture flow uses a directional slide with a short fade between
     // gallery, capture and comparison. Keep the same continuity on Android.
     AnimatedContent(
@@ -109,11 +102,20 @@ internal fun BodyProgressScreen(
             is Screen.Compare -> Compare(sessions, destination.id, profile, { screen = Screen.Gallery }, generateFuturePreview, loadFuturePreview, analyzeComposition)
         }
     }
+    if (showGalleryTutorial) {
+        BodyProgressTutorial(
+            onFinish = {
+                preferences.edit().putBoolean("gallery_tutorial_v1", true).apply()
+                showGalleryTutorial = false
+            },
+            onDismiss = { showGalleryTutorial = false },
+        )
+    }
 }
 
 private sealed class Screen { data object Gallery : Screen(); data object Capture : Screen(); data class Compare(val id: String) : Screen() }
 
-@Composable private fun BodyProgressTutorial(onFinish: () -> Unit, onClose: () -> Unit) {
+@Composable private fun BodyProgressTutorial(onFinish: () -> Unit, onDismiss: () -> Unit) {
     var step by remember { mutableStateOf(0) }
     val titles = listOf("Sigue tu progreso visual", "Mantén la consistencia", "Compara con claridad")
     val eyebrows = listOf("REGISTRA TU CAMBIO", "MISMO ENCUADRE", "REVISA TU EVOLUCIÓN")
@@ -127,29 +129,36 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
         "• Luz similar\n• Dentro de la guía\n• Postura natural",
         "Galería  →  Comparar",
     )
-    Column(Modifier.fillMaxSize().background(WildforceThemeTokens.backgroundSecondary).padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+    Column(Modifier.fillMaxWidth().heightIn(min = maxHeight * .5f, max = maxHeight * .85f).clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(24.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("Paso ${step + 1} de 3", Modifier.weight(1f), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
-            Text("Omitir", Modifier.heightIn(min = 48.dp).clickable(onClick = onFinish).padding(horizontal = 8.dp, vertical = 8.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_45881d23fdac1d2c, step + 1), Modifier.weight(1f), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip), Modifier.heightIn(min = 48.dp).clickable(onClick = onFinish).padding(horizontal = 8.dp, vertical = 8.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) { repeat(3) { index -> Box(Modifier.weight(1f).height(6.dp).clip(RoundedCornerShape(6.dp)).background(if (index == step) WildforceThemeTokens.textPrimary else WildforceThemeTokens.textPrimary.copy(alpha = .14f))) } }
-        Spacer(Modifier.height(22.dp))
-        Box(Modifier.size(54.dp).clip(RoundedCornerShape(16.dp)).background(WildforceThemeTokens.textPrimary), contentAlignment = Alignment.Center) {
-            Icon(Icons.Filled.PhotoCamera, null, Modifier.size(25.dp), WildforceThemeTokens.background)
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                Box(Modifier.size(54.dp).clip(RoundedCornerShape(16.dp)).background(WildforceThemeTokens.textPrimary), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Filled.PhotoCamera, null, Modifier.size(25.dp), WildforceThemeTokens.background)
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(eyebrows[step], style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accent)
+                    Text(titles[step], style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+                }
+            }
+            Text(descriptions[step], style = MaterialTheme.typography.body1, color = WildforceThemeTokens.textSecondary)
+            Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.textPrimary.copy(alpha = .08f)).padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(if (step == 1) "Para una buena comparación" else if (step == 0) "Qué vas a capturar" else "Cómo funciona", style = MaterialTheme.typography.subtitle2, color = WildforceThemeTokens.textPrimary)
+                Text(cards[step], style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
+            }
         }
-        Text(eyebrows[step], style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accent)
-        Text(titles[step], style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-        Text(descriptions[step], style = MaterialTheme.typography.body1, color = WildforceThemeTokens.textSecondary)
-        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.textPrimary.copy(alpha = .08f)).padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(if (step == 1) "Para una buena comparación" else if (step == 0) "Qué vas a capturar" else "Cómo funciona", style = MaterialTheme.typography.subtitle2, color = WildforceThemeTokens.textPrimary)
-            Text(cards[step], style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
-        }
-        Spacer(Modifier.weight(1f))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (step > 0) Text("Atrás", Modifier.heightIn(min = 48.dp).clickable { step-- }.padding(horizontal = 12.dp, vertical = 12.dp), color = WildforceThemeTokens.textSecondary)
-            Button(onClick = { if (step == 2) onFinish() else step++ }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), modifier = Modifier.weight(1f)) { Text(if (step == 2) "Entendido" else "Siguiente", color = WildforceThemeTokens.primaryButtonText) }
+            if (step > 0) Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.action_back), Modifier.heightIn(min = 48.dp).clickable { step-- }.padding(horizontal = 12.dp, vertical = 12.dp), color = WildforceThemeTokens.textSecondary)
+            Button(onClick = { if (step == 2) onFinish() else step++ }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), modifier = Modifier.weight(1f)) { Text(if (step == 2) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.got_it) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.next), color = WildforceThemeTokens.primaryButtonText) }
         }
-        Text("Volver", Modifier.align(Alignment.CenterHorizontally).heightIn(min = 48.dp).clickable(onClick = onClose).padding(horizontal = 8.dp, vertical = 8.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+    }
+    }
     }
 }
 
@@ -178,29 +187,30 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
             Spacer(Modifier.height(24.dp))
         }
     }
-    pendingDelete?.let { session -> AlertDialog(onDismissRequest = { pendingDelete = null }, title = { Text("¿Eliminar este check-in?") }, text = { Text("Se borrarán las fotos frontal y de perfil. Esta acción no se puede deshacer.") }, confirmButton = { Button(onClick = { delete(session); pendingDelete = null }) { Text("Eliminar") } }, dismissButton = { Button(onClick = { pendingDelete = null }) { Text("Cancelar") } }) }
+    pendingDelete?.let { session -> AlertDialog(onDismissRequest = { pendingDelete = null }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_e65789c3621d4999)) }, text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_removes_all_saved_photos_from_this_check_in_and_can_t_be_undone_)) }, confirmButton = { Button(onClick = { delete(session); pendingDelete = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.delete)) } }, dismissButton = { Button(onClick = { pendingDelete = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel)) } }) }
     if (tipsOpen) BestPracticesDialog { tipsOpen = false }
 }
 
 @Composable private fun EmptyGallery(capture: () -> Unit) = Column(Modifier.fillMaxSize().padding(horizontal = 24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
-    Spacer(Modifier.height(62.dp))
+    Spacer(Modifier.weight(1f))
     Box(Modifier.size(110.dp).clip(RoundedCornerShape(30.dp)).background(WildforceThemeTokens.accent.copy(alpha = .16f)), contentAlignment = Alignment.Center) {
         Icon(Icons.Filled.PhotoCamera, null, Modifier.size(44.dp), WildforceThemeTokens.accent)
     }
-    Text("Sigue tu físico con check-ins consistentes", style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
-    Text("Captura fotos frontal y de perfil con guías para que cada check-in sea fácil de comparar con el tiempo.", style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
-    Button(onClick = capture, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), modifier = Modifier.fillMaxWidth()) { Text("Hacer mis primeras fotos de progreso", color = WildforceThemeTokens.primaryButtonText) }
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3ab7a4383ee95fc7), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.capture_front_and_profile_photos_with_guides_so_every_check_in_is_easy_to_compare_over_time_), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     Spacer(Modifier.weight(1f))
+    Spacer(Modifier.weight(1f))
+    Button(onClick = capture, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.start).uppercase(), color = WildforceThemeTokens.primaryButtonText) }
 }
 
 @Composable private fun BestPracticesDialog(close: () -> Unit) = AlertDialog(
     onDismissRequest = close,
-    title = { Text("Consejos para las fotos de progreso") },
+    title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_ce9a1f0628bfdf47)) },
     text = { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Mantén tus fotos de progreso lo más consistentes posible para que los cambios sean fáciles de valorar.")
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.keep_your_progress_photos_as_consistent_as_possible_so_changes_are_easier_to_judge_over_time_))
         Text("• Usa la misma ropa, ubicación y luz.\n• Coloca el móvil a la misma distancia y altura.\n• Mantén una postura relajada y natural.\n• Usa la referencia de tu último check-in para alinear el encuadre.", color = WildforceThemeTokens.textSecondary)
     } },
-    confirmButton = { Button(onClick = close) { Text("Entendido") } }
+    confirmButton = { Button(onClick = close) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.got_it)) } }
 )
 
 @Composable private fun Capture(sessions: List<BodyProgressSession>, close: () -> Unit, saved: () -> Unit) {
@@ -301,7 +311,7 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
     }
     Column(Modifier.fillMaxSize().background(Color.Black).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(Modifier.fillMaxWidth().padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("Cerrar", Modifier.heightIn(min = 48.dp).clickable(onClick = close).padding(vertical = 10.dp), color = Color.White, style = MaterialTheme.typography.body2)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss), Modifier.heightIn(min = 48.dp).clickable(onClick = close).padding(vertical = 10.dp), color = Color.White, style = MaterialTheme.typography.body2)
             Row(Modifier.weight(1f).padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(5.dp)) { repeat(2) { index -> Box(Modifier.weight(1f).height(4.dp).clip(RoundedCornerShape(6.dp)).background(if (index < if (step == Step.Front) 1 else 2) Color.White else Color.White.copy(alpha = .22f))) } }
             Box(Modifier.size(48.dp).clickable {
                 useFrontCamera = !useFrontCamera
@@ -313,7 +323,7 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
         Text("${if (step == Step.Front) "1" else "2"} de 2 · ${step.label}", color = Color.White, style = MaterialTheme.typography.h6)
         Text(step.help, color = Color.White.copy(alpha = .78f), style = MaterialTheme.typography.body2)
         if (voiceState == BodyProgressVoiceCaptureController.State.Listening) {
-            Text("Di ${voiceCapture.triggerDisplayWord} para hacer la foto", color = WildforceThemeTokens.accent, style = MaterialTheme.typography.caption, modifier = Modifier.align(Alignment.CenterHorizontally))
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_caa7246aae3a7b91, voiceCapture.triggerDisplayWord), color = WildforceThemeTokens.accent, style = MaterialTheme.typography.caption, modifier = Modifier.align(Alignment.CenterHorizontally))
         }
         Box(Modifier.fillMaxWidth().weight(1f).clip(RoundedCornerShape(20.dp)).background(Color.DarkGray), contentAlignment = Alignment.Center) {
             if (image == null) {
@@ -354,12 +364,12 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
                         Modifier.fillMaxSize().background(Color.White.copy(alpha = captureFlashOpacity)),
                     )
                     TiltIndicator(tiltState, Modifier.align(Alignment.CenterEnd))
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) { Text(if (overlay == Overlay.Reference && referencePath != null) "Arrastra y pellizca para alinear tu último check-in" else "Alinea tu cuerpo dentro de la guía", color = Color.White, textAlign = TextAlign.Center) }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) { Text(if (overlay == Overlay.Reference && referencePath != null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_11102b29326ef97a) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3657487951193daf), color = Color.White, textAlign = TextAlign.Center) }
                 } else {
                     Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Icon(Icons.Filled.PhotoCamera, null, Modifier.size(52.dp), Color.White)
-                        Text("Necesitamos acceso a la cámara para usar las guías de encuadre.", color = Color.White, textAlign = TextAlign.Center)
-                        Button(onClick = { requestCameraPermission.launch(Manifest.permission.CAMERA) }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText)) { Text("Permitir cámara", color = WildforceThemeTokens.primaryButtonText) }
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_16945fe99efdebf9), color = Color.White, textAlign = TextAlign.Center)
+                        Button(onClick = { requestCameraPermission.launch(Manifest.permission.CAMERA) }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_71dc78bdba9c367c), color = WildforceThemeTokens.primaryButtonText) }
                     }
                 }
             } else {
@@ -382,7 +392,7 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
                         },
                         contentScale = ContentScale.Crop,
                     )
-                    Text("Arrastra y pellizca para ajustar", color = Color.White.copy(alpha = .82f), style = MaterialTheme.typography.caption, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp))
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_101c82a9a65dd9cd), color = Color.White.copy(alpha = .82f), style = MaterialTheme.typography.caption, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp))
                 }
             }
             countdown?.let {
@@ -403,18 +413,18 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
             Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(Modifier.size(48.dp).clip(RoundedCornerShape(24.dp)).background(Color.White.copy(alpha = .16f)).clickable { gallery.launch("image/*") }, contentAlignment = Alignment.Center) { Icon(Icons.Filled.PhotoCamera, "Elegir de galería", Modifier.size(24.dp), Color.White) }
-                    Text("Galería", color = Color.White, style = MaterialTheme.typography.caption)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gallery), color = Color.White, style = MaterialTheme.typography.caption)
                 }
                 Box(Modifier.size(82.dp).clip(RoundedCornerShape(41.dp)).background(Color.White).clickable(enabled = countdown == null, onClick = ::startCamera), contentAlignment = Alignment.Center) {
                     Box(Modifier.size(68.dp).clip(RoundedCornerShape(34.dp)).background(if (countdown == null) WildforceThemeTokens.accent else Color.Gray))
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(Modifier.size(48.dp).clip(RoundedCornerShape(24.dp)).background(Color.White.copy(alpha = .16f)).clickable { timerSeconds = when (timerSeconds) { 0 -> 3; 3 -> 5; else -> 0 } }, contentAlignment = Alignment.Center) { Icon(Icons.Filled.Timer, "Cambiar temporizador", Modifier.size(24.dp), Color.White) }
-                    Text(if (countdown == null) "Disparar" else "Preparando", color = Color.White, style = MaterialTheme.typography.caption)
+                    Text(if (countdown == null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_fd035357b83dd14f) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_e160381847c42d4d), color = Color.White, style = MaterialTheme.typography.caption)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(Modifier.size(48.dp).clip(RoundedCornerShape(24.dp)).background(Color.White.copy(alpha = .16f)).clickable(enabled = countdown == null, onClick = ::toggleVoiceCapture), contentAlignment = Alignment.Center) { Icon(if (voiceState == BodyProgressVoiceCaptureController.State.Listening) Icons.Filled.Mic else Icons.Filled.MicNone, "Activar captura por voz", Modifier.size(24.dp), if (voiceState == BodyProgressVoiceCaptureController.State.Listening) WildforceThemeTokens.accent else Color.White) }
-                    Text(if (voiceState == BodyProgressVoiceCaptureController.State.Listening) "Escuchando" else "Voz", color = Color.White, style = MaterialTheme.typography.caption)
+                    Text(if (voiceState == BodyProgressVoiceCaptureController.State.Listening) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_21f51ef777460b14) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_c9566ca43bdcc78f), color = Color.White, style = MaterialTheme.typography.caption)
                 }
             }
         } else {
@@ -427,12 +437,12 @@ private sealed class Screen { data object Gallery : Screen(); data object Captur
                     profile = adjusted
                     runCatching { BodyProgressStore.save(context, front!!, adjusted) }.onSuccess { saved() }.onFailure { error = "No se pudieron guardar las fotos. Inténtalo de nuevo." }
                 }
-            }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), modifier = Modifier.fillMaxWidth()) { Text(if (step == Step.Front) "Continuar al perfil" else "Guardar check-in", color = WildforceThemeTokens.primaryButtonText) }
-            Button(onClick = { if (step == Step.Front) front = null else profile = null }, modifier = Modifier.fillMaxWidth()) { Text("Repetir foto") }
+            }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), modifier = Modifier.fillMaxWidth()) { Text(if (step == Step.Front) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_601986ca2a0a0305) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_97992b805fa065cf), color = WildforceThemeTokens.primaryButtonText) }
+            Button(onClick = { if (step == Step.Front) front = null else profile = null }, modifier = Modifier.fillMaxWidth()) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retake_photo)) }
         }
         error?.let { Text(it, color = Color.Red) }
     }
-    if (tutorial) AlertDialog(onDismissRequest = { tutorial = false; context.getSharedPreferences("wildforce_body_progress", 0).edit().putBoolean("capture_tutorial_v1", true).apply() }, title = { Text("Check-ins consistentes") }, text = { Text("Haz una foto frontal y otra de perfil. Mantén la misma ropa, distancia, postura y luz. Puedes activar Referencia para usar tu último check-in como guía.") }, confirmButton = { Button(onClick = { tutorial = false; context.getSharedPreferences("wildforce_body_progress", 0).edit().putBoolean("capture_tutorial_v1", true).apply() }) { Text("Entendido") } })
+    if (tutorial) AlertDialog(onDismissRequest = { tutorial = false; context.getSharedPreferences("wildforce_body_progress", 0).edit().putBoolean("capture_tutorial_v1", true).apply() }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_ae46f63766af26c9)) }, text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_ca77c21fec39cef1)) }, confirmButton = { Button(onClick = { tutorial = false; context.getSharedPreferences("wildforce_body_progress", 0).edit().putBoolean("capture_tutorial_v1", true).apply() }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.got_it)) } })
 }
 private enum class Step(val label: String, val help: String) { Front("Frontal", "Misma hora, distancia y luz que en tus próximos check-ins."), Profile("Perfil", "Gira de lado y conserva la ropa, postura y encuadre.") }
 private enum class Overlay(val label: String) { Guide("Guía"), Reference("Referencia") }
@@ -488,7 +498,7 @@ private fun TiltIndicator(state: TiltState, modifier: Modifier = Modifier) {
             )
         }
         if (!state.isUpright) {
-            Text(if (state.leanDegrees < 0) "Inclina hacia delante" else "Inclina hacia atrás", color = Color.White.copy(alpha = .82f), style = MaterialTheme.typography.overline, textAlign = TextAlign.Center, modifier = Modifier.width(68.dp).padding(top = 8.dp))
+            Text(if (state.leanDegrees < 0) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f79424eb7f17047c) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_d77ee55e1cbc8ec0), color = Color.White.copy(alpha = .82f), style = MaterialTheme.typography.overline, textAlign = TextAlign.Center, modifier = Modifier.width(68.dp).padding(top = 8.dp))
         }
     }
 }
@@ -639,9 +649,9 @@ private fun TiltIndicator(state: TiltState, modifier: Modifier = Modifier) {
             }
         }
         if (profile.birthYear <= Year.now().value - 18) {
-            Button(onClick = { if (consent) { loading = true; failure = null; scope.launch { runCatching { generateFuture(current.id, angle.apiValue) }.onSuccess { future = it; BodyProgressStore.saveFuture(context, current, it) }.onFailure { failure = it.message ?: "No se pudo crear la previsión" }; loading = false } } else dialog = true }, enabled = !loading, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), modifier = Modifier.fillMaxWidth()) { if (loading) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp) else Text(if (future == null) "Ver previsión a 6 meses" else "Regenerar previsión", color = WildforceThemeTokens.primaryButtonText) }
+            Button(onClick = { if (consent) { loading = true; failure = null; scope.launch { runCatching { generateFuture(current.id, angle.apiValue) }.onSuccess { future = it; BodyProgressStore.saveFuture(context, current, it) }.onFailure { failure = it.message ?: "No se pudo crear la previsión" }; loading = false } } else dialog = true }, enabled = !loading, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), modifier = Modifier.fillMaxWidth()) { if (loading) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp) else Text(if (future == null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_879aca039a8a9db7) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_b989f191a70f69da), color = WildforceThemeTokens.primaryButtonText) }
             future?.let { Image(it.asImageBitmap(), "Previsión a 6 meses", Modifier.fillMaxWidth().height(250.dp).clip(RoundedCornerShape(14.dp)), contentScale = ContentScale.Crop) }; failure?.let { Text(it, color = Color.Red, style = MaterialTheme.typography.caption) }
-            if (consent) Text("Retirar consentimiento", Modifier.clickable { prefs.edit().remove("future_preview_ai_consent_v1").apply(); consent = false }, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            if (consent) Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_86f8ec5c3ad66be3), Modifier.clickable { prefs.edit().remove("future_preview_ai_consent_v1").apply(); consent = false }, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
         if (showAnalysisIntro && analysis == null) {
             BodyCompositionIntro(
@@ -661,16 +671,16 @@ private fun TiltIndicator(state: TiltState, modifier: Modifier = Modifier) {
         }
         analysis?.let { BodyCompositionResult(it) }
     }
-    if (dialog) AlertDialog(onDismissRequest = { dialog = false }, title = { Text("Vista a futuro con IA") }, text = { Text("Enviaremos una copia de tu foto frontal y datos básicos de entrenamiento a la API de OpenAI para crear una previsión de 6 meses. El contenido no se usa para entrenar modelos; puede conservarse para monitorización de abuso durante hasta 30 días. Confirmas que tienes 18 años o más y aceptas este tratamiento.") }, confirmButton = { Button(onClick = { prefs.edit().putLong("future_preview_ai_consent_v1", System.currentTimeMillis()).apply(); consent = true; dialog = false }) { Text("Acepto") } }, dismissButton = { Button(onClick = { dialog = false }) { Text("Cancelar") } })
+    if (dialog) AlertDialog(onDismissRequest = { dialog = false }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_b284a57124c1f887)) }, text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_9e3ea731ed74b4e9)) }, confirmButton = { Button(onClick = { prefs.edit().putLong("future_preview_ai_consent_v1", System.currentTimeMillis()).apply(); consent = true; dialog = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_47ceb6c25b64d1c6)) } }, dismissButton = { Button(onClick = { dialog = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel)) } })
 }
 
 @Composable
 private fun BodyCompositionResult(analysis: BodyCompositionAnalysis) {
     Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), backgroundColor = WildforceThemeTokens.surfaceElevated) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Análisis de composición", style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
-            Text("Grasa estimada: ${analysis.estimatedBodyFatRange}", color = WildforceThemeTokens.textPrimary)
-            Text("Confianza: ${analysis.confidence.name}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_fef8f7d43e193626), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_fd4cf155018f52bb, analysis.estimatedBodyFatRange), color = WildforceThemeTokens.textPrimary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_76f0763a556d39c7, analysis.confidence.name), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
             Text(analysis.summary, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
             analysis.insights.forEach { Text("• $it", style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textPrimary) }
             analysis.recommendations.forEach { Text("→ $it", style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textPrimary) }
@@ -692,15 +702,15 @@ private fun BodyCompositionIntro(loading: Boolean, error: String?, onStart: () -
             if (loading) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(Modifier.size(20.dp), color = WildforceThemeTokens.accent, strokeWidth = 2.dp)
-                    Text("Analizando fotos…", color = WildforceThemeTokens.textPrimary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_439857d9ffd3c54c), color = WildforceThemeTokens.textPrimary)
                 }
             } else {
                 error?.let { Text(it, color = Color.Red, style = MaterialTheme.typography.caption) }
                 Button(onClick = onStart, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary), modifier = Modifier.fillMaxWidth()) {
-                    Text(if (error == null) "Iniciar estimación" else "Reintentar", color = WildforceThemeTokens.primaryButtonText)
+                    Text(if (error == null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.start_estimate) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry), color = WildforceThemeTokens.primaryButtonText)
                 }
             }
-            Text("El resultado es orientativo y no sustituye asesoramiento médico.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_24d69a5c82264b40), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
     }
 }
@@ -739,7 +749,7 @@ private fun BodyProgressBackgroundPicker(
             textAlign = TextAlign.Center,
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(onClick = { onSelect(null); expanded = false }) { Text("Original") }
+            DropdownMenuItem(onClick = { onSelect(null); expanded = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.original)) }
             BodyProgressBackgroundStyle.entries.forEach { style ->
                 DropdownMenuItem(onClick = { onSelect(style); expanded = false }) { Text(style.label) }
             }

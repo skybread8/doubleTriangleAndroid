@@ -4,6 +4,14 @@ This document is the persistent source of truth for bringing the Android workout
 
 ## Reference implementation
 
+### Translation migration (2026-11-03)
+
+- Workout labels with verified equivalents use the shared Sheet export, and the
+  path's round count and add/back accessibility labels resolve through resources.
+- The localization checklist remains open: Android-only fallback resources and
+  other untranslated or hard-coded workout copy still require review against
+  iOS and the shared Sheet.
+
 ### Tutorial localization and media audit (2026-10-29)
 
 - Exercise guides and names include all 134 iOS catalog exercises and use the iOS translations, with English fallback where the iOS catalog has no translation. The first-exposure tutorial uses the selected gender's tutorial image; exercise details use the female image as on iOS, with coach media taking precedence.
@@ -87,6 +95,35 @@ Initial estimate: functional 70%, visual 55%, accessibility/localization/integra
 - [x] Haptics cover set, exercise, feedback, rest adjustment, and final completion. Android now maps the iOS selection/success cues across calendar/mode selection, set completion, exercise transitions, feedback, timers/rest adjustment, and completion records/summary/milestones.
 
 ## Implementation log
+
+### 2026-11-02 — Android watch actions while backgrounded
+
+- Watch commands received while the workout screen is paused are queued for the current workout and replayed after its saved session is restored. Bluetooth and the local bridge share this path. Physical watch verification, including multiple successive actions while locked, remains pending.
+
+### 2026-11-02 — Android background exercise timer
+
+- The foreground notification refreshes timed-exercise and rest countdowns in the background even when additional workout notifications are disabled; alert preferences still control sound and vibration. Pause and resume invalidate the displayed value. Debug assembly and workout unit tests pass; device verification of the corrected countdown remains pending.
+
+
+### 2026-11-02 — exercise catalog and plan roles
+
+- The iOS exercise catalog metadata now supplies the compound/isolation classification and English and localized search aliases. The add/swap picker and exercise analytics search those names; the four new catalog exercises include their iOS guides and available translations.
+- Planned exercise roles survive plan synchronization, local and active-session storage, reconciliation, and independent workout duplication.
+- Automated checks cover alias matching and role reconciliation/duplication. Cross-device synchronization and remote media rendering still require device verification.
+
+
+### 2026-10-30 — regeneration contract (verification pending)
+
+- Android sends the current plan ID as `replace_workout_plan_id`, matching iOS. The backend checkout currently ignores this field, so replacement semantics depend on the deployed backend and remain unverified.
+- Android compilation passes; end-to-end regeneration and cancellation remain unverified. These changes do not establish full parity.
+- Remote exercise-history imports refresh existing results by identity, preserve distinct results recorded at the same time, and read minute-based durations. The exercise detail and analytics screens allow editing local and synchronized results and retain pending edits across pulls. Local results acquire a remote identity only after their matching planned exercise is uploaded. Unit tests cover merging; end-to-end synchronization and visual comparison with iOS still require verification.
+- Exercise-result edits use their actual edit timestamp. A newer remote result wins on pull, and an upload that returns a newer server revision remains pending until the next pull reconciles it. Unit tests cover older and newer remote revisions and identity assignment during concurrent edits.
+- Cardio exercise history includes the iOS pace series, preferring the stored pace and deriving it from duration and distance when needed; the chart converts between min/km and min/mi. Repetition charts use the per-set breakdown when available. Unit tests cover these cases.
+- Exercise analytics now uses the same history series as the exercise detail. The result editor uses the available iOS string-catalog translations. Debug APK assembly and app, workout and onboarding unit tests pass; cross-device and visual verification remain open.
+- Visual source review: the result editor is presented as a bottom sheet with the iOS toolbar and rounded editing cards; history charts use the iOS card, icons, date-proportional curved line, gradient and date labels. The body-progress tutorial is presented over the gallery as a bottom sheet. These are source-level adjustments; matched iOS/Android screenshots and dynamic-type checks remain unverified.
+- Emulator check: with Spanish selected in the app and English as the device language, chart dates and available editor translations follow the app language. Opening a recorded session showed its three existing sets; it was dismissed without saving. Matched iOS screenshots and cross-device editing remain unverified.
+- Gym members retain access to workouts and analytics rather than being forced to the Gym tab; nutrition presents the subscription offer within the tab, following iOS member access.
+- Body-progress onboarding now keeps the tutorial footer visible while its content scrolls, and the empty gallery anchors the Start action at the bottom, following the latest iOS layout. Visual comparison remains pending.
 
 ### 2026-10-28 — custom superset zero rest persistence
 

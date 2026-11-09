@@ -76,7 +76,8 @@ object WildforceWatchLocalBridge {
      */
     internal fun dispatch(context: Context, command: Command) = Handler(Looper.getMainLooper()).post {
         val listener = commandListener
-        if (listener != null) listener(command) else WatchCommandStore.enqueue(context, command)
+        if (listener != null && context.getSharedPreferences("wildforce_notification_settings", 0).getBoolean("app_foreground", false)) listener(command)
+        else (state?.workoutId ?: WildforceWatchBridge.state?.workoutId)?.let { WatchCommandStore.enqueue(context, it, command) }
     }
 }
 
@@ -86,27 +87,50 @@ internal object WatchCommandStore {
     private const val PREFS = "wildforce_watch_commands"
     private const val QUEUE = "queue"
 
-    fun enqueue(context: Context, command: WildforceWatchLocalBridge.Command) {
+    fun enqueue(context: Context, workoutId: String, command: WildforceWatchLocalBridge.Command) {
         synchronized(this) {
             val prefs = context.getSharedPreferences(PREFS, 0)
             val queue = runCatching { JSONArray(prefs.getString(QUEUE, "[]")) }.getOrDefault(JSONArray())
-            queue.put(JSONObject().put("op", command.operation).put("reps", command.reps).put("weightKg", command.weightKg))
+            val item = JSONObject().put("workoutId", workoutId).put("op", command.operation).put("reps", command.reps)
+                .put("weightKg", command.weightKg).put("feedback", command.feedback)
+                .put("durationMinutes", command.durationMinutes).put("distanceKm", command.distanceKm)
+            command.motion?.let { motion ->
+                item.put("motion", JSONObject().put("status", motion.statusCode)
+                    .put("count", motion.autoDetectedRepCount).put("confidence", motion.confidencePermille)
+                    .put("reps", JSONArray().also { reps -> motion.reps.forEach { rep ->
+                        reps.put(JSONObject().put("duration", rep.durationMillis).put("range", rep.rangeOfMotionPermille).put("velocity", rep.velocityCode))
+                    } }))
+            }
+            queue.put(item)
             prefs.edit().putString(QUEUE, queue.toString()).apply()
         }
     }
 
-    fun drain(context: Context): List<WildforceWatchLocalBridge.Command> = synchronized(this) {
+    fun drain(context: Context, workoutId: String): List<WildforceWatchLocalBridge.Command> = synchronized(this) {
         val prefs = context.getSharedPreferences(PREFS, 0)
         val queue = runCatching { JSONArray(prefs.getString(QUEUE, "[]")) }.getOrDefault(JSONArray())
         prefs.edit().remove(QUEUE).apply()
         buildList {
             for (index in 0 until queue.length()) {
                 val item = queue.optJSONObject(index) ?: continue
-                when (item.optString("op")) {
-                    "set_reps" -> add(WildforceWatchLocalBridge.Command("set_reps", reps = item.optInt("reps")))
-                    "set_weight" -> add(WildforceWatchLocalBridge.Command("set_weight", weightKg = item.optDouble("weightKg")))
-                    "complete_set", "skip_rest", "add_rest" -> add(WildforceWatchLocalBridge.Command(item.getString("op")))
+                if (item.optString("workoutId") != workoutId) continue
+                val motion = item.optJSONObject("motion")?.let { data ->
+                    val reps = data.optJSONArray("reps") ?: JSONArray()
+                    WatchMotionSnapshotData(data.optInt("status"), data.optInt("count"),
+                        if (data.has("confidence")) data.optInt("confidence") else null,
+                        (0 until reps.length()).mapNotNull { i -> reps.optJSONObject(i)?.let { rep ->
+                            WatchMotionRepData(rep.optInt("duration"), rep.optInt("range"), rep.optInt("velocity"))
+                        } })
                 }
+                add(WildforceWatchLocalBridge.Command(
+                    operation = item.optString("op"),
+                    reps = if (item.has("reps")) item.optInt("reps") else null,
+                    weightKg = if (item.has("weightKg")) item.optDouble("weightKg") else null,
+                    feedback = item.optString("feedback").takeIf { item.has("feedback") },
+                    durationMinutes = if (item.has("durationMinutes")) item.optInt("durationMinutes") else null,
+                    distanceKm = if (item.has("distanceKm")) item.optDouble("distanceKm") else null,
+                    motion = motion,
+                ))
             }
         }
     }

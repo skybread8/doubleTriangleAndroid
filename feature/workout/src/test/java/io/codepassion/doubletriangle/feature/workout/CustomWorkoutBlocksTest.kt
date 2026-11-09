@@ -3,6 +3,7 @@ package io.codepassion.doubletriangle.feature.workout
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.ExerciseTrackingMode
 import io.codepassion.doubletriangle.core.model.RepRange
+import io.codepassion.doubletriangle.core.model.WorkoutBlockSummary
 import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
@@ -14,6 +15,16 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CustomWorkoutBlocksTest {
+    @Test fun importedRoleIsRetainedOnMergeAndDuplication() {
+        val original = ExerciseSummary("Press", imageKey = "barbellBenchPress", sets = 3, reps = "8", restSeconds = 90, plannedExerciseId = "id")
+        val local = WorkoutBlockSummary(WorkoutBlockType.Standard, exercises = listOf(original))
+        val remote = local.copy(exercises = listOf(original.copy(role = "main")))
+        val merged = reconcileImportedSkips(listOf(local), listOf(remote)).single().exercises.single()
+        assertEquals("main", merged.role)
+        val day = WorkoutDaySummary("day", 1, "Day", "Strength", "strength", DayOfWeek.MONDAY, 30, WorkoutStatus.Planned, exercises = listOf(merged))
+        assertEquals("main", day.asIndependentWorkoutCopy().exercises.single().role)
+    }
+
     @Test fun `imported omission is merged into matching saved session without changing local targets`() {
         val localExercise = ExerciseSummary("Press", imageKey = "benchPress", sets = 4, reps = "8", restSeconds = 90)
         val block = io.codepassion.doubletriangle.core.model.WorkoutBlockSummary(WorkoutBlockType.Standard, exercises = listOf(localExercise))

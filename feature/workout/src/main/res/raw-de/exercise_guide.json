@@ -1888,5 +1888,61 @@
       "Wenn du stechende Schmerzen oder Schwindel empfindest, hör sofort auf.",
       "Halte die Schultern während der gesamten Übung unten und entspannt."
     ]
+  },
+  "ezBarSkullCrusher": {
+    "description": "Eine liegende Trizepsstreckübung mit der SZ-Stange, die den Trizeps über einen großen Bewegungsumfang bei tiefer Ellenbogenbeugung beansprucht.",
+    "instructions": [
+      "Lege dich flach auf eine Bank und halte eine SZ-Stange mit engem Obergriff über der Brust.",
+      "Halte die Oberarme weitgehend senkrecht, während du die Ellenbogen beugst und die Stange zur Stirn oder knapp dahinter absenkst.",
+      "Strecke die Ellenbogen, um die Stange in die Ausgangsposition zurückzuführen, ohne die Schultern übermäßig zu bewegen.",
+      "Halte die Handgelenke neutral und kontrolliere die Abwärtsbewegung."
+    ],
+    "tips": [
+      "Nutze die abgewinkelten Griffe der SZ-Stange, damit deine Handgelenke angenehm bleiben.",
+      "Lass die Ellenbogen nur leicht nach hinten wandern; mache aus der Bewegung keine Überkopfstreckung.",
+      "Nutze bei hohen Gewichten einen Trainingspartner oder eine Sicherheitsvorrichtung."
+    ]
+  },
+  "closeGripDumbbellBenchPress": {
+    "description": "Eine Variante des Kurzhantel-Bankdrückens, bei der die Gewichte eng zusammengehalten werden, um den Trizeps stärker zu beanspruchen.",
+    "instructions": [
+      "Lege dich flach auf eine Bank und halte je eine Kurzhantel über der Mitte deiner Brust.",
+      "Halte die Kurzhanteln eng zusammen und die Handflächen zueinander oder leicht nach innen gerichtet.",
+      "Senke die Gewichte ab und führe die Ellenbogen nah am Oberkörper.",
+      "Drücke die Gewichte wieder nach oben, halte die Kurzhanteln eng zusammen und die Schultern stabil auf der Bank."
+    ],
+    "tips": [
+      "Drücke die Kurzhanteln nicht gewaltsam zusammen, wenn das deine Handgelenke reizt.",
+      "Halte die Ellenbogen nah genug am Körper, um den Trizeps zu spüren, ohne sie schmerzhaft an die Seiten zu pressen.",
+      "Senke die Gewichte kontrolliert ab und lasse die Kurzhanteln unten nicht federn."
+    ]
+  },
+  "lyingCableCurl": {
+    "description": "Ein Bizepscurl in Rückenlage am Kabelzug mit einer geraden oder EZ-Stange, bei dem der Bizeps durch die Beugung der Ellenbogen belastet wird.",
+    "instructions": [
+      "Stelle eine Flachbank vor einen tiefen Kabelzug und lege dich mit dem Rücken darauf. Deine Füße zeigen zur Maschine.",
+      "Greife eine gerade Kabelstange oder eine SZ-Kabelstange mit den Handflächen nach oben und den Armen in Richtung der Umlenkrolle ausgestreckt.",
+      "Halte deine Oberarme weitgehend ruhig und beuge die Arme, um die Stange zur Stirn oder zum oberen Brustbereich zu ziehen.",
+      "Senke die Stange langsam ab, bis deine Ellbogen wieder gestreckt sind. Halte dabei das Kabel unter Spannung."
+    ],
+    "tips": [
+      "Stelle die Bank weit genug von der Umlenkrolle entfernt auf, damit das Kabel am tiefsten Punkt gespannt bleibt.",
+      "Halte deine Ellbogen stabil, statt sie zu den Rippen zu ziehen.",
+      "Führe die Wiederholungen gleichmäßig und kontrolliert aus, damit dich der Kabelzug nicht aus der Position zieht."
+    ]
+  },
+  "smithMachineCalfRaise": {
+    "description": "Stehendes Wadenheben unter der geführten Stange einer Smith-Maschine für ein stabiles Wadentraining mit schrittweise steigerbarer Belastung.",
+    "instructions": [
+      "Stelle dich unter die Smith-Stange, sodass sie auf deinem oberen Rücken aufliegt. Stelle die Fußballen, falls möglich, auf eine stabile Erhöhung.",
+      "Entriegele die Stange und senke die Fersen kontrolliert ab, um die Waden zu dehnen.",
+      "Drücke dich über die Fußballen ab und hebe die Fersen so hoch wie möglich.",
+      "Halte oben kurz inne und senke die Fersen dann langsam ab, ohne zu wippen."
+    ],
+    "tips": [
+      "Lass deine Knie leicht gebeugt und halte den Oberkörper aufrecht.",
+      "Verwende nur dann eine stabile Stufe oder Plattform, wenn sie sicher in die Smith-Maschine passt.",
+      "Lege mehr Wert auf den vollen Bewegungsumfang als auf zusätzliches Gewicht."
+    ]
   }
 }

@@ -1,7 +1,7 @@
 {
   "sourceCatalog": "doubleTriangle/Packages/WildforceShared/Sources/WildforceShared/Resources/Localizable.xcstrings",
   "sourceLanguage": "en",
-  "generatedAt": "2026-10-28T00:55:10.3712346Z",
+  "generatedAt": "2026-11-02T11:28:49.2515245Z",
   "entries": [
     {
       "iosKey": "-%@ in this period",
@@ -536,6 +536,10 @@
       "androidResource": "ios_catalog_8f020bc6ae741ae5"
     },
     {
+      "iosKey": "A chest-supported curl performed face down on an incline bench to isolate the biceps and limit momentum.",
+      "androidResource": "ios_catalog_017ed5dcc00573db"
+    },
+    {
       "iosKey": "A chest-supported machine row that isolates the back muscles while protecting the lower back.",
       "androidResource": "ios_catalog_35e74dcfe361c885"
     },
@@ -574,6 +578,10 @@
     {
       "iosKey": "A dip variation where you lean your torso forward to shift the focus from the triceps to the chest muscles.",
       "androidResource": "ios_catalog_5f076d407a053e25"
+    },
+    {
+      "iosKey": "A dumbbell bench press with the weights held close together to increase the triceps contribution.",
+      "androidResource": "ios_catalog_c18a7d105ca4a934"
     },
     {
       "iosKey": "A dynamic exercise that targets the core while providing a significant cardiovascular challenge.",
@@ -644,12 +652,20 @@
       "androidResource": "ios_catalog_5e3b59d4982ba943"
     },
     {
+      "iosKey": "A guided hip thrust machine that loads the glutes directly while providing a stable and comfortable setup.",
+      "androidResource": "ios_catalog_c85c5454c73a6d54"
+    },
+    {
       "iosKey": "A guided incline press that isolates the upper chest and allows for safe training near failure.",
       "androidResource": "ios_catalog_fdd96713d4857658"
     },
     {
       "iosKey": "A guided row variation that allows for heavy loading with a focus on mid-back contraction.",
       "androidResource": "ios_catalog_d88ff50345f87b23"
+    },
+    {
+      "iosKey": "A guided squat machine that lets you train the quads and glutes with high stability and minimal balance demand.",
+      "androidResource": "ios_catalog_0c3e05c2c5f9ab5d"
     },
     {
       "iosKey": "A guided vertical press that allows you to focus purely on shoulder drive with added safety.",
@@ -678,6 +694,10 @@
     {
       "iosKey": "A low-impact cardio option that targets the lower body while being easy on the joints.",
       "androidResource": "ios_catalog_ed13ed5df65a425e"
+    },
+    {
+      "iosKey": "A lying EZ-bar triceps extension that emphasizes the triceps through a deep elbow-flexion range.",
+      "androidResource": "ios_catalog_0fd5bcae2a41e05e"
     },
     {
       "iosKey": "A machine-based exercise that allows you to build vertical pulling strength in a controlled way.",
@@ -744,6 +764,14 @@
       "androidResource": "ios_catalog_e745e858869dcd35"
     },
     {
+      "iosKey": "A reverse fly performed on a pec deck machine to isolate the rear deltoids and upper back.",
+      "androidResource": "ios_catalog_74fa5b2d6c983843"
+    },
+    {
+      "iosKey": "A rope cable pushdown that isolates the triceps and allows a strong contraction at the bottom of each rep.",
+      "androidResource": "ios_catalog_f9a8d8ffd999cbdc"
+    },
+    {
       "iosKey": "A safe and effective way to build core stability and coordination without straining the back.",
       "androidResource": "ios_catalog_df8c4c955438504e"
     },
@@ -768,6 +796,18 @@
       "androidResource": "ios_catalog_091df3a57284cdf9"
     },
     {
+      "iosKey": "A standing calf raise under the guided bar of a Smith machine for stable, progressively loaded calf training.",
+      "androidResource": "ios_catalog_fa7f63814a3e4780"
+    },
+    {
+      "iosKey": "A supine cable curl performed with a straight or EZ-style cable bar to load the biceps through elbow flexion.",
+      "androidResource": "ios_catalog_9424e943055014d0"
+    },
+    {
+      "iosKey": "A supported curl that keeps the upper arms fixed to isolate the biceps through a controlled range of motion.",
+      "androidResource": "ios_catalog_6bb06413098aafb3"
+    },
+    {
       "iosKey": "A targeted machine exercise that isolates the glutes through a kickback motion.",
       "androidResource": "ios_catalog_ed6d615f4486d162"
     },
@@ -782,6 +822,10 @@
     {
       "iosKey": "Absorb the impact by landing on the balls of your feet and rolling to your heels.",
       "androidResource": "ios_catalog_898fdcb0f9e00781"
+    },
+    {
+      "iosKey": "Accessory",
+      "androidResource": "ios_catalog_adf7651801aea461"
     },
     {
       "iosKey": "Account",
@@ -954,6 +998,10 @@
     {
       "iosKey": "Adjust speed and incline as needed to match your fitness level.",
       "androidResource": "ios_catalog_80b4db767ee477a0"
+    },
+    {
+      "iosKey": "Adjust the back pad and belt or hip pad so it rests securely across your hips.",
+      "androidResource": "ios_catalog_e6adc270c861eb8b"
     },
     {
       "iosKey": "Adjust the bench position to find the most comfortable pressing line.",
@@ -1268,6 +1316,10 @@
       "androidResource": "ios_catalog_a4a589f8355df9ba"
     },
     {
+      "iosKey": "Are you sure you want to redo this plan? A replacement will be generated in the same training cycle, while completed workouts and results are kept.",
+      "androidResource": "ios_catalog_0f70a67a67c9e498"
+    },
+    {
       "iosKey": "Are you sure you want to redo this plan? The current plan will be deleted and a new one will be generated.",
       "androidResource": "ios_catalog_7e2442d03e31cf5d"
     },
@@ -1314,6 +1366,10 @@
     {
       "iosKey": "Attach a rope to a cable pulley at upper-chest or eye level.",
       "androidResource": "ios_catalog_b2f50e7dc776909e"
+    },
+    {
+      "iosKey": "Attach a rope to a high cable pulley and stand facing the machine.",
+      "androidResource": "ios_catalog_2be8c739129c09d7"
     },
     {
       "iosKey": "Attach a rope to a high pulley and kneel facing the cable machine.",
@@ -1480,6 +1536,10 @@
       "androidResource": "ios_catalog_8c09e27eec3655f9"
     },
     {
+      "iosKey": "Avoid leaning your body weight into the cable to move the load.",
+      "androidResource": "ios_catalog_f27855c4614e8f44"
+    },
+    {
       "iosKey": "Avoid letting your hips bounce up and down.",
       "androidResource": "ios_catalog_e239d2faf9aa5482"
     },
@@ -1592,6 +1652,10 @@
       "androidResource": "ios_catalog_9903dbd0d62cfc8f"
     },
     {
+      "iosKey": "Barbell Bent-Over Row",
+      "androidResource": "ios_catalog_14213549f94ae76a"
+    },
+    {
       "iosKey": "Barbell Decline Bench Press",
       "androidResource": "ios_catalog_9c65bd831e1381c7"
     },
@@ -1602,6 +1666,14 @@
     {
       "iosKey": "Barbell Incline Bench Press",
       "androidResource": "ios_catalog_83edb6bf19b44ccb"
+    },
+    {
+      "iosKey": "Barbell Overhead Press",
+      "androidResource": "ios_catalog_ff45e806225bdd26"
+    },
+    {
+      "iosKey": "Barbell Romanian Deadlift",
+      "androidResource": "ios_catalog_062bde1a757533ec"
     },
     {
       "iosKey": "Barcode",
@@ -2388,6 +2460,10 @@
       "androidResource": "ios_catalog_85c8376add6cc5e3"
     },
     {
+      "iosKey": "Close-Grip Dumbbell Bench Press",
+      "androidResource": "ios_catalog_cc60073797181ec0"
+    },
+    {
       "iosKey": "cm",
       "androidResource": "ios_catalog_b5039c325d7107d6"
     },
@@ -2506,6 +2582,10 @@
     {
       "iosKey": "Completed workouts by weekday",
       "androidResource": "ios_catalog_cdd0797d529ac6cb"
+    },
+    {
+      "iosKey": "Compound",
+      "androidResource": "ios_catalog_b13b4bbd622c432d"
     },
     {
       "iosKey": "Configure",
@@ -2630,6 +2710,10 @@
     {
       "iosKey": "Control speed",
       "androidResource": "ios_catalog_bf431d964505b2fe"
+    },
+    {
+      "iosKey": "Control the bottom position and use the safety stops at an appropriate depth.",
+      "androidResource": "ios_catalog_62b0cefbe4852eae"
     },
     {
       "iosKey": "Control the descent to avoid banging your back knee on the floor.",
@@ -2840,12 +2924,20 @@
       "androidResource": "ios_catalog_1b337c868f49053b"
     },
     {
+      "iosKey": "Curl the bar toward your shoulders while keeping your upper arms against the support.",
+      "androidResource": "ios_catalog_a98f8ba9df0801cd"
+    },
+    {
       "iosKey": "Curl the handle toward your shoulder while keeping your elbow from drifting too far forward.",
       "androidResource": "ios_catalog_cd320a92bbedbecb"
     },
     {
       "iosKey": "Curl the handle toward your shoulders while keeping your upper arms mostly still.",
       "androidResource": "ios_catalog_bc731288de1dde83"
+    },
+    {
+      "iosKey": "Curl the weights toward your shoulders without letting your elbows travel forward.",
+      "androidResource": "ios_catalog_f64a0c3805732f30"
     },
     {
       "iosKey": "Curl the weights up toward your shoulders by bending your elbows.",
@@ -3120,8 +3212,16 @@
       "androidResource": "ios_catalog_b073fb73277c8315"
     },
     {
+      "iosKey": "Do not bounce the bar from the bottom position.",
+      "androidResource": "ios_catalog_e216a4886bdb18ec"
+    },
+    {
       "iosKey": "Do not chase range of motion; stop the descent as soon as your lower back starts to lift.",
       "androidResource": "ios_catalog_3ddc13cf59d3aa57"
+    },
+    {
+      "iosKey": "Do not force the dumbbells to touch if that irritates your wrists.",
+      "androidResource": "ios_catalog_b4ab8422c7946e18"
     },
     {
       "iosKey": "Do not let your shoulders roll forward as the weight lowers.",
@@ -3332,6 +3432,10 @@
       "androidResource": "ios_catalog_cea5e2fde54a074c"
     },
     {
+      "iosKey": "Drive through your heels to extend your hips until your torso and thighs form a straight line.",
+      "androidResource": "ios_catalog_3c95fb1f5488be11"
+    },
+    {
       "iosKey": "Drive through your heels to lift your hips toward the ceiling until your body forms a straight line from shoulders to knees.",
       "androidResource": "ios_catalog_b98ba75911391d6d"
     },
@@ -3342,6 +3446,10 @@
     {
       "iosKey": "Drive through your heels to return to the starting position.",
       "androidResource": "ios_catalog_b970afeca9e44e64"
+    },
+    {
+      "iosKey": "Drive through your whole feet to return to the start without forcefully locking your knees.",
+      "androidResource": "ios_catalog_89bb253a0359a029"
     },
     {
       "iosKey": "Drive your hips forward to return to the starting position.",
@@ -4012,6 +4120,10 @@
       "androidResource": "ios_catalog_c9e0d7387a85fa72"
     },
     {
+      "iosKey": "Extend your elbows to return the bar to the starting position without moving your shoulders excessively.",
+      "androidResource": "ios_catalog_feb0b4558ce1db67"
+    },
+    {
       "iosKey": "Extend your elbows until your arms are straight, squeezing the triceps at the top.",
       "androidResource": "ios_catalog_16ef4f49c374a40c"
     },
@@ -4050,6 +4162,10 @@
     {
       "iosKey": "Ez Bar",
       "androidResource": "ios_catalog_0cc8aef20a135088"
+    },
+    {
+      "iosKey": "EZ Bar Skull Crusher",
+      "androidResource": "ios_catalog_2204dbe2e95ee1b2"
     },
     {
       "iosKey": "Face away from the machine and bring the rope overhead with elbows bent and pointed forward.",
@@ -4972,6 +5088,10 @@
       "androidResource": "ios_catalog_bb84ff6a957f0807"
     },
     {
+      "iosKey": "Grip the handles with your arms extended in front of you at shoulder height.",
+      "androidResource": "ios_catalog_1d42217304a0678e"
+    },
+    {
       "iosKey": "Grip the handles with your arms extended in front of you.",
       "androidResource": "ios_catalog_5b39851e42e93507"
     },
@@ -4982,6 +5102,10 @@
     {
       "iosKey": "Grip the parallel bars and push yourself up until your arms are fully extended.",
       "androidResource": "ios_catalog_eebedd934c104c0a"
+    },
+    {
+      "iosKey": "Grip the rope ends with a neutral grip and keep your elbows close to your sides.",
+      "androidResource": "ios_catalog_c4ffd94fa5157440"
     },
     {
       "iosKey": "Grocery List",
@@ -5006,6 +5130,14 @@
     {
       "iosKey": "Gymnastic Rings",
       "androidResource": "ios_catalog_44f003bcd129f00c"
+    },
+    {
+      "iosKey": "Hack Squat",
+      "androidResource": "ios_catalog_390440166430f19f"
+    },
+    {
+      "iosKey": "Hack Squat Machine",
+      "androidResource": "ios_catalog_d0a9cd8fc1161c8d"
     },
     {
       "iosKey": "Hammer Curl",
@@ -5180,6 +5312,10 @@
       "androidResource": "ios_catalog_778bff28d318ee01"
     },
     {
+      "iosKey": "Hip Thrust Machine",
+      "androidResource": "ios_catalog_a5996633f5784abf"
+    },
+    {
       "iosKey": "Hips",
       "androidResource": "ios_catalog_b004098c1134baf8"
     },
@@ -5194,6 +5330,14 @@
     {
       "iosKey": "Hold a dumbbell or kettlebell against your chest with both hands.",
       "androidResource": "ios_catalog_6760b184af6537fe"
+    },
+    {
+      "iosKey": "Hold a straight or EZ-style cable bar with palms facing up and your arms extended toward the pulley.",
+      "androidResource": "ios_catalog_5e9280acab8e926e"
+    },
+    {
+      "iosKey": "Hold an EZ bar with an underhand grip and begin with your arms almost fully extended.",
+      "androidResource": "ios_catalog_c9730880765d2b16"
     },
     {
       "iosKey": "Hold and breathe into the stretch, then switch sides.",
@@ -5564,6 +5708,10 @@
       "androidResource": "ios_catalog_9da1e451fda8839e"
     },
     {
+      "iosKey": "Isolation",
+      "androidResource": "ios_catalog_45c4fc064e525974"
+    },
+    {
       "iosKey": "It doesn’t need to be exact here. You’ll be able to move and adjust the photo before saving.",
       "androidResource": "ios_catalog_e24b064a5b154bae"
     },
@@ -5732,6 +5880,10 @@
       "androidResource": "ios_catalog_90acead64187deee"
     },
     {
+      "iosKey": "Keep the dumbbells close together with your palms facing each other or slightly inward.",
+      "androidResource": "ios_catalog_c044a2fab6490a68"
+    },
+    {
       "iosKey": "Keep the movement controlled and focus on the glute contraction.",
       "androidResource": "ios_catalog_585654ade860eb4a"
     },
@@ -5822,6 +5974,10 @@
     {
       "iosKey": "Keep your chest as upright as possible.",
       "androidResource": "ios_catalog_de10c40be40acd32"
+    },
+    {
+      "iosKey": "Keep your chest firmly against the pad throughout the set.",
+      "androidResource": "ios_catalog_ba4399ace21b5c6d"
     },
     {
       "iosKey": "Keep your chest pressed firmly against the pad to isolate your back.",
@@ -5980,6 +6136,14 @@
       "androidResource": "ios_catalog_b192cb2681aa33ac"
     },
     {
+      "iosKey": "Keep your elbows stable instead of pulling them toward your ribs.",
+      "androidResource": "ios_catalog_cca10b380f98c2fa"
+    },
+    {
+      "iosKey": "Keep your elbows tucked enough to feel the triceps, without pinning them painfully against your sides.",
+      "androidResource": "ios_catalog_65d164925fa6037a"
+    },
+    {
       "iosKey": "Keep your elbows tucked in close to your body.",
       "androidResource": "ios_catalog_30e0d132f75e4a01"
     },
@@ -6056,6 +6220,10 @@
       "androidResource": "ios_catalog_06831e880482b7e1"
     },
     {
+      "iosKey": "Keep your knees softly unlocked and your torso upright.",
+      "androidResource": "ios_catalog_349f3fe532cefe52"
+    },
+    {
       "iosKey": "Keep your knees together and your torso upright.",
       "androidResource": "ios_catalog_484a7eac4f69c3d9"
     },
@@ -6066,6 +6234,10 @@
     {
       "iosKey": "Keep your legs straight as long as possible to maximize the hamstring stretch.",
       "androidResource": "ios_catalog_ff3bcc7a46be2a19"
+    },
+    {
+      "iosKey": "Keep your lower back in contact with the pad throughout the movement.",
+      "androidResource": "ios_catalog_f56d8efcdf970bf4"
     },
     {
       "iosKey": "Keep your lower back pressed firmly into the floor throughout the movement.",
@@ -6096,6 +6268,10 @@
       "androidResource": "ios_catalog_a2edfba27b3993f9"
     },
     {
+      "iosKey": "Keep your ribs down and avoid overextending your lower back at the top.",
+      "androidResource": "ios_catalog_648f253cf3ea2e48"
+    },
+    {
       "iosKey": "Keep your shoulder blades retracted (squeezed together) throughout the lift.",
       "androidResource": "ios_catalog_9548ab8a146224a6"
     },
@@ -6110,6 +6286,10 @@
     {
       "iosKey": "Keep your shoulders down and relaxed throughout.",
       "androidResource": "ios_catalog_c75f121cbdd76bf0"
+    },
+    {
+      "iosKey": "Keep your shoulders down and your upper arms still throughout the movement.",
+      "androidResource": "ios_catalog_5264891d22bfd4f4"
     },
     {
       "iosKey": "Keep your shoulders relaxed and avoid gripping the handles too tightly.",
@@ -6148,6 +6328,18 @@
       "androidResource": "ios_catalog_714223da56b61f69"
     },
     {
+      "iosKey": "Keep your upper arms mostly fixed as you curl the bar toward your forehead or upper chest.",
+      "androidResource": "ios_catalog_f44e21132e4f9f47"
+    },
+    {
+      "iosKey": "Keep your upper arms mostly vertical as you bend your elbows to lower the bar toward your forehead or just behind it.",
+      "androidResource": "ios_catalog_85aaae4b8c6c21ed"
+    },
+    {
+      "iosKey": "Keep your upper arms perpendicular to the floor throughout the movement.",
+      "androidResource": "ios_catalog_f157d6a1ddfc5cff"
+    },
+    {
       "iosKey": "Keep your upper arms stationary throughout the movement.",
       "androidResource": "ios_catalog_406dfc93a765a8c8"
     },
@@ -6166,6 +6358,14 @@
     {
       "iosKey": "Keep your weight primarily on the front foot.",
       "androidResource": "ios_catalog_49c99126389f3aab"
+    },
+    {
+      "iosKey": "Keep your wrists neutral and avoid bending them back under load.",
+      "androidResource": "ios_catalog_eb9a5c34ec487433"
+    },
+    {
+      "iosKey": "Keep your wrists neutral and control the lowering phase.",
+      "androidResource": "ios_catalog_ff8aba018b5f8f23"
     },
     {
       "iosKey": "Keep your wrists stacked over your elbows throughout the press.",
@@ -6308,6 +6508,10 @@
       "androidResource": "ios_catalog_fd26db45a8b53034"
     },
     {
+      "iosKey": "Lead with your elbows and avoid shrugging your shoulders upward.",
+      "androidResource": "ios_catalog_b10239049b708989"
+    },
+    {
       "iosKey": "Lead with your elbows, not your wrists.",
       "androidResource": "ios_catalog_9b5cf19f233bbf6d"
     },
@@ -6364,8 +6568,16 @@
       "androidResource": "ios_catalog_ae5239ec63f28cd4"
     },
     {
+      "iosKey": "Let the elbows travel back only slightly; do not turn the movement into a pullover.",
+      "androidResource": "ios_catalog_00fe7ade18ad30a9"
+    },
+    {
       "iosKey": "Let us know about any movement limits or areas to be careful with.",
       "androidResource": "ios_catalog_3f5ae9179ffc2259"
+    },
+    {
+      "iosKey": "Let your arms hang straight toward the floor while holding dumbbells with palms facing forward.",
+      "androidResource": "ios_catalog_7b81c767669e23ef"
     },
     {
       "iosKey": "Let your watch count your reps automatically while you focus on the movement.",
@@ -6430,6 +6642,14 @@
     {
       "iosKey": "Lie flat on a bench holding a dumbbell in each hand at chest level.",
       "androidResource": "ios_catalog_b6643cbec43ecc5d"
+    },
+    {
+      "iosKey": "Lie flat on a bench holding an EZ bar above your chest with a narrow overhand grip.",
+      "androidResource": "ios_catalog_a68412a31a66c516"
+    },
+    {
+      "iosKey": "Lie flat on a bench with a dumbbell in each hand held above the center of your chest.",
+      "androidResource": "ios_catalog_a90bc33919e9c7dd"
     },
     {
       "iosKey": "Lie flat on a bench with dumbbells held over your chest, palms facing each other.",
@@ -6768,6 +6988,14 @@
       "androidResource": "ios_catalog_11568682beec8e70"
     },
     {
+      "iosKey": "Lower the bar slowly until you feel a stretch in your biceps without forcing your elbows straight.",
+      "androidResource": "ios_catalog_1dfd255456ae8eff"
+    },
+    {
+      "iosKey": "Lower the bar slowly until your elbows are extended again while keeping tension on the cable.",
+      "androidResource": "ios_catalog_6011ac8e063d9a98"
+    },
+    {
       "iosKey": "Lower the bar to your lower chest/upper abs area.",
       "androidResource": "ios_catalog_5af56471d80b3deb"
     },
@@ -6786,6 +7014,10 @@
     {
       "iosKey": "Lower the dumbbells back to shoulder height with control.",
       "androidResource": "ios_catalog_55a079ae1a8c1e0b"
+    },
+    {
+      "iosKey": "Lower the dumbbells slowly until your arms are fully extended again.",
+      "androidResource": "ios_catalog_26b2af44eef43de2"
     },
     {
       "iosKey": "Lower the dumbbells with control until they are level with your chest.",
@@ -6830,6 +7062,10 @@
     {
       "iosKey": "Lower the weights out to the sides in a wide arc, keeping a slight bend in your elbows.",
       "androidResource": "ios_catalog_9c32e482e74487c3"
+    },
+    {
+      "iosKey": "Lower the weights with your elbows tracking close to your torso.",
+      "androidResource": "ios_catalog_090828f41226e816"
     },
     {
       "iosKey": "Lower them back down with control.",
@@ -6916,6 +7152,10 @@
       "androidResource": "ios_catalog_12dbd5aa23e8edaa"
     },
     {
+      "iosKey": "Lying Cable Curl",
+      "androidResource": "ios_catalog_c3080eb1afc50d31"
+    },
+    {
       "iosKey": "Lying Leg Raise",
       "androidResource": "ios_catalog_88ee99cff56f5a3c"
     },
@@ -6930,6 +7170,10 @@
     {
       "iosKey": "Machine Hip Adduction",
       "androidResource": "ios_catalog_c44b41aaa0622dad"
+    },
+    {
+      "iosKey": "Machine Hip Thrust",
+      "androidResource": "ios_catalog_e94f2758a9aa986c"
     },
     {
       "iosKey": "Machine Rear Delt Fly",
@@ -7188,6 +7432,10 @@
       "androidResource": "ios_catalog_fb1ddf89e189ce51"
     },
     {
+      "iosKey": "Managed by your gym",
+      "androidResource": "ios_catalog_c6414b199b116853"
+    },
+    {
       "iosKey": "Manual",
       "androidResource": "ios_catalog_b0b9fe24ffa96291"
     },
@@ -7290,6 +7538,10 @@
     {
       "iosKey": "Meals per day",
       "androidResource": "ios_catalog_daa3eadd18c18e8e"
+    },
+    {
+      "iosKey": "Mechanic",
+      "androidResource": "ios_catalog_57d04c6969ddd750"
     },
     {
       "iosKey": "Medicine Ball",
@@ -7996,6 +8248,10 @@
       "androidResource": "ios_catalog_3f940108cb1ecd9c"
     },
     {
+      "iosKey": "Open your arms in a wide arc until they are in line with your torso.",
+      "androidResource": "ios_catalog_1d4dc69a02607242"
+    },
+    {
       "iosKey": "Opens menu with feedback and help options",
       "androidResource": "ios_catalog_452e9b5c6d088381"
     },
@@ -8102,6 +8358,14 @@
     {
       "iosKey": "Pause",
       "androidResource": "ios_catalog_858e4ba7a29fd38b"
+    },
+    {
+      "iosKey": "Pause briefly at the top without lifting your chest from the bench.",
+      "androidResource": "ios_catalog_5a4b0d1f0b086fea"
+    },
+    {
+      "iosKey": "Pause briefly at the top, then lower slowly without bouncing.",
+      "androidResource": "ios_catalog_4b0be405f8b30717"
     },
     {
       "iosKey": "Pause briefly near the top to maximize the biceps contraction.",
@@ -8284,6 +8548,10 @@
       "androidResource": "ios_catalog_6840b143cc33c1f3"
     },
     {
+      "iosKey": "Place a flat bench in front of a low cable pulley and lie on your back with your feet toward the machine.",
+      "androidResource": "ios_catalog_afeebeb9059ddc22"
+    },
+    {
       "iosKey": "Place a towel between your elbow and your side to ensure your arm stays tucked.",
       "androidResource": "ios_catalog_28a39f55e4f0e433"
     },
@@ -8306,6 +8574,10 @@
     {
       "iosKey": "Place your feet on the platform about shoulder-width apart.",
       "androidResource": "ios_catalog_db3f3fcc3b729896"
+    },
+    {
+      "iosKey": "Place your feet shoulder-width apart on the platform, slightly forward of your hips.",
+      "androidResource": "ios_catalog_40e865ab369f941e"
     },
     {
       "iosKey": "Place your forearm(s) against the doorframe with the elbow at shoulder height.",
@@ -8396,6 +8668,10 @@
       "androidResource": "ios_catalog_0af43ff586a88a46"
     },
     {
+      "iosKey": "Plant your feet about shoulder-width apart with your knees bent at roughly 90 degrees at the top.",
+      "androidResource": "ios_catalog_f3afbbe20c055668"
+    },
+    {
       "iosKey": "Plant your feet firmly on the ground, about shoulder-width apart.",
       "androidResource": "ios_catalog_241bc1a4b6a051b7"
     },
@@ -8452,6 +8728,10 @@
       "androidResource": "ios_catalog_8b70ce4b0aa36cbd"
     },
     {
+      "iosKey": "Position your feet so you feel the movement primarily in your glutes rather than your hamstrings.",
+      "androidResource": "ios_catalog_096e5267a9c58919"
+    },
+    {
       "iosKey": "Position yourself in a bent-over stance over the Smith machine bar.",
       "androidResource": "ios_catalog_7cf427d138995e42"
     },
@@ -8478,6 +8758,10 @@
     {
       "iosKey": "Pre-workout",
       "androidResource": "ios_catalog_7631d19b828a0852"
+    },
+    {
+      "iosKey": "Preacher Curl",
+      "androidResource": "ios_catalog_94eef836e81dcb9f"
     },
     {
       "iosKey": "Prefer a body-part split for advanced hypertrophy-focused structure when the user's frequency and recovery capacity support it. Avoid using it if the schedule is too limited.",
@@ -8536,6 +8820,10 @@
       "androidResource": "ios_catalog_9bc867e65b8fa05c"
     },
     {
+      "iosKey": "Press back up while keeping the dumbbells close and your shoulders stable against the bench.",
+      "androidResource": "ios_catalog_7d4e4b007277aa78"
+    },
+    {
       "iosKey": "Press the bar back to the starting position.",
       "androidResource": "ios_catalog_dcbe88f3ab8eab0a"
     },
@@ -8560,6 +8848,10 @@
       "androidResource": "ios_catalog_4d841945212eceb9"
     },
     {
+      "iosKey": "Press the rope down until your elbows are fully extended, separating the rope ends slightly at the bottom.",
+      "androidResource": "ios_catalog_8057d119757b0d8e"
+    },
+    {
       "iosKey": "Press the weights overhead while rotating your palms forward.",
       "androidResource": "ios_catalog_2d6c2b4345d13eb8"
     },
@@ -8570,6 +8862,10 @@
     {
       "iosKey": "Press the weights upward until your arms are fully extended.",
       "androidResource": "ios_catalog_93e7354e37f14329"
+    },
+    {
+      "iosKey": "Press through the balls of your feet to raise your heels as high as possible.",
+      "androidResource": "ios_catalog_4a6c41afff246f2c"
     },
     {
       "iosKey": "Pressing a barbell on an incline bench targets the upper chest and shoulders while allowing for heavier loads.",
@@ -8622,6 +8918,10 @@
     {
       "iosKey": "Primary muscles: %@",
       "androidResource": "ios_catalog_9f7e6dadba4d354b"
+    },
+    {
+      "iosKey": "Prioritize full range of motion over adding load.",
+      "androidResource": "ios_catalog_664548c1c72cb9fa"
     },
     {
       "iosKey": "Privacy",
@@ -9308,6 +9608,10 @@
       "androidResource": "ios_catalog_942087cc2d41e013"
     },
     {
+      "iosKey": "Return the rope under control until your forearms are just above parallel to the floor.",
+      "androidResource": "ios_catalog_152a1d6d416ab938"
+    },
+    {
       "iosKey": "Return to a standing position and repeat.",
       "androidResource": "ios_catalog_363c1cdc61a5d9fe"
     },
@@ -9334,6 +9638,10 @@
     {
       "iosKey": "Reverse Lunge",
       "androidResource": "ios_catalog_9a9b95321e6fcf8b"
+    },
+    {
+      "iosKey": "Reverse Pec Deck",
+      "androidResource": "ios_catalog_f77587cd28e9b50d"
     },
     {
       "iosKey": "Review",
@@ -9400,12 +9708,12 @@
       "androidResource": "ios_catalog_7e7738f6b6c46bc5"
     },
     {
-      "iosKey": "Romanian Deadlift",
-      "androidResource": "ios_catalog_2bb05dd30ce45cf9"
-    },
-    {
       "iosKey": "Room",
       "androidResource": "ios_catalog_911ea89c43d9dbb8"
+    },
+    {
+      "iosKey": "Rope Triceps Pushdown",
+      "androidResource": "ios_catalog_e6996e5b489f9dc5"
     },
     {
       "iosKey": "Rotate your ankle in a circular motion, drawing the largest circle possible with your toes.",
@@ -9760,6 +10068,10 @@
       "androidResource": "ios_catalog_2c66a1b32baedf1c"
     },
     {
+      "iosKey": "Set an adjustable bench to a steep incline and lie face down with your chest against the pad.",
+      "androidResource": "ios_catalog_2a1afc5e3249481d"
+    },
+    {
       "iosKey": "Set Analysis",
       "androidResource": "ios_catalog_7d2551b06b6b8650"
     },
@@ -9784,6 +10096,10 @@
       "androidResource": "ios_catalog_32211102e93306b4"
     },
     {
+      "iosKey": "Set the bench far enough from the pulley that the cable stays taut at the bottom.",
+      "androidResource": "ios_catalog_1da96c130f02395a"
+    },
+    {
       "iosKey": "Set the bench to a 30-45 degree incline and position yourself under the bar.",
       "androidResource": "ios_catalog_016cf1dafec466d8"
     },
@@ -9796,12 +10112,24 @@
       "androidResource": "ios_catalog_2625ae5c274ba395"
     },
     {
+      "iosKey": "Set the pec deck arms behind you and sit facing the pad with your chest supported.",
+      "androidResource": "ios_catalog_9313b623a29dc8eb"
+    },
+    {
       "iosKey": "Set the session length you want us to optimize for.",
       "androidResource": "ios_catalog_86ceafaebd433e0c"
     },
     {
+      "iosKey": "Set the shoulder pads so you can stand tall with your back supported against the pad.",
+      "androidResource": "ios_catalog_2003361622ac9460"
+    },
+    {
       "iosKey": "Set up a consistent check-in",
       "androidResource": "ios_catalog_399f59efecca600c"
+    },
+    {
+      "iosKey": "Set up an angled preacher support or an adjustable bench so your upper arms rest securely on the pad.",
+      "androidResource": "ios_catalog_611c38152fde5c7a"
     },
     {
       "iosKey": "Set up category blocking before your next workout starts.",
@@ -10244,6 +10572,10 @@
       "androidResource": "ios_catalog_b56e71cce45dab82"
     },
     {
+      "iosKey": "Smith Machine Calf Raise",
+      "androidResource": "ios_catalog_fdd61578b96f0890"
+    },
+    {
       "iosKey": "Smith Machine Decline Bench Press",
       "androidResource": "ios_catalog_010a955c6490a13d"
     },
@@ -10320,6 +10652,10 @@
       "androidResource": "ios_catalog_5e2b74030767b55b"
     },
     {
+      "iosKey": "Spider Curl",
+      "androidResource": "ios_catalog_130777d22cb1f0b4"
+    },
+    {
       "iosKey": "Sprawl",
       "androidResource": "ios_catalog_6190fdae93a2fea9"
     },
@@ -10376,6 +10712,10 @@
       "androidResource": "ios_catalog_02f7f0a3a9a99497"
     },
     {
+      "iosKey": "Squeeze your glutes at the top, then lower the load under control.",
+      "androidResource": "ios_catalog_df5d1f9bf086b970"
+    },
+    {
       "iosKey": "Squeeze your glutes at the top, then lower your hips back toward the floor.",
       "androidResource": "ios_catalog_8ea72526f0d7604c"
     },
@@ -10394,6 +10734,10 @@
     {
       "iosKey": "Squeeze your lower chest at the bottom of the movement.",
       "androidResource": "ios_catalog_17b1667402c1561e"
+    },
+    {
+      "iosKey": "Squeeze your rear delts, then return slowly to the starting position.",
+      "androidResource": "ios_catalog_295cb0d6ce80bd4f"
     },
     {
       "iosKey": "Squeeze your rear delts, then slowly return to the starting position.",
@@ -10502,6 +10846,10 @@
     {
       "iosKey": "Stand tall and keep your core tight.",
       "androidResource": "ios_catalog_65d993dc745a9699"
+    },
+    {
+      "iosKey": "Stand under the Smith bar with it resting across your upper back and the balls of your feet on a stable raised surface if available.",
+      "androidResource": "ios_catalog_0a2f68d8d7d643f2"
     },
     {
       "iosKey": "Stand up fully, then step back down one foot at a time.",
@@ -11030,6 +11378,10 @@
     {
       "iosKey": "Tap to reveal",
       "androidResource": "ios_catalog_4efdce880cdc224e"
+    },
+    {
+      "iosKey": "Tap value to edit it",
+      "androidResource": "ios_catalog_7ca905bd8badf9b1"
     },
     {
       "iosKey": "Target",
@@ -11896,6 +12248,14 @@
       "androidResource": "ios_catalog_e70d5d3b5c0725e3"
     },
     {
+      "iosKey": "Unlock the bar and lower your heels under control to stretch your calves.",
+      "androidResource": "ios_catalog_543e909d477e9048"
+    },
+    {
+      "iosKey": "Unlock the safety handles and lower under control by bending your knees and hips.",
+      "androidResource": "ios_catalog_b1f8b884a71c6556"
+    },
+    {
       "iosKey": "Unlock with Face ID",
       "androidResource": "ios_catalog_3957d339a6308816"
     },
@@ -11972,12 +12332,24 @@
       "androidResource": "ios_catalog_338408991162ecc5"
     },
     {
+      "iosKey": "Use a controlled descent and avoid bouncing the dumbbells at the bottom.",
+      "androidResource": "ios_catalog_0004983970e628f3"
+    },
+    {
       "iosKey": "Use a controlled load that lets you fully shorten the abs on every rep.",
       "androidResource": "ios_catalog_39c9820251460400"
     },
     {
+      "iosKey": "Use a controlled range and stop short of painful elbow extension.",
+      "androidResource": "ios_catalog_bfee8ad20a5c1acf"
+    },
+    {
       "iosKey": "Use a controlled range that lets you feel your lats stretch at the top and contract near your thighs.",
       "androidResource": "ios_catalog_a8b1742cbdc89908"
+    },
+    {
+      "iosKey": "Use a controlled tempo and avoid letting the weight stack touch between reps.",
+      "androidResource": "ios_catalog_1b2fe4f809bb341f"
     },
     {
       "iosKey": "Use a controlled tempo for both the opening and closing phases.",
@@ -11986,6 +12358,14 @@
     {
       "iosKey": "Use a controlled tempo to avoid hitting your head or neck.",
       "androidResource": "ios_catalog_78f995817dd3ec85"
+    },
+    {
+      "iosKey": "Use a foot position that lets your knees track comfortably in line with your toes.",
+      "androidResource": "ios_catalog_502f9962c2cd67b4"
+    },
+    {
+      "iosKey": "Use a full but controlled range of motion without locking the elbows aggressively.",
+      "androidResource": "ios_catalog_29f42d59ab5a51f7"
     },
     {
       "iosKey": "Use a light to moderate load and focus on the squeeze at the end range.",
@@ -12016,12 +12396,20 @@
       "androidResource": "ios_catalog_4bc37862fdc79970"
     },
     {
+      "iosKey": "Use a spotter or safety setup when loading heavily.",
+      "androidResource": "ios_catalog_0445982d0957bcff"
+    },
+    {
       "iosKey": "Use a spotter, especially when lifting heavy weights.",
       "androidResource": "ios_catalog_d951a4b6b61ac3e4"
     },
     {
       "iosKey": "Use a squat rack and a spotter for safety when lifting heavy.",
       "androidResource": "ios_catalog_3ae1a577926c887e"
+    },
+    {
+      "iosKey": "Use a stable step or platform only if it fits safely inside the Smith machine.",
+      "androidResource": "ios_catalog_ecfa05e8a656ef25"
     },
     {
       "iosKey": "Use a very light weight; this is about joint health and stability, not maximum load.",
@@ -12056,6 +12444,10 @@
       "androidResource": "ios_catalog_f19d177de46f7924"
     },
     {
+      "iosKey": "Use lighter loads than in standing curls to keep the movement strict.",
+      "androidResource": "ios_catalog_a92a3dc4328e0f94"
+    },
+    {
       "iosKey": "Use lighter weights and focus on the quality of the contraction.",
       "androidResource": "ios_catalog_c30af167c24f1786"
     },
@@ -12080,6 +12472,14 @@
       "androidResource": "ios_catalog_71f165a7fc0a1775"
     },
     {
+      "iosKey": "Use smooth, controlled repetitions to avoid the cable stack pulling you out of position.",
+      "androidResource": "ios_catalog_12cefd52fdd192cd"
+    },
+    {
+      "iosKey": "Use the angled grips of the EZ bar to keep your wrists comfortable.",
+      "androidResource": "ios_catalog_a63eab14ddd8cae3"
+    },
+    {
       "iosKey": "Use the available tools to master these habits.",
       "androidResource": "ios_catalog_8f743109ef51b716"
     },
@@ -12094,6 +12494,10 @@
     {
       "iosKey": "Use the incline feature to simulate outdoor walking and increase intensity.",
       "androidResource": "ios_catalog_5f8d31d5120856b8"
+    },
+    {
+      "iosKey": "Use the machine's safety stops before loading the movement heavily.",
+      "androidResource": "ios_catalog_555d85ad7bda54be"
     },
     {
       "iosKey": "Use the planned rep speed of %@ for every rep. That tempo tells you how controlled the lowering, pause, and lifting phases should be so the set is driven by movement quality, not just by load.",
@@ -12882,6 +13286,10 @@
     {
       "iosKey": "Your current place in the active cycle.",
       "androidResource": "ios_catalog_7464117beeadcca5"
+    },
+    {
+      "iosKey": "Your default location is your gym, so its staff keep this equipment up to date.",
+      "androidResource": "ios_catalog_823365d24416d63c"
     },
     {
       "iosKey": "Your feedback has been sent successfully. We appreciate your input!",

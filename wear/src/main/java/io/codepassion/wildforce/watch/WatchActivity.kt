@@ -13,6 +13,8 @@ import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -90,6 +92,7 @@ private data class WatchState(
 private enum class WatchPage { Activity, Path, Style, Insights }
 
 private class WatchBleClient(
+    private val context: android.content.Context,
     private val onState: (WatchState?) -> Unit,
     private val onStatus: (String) -> Unit,
     private val onRemoteStateEmpty: () -> Unit,
@@ -118,38 +121,38 @@ private class WatchBleClient(
         }
 
         override fun onScanFailed(errorCode: Int) {
-            onStatus("No se pudo buscar el reloj ($errorCode)")
+            onStatus(context.getString(R.string.watch_scan_failed, errorCode))
         }
     }
 
     @SuppressLint("MissingPermission")
     fun start(adapter: android.bluetooth.BluetoothAdapter?) {
         scanner = adapter?.bluetoothLeScanner
-        val activeScanner = scanner ?: run { onStatus("Bluetooth no disponible"); return }
+        val activeScanner = scanner ?: run { onStatus(context.getString(R.string.watch_bluetooth_unavailable)); return }
         if (scanning) return
         scanning = true
-        onStatus("Buscando el teléfono…")
+        onStatus(context.getString(R.string.watch_searching_phone))
         activeScanner.startScan(
             listOf(ScanFilter.Builder().setServiceUuid(android.os.ParcelUuid(serviceUuid)).build()),
             ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(),
             scanCallback,
         )
-        handler.postDelayed({ if (scanning) { stopScan(); onStatus("No se encontró el teléfono") } }, 12_000)
+        handler.postDelayed({ if (scanning) { stopScan(); onStatus(context.getString(R.string.watch_phone_not_found)) } }, 12_000)
     }
 
     @SuppressLint("MissingPermission")
     private fun connect(device: BluetoothDevice) {
-        onStatus("Conectando…")
+        onStatus(context.getString(R.string.watch_connecting))
         gatt = device.connectGatt(null, false, object : BluetoothGattCallback() {
             override fun onConnectionStateChange(g: BluetoothGatt, status: Int, newState: Int) {
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
-                    onStatus("Conectado")
+                    onStatus(context.getString(R.string.watch_connected))
                     g.discoverServices()
                 } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                     stateCharacteristic = null
                     commandCharacteristic = null
                     onState(null)
-                    onStatus("Desconectado")
+                    onStatus(context.getString(R.string.watch_disconnected))
                 }
             }
 
@@ -159,7 +162,7 @@ private class WatchBleClient(
                 commandCharacteristic = service?.getCharacteristic(commandUuid)
                 metadataCharacteristic = service?.getCharacteristic(metadataUuid)
                 if (stateCharacteristic == null || commandCharacteristic == null || metadataCharacteristic == null) {
-                    onStatus("Bridge incompatible")
+                    onStatus(context.getString(R.string.watch_incompatible))
                     return
                 }
                 while (pendingCommands.isNotEmpty()) send(pendingCommands.removeFirst())
@@ -233,8 +236,8 @@ private class WatchBleClient(
             parts[6].takeIf { it >= 0 }, isSummary = parts.getOrNull(7) == 1,
             pendingFeedback = parts.getOrNull(8) == 1,
             selectedFeedback = parts.getOrNull(9) ?: 2,
-            durationMinutes = parts.getOrNull(10)?.toInt()?.takeIf { it >= 0 },
-            distanceKm = parts.getOrNull(11)?.toInt()?.takeIf { it >= 0 }?.div(10.0),
+            durationMinutes = parts.getOrNull(10)?.takeIf { it >= 0 },
+            distanceKm = parts.getOrNull(11)?.takeIf { it >= 0 }?.div(10.0),
         )
     }.getOrNull()
 
@@ -267,13 +270,14 @@ class WatchActivity : ComponentActivity() {
     private var lastKnownState by mutableStateOf<WatchState?>(null)
     private var watchPage by mutableStateOf(WatchPage.Activity)
     private var motionSnapshot by mutableStateOf(MotionSnapshot())
-    private var status by mutableStateOf("Pulsa conectar para empezar")
+    private var status by mutableStateOf<String?>(null)
     private var autoTrackingEnabled = false
     private var healthSessionStarted = false
     private var healthStartPending = false
     private val motionTracker by lazy { WatchMotionTracker(this) { publishMotionSnapshot(it) } }
     private val client by lazy {
         WatchBleClient(
+            this,
             { state ->
                 val previous = connectedState
                 connectedState = state
@@ -412,22 +416,22 @@ class WatchActivity : ComponentActivity() {
             Surface(modifier = Modifier.fillMaxSize(), color = Color(0xFF101010)) {
                 Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("WILDFORCE", color = Color(0xFFFFB300), fontWeight = FontWeight.Black, letterSpacing = 2.sp)
-                    Text(status, color = Color.LightGray, fontSize = 12.sp, textAlign = TextAlign.Center)
+                    Text(status ?: androidx.compose.ui.res.stringResource(R.string.watch_tap_connect), color = Color.LightGray, fontSize = 12.sp, textAlign = TextAlign.Center)
                     val state = connectedState ?: lastKnownState
                     if (state == null) {
                         CircularProgressIndicator(modifier = Modifier.size(42.dp), color = Color(0xFFFFB300), strokeWidth = 3.dp)
-                        Button(onClick = ::connectWatch) { Text("CONECTAR") }
+                        Button(onClick = ::connectWatch) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.connect).uppercase()) }
                     } else {
                         if (!state.pendingFeedback && !state.isSummary) WatchPageSelector(state)
                         if (state.isResting && watchPage == WatchPage.Path) {
                             WatchPathPage(state)
                         } else if (state.isResting) {
                         Text(formatSeconds(state.restRemaining ?: 0), color = Color.White, fontSize = 44.sp, fontWeight = FontWeight.Bold)
-                        Text(if (connectedState == null) "DESCANSO · SIN CONEXIÓN" else "DESCANSO", color = Color(0xFFFFB300), fontWeight = FontWeight.Bold)
+                        Text(if (connectedState == null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_69665fe06cb63113) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.rest).uppercase(), color = Color(0xFFFFB300), fontWeight = FontWeight.Bold)
                         if (WatchHealthState.heartRate > 0) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 Icon(Icons.Filled.Favorite, contentDescription = null, tint = Color(0xFFFF80AB), modifier = Modifier.size(18.dp))
-                                Text("${WatchHealthState.heartRate.roundToInt()} BPM", color = Color(0xFFFF80AB), fontSize = 16.sp)
+                                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_d145c96a3b10150c, WatchHealthState.heartRate.roundToInt()), color = Color(0xFFFF80AB), fontSize = 16.sp)
                             }
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -435,11 +439,18 @@ class WatchActivity : ComponentActivity() {
                             IconButton(onClick = { client.send("s") }) { Icon(Icons.Filled.SkipNext, "Saltar", tint = Color.White) }
                         }
                         } else if (state.pendingFeedback) {
-                        Text("¿CÓMO HA IDO?", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Text("Selecciona el esfuerzo del ejercicio", color = Color.LightGray, textAlign = TextAlign.Center)
-                        val feedback = listOf("MUY FÁCIL", "FÁCIL", "JUSTO", "DIFÍCIL", "MUY DIFÍCIL")
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.how_was_it_).uppercase(), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3a15f792414be5a6), color = Color.LightGray, textAlign = TextAlign.Center)
+                        val feedbackCommands = listOf("MUY FÁCIL", "FÁCIL", "JUSTO", "DIFÍCIL", "MUY DIFÍCIL")
+                        val feedback = listOf(
+                            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.very_easy),
+                            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.easy),
+                            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.just_right),
+                            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.hard),
+                            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.very_hard),
+                        )
                         feedback.forEachIndexed { index, title ->
-                            Button(onClick = { client.send("f|$title") }) {
+                            Button(onClick = { client.send("f|${feedbackCommands[index]}") }, modifier = Modifier.semantics { selected = index == state.selectedFeedback }) {
                                 Row(
                                     Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically,
@@ -447,17 +458,17 @@ class WatchActivity : ComponentActivity() {
                                     Text(title)
                                     Spacer(Modifier.weight(1f))
                                     if (index == state.selectedFeedback) {
-                                        Icon(Icons.Filled.Check, contentDescription = "Seleccionado", modifier = Modifier.size(18.dp))
+                                        Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(18.dp))
                                     }
                                 }
                             }
                         }
                         Button(onClick = { client.send("fc") }, enabled = state.selectedFeedback in feedback.indices) {
-                            Text("CONTINUAR")
+                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_continue).uppercase())
                         }
                         } else if (state.isSummary) {
                             Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = Color(0xFF69F0AE), modifier = Modifier.size(56.dp))
-                            Text("ENTRENAMIENTO COMPLETADO", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_complete).uppercase(), color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                             if (state.workoutTitle.isNotBlank()) Text(state.workoutTitle, color = Color.LightGray, maxLines = 2, textAlign = TextAlign.Center)
                         } else if (watchPage == WatchPage.Path) {
                             WatchPathPage(state)
@@ -468,7 +479,7 @@ class WatchActivity : ComponentActivity() {
                         } else {
                             Text(state.exerciseName.ifBlank { "Ejercicio ${state.exerciseIndex + 1}/${state.exerciseCount}" }, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                             if (state.workoutTitle.isNotBlank()) Text(state.workoutTitle, color = Color.LightGray, maxLines = 1)
-                            Text("Serie ${state.setNumber}/${state.targetSets}", color = Color.LightGray)
+                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_a8a72f1464bbe773, state.setNumber, state.targetSets), color = Color.LightGray)
                             WatchMetricStepper(
                                 label = "Reps",
                                 value = state.reps.toString(),
@@ -532,7 +543,7 @@ class WatchActivity : ComponentActivity() {
     @androidx.compose.runtime.Composable
     private fun WatchPathPage(state: WatchState) {
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("RUTA DEL ENTRENAMIENTO", color = Color(0xFFFFB300), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_6fb0040d5ea0199f), color = Color(0xFFFFB300), fontSize = 11.sp, fontWeight = FontWeight.Bold)
             state.pathExercises.ifEmpty { listOf(state.exerciseName) }.forEachIndexed { index, name ->
                 Text(
                     "${if (index == state.exerciseIndex) "•" else "○"} $name",
@@ -547,7 +558,7 @@ class WatchActivity : ComponentActivity() {
     @androidx.compose.runtime.Composable
     private fun WatchStylePage(state: WatchState) {
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("ESTILO DE SERIE", color = Color(0xFFFFB300), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.set_style).uppercase(), color = Color(0xFFFFB300), fontSize = 11.sp, fontWeight = FontWeight.Bold)
             Text(state.setStyleLabel.ifBlank { "Series normales" }, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
             state.setStyleDetails.ifEmpty { listOf("Sin instrucciones adicionales") }.forEach { detail ->
                 Text(detail, color = Color.LightGray, fontSize = 12.sp)
@@ -580,7 +591,7 @@ class WatchActivity : ComponentActivity() {
     @androidx.compose.runtime.Composable
     private fun MotionInsights(snapshot: MotionSnapshot) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("REP INSIGHTS", color = Color(0xFFFFB300), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.rep_insights).uppercase(), color = Color(0xFFFFB300), fontSize = 11.sp, fontWeight = FontWeight.Bold)
             Text(snapshot.statusTitle, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
             Text(snapshot.statusSubtitle, color = Color.LightGray, fontSize = 11.sp, textAlign = TextAlign.Center)
             if (snapshot.reps.isNotEmpty()) {

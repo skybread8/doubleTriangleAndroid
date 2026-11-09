@@ -133,7 +133,11 @@
     "doorwayChestStretch": "Doorway Chest Stretch",
     "scorpions": "Scorpions",
     "threadTheNeedle": "Thread the Needle",
-    "neckCircles": "Neck Circles"
+    "neckCircles": "Neck Circles",
+    "ezBarSkullCrusher": "EZ Bar Skull Crusher",
+    "closeGripDumbbellBenchPress": "Close-Grip Dumbbell Bench Press",
+    "lyingCableCurl": "Lying Cable Curl",
+    "smithMachineCalfRaise": "Smith Machine Calf Raise"
   },
   "texts": {
     "Walking": "Walking",
@@ -426,6 +430,9 @@
     "Straight Sets": "Straight Sets",
     "Time + Distance": "Time + Distance",
     "Seconds": "Seconds",
-    "Minutes": "Minutes"
+    "Minutes": "Minutes",
+    "Flat Bench": "Flat Bench",
+    "EZ Bar": "EZ Bar",
+    "Smith Machine": "Smith Machine"
   }
 }

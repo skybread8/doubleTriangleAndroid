@@ -42,9 +42,8 @@ internal class WorkoutForegroundService : Service() {
             val notificationsEnabled = WorkoutNotificationPreferences.enabled(this@WorkoutForegroundService)
             val restAlertsEnabled = WorkoutNotificationPreferences.restAlertsEnabled(this@WorkoutForegroundService)
             // A foreground-service notification is mandatory while a workout
-            // runs. The preference below controls extra progress/rest updates;
-            // cancelling the required foreground notification would terminate
-            // the Android equivalent of iOS's ongoing Live Activity.
+            // runs. Notification preferences control alerts, not updates to this
+            // mandatory ongoing notification.
 
             // The foreground service is the authoritative owner of notification
             // actions. Lifecycle flags can be stale while the app backgrounds.
@@ -97,7 +96,7 @@ internal class WorkoutForegroundService : Service() {
                         )
                         restCompletionShownAtMillis = now
                     }
-                } else if (!appForeground && notificationsEnabled && restAlertsEnabled && remaining != lastNotifiedRemaining) {
+                } else if (!appForeground && remaining != lastNotifiedRemaining) {
                     lastNotifiedRemaining = remaining
                     WorkoutActiveNotification.show(
                         context = this@WorkoutForegroundService,
@@ -129,8 +128,8 @@ internal class WorkoutForegroundService : Service() {
                         if (notificationsEnabled && restAlertsEnabled) {
                             WorkoutActiveNotification.showRestCompletedInPlace(this@WorkoutForegroundService, currentTitle, currentExerciseIndex, totalExercises)
                         }
-                    } else if (notificationsEnabled && lastNotifiedRemaining != -1) {
-                        lastNotifiedRemaining = -1
+                    } else if (lastNotifiedRemaining != (snapshot.exerciseTimeRemaining ?: -1)) {
+                        lastNotifiedRemaining = snapshot.exerciseTimeRemaining ?: -1
                         WorkoutActiveNotification.show(
                             context = this@WorkoutForegroundService,
                             title = currentTitle,
@@ -141,6 +140,7 @@ internal class WorkoutForegroundService : Service() {
                             exerciseIndex = currentExerciseIndex,
                             totalExercises = totalExercises,
                             exerciseTimerSeconds = snapshot.exerciseTimeRemaining,
+                            exerciseTimerRunning = snapshot.exerciseTimerRunning,
                             canToggleExerciseTimer = currentExerciseHasTimer,
                         )
                     }
@@ -161,6 +161,7 @@ internal class WorkoutForegroundService : Service() {
     private fun handleAction(id: String, current: WorkoutSessionSnapshot, action: String) {
         val updated = when (action) {
             WorkoutActiveNotification.ACTION_TOGGLE_TIMER -> {
+                lastNotifiedRemaining = null
                 if (current.restRemaining != null) {
                     restPausedByAction = !restPausedByAction
                     restEndAtMillis = if (restPausedByAction) null else System.currentTimeMillis() + current.restRemaining * 1_000L
@@ -221,6 +222,7 @@ internal class WorkoutForegroundService : Service() {
             exerciseIndex = snapshot?.exerciseIndex,
             totalExercises = totalExercises,
             exerciseTimerSeconds = snapshot?.exerciseTimeRemaining,
+            exerciseTimerRunning = snapshot?.exerciseTimerRunning == true,
             canToggleExerciseTimer = currentExerciseHasTimer,
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -229,6 +231,7 @@ internal class WorkoutForegroundService : Service() {
             startForeground(4101, notification)
         }
 
+        lastNotifiedRemaining = null
         handler.removeCallbacks(monitor)
         handler.post(monitor)
         return START_STICKY

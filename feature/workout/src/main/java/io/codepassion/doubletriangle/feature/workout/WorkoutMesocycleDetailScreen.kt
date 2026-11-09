@@ -84,7 +84,7 @@ internal fun WorkoutMesocycleDetailScreen(state: WorkoutHubState, planHistory: L
         // iOS presents this as a sheet with a trailing Done action.
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Spacer(Modifier.weight(1f))
-            Text("HECHO", Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Hecho" }.clickable(onClick = onBack).padding(horizontal = 8.dp), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.done).uppercase(), Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Hecho" }.clickable(onClick = onBack).padding(horizontal = 8.dp), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
         }
         LazyColumn(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 160.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             item { MesocycleSummaryCard(state, currentGroup, currentEntry, appLanguage) }
@@ -111,9 +111,9 @@ private fun MesocycleSummaryCard(state: WorkoutHubState, group: MesocycleTimelin
     val phase = currentEntry?.phase ?: state.mesocyclePhase ?: phaseForMesocycleWeek(currentWeek, group.cycleLength)
     val phaseWeek = currentEntry?.phaseWeek ?: state.phaseWeek
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("MESOCICLO ACTUAL", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
-        Text("Mesociclo ${group.index}", fontFamily = Exo2FontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-        Text("Semana $currentWeek de ${group.cycleLength} · ${phase.label}", style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.current_mesocycle).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.mesocycle__d, group.index), fontFamily = Exo2FontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.week__d_of__d_____, currentWeek, group.cycleLength, phase.label), style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
         MesocyclePillProgress(currentWeek, group.cycleLength)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             // The Android state only carries the goal display name; iOS resolves its specific goal symbol.
@@ -209,8 +209,8 @@ private fun MesocycleGroupCard(group: MesocycleTimelineGroup, showProjectedBadge
 @Composable
 private fun MesocycleGroupHeader(group: MesocycleTimelineGroup, showProjectedBadge: Boolean, modifier: Modifier = Modifier) = Row(modifier, verticalAlignment = Alignment.CenterVertically) {
     Column(Modifier.weight(1f)) {
-        Text("Mesociclo ${group.index}", fontFamily = Exo2FontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
-        Text("${group.cycleLength} semanas", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.mesocycle__d, group.index), fontFamily = Exo2FontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_4cab546bb49505c2, group.cycleLength), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
     }
     if (showProjectedBadge) ContextPill("Proyectado", Icons.Filled.AutoAwesome)
 }
@@ -231,13 +231,13 @@ private fun MesocycleEntryRow(entry: MesocycleTimelineEntry) {
             entry.isProjected -> WildforceThemeTokens.textSecondary.copy(alpha = .14f)
             else -> WildforceThemeTokens.textSecondary.copy(alpha = .44f)
         }), contentAlignment = Alignment.Center) {
-            if (entry.isCompleted) Icon(Icons.Filled.CheckCircle, contentDescription = "Completado", modifier = Modifier.size(18.dp), tint = Color.White)
+            if (entry.isCompleted) Icon(Icons.Filled.CheckCircle, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.completed), modifier = Modifier.size(18.dp), tint = Color.White)
             else Text(entry.position.toString(), fontWeight = FontWeight.Bold, color = Color.White)
         }
         Column(Modifier.weight(1f).padding(start = 14.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
             val title = entry.state?.planName ?: "${entry.phase.label} · semana ${entry.position}"
             Text(title, style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text("${entry.phase.label} · semana ${entry.phaseWeek}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_38f03af9e95ae2cb, entry.phase.label, entry.phaseWeek), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
             formatMesocycleStartDate(entry.startsOn)?.let { startsOn ->
                 Row(Modifier.padding(top = 5.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.CalendarToday, null, Modifier.size(14.dp), WildforceThemeTokens.textSecondary)

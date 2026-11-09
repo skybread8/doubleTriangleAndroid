@@ -27,7 +27,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CheckCircle
@@ -74,6 +74,7 @@ internal fun WorkoutPathScreen(
     onAddExerciseToBlock: (Int) -> Unit = {},
     onBack: () -> Unit,
 ) {
+    val addExerciseDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_exercise)
     val pathBlocks = remember(workout) { workout.pathBlocks() }
     val pathExercises = remember(pathBlocks) { pathBlocks.flatMap { it.exercises } }
     val matchedPathIndex = pathExercises.indexOfFirst { currentExerciseIndex in it.executionIndices }
@@ -97,7 +98,7 @@ internal fun WorkoutPathScreen(
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
             Text(formatInsightClock(elapsedSeconds), style = MaterialTheme.typography.h3, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Spacer(Modifier.weight(1f))
-            Text("$currentPathPosition de ${pathExercises.size}", color = WildforceThemeTokens.textSecondary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_of__d, currentPathPosition, pathExercises.size), color = WildforceThemeTokens.textSecondary)
         }
         LinearProgressIndicator(
             progress = if (pathExercises.isEmpty()) 0f else currentPathPosition.toFloat() / pathExercises.size,
@@ -120,12 +121,12 @@ internal fun WorkoutPathScreen(
                             WorkoutBlockType.Standard -> WildforceThemeTokens.textSecondary
                         },
                     )
-                    if (block.rounds > 1) Text(" · ${block.rounds} RONDAS", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    if (block.rounds > 1) Text(" " + androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.___d_rounds, block.rounds).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                     Spacer(Modifier.weight(1f))
                     Box(
                         Modifier.size(48.dp)
                             .clip(CircleShape)
-                            .semantics { contentDescription = "Añadir ejercicio" }
+                            .semantics { contentDescription = addExerciseDescription }
                             .clickable { onAddExerciseToBlock(blockIndex) },
                         contentAlignment = Alignment.Center,
                     ) {
@@ -193,14 +194,14 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
             RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exerciseDisplayName(exercise.imageKey, exercise.name), Modifier.size(72.dp).clip(RoundedCornerShape(16.dp)))
             Column(Modifier.padding(start = 14.dp)) {
                 Text(exerciseDisplayName(exercise.imageKey, exercise.name), fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                Text("Progreso y ejecuciones anteriores", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_70ffcec48320c070), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         if (history.isEmpty()) {
             Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
                 Icon(Icons.Filled.BarChart, contentDescription = null, modifier = Modifier.size(56.dp), tint = WildforceThemeTokens.textSecondary)
-                Text("SIN EJECUCIONES ANTERIORES", fontFamily = Exo2FontFamily, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                Text("Completa este ejercicio para desbloquear su historial.", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_previous_executions).uppercase(), fontFamily = Exo2FontFamily, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.complete_this_exercise_in_other_workouts_to_unlock_the_history_graph_), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
             return
         }
@@ -208,7 +209,7 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
             HistoryMetric("PR", formatTrainingWeight(best?.maxWeightKg ?: 0.0, useImperial), "MEJOR PESO", Modifier.weight(1f))
             HistoryMetric("Último", formatTrainingWeight(history.first().maxWeightKg, useImperial), "MEJOR PESO", Modifier.weight(1f))
         }
-        Text("VOLUMEN POR SESIÓN", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_6c6bfcc229d15b92), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
         Row(
             Modifier.fillMaxWidth().height(138.dp).padding(vertical = 10.dp).horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(9.dp), verticalAlignment = Alignment.Bottom,
@@ -222,7 +223,7 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
                 }
             }
         }
-        Text("EJECUCIONES ANTERIORES", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 4.dp, bottom = 6.dp))
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.previous_executions).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 4.dp, bottom = 6.dp))
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             history.forEach { entry -> HistoryEntryRow(entry, useImperial) }
         }
@@ -231,16 +232,17 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
 
 @Composable
 private fun InsightHeader(title: String, onBack: () -> Unit) {
+    val backDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.action_back)
     Row(Modifier.fillMaxWidth().padding(bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(
             Modifier.size(48.dp)
                 .clip(CircleShape)
                 .background(WildforceThemeTokens.surfaceElevated)
-                .semantics { contentDescription = "Volver" }
+                .semantics { contentDescription = backDescription }
                 .clickable(onClick = onBack),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Filled.ArrowBack, contentDescription = null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(22.dp))
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(22.dp))
         }
         Spacer(Modifier.weight(1f))
         Text(title, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)

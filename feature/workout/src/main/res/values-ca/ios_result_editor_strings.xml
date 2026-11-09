@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wf_editor_cancel" formatted="false">Cancel·la</string>
+    <string name="wf_editor_distance" formatted="false">Distància</string>
+    <string name="wf_editor_duration" formatted="false">Durada</string>
+    <string name="wf_editor_edit" formatted="false">Edita</string>
+    <string name="wf_editor_pace" formatted="false">Ritme</string>
+    <string name="wf_editor_reps" formatted="false">Reps</string>
+    <string name="wf_editor_save" formatted="false">Desa</string>
+    <string name="wf_editor_set" formatted="false">Sèrie</string>
+    <string name="wf_editor_sets" formatted="false">Sèries</string>
+    <string name="wf_editor_weight" formatted="false">Pes</string>
+    <string name="wf_editor_results" formatted="false">Els teus resultats</string>
+</resources>

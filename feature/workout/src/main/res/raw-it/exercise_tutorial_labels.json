@@ -133,7 +133,11 @@
     "doorwayChestStretch": "Allungamento del petto nel telaio della porta",
     "scorpions": "Scorpioni",
     "threadTheNeedle": "Infilare l'ago",
-    "neckCircles": "Rotazioni del collo"
+    "neckCircles": "Rotazioni del collo",
+    "ezBarSkullCrusher": "French press con bilanciere EZ",
+    "closeGripDumbbellBenchPress": "Panca stretta con manubri",
+    "lyingCableCurl": "Curl ai cavi da sdraiato",
+    "smithMachineCalfRaise": "Calf raise alla macchina Smith"
   },
   "texts": {
     "Walking": "Camminata",
@@ -426,6 +430,9 @@
     "Straight Sets": "Straight Sets",
     "Time + Distance": "Time + Distance",
     "Seconds": "Seconds",
-    "Minutes": "Minuti"
+    "Minutes": "Minuti",
+    "Flat Bench": "Panca piana",
+    "EZ Bar": "EZ Bar",
+    "Smith Machine": "Macchina Smith"
   }
 }

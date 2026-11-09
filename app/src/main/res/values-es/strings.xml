@@ -6,7 +6,6 @@
     <string name="plan_progress">Plan %1$d · Mesociclo %2$d · Semana %3$d/%4$d</string>
     <string name="plan_preview_workout">• %1$s: %2$s · %3$d ejercicios · %4$d min</string>
     <string name="use_this_plan">USAR ESTE PLAN</string>
-    <string name="cancel">CANCELAR</string>
     <string name="coming_soon">%1$s\nPróximamente</string>
     <string name="creating_next_plan">CREANDO TU SIGUIENTE PLAN</string>
     <string name="exit_app_title">¿SALIR DE LA APLICACIÓN?</string>

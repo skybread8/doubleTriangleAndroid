@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated iOS fallbacks for onboarding keys absent from the Sheet. -->
+<resources>
+    <string name="ios_onboarding_d0a9cd8fc1161c8d" formatted="false">Machine à hack squat</string>
+    <string name="ios_onboarding_a5996633f5784abf" formatted="false">Machine à hip thrust</string>
+</resources>

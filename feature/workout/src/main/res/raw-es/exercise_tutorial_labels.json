@@ -133,7 +133,11 @@
     "doorwayChestStretch": "Estiramiento de pecho en el marco de la puerta",
     "scorpions": "Escorpiones",
     "threadTheNeedle": "Enhebrar la aguja",
-    "neckCircles": "Rotaciones de cuello"
+    "neckCircles": "Rotaciones de cuello",
+    "ezBarSkullCrusher": "Extensión de tríceps tumbado con barra EZ",
+    "closeGripDumbbellBenchPress": "Press de banca con mancuernas y agarre cerrado",
+    "lyingCableCurl": "Curl de bíceps tumbado en polea",
+    "smithMachineCalfRaise": "Elevación de gemelos en máquina Smith"
   },
   "texts": {
     "Walking": "Caminar",
@@ -426,6 +430,9 @@
     "Straight Sets": "Straight Sets",
     "Time + Distance": "Time + Distance",
     "Seconds": "Seconds",
-    "Minutes": "Minutos"
+    "Minutes": "Minutos",
+    "Flat Bench": "Banco plano",
+    "EZ Bar": "EZ Bar",
+    "Smith Machine": "Máquina Smith"
   }
 }

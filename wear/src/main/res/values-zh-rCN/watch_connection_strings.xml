@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android Wear connection states; no matching shared Sheet keys. -->
+<resources>
+    <string name="watch_tap_connect">点按连接以开始</string>
+    <string name="watch_scan_failed">无法搜索手表（%1$d）</string>
+    <string name="watch_bluetooth_unavailable">蓝牙不可用</string>
+    <string name="watch_searching_phone">正在搜索手机…</string>
+    <string name="watch_phone_not_found">未找到手机</string>
+    <string name="watch_connecting">正在连接…</string>
+    <string name="watch_connected">已连接</string>
+    <string name="watch_disconnected">已断开连接</string>
+    <string name="watch_incompatible">连接不兼容</string>
+</resources>

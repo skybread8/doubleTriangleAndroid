@@ -118,6 +118,7 @@ data class ExerciseSummary(
     val coachExerciseId: String? = null,
     val skippedAt: String? = null,
     /** Stable server identity of this planned occurrence, distinct from the exercise catalog ID. */
+    val role: String? = null,
     val plannedExerciseId: String? = null,
 )
 

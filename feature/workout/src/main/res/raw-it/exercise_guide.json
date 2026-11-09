@@ -1888,5 +1888,61 @@
       "Se avverti un dolore acuto o vertigini, fermati immediatamente.",
       "Tieni le spalle basse e rilassate per tutta la durata dell'esercizio."
     ]
+  },
+  "ezBarSkullCrusher": {
+    "description": "Un'estensione dei tricipiti da sdraiati con bilanciere EZ, che sollecita i tricipiti con un'ampia flessione del gomito.",
+    "instructions": [
+      "Sdraiati su una panca e tieni un bilanciere EZ sopra il petto con una presa prona e stretta.",
+      "Mantieni le braccia quasi verticali mentre pieghi i gomiti e abbassi il bilanciere verso la fronte o appena dietro.",
+      "Estendi i gomiti per riportare il bilanciere alla posizione iniziale senza muovere eccessivamente le spalle.",
+      "Mantieni i polsi in posizione neutra e controlla la fase di discesa."
+    ],
+    "tips": [
+      "Usa le impugnature angolate del bilanciere EZ per mantenere i polsi comodi.",
+      "Lascia che i gomiti arretrino solo leggermente; non trasformare il movimento in un pullover.",
+      "Usa l'assistenza di un compagno o un sistema di sicurezza quando sollevi carichi pesanti."
+    ]
+  },
+  "closeGripDumbbellBenchPress": {
+    "description": "Una variante della panca con manubri in cui i pesi restano ravvicinati per aumentare il coinvolgimento dei tricipiti.",
+    "instructions": [
+      "Sdraiati su una panca con un manubrio in ogni mano, sopra il centro del petto.",
+      "Tieni i manubri vicini, con i palmi rivolti l'uno verso l'altro o leggermente verso l'interno.",
+      "Abbassa i pesi mantenendo i gomiti vicini al busto.",
+      "Spingi di nuovo i pesi verso l'alto, tenendo i manubri vicini e le spalle stabili contro la panca."
+    ],
+    "tips": [
+      "Non forzare il contatto tra i manubri se ti dà fastidio ai polsi.",
+      "Tieni i gomiti abbastanza vicini al corpo da sentire i tricipiti, senza premerli dolorosamente contro i fianchi.",
+      "Controlla la discesa ed evita di far rimbalzare i manubri nella posizione più bassa."
+    ]
+  },
+  "lyingCableCurl": {
+    "description": "Un curl per i bicipiti ai cavi da sdraiato, eseguito con una barra dritta o tipo EZ, che sollecita i bicipiti flettendo i gomiti.",
+    "instructions": [
+      "Posiziona una panca piana davanti a una carrucola bassa e sdraiati sulla schiena con i piedi rivolti verso la macchina.",
+      "Afferra una barra dritta o una barra EZ per cavi con i palmi rivolti verso l'alto e le braccia distese verso la carrucola.",
+      "Tieni la parte superiore delle braccia quasi ferma mentre fletti i gomiti per portare la barra verso la fronte o la parte alta del petto.",
+      "Abbassa lentamente la barra finché i gomiti non sono di nuovo estesi, mantenendo il cavo in tensione."
+    ],
+    "tips": [
+      "Posiziona la panca abbastanza lontano dalla carrucola affinché il cavo resti teso nella posizione più bassa.",
+      "Tieni i gomiti fermi invece di portarli verso le costole.",
+      "Esegui le ripetizioni con un movimento fluido e controllato per evitare che il pacco pesi ti faccia perdere la posizione."
+    ]
+  },
+  "smithMachineCalfRaise": {
+    "description": "Un esercizio per i polpacci in piedi sotto il bilanciere guidato di una macchina Smith, per allenarli in modo stabile aumentando gradualmente il carico.",
+    "instructions": [
+      "Posizionati sotto il bilanciere della macchina Smith, appoggiato sulla parte alta della schiena, e metti gli avampiedi su una superficie rialzata e stabile, se disponibile.",
+      "Sblocca il bilanciere e abbassa i talloni in modo controllato per allungare i polpacci.",
+      "Spingi sugli avampiedi per sollevare i talloni il più possibile.",
+      "Fai una breve pausa in alto, poi abbassa lentamente senza rimbalzare."
+    ],
+    "tips": [
+      "Tieni le ginocchia leggermente flesse e il busto eretto.",
+      "Usa un gradino o una piattaforma stabile solo se entra in sicurezza nella macchina Smith.",
+      "Dai la priorità all'intero arco di movimento piuttosto che ad aggiungere carico."
+    ]
   }
 }

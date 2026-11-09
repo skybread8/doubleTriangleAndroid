@@ -22,7 +22,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.PlayArrow
@@ -63,11 +63,11 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, planHistory: List
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(contentPadding).padding(horizontal = 18.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth().padding(bottom = 16.dp), verticalAlignment = Alignment.CenterVertically) {
             Row(Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Volver" }.clickable(onClick = onBack).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
-                Text("VOLVER", color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.go_back).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.weight(1f))
-            Text("PLAN DE ENTRENAMIENTO", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training_plan).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
         }
         LazyColumn(
             contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 160.dp),
@@ -77,37 +77,37 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, planHistory: List
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(22.dp), emphasized = true).padding(20.dp)) {
                     Text(state.planName.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     Text(state.phase, Modifier.padding(top = 3.dp), color = WildforceThemeTokens.textSecondary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                    Text("PLAN ${state.mesocycleNumber}  ·  MESOCICLO ${state.mesocycleIndex}  ·  SEMANA ${state.weekIndex}/${state.cycleLength}", Modifier.padding(top = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                    state.mesocyclePhase?.let { phase -> Text("${phase.label.uppercase()} · SEMANA DE FASE ${state.phaseWeek}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_6334941613f202f4, state.mesocycleNumber, state.mesocycleIndex, state.weekIndex, state.cycleLength), Modifier.padding(top = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                    state.mesocyclePhase?.let { phase -> Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_7bc4873e06901e86, phase.label.uppercase(), state.phaseWeek), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                     Spacer(Modifier.height(18.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.size(64.dp).clip(CircleShape).background(WildforceThemeTokens.textPrimary.copy(alpha = 0.10f)), contentAlignment = Alignment.Center) {
                             Text("${(animatedProgress * 100).toInt()}%", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                         }
                         Column(Modifier.padding(start = 14.dp)) {
-                            Text("PROGRESO DEL MESOCICLO", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
-                            Text("$finalized de ${state.workouts.size} sesiones finalizadas", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                            if (skipped > 0) Text("$skipped sesión(es) omitida(s)", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.mesocycle_progress).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_247465696a9e46a7, finalized, state.workouts.size), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                            if (skipped > 0) Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_932171ddecdd9f81, skipped), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                         }
                     }
                     LinearProgressIndicator(progress = animatedProgress, Modifier.fillMaxWidth().padding(top = 16.dp).height(7.dp).clip(RoundedCornerShape(6.dp)), color = WildforceThemeTokens.textPrimary, backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.15f))
                 }
             }
-            item { Text("SESIONES DE LA SEMANA", Modifier.padding(top = 4.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary) }
+            item { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_177fbe3bbd460630), Modifier.padding(top = 4.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary) }
             items(state.workouts, key = { it.id }) { workout -> PlanSessionRow(workout) { onWorkoutSelected(workout) } }
             item {
                 Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(18.dp)).padding(16.dp)) {
-                    Text("SIGUIENTE PASO", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.next).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                     Text(if (finalized == state.workouts.size && state.workouts.isNotEmpty()) "Mesociclo completado. Ya puedes preparar la siguiente fase." else "Completa u omite las sesiones previstas para avanzar en tu fase actual.", Modifier.padding(top = 5.dp), color = WildforceThemeTokens.textSecondary, maxLines = 3, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
             }
             if (planHistory.isNotEmpty()) {
-                item { Text("PLANES ANTERIORES", Modifier.padding(top = 4.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary) }
+                item { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_962180b7dadf0cd5), Modifier.padding(top = 4.dp), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary) }
                 items(planHistory.sortedByDescending { it.mesocycleNumber }.take(8), key = { "archive-${it.mesocycleNumber}-${it.planName}" }) { archived ->
                     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(14.dp)) {
                         Text(archived.planName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                        Text("Plan ${archived.mesocycleNumber} · Mesociclo ${archived.mesocycleIndex} · Semana ${archived.weekIndex}/${archived.cycleLength}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
-                        Text("${archived.workouts.size} sesiones · ${archived.mesocyclePhase?.label ?: archived.phase}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_b221067dab9b73d3, archived.mesocycleNumber, archived.mesocycleIndex, archived.weekIndex, archived.cycleLength), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_beb27d1c23e4f96d, archived.workouts.size, archived.mesocyclePhase?.label ?: archived.phase), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -130,9 +130,9 @@ private fun PlanSessionRow(workout: WorkoutDaySummary, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).semantics { contentDescription = "${workout.title}, ${workout.status}, ${workout.estimatedMinutes} minutos" }.clickable(onClick = onClick).padding(13.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(42.dp).clip(CircleShape).background(statusColor.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {
             when (workout.status) {
-                WorkoutStatus.Completed -> Icon(Icons.Filled.CheckCircle, contentDescription = "Completado", modifier = Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, tint = statusColor)
-                WorkoutStatus.Skipped -> Icon(Icons.Filled.Remove, contentDescription = "Omitido", modifier = Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, tint = statusColor)
-                WorkoutStatus.InProgress -> Icon(Icons.Filled.PlayArrow, contentDescription = "En curso", modifier = Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, tint = statusColor)
+                WorkoutStatus.Completed -> Icon(Icons.Filled.CheckCircle, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.completed), modifier = Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, tint = statusColor)
+                WorkoutStatus.Skipped -> Icon(Icons.Filled.Remove, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skipped), modifier = Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, tint = statusColor)
+                WorkoutStatus.InProgress -> Icon(Icons.Filled.PlayArrow, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.in_progress), modifier = Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, tint = statusColor)
                 WorkoutStatus.Draft, WorkoutStatus.Planned -> Text(workout.order.toString(), Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, fontWeight = FontWeight.Bold, color = statusColor)
             }
         }

@@ -7,6 +7,7 @@ import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.LeanBodyMassRecord
+import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.units.Mass
@@ -48,7 +49,7 @@ internal object HealthConnectWeightSync {
         if (permission !in client.permissionController.getGrantedPermissions()) return false
         val now = Instant.now()
         val offset = ZoneId.systemDefault().rules.getOffset(now)
-        val record = when (kind) {
+        val record: Record = when (kind) {
             "BodyFat" -> BodyFatRecord(now, offset, value.percent, Metadata.manualEntry())
             "LeanBodyMass" -> LeanBodyMassRecord(now, offset, Mass.kilograms(value), Metadata.manualEntry())
             else -> return false

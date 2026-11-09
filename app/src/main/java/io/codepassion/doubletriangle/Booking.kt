@@ -219,15 +219,15 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
                     error != null -> BookingEmpty("No se pudieron cargar las reservas", error!!, onRetry = { scope.launch { reload() } })
                     selectedGym == null -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         BookingEmpty("No tienes gimnasios disponibles", "Introduce el código que te ha dado tu gimnasio para acceder a sus salas.")
-                        OutlinedButton(onClick = { joiningGym = true }) { Text("TENGO UN CÓDIGO DE GIMNASIO") }
+                        OutlinedButton(onClick = { joiningGym = true }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.i_have_a_gym_code).uppercase()) }
                     }
                     else -> {
-                    Text("PRÓXIMAS RESERVAS", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.upcoming_reservations).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                     val visible = reservations.filter { it.gymId == selectedGym.id }
                     if (visible.none { !it.isCancelled }) BookingEmpty("No hay reservas próximas", "Reserva una sala para entrenar en tu gimnasio.")
                     visible.filter { !it.isCancelled }.forEach { reservation -> ReservationCard(reservation, onCancel = { cancellation = reservation }) }
-                    Button(onClick = { bookingGym = selectedGym }, modifier = Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.background)) { Text("NUEVA RESERVA", fontWeight = FontWeight.Bold) }
-                    visible.filter { it.isCancelled }.takeIf { it.isNotEmpty() }?.let { cancelled -> Text("CANCELADAS", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary); cancelled.forEach { ReservationCard(it, {}) } }
+                    Button(onClick = { bookingGym = selectedGym }, modifier = Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.background)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.new_booking).uppercase(), fontWeight = FontWeight.Bold) }
+                    visible.filter { it.isCancelled }.takeIf { it.isNotEmpty() }?.let { cancelled -> Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancelled).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary); cancelled.forEach { ReservationCard(it, {}) } }
                     }
                 }
             }
@@ -247,13 +247,13 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
             reload()
         },
     )
-    cancellation?.let { reservation -> AlertDialog(onDismissRequest = { cancellation = null }, title = { Text("¿Cancelar esta reserva?") }, text = { Text("${reservation.roomName} · ${formatDateTime(reservation.startsAt, reservation.gymZone, locale)}") }, confirmButton = { TextButton(onClick = { cancellation = null; scope.launch { runCatching { api.cancel(reservation.id) }.onFailure { actionError = it.message ?: "No se pudo cancelar la reserva." }; reload() } }) { Text("CANCELAR") } }, dismissButton = { TextButton(onClick = { cancellation = null }) { Text("MANTENER") } }) }
+    cancellation?.let { reservation -> AlertDialog(onDismissRequest = { cancellation = null }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_this_reservation_)) }, text = { Text("${reservation.roomName} · ${formatDateTime(reservation.startsAt, reservation.gymZone, locale)}") }, confirmButton = { TextButton(onClick = { cancellation = null; scope.launch { runCatching { api.cancel(reservation.id) }.onFailure { actionError = it.message ?: "No se pudo cancelar la reserva." }; reload() } }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } }, dismissButton = { TextButton(onClick = { cancellation = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.keep_it).uppercase()) } }) }
     actionError?.let { message ->
         AlertDialog(
             onDismissRequest = { actionError = null },
-            title = { Text("Algo salió mal") },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.something_went_wrong)) },
             text = { Text(message) },
-            confirmButton = { TextButton(onClick = { actionError = null }) { Text("OK") } },
+            confirmButton = { TextButton(onClick = { actionError = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_565339bc4d33d728)) } },
         )
     }
 }
@@ -266,14 +266,14 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
     val scope = rememberCoroutineScope()
     AlertDialog(
         onDismissRequest = { if (!submitting) onDismiss() },
-        title = { Text("ÚNETE A TU GIMNASIO") },
+        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.join_your_gym).uppercase()) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Introduce el código que te ha dado tu gimnasio.", color = WildforceThemeTokens.textSecondary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.enter_the_code_your_gym_gave_you__or_scan_its_qr_), color = WildforceThemeTokens.textSecondary)
                 OutlinedTextField(
                     value = code,
                     onValueChange = { code = it; localError = null },
-                    label = { Text("Código de gimnasio") },
+                    label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym_code)) },
                     singleLine = true,
                     enabled = !submitting,
                     trailingIcon = {
@@ -311,9 +311,9 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
                         submitting = false
                     }
                 },
-            ) { if (submitting) CircularProgressIndicator(Modifier.size(18.dp)) else Text("UNIRSE") }
+            ) { if (submitting) CircularProgressIndicator(Modifier.size(18.dp)) else Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.join).uppercase()) }
         },
-        dismissButton = { TextButton(enabled = !submitting, onClick = onDismiss) { Text("CANCELAR") } },
+        dismissButton = { TextButton(enabled = !submitting, onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
     )
 }
 
@@ -391,7 +391,7 @@ private fun GymHeading(gym: BookingGym, gyms: List<BookingGym>, onSelect: (Booki
         }
     }
 }
-@Composable private fun BookingEmpty(title: String, detail: String, onRetry: (() -> Unit)? = null, icon: ImageVector = Icons.Filled.EventAvailable) = Column(Modifier.fillMaxWidth().padding(vertical = 28.dp), horizontalAlignment = Alignment.CenterHorizontally) { Icon(icon, null, Modifier.size(42.dp), WildforceThemeTokens.textSecondary); Spacer(Modifier.height(8.dp)); Text(title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center); Text(detail, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center); onRetry?.let { TextButton(onClick = it) { Text("REINTENTAR") } } }
+@Composable private fun BookingEmpty(title: String, detail: String, onRetry: (() -> Unit)? = null, icon: ImageVector = Icons.Filled.EventAvailable) = Column(Modifier.fillMaxWidth().padding(vertical = 28.dp), horizontalAlignment = Alignment.CenterHorizontally) { Icon(icon, null, Modifier.size(42.dp), WildforceThemeTokens.textSecondary); Spacer(Modifier.height(8.dp)); Text(title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center); Text(detail, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center); onRetry?.let { TextButton(onClick = it) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase()) } } }
 @Composable
 private fun ReservationCard(reservation: BookingReservation, onCancel: () -> Unit) {
     var menuOpen by remember(reservation.id) { mutableStateOf(false) }
@@ -415,7 +415,7 @@ private fun ReservationCard(reservation: BookingReservation, onCancel: () -> Uni
                             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                                 DropdownMenuItem(onClick = { menuOpen = false; onCancel() }) {
                                     Icon(Icons.Filled.Close, null, tint = Color(0xFFE26D5A), modifier = Modifier.size(18.dp))
-                                    Text("Cancelar reserva", Modifier.padding(start = 10.dp))
+                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_reservation), Modifier.padding(start = 10.dp))
                                 }
                             }
                         }
@@ -606,7 +606,7 @@ private fun BookingStatusBadge(status: String) {
                     .padding(bottom = if (selectedRoom != null) 76.dp else 0.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-            Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onBack) { Icon(Icons.Filled.Close, "Volver") }; Column { Text("NUEVA RESERVA", fontSize = 22.sp, fontWeight = FontWeight.Black, color = WildforceThemeTokens.textPrimary); Text(gym.name, color = WildforceThemeTokens.textSecondary) } }
+            Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onBack) { Icon(Icons.Filled.Close, "Volver") }; Column { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.new_booking).uppercase(), fontSize = 22.sp, fontWeight = FontWeight.Black, color = WildforceThemeTokens.textPrimary); Text(gym.name, color = WildforceThemeTokens.textSecondary) } }
             if (loading) Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } else if (roomError != null) BookingEmpty("No se pudieron cargar las salas", roomError!!, onRetry = { scope.launch { loadRooms() } }, icon = Icons.Filled.WarningAmber) else if (rooms.isEmpty()) BookingEmpty("No hay salas disponibles", "Este gimnasio no tiene salas abiertas para reservar.") else {
                 BookingSection("DÍA") { LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(bookingWindowDays(ZonedDateTime.now(gym.zone).toLocalDate(), selectedRoom!!.windowDays)) { day -> BookingDayChoice(day, day == selectedDate, onClick = { selectedDate = day }) } } }
                 BookingSection("SALA") {
@@ -651,7 +651,7 @@ private fun BookingStatusBadge(status: String) {
                         disabledBackgroundColor = WildforceThemeTokens.textPrimary.copy(alpha = 0.12f),
                         disabledContentColor = WildforceThemeTokens.textSecondary,
                     ),
-                ) { Text("CONTINUAR", fontWeight = FontWeight.Bold) }
+                ) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_continue).uppercase(), fontWeight = FontWeight.Bold) }
             }
             PullRefreshIndicator(refreshing, refreshState, Modifier.align(Alignment.TopCenter))
         }
@@ -674,8 +674,8 @@ private fun BookingConfirmationSheet(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(enabled = !reserving, onClick = onCancel) { Text(stringResource(R.string.ios_catalog_19766ed6ccb2f4a3)) }
-            Text(stringResource(R.string.ios_catalog_a52a24719590f68b), fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+            TextButton(enabled = !reserving, onClick = onCancel) { Text(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel)) }
+            Text(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.confirm_reservation), fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             Spacer(Modifier.width(64.dp))
         }
         Card(Modifier.fillMaxWidth(), backgroundColor = WildforceThemeTokens.backgroundSecondary, shape = RoundedCornerShape(14.dp)) {
@@ -689,7 +689,7 @@ private fun BookingConfirmationSheet(
                 BookingSummaryRow("Hora", "${formatTime(start.startsAt, gym.zone, locale)} – ${formatTime(start.endsAt, gym.zone, locale)}")
             }
         }
-        Text("Puedes cancelar gratis hasta ${formatDuration(room.cancellationCutoff, locale)} antes de que empiece.", color = WildforceThemeTokens.textSecondary, fontSize = 13.sp)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_2040464160c3581e, formatDuration(room.cancellationCutoff, locale)), color = WildforceThemeTokens.textSecondary, fontSize = 13.sp)
         error?.let {
             Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Icon(Icons.Filled.WarningAmber, contentDescription = null, tint = Color(0xFFFF9500), modifier = Modifier.size(18.dp))
@@ -702,7 +702,7 @@ private fun BookingConfirmationSheet(
             modifier = Modifier.fillMaxWidth().height(52.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.background),
         ) {
-            if (reserving) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.background, strokeWidth = 2.dp) else Text(if (error == null) stringResource(R.string.ios_catalog_a52a24719590f68b).uppercase(locale) else "REINTENTAR", fontWeight = FontWeight.Bold)
+            if (reserving) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.background, strokeWidth = 2.dp) else Text(if (error == null) stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.confirm_reservation).uppercase(locale) else stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase(locale), fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -724,12 +724,12 @@ private fun BookingSuccessSheet(reservation: BookingReservation, locale: Locale,
     ) {
         Spacer(Modifier.height(18.dp))
         Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.size(72.dp), tint = Color(0xFF34C759))
-        Text("RESERVA CONFIRMADA", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.you_re_booked).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
         if (reservation.roomAvatar != null) RemoteTrainingImage(reservation.roomAvatar, reservation.roomName, Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)))
         Text(reservation.roomName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
         Text("${formatRelativeDay(reservation.startsAt, reservation.gymZone, locale)} · ${formatTime(reservation.startsAt, reservation.gymZone, locale)} – ${formatTime(reservation.endsAt, reservation.gymZone, locale)}", color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
         Spacer(Modifier.height(14.dp))
-        Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.background)) { Text("LISTO", fontWeight = FontWeight.Bold) }
+        Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.background)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ready).uppercase(), fontWeight = FontWeight.Bold) }
     }
 }
 @Composable private fun BookingSection(title: String, content: @Composable () -> Unit) = Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { Text(title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary); content() }

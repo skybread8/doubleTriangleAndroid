@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="wf_editor_cancel" formatted="false">Annuler</string>
+    <string name="wf_editor_distance" formatted="false">Distance</string>
+    <string name="wf_editor_duration" formatted="false">Durée</string>
+    <string name="wf_editor_edit" formatted="false">Modifier</string>
+    <string name="wf_editor_pace" formatted="false">Allure</string>
+    <string name="wf_editor_reps" formatted="false">Réps</string>
+    <string name="wf_editor_save" formatted="false">Enregistrer</string>
+    <string name="wf_editor_set" formatted="false">Série</string>
+    <string name="wf_editor_sets" formatted="false">Séries</string>
+    <string name="wf_editor_weight" formatted="false">Poids</string>
+    <string name="wf_editor_results" formatted="false">Vos résultats</string>
+</resources>

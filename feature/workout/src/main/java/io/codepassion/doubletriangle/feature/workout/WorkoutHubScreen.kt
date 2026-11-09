@@ -81,8 +81,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowCircleUp
 import androidx.compose.material.icons.filled.ArrowCircleDown
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -97,14 +97,14 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.DirectionsWalk
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Hotel
-import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Info
@@ -113,7 +113,7 @@ import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material.icons.filled.ExpandLess
@@ -312,9 +312,9 @@ fun WorkoutHubScreen(
                     .liquidGlass(RoundedCornerShape(14.dp)).padding(start = 12.dp, end = 6.dp, top = 10.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("No se pudo generar el plan: $error", Modifier.weight(1f), color = Color(0xFFC62828), style = MaterialTheme.typography.caption)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_18423c54a5c7ac9c, error), Modifier.weight(1f), color = Color(0xFFC62828), style = MaterialTheme.typography.caption)
                 TextButton(onClick = onRetryGeneration) {
-                    Text("REINTENTAR", color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -436,7 +436,7 @@ fun WorkoutHubScreen(
     customGenerationError?.let { error ->
         AlertDialog(
             onDismissRequest = { customGenerationError = null },
-            title = { Text("NO SE PUDO GENERAR CON IA", fontFamily = AntonFontFamily) },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_5a8338c653a66542), fontFamily = AntonFontFamily) },
             text = { Text(error) },
             confirmButton = {
                 Row {
@@ -456,7 +456,7 @@ fun WorkoutHubScreen(
                                     generatingCustomWorkout = false
                                 }
                             }
-                        }) { Text("REINTENTAR", color = WildforceThemeTokens.accent) }
+                        }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase(), color = WildforceThemeTokens.accent) }
                     }
                     TextButton(onClick = {
                         customGenerationError = null
@@ -466,10 +466,10 @@ fun WorkoutHubScreen(
                         ))
                         customWorkouts = CustomWorkoutStore.load(customContext)
                         lastCustomRequest = null
-                    }) { Text("USAR PLANTILLA LOCAL", color = WildforceThemeTokens.accent) }
+                    }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_a548146eea4b93d6), color = WildforceThemeTokens.accent) }
                 }
             },
-            dismissButton = { TextButton(onClick = { customGenerationError = null }) { Text("CERRAR", color = WildforceThemeTokens.textSecondary) } },
+            dismissButton = { TextButton(onClick = { customGenerationError = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
 }
@@ -608,11 +608,11 @@ private fun WorkoutHeader(
             ) {
                 DropdownMenuItem(onClick = { showsMoreOptions = false; showsFeedback = true }) {
                     Icon(Icons.Filled.Campaign, contentDescription = null, tint = WildforceThemeTokens.textPrimary)
-                    Text("Feedback", Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_aac77df347205252), Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
                 }
                 DropdownMenuItem(onClick = { showsMoreOptions = false; showsFaq = true }) {
-                    Icon(Icons.Filled.HelpOutline, contentDescription = null, tint = WildforceThemeTokens.textPrimary)
-                    Text("FAQ", Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
+                    Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null, tint = WildforceThemeTokens.textPrimary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.faq).uppercase(), Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
                 }
             }
         }
@@ -635,7 +635,7 @@ internal fun goalIcon(goal: String): ImageVector = when {
     goal.contains("peso", ignoreCase = true) || goal.contains("loseweight", ignoreCase = true) -> Icons.Filled.Sync
     goal.contains("músculo", ignoreCase = true) || goal.contains("muscle", ignoreCase = true) || goal.contains("buildmuscle", ignoreCase = true) -> Icons.Filled.FitnessCenter
     goal.contains("fuerza", ignoreCase = true) || goal.contains("strength", ignoreCase = true) || goal.contains("gainstrength", ignoreCase = true) -> Icons.Filled.Bolt
-    goal.contains("resistencia", ignoreCase = true) || goal.contains("endurance", ignoreCase = true) || goal.contains("improveendurance", ignoreCase = true) -> Icons.Filled.DirectionsWalk
+    goal.contains("resistencia", ignoreCase = true) || goal.contains("endurance", ignoreCase = true) || goal.contains("improveendurance", ignoreCase = true) -> Icons.AutoMirrored.Filled.DirectionsWalk
     goal.contains("movilidad", ignoreCase = true) || goal.contains("mobility", ignoreCase = true) || goal.contains("improvemobility", ignoreCase = true) -> Icons.Filled.SelfImprovement
     goal.contains("recomposición", ignoreCase = true) || goal.contains("recomposition", ignoreCase = true) || goal.contains("bodyrecomposition", ignoreCase = true) -> Icons.Filled.MyLocation
     else -> Icons.Filled.Favorite
@@ -682,21 +682,21 @@ private fun StreakCalendarDialog(
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("HISTORIAL DE ENTRENAMIENTOS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_history).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
                         Text(
                             if (state.user.currentStreak == 1) "1 día de racha" else "${state.user.currentStreak} días de racha",
                             color = WildforceThemeTokens.textSecondary,
                         )
                     }
-                    TextButton(onClick = onDismiss) { Text("LISTO", color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold) }
+                    TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ready).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold) }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(onClick = { month = month.minusMonths(1) }) { Icon(Icons.Filled.ArrowBack, contentDescription = "Mes anterior", modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.textPrimary) }
+                    TextButton(onClick = { month = month.minusMonths(1) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Mes anterior", modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.textPrimary) }
                     Text(
                         month.format(java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy", monthLocale)).replaceFirstChar { it.titlecase(monthLocale) },
                         Modifier.weight(1f), textAlign = TextAlign.Center, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary,
                     )
-                    TextButton(onClick = { month = month.plusMonths(1) }) { Icon(Icons.Filled.ArrowForward, contentDescription = "Mes siguiente", modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.textPrimary) }
+                    TextButton(onClick = { month = month.plusMonths(1) }) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Mes siguiente", modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.textPrimary) }
                 }
                 val firstDayOfMonth = month.withDayOfMonth(1)
                 val leadingDays = firstDayOfMonth.dayOfWeek.value - DayOfWeek.MONDAY.value
@@ -749,7 +749,7 @@ private fun StreakCalendarDialog(
     selectedWorkoutsForDay?.let { workouts ->
         AlertDialog(
             onDismissRequest = { selectedWorkoutsForDay = null },
-            title = { Text("ENTRENAMIENTOS COMPLETADOS", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.completed_workouts).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     workouts.forEach { workout ->
@@ -775,7 +775,7 @@ private fun StreakCalendarDialog(
             },
             confirmButton = {
                 TextButton(onClick = { selectedWorkoutsForDay = null }) {
-                    Text("CERRAR", color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
                 }
             },
         )
@@ -805,18 +805,18 @@ private fun FeedbackDialog(onDismiss: () -> Unit) {
     if (sent) {
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text("Gracias", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
-            text = { Text("Tu feedback nos ayuda a saber qué mejorar a continuación.", color = WildforceThemeTokens.textSecondary) },
-            confirmButton = { TextButton(onClick = onDismiss) { Text("CERRAR", color = WildforceThemeTokens.textPrimary) } },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.thank_you), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
+            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_feedback_helps_us_understand_what_to_improve_next_), color = WildforceThemeTokens.textSecondary) },
+            confirmButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = WildforceThemeTokens.textPrimary) } },
         )
         return
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("FEEDBACK", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
+        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.feedback).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Cuéntanos qué podemos mejorar.", color = WildforceThemeTokens.textSecondary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_ed911e568099bf51), color = WildforceThemeTokens.textSecondary)
                 Box {
                     OutlinedButton(onClick = { categoriesExpanded = true }, modifier = Modifier.fillMaxWidth()) {
                         Text(category, Modifier.weight(1f), color = WildforceThemeTokens.textPrimary)
@@ -832,7 +832,7 @@ private fun FeedbackDialog(onDismiss: () -> Unit) {
                     value = message,
                     onValueChange = { message = it },
                     modifier = Modifier.fillMaxWidth().heightIn(min = 130.dp),
-                    label = { Text("Tu mensaje") },
+                    label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_c35ce8f329c93131)) },
                     colors = TextFieldDefaults.textFieldColors(
                         textColor = WildforceThemeTokens.textPrimary,
                         backgroundColor = WildforceThemeTokens.backgroundSecondary,
@@ -859,9 +859,9 @@ private fun FeedbackDialog(onDismiss: () -> Unit) {
                         sending = false
                     }
                 },
-            ) { if (sending) CircularProgressIndicator(Modifier.size(18.dp)) else Text("ENVIAR", color = WildforceThemeTokens.textPrimary) }
+            ) { if (sending) CircularProgressIndicator(Modifier.size(18.dp)) else Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.submit).uppercase(), color = WildforceThemeTokens.textPrimary) }
         },
-        dismissButton = { TextButton(enabled = !sending, onClick = onDismiss) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+        dismissButton = { TextButton(enabled = !sending, onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
     )
 }
 
@@ -888,7 +888,7 @@ private fun FaqDialog(onDismiss: () -> Unit) {
                         color = WildforceThemeTokens.textPrimary,
                     )
                     TextButton(onClick = onDismiss) {
-                        Text("CERRAR", color = WildforceThemeTokens.textPrimary)
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = WildforceThemeTokens.textPrimary)
                     }
                 }
                 AndroidView(
@@ -1256,7 +1256,7 @@ private fun NextPhasePlanCard(appLanguage: String, onGenerate: () -> Unit) {
             modifier = Modifier.semantics { contentDescription = action },
         ) {
             Text(action, fontFamily = FontFamily.Default, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-            Icon(Icons.Filled.ArrowForward, contentDescription = null, modifier = Modifier.padding(start = 6.dp).size(18.dp))
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.padding(start = 6.dp).size(18.dp))
         }
     }
 }
@@ -1323,7 +1323,7 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> U
     ) {
         Row(verticalAlignment = Alignment.Top) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("ESTA SEMANA", fontFamily = FontFamily.Default, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_week).uppercase(), fontFamily = FontFamily.Default, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
                 Text(state.planName, fontFamily = Exo2FontFamily, fontSize = 22.sp, fontWeight = FontWeight.Normal, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
                 if (isCompleted) {
@@ -1350,8 +1350,8 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> U
                                     showsPlanMenu = false
                                     showsPlanNotes = true
                                 }) {
-                                    Icon(Icons.Filled.Notes, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.textPrimary)
-                                    Text("Ver notas", Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
+                                    Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.textPrimary)
+                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.view_notes), Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
                                 }
                             }
                             if (canRegeneratePlan) {
@@ -1361,7 +1361,7 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> U
                                 }) {
                                     // Mirrors iOS PlanHeaderView's `Label(..., systemImage: "trash")`.
                                     Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.textPrimary)
-                                    Text("Rehacer plan", Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
+                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.redo_plan), Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
                                 }
                             }
                         }
@@ -1370,7 +1370,7 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> U
         }
         ContextPill(planGoalLabel, goalIcon(planGoal))
         if (state.workouts.isNotEmpty()) {
-            Text("$finalized de ${state.workouts.size} sesiones finalizadas", fontFamily = FontFamily.Default, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_247465696a9e46a7, finalized, state.workouts.size), fontFamily = FontFamily.Default, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -1397,11 +1397,11 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> U
     if (showsPlanNotes && planNotes != null) {
         AlertDialog(
             onDismissRequest = { showsPlanNotes = false },
-            title = { Text("NOTAS DEL PLAN", fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.plan_notes).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
             text = { Text(planNotes, color = WildforceThemeTokens.textSecondary) },
             confirmButton = {
                 TextButton(onClick = { showsPlanNotes = false }) {
-                    Text("CERRAR", color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
                 }
             },
         )
@@ -1747,7 +1747,7 @@ private fun workoutLabelResourceName(canonical: String): String? = when (canonic
     else -> null
 }
 
-private fun workoutLanguageTag(language: String): String = when (language) {
+internal fun workoutLanguageTag(language: String): String = when (language) {
     "English" -> "en"
     "Català" -> "ca"
     "Français" -> "fr"
@@ -1801,7 +1801,7 @@ private fun WorkoutCardMetadata(
 private fun workoutFocusIcon(focus: String): ImageVector = when (focus.lowercase(Locale.ROOT)) {
     "empuje", "push" -> Icons.Filled.ArrowCircleUp
     "tirón", "tiron", "pull" -> Icons.Filled.ArrowCircleDown
-    "piernas", "legs" -> Icons.Filled.DirectionsWalk
+    "piernas", "legs" -> Icons.AutoMirrored.Filled.DirectionsWalk
     "movilidad", "mobility" -> Icons.Filled.SelfImprovement
     "recuperación", "recuperacion", "recovery" -> Icons.Filled.Hotel
     "cardio" -> Icons.Filled.Favorite
@@ -1852,8 +1852,8 @@ private fun RestDayCard() {
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Icon(Icons.Filled.Eco, contentDescription = null, modifier = Modifier.size(80.dp), tint = WildforceThemeTokens.textSecondary.copy(alpha = 0.72f))
         }
-        Text("Día de descanso", style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
-        Text("No hay entrenamiento planificado. Úsalo para recuperarte, estirar o dar un paseo ligero.", color = WildforceThemeTokens.textSecondary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.rest_day), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_workout_is_planned_for_this_day__use_it_to_recover__stretch__or_take_a_light_walk_), color = WildforceThemeTokens.textSecondary)
     }
 }
 
@@ -1910,14 +1910,14 @@ private fun AdaptWorkoutLocationDialog(
     val selected = equipmentPresets.getOrNull(selectedIndex)
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("ADAPTAR ENTRENAMIENTO", fontFamily = AntonFontFamily) },
+        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_ce033ecdd4c7ed84), fontFamily = AntonFontFamily) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Adapta esta sesión al equipamiento disponible en otra ubicación.", color = WildforceThemeTokens.textSecondary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.adapt_this_session_to_the_equipment_available_at_another_training_location_), color = WildforceThemeTokens.textSecondary)
                 if (equipmentPresets.isEmpty()) {
-                    Text("Añade una ubicación de entrenamiento en tu perfil antes de adaptar esta sesión.", color = WildforceThemeTokens.textSecondary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_a_training_location_in_your_profile_before_adapting_this_workout_), color = WildforceThemeTokens.textSecondary)
                 } else {
-                    Text("UBICACIÓN DE ENTRENAMIENTO", style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_e610ce89bce53e88), style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
                     equipmentPresets.forEachIndexed { index, (name, equipment) ->
                         Column(
                             Modifier.fillMaxWidth()
@@ -1946,14 +1946,14 @@ private fun AdaptWorkoutLocationDialog(
                         trainingLocationId = equipmentPresetIds.getOrNull(selectedIndex)?.takeIf(String::isNotBlank),
                     ))
                 },
-            ) { Text("GENERAR", color = WildforceThemeTokens.accent) }
+            ) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.generate).uppercase(), color = WildforceThemeTokens.accent) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
     )
 }
 
 @Composable
-fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial: Boolean = false, showWearStartOption: Boolean = false, appLanguage: String = "Español", mesocyclePhase: io.codepassion.doubletriangle.core.model.MesocyclePhase? = null, onBack: () -> Unit, onStart: (Boolean) -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}, adaptEquipmentPresets: List<Pair<String, String>> = emptyList(), adaptEquipmentPresetIds: List<String> = emptyList(), adaptAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null, canUseAiCoach: Boolean = true, onShowAiCoachOffer: () -> Unit = {}) {
+fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial: Boolean = false, showWearStartOption: Boolean = false, appLanguage: String = "Español", mesocyclePhase: io.codepassion.doubletriangle.core.model.MesocyclePhase? = null, onBack: () -> Unit, onStart: (Boolean) -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}, adaptEquipmentPresets: List<Pair<String, String>> = emptyList(), adaptEquipmentPresetIds: List<String> = emptyList(), adaptAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null, canUseAiCoach: Boolean = true, onShowAiCoachOffer: () -> Unit = {}, onResultEdited: () -> Unit = {}) {
     val detailHeroHeight = (LocalConfiguration.current.screenHeightDp * 0.43f).dp.coerceIn(330.dp, 430.dp)
     val focusLabel = localizedWorkoutLabel(workout.focus, appLanguage)
     val dayTypeLabel = localizedWorkoutLabel(workout.dayType, appLanguage)
@@ -2015,7 +2015,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
         )
     }
     guideExercise?.let { selected ->
-        ExerciseGuideScreen(selected, gender) { guideExercise = null }
+        ExerciseGuideScreen(selected, gender, useImperial, onResultEdited) { guideExercise = null }
         return
     }
     if (skipped) {
@@ -2031,13 +2031,13 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
-                    Text("VOLVER", color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.go_back).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
                 }
                 Icon(Icons.Filled.FastForward, contentDescription = null, modifier = Modifier.size(64.dp).graphicsLayer { scaleX = skipIconScale; scaleY = skipIconScale }, tint = WildforceThemeTokens.accent)
-                Text("DÍA OMITIDO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
-                Text("Este entrenamiento se ha marcado como descanso.", Modifier.padding(top = 8.dp), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                Text("DESHACER", Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Deshacer" }.clickable { skipped = false; onUnskip() }.padding(horizontal = 14.dp), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_4f8f1b6d130128cf), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_6d67523a3c2efeff), Modifier.padding(top = 8.dp), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_22521a61f6aadd7b), Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Deshacer" }.clickable { skipped = false; onUnskip() }.padding(horizontal = 14.dp), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
             }
         }
         return
@@ -2109,7 +2109,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                 }
             }
             Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 10.dp)) {
-                Text("DÍA ${workout.order}", fontFamily = AntonFontFamily, fontSize = 38.sp, color = Color.White, maxLines = 1)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_8c1f2fcbdf15dcce, workout.order), fontFamily = AntonFontFamily, fontSize = 38.sp, color = Color.White, maxLines = 1)
                 // WorkoutDayView.swift uses an 8 pt VStack gap between the
                 // day label and the workout title.
                 Text(
@@ -2147,14 +2147,19 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                     if (showWearStartOption) {
                         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
-                                Text("EMPEZAR EN WEAR OS", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                                Text("Abrir el entrenamiento en el reloj conectado", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_35e7032fdd21e5f2), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_6f27726318df3809), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                             }
                             Switch(checked = startOnWear, onCheckedChange = { startOnWear = it }, enabled = !startingWorkout)
                         }
                     }
                     Button(onClick = { if (!startingWorkout) { startingWorkout = true; onStart(startOnWear) } }, enabled = !startingWorkout, modifier = Modifier.fillMaxWidth().padding(16.dp).height(48.dp), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 0.dp, disabledElevation = 0.dp)) {
-                        Text(if (startingWorkout) "ABRIENDO ENTRENAMIENTO…" else if (hasSavedSession || workout.status == WorkoutStatus.InProgress) "REANUDAR ENTRENAMIENTO" else "EMPEZAR ENTRENAMIENTO", fontWeight = FontWeight.Bold)
+                        Text(
+                            if (startingWorkout) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_opening_workout)
+                            else if (hasSavedSession || workout.status == WorkoutStatus.InProgress) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.resume_workout).uppercase()
+                            else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.start_workout).uppercase(),
+                            fontWeight = FontWeight.Bold,
+                        )
                     }
                 }
                 Divider(Modifier.padding(horizontal = 16.dp))
@@ -2207,7 +2212,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                                     color = WildforceThemeTokens.textPrimary,
                                 )
                                 if (block.rounds > 1) {
-                                    Text("${block.rounds} RONDAS", Modifier.padding(start = 9.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.12f), RoundedCornerShape(12.dp)).padding(horizontal = 8.dp, vertical = 3.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_b2636d897f370e98, block.rounds), Modifier.padding(start = 9.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.12f), RoundedCornerShape(12.dp)).padding(horizontal = 8.dp, vertical = 3.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                                 }
                             }
                             block.notes?.let { Text(it, Modifier.padding(top = 5.dp, start = if (collapsible) 22.dp else 14.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
@@ -2270,7 +2275,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                                         useImperial = useImperial,
                                     )
                                 }
-                                Icon(Icons.Filled.MoreHoriz, contentDescription = "Más opciones", tint = WildforceThemeTokens.textPrimary)
+                                Icon(Icons.Filled.MoreHoriz, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.more_options), tint = WildforceThemeTokens.textPrimary)
                             }
                             if (exerciseIndex < block.exercises.lastIndex) {
                                 Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp).height(1.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.14f)))
@@ -2279,7 +2284,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                         block.restAfterBlockSeconds?.let { rest ->
                             Row(Modifier.padding(horizontal = 14.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Icon(Icons.Filled.Timer, contentDescription = null, modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.textSecondary)
-                                Text("Descansa ${rest}s al terminar el bloque", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
+                                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_33292775312c232f, rest), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
                             }
                         }
                     }
@@ -2294,17 +2299,17 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
     if (showSkipConfirmation) {
         AlertDialog(
             onDismissRequest = { showSkipConfirmation = false },
-            title = { Text("¿OMITIR ENTRENAMIENTO?", fontFamily = AntonFontFamily) },
-            text = { Text("El día quedará marcado como descanso y podrás volver a abrirlo después.") },
-            confirmButton = { TextButton(onClick = { skipped = true; showSkipConfirmation = false; onSkip() }) { Text("OMITIR", color = Color(0xFFC62828)) } },
-            dismissButton = { TextButton(onClick = { showSkipConfirmation = false }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_e868d979b693438b), fontFamily = AntonFontFamily) },
+            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_9230242151559170)) },
+            confirmButton = { TextButton(onClick = { skipped = true; showSkipConfirmation = false; onSkip() }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip).uppercase(), color = Color(0xFFC62828)) } },
+            dismissButton = { TextButton(onClick = { showSkipConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
     if (showCancelConfirmation) {
         AlertDialog(
             onDismissRequest = { showCancelConfirmation = false },
-            title = { Text("¿CANCELAR ENTRENAMIENTO?", fontFamily = AntonFontFamily) },
-            text = { Text("Se eliminará el progreso guardado de esta sesión. Esta acción no se puede deshacer.") },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_74be332575411a26), fontFamily = AntonFontFamily) },
+            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_e843f0002491aaa9)) },
             confirmButton = {
                 TextButton(onClick = {
                     cancelWorkoutSession(detailContext, workout.id)
@@ -2313,22 +2318,22 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                         workout.resetCancelledWorkout(),
                     )
                     showCancelConfirmation = false
-                }) { Text("CANCELAR ENTRENAMIENTO", color = Color(0xFFC62828)) }
+                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), color = Color(0xFFC62828)) }
             },
-            dismissButton = { TextButton(onClick = { showCancelConfirmation = false }) { Text("SEGUIR", color = WildforceThemeTokens.textSecondary) } },
+            dismissButton = { TextButton(onClick = { showCancelConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_1daf179b6751ecd3), color = WildforceThemeTokens.textSecondary) } },
         )
     }
     if (adapting) {
         Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.58f)).clickable { }, contentAlignment = Alignment.Center) {
             Column(Modifier.liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(26.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 CircularProgressIndicator(color = WildforceThemeTokens.accent)
-                Text("ADAPTANDO ENTRENAMIENTO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-                Text("La IA conserva el objetivo de la sesión y sustituye solo lo necesario.", color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_ad63682fd261030f), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_1f186c370603e755), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             }
         }
     }
     adaptationError?.let { error ->
-        AlertDialog(onDismissRequest = { adaptationError = null }, title = { Text("NO SE PUDO ADAPTAR") }, text = { Text(error) }, confirmButton = {
+        AlertDialog(onDismissRequest = { adaptationError = null }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_94fd46fb2ebefd8c)) }, text = { Text(error) }, confirmButton = {
             TextButton(onClick = {
                 val request = lastAdaptRequest
                 val generator = adaptAiGenerator
@@ -2341,15 +2346,15 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                         adapting = false
                     }
                 } else adaptationError = null
-            }) { Text("REINTENTAR", color = WildforceThemeTokens.accent) }
-        }, dismissButton = { TextButton(onClick = { adaptationError = null }) { Text("CERRAR", color = WildforceThemeTokens.textSecondary) } })
+            }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase(), color = WildforceThemeTokens.accent) }
+        }, dismissButton = { TextButton(onClick = { adaptationError = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = WildforceThemeTokens.textSecondary) } })
     }
     pendingAdapted?.let { adapted ->
-        AlertDialog(onDismissRequest = { pendingAdapted = null }, title = { Text("ENTRENAMIENTO ADAPTADO", fontFamily = AntonFontFamily) }, text = {
+        AlertDialog(onDismissRequest = { pendingAdapted = null }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_7da4232d06825169), fontFamily = AntonFontFamily) }, text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("Revisa los cambios antes de sustituir la sesión actual.", color = WildforceThemeTokens.textSecondary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_66b7a9375ddc733a), color = WildforceThemeTokens.textSecondary)
                 Text(adapted.title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                Text("${adapted.exercises.size} ejercicios · ${adapted.estimatedMinutes} min", color = WildforceThemeTokens.textSecondary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_4db754c1635a189f, adapted.exercises.size, adapted.estimatedMinutes), color = WildforceThemeTokens.textSecondary)
                 adapted.notes?.takeIf(String::isNotBlank)?.let { notes ->
                     Text(notes, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 }
@@ -2368,9 +2373,9 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                         }
                     }
                 }
-                Text("La sesión original se conservará hasta confirmar.", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accent)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_ed3b48a690d2135a), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accent)
             }
-        }, confirmButton = { TextButton(onClick = { pendingAdapted = null; onWorkoutUpdated(adapted) }) { Text("APLICAR", color = WildforceThemeTokens.accent) } }, dismissButton = { TextButton(onClick = { pendingAdapted = null }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } })
+        }, confirmButton = { TextButton(onClick = { pendingAdapted = null; onWorkoutUpdated(adapted) }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3db550736adeaaf3), color = WildforceThemeTokens.accent) } }, dismissButton = { TextButton(onClick = { pendingAdapted = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } })
     }
 }
 
@@ -2639,7 +2644,7 @@ private fun WorkoutInformationTab(workout: WorkoutDaySummary, appLanguage: Strin
         Spacer(Modifier.height(24.dp))
     }
     workout.notes?.trim()?.takeIf { it.isNotBlank() }?.let { notes ->
-        Text("NOTAS", color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.notes).uppercase(), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold)
         Text(notes, Modifier.padding(top = 9.dp), color = WildforceThemeTokens.textSecondary)
         Spacer(Modifier.height(18.dp))
     }
@@ -2686,7 +2691,7 @@ private fun watchMotionStatusSubtitle(snapshot: WatchMotionSnapshotData): String
 private fun WatchMotionInsightsSection(snapshot: WatchMotionSnapshotData) {
     if (!snapshot.isVisible) return
     Column(Modifier.fillMaxWidth().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text("REP INSIGHTS", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accent)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.rep_insights).uppercase(), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accent)
         Text(watchMotionStatusTitle(snapshot.statusCode), style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
         Text(watchMotionStatusSubtitle(snapshot), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         if (snapshot.reps.isNotEmpty()) {
@@ -3068,7 +3073,7 @@ fun ActiveWorkoutScreen(
             } else {
                 WorkoutRestContext.BeforeNextBlock
             }
-            val transitionSeconds = if (crossesRound) currentPathBlock?.restAfterBlockSeconds ?: restSeconds else restSeconds
+            val transitionSeconds = if (crossesRound) currentPathBlock.restAfterBlockSeconds ?: restSeconds else restSeconds
             exerciseIndex = nextIndex
             if (!skipRestPeriods && transitionSeconds > 0) {
                 restInitialSeconds = transitionSeconds
@@ -3354,7 +3359,7 @@ fun ActiveWorkoutScreen(
                 // If Android had released the workout composition, watch
                 // commands were persisted by the local bridge. Apply them only
                 // after restoring the snapshot so the action uses current data.
-                WatchCommandStore.drain(context).forEach(::applyWatchCommand)
+                WatchCommandStore.drain(context, workout.id).forEach(::applyWatchCommand)
             } else if (event == Lifecycle.Event.ON_PAUSE) {
                 context.getSharedPreferences("wildforce_notification_settings", 0).edit().putBoolean("app_foreground", false).apply()
                 // Force an immediate save before the foreground service takes over.
@@ -3403,7 +3408,7 @@ fun ActiveWorkoutScreen(
             // único dueño de la notificación. Evita que Compose publique otra
             // versión del contador y produzca dos temporizadores visibles.
             val appIsForeground = lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
-            if (WorkoutNotificationPreferences.enabled(context) && appIsForeground) {
+            if (appIsForeground) {
                 runCatching {
                     WorkoutActiveNotification.show(
                         context,
@@ -3417,6 +3422,7 @@ fun ActiveWorkoutScreen(
                         exerciseIndex = exerciseIndex,
                         totalExercises = workout.exercises.size,
                         exerciseTimerSeconds = exerciseTimeRemaining?.takeIf { restRemaining == null },
+                        exerciseTimerRunning = exerciseTimerRunning,
                         canToggleExerciseTimer = restRemaining == null && exercise?.resolvedTargetDurationSeconds() != null,
                         restEndAtMillis = restEndsAtMillis,
                     )
@@ -3679,8 +3685,8 @@ fun ActiveWorkoutScreen(
         val skipsWholeBlock = exercise?.blockType in setOf(WorkoutBlockType.Warmup, WorkoutBlockType.Cooldown)
         AlertDialog(
             onDismissRequest = { showsSkipExerciseConfirmation = false },
-            title = { Text(if (skipsWholeBlock) "¿SALTAR BLOQUE?" else "¿SALTAR EJERCICIO?", fontFamily = AntonFontFamily) },
-            text = { Text(if (skipsWholeBlock) "Se omitirá todo el bloque actual y pasarás al siguiente." else "Este ejercicio quedará sin completar y pasarás al siguiente.") },
+            title = { Text(if (skipsWholeBlock) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3a2a4b75e5f5742f) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_87e24da452a03eda), fontFamily = AntonFontFamily) },
+            text = { Text(if (skipsWholeBlock) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3c695985e74f6e76) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_c9ac2cb120cfe227)) },
             confirmButton = { TextButton(onClick = {
                 showsSkipExerciseConfirmation = false
                 val nextIndex = if (skipsWholeBlock) currentPathBlock?.exercises?.flatMap { it.executionIndices }?.maxOrNull()?.plus(1) else exerciseIndex + 1
@@ -3695,25 +3701,25 @@ fun ActiveWorkoutScreen(
                 } else {
                     exerciseIndex = nextIndex
                 }
-            }) { Text("SALTAR", color = WildforceThemeTokens.accent) } },
-            dismissButton = { TextButton(onClick = { showsSkipExerciseConfirmation = false }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+            }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip).uppercase(), color = WildforceThemeTokens.accent) } },
+            dismissButton = { TextButton(onClick = { showsSkipExerciseConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
 
     if (showsRemoveExerciseConfirmation) {
         AlertDialog(
             onDismissRequest = { showsRemoveExerciseConfirmation = false },
-            title = { Text("¿ELIMINAR EJERCICIO?", fontFamily = AntonFontFamily) },
-            text = { Text("Esta acción eliminará el ejercicio de este entrenamiento.") },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f882bae2c871a1bc), fontFamily = AntonFontFamily) },
+            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_01398e25b10ed715)) },
             confirmButton = {
                 TextButton(onClick = {
                     showsRemoveExerciseConfirmation = false
                     removeCurrentExercise()
-                }) { Text("ELIMINAR", color = Color(0xFFC62828)) }
+                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.delete).uppercase(), color = Color(0xFFC62828)) }
             },
             dismissButton = {
                 TextButton(onClick = { showsRemoveExerciseConfirmation = false }) {
-                    Text("CANCELAR", color = WildforceThemeTokens.textSecondary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary)
                 }
             },
         )
@@ -3722,18 +3728,18 @@ fun ActiveWorkoutScreen(
     if (showsCancelWorkoutConfirmation) {
         AlertDialog(
             onDismissRequest = { showsCancelWorkoutConfirmation = false },
-            title = { Text("¿CANCELAR ENTRENAMIENTO?", fontFamily = AntonFontFamily) },
-            text = { Text("Se eliminará todo el progreso de esta sesión.") },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_74be332575411a26), fontFamily = AntonFontFamily) },
+            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_34fbf2a18984301a)) },
             confirmButton = {
                 TextButton(onClick = {
                     showsCancelWorkoutConfirmation = false
                     cancelWorkoutSession(context, workout.id)
                     onExit()
-                }) { Text("CANCELAR ENTRENAMIENTO", color = Color(0xFFC62828)) }
+                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), color = Color(0xFFC62828)) }
             },
             dismissButton = {
                 TextButton(onClick = { showsCancelWorkoutConfirmation = false }) {
-                    Text("SEGUIR ENTRENANDO", color = WildforceThemeTokens.textSecondary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.continue_with_your_workout).uppercase(), color = WildforceThemeTokens.textSecondary)
                 }
             },
         )
@@ -3827,7 +3833,7 @@ fun ActiveWorkoutScreen(
     }
 
     fun continueFeedback() {
-        selectedFeedback?.let { feedbackByExercise = feedbackByExercise + (exerciseIndex to it) }
+        feedbackByExercise = feedbackByExercise + (exerciseIndex to selectedFeedback)
         pendingNote.trim().takeIf(String::isNotEmpty)?.let { notesByExercise = notesByExercise + (exerciseIndex to it) }
         if (exercise?.targetDistanceKm != null) {
             val latestRecordIndex = completedSetRecords.indexOfLast { it.exerciseIndex == exerciseIndex }
@@ -4205,8 +4211,8 @@ fun ActiveWorkoutScreen(
                         val isWarmupOrCooldown = exercise.blockType == WorkoutBlockType.Warmup || exercise.blockType == WorkoutBlockType.Cooldown
                         if (isWarmupOrCooldown) {
                         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                            Text(if (exercise.blockType == WorkoutBlockType.Warmup) "PREPÁRATE PARA ENTRENAR" else "RECUPERA Y BAJA PULSACIONES", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                            Text("Completa el movimiento con control y sin buscar fatiga.", Modifier.padding(top = 6.dp, bottom = 16.dp), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            Text(if (exercise.blockType == WorkoutBlockType.Warmup) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_4584ab778135a0fb) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_2775726f473ccdf1), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_71c9925afe473640), Modifier.padding(top = 6.dp, bottom = 16.dp), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                             if (exercise.resolvedTargetDurationSeconds() != null) {
                                 ExerciseWorkTimer(
                                     seconds = exerciseTimeRemaining ?: exerciseTimeInitial,
@@ -4365,7 +4371,7 @@ fun ActiveWorkoutScreen(
                                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 ) {
                                     Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.textPrimary)
-                                    Text("AÑADIR SERIE", fontFamily = Exo2FontFamily, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_set).uppercase(), fontFamily = Exo2FontFamily, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                                 }
                             }
                         }
@@ -4480,7 +4486,7 @@ private fun ActiveWorkoutHeroHeader(
                 Divider()
                 ActiveWorkoutMenuItem("⛓", "Crear superserie", onClick = onCreateSuperset)
             }
-            if (canEditSuperset && currentPathBlock != null) {
+            if (canEditSuperset) {
                 Divider()
                 ActiveWorkoutMenuItem("□", "Quitar superserie", onClick = onRemoveSuperset)
                 ActiveWorkoutMenuItem("round+", "Añadir ronda", onClick = onAddRound)
@@ -4598,28 +4604,28 @@ private fun ActiveWorkoutConfirmationDialogs(
     if (showsSkipExerciseConfirmation) {
         AlertDialog(
             onDismissRequest = onDismissSkip,
-            title = { Text(if (isSkippingWholeBlock) "¿SALTAR BLOQUE?" else "¿SALTAR EJERCICIO?", fontFamily = AntonFontFamily) },
-            text = { Text(if (isSkippingWholeBlock) "Se omitirá todo el bloque actual y pasarás al siguiente." else "Este ejercicio quedará sin completar y pasarás al siguiente.") },
-            confirmButton = { TextButton(onClick = onConfirmSkip) { Text("SALTAR", color = WildforceThemeTokens.accent) } },
-            dismissButton = { TextButton(onClick = onDismissSkip) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+            title = { Text(if (isSkippingWholeBlock) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3a2a4b75e5f5742f) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_87e24da452a03eda), fontFamily = AntonFontFamily) },
+            text = { Text(if (isSkippingWholeBlock) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3c695985e74f6e76) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_c9ac2cb120cfe227)) },
+            confirmButton = { TextButton(onClick = onConfirmSkip) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip).uppercase(), color = WildforceThemeTokens.accent) } },
+            dismissButton = { TextButton(onClick = onDismissSkip) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
     if (showsRemoveExerciseConfirmation) {
         AlertDialog(
             onDismissRequest = onDismissRemove,
-            title = { Text("¿ELIMINAR EJERCICIO?", fontFamily = AntonFontFamily) },
-            text = { Text("Esta acción eliminará el ejercicio de este entrenamiento.") },
-            confirmButton = { TextButton(onClick = onConfirmRemove) { Text("ELIMINAR", color = Color(0xFFC62828)) } },
-            dismissButton = { TextButton(onClick = onDismissRemove) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f882bae2c871a1bc), fontFamily = AntonFontFamily) },
+            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_01398e25b10ed715)) },
+            confirmButton = { TextButton(onClick = onConfirmRemove) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.delete).uppercase(), color = Color(0xFFC62828)) } },
+            dismissButton = { TextButton(onClick = onDismissRemove) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
     if (showsCancelWorkoutConfirmation) {
         AlertDialog(
             onDismissRequest = onDismissCancel,
-            title = { Text("¿CANCELAR ENTRENAMIENTO?", fontFamily = AntonFontFamily) },
-            text = { Text("Se eliminará todo el progreso de esta sesión.") },
-            confirmButton = { TextButton(onClick = onConfirmCancel) { Text("CANCELAR ENTRENAMIENTO", color = Color(0xFFC62828)) } },
-            dismissButton = { TextButton(onClick = onDismissCancel) { Text("SEGUIR ENTRENANDO", color = WildforceThemeTokens.textSecondary) } },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_74be332575411a26), fontFamily = AntonFontFamily) },
+            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_34fbf2a18984301a)) },
+            confirmButton = { TextButton(onClick = onConfirmCancel) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), color = Color(0xFFC62828)) } },
+            dismissButton = { TextButton(onClick = onDismissCancel) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.continue_with_your_workout).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
 }
@@ -4853,7 +4859,7 @@ private fun ActiveWorkoutPhaseContent(
                                 state.completedSetRecords,
                                 state.useImperial,
                                 showWeight = exerciseTracksWeight(state.effectiveExercise ?: exercise),
-                                currentEditor = if (state.restRemaining != null || exercise.resolvedTargetDurationSeconds() != null) null else {
+                                currentEditor = if (exercise.resolvedTargetDurationSeconds() != null) null else {
                                     {
                                         ActiveSetEditor(
                                             targetReps = targetRepsLabel(exercise, state.completedForExercise),
@@ -4886,7 +4892,7 @@ private fun ActiveWorkoutPhaseContent(
                                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 ) {
                                     Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.textPrimary)
-                                    Text("AÑADIR SERIE", fontFamily = Exo2FontFamily, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_set).uppercase(), fontFamily = Exo2FontFamily, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                                 }
                             }
                         }
@@ -4932,7 +4938,7 @@ private fun SupersetRoundMap(block: WorkoutPathBlock, currentExerciseIndex: Int,
             ) {
                 Icon(Icons.Filled.Layers, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.backgroundSecondary)
             }
-            Text("SUPERSERIE · RONDA $currentRound/${block.rounds}", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.body2)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.superset___round__d_of__d, currentRound, block.rounds), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.body2)
             Row(Modifier.weight(1f).height(6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 repeat(block.rounds) { roundIndex ->
                     Box(
@@ -4961,7 +4967,7 @@ private fun SupersetRoundMap(block: WorkoutPathBlock, currentExerciseIndex: Int,
                     maxLines = 1,
                 )
                 if (index < block.exercises.lastIndex) {
-                    Icon(Icons.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.textSecondary)
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.textSecondary)
                 }
             }
         }
@@ -5025,13 +5031,13 @@ private fun SetTrackingRows(
                 if (completed) Icon(Icons.Filled.CheckCircle, contentDescription = "Serie completada", modifier = Modifier.width(34.dp).graphicsLayer { scaleX = completionScale; scaleY = completionScale }, tint = Color(0xFF2EAF68))
                 else Text(setNumber.toString(), Modifier.width(34.dp).graphicsLayer { scaleX = completionScale; scaleY = completionScale }, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Reps", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_85bf5aae0c21e80f), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                     Spacer(Modifier.width(6.dp))
                     Text(if (record != null) record.reps.toString() else targetRepsLabel(exercise, setIndex), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
                 }
                 if (showWeight) {
                     Row(Modifier.weight(1.25f), verticalAlignment = Alignment.CenterVertically) {
-                        Text(if (exercise.isPerSideLoad) "Peso/lado" else "Peso", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                        Text(if (exercise.isPerSideLoad) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_816b51f9414f1ce3) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.weight), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                         Spacer(Modifier.width(6.dp))
                         Text(record?.let { formatTrainingWeight(it.weightKg, useImperial) } ?: exercise.targetWeightsKg?.getOrNull(setIndex)?.let { formatTrainingWeight(it, useImperial) } ?: exercise.targetWeightKg?.let { formatTrainingWeight(it, useImperial) }.orEmpty().ifBlank { "—" }, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
@@ -5041,7 +5047,7 @@ private fun SetTrackingRows(
         }
         if (!current && editingSetNumber == setNumber && record != null) {
             Column(Modifier.fillMaxWidth().padding(bottom = 7.dp)) {
-                Text("CORREGIR SERIE $setNumber", Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accent)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_8c9f2c9321a63344, setNumber), Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accent)
                 ActiveSetEditor(
                     targetReps = targetRepsLabel(exercise, setIndex),
                     targetWeightKg = exercise.targetWeightsKg?.getOrNull(setIndex) ?: exercise.targetWeightKg ?: editWeightKg,
@@ -5054,8 +5060,8 @@ private fun SetTrackingRows(
                     onWeightChanged = { editWeightKg = it },
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    Text("CANCELAR", Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Cancelar" }.clickable { editingSetNumber = null }.padding(horizontal = 10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
-                    Text("GUARDAR", Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Guardar" }.clickable {
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Cancelar" }.clickable { editingSetNumber = null }.padding(horizontal = 10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase(), Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Guardar" }.clickable {
                         onRecordChanged(record, record.copy(reps = editReps, weightKg = editWeightKg))
                         editingSetNumber = null
                     }.padding(10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
@@ -5137,7 +5143,7 @@ private fun ActiveSetEditor(
  * for direct entry and exposes the usual training increment as +/- controls.
  */
 @Composable
-private fun WorkoutNumericInputDialog(
+internal fun WorkoutNumericInputDialog(
     title: String,
     initialValue: Double,
     allowsDecimal: Boolean,
@@ -5201,10 +5207,10 @@ private fun WorkoutNumericInputDialog(
         },
         confirmButton = {
             TextButton(onClick = { parsedDraft()?.let(onSave) }) {
-                Text("LISTO", color = WildforceThemeTokens.accent)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ready).uppercase(), color = WildforceThemeTokens.accent)
             }
         },
-        dismissButton = { TextButton(onClick = onDismissRequest) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+        dismissButton = { TextButton(onClick = onDismissRequest) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
     )
 }
 
@@ -5305,9 +5311,9 @@ private fun ExerciseFeedbackContent(
                 Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text("TUS RESULTADOS", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_results).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Duración", color = WildforceThemeTokens.textSecondary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.duration), color = WildforceThemeTokens.textSecondary)
                     Text(formatClock(elapsedSeconds), fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                 }
                 targetDistanceKm?.let {
@@ -5330,14 +5336,14 @@ private fun ExerciseFeedbackContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
-                Text("Editar series", color = WildforceThemeTokens.accent, fontWeight = FontWeight.SemiBold)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.edit_sets), color = WildforceThemeTokens.accent, fontWeight = FontWeight.SemiBold)
             }
         }
-        Text("EJERCICIO COMPLETADO", fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_276591fdc76a8e39), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
         Text(exerciseName, color = WildforceThemeTokens.textSecondary)
-        Text("¿CÓMO HA IDO?", Modifier.fillMaxWidth().padding(top = 12.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-        Text("Esta información ayudará a personalizar las siguientes sesiones.", Modifier.fillMaxWidth().padding(top = 2.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.how_was_it_).uppercase(), Modifier.fillMaxWidth().padding(top = 12.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_b20ae2dc3aacf09e), Modifier.fillMaxWidth().padding(top = 2.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Row(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             choices.forEach { (emoji, title, _) ->
                 val isSelected = selected == title
@@ -5382,14 +5388,14 @@ private fun ExerciseFeedbackContent(
             value = note,
             onValueChange = { onNoteChanged(it.take(300)) },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Añadir notas…") },
+            placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_notes___)) },
             maxLines = 3,
             colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent),
             shape = RoundedCornerShape(13.dp),
         )
         Spacer(Modifier.height(10.dp))
         Button(onClick = onContinue, enabled = selected != null, modifier = Modifier.fillMaxWidth().height(48.dp), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) {
-            Text("MARCAR COMO COMPLETADO", fontWeight = FontWeight.Bold)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_690d2168621b5112), fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -5483,7 +5489,7 @@ private fun RestTimerContent(
                     backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.18f), strokeWidth = 12.dp,
                 )
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("${seconds}s", fontFamily = Exo2FontFamily, fontSize = 42.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_44d1064e89430456, seconds), fontFamily = Exo2FontFamily, fontSize = 42.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                     Text(
                         when (context) {
                             WorkoutRestContext.BetweenSets -> "SERIE"
@@ -5500,11 +5506,11 @@ private fun RestTimerContent(
             })
         }
         if (context == WorkoutRestContext.BetweenRounds && nextRoundExercises.isNotEmpty()) {
-            Text("SIGUIENTE RONDA", Modifier.fillMaxWidth().padding(start = 10.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary, maxLines = 1)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.next_round).uppercase(), Modifier.fillMaxWidth().padding(start = 10.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary, maxLines = 1)
             Column(Modifier.fillMaxWidth().padding(top = 6.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(16.dp)).padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 nextRoundExercises.forEachIndexed { index, roundExercise ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("A${index + 1}", Modifier.background(WildforceThemeTokens.accent.copy(alpha = 0.14f), RoundedCornerShape(12.dp)).padding(horizontal = 7.dp, vertical = 3.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_938dcead4d66655b, index + 1), Modifier.background(WildforceThemeTokens.accent.copy(alpha = 0.14f), RoundedCornerShape(12.dp)).padding(horizontal = 7.dp, vertical = 3.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                         RemoteTrainingImage(exerciseImageUrl(roundExercise.imageKey, gender), null, Modifier.padding(start = 8.dp).size(42.dp).clip(RoundedCornerShape(10.dp)))
                         Column(Modifier.weight(1f).padding(start = 10.dp)) {
                             Text(exerciseDisplayName(roundExercise.imageKey, roundExercise.name), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -5514,7 +5520,7 @@ private fun RestTimerContent(
                 }
             }
         } else if (context != WorkoutRestContext.BetweenSets && nextExercise != null) {
-            Text("A CONTINUACIÓN", Modifier.fillMaxWidth().padding(start = 10.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary, maxLines = 1)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.up_next).uppercase(), Modifier.fillMaxWidth().padding(start = 10.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary, maxLines = 1)
             Row(Modifier.fillMaxWidth().padding(top = 6.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(16.dp)).padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
                 RemoteTrainingImage(exerciseImageUrl(nextExercise.imageKey, gender), null, Modifier.size(52.dp).clip(RoundedCornerShape(12.dp)))
                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
@@ -5665,13 +5671,13 @@ private fun CompactMetricStepper(title: String, value: String, onMinus: () -> Un
         }
         AlertDialog(
             onDismissRequest = { showManualInput = false },
-            title = { Text("EDITAR $title", fontFamily = AntonFontFamily) },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_4acff08d209d2081, title), fontFamily = AntonFontFamily) },
             text = { TextField(manualInput, { value ->
                 val sanitized = sanitizeNumericInput(value.text, allowsDecimal = decimalInput)
                 manualInput = value.copy(text = sanitized, selection = TextRange(sanitized.length))
-            }, modifier = Modifier.focusRequester(manualInputFocusRequester), label = { Text(if (decimalInput) "Valor" else "Repeticiones") }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = if (decimalInput) KeyboardType.Decimal else KeyboardType.Number)) },
-            confirmButton = { TextButton(onClick = { onValueEntered(manualInput.text); showManualInput = false }) { Text("GUARDAR", color = WildforceThemeTokens.accent) } },
-            dismissButton = { TextButton(onClick = { showManualInput = false }) { Text("CANCELAR", color = WildforceThemeTokens.textSecondary) } },
+            }, modifier = Modifier.focusRequester(manualInputFocusRequester), label = { Text(if (decimalInput) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.value) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.reps)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = if (decimalInput) KeyboardType.Decimal else KeyboardType.Number)) },
+            confirmButton = { TextButton(onClick = { onValueEntered(manualInput.text); showManualInput = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase(), color = WildforceThemeTokens.accent) } },
+            dismissButton = { TextButton(onClick = { showManualInput = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
 }
@@ -5742,7 +5748,7 @@ private fun CenteredBackButton(onClick: () -> Unit, size: Dp, padding: Dp = 0.dp
             // A 22 dp Material icon has the same visible glyph size once the
             // vector's built-in viewport padding is accounted for. Keep this
             // fixed even when a screen uses a different circular hit target.
-            Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = WildforceThemeTokens.imageControlContent, modifier = Modifier.size(22.dp))
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.action_back), tint = WildforceThemeTokens.imageControlContent, modifier = Modifier.size(22.dp))
         }
     }
 }

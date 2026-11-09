@@ -83,9 +83,9 @@ class NutritionStatusWidget : AppWidgetProvider() {
                         context.getString(R.string.ios_catalog_06c4ce57478b878d)
                             .replace("%d", (target.calories - calories).toString()),
                     )
-                    bindMacro(context, R.id.nutrition_protein_title, R.id.nutrition_protein, R.id.nutrition_protein_progress, R.string.ios_catalog_92a31f1de3dff9a0, protein, target.protein)
-                    bindMacro(context, R.id.nutrition_carbs_title, R.id.nutrition_carbs, R.id.nutrition_carbs_progress, R.string.ios_catalog_2c06fb68cd6e1a28, carbs, target.carbs)
-                    bindMacro(context, R.id.nutrition_fat_title, R.id.nutrition_fat, R.id.nutrition_fat_progress, R.string.ios_catalog_ddcdda5ac2be57d4, fat, target.fat)
+                    bindMacro(context, R.id.nutrition_protein_title, R.id.nutrition_protein, R.id.nutrition_protein_progress, io.codepassion.doubletriangle.core.designsystem.R.string.protein, protein, target.protein)
+                    bindMacro(context, R.id.nutrition_carbs_title, R.id.nutrition_carbs, R.id.nutrition_carbs_progress, io.codepassion.doubletriangle.core.designsystem.R.string.carbs, carbs, target.carbs)
+                    bindMacro(context, R.id.nutrition_fat_title, R.id.nutrition_fat, R.id.nutrition_fat_progress, io.codepassion.doubletriangle.core.designsystem.R.string.fat, fat, target.fat)
                 }
             }
         }

@@ -133,7 +133,11 @@
     "doorwayChestStretch": "Estirament de pit al marc de la porta",
     "scorpions": "Escorpió",
     "threadTheNeedle": "Enfilar l'agulla",
-    "neckCircles": "Rotacions de coll"
+    "neckCircles": "Rotacions de coll",
+    "ezBarSkullCrusher": "Extensió de tríceps estirat amb barra EZ",
+    "closeGripDumbbellBenchPress": "Press de banca amb manuelles i presa tancada",
+    "lyingCableCurl": "Curl de bíceps estirat a la politja",
+    "smithMachineCalfRaise": "Elevació de bessons a la màquina Smith"
   },
   "texts": {
     "Walking": "Caminar",
@@ -426,6 +430,9 @@
     "Straight Sets": "Straight Sets",
     "Time + Distance": "Time + Distance",
     "Seconds": "Seconds",
-    "Minutes": "Minuts"
+    "Minutes": "Minuts",
+    "Flat Bench": "Banc pla",
+    "EZ Bar": "EZ Bar",
+    "Smith Machine": "Màquina Smith"
   }
 }

@@ -64,7 +64,7 @@ internal object WildforceNotificationScheduler {
                         dateTime = reminderAt,
                         channel = CHANNEL_WORKOUT,
                         title = workoutReminderTitle(context),
-                        body = context.getString(R.string.workout_reminder_body, workout.title),
+                        body = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.time_for_you_workout_),
                     )
                     scheduledAlarmCodes.add(requestCode)
                 }
@@ -177,8 +177,18 @@ internal object WildforceNotificationScheduler {
         persistScheduledWorkoutAlarmCodes(context, emptySet())
     }
 
-    private fun workoutReminderTitle(context: Context): String =
-        context.resources.getStringArray(R.array.workout_reminder_titles).random()
+    private fun workoutReminderTitle(context: Context): String = listOf(
+        io.codepassion.doubletriangle.core.designsystem.R.string.time_to_crush_it_,
+        io.codepassion.doubletriangle.core.designsystem.R.string.sweat_now__shine_later_,
+        io.codepassion.doubletriangle.core.designsystem.R.string.your_future_self_will_thank_you_,
+        io.codepassion.doubletriangle.core.designsystem.R.string.consistency_is_key_,
+        io.codepassion.doubletriangle.core.designsystem.R.string.ready_for_your_workout_,
+        io.codepassion.doubletriangle.core.designsystem.R.string.let_s_get_moving_,
+        io.codepassion.doubletriangle.core.designsystem.R.string.make_yourself_proud_today_,
+        io.codepassion.doubletriangle.core.designsystem.R.string.don_t_stop_until_you_re_proud_,
+        io.codepassion.doubletriangle.core.designsystem.R.string.push_your_limits_,
+        io.codepassion.doubletriangle.core.designsystem.R.string.believe_in_yourself_,
+    ).random().let(context::getString)
 
     /** Planned breakfast/lunch/dinner checkpoints, using the same iOS ranges: 12:00, 17:00 and 21:00. */
     private fun pendingNutritionCheckpoints(context: Context, now: LocalDateTime): List<NutritionCheckpoint> {

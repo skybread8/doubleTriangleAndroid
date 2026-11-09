@@ -31,9 +31,12 @@ internal object WorkoutActiveNotification {
     private const val restFinishedNotificationId = 4105
     // These match the active workout's progress segments: completed, current,
     // and pending respectively.
-    private const val workoutProgressCompleted = 0xE0FFFFFF.toInt()
-    private const val workoutProgressCurrent = 0x9EFFFFFF.toInt()
-    private const val workoutProgressPending = 0x47FFFFFF
+    private const val workoutProgressCompleted = 0xFFFFFFFF.toInt()
+    private const val workoutProgressCurrent = 0xFFBDBDBD.toInt()
+    private const val workoutProgressPending = 0xFF777777.toInt()
+    private const val workoutProgressDivider = 0xFF242424.toInt()
+    private const val workoutSegmentLength = 20
+    private const val workoutDividerLength = 1
     private var artworkTitle: String? = null
     private var artwork: Bitmap? = null
     private var liveArtworkSource: Bitmap? = null
@@ -51,6 +54,7 @@ internal object WorkoutActiveNotification {
         exerciseIndex: Int? = null,
         totalExercises: Int? = null,
         exerciseTimerSeconds: Int? = null,
+        exerciseTimerRunning: Boolean = false,
         canToggleExerciseTimer: Boolean = false,
         restEndAtMillis: Long? = null,
     ) {
@@ -63,6 +67,7 @@ internal object WorkoutActiveNotification {
                 exerciseIndex = exerciseIndex,
                 totalExercises = totalExercises,
                 exerciseTimerSeconds = exerciseTimerSeconds,
+                exerciseTimerRunning = exerciseTimerRunning,
                 canToggleExerciseTimer = canToggleExerciseTimer,
                 restEndAtMillis = restEndAtMillis,
             )
@@ -119,6 +124,7 @@ internal object WorkoutActiveNotification {
         exerciseIndex: Int? = null,
         totalExercises: Int? = null,
         exerciseTimerSeconds: Int? = null,
+        exerciseTimerRunning: Boolean = false,
         canToggleExerciseTimer: Boolean = false,
         restEndAtMillis: Long? = null,
     ): android.app.Notification {
@@ -186,7 +192,7 @@ internal object WorkoutActiveNotification {
             )
 
             val liveStyle = android.app.Notification.ProgressStyle()
-                .setStyledByProgress(true)
+                .setStyledByProgress(isResting)
                 // iOS leaves this leading slot empty when the exercise has no
                 // catalogued muscle icon. Android must not inject the orange
                 // launcher artwork as a platform-only brand marker.
@@ -212,11 +218,20 @@ internal object WorkoutActiveNotification {
                         else -> workoutProgressPending
                     }
                     liveStyle.addProgressSegment(
-                        android.app.Notification.ProgressStyle.Segment(1)
+                        android.app.Notification.ProgressStyle.Segment(workoutSegmentLength)
                             .setColor(segmentColor)
                     )
+                    if (segmentIndex < count - 1) {
+                        liveStyle.addProgressSegment(
+                            android.app.Notification.ProgressStyle.Segment(workoutDividerLength)
+                                .setColor(workoutProgressDivider)
+                        )
+                    }
                 }
-                liveStyle.setProgress(progress.coerceIn(0, count))
+                val completed = progress.coerceIn(0, count)
+                liveStyle.setProgress((completed * (workoutSegmentLength + workoutDividerLength)).coerceAtMost(
+                    count * workoutSegmentLength + (count - 1) * workoutDividerLength
+                ))
             }
             builder.setStyle(liveStyle)
         } else {
@@ -236,6 +251,11 @@ internal object WorkoutActiveNotification {
             // Notification.when is wall-clock based. elapsedRealtime() makes
             // the system chronometer resolve to zero/invalid on the lockscreen.
             builder.setWhen(restEndAtMillis ?: System.currentTimeMillis() + progress * 1_000L)
+                .setUsesChronometer(true)
+                .setChronometerCountDown(true)
+                .setShowWhen(true)
+        } else if (!isResting && exerciseTimerRunning && (exerciseTimerSeconds ?: 0) > 0) {
+            builder.setWhen(System.currentTimeMillis() + exerciseTimerSeconds!! * 1_000L)
                 .setUsesChronometer(true)
                 .setChronometerCountDown(true)
                 .setShowWhen(true)

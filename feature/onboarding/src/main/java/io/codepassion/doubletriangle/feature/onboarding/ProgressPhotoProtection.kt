@@ -5,6 +5,7 @@ import android.app.KeyguardManager
 import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.biometrics.BiometricPrompt
+import android.hardware.biometrics.BiometricManager
 import android.os.Build
 import android.os.CancellationSignal
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -135,6 +136,7 @@ internal fun rememberDeviceAuthenticator(
         else latestFailure("No se pudo verificar tu identidad.")
     }
 
+    @Suppress("DEPRECATION") // Android 9 needs the legacy credential confirmation API.
     fun showCredentialPrompt(reason: String) {
         val keyguard = context.getSystemService(KeyguardManager::class.java)
         val intent = keyguard?.createConfirmDeviceCredentialIntent("Desbloquear fotos", reason)
@@ -153,11 +155,18 @@ internal fun rememberDeviceAuthenticator(
                     override fun onAuthenticationFailed() = Unit
                 }
                 runCatching<Unit> {
-                    BiometricPrompt.Builder(activity)
+                    val builder = BiometricPrompt.Builder(activity)
                         .setTitle("Desbloquear fotos de progreso")
                         .setDescription(reason)
-                        .setDeviceCredentialAllowed(true)
-                        .build()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        builder.setAllowedAuthenticators(
+                            BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+                        )
+                    } else {
+                        @Suppress("DEPRECATION") // Android 10 does not support setAllowedAuthenticators.
+                        builder.setDeviceCredentialAllowed(true)
+                    }
+                    builder.build()
                         .authenticate(CancellationSignal(), context.mainExecutor, callback)
                 }.onFailure { latestFailure(it.message ?: "No se pudo abrir la autenticación del dispositivo.") }
             } else {
@@ -189,12 +198,12 @@ private fun LockedProgressPhotos(
     Box(Modifier.size(122.dp).clip(RoundedCornerShape(34.dp)).background(WildforceThemeTokens.accent.copy(alpha = .16f)), contentAlignment = Alignment.Center) {
         Icon(Icons.Filled.Lock, null, Modifier.size(46.dp), WildforceThemeTokens.accent)
     }
-    Text("Las fotos de progreso están bloqueadas", style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
-    Text("Usa la biometría o el código de tu dispositivo para ver tus check-ins y comparaciones guardados.", style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.progress_photos_are_locked), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_c84cf18c52c0ff75), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
     error?.let { Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center) }
     Button(onClick = onUnlock, enabled = !authenticating, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary), modifier = Modifier.fillMaxWidth()) {
         if (authenticating) CircularProgressIndicator(Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp)
-        else Text("Desbloquear fotos de progreso", color = WildforceThemeTokens.primaryButtonText)
+        else Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.unlock_progress_photos), color = WildforceThemeTokens.primaryButtonText)
     }
     Text(
         "Volver",

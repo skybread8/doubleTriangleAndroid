@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -35,8 +36,13 @@ import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Person
@@ -232,7 +238,7 @@ internal object ExerciseGuideRepository {
 }
 
 @Composable
-fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () -> Unit) {
+fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, useImperial: Boolean = false, onResultEdited: () -> Unit = {}, onBack: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val locale = LocalLocale.current
     val guide = remember(exercise.imageKey, locale) { ExerciseGuideRepository.get(context, exercise.imageKey) }
@@ -241,7 +247,8 @@ fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () ->
     val backLabel = tutorialText("action.back")
     val visualMetadata = remember(exercise.imageKey) { ExerciseVisualCatalog.metadata(exercise.imageKey) }
     val equipmentVisuals = remember(exercise.imageKey) { ExerciseVisualCatalog.equipmentVisualsFor(exercise.imageKey) }
-    val history = remember(exercise.imageKey) { WorkoutHistoryStore.history(context, exercise) }
+    var history by remember(exercise.imageKey) { mutableStateOf(WorkoutHistoryStore.history(context, exercise)) }
+    var editingResult by remember(exercise.imageKey) { mutableStateOf<ExerciseHistoryEntry?>(null) }
     var profile by remember(exercise.imageKey) { mutableStateOf(LocalExerciseProfileStore.load(context, exercise)) }
     var section by remember(exercise.imageKey) { mutableStateOf(ExerciseDetailsSection.Instructions) }
     var relatedExercise by remember(exercise.imageKey) { mutableStateOf<ExerciseSummary?>(null) }
@@ -249,7 +256,7 @@ fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () ->
     LaunchedEffect(exercise.imageKey) { appeared = true }
 
     relatedExercise?.let { related ->
-        ExerciseGuideScreen(related, gender) { relatedExercise = null }
+        ExerciseGuideScreen(related, gender, useImperial, onResultEdited) { relatedExercise = null }
         return
     }
 
@@ -258,7 +265,7 @@ fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () ->
         Box(Modifier.fillMaxWidth().height(500.dp).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.55f), Color.Transparent, WildforceThemeTokens.background))))
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = 112.dp)) {
             Box(Modifier.padding(14.dp).size(48.dp).clip(CircleShape).background(WildforceThemeTokens.imageControlBackground).semantics { contentDescription = backLabel }.clickable(onClick = onBack), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = backLabel, tint = WildforceThemeTokens.imageControlContent, modifier = Modifier.size(22.dp))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = backLabel, tint = WildforceThemeTokens.imageControlContent, modifier = Modifier.size(22.dp))
             }
             Box(Modifier.fillMaxWidth().height(255.dp)) {
                 Row(
@@ -327,7 +334,7 @@ fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () ->
                 ExerciseDetailsTabs(section) { section = it }
                 when (section) {
                     ExerciseDetailsSection.Instructions -> InstructionsContent(context, exercise, gender, guide, coachMedia)
-                    ExerciseDetailsSection.History -> HistoryContent(history, exercise)
+                    ExerciseDetailsSection.History -> HistoryContent(history, exercise, useImperial) { editingResult = it }
                     ExerciseDetailsSection.Profile -> ProfileContent(
                         context = context,
                         exercise = exercise,
@@ -347,6 +354,15 @@ fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, onBack: () ->
                 Spacer(Modifier.height(30.dp))
                 }
             }
+        }
+    }
+    editingResult?.let { entry ->
+        ExerciseResultEditor(exercise, entry, useImperial, onDismiss = { editingResult = null }) { updated, kind ->
+            if (WorkoutHistoryStore.saveEdit(context, exercise, entry, updated, kind)) {
+                history = WorkoutHistoryStore.history(context, exercise)
+                onResultEdited()
+            }
+            editingResult = null
         }
     }
 }
@@ -382,7 +398,7 @@ private fun InstructionsContent(context: Context, exercise: ExerciseSummary, gen
     }
     Text(guide?.description?.takeIf(String::isNotBlank) ?: coachMedia?.notes?.takeIf(String::isNotBlank) ?: tutorialText("Move with control and stay inside a range of motion that feels clean."), color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 12.dp))
     if (!exercise.imageKey.isNullOrBlank()) RemoteTrainingImage(
-        url = coachMedia?.imageUrl ?: exerciseTutorialImageUrl(exercise.imageKey), contentDescription = tutorialText("Tutorial animation for %@").replace("%@", tutorialExerciseName(exercise.imageKey, exercise.name)),
+        url = coachMedia?.imageUrl ?: exerciseTutorialImageUrl(exercise.imageKey), contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.tutorial_animation_for___, tutorialExerciseName(exercise.imageKey, exercise.name)),
         modifier = Modifier.fillMaxWidth().height(230.dp).clip(RoundedCornerShape(24.dp)),
         contentScale = androidx.compose.ui.layout.ContentScale.Fit,
         unavailableContent = {},
@@ -421,26 +437,27 @@ private fun InstructionsContent(context: Context, exercise: ExerciseSummary, gen
 }
 
 @Composable
-private fun HistoryContent(history: List<ExerciseHistoryEntry>, exercise: ExerciseSummary) {
+private fun HistoryContent(history: List<ExerciseHistoryEntry>, exercise: ExerciseSummary, useImperial: Boolean, onEdit: (ExerciseHistoryEntry) -> Unit) {
     if (history.isEmpty()) {
         EmptyDetailsState(Icons.Filled.BarChart, "SIN HISTORIAL", "Completa este ejercicio para ver aquí tus sesiones anteriores.")
         return
     }
     exerciseHistoryChartSeries(exercise, history).forEach { series ->
-        ExerciseHistoryChartCard(series)
+        ExerciseHistoryChartCard(series, useImperial)
     }
     SectionTitle("HISTORIAL")
     history.forEach { entry ->
         Column(
-            Modifier.fillMaxWidth().padding(vertical = 4.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(14.dp)).padding(12.dp),
+            Modifier.fillMaxWidth().padding(vertical = 4.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(14.dp))
+                .clickable { onEdit(entry) }.padding(12.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(entry.timestampMillis)), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                    Text(historyEntrySummary(entry, false), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    Text(historyEntrySummary(entry, useImperial), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(formatTrainingWeight(entry.maxWeightKg, false), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text(formatTrainingWeight(entry.maxWeightKg, useImperial), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                     Text(formatVolumeSummary(entry.volumeKg), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 }
             }
@@ -450,10 +467,22 @@ private fun HistoryContent(history: List<ExerciseHistoryEntry>, exercise: Exerci
 }
 
 @Composable
-private fun ExerciseHistoryChartCard(series: ExerciseHistoryChartSeries) {
+fun ExerciseHistoryCharts(exercise: ExerciseSummary, useImperial: Boolean, historyVersion: Int = 0) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val history = remember(exercise, historyVersion) { WorkoutHistoryStore.history(context, exercise) }
+    exerciseHistoryChartSeries(exercise, history).forEach { series ->
+        ExerciseHistoryChartCard(series, useImperial)
+    }
+}
+
+@Composable
+private fun ExerciseHistoryChartCard(series: ExerciseHistoryChartSeries, useImperial: Boolean) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val language = context.getSharedPreferences("wildforce_profile", 0).getString("app_language", "Español") ?: "Español"
+    val dateLocale = Locale.forLanguageTag(workoutLanguageTag(language))
     var selectedIndex by remember(series) { mutableStateOf<Int?>(null) }
     val accent = WildforceThemeTokens.accent
-    val selected = selectedIndex?.let(series.points::getOrNull) ?: series.points.last()
+    val selected = series.points.last()
     val values = series.points.map(ExerciseHistoryChartPoint::value)
     val low = values.minOrNull() ?: 0.0
     val high = values.maxOrNull() ?: 0.0
@@ -461,38 +490,78 @@ private fun ExerciseHistoryChartCard(series: ExerciseHistoryChartSeries) {
     val lower = low - padding
     val upper = high + padding
     Column(
-        Modifier.fillMaxWidth().padding(bottom = 12.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = .07f), RoundedCornerShape(24.dp)).padding(16.dp),
+        Modifier.fillMaxWidth().padding(bottom = 12.dp).background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(20.dp)).border(1.dp, accent.copy(alpha = .16f), RoundedCornerShape(20.dp)).padding(16.dp),
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(series.metric.title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+            val icon = when (series.metric) {
+                ExerciseHistoryChartMetric.Volume -> Icons.Filled.BarChart
+                ExerciseHistoryChartMetric.Weight -> Icons.Filled.FitnessCenter
+                ExerciseHistoryChartMetric.Reps -> Icons.Filled.Repeat
+                ExerciseHistoryChartMetric.Distance -> Icons.AutoMirrored.Filled.DirectionsRun
+                ExerciseHistoryChartMetric.Pace -> Icons.Filled.Speed
+                ExerciseHistoryChartMetric.Duration -> Icons.Filled.Timer
+            }
+            Icon(icon, null, Modifier.size(18.dp), tint = WildforceThemeTokens.textPrimary)
+            Text(series.metric.title, Modifier.padding(start = 7.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Spacer(Modifier.weight(1f))
-            Text("${series.metric.displayValue(low)} – ${series.metric.displayValue(high)}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text("${series.metric.displayValue(low, useImperial)} – ${series.metric.displayValue(high, useImperial)}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
-        Text(series.metric.displayValue(selected.value), Modifier.padding(top = 6.dp), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
+        Text(series.metric.displayValue(selected.value, useImperial), Modifier.padding(top = 6.dp), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
         Canvas(
-            Modifier.fillMaxWidth().height(90.dp).padding(top = 10.dp)
+            Modifier.fillMaxWidth().height(112.dp).padding(top = 10.dp)
+                .clip(RoundedCornerShape(12.dp)).background(accent.copy(alpha = .06f))
                 .pointerInput(series) {
                     detectTapGestures { offset ->
-                        val step = size.width / (series.points.size - 1).coerceAtLeast(1)
-                        selectedIndex = (offset.x / step).toInt().coerceIn(0, series.points.lastIndex)
+                        val start = series.points.first().timestampMillis
+                        val span = (series.points.last().timestampMillis - start).coerceAtLeast(1)
+                        val selectedTime = start + (span * (offset.x / size.width).coerceIn(0f, 1f)).toLong()
+                        selectedIndex = series.points.indices.minByOrNull { kotlin.math.abs(series.points[it].timestampMillis - selectedTime) }
                     }
                 },
         ) {
-            val step = size.width / (series.points.size - 1).coerceAtLeast(1)
+            val first = series.points.first().timestampMillis
+            val timeSpan = (series.points.last().timestampMillis - first).coerceAtLeast(1)
             fun point(index: Int, value: Double): Offset = Offset(
-                x = step * index,
+                x = ((series.points[index].timestampMillis - first).toDouble() / timeSpan).toFloat() * size.width,
                 y = size.height - ((value - lower) / (upper - lower)).toFloat() * size.height,
             )
             val path = Path()
-            series.points.forEachIndexed { index, entry ->
-                val offset = point(index, entry.value)
-                if (index == 0) path.moveTo(offset.x, offset.y) else path.lineTo(offset.x, offset.y)
+            val points = series.points.mapIndexed { index, entry -> point(index, entry.value) }
+            path.moveTo(points.first().x, points.first().y)
+            for (index in 0 until points.lastIndex) {
+                val before = points.getOrElse(index - 1) { points[index] }
+                val start = points[index]
+                val end = points[index + 1]
+                val after = points.getOrElse(index + 2) { end }
+                path.cubicTo(start.x + (end.x - before.x) / 6f, start.y + (end.y - before.y) / 6f, end.x - (after.x - start.x) / 6f, end.y - (after.y - start.y) / 6f, end.x, end.y)
             }
+            val area = Path().apply {
+                moveTo(0f, size.height)
+                lineTo(points.first().x, points.first().y)
+                for (index in 0 until points.lastIndex) {
+                    val before = points.getOrElse(index - 1) { points[index] }
+                    val start = points[index]
+                    val end = points[index + 1]
+                    val after = points.getOrElse(index + 2) { end }
+                    cubicTo(start.x + (end.x - before.x) / 6f, start.y + (end.y - before.y) / 6f, end.x - (after.x - start.x) / 6f, end.y - (after.y - start.y) / 6f, end.x, end.y)
+                }
+                lineTo(size.width, size.height)
+                close()
+            }
+            drawPath(area, Brush.verticalGradient(listOf(accent.copy(alpha = .22f), accent.copy(alpha = .02f))))
             drawPath(path, accent, style = Stroke(3f * density, cap = StrokeCap.Round, join = StrokeJoin.Round))
             series.points.forEachIndexed { index, entry ->
                 val offset = point(index, entry.value)
                 drawCircle(accent, if (index == selectedIndex) 5f * density else 3f * density, offset)
             }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(DateFormat.getDateInstance(DateFormat.MEDIUM, dateLocale).format(Date(series.points.first().timestampMillis)), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(DateFormat.getDateInstance(DateFormat.MEDIUM, dateLocale).format(Date(series.points.last().timestampMillis)), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+        }
+        selectedIndex?.let { index ->
+            val point = series.points[index]
+            Text("${DateFormat.getDateInstance(DateFormat.MEDIUM, dateLocale).format(Date(point.timestampMillis))} · ${series.metric.displayValue(point.value, useImperial)}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
     }
 }
@@ -512,7 +581,7 @@ private fun ProfileContent(
     val locale = LocalLocale.current.platformLocale
     if (profile == null) {
         EmptyDetailsState(Icons.Filled.Person, "SIN PERFIL", "Crea un perfil para guardar notas e información específica de este ejercicio.")
-        Button(onClick = onCreate, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) { Text("CREAR PERFIL") }
+        Button(onClick = onCreate, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_profile).uppercase()) }
         return
     }
     SectionTitle("PERFIL")
@@ -532,12 +601,12 @@ private fun ProfileContent(
     profile.typicalDistanceKm?.let { ProfileValue("Distancia habitual", String.format(locale, "%.1f km", it)) }
     profile.typicalPaceSecondsPerKm?.let { pace -> ProfileValue("Ritmo habitual", "${pace / 60}:${(pace % 60).toString().padStart(2, '0')} min/km") }
     Divider(Modifier.padding(vertical = 14.dp))
-    Text("NOTAS", fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.notes).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
     OutlinedTextField(
         value = profile.notes,
         onValueChange = onNotesChanged,
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-        placeholder = { Text("Añade notas personales para este ejercicio") },
+        placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_personal_notes_for_this_exercise)) },
         minLines = 4,
         maxLines = 8,
     )

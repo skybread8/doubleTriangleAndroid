@@ -40,7 +40,7 @@ internal class WatchExerciseService : Service() {
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= 26) {
             getSystemService(NotificationManager::class.java).createNotificationChannel(
-                NotificationChannel(CHANNEL_ID, "Entrenamiento activo", NotificationManager.IMPORTANCE_LOW),
+                NotificationChannel(CHANNEL_ID, getString(io.codepassion.doubletriangle.core.designsystem.R.string.active_workout), NotificationManager.IMPORTANCE_LOW),
             )
         }
     }
@@ -48,7 +48,7 @@ internal class WatchExerciseService : Service() {
     private fun notification(): Notification = NotificationCompat.Builder(this, CHANNEL_ID)
         .setSmallIcon(android.R.drawable.ic_media_play)
         .setContentTitle("Wildforce")
-        .setContentText("Entrenamiento activo")
+        .setContentText(getString(io.codepassion.doubletriangle.core.designsystem.R.string.active_workout))
         .setOngoing(true)
         .build()
 

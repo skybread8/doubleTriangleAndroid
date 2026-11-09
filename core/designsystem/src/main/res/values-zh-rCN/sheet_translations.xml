@@ -1,0 +1,1638 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- A unit of measurement for grams. -->
+    <string name="_d_completions">%1$d completions</string>
+    <string name="_d_ft__d_in">%1$d ft %2$d in</string>
+    <string name="_d_in_the_last_30_days">%1$d in the last 30 days</string>
+    <string name="_d_logs">%1$d logs</string>
+    <string name="_d_of__d_sessions">%1$d of %2$d sessions</string>
+    <string name="_d_sets">%1$d sets</string>
+    <string name="_d_total_completions">%1$d total completions</string>
+    <string name="_d_unique_exercises">%1$d unique exercises</string>
+    <string name="__6mo" formatted="false">+6mo</string>
+    <string name="__15s" formatted="false">+15s</string>
+    <string name="__30s" formatted="false">+30s</string>
+    <!-- two weeks -->
+    <!-- 7 days -->
+    <!-- 12 weeks -->
+    <!-- 30 days -->
+    <string name="about_you" formatted="false">About You</string>
+    <string name="action_back" formatted="false">返回</string>
+    <string name="active" formatted="false">Active</string>
+    <string name="active_workout" formatted="false">Active Workout</string>
+    <string name="add_notes___" formatted="false">Add notes...</string>
+    <string name="analytics" formatted="false">Analytics</string>
+    <string name="archived" formatted="false">Archived</string>
+    <string name="automatic" formatted="false">Automatic</string>
+    <string name="availability" formatted="false">Availability</string>
+    <!-- For the profile picks -->
+    <string name="best_load" formatted="false">Best load</string>
+    <string name="best_reps" formatted="false">Best reps</string>
+    <string name="best_streak" formatted="false">Best streak</string>
+    <string name="best_volume" formatted="false">Best volume</string>
+    <string name="best_weight" formatted="false">Best weight</string>
+    <string name="big_gym" formatted="false">Big gym</string>
+    <string name="birth_date" formatted="false">Birth date</string>
+    <string name="birth_month_and_year" formatted="false">Birth month and year</string>
+    <string name="body" formatted="false">Body</string>
+    <string name="body_part_split" formatted="false">Body Part Split</string>
+    <string name="bodyweight_only" formatted="false">Bodyweight only</string>
+    <string name="cancel" formatted="false">Cancel</string>
+    <string name="catalan" formatted="false">Catalan</string>
+    <string name="change_language" formatted="false">Change language</string>
+    <string name="chin_up" formatted="false">Chin Up</string>
+    <string name="chinese__simplified_" formatted="false">Chinese (Simplified)</string>
+    <string name="choose_the_level_that_best_matches_your_recent_training_consistency__exercise_technique__and_ability_to_handle_load_safely_" formatted="false">Choose the level that best matches your recent training consistency, exercise technique, and ability to handle load safely.</string>
+    <string name="choose_the_training_objective_that_best_fits_you_" formatted="false">Choose the training objective that best fits you.</string>
+    <string name="clear_whole_database" formatted="false">Clear whole database</string>
+    <string name="clear_workouts_database" formatted="false">Clear workouts database</string>
+    <string name="close" formatted="false">Close</string>
+    <string name="complete_a_workout_to_start_seeing_streaks__exercise_history__and_progression_metrics_here_" formatted="false">Complete a workout to start seeing streaks, exercise history, and progression metrics here.</string>
+    <string name="complete_this_exercise_in_a_workout_to_unlock_detailed_analytics_" formatted="false">Complete this exercise in a workout to unlock detailed analytics.</string>
+    <string name="completed" formatted="false">Completed</string>
+    <string name="completed_exercises" formatted="false">Completed exercises</string>
+    <string name="completed_workouts" formatted="false">Completed workouts</string>
+    <string name="key_continue" formatted="false">Continue</string>
+    <string name="cooldown" formatted="false">Cooldown</string>
+    <string name="create_fake_2_week_plan" formatted="false">Create fake 2 week plan</string>
+    <string name="create_plan" formatted="false">Create Plan</string>
+    <string name="current_level" formatted="false">Current Level</string>
+    <string name="current_streak" formatted="false">Current streak</string>
+    <string name="danger_zone" formatted="false">Danger zone</string>
+    <string name="day" formatted="false">Day</string>
+    <string name="define_your_preferred_workout_structure_and_duration_" formatted="false">Define your preferred workout structure and duration.</string>
+    <string name="distance__km_" formatted="false">Distance (km)</string>
+    <string name="distance__mi_" formatted="false">Distance (mi)</string>
+    <string name="done" formatted="false">Done</string>
+    <string name="draft" formatted="false">Draft</string>
+    <string name="duration" formatted="false">Duration</string>
+    <string name="duration__min_" formatted="false">Duration (min)</string>
+    <string name="dutch" formatted="false">Dutch</string>
+    <string name="easy" formatted="false">Easy</string>
+    <string name="english" formatted="false">English</string>
+    <string name="environment" formatted="false">Environment</string>
+    <string name="equipment" formatted="false">Equipment</string>
+    <string name="exercise_categories" formatted="false">Exercise categories</string>
+    <string name="exercise_logs" formatted="false">Exercise logs</string>
+    <string name="experience" formatted="false">Experience</string>
+    <string name="fastest_pace" formatted="false">Fastest pace</string>
+    <string name="feedback" formatted="false">Feedback</string>
+    <string name="female" formatted="false">Female</string>
+    <string name="first_performed" formatted="false">First performed</string>
+    <string name="french" formatted="false">French</string>
+    <string name="friday" formatted="false">Friday</string>
+    <string name="gender" formatted="false">Gender</string>
+    <string name="generating_your_workout_plan_" formatted="false">Generating your workout plan…</string>
+    <string name="generation_failed" formatted="false">Generation Failed</string>
+    <string name="german" formatted="false">German</string>
+    <string name="goal" formatted="false">Goal</string>
+    <string name="gym_setup" formatted="false">Gym setup</string>
+    <string name="hard" formatted="false">Hard</string>
+    <string name="height" formatted="false">Height</string>
+    <string name="home_gym" formatted="false">Home gym</string>
+    <string name="how_should_we_call_you_" formatted="false">How should we call you?</string>
+    <string name="how_was_it_" formatted="false">How was it?</string>
+    <string name="imperial" formatted="false">Imperial</string>
+    <string name="in_progress" formatted="false">In Progress</string>
+    <string name="italian" formatted="false">Italian</string>
+    <string name="japanese" formatted="false">Japanese</string>
+    <string name="just_right" formatted="false">Just Right</string>
+    <string name="language" formatted="false">Language</string>
+    <string name="last_7_days" formatted="false">Last 7 days</string>
+    <string name="last_30_days" formatted="false">Last 30 days</string>
+    <string name="last_30_days__d">Last 30 days %1$d</string>
+    <string name="last_performed" formatted="false">Last performed</string>
+    <string name="last_workout" formatted="false">Last workout</string>
+    <string name="let_s_start_with_the_basics_to_get_to_know_you_" formatted="false">Let’s start with the basics to get to know you.</string>
+    <string name="longest__d">Longest %1$d</string>
+    <string name="longest_distance" formatted="false">Longest distance</string>
+    <string name="longest_duration" formatted="false">Longest duration</string>
+    <string name="longest_hold" formatted="false">Longest hold</string>
+    <string name="lower_body" formatted="false">Lower Body</string>
+    <string name="male" formatted="false">Male</string>
+    <string name="mark_complete" formatted="false">Mark Complete</string>
+    <string name="monday" formatted="false">Monday</string>
+    <string name="month" formatted="false">Month</string>
+    <string name="most_trained" formatted="false">Most trained</string>
+    <string name="motivation" formatted="false">Motivation</string>
+    <string name="never" formatted="false">Never</string>
+    <string name="new_workout_plan" formatted="false">New Workout Plan</string>
+    <string name="no_analytics_available" formatted="false">No analytics available</string>
+    <string name="no_analytics_yet" formatted="false">No analytics yet</string>
+    <string name="no_fixed_split_preference__choose_the_workout_structure_that_best_matches_the_user_s_goal__schedule__and_recovery_capacity_" formatted="false">No fixed split preference. Choose the workout structure that best matches the user\&apos;s goal, schedule, and recovery capacity.</string>
+    <string name="no_preferred_days" formatted="false">No preferred days</string>
+    <string name="no_prescription_yet" formatted="false">No prescription yet</string>
+    <string name="no_workout_is_planned_for_this_day__use_it_to_recover__stretch__or_take_a_light_walk_" formatted="false">No workout is planned for this day. Use it to recover, stretch, or take a light walk.</string>
+    <string name="no_workout_plan_available_yet_" formatted="false">No workout plan available yet.</string>
+    <string name="none" formatted="false">None</string>
+    <string name="none_selected" formatted="false">未选择</string>
+    <string name="overview" formatted="false">Overview</string>
+    <string name="pace___">Pace %1$s</string>
+    <string name="performance" formatted="false">Performance</string>
+    <string name="planned" formatted="false">Planned</string>
+    <string name="portuguese" formatted="false">Portuguese</string>
+    <string name="prefer_a_body_part_split_for_advanced_hypertrophy_focused_structure_when_the_user_s_frequency_and_recovery_capacity_support_it__avoid_using_it_if_the_schedule_is_too_limited_" formatted="false">Prefer a body-part split for advanced hypertrophy-focused structure when the user\&apos;s frequency and recovery capacity support it. Avoid using it if the schedule is too limited.</string>
+    <string name="prefer_a_push_pull_legs_split_when_the_weekly_schedule_supports_it__if_the_user_has_fewer_than_3_weekly_sessions__fall_back_to_the_closest_practical_structure_" formatted="false">Prefer a push/pull/legs split when the weekly schedule supports it. If the user has fewer than 3 weekly sessions, fall back to the closest practical structure.</string>
+    <string name="prefer_an_upper_lower_split_when_the_weekly_schedule_supports_it__if_the_user_has_an_odd_number_of_workout_days__adapt_sensibly_and_explain_the_rotation_" formatted="false">Prefer an upper/lower split when the weekly schedule supports it. If the user has an odd number of workout days, adapt sensibly and explain the rotation.</string>
+    <string name="prefer_full_body_sessions_across_the_training_week_unless_safety__equipment__or_recovery_constraints_make_a_close_variant_more_appropriate_" formatted="false">Prefer full-body sessions across the training week unless safety, equipment, or recovery constraints make a close variant more appropriate.</string>
+    <string name="preferred_workout_duration" formatted="false">Preferred workout duration</string>
+    <string name="preparing_" formatted="false">Preparing…</string>
+    <string name="profile" formatted="false">Profile</string>
+    <string name="program" formatted="false">Program</string>
+    <string name="program_structure" formatted="false">Program structure</string>
+    <string name="pull" formatted="false">Pull</string>
+    <string name="pull_up_bar" formatted="false">Pull-Up Bar</string>
+    <string name="push" formatted="false">Push</string>
+    <string name="push_pull_legs" formatted="false">推/拉/腿</string>
+    <string name="recovery" formatted="false">Recovery</string>
+    <string name="rest__ds">Rest %1$ds</string>
+    <string name="rest_day" formatted="false">Rest Day</string>
+    <string name="rest_period" formatted="false">Rest Period</string>
+    <string name="restrictions" formatted="false">Restrictions</string>
+    <string name="resume" formatted="false">Resume</string>
+    <string name="resume_workout" formatted="false">Resume Workout</string>
+    <string name="review" formatted="false">Review</string>
+    <string name="review_your_profile_before_creating_it_" formatted="false">Review your profile before creating it.</string>
+    <string name="saturday" formatted="false">Saturday</string>
+    <string name="save_plan" formatted="false">Save Plan</string>
+    <string name="select_when_you_train_and_what_you_have_access_to_" formatted="false">Select when you train and what you have access to.</string>
+    <string name="sets" formatted="false">Sets</string>
+    <string name="skip_rest" formatted="false">Skip Rest</string>
+    <string name="skipped" formatted="false">Skipped</string>
+    <string name="small_gym" formatted="false">Small gym</string>
+    <string name="some_accessories" formatted="false">Some accessories</string>
+    <string name="spanish" formatted="false">Spanish</string>
+    <string name="start_workout" formatted="false">Start Workout</string>
+    <string name="sunday" formatted="false">Sunday</string>
+    <string name="tell_us_about_your_current_fitness_experience_" formatted="false">Tell us about your current fitness experience.</string>
+    <string name="this_helps_us_calculate_your_needs_accurately_" formatted="false">This helps us calculate your needs accurately.</string>
+    <string name="this_may_take_up_to_a_minute_" formatted="false">This may take up to a minute.</string>
+    <string name="thursday" formatted="false">Thursday</string>
+    <string name="total_completions" formatted="false">Total completions</string>
+    <string name="total_distance" formatted="false">Total distance</string>
+    <string name="total_duration" formatted="false">Total duration</string>
+    <string name="total_sessions" formatted="false">Total sessions</string>
+    <string name="training" formatted="false">Training</string>
+    <string name="training_level" formatted="false">Training level</string>
+    <string name="tuesday" formatted="false">Tuesday</string>
+    <string name="upper_body" formatted="false">Upper Body</string>
+    <string name="upper_lower" formatted="false">上肢/下肢</string>
+    <string name="very_easy" formatted="false">Very Easy</string>
+    <string name="very_hard" formatted="false">Very Hard</string>
+    <string name="vs_previous" formatted="false">vs previous</string>
+    <string name="warmup" formatted="false">Warmup</string>
+    <string name="wednesday" formatted="false">Wednesday</string>
+    <string name="weight__kg_" formatted="false">Weight (kg)</string>
+    <string name="weight__lb_" formatted="false">Weight (lb)</string>
+    <string name="welcome" formatted="false">Welcome</string>
+    <string name="what_kind_of_environment_will_you_be_training_in_" formatted="false">What kind of environment will you be training in?</string>
+    <string name="workout" formatted="false">Workout</string>
+    <string name="workout_complete_" formatted="false">训练完成！</string>
+    <string name="workout_days" formatted="false">Workout days</string>
+    <string name="workout_duration" formatted="false">Workout duration</string>
+    <string name="workout_focus" formatted="false">Workout focus</string>
+    <string name="year" formatted="false">Year</string>
+    <string name="your_completed_main_exercises_will_appear_here_once_you_finish_a_workout_" formatted="false">Your completed main exercises will appear here once you finish a workout.</string>
+    <string name="your_goals" formatted="false">Your Goals</string>
+    <string name="your_name" formatted="false">Your name</string>
+    <!-- Goal description -->
+    <!-- Goal description -->
+    <!-- Goal description -->
+    <!-- Goal description -->
+    <!-- Goal description -->
+    <!-- Goal description -->
+    <!-- Goal description -->
+    <!-- Lifestyle description -->
+    <!-- Lifestyle description -->
+    <!-- Lifestyle description -->
+    <!-- Lifestyle description -->
+    <!-- Lifestyle description -->
+    <!-- Lifestyle description -->
+    <!-- Lifestyle description -->
+    <!-- Lifestyle description -->
+    <!-- Training level description -->
+    <!-- Training level description -->
+    <!-- Training level description -->
+    <!-- Training level description -->
+    <!-- Training level description -->
+    <!-- Training level description -->
+    <!-- Workout summary -->
+    <!-- Workout summary -->
+    <!-- Workout summary -->
+    <!-- Workout summary -->
+    <!-- Workout summary -->
+    <!-- Workout summary -->
+    <!-- Workout summary -->
+    <!-- Workout summary -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Set style tutorial -->
+    <!-- Feedback enum desc -->
+    <!-- Feedback enum desc -->
+    <!-- Feedback enum desc -->
+    <!-- Feedback enum desc -->
+    <!-- Feedback enum desc -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Focus mode -->
+    <!-- Log suggsetion card -->
+    <!-- Log suggsetion card -->
+    <!-- Log suggsetion card -->
+    <!-- Log suggsetion card -->
+    <!-- Log suggsetion card -->
+    <!-- Log suggsetion card -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Bookings -->
+    <!-- Exercise sprawl: description -->
+    <!-- Exercise bayesianCableCurl: description -->
+    <!-- Exercise gluteBridge: description -->
+    <!-- Exercise pikePushUp: description -->
+    <!-- Catalog muscleGroups: abs -->
+    <!-- Exercise squatJump: tip 1 -->
+    <!-- Exercise cableOverheadTricepsExtension: description -->
+    <!-- Exercise seatedMachineRow: description -->
+    <!-- Exercise pushUp: description -->
+    <!-- Exercise butterflySitUp: description -->
+    <!-- Exercise outdoorRunning: description -->
+    <!-- Exercise quadStretch: description -->
+    <!-- Exercise jumpingJacks: description -->
+    <!-- Exercise worldGreatestStretch: description -->
+    <!-- Exercise romanianDeadlift: description -->
+    <!-- Exercise tricepsDip: description -->
+    <!-- Exercise chestDip: description -->
+    <!-- Catalog equipment: adjustableBench -->
+    <!-- Exercise treadmillWalking: instruction 4 -->
+    <!-- Exercise smithMachineInclineBenchPress: tip 2 -->
+    <!-- Exercise suspensionRow: tip 1 -->
+    <!-- Exercise stationaryBike: instruction 4 -->
+    <!-- Exercise seatedMachineRow: instruction 1 -->
+    <!-- Exercise chestPressMachine: instruction 1 -->
+    <!-- Exercise stationaryBike: instruction 1 -->
+    <!-- Exercise machineHipAbduction: tip 3 -->
+    <!-- Exercise smithMachineBentOverRow: tip 3 -->
+    <!-- Exercise bulgarianSplitSquat: tip 3 -->
+    <!-- Catalog trainingLevels: advanced -->
+    <!-- Exercise mountainClimber: description -->
+    <!-- Exercise inchworm: description -->
+    <!-- Exercise scorpions: description -->
+    <!-- Exercise legSwings: description -->
+    <!-- Exercise airSquat: description -->
+    <!-- Exercise armCircles: instruction 3 -->
+    <!-- Exercise legSwings: instruction 3 -->
+    <!-- Exercise walkingLunge: description -->
+    <!-- Exercise cableWoodchop: description -->
+    <!-- Exercise plank: description -->
+    <!-- Exercise deadlift: description -->
+    <!-- Exercise cobraStretch: description -->
+    <!-- Exercise threadTheNeedle: description -->
+    <!-- Exercise catCow: description -->
+    <!-- Exercise smithMachineBenchPress: tip 3 -->
+    <!-- Exercise smithMachineDeclineBenchPress: description -->
+    <!-- Exercise smithMachineInclineBenchPress: description -->
+    <!-- Exercise smithMachineBentOverRow: description -->
+    <!-- Exercise smithMachineOverheadPress: description -->
+    <!-- Exercise dumbbellRomanianDeadlift: description -->
+    <!-- Exercise jumpRope: description -->
+    <!-- Exercise highKnees: description -->
+    <!-- Exercise airSquat: name -->
+    <!-- Exercise cableCrunchPress: description -->
+    <!-- Exercise cableLateralRaise: description -->
+    <!-- Exercise singleArmDumbbellRow: description -->
+    <!-- Exercise chestDip: instruction 3 -->
+    <!-- Exercise stationaryBike: description -->
+    <!-- Exercise stepUp: instruction 4 -->
+    <!-- Exercise latPulldown: description -->
+    <!-- Exercise pecDeckFly: description -->
+    <!-- Exercise legPress: description -->
+    <!-- Exercise hangingLegRaise: description -->
+    <!-- Exercise ringDip: description -->
+    <!-- Exercise walking: description -->
+    <!-- Exercise landmineRow: instruction 1 -->
+    <!-- Exercise stairClimber: description -->
+    <!-- Exercise pigeonPose: description -->
+    <!-- Exercise pullUp: description -->
+    <!-- Exercise hammerCurl: description -->
+    <!-- Exercise bicycleCrunch: description -->
+    <!-- Exercise boxJump: description -->
+    <!-- Exercise legExtension: description -->
+    <!-- Exercise chestFly: description -->
+    <!-- Exercise deepSquatHold: description -->
+    <!-- Exercise ankleCircles: name -->
+    <!-- Catalog movementRestrictions: anklePain -->
+    <!-- Exercise inclineBenchPress: description -->
+    <!-- Exercise tricepsPushdown: description -->
+    <!-- Exercise landmineRow: description -->
+    <!-- Exercise bentOverRow: description -->
+    <!-- Exercise rowing: description -->
+    <!-- Exercise skiErgWork: description -->
+    <!-- Exercise overheadPress: description -->
+    <!-- Exercise chinUp: description -->
+    <!-- Exercise handReleasePushUp: description -->
+    <!-- Exercise childsPose: description -->
+    <!-- Exercise armCircles: name -->
+    <!-- Catalog majorMuscleGroups: arms -->
+    <!-- Exercise arnoldPress: name -->
+    <!-- Exercise deadBug: description -->
+    <!-- Exercise shoulderMobilityFlow: description -->
+    <!-- Exercise arnoldPress: description -->
+    <!-- Exercise armCircles: description -->
+    <!-- Exercise cableCurl: description -->
+    <!-- Exercise machineGluteKickback: description -->
+    <!-- Exercise tricepsPushdown: instruction 1 -->
+    <!-- Exercise cableHipAdduction: instruction 1 -->
+    <!-- Exercise cableHipAbduction: instruction 1 -->
+    <!-- Exercise cableGluteKickback: instruction 1 -->
+    <!-- Exercise facePull: instruction 1 -->
+    <!-- Exercise cableCrunchPress: instruction 1 -->
+    <!-- Exercise cableOverheadTricepsExtension: instruction 1 -->
+    <!-- Exercise bayesianCableCurl: instruction 1 -->
+    <!-- Exercise cableCurl: instruction 1 -->
+    <!-- Exercise treadmillRunning: instruction 1 -->
+    <!-- Exercise shoulderMobilityFlow: tip 1 -->
+    <!-- Exercise neckCircles: tip 1 -->
+    <!-- Exercise scapularCircles: tip 3 -->
+    <!-- Exercise hipFlexorStretch: tip 1 -->
+    <!-- Exercise smithMachineOverheadPress: tip 3 -->
+    <!-- Exercise chestFly: tip 2 -->
+    <!-- Exercise mountainClimber: tip 1 -->
+    <!-- Exercise plank: tip 1 -->
+    <!-- Exercise barbellBackSquat: tip 2 -->
+    <!-- Exercise tricepsDip: tip 1 -->
+    <!-- Exercise legPress: tip 1 -->
+    <!-- Exercise chestPressMachine: tip 3 -->
+    <!-- Exercise romanianDeadlift: tip 3 -->
+    <!-- Exercise seatedMachineRow: tip 3 -->
+    <!-- Exercise cableUprightRow: tip 2 -->
+    <!-- Exercise stairClimber: tip 3 -->
+    <!-- Exercise hamstringCurl: tip 3 -->
+    <!-- Exercise bicepsCurl: tip 1 -->
+    <!-- Exercise hangingLegRaise: instruction 4 -->
+    <!-- Exercise pullUp: tip 2 -->
+    <!-- Exercise arnoldPress: tip 3 -->
+    <!-- Exercise legExtension: tip 1 -->
+    <!-- Exercise highToLowCableFly: tip 3 -->
+    <!-- Exercise tricepsPushdown: tip 2 -->
+    <!-- Exercise facePull: tip 2 -->
+    <!-- Catalog majorMuscleGroups: back -->
+    <!-- Exercise barbellBackSquat: name -->
+    <!-- Exercise barbellDeclineBenchPress: name -->
+    <!-- Exercise barbellFrontSquat: name -->
+    <!-- Exercise barbellInclineBenchPress: name -->
+    <!-- Catalog equipment: battleRopes -->
+    <!-- Exercise bayesianCableCurl: name -->
+    <!-- Exercise dumbbellDeclineBenchPress: tip 1 -->
+    <!-- Exercise elliptical: instruction 2 -->
+    <!-- Catalog trainingLevels: beginner -->
+    <!-- Exercise benchPress: name -->
+    <!-- Exercise dumbbellBentOverRow: description -->
+    <!-- Exercise quadStretch: instruction 2 -->
+    <!-- Exercise bentOverRow: name -->
+    <!-- Catalog muscleGroups: biceps -->
+    <!-- Exercise bicepsCurl: name -->
+    <!-- Exercise bicycleCrunch: name -->
+    <!-- Exercise birdDog: name -->
+    <!-- Catalog goals: bodyRecomposition -->
+    <!-- Catalog exerciseCategories: bodyweight -->
+    <!-- Catalog equipment: boxingBag -->
+    <!-- Exercise boxingBagWork: name -->
+    <!-- Exercise boxJump: name -->
+    <!-- Exercise barbellBackSquat: instruction 3 -->
+    <!-- Exercise overheadPress: instruction 2 -->
+    <!-- Exercise cableHipAbduction: tip 2 -->
+    <!-- Exercise cableOverheadTricepsExtension: tip 2 -->
+    <!-- Exercise landmineRow: tip 1 -->
+    <!-- Exercise hamstringStretch: tip 3 -->
+    <!-- Exercise pushUp: tip 3 -->
+    <!-- Exercise armCircles: tip 3 -->
+    <!-- Exercise superman: tip 3 -->
+    <!-- Exercise plank: tip 3 -->
+    <!-- Exercise handReleasePushUp: instruction 3 -->
+    <!-- Exercise cableFly: instruction 3 -->
+    <!-- Exercise worldGreatestStretch: instruction 4 -->
+    <!-- Exercise bicycleCrunch: instruction 2 -->
+    <!-- Catalog goals: buildMuscle -->
+    <!-- Exercise bulgarianSplitSquat: name -->
+    <!-- Exercise burpee: name -->
+    <!-- Exercise butterflySitUp: name -->
+    <!-- Exercise cableCrunchPress: name -->
+    <!-- Exercise cableCurl: name -->
+    <!-- Exercise cableExternalRotation: name -->
+    <!-- Exercise cableFly: name -->
+    <!-- Exercise cableFrontRaise: name -->
+    <!-- Exercise cableGluteKickback: name -->
+    <!-- Exercise cableHipAbduction: name -->
+    <!-- Exercise cableHipAdduction: name -->
+    <!-- Exercise cableInternalRotation: name -->
+    <!-- Exercise cableLateralRaise: name -->
+    <!-- Catalog equipment: cableMachine -->
+    <!-- Exercise cableOverheadTricepsExtension: name -->
+    <!-- Exercise cableRearDeltFly: name -->
+    <!-- Exercise cableUprightRow: name -->
+    <!-- Exercise cableWoodchop: name -->
+    <!-- Exercise calfRaise: name -->
+    <!-- Catalog muscleGroups: calves -->
+    <!-- Exercise burpee: tip 3 -->
+    <!-- Exercise frontRaise: tip 3 -->
+    <!-- Exercise calfRaise: tip 3 -->
+    <!-- Catalog exerciseCategories: cardio -->
+    <!-- Exercise catCow: name -->
+    <!-- Exercise catCow: instruction 3 -->
+    <!-- Catalog majorMuscleGroups: chest -->
+    <!-- Exercise chestDip: name -->
+    <!-- Exercise chestFly: name -->
+    <!-- Catalog equipment: chestPressMachine -->
+    <!-- Exercise childsPose: name -->
+    <!-- Exercise chinUp: tip 1 -->
+    <!-- Exercise boxJump: tip 2 -->
+    <!-- Exercise climber: name -->
+    <!-- Exercise cobraStretch: name -->
+    <!-- Exercise squatJump: description -->
+    <!-- Catalog trainingLevels: completeBeginner -->
+    <!-- Exercise climber: instruction 4 -->
+    <!-- Exercise highKnees: instruction 4 -->
+    <!-- Exercise walkingLunge: instruction 4 -->
+    <!-- Exercise bicycleCrunch: instruction 4 -->
+    <!-- Exercise neckCircles: instruction 4 -->
+    <!-- Exercise reverseLunge: tip 3 -->
+    <!-- Exercise chestDip: tip 3 -->
+    <!-- Exercise legPress: tip 3 -->
+    <!-- Exercise lowToHighCableFly: tip 3 -->
+    <!-- Exercise cableGluteKickback: tip 3 -->
+    <!-- Exercise latPulldown: tip 3 -->
+    <!-- Exercise cableFrontRaise: tip 2 -->
+    <!-- Exercise stepUp: tip 3 -->
+    <!-- Exercise treadmillRunning: tip 3 -->
+    <!-- Catalog majorMuscleGroups: core -->
+    <!-- Catalog movementPatterns: coreFlexion -->
+    <!-- Catalog movementPatterns: coreRotation -->
+    <!-- Catalog movementPatterns: coreStability -->
+    <!-- Exercise catCow: instruction 2 -->
+    <!-- Exercise cableRearDeltFly: instruction 2 -->
+    <!-- Exercise cableCrunchPress: instruction 3 -->
+    <!-- Exercise cableCurl: instruction 3 -->
+    <!-- Exercise bayesianCableCurl: instruction 3 -->
+    <!-- Exercise bicepsCurl: instruction 2 -->
+    <!-- Exercise hammerCurl: instruction 2 -->
+    <!-- Exercise seatedLegCurl: instruction 3 -->
+    <!-- Exercise hamstringCurl: instruction 3 -->
+    <!-- Catalog movementPatterns: cyclicalCardio -->
+    <!-- Exercise deadBug: name -->
+    <!-- Exercise deadlift: name -->
+    <!-- Catalog equipment: deadliftPlatform -->
+    <!-- Exercise declinePushUp: name -->
+    <!-- Exercise deepSquatHold: name -->
+    <!-- Catalog equipment: dipStation -->
+    <!-- Catalog targetMetrics: distance -->
+    <!-- Exercise hamstringStretch: tip 1 -->
+    <!-- Exercise thoracicRotation: tip 3 -->
+    <!-- Exercise legSwings: tip 2 -->
+    <!-- Exercise cobraStretch: tip 1 -->
+    <!-- Exercise pigeonPose: tip 1 -->
+    <!-- Exercise boxJump: tip 3 -->
+    <!-- Exercise doorwayChestStretch: tip 1 -->
+    <!-- Exercise stationaryBike: tip 3 -->
+    <!-- Exercise inclineBenchPress: tip 1 -->
+    <!-- Exercise machineHipAdduction: tip 3 -->
+    <!-- Exercise walkingLunge: tip 2 -->
+    <!-- Exercise declinePushUp: tip 2 -->
+    <!-- Exercise sidePlank: tip 1 -->
+    <!-- Exercise overheadTricepsExtension: tip 2 -->
+    <!-- Exercise pushUp: tip 1 -->
+    <!-- Exercise frontRaise: tip 2 -->
+    <!-- Exercise birdDog: tip 2 -->
+    <!-- Exercise legExtension: tip 2 -->
+    <!-- Exercise superman: tip 1 -->
+    <!-- Exercise hipThrust: tip 3 -->
+    <!-- Exercise latPulldown: tip 1 -->
+    <!-- Exercise deadlift: tip 1 -->
+    <!-- Exercise rearDeltFly: tip 3 -->
+    <!-- Exercise lateralRaise: tip 1 -->
+    <!-- Exercise machineGluteKickback: tip 3 -->
+    <!-- Exercise bentOverRow: tip 3 -->
+    <!-- Exercise overheadPress: tip 1 -->
+    <!-- Exercise cableCurl: tip 1 -->
+    <!-- Exercise doorwayChestStretch: name -->
+    <!-- Exercise ringDip: instruction 3 -->
+    <!-- Exercise barbellFrontSquat: instruction 4 -->
+    <!-- Exercise tricepsDip: instruction 3 -->
+    <!-- Exercise mountainClimber: instruction 2 -->
+    <!-- Exercise benchPress: instruction 4 -->
+    <!-- Exercise stepUp: instruction 2 -->
+    <!-- Exercise bulgarianSplitSquat: instruction 4 -->
+    <!-- Exercise walkingLunge: instruction 3 -->
+    <!-- Exercise hipThrust: instruction 3 -->
+    <!-- Exercise barbellBackSquat: instruction 4 -->
+    <!-- Exercise airSquat: instruction 4 -->
+    <!-- Exercise romanianDeadlift: instruction 4 -->
+    <!-- Exercise burpee: instruction 2 -->
+    <!-- Exercise scapularCircles: instruction 4 -->
+    <!-- Exercise dumbbellBenchPress: name -->
+    <!-- Exercise dumbbellBentOverRow: name -->
+    <!-- Exercise dumbbellDeclineBenchPress: name -->
+    <!-- Exercise dumbbellDeclineBenchPress: description -->
+    <!-- Exercise dumbbellOverheadPress: name -->
+    <!-- Exercise dumbbellRomanianDeadlift: name -->
+    <!-- Catalog equipment: dumbbells -->
+    <!-- Exercise dumbbellBentOverRow: tip 3 -->
+    <!-- Exercise dumbbellOverheadPress: tip 3 -->
+    <!-- Exercise dumbbellSquat: name -->
+    <!-- Exercise dumbbellBenchPress: tip 3 -->
+    <!-- Catalog trackingModes: durationMinutes -->
+    <!-- Catalog trackingModes: durationMinutesAndDistance -->
+    <!-- Catalog trackingModes: durationSeconds -->
+    <!-- Catalog movementRestrictions: elbowPain -->
+    <!-- Exercise bulgarianSplitSquat: description -->
+    <!-- Catalog trainingLevels: elite -->
+    <!-- Catalog equipment: elliptical -->
+    <!-- Exercise plank: instruction 4 -->
+    <!-- Exercise airSquat: instruction 2 -->
+    <!-- Exercise hangingLegRaise: tip 1 -->
+    <!-- Exercise butterflySitUp: instruction 3 -->
+    <!-- Exercise dumbbellRomanianDeadlift: instruction 4 -->
+    <!-- Exercise cobraStretch: tip 2 -->
+    <!-- Exercise ankleCircles: description -->
+    <!-- Exercise chinUp: tip 3 -->
+    <!-- Exercise barbellInclineBenchPress: tip 2 -->
+    <!-- Exercise smithMachineBenchPress: tip 1 -->
+    <!-- Exercise smithMachineDeclineBenchPress: tip 1 -->
+    <!-- Exercise legExtension: tip 3 -->
+    <!-- Exercise ringDip: tip 3 -->
+    <!-- Exercise quadStretch: tip 3 -->
+    <!-- Exercise gluteBridge: tip 1 -->
+    <!-- Exercise stationaryBike: tip 1 -->
+    <!-- Exercise reverseLunge: instruction 3 -->
+    <!-- Exercise walkingLunge: instruction 2 -->
+    <!-- Exercise bulgarianSplitSquat: instruction 3 -->
+    <!-- Exercise squatJump: tip 2 -->
+    <!-- Exercise airSquat: tip 2 -->
+    <!-- Exercise smithMachineOverheadPress: tip 1 -->
+    <!-- Exercise facePull: description -->
+    <!-- Exercise smithMachineInclineBenchPress: tip 3 -->
+    <!-- Exercise childsPose: instruction 3 -->
+    <!-- Exercise deadBug: tip 3 -->
+    <!-- Exercise thoracicRotation: tip 2 -->
+    <!-- Exercise butterflySitUp: tip 3 -->
+    <!-- Exercise boxingBagWork: tip 2 -->
+    <!-- Exercise smithMachineSquat: tip 2 -->
+    <!-- Exercise squatJump: instruction 3 -->
+    <!-- Exercise climber: instruction 3 -->
+    <!-- Exercise childsPose: instruction 4 -->
+    <!-- Exercise wristCircles: instruction 1 -->
+    <!-- Exercise butterflySitUp: instruction 2 -->
+    <!-- Exercise overheadTricepsExtension: instruction 3 -->
+    <!-- Exercise cableOverheadTricepsExtension: instruction 3 -->
+    <!-- Exercise skiErgWork: instruction 4 -->
+    <!-- Exercise pigeonPose: instruction 3 -->
+    <!-- Exercise plank: instruction 2 -->
+    <!-- Exercise legExtension: instruction 3 -->
+    <!-- Catalog equipment: ezBar -->
+    <!-- Exercise cableOverheadTricepsExtension: instruction 2 -->
+    <!-- Exercise facePull: name -->
+    <!-- Exercise skiErgWork: instruction 3 -->
+    <!-- Exercise arnoldPress: instruction 3 -->
+    <!-- Catalog equipment: flatBench -->
+    <!-- Exercise hamstringCurl: description -->
+    <!-- Exercise sidePlank: description -->
+    <!-- Exercise pushUp: tip 2 -->
+    <!-- Exercise climber: tip 2 -->
+    <!-- Exercise boxJump: tip 1 -->
+    <!-- Exercise hamstringCurl: tip 2 -->
+    <!-- Exercise smithMachineInclineBenchPress: tip 1 -->
+    <!-- Exercise skiErgWork: tip 3 -->
+    <!-- Exercise suspensionRow: tip 3 -->
+    <!-- Exercise dumbbellOverheadPress: tip 1 -->
+    <!-- Exercise rowing: tip 3 -->
+    <!-- Exercise walking: tip 3 -->
+    <!-- Exercise stairClimber: tip 2 -->
+    <!-- Exercise overheadPress: tip 3 -->
+    <!-- Exercise dumbbellBenchPress: tip 1 -->
+    <!-- Exercise mountainClimber: tip 2 -->
+    <!-- Exercise barbellFrontSquat: tip 3 -->
+    <!-- Exercise shoulderMobilityFlow: instruction 3 -->
+    <!-- Exercise bulgarianSplitSquat: tip 1 -->
+    <!-- Exercise treadmillRunning: instruction 3 -->
+    <!-- Exercise cableLateralRaise: tip 2 -->
+    <!-- Exercise latPulldown: tip 2 -->
+    <!-- Exercise superman: tip 2 -->
+    <!-- Exercise cobraStretch: tip 3 -->
+    <!-- Exercise highKnees: tip 1 -->
+    <!-- Exercise catCow: tip 1 -->
+    <!-- Exercise ankleCircles: tip 1 -->
+    <!-- Exercise worldGreatestStretch: tip 3 -->
+    <!-- Exercise boxingBagWork: tip 1 -->
+    <!-- Exercise singleArmDumbbellRow: tip 1 -->
+    <!-- Exercise pullUp: tip 1 -->
+    <!-- Exercise dumbbellBentOverRow: tip 2 -->
+    <!-- Exercise landmineRow: tip 2 -->
+    <!-- Exercise seatedCableRow: tip 2 -->
+    <!-- Exercise cableRearDeltFly: tip 2 -->
+    <!-- Exercise handReleasePushUp: tip 3 -->
+    <!-- Exercise elliptical: tip 1 -->
+    <!-- Exercise pikePushUp: tip 3 -->
+    <!-- Exercise romanianDeadlift: tip 2 -->
+    <!-- Exercise dumbbellRomanianDeadlift: tip 2 -->
+    <!-- Exercise sprawl: tip 2 -->
+    <!-- Exercise hamstringStretch: tip 2 -->
+    <!-- Exercise deepSquatHold: tip 2 -->
+    <!-- Exercise bicycleCrunch: tip 1 -->
+    <!-- Exercise childsPose: tip 2 -->
+    <!-- Exercise pecDeckFly: tip 2 -->
+    <!-- Exercise smithMachineOverheadPress: tip 2 -->
+    <!-- Exercise facePull: instruction 4 -->
+    <!-- Exercise seatedMachineRow: tip 2 -->
+    <!-- Exercise inclineBenchPress: tip 2 -->
+    <!-- Exercise chestFly: tip 3 -->
+    <!-- Exercise hangingLegRaise: tip 2 -->
+    <!-- Exercise machineRearDeltFly: tip 2 -->
+    <!-- Exercise barbellDeclineBenchPress: tip 3 -->
+    <!-- Exercise hammerCurl: tip 1 -->
+    <!-- Exercise cableFly: tip 1 -->
+    <!-- Exercise smithMachineBenchPress: tip 2 -->
+    <!-- Exercise lowToHighCableFly: tip 1 -->
+    <!-- Exercise cableInternalRotation: tip 2 -->
+    <!-- Exercise scorpions: tip 2 -->
+    <!-- Exercise dumbbellDeclineBenchPress: tip 2 -->
+    <!-- Exercise threadTheNeedle: tip 1 -->
+    <!-- Exercise gluteBridge: tip 2 -->
+    <!-- Exercise machineHipAdduction: tip 2 -->
+    <!-- Exercise rearDeltFly: tip 1 -->
+    <!-- Exercise russianTwist: tip 1 -->
+    <!-- Exercise russianTwist: tip 3 -->
+    <!-- Exercise gluteBridge: tip 3 -->
+    <!-- Exercise sidePlank: tip 3 -->
+    <!-- Catalog muscleGroups: forearms -->
+    <!-- Exercise pigeonPose: instruction 1 -->
+    <!-- Exercise sprawl: instruction 1 -->
+    <!-- Exercise frontRaise: name -->
+    <!-- Catalog muscleGroups: fullBody -->
+    <!-- Exercise bicepsCurl: tip 3 -->
+    <!-- Catalog goals: gainStrength -->
+    <!-- Catalog goals: generalFitness -->
+    <!-- Exercise neckCircles: instruction 2 -->
+    <!-- Exercise doorwayChestStretch: instruction 3 -->
+    <!-- Exercise quadStretch: instruction 3 -->
+    <!-- Exercise neckCircles: description -->
+    <!-- Exercise deepSquatHold: tip 3 -->
+    <!-- Exercise gluteBridge: name -->
+    <!-- Catalog equipment: gluteKickbackMachine -->
+    <!-- Catalog muscleGroups: glutes -->
+    <!-- Exercise gobletSquat: name -->
+    <!-- Exercise treadmillWalking: tip 3 -->
+    <!-- Exercise armCircles: instruction 4 -->
+    <!-- Exercise treadmillRunning: instruction 2 -->
+    <!-- Exercise shoulderMobilityFlow: tip 3 -->
+    <!-- Exercise smithMachineDeclineBenchPress: tip 3 -->
+    <!-- Exercise ankleCircles: tip 3 -->
+    <!-- Exercise dumbbellSquat: tip 3 -->
+    <!-- Exercise tricepsPushdown: instruction 2 -->
+    <!-- Exercise landmineRow: instruction 4 -->
+    <!-- Exercise smithMachineBentOverRow: instruction 2 -->
+    <!-- Exercise benchPress: instruction 2 -->
+    <!-- Exercise barbellDeclineBenchPress: instruction 2 -->
+    <!-- Exercise barbellInclineBenchPress: instruction 2 -->
+    <!-- Exercise latPulldown: instruction 2 -->
+    <!-- Exercise cableUprightRow: instruction 2 -->
+    <!-- Exercise pullUp: instruction 1 -->
+    <!-- Exercise chinUp: instruction 1 -->
+    <!-- Exercise facePull: instruction 2 -->
+    <!-- Exercise seatedCableRow: instruction 2 -->
+    <!-- Exercise suspensionRow: instruction 1 -->
+    <!-- Exercise pecDeckFly: instruction 2 -->
+    <!-- Exercise lowToHighCableFly: instruction 2 -->
+    <!-- Exercise highToLowCableFly: instruction 2 -->
+    <!-- Exercise machineRearDeltFly: instruction 2 -->
+    <!-- Exercise cableWoodchop: instruction 2 -->
+    <!-- Exercise cableCurl: instruction 2 -->
+    <!-- Exercise cableExternalRotation: instruction 2 -->
+    <!-- Exercise cableLateralRaise: instruction 2 -->
+    <!-- Exercise cableInternalRotation: instruction 2 -->
+    <!-- Exercise chestDip: instruction 1 -->
+    <!-- Exercise tricepsDip: instruction 1 -->
+    <!-- Catalog equipment: gymnasticRings -->
+    <!-- Exercise hammerCurl: name -->
+    <!-- Exercise hamstringCurl: name -->
+    <!-- Catalog muscleGroups: hamstrings -->
+    <!-- Exercise hamstringStretch: name -->
+    <!-- Exercise handReleasePushUp: name -->
+    <!-- Exercise hangingLegRaise: instruction 1 -->
+    <!-- Exercise hangingLegRaise: name -->
+    <!-- Exercise chinUp: instruction 2 -->
+    <!-- Exercise pullUp: instruction 2 -->
+    <!-- Exercise barbellDeclineBenchPress: tip 1 -->
+    <!-- Exercise boxingBagWork: description -->
+    <!-- Exercise highToLowCableFly: name -->
+    <!-- Exercise highKnees: name -->
+    <!-- Catalog exerciseCategories: hiit -->
+    <!-- Catalog movementPatterns: hinge -->
+    <!-- Exercise bentOverRow: instruction 2 -->
+    <!-- Exercise deadlift: instruction 2 -->
+    <!-- Exercise romanianDeadlift: instruction 2 -->
+    <!-- Exercise boxJump: instruction 2 -->
+    <!-- Exercise dumbbellBentOverRow: instruction 2 -->
+    <!-- Exercise landmineRow: instruction 3 -->
+    <!-- Exercise dumbbellRomanianDeadlift: instruction 2 -->
+    <!-- Exercise inchworm: instruction 2 -->
+    <!-- Exercise hamstringStretch: instruction 2 -->
+    <!-- Catalog equipment: hipAbductionMachine -->
+    <!-- Catalog equipment: hipAdductionMachine -->
+    <!-- Exercise hipFlexorStretch: name -->
+    <!-- Catalog movementRestrictions: hipPain -->
+    <!-- Catalog muscleGroups: hips -->
+    <!-- Exercise hipThrust: name -->
+    <!-- Exercise threadTheNeedle: instruction 5 -->
+    <!-- Exercise singleArmDumbbellRow: instruction 2 -->
+    <!-- Exercise gobletSquat: instruction 1 -->
+    <!-- Exercise pigeonPose: instruction 5 -->
+    <!-- Exercise quadStretch: instruction 5 -->
+    <!-- Exercise rearDeltFly: instruction 2 -->
+    <!-- Exercise birdDog: instruction 4 -->
+    <!-- Exercise hipFlexorStretch: instruction 4 -->
+    <!-- Exercise gobletSquat: description -->
+    <!-- Exercise dumbbellSquat: description -->
+    <!-- Exercise calfRaise: tip 1 -->
+    <!-- Exercise cableFrontRaise: instruction 2 -->
+    <!-- Exercise jumpRope: instruction 1 -->
+    <!-- Exercise doorwayChestStretch: instruction 4 -->
+    <!-- Exercise superman: instruction 3 -->
+    <!-- Exercise gluteBridge: instruction 4 -->
+    <!-- Exercise deepSquatHold: instruction 5 -->
+    <!-- Exercise sidePlank: instruction 4 -->
+    <!-- Exercise cableCrunchPress: instruction 2 -->
+    <!-- Exercise hamstringStretch: instruction 3 -->
+    <!-- Catalog movementPatterns: horizontalPull -->
+    <!-- Catalog movementPatterns: horizontalPush -->
+    <!-- Exercise tricepsDip: tip 3 -->
+    <!-- Exercise hangingLegRaise: tip 3 -->
+    <!-- Exercise pullUp: tip 3 -->
+    <!-- Exercise neckCircles: tip 2 -->
+    <!-- Exercise deepSquatHold: tip 1 -->
+    <!-- Exercise scapularCircles: tip 2 -->
+    <!-- Exercise birdDog: tip 1 -->
+    <!-- Exercise lateralRaise: tip 3 -->
+    <!-- Exercise sprawl: instruction 3 -->
+    <!-- Catalog movementRestrictions: impactSensitivity -->
+    <!-- Catalog goals: improveEndurance -->
+    <!-- Catalog goals: improveMobility -->
+    <!-- Exercise birdDog: description -->
+    <!-- Exercise hamstringStretch: description -->
+    <!-- Exercise scapularCircles: description -->
+    <!-- Exercise wristCircles: description -->
+    <!-- Exercise inchworm: name -->
+    <!-- Exercise inclineBenchPress: name -->
+    <!-- Exercise outdoorRunning: tip 2 -->
+    <!-- Exercise deadlift: tip 2 -->
+    <!-- Exercise cobraStretch: instruction 3 -->
+    <!-- Exercise gobletSquat: tip 2 -->
+    <!-- Catalog muscleGroups: innerThigh -->
+    <!-- Catalog trainingLevels: intermediate -->
+    <!-- Exercise cableFrontRaise: description -->
+    <!-- Exercise seatedLegCurl: description -->
+    <!-- Exercise machineRearDeltFly: description -->
+    <!-- Exercise cableRearDeltFly: description -->
+    <!-- Exercise rearDeltFly: description -->
+    <!-- Exercise jumpingJacks: instruction 3 -->
+    <!-- Exercise jumpingJacks: name -->
+    <!-- Exercise jumpingJacks: instruction 2 -->
+    <!-- Exercise jumpRope: instruction 2 -->
+    <!-- Catalog equipment: jumpRope -->
+    <!-- Exercise sprawl: instruction 2 -->
+    <!-- Exercise burpee: instruction 3 -->
+    <!-- Exercise burpee: instruction 4 -->
+    <!-- Exercise climber: instruction 2 -->
+    <!-- Exercise lowToHighCableFly: tip 2 -->
+    <!-- Exercise cableRearDeltFly: tip 1 -->
+    <!-- Exercise treadmillRunning: tip 2 -->
+    <!-- Exercise cableGluteKickback: instruction 3 -->
+    <!-- Exercise hangingLegRaise: instruction 2 -->
+    <!-- Exercise cableUprightRow: tip 1 -->
+    <!-- Exercise deadlift: instruction 4 -->
+    <!-- Exercise romanianDeadlift: tip 1 -->
+    <!-- Exercise dumbbellRomanianDeadlift: tip 1 -->
+    <!-- Exercise barbellDeclineBenchPress: tip 2 -->
+    <!-- Exercise machineGluteKickback: tip 2 -->
+    <!-- Exercise chestFly: tip 1 -->
+    <!-- Exercise wristCircles: tip 1 -->
+    <!-- Exercise cableHipAbduction: tip 1 -->
+    <!-- Exercise dumbbellSquat: tip 1 -->
+    <!-- Exercise gluteBridge: instruction 2 -->
+    <!-- Exercise cableWoodchop: tip 1 -->
+    <!-- Exercise scapularCircles: tip 1 -->
+    <!-- Exercise pecDeckFly: tip 1 -->
+    <!-- Exercise smithMachineDeclineBenchPress: tip 2 -->
+    <!-- Exercise machineHipAbduction: tip 1 -->
+    <!-- Exercise deadlift: instruction 3 -->
+    <!-- Exercise dumbbellBentOverRow: tip 1 -->
+    <!-- Exercise worldGreatestStretch: tip 2 -->
+    <!-- Exercise seatedCableRow: tip 1 -->
+    <!-- Exercise arnoldPress: tip 2 -->
+    <!-- Exercise pushUp: instruction 2 -->
+    <!-- Exercise machineRearDeltFly: tip 1 -->
+    <!-- Exercise deepSquatHold: instruction 4 -->
+    <!-- Exercise seatedMachineRow: tip 1 -->
+    <!-- Exercise bayesianCableCurl: tip 2 -->
+    <!-- Exercise smithMachineSquat: tip 1 -->
+    <!-- Exercise barbellBackSquat: tip 1 -->
+    <!-- Exercise hipThrust: tip 2 -->
+    <!-- Exercise suspensionRow: tip 2 -->
+    <!-- Exercise overheadPress: tip 2 -->
+    <!-- Exercise dumbbellDeclineBenchPress: tip 3 -->
+    <!-- Exercise treadmillRunning: instruction 4 -->
+    <!-- Exercise outdoorRunning: instruction 4 -->
+    <!-- Exercise elliptical: instruction 3 -->
+    <!-- Exercise stepUp: tip 1 -->
+    <!-- Exercise stairClimber: instruction 4 -->
+    <!-- Exercise jumpRope: tip 1 -->
+    <!-- Exercise boxingBagWork: tip 3 -->
+    <!-- Exercise jumpingJacks: tip 3 -->
+    <!-- Exercise dumbbellOverheadPress: instruction 4 -->
+    <!-- Exercise doorwayChestStretch: tip 3 -->
+    <!-- Exercise cableFrontRaise: tip 1 -->
+    <!-- Exercise shoulderMobilityFlow: tip 2 -->
+    <!-- Exercise bentOverRow: tip 2 -->
+    <!-- Exercise ringDip: tip 1 -->
+    <!-- Exercise walking: tip 2 -->
+    <!-- Exercise frontRaise: tip 1 -->
+    <!-- Exercise sprawl: tip 1 -->
+    <!-- Exercise cableFly: tip 3 -->
+    <!-- Exercise chinUp: tip 2 -->
+    <!-- Exercise cableInternalRotation: tip 1 -->
+    <!-- Exercise declinePushUp: tip 1 -->
+    <!-- Exercise dumbbellBenchPress: tip 2 -->
+    <!-- Exercise facePull: tip 1 -->
+    <!-- Exercise barbellFrontSquat: instruction 2 -->
+    <!-- Exercise cableOverheadTricepsExtension: tip 1 -->
+    <!-- Exercise hammerCurl: instruction 4 -->
+    <!-- Exercise tricepsPushdown: tip 1 -->
+    <!-- Exercise gobletSquat: tip 1 -->
+    <!-- Exercise overheadTricepsExtension: tip 1 -->
+    <!-- Exercise chestPressMachine: tip 1 -->
+    <!-- Exercise tricepsDip: tip 2 -->
+    <!-- Exercise bicepsCurl: tip 2 -->
+    <!-- Exercise barbellInclineBenchPress: tip 1 -->
+    <!-- Exercise treadmillWalking: tip 1 -->
+    <!-- Exercise legPress: tip 2 -->
+    <!-- Exercise seatedLegCurl: tip 3 -->
+    <!-- Exercise russianTwist: tip 2 -->
+    <!-- Exercise pigeonPose: tip 3 -->
+    <!-- Exercise birdDog: tip 3 -->
+    <!-- Exercise outdoorRunning: instruction 1 -->
+    <!-- Exercise climber: tip 1 -->
+    <!-- Exercise birdDog: instruction 3 -->
+    <!-- Exercise mountainClimber: instruction 3 -->
+    <!-- Exercise cableCrunchPress: tip 2 -->
+    <!-- Exercise cobraStretch: instruction 4 -->
+    <!-- Exercise hamstringCurl: tip 1 -->
+    <!-- Exercise threadTheNeedle: instruction 4 -->
+    <!-- Exercise pigeonPose: instruction 4 -->
+    <!-- Exercise thoracicRotation: tip 1 -->
+    <!-- Exercise quadStretch: instruction 4 -->
+    <!-- Exercise pikePushUp: instruction 2 -->
+    <!-- Exercise inchworm: tip 2 -->
+    <!-- Exercise deadBug: instruction 3 -->
+    <!-- Exercise bicycleCrunch: tip 2 -->
+    <!-- Exercise butterflySitUp: tip 2 -->
+    <!-- Exercise catCow: tip 2 -->
+    <!-- Exercise sidePlank: tip 2 -->
+    <!-- Exercise singleArmDumbbellRow: tip 3 -->
+    <!-- Exercise benchPress: tip 1 -->
+    <!-- Exercise doorwayChestStretch: tip 2 -->
+    <!-- Exercise neckCircles: tip 3 -->
+    <!-- Exercise elliptical: tip 3 -->
+    <!-- Exercise armCircles: tip 1 -->
+    <!-- Exercise tricepsDip: instruction 4 -->
+    <!-- Exercise cableCurl: tip 2 -->
+    <!-- Exercise highKnees: tip 2 -->
+    <!-- Exercise cableGluteKickback: tip 1 -->
+    <!-- Exercise legSwings: tip 1 -->
+    <!-- Exercise hipFlexorStretch: instruction 2 -->
+    <!-- Exercise walkingLunge: tip 1 -->
+    <!-- Exercise overheadTricepsExtension: instruction 4 -->
+    <!-- Exercise machineHipAdduction: tip 1 -->
+    <!-- Exercise mountainClimber: tip 3 -->
+    <!-- Exercise airSquat: tip 1 -->
+    <!-- Exercise reverseLunge: tip 1 -->
+    <!-- Catalog equipment: kettlebells -->
+    <!-- Exercise hipFlexorStretch: instruction 1 -->
+    <!-- Exercise childsPose: instruction 1 -->
+    <!-- Catalog movementRestrictions: kneePain -->
+    <!-- Catalog equipment: landmineAttachment -->
+    <!-- Exercise landmineRow: name -->
+    <!-- Exercise squatJump: instruction 4 -->
+    <!-- Exercise boxJump: instruction 3 -->
+    <!-- Exercise jumpRope: instruction 3 -->
+    <!-- Exercise outdoorRunning: instruction 3 -->
+    <!-- Exercise burpee: tip 2 -->
+    <!-- Exercise smithMachineSquat: instruction 4 -->
+    <!-- Exercise smithMachineBenchPress: instruction 4 -->
+    <!-- Exercise lateralRaise: name -->
+    <!-- Exercise latPulldown: name -->
+    <!-- Exercise lateralRaise: tip 2 -->
+    <!-- Exercise russianTwist: instruction 2 -->
+    <!-- Exercise chestDip: instruction 2 -->
+    <!-- Catalog equipment: legCurlMachine -->
+    <!-- Exercise legExtension: name -->
+    <!-- Exercise legPress: name -->
+    <!-- Catalog equipment: legPressMachine -->
+    <!-- Catalog majorMuscleGroups: legs -->
+    <!-- Exercise legSwings: name -->
+    <!-- Exercise dumbbellDeclineBenchPress: instruction 2 -->
+    <!-- Exercise smithMachineDeclineBenchPress: instruction 2 -->
+    <!-- Exercise scorpions: instruction 1 -->
+    <!-- Exercise superman: instruction 1 -->
+    <!-- Exercise cobraStretch: instruction 1 -->
+    <!-- Exercise hamstringCurl: instruction 1 -->
+    <!-- Exercise dumbbellBenchPress: instruction 1 -->
+    <!-- Exercise chestFly: instruction 1 -->
+    <!-- Exercise benchPress: instruction 1 -->
+    <!-- Exercise smithMachineInclineBenchPress: instruction 2 -->
+    <!-- Exercise smithMachineBenchPress: instruction 1 -->
+    <!-- Exercise butterflySitUp: instruction 1 -->
+    <!-- Exercise deadBug: instruction 1 -->
+    <!-- Exercise bicycleCrunch: instruction 1 -->
+    <!-- Exercise gluteBridge: instruction 1 -->
+    <!-- Exercise sidePlank: instruction 1 -->
+    <!-- Exercise frontRaise: instruction 2 -->
+    <!-- Exercise cableFrontRaise: instruction 3 -->
+    <!-- Exercise gluteBridge: instruction 3 -->
+    <!-- Exercise sidePlank: instruction 3 -->
+    <!-- Exercise worldGreatestStretch: instruction 3 -->
+    <!-- Exercise highKnees: instruction 2 -->
+    <!-- Exercise scorpions: instruction 2 -->
+    <!-- Catalog movementRestrictions: limitedAnkleMobility -->
+    <!-- Catalog movementRestrictions: limitedHipMobility -->
+    <!-- Catalog movementRestrictions: limitedKneeFlexion -->
+    <!-- Catalog movementRestrictions: limitedShoulderMobility -->
+    <!-- Exercise landmineRow: instruction 2 -->
+    <!-- Exercise overheadPress: instruction 3 -->
+    <!-- Catalog movementPatterns: locomotion -->
+    <!-- Exercise cobraStretch: instruction 5 -->
+    <!-- Catalog goals: loseWeight -->
+    <!-- Exercise lowToHighCableFly: name -->
+    <!-- Catalog muscleGroups: lowerAbs -->
+    <!-- Catalog muscleGroups: lowerBack -->
+    <!-- Exercise calfRaise: instruction 4 -->
+    <!-- Exercise superman: instruction 4 -->
+    <!-- Catalog movementRestrictions: lowerBackPain -->
+    <!-- Exercise bayesianCableCurl: instruction 4 -->
+    <!-- Exercise squatJump: instruction 2 -->
+    <!-- Exercise deepSquatHold: instruction 2 -->
+    <!-- Exercise smithMachineOverheadPress: instruction 4 -->
+    <!-- Exercise smithMachineBentOverRow: instruction 4 -->
+    <!-- Exercise bentOverRow: instruction 4 -->
+    <!-- Exercise overheadPress: instruction 4 -->
+    <!-- Exercise deadlift: tip 3 -->
+    <!-- Exercise barbellDeclineBenchPress: instruction 3 -->
+    <!-- Exercise benchPress: instruction 3 -->
+    <!-- Exercise barbellInclineBenchPress: instruction 3 -->
+    <!-- Exercise romanianDeadlift: instruction 3 -->
+    <!-- Exercise dumbbellOverheadPress: instruction 3 -->
+    <!-- Exercise dumbbellBenchPress: instruction 3 -->
+    <!-- Exercise dumbbellDeclineBenchPress: instruction 4 -->
+    <!-- Exercise pikePushUp: instruction 3 -->
+    <!-- Exercise landmineRow: instruction 5 -->
+    <!-- Exercise hamstringCurl: instruction 4 -->
+    <!-- Exercise overheadTricepsExtension: instruction 2 -->
+    <!-- Exercise dumbbellBentOverRow: instruction 4 -->
+    <!-- Exercise inclineBenchPress: instruction 4 -->
+    <!-- Exercise legExtension: instruction 4 -->
+    <!-- Exercise chestFly: instruction 2 -->
+    <!-- Exercise cableCurl: instruction 4 -->
+    <!-- Exercise dumbbellRomanianDeadlift: instruction 3 -->
+    <!-- Exercise dumbbellSquat: instruction 3 -->
+    <!-- Exercise tricepsDip: instruction 2 -->
+    <!-- Exercise airSquat: instruction 3 -->
+    <!-- Exercise ringDip: instruction 2 -->
+    <!-- Exercise handReleasePushUp: instruction 2 -->
+    <!-- Exercise pushUp: instruction 3 -->
+    <!-- Exercise declinePushUp: instruction 3 -->
+    <!-- Exercise calfRaise: instruction 2 -->
+    <!-- Exercise gobletSquat: instruction 3 -->
+    <!-- Exercise dumbbellSquat: instruction 2 -->
+    <!-- Exercise bulgarianSplitSquat: instruction 2 -->
+    <!-- Exercise hangingLegRaise: instruction 3 -->
+    <!-- Exercise threadTheNeedle: instruction 3 -->
+    <!-- Exercise butterflySitUp: instruction 4 -->
+    <!-- Exercise pullUp: instruction 4 -->
+    <!-- Exercise chestDip: tip 2 -->
+    <!-- Catalog movementPatterns: lunge -->
+    <!-- Exercise machineGluteKickback: name -->
+    <!-- Exercise machineHipAbduction: name -->
+    <!-- Exercise machineHipAdduction: name -->
+    <!-- Exercise machineRearDeltFly: name -->
+    <!-- Exercise pecDeckFly: tip 3 -->
+    <!-- Exercise mountainClimber: instruction 4 -->
+    <!-- Exercise stationaryBike: tip 2 -->
+    <!-- Exercise landmineRow: tip 3 -->
+    <!-- Exercise jumpRope: tip 3 -->
+    <!-- Exercise arnoldPress: tip 1 -->
+    <!-- Exercise skiErgWork: tip 2 -->
+    <!-- Exercise boxingBagWork: instruction 4 -->
+    <!-- Exercise plank: tip 2 -->
+    <!-- Exercise gobletSquat: tip 3 -->
+    <!-- Exercise dumbbellSquat: tip 2 -->
+    <!-- Exercise airSquat: tip 3 -->
+    <!-- Exercise treadmillWalking: instruction 3 -->
+    <!-- Exercise stairClimber: instruction 2 -->
+    <!-- Exercise hammerCurl: tip 2 -->
+    <!-- Exercise reverseLunge: tip 2 -->
+    <!-- Exercise walking: instruction 1 -->
+    <!-- Exercise outdoorRunning: instruction 2 -->
+    <!-- Exercise legSwings: tip 3 -->
+    <!-- Exercise benchPress: tip 2 -->
+    <!-- Exercise dumbbellRomanianDeadlift: tip 3 -->
+    <!-- Exercise highToLowCableFly: tip 2 -->
+    <!-- Exercise tricepsPushdown: tip 3 -->
+    <!-- Exercise cableFly: tip 2 -->
+    <!-- Exercise cableUprightRow: tip 3 -->
+    <!-- Exercise dumbbellOverheadPress: tip 2 -->
+    <!-- Exercise cableWoodchop: tip 3 -->
+    <!-- Exercise machineGluteKickback: tip 1 -->
+    <!-- Exercise dumbbellBenchPress: instruction 4 -->
+    <!-- Exercise seatedCableRow: tip 3 -->
+    <!-- Exercise inclineBenchPress: tip 3 -->
+    <!-- Exercise smithMachineBentOverRow: tip 1 -->
+    <!-- Exercise armCircles: tip 2 -->
+    <!-- Exercise singleArmDumbbellRow: tip 2 -->
+    <!-- Exercise seatedLegCurl: tip 1 -->
+    <!-- Exercise walking: instruction 4 -->
+    <!-- Exercise shoulderMobilityFlow: instruction 4 -->
+    <!-- Exercise sprawl: tip 3 -->
+    <!-- Exercise declinePushUp: instruction 2 -->
+    <!-- Exercise suspensionRow: instruction 2 -->
+    <!-- Exercise climber: tip 3 -->
+    <!-- Exercise rowing: tip 1 -->
+    <!-- Exercise cableInternalRotation: tip 3 -->
+    <!-- Exercise cableLateralRaise: tip 1 -->
+    <!-- Exercise hipFlexorStretch: tip 3 -->
+    <!-- Exercise burpee: tip 1 -->
+    <!-- Exercise handReleasePushUp: tip 1 -->
+    <!-- Exercise inchworm: tip 1 -->
+    <!-- Exercise barbellFrontSquat: tip 2 -->
+    <!-- Exercise chestPressMachine: tip 2 -->
+    <!-- Exercise walkingLunge: tip 3 -->
+    <!-- Catalog equipment: medicineBall -->
+    <!-- Catalog exerciseCategories: mobility -->
+    <!-- Exercise mountainClimber: name -->
+    <!-- Exercise deadBug: tip 2 -->
+    <!-- Exercise scorpions: tip 1 -->
+    <!-- Exercise cableHipAdduction: tip 2 -->
+    <!-- Exercise ankleCircles: tip 2 -->
+    <!-- Exercise catCow: instruction 4 -->
+    <!-- Exercise cableHipAbduction: instruction 3 -->
+    <!-- Exercise shoulderMobilityFlow: instruction 2 -->
+    <!-- Exercise worldGreatestStretch: tip 1 -->
+    <!-- Exercise cableGluteKickback: tip 2 -->
+    <!-- Exercise inchworm: tip 3 -->
+    <!-- Exercise cableExternalRotation: tip 3 -->
+    <!-- Exercise bicycleCrunch: tip 3 -->
+    <!-- Catalog muscleGroups: neck -->
+    <!-- Exercise neckCircles: name -->
+    <!-- Catalog movementRestrictions: neckPain -->
+    <!-- Catalog trainingLevels: novice -->
+    <!-- Catalog muscleGroups: obliques -->
+    <!-- Catalog equipment: olympicBarbell -->
+    <!-- Exercise scorpions: tip 3 -->
+    <!-- Exercise thoracicRotation: description -->
+    <!-- Catalog majorMuscleGroups: other -->
+    <!-- Exercise outdoorRunning: name -->
+    <!-- Catalog muscleGroups: outerThigh -->
+    <!-- Catalog movementRestrictions: overheadMovementLimitation -->
+    <!-- Exercise overheadPress: name -->
+    <!-- Exercise overheadTricepsExtension: name -->
+    <!-- Catalog targetMetrics: pace -->
+    <!-- Exercise wristCircles: tip 3 -->
+    <!-- Exercise cableHipAdduction: instruction 4 -->
+    <!-- Exercise cableHipAbduction: instruction 4 -->
+    <!-- Exercise inchworm: instruction 4 -->
+    <!-- Exercise cableCurl: tip 3 -->
+    <!-- Exercise frontRaise: instruction 3 -->
+    <!-- Exercise machineHipAbduction: instruction 3 -->
+    <!-- Exercise lateralRaise: instruction 3 -->
+    <!-- Exercise calfRaise: tip 2 -->
+    <!-- Exercise pecDeckFly: name -->
+    <!-- Catalog equipment: pecDeckMachine -->
+    <!-- Exercise stationaryBike: instruction 3 -->
+    <!-- Exercise shoulderMobilityFlow: instruction 1 -->
+    <!-- Exercise wristCircles: instruction 3 -->
+    <!-- Exercise ankleCircles: instruction 3 -->
+    <!-- Exercise declinePushUp: description -->
+    <!-- Exercise armCircles: instruction 2 -->
+    <!-- Exercise boxingBagWork: instruction 2 -->
+    <!-- Exercise pigeonPose: name -->
+    <!-- Exercise pikePushUp: name -->
+    <!-- Exercise cableWoodchop: tip 2 -->
+    <!-- Exercise cableExternalRotation: tip 1 -->
+    <!-- Exercise stepUp: instruction 1 -->
+    <!-- Exercise thoracicRotation: instruction 2 -->
+    <!-- Exercise singleArmDumbbellRow: instruction 1 -->
+    <!-- Exercise declinePushUp: instruction 1 -->
+    <!-- Exercise legPress: instruction 2 -->
+    <!-- Exercise doorwayChestStretch: instruction 2 -->
+    <!-- Exercise plank: instruction 1 -->
+    <!-- Exercise cobraStretch: instruction 2 -->
+    <!-- Exercise seatedLegCurl: instruction 2 -->
+    <!-- Exercise pigeonPose: instruction 2 -->
+    <!-- Exercise legExtension: instruction 2 -->
+    <!-- Exercise barbellFrontSquat: description -->
+    <!-- Exercise plank: name -->
+    <!-- Exercise hipThrust: instruction 2 -->
+    <!-- Catalog equipment: plyoBox -->
+    <!-- Catalog movementPatterns: plyometric -->
+    <!-- Exercise smithMachineDeclineBenchPress: instruction 1 -->
+    <!-- Exercise smithMachineOverheadPress: instruction 1 -->
+    <!-- Exercise barbellBackSquat: instruction 1 -->
+    <!-- Exercise hamstringCurl: instruction 2 -->
+    <!-- Exercise smithMachineBentOverRow: instruction 1 -->
+    <!-- Exercise machineGluteKickback: instruction 1 -->
+    <!-- Exercise smithMachineSquat: instruction 1 -->
+    <!-- Exercise barbellInclineBenchPress: description -->
+    <!-- Exercise dumbbellOverheadPress: description -->
+    <!-- Exercise dumbbellBenchPress: description -->
+    <!-- Exercise barbellDeclineBenchPress: description -->
+    <!-- Exercise smithMachineInclineBenchPress: instruction 4 -->
+    <!-- Exercise barbellDeclineBenchPress: instruction 4 -->
+    <!-- Exercise smithMachineBenchPress: instruction 3 -->
+    <!-- Exercise inclineBenchPress: instruction 3 -->
+    <!-- Exercise dumbbellDeclineBenchPress: instruction 3 -->
+    <!-- Exercise arnoldPress: instruction 2 -->
+    <!-- Exercise dumbbellOverheadPress: instruction 2 -->
+    <!-- Exercise dumbbellBenchPress: instruction 2 -->
+    <!-- Exercise sidePlank: instruction 2 -->
+    <!-- Exercise elliptical: description -->
+    <!-- Exercise chestPressMachine: description -->
+    <!-- Exercise pullUp: name -->
+    <!-- Exercise bentOverRow: instruction 3 -->
+    <!-- Exercise latPulldown: instruction 3 -->
+    <!-- Exercise smithMachineBentOverRow: instruction 3 -->
+    <!-- Exercise cableUprightRow: instruction 3 -->
+    <!-- Exercise dumbbellBentOverRow: instruction 3 -->
+    <!-- Exercise singleArmDumbbellRow: instruction 3 -->
+    <!-- Exercise cableWoodchop: instruction 3 -->
+    <!-- Exercise machineRearDeltFly: instruction 3 -->
+    <!-- Exercise highToLowCableFly: instruction 3 -->
+    <!-- Exercise skiErgWork: instruction 2 -->
+    <!-- Exercise cableRearDeltFly: instruction 3 -->
+    <!-- Exercise seatedMachineRow: instruction 3 -->
+    <!-- Exercise lowToHighCableFly: instruction 3 -->
+    <!-- Exercise seatedCableRow: instruction 3 -->
+    <!-- Exercise scapularCircles: instruction 3 -->
+    <!-- Exercise facePull: instruction 3 -->
+    <!-- Exercise pullUp: instruction 3 -->
+    <!-- Exercise suspensionRow: instruction 3 -->
+    <!-- Exercise chinUp: instruction 3 -->
+    <!-- Exercise highKnees: tip 3 -->
+    <!-- Exercise pushUp: name -->
+    <!-- Exercise worldGreatestStretch: instruction 5 -->
+    <!-- Exercise pikePushUp: instruction 4 -->
+    <!-- Exercise declinePushUp: instruction 4 -->
+    <!-- Exercise chestDip: instruction 4 -->
+    <!-- Exercise handReleasePushUp: instruction 4 -->
+    <!-- Exercise reverseLunge: instruction 4 -->
+    <!-- Exercise tricepsPushdown: instruction 3 -->
+    <!-- Exercise chestPressMachine: instruction 3 -->
+    <!-- Exercise scapularCircles: instruction 5 -->
+    <!-- Exercise machineGluteKickback: instruction 2 -->
+    <!-- Exercise legPress: instruction 4 -->
+    <!-- Exercise calfRaise: instruction 3 -->
+    <!-- Exercise dumbbellSquat: instruction 4 -->
+    <!-- Exercise gobletSquat: instruction 4 -->
+    <!-- Exercise pushUp: instruction 4 -->
+    <!-- Exercise machineHipAbduction: instruction 2 -->
+    <!-- Catalog muscleGroups: quads -->
+    <!-- Exercise quadStretch: name -->
+    <!-- Exercise highKnees: instruction 3 -->
+    <!-- Exercise rearDeltFly: instruction 3 -->
+    <!-- Exercise cableLateralRaise: instruction 3 -->
+    <!-- Exercise lateralRaise: instruction 2 -->
+    <!-- Exercise threadTheNeedle: instruction 2 -->
+    <!-- Exercise rearDeltFly: name -->
+    <!-- Catalog equipment: rearDeltMachine -->
+    <!-- Exercise wristCircles: tip 2 -->
+    <!-- Exercise childsPose: tip 3 -->
+    <!-- Exercise threadTheNeedle: tip 3 -->
+    <!-- Exercise legPress: instruction 3 -->
+    <!-- Exercise hipFlexorStretch: description -->
+    <!-- Exercise jumpingJacks: instruction 4 -->
+    <!-- Exercise hamstringStretch: instruction 4 -->
+    <!-- Catalog trackingModes: reps -->
+    <!-- Catalog equipment: resistanceBands -->
+    <!-- Exercise barbellFrontSquat: instruction 1 -->
+    <!-- Exercise deepSquatHold: instruction 3 -->
+    <!-- Exercise childsPose: instruction 5 -->
+    <!-- Exercise inchworm: instruction 5 -->
+    <!-- Exercise sprawl: instruction 4 -->
+    <!-- Exercise scorpions: instruction 4 -->
+    <!-- Exercise worldGreatestStretch: instruction 6 -->
+    <!-- Exercise deadBug: instruction 4 -->
+    <!-- Exercise neckCircles: instruction 5 -->
+    <!-- Exercise reverseLunge: name -->
+    <!-- Exercise ringDip: name -->
+    <!-- Exercise romanianDeadlift: name -->
+    <!-- Exercise ankleCircles: instruction 2 -->
+    <!-- Exercise thoracicRotation: instruction 3 -->
+    <!-- Exercise cableInternalRotation: instruction 3 -->
+    <!-- Exercise cableExternalRotation: instruction 3 -->
+    <!-- Exercise arnoldPress: instruction 4 -->
+    <!-- Exercise wristCircles: instruction 2 -->
+    <!-- Exercise rowing: name -->
+    <!-- Catalog equipment: rowingMachine -->
+    <!-- Exercise treadmillRunning: description -->
+    <!-- Exercise russianTwist: name -->
+    <!-- Exercise scapularCircles: name -->
+    <!-- Exercise scorpions: name -->
+    <!-- Exercise seatedCableRow: name -->
+    <!-- Exercise seatedLegCurl: name -->
+    <!-- Exercise seatedMachineRow: name -->
+    <!-- Catalog equipment: seatedRowMachine -->
+    <!-- Exercise barbellDeclineBenchPress: instruction 1 -->
+    <!-- Exercise childsPose: instruction 2 -->
+    <!-- Exercise inclineBenchPress: instruction 1 -->
+    <!-- Exercise smithMachineInclineBenchPress: instruction 1 -->
+    <!-- Exercise barbellInclineBenchPress: instruction 1 -->
+    <!-- Exercise highToLowCableFly: instruction 1 -->
+    <!-- Exercise lowToHighCableFly: instruction 1 -->
+    <!-- Exercise highToLowCableFly: description -->
+    <!-- Exercise lowToHighCableFly: description -->
+    <!-- Exercise bayesianCableCurl: tip 1 -->
+    <!-- Exercise shoulderMobilityFlow: name -->
+    <!-- Catalog movementRestrictions: shoulderPain -->
+    <!-- Catalog majorMuscleGroups: shoulders -->
+    <!-- Exercise scapularCircles: instruction 2 -->
+    <!-- Exercise sidePlank: name -->
+    <!-- Exercise climber: description -->
+    <!-- Exercise superman: instruction 2 -->
+    <!-- Exercise singleArmDumbbellRow: name -->
+    <!-- Exercise machineRearDeltFly: instruction 1 -->
+    <!-- Exercise legExtension: instruction 1 -->
+    <!-- Exercise latPulldown: instruction 1 -->
+    <!-- Exercise seatedLegCurl: instruction 1 -->
+    <!-- Exercise pecDeckFly: instruction 1 -->
+    <!-- Exercise legPress: instruction 1 -->
+    <!-- Exercise machineHipAdduction: instruction 1 -->
+    <!-- Exercise machineHipAbduction: instruction 1 -->
+    <!-- Exercise rearDeltFly: instruction 1 -->
+    <!-- Exercise dumbbellDeclineBenchPress: instruction 1 -->
+    <!-- Exercise hamstringStretch: instruction 1 -->
+    <!-- Exercise russianTwist: instruction 1 -->
+    <!-- Exercise hipThrust: instruction 1 -->
+    <!-- Exercise rowing: instruction 1 -->
+    <!-- Exercise overheadTricepsExtension: instruction 1 -->
+    <!-- Exercise neckCircles: instruction 1 -->
+    <!-- Exercise arnoldPress: instruction 1 -->
+    <!-- Exercise stationaryBike: instruction 2 -->
+    <!-- Exercise inclineBenchPress: instruction 2 -->
+    <!-- Exercise chestPressMachine: instruction 2 -->
+    <!-- Exercise seatedMachineRow: instruction 2 -->
+    <!-- Exercise seatedCableRow: instruction 1 -->
+    <!-- Catalog equipment: skiErg -->
+    <!-- Exercise skiErgWork: name -->
+    <!-- Exercise cableHipAbduction: tip 3 -->
+    <!-- Exercise machineHipAdduction: instruction 4 -->
+    <!-- Exercise machineHipAbduction: instruction 4 -->
+    <!-- Exercise birdDog: instruction 2 -->
+    <!-- Exercise cableFrontRaise: instruction 4 -->
+    <!-- Exercise cableUprightRow: instruction 5 -->
+    <!-- Exercise singleArmDumbbellRow: instruction 4 -->
+    <!-- Exercise cableLateralRaise: instruction 4 -->
+    <!-- Exercise lowToHighCableFly: instruction 4 -->
+    <!-- Exercise rearDeltFly: instruction 4 -->
+    <!-- Exercise deadBug: instruction 2 -->
+    <!-- Exercise latPulldown: instruction 4 -->
+    <!-- Exercise chestPressMachine: instruction 4 -->
+    <!-- Exercise seatedLegCurl: instruction 4 -->
+    <!-- Exercise tricepsPushdown: instruction 4 -->
+    <!-- Exercise cableRearDeltFly: instruction 4 -->
+    <!-- Exercise cableFly: instruction 4 -->
+    <!-- Exercise machineGluteKickback: instruction 4 -->
+    <!-- Exercise seatedCableRow: instruction 4 -->
+    <!-- Exercise cableCrunchPress: instruction 4 -->
+    <!-- Exercise cableOverheadTricepsExtension: instruction 4 -->
+    <!-- Exercise highToLowCableFly: instruction 4 -->
+    <!-- Exercise neckCircles: instruction 3 -->
+    <!-- Catalog equipment: smithMachine -->
+    <!-- Exercise smithMachineBenchPress: name -->
+    <!-- Exercise smithMachineBentOverRow: name -->
+    <!-- Exercise smithMachineDeclineBenchPress: name -->
+    <!-- Exercise smithMachineInclineBenchPress: name -->
+    <!-- Exercise smithMachineOverheadPress: name -->
+    <!-- Exercise smithMachineSquat: name -->
+    <!-- Exercise scapularCircles: instruction 6 -->
+    <!-- Exercise sprawl: name -->
+    <!-- Exercise catCow: tip 3 -->
+    <!-- Catalog movementPatterns: squat -->
+    <!-- Exercise barbellFrontSquat: instruction 3 -->
+    <!-- Exercise squatJump: name -->
+    <!-- Catalog equipment: squatRack -->
+    <!-- Exercise smithMachineSquat: description -->
+    <!-- Exercise hammerCurl: instruction 3 -->
+    <!-- Exercise hipFlexorStretch: instruction 3 -->
+    <!-- Exercise bicepsCurl: instruction 3 -->
+    <!-- Exercise chestDip: tip 1 -->
+    <!-- Exercise chestFly: instruction 4 -->
+    <!-- Exercise hipThrust: instruction 4 -->
+    <!-- Exercise cableGluteKickback: instruction 4 -->
+    <!-- Exercise machineGluteKickback: instruction 3 -->
+    <!-- Exercise quadStretch: tip 1 -->
+    <!-- Exercise seatedLegCurl: tip 2 -->
+    <!-- Exercise machineHipAdduction: instruction 2 -->
+    <!-- Exercise highToLowCableFly: tip 1 -->
+    <!-- Exercise machineRearDeltFly: instruction 4 -->
+    <!-- Catalog equipment: stairClimber -->
+    <!-- Exercise bulgarianSplitSquat: instruction 1 -->
+    <!-- Exercise cableFly: instruction 1 -->
+    <!-- Exercise cableUprightRow: instruction 1 -->
+    <!-- Exercise boxJump: instruction 1 -->
+    <!-- Exercise cableFrontRaise: instruction 1 -->
+    <!-- Exercise cableGluteKickback: instruction 2 -->
+    <!-- Exercise boxingBagWork: instruction 1 -->
+    <!-- Exercise doorwayChestStretch: instruction 1 -->
+    <!-- Exercise cableRearDeltFly: instruction 1 -->
+    <!-- Exercise legSwings: instruction 1 -->
+    <!-- Exercise ankleCircles: instruction 1 -->
+    <!-- Exercise quadStretch: instruction 1 -->
+    <!-- Exercise calfRaise: instruction 1 -->
+    <!-- Exercise scapularCircles: instruction 1 -->
+    <!-- Exercise dumbbellOverheadPress: instruction 1 -->
+    <!-- Exercise cableHipAbduction: instruction 2 -->
+    <!-- Exercise cableHipAdduction: instruction 2 -->
+    <!-- Exercise cableWoodchop: instruction 1 -->
+    <!-- Exercise cableExternalRotation: instruction 1 -->
+    <!-- Exercise cableLateralRaise: instruction 1 -->
+    <!-- Exercise cableRearDeltFly: tip 3 -->
+    <!-- Exercise boxJump: instruction 4 -->
+    <!-- Exercise hammerCurl: instruction 1 -->
+    <!-- Exercise frontRaise: instruction 1 -->
+    <!-- Exercise romanianDeadlift: instruction 1 -->
+    <!-- Exercise dumbbellRomanianDeadlift: instruction 1 -->
+    <!-- Exercise lateralRaise: instruction 1 -->
+    <!-- Exercise bicepsCurl: instruction 1 -->
+    <!-- Exercise inchworm: instruction 1 -->
+    <!-- Exercise overheadPress: instruction 1 -->
+    <!-- Exercise bentOverRow: instruction 1 -->
+    <!-- Exercise dumbbellBentOverRow: instruction 1 -->
+    <!-- Exercise dumbbellSquat: instruction 1 -->
+    <!-- Exercise barbellBackSquat: instruction 2 -->
+    <!-- Exercise squatJump: instruction 1 -->
+    <!-- Exercise armCircles: instruction 1 -->
+    <!-- Exercise reverseLunge: instruction 1 -->
+    <!-- Exercise skiErgWork: instruction 1 -->
+    <!-- Exercise airSquat: instruction 1 -->
+    <!-- Exercise gobletSquat: instruction 2 -->
+    <!-- Exercise jumpingJacks: instruction 1 -->
+    <!-- Exercise deadlift: instruction 1 -->
+    <!-- Exercise treadmillWalking: instruction 2 -->
+    <!-- Exercise pikePushUp: instruction 1 -->
+    <!-- Exercise handReleasePushUp: instruction 1 -->
+    <!-- Exercise pushUp: instruction 1 -->
+    <!-- Exercise mountainClimber: instruction 1 -->
+    <!-- Exercise burpee: instruction 1 -->
+    <!-- Exercise thoracicRotation: instruction 1 -->
+    <!-- Exercise catCow: instruction 1 -->
+    <!-- Exercise birdDog: instruction 1 -->
+    <!-- Exercise outdoorRunning: tip 1 -->
+    <!-- Exercise ringDip: tip 2 -->
+    <!-- Exercise jumpRope: tip 2 -->
+    <!-- Catalog equipment: stationaryBike -->
+    <!-- Exercise outdoorRunning: tip 3 -->
+    <!-- Exercise boxingBagWork: instruction 3 -->
+    <!-- Exercise stepUp: name -->
+    <!-- Exercise reverseLunge: description -->
+    <!-- Exercise reverseLunge: instruction 2 -->
+    <!-- Exercise stepUp: instruction 3 -->
+    <!-- Exercise walking: instruction 3 -->
+    <!-- Exercise cableFly: instruction 2 -->
+    <!-- Exercise bayesianCableCurl: instruction 2 -->
+    <!-- Exercise walkingLunge: instruction 1 -->
+    <!-- Exercise stepUp: description -->
+    <!-- Exercise stairClimber: instruction 1 -->
+    <!-- Exercise elliptical: instruction 1 -->
+    <!-- Exercise treadmillWalking: instruction 1 -->
+    <!-- Exercise stairClimber: instruction 3 -->
+    <!-- Exercise worldGreatestStretch: instruction 2 -->
+    <!-- Exercise cableUprightRow: instruction 4 -->
+    <!-- Exercise chestFly: instruction 3 -->
+    <!-- Catalog exerciseCategories: strength -->
+    <!-- Exercise calfRaise: description -->
+    <!-- Exercise superman: description -->
+    <!-- Exercise machineHipAdduction: description -->
+    <!-- Exercise cableInternalRotation: description -->
+    <!-- Exercise cableExternalRotation: description -->
+    <!-- Exercise superman: name -->
+    <!-- Exercise ringDip: instruction 1 -->
+    <!-- Exercise suspensionRow: name -->
+    <!-- Catalog equipment: suspensionTrainer -->
+    <!-- Exercise cableHipAdduction: instruction 3 -->
+    <!-- Exercise legSwings: instruction 2 -->
+    <!-- Exercise walking: instruction 2 -->
+    <!-- Exercise squatJump: tip 3 -->
+    <!-- Exercise ankleCircles: instruction 4 -->
+    <!-- Exercise legSwings: instruction 4 -->
+    <!-- Exercise bicycleCrunch: instruction 3 -->
+    <!-- Exercise frontRaise: description -->
+    <!-- Exercise overheadTricepsExtension: description -->
+    <!-- Exercise russianTwist: description -->
+    <!-- Exercise machineHipAbduction: description -->
+    <!-- Exercise cableUprightRow: description -->
+    <!-- Exercise seatedCableRow: description -->
+    <!-- Exercise barbellFrontSquat: tip 1 -->
+    <!-- Exercise cableLateralRaise: tip 3 -->
+    <!-- Exercise rowing: instruction 2 -->
+    <!-- Exercise bicepsCurl: description -->
+    <!-- Exercise pikePushUp: tip 1 -->
+    <!-- Exercise rowing: instruction 3 -->
+    <!-- Exercise rowing: instruction 4 -->
+    <!-- Exercise smithMachineBentOverRow: tip 2 -->
+    <!-- Exercise benchPress: description -->
+    <!-- Exercise barbellBackSquat: description -->
+    <!-- Exercise declinePushUp: tip 3 -->
+    <!-- Exercise lateralRaise: description -->
+    <!-- Exercise deadBug: tip 1 -->
+    <!-- Exercise rowing: tip 2 -->
+    <!-- Exercise rowing: instruction 5 -->
+    <!-- Exercise smithMachineSquat: tip 3 -->
+    <!-- Exercise smithMachineBenchPress: description -->
+    <!-- Exercise burpee: description -->
+    <!-- Exercise cableCrunchPress: tip 1 -->
+    <!-- Exercise bulgarianSplitSquat: tip 2 -->
+    <!-- Exercise thoracicRotation: name -->
+    <!-- Exercise threadTheNeedle: name -->
+    <!-- Catalog equipment: trapBar -->
+    <!-- Catalog equipment: treadmill -->
+    <!-- Exercise treadmillRunning: name -->
+    <!-- Exercise treadmillWalking: name -->
+    <!-- Catalog muscleGroups: triceps -->
+    <!-- Exercise tricepsDip: name -->
+    <!-- Exercise tricepsPushdown: name -->
+    <!-- Exercise stepUp: tip 2 -->
+    <!-- Exercise scorpions: instruction 3 -->
+    <!-- Exercise ringDip: instruction 4 -->
+    <!-- Exercise russianTwist: instruction 4 -->
+    <!-- Exercise russianTwist: instruction 3 -->
+    <!-- Exercise smithMachineBenchPress: instruction 2 -->
+    <!-- Exercise smithMachineDeclineBenchPress: instruction 3 -->
+    <!-- Exercise smithMachineInclineBenchPress: instruction 3 -->
+    <!-- Exercise smithMachineSquat: instruction 2 -->
+    <!-- Exercise smithMachineOverheadPress: instruction 3 -->
+    <!-- Catalog muscleGroups: upperAbs -->
+    <!-- Catalog muscleGroups: upperBack -->
+    <!-- Exercise pigeonPose: tip 2 -->
+    <!-- Exercise cableCrunchPress: tip 3 -->
+    <!-- Exercise machineHipAbduction: tip 2 -->
+    <!-- Exercise overheadTricepsExtension: tip 3 -->
+    <!-- Exercise cableHipAdduction: tip 3 -->
+    <!-- Exercise hipThrust: tip 1 -->
+    <!-- Exercise cableOverheadTricepsExtension: tip 3 -->
+    <!-- Exercise benchPress: tip 3 -->
+    <!-- Exercise barbellInclineBenchPress: tip 3 -->
+    <!-- Exercise barbellBackSquat: tip 3 -->
+    <!-- Exercise cableExternalRotation: tip 2 -->
+    <!-- Exercise facePull: tip 3 -->
+    <!-- Exercise bayesianCableCurl: tip 3 -->
+    <!-- Exercise cableHipAbduction: description -->
+    <!-- Exercise cableHipAdduction: description -->
+    <!-- Exercise doorwayChestStretch: description -->
+    <!-- Exercise suspensionRow: description -->
+    <!-- Exercise cableGluteKickback: description -->
+    <!-- Exercise cableFly: description -->
+    <!-- Exercise elliptical: instruction 4 -->
+    <!-- Exercise treadmillWalking: tip 2 -->
+    <!-- Exercise butterflySitUp: tip 1 -->
+    <!-- Exercise skiErgWork: tip 1 -->
+    <!-- Exercise threadTheNeedle: tip 2 -->
+    <!-- Exercise jumpRope: instruction 4 -->
+    <!-- Exercise elliptical: tip 2 -->
+    <!-- Exercise stairClimber: tip 1 -->
+    <!-- Exercise treadmillRunning: tip 1 -->
+    <!-- Catalog movementPatterns: verticalPull -->
+    <!-- Catalog movementPatterns: verticalPush -->
+    <!-- Exercise walking: name -->
+    <!-- Exercise walkingLunge: name -->
+    <!-- Exercise treadmillWalking: description -->
+    <!-- Exercise inchworm: instruction 3 -->
+    <!-- Exercise walking: tip 1 -->
+    <!-- Catalog targetMetrics: weight -->
+    <!-- Exercise hipThrust: description -->
+    <!-- Exercise childsPose: tip 1 -->
+    <!-- Exercise worldGreatestStretch: name -->
+    <!-- Exercise wristCircles: name -->
+    <!-- Catalog movementRestrictions: wristPain -->
+    <!-- Exercise doorwayChestStretch: instruction 5 -->
+    <!-- Exercise wristCircles: instruction 4 -->
+    <!-- Exercise hipFlexorStretch: tip 2 -->
+    <!-- dumbbellInclineBenchPress -->
+    <!-- dumbbellInclineBenchPress -->
+    <!-- dumbbellInclineBenchPress -->
+    <!-- dumbbellInclineBenchPress -->
+    <!-- dumbbellInclineBenchPress -->
+    <!-- dumbbellInclineBenchPress -->
+    <!-- dumbbellInclineBenchPress -->
+    <!-- dumbbellInclineBenchPress -->
+    <!-- cableLatPushdown -->
+    <!-- cableLatPushdown desc -->
+    <!-- cableLatPushdown howto -->
+    <!-- cableLatPushdown howto -->
+    <!-- cableLatPushdown howto -->
+    <!-- cableLatPushdown howto -->
+    <!-- cableLatPushdown tip -->
+    <!-- cableLatPushdown tip -->
+    <!-- cableLatPushdown tip -->
+    <!-- cableLatPushdown llm -->
+    <!-- lyingLegRaise -->
+    <!-- lyingLegRaise desc -->
+    <!-- lyingLegRaise howto -->
+    <!-- lyingLegRaise howto -->
+    <!-- lyingLegRaise howto -->
+    <!-- lyingLegRaise howto -->
+    <!-- lyingLegRaise tip -->
+    <!-- lyingLegRaise tip -->
+    <!-- lyingLegRaise tip -->
+    <!-- lyingLegRaise llm -->
+</resources>

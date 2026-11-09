@@ -133,7 +133,11 @@
     "doorwayChestStretch": "Étirement pectoral dans l'embrasure de la porte",
     "scorpions": "Scorpions",
     "threadTheNeedle": "Passer l'aiguille",
-    "neckCircles": "Rotations du cou"
+    "neckCircles": "Rotations du cou",
+    "ezBarSkullCrusher": "Barre au front avec barre EZ",
+    "closeGripDumbbellBenchPress": "Développé couché serré avec haltères",
+    "lyingCableCurl": "Curl biceps allongé à la poulie",
+    "smithMachineCalfRaise": "Extensions des mollets à la machine Smith"
   },
   "texts": {
     "Walking": "Marche",
@@ -426,6 +430,9 @@
     "Straight Sets": "Straight Sets",
     "Time + Distance": "Time + Distance",
     "Seconds": "Seconds",
-    "Minutes": "Minutes"
+    "Minutes": "Minutes",
+    "Flat Bench": "Banc plat",
+    "EZ Bar": "EZ Bar",
+    "Smith Machine": "Smith machine"
   }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android Wear connection states; no matching shared Sheet keys. -->
+<resources>
+    <string name="watch_tap_connect">Pulsa Conectar para empezar</string>
+    <string name="watch_scan_failed">No se pudo buscar el reloj (%1$d)</string>
+    <string name="watch_bluetooth_unavailable">Bluetooth no disponible</string>
+    <string name="watch_searching_phone">Buscando el teléfono…</string>
+    <string name="watch_phone_not_found">No se encontró el teléfono</string>
+    <string name="watch_connecting">Conectando…</string>
+    <string name="watch_connected">Conectado</string>
+    <string name="watch_disconnected">Desconectado</string>
+    <string name="watch_incompatible">Conexión incompatible</string>
+</resources>

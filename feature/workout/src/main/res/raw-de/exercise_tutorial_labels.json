@@ -133,7 +133,11 @@
     "doorwayChestStretch": "Brustdehnung im Türrahmen",
     "scorpions": "Skorpione",
     "threadTheNeedle": "Nadel einfädeln",
-    "neckCircles": "Nackenrotationen"
+    "neckCircles": "Nackenrotationen",
+    "ezBarSkullCrusher": "Stirndrücken mit SZ-Stange",
+    "closeGripDumbbellBenchPress": "Enges Kurzhantel-Bankdrücken",
+    "lyingCableCurl": "Bizepscurl am Kabelzug in Rückenlage",
+    "smithMachineCalfRaise": "Wadenheben an der Smith-Maschine"
   },
   "texts": {
     "Walking": "Gehen",
@@ -426,6 +430,9 @@
     "Straight Sets": "Straight Sets",
     "Time + Distance": "Time + Distance",
     "Seconds": "Seconds",
-    "Minutes": "Minuten"
+    "Minutes": "Minuten",
+    "Flat Bench": "Flachbank",
+    "EZ Bar": "EZ Bar",
+    "Smith Machine": "Smith-Maschine"
   }
 }

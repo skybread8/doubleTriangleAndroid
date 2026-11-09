@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android-only fallbacks pending a verified shared Sheet key. -->
+<resources>
+    <string name="android_fallback_opening_workout" formatted="false">ABRIENDO ENTRENAMIENTO…</string>
+    <string name="android_fallback_565339bc4d33d728">@string/ok</string>
+    <string name="android_fallback_0672ca5254978ac1" formatted="false">TU NUEVO PLAN</string>
+    <string name="android_fallback_d87b542b930fc289" formatted="false">REVISA TU PLAN</string>
+    <string name="android_fallback_d19904bc72fb8c70" formatted="false">No se guardará hasta que lo confirmes.</string>
+    <string name="android_fallback_c564319129b0cdb7" formatted="false">¿Eliminar registro?</string>
+    <string name="android_fallback_fc0eb916b51fbc32" formatted="false">Guardar comida</string>
+    <string name="android_fallback_960b584841df4abf" formatted="false">OBJETIVOS DIARIOS</string>
+    <string name="android_fallback_2f0b47dc21305702" formatted="false">¿Cómo comes?</string>
+    <string name="android_fallback_51abb8184a95f0c0" formatted="false">Ej.: huevos, tofu, salmón</string>
+    <string name="android_fallback_0218e37495d4775d" formatted="false">Alimentos que no te gustan</string>
+    <string name="android_fallback_966462e99a10529e" formatted="false">Ej.: aceitunas, hígado</string>
+    <string name="android_fallback_d0d81f2dcf960609" formatted="false">Ej.: setas, aceitunas</string>
+    <string name="android_fallback_cedac6b4faab8beb" formatted="false">Ej.: comidas rápidas entre semana</string>
+    <string name="android_fallback_86aecc17fac663f8" formatted="false">SINCRONIZA CON HEALTH CONNECT</string>
+    <string name="android_fallback_141c18fe0c772367" formatted="false">Importa tus medidas y mantén tus datos de salud sincronizados.</string>
+    <string name="android_fallback_79de068350f9e051" formatted="false">CONECTAR HEALTH CONNECT</string>
+    <string name="android_fallback_276f6069beea5cd5" formatted="false">COMENZAR CONFIGURACIÓN</string>
+    <string name="android_fallback_f859a18512113c62" formatted="false">Selecciona un día del plan para crear una idea de comida.</string>
+    <string name="android_fallback_c20cc6b8b1c4e51a" formatted="false">IDEAS DESDE TU NEVERA</string>
+    <string name="android_fallback_655cdbd0ac1b3b55" formatted="false">Escribe los ingredientes que tienes y crearé una comida ajustada a los macros del día.</string>
+    <string name="android_fallback_61b41c62b0a376b9" formatted="false">Ingredientes disponibles</string>
+    <string name="android_fallback_6cb18128083479df" formatted="false">Ej.: arroz, pollo, tomate y yogur</string>
+    <string name="android_fallback_f38cc5bbb28c6004" formatted="false">IDEAS DISPONIBLES</string>
+    <string name="android_fallback_2e89417900b71bf5" formatted="false">USAR IDEA</string>
+    <string name="android_fallback_63cd02ffaabd142e" formatted="false">Haz una foto ahora o selecciona una de tu galería para identificar ingredientes.</string>
+    <string name="android_fallback_841b8ccb44fa8d7f" formatted="false">Cámara</string>
+    <string name="android_fallback_803e7245f990473b" formatted="false">ACCIONES DE NUTRICIÓN</string>
+    <string name="android_fallback_884f0d53f3e1d469" formatted="false">COMPARTIR</string>
+    <string name="android_fallback_fa2ea3fb081cf5c5" formatted="false">Personas</string>
+    <string name="android_fallback_325b08a2f774093a" formatted="false">MACROS QUE FALTAN</string>
+    <string name="android_fallback_1182ed312c77b345" formatted="false">Buscando opciones…</string>
+    <string name="android_fallback_a5c8086965bc35b7" formatted="false">Registrar ingesta</string>
+    <string name="android_fallback_5ad374c93f3ed129" formatted="false">Buscar alimento</string>
+    <string name="android_fallback_a92708024e2207b6" formatted="false">Busca para ver alimentos del catálogo.</string>
+    <string name="android_fallback_d38ec149b0ba76cf" formatted="false">Corregir</string>
+    <string name="android_fallback_afa66ce42b1bb6cd" formatted="false">Describe qué falta o está mal</string>
+    <string name="android_fallback_15f1ac8749665ff4" formatted="false">Reanalizar</string>
+    <string name="android_fallback_d331658963a3da58" formatted="false">Foto lista para revisar</string>
+    <string name="android_fallback_91a7a94f214382ec" formatted="false">Repetir</string>
+    <string name="android_fallback_d6ec493b8c2d44cf" formatted="false">Analizando alimentos, cantidades y macros…</string>
+    <string name="android_fallback_5ab574fb102f4622" formatted="false">Alimentos detectados</string>
+    <string name="android_fallback_40e40d9bc8769c5a" formatted="false">Alimento</string>
+    <string name="android_fallback_8ba3e2586172639d" formatted="false">Indica cualquier ingrediente, cantidad o preparación que falte o esté estimada incorrectamente.</string>
+    <string name="android_fallback_f3a532f08e933f5c" formatted="false">Qué falta o está mal</string>
+    <string name="android_fallback_3c4c833c1d150638" formatted="false">Ej.: había aguacate y 200 g de pollo</string>
+    <string name="android_fallback_ed5b298694cd6a71" formatted="false">¿Qué has comido?</string>
+    <string name="android_fallback_e03d0894d02fd8be" formatted="false">Ej.: 2 huevos, una tostada integral con aguacate y un café solo</string>
+    <string name="android_fallback_e92595810ec0b5a5" formatted="false">Alimentos</string>
+    <string name="android_fallback_a32e76ea3e9bab18" formatted="false">Ej.: 2 huevos, una tostada con aguacate y café</string>
+    <string name="android_fallback_220574726dbdb571" formatted="false">Marca para contribuir</string>
+    <string name="android_fallback_36d2f60457178100" formatted="false">Si el producto no existe en Open Food Facts, puedes añadirlo con fotos del frontal y de la tabla nutricional.</string>
+    <string name="android_fallback_678510820f76eb43" formatted="false">Otro alimento</string>
+    <string name="android_fallback_685041d04d880e33" formatted="false">Haz una foto o selecciona una imagen para contribuir este producto.</string>
+    <string name="android_fallback_55a42a91d5d61227" formatted="false">Notas del alimento</string>
+    <string name="android_fallback_1526b89a9937b9c7" formatted="false">NO SE PUDO GENERAR EL PLAN</string>
+    <string name="android_fallback_bef6848538ac5135" formatted="false">El plan actual se sustituirá cuando guardes el nuevo plan.</string>
+    <string name="android_fallback_50d6ddbfbb166e2e" formatted="false">ACTIVA TU SEMANA</string>
+    <string name="android_fallback_ed18234e852474e0" formatted="false">kcal/día</string>
+    <string name="android_fallback_9e2a24e11f081d89" formatted="false">Editar objetivos</string>
+    <string name="android_fallback_b2a9947912be8b9d" formatted="false">Las calorías y macros cambian según la demanda de cada entrenamiento.</string>
+    <string name="android_fallback_8e2c90c5cde299e5" formatted="false">Se cerrará esta cuenta en el dispositivo.</string>
+    <string name="android_fallback_205443ee88568e8c" formatted="false">Cargando…</string>
+    <string name="android_fallback_819eb0325573d67e" formatted="false">SUSCRIBIRME</string>
+    <string name="android_fallback_da626fd0c9ebd0ef" formatted="false">Este plan no está disponible ahora mismo en Google Play.</string>
+    <string name="android_fallback_e65789c3621d4999" formatted="false">¿Eliminar este check-in?</string>
+    <string name="android_fallback_3ab7a4383ee95fc7" formatted="false">Sigue tu físico con check-ins consistentes</string>
+    <string name="android_fallback_ce9a1f0628bfdf47" formatted="false">Consejos para las fotos de progreso</string>
+    <string name="android_fallback_16945fe99efdebf9" formatted="false">Necesitamos acceso a la cámara para usar las guías de encuadre.</string>
+    <string name="android_fallback_71dc78bdba9c367c" formatted="false">Permitir cámara</string>
+    <string name="android_fallback_101c82a9a65dd9cd" formatted="false">Arrastra y pellizca para ajustar</string>
+    <string name="android_fallback_a627668c9215338a" formatted="false">Repetir foto</string>
+    <string name="android_fallback_ae46f63766af26c9" formatted="false">Check-ins consistentes</string>
+    <string name="android_fallback_ca77c21fec39cef1" formatted="false">Haz una foto frontal y otra de perfil. Mantén la misma ropa, distancia, postura y luz. Puedes activar Referencia para usar tu último check-in como guía.</string>
+    <string name="android_fallback_86f8ec5c3ad66be3" formatted="false">Retirar consentimiento</string>
+    <string name="android_fallback_b284a57124c1f887" formatted="false">Vista a futuro con IA</string>
+    <string name="android_fallback_9e3ea731ed74b4e9" formatted="false">Enviaremos una copia de tu foto frontal y datos básicos de entrenamiento a la API de OpenAI para crear una previsión de 6 meses. El contenido no se usa para entrenar modelos; puede conservarse para monitorización de abuso durante hasta 30 días. Confirmas que tienes 18 años o más y aceptas este tratamiento.</string>
+    <string name="android_fallback_47ceb6c25b64d1c6" formatted="false">Acepto</string>
+    <string name="android_fallback_fef8f7d43e193626" formatted="false">Análisis de composición</string>
+    <string name="android_fallback_439857d9ffd3c54c" formatted="false">Analizando fotos…</string>
+    <string name="android_fallback_24d69a5c82264b40" formatted="false">El resultado es orientativo y no sustituye asesoramiento médico.</string>
+    <string name="android_fallback_82da898217b2b8b7" formatted="false">Foco semanal</string>
+    <string name="android_fallback_526484234b492b02">@string/i_have_a_gym_code</string>
+    <string name="android_fallback_8535879c75ac3c86" formatted="false">No hemos podido crear tu plan</string>
+    <string name="android_fallback_f6f8978612a50da6" formatted="false">Sincroniza con Health Connect</string>
+    <string name="android_fallback_edd63f33842687f3" formatted="false">Configuración nutricional necesaria</string>
+    <string name="android_fallback_c5a4c3c3e1aaf3a5" formatted="false">CREANDO TU PLAN</string>
+    <string name="android_fallback_c9e05a29f31f33fe" formatted="false">La IA está organizando tus sesiones y ajustándolas a tu perfil.</string>
+    <string name="android_fallback_71801cc04f3101d6" formatted="false">No se pudo cambiar la protección</string>
+    <string name="android_fallback_c06acd8b1617152c" formatted="false">Último valor registrado</string>
+    <string name="android_fallback_7744302569867726" formatted="false">Aún no hay registros para este periodo.</string>
+    <string name="android_fallback_9b5943016c3ffc7f" formatted="false">Sincronizar métricas</string>
+    <string name="android_fallback_96bcd9d57aa889c8" formatted="false">Cuenta repeticiones y muestra insights de movimiento en ejercicios compatibles.</string>
+    <string name="android_fallback_44e30460bdb88853" formatted="false">Separa los elementos con comas.</string>
+    <string name="android_fallback_c3a12a63638b1a56" formatted="false">Toca una ubicación para marcarla como principal. Su equipamiento será el usado al generar planes.</string>
+    <string name="android_fallback_b7a91311229d74fd" formatted="false">Latitud</string>
+    <string name="android_fallback_dc8528ecd0fc59e7" formatted="false">Longitud</string>
+    <string name="android_fallback_fa69ce177fcf02c7" formatted="false">ELIMINAR UBICACIÓN</string>
+    <string name="android_fallback_c84cf18c52c0ff75" formatted="false">Usa la biometría o el código de tu dispositivo para ver tus check-ins y comparaciones guardados.</string>
+    <string name="android_fallback_70ffcec48320c070" formatted="false">Progreso y ejecuciones anteriores</string>
+    <string name="android_fallback_6c6bfcc229d15b92" formatted="false">VOLUMEN POR SESIÓN</string>
+    <string name="android_fallback_13adb45a3aca649c" formatted="false">CREAR PERFIL</string>
+    <string name="android_fallback_22447c9c12d49c89" formatted="false">BENEFICIOS</string>
+    <string name="android_fallback_5441cb400ad25e80" formatted="false">Has terminado mucho antes de lo previsto. ¿Quieres cancelar el entrenamiento?</string>
+    <string name="android_fallback_4514362231b4ebda" formatted="false">Has completado todas las semanas del ciclo. Tu progresión está lista para el siguiente bloque.</string>
+    <string name="android_fallback_e43262c17207504d" formatted="false">SIGUIENTE PLAN</string>
+    <string name="android_fallback_d67126ae53afa3cf" formatted="false">Genera la siguiente semana manteniendo tu progresión, historial y feedback.</string>
+    <string name="android_fallback_006a2c0894258f2d" formatted="false">Activa recordatorios antes de tus entrenamientos y avisos cuando termine un descanso.</string>
+    <string name="android_fallback_697e0b6bbef69f5c" formatted="false">Hora de entrenar</string>
+    <string name="android_fallback_03812c2ff805ac31" formatted="false">¿TE GUSTA TU PROGRESO?</string>
+    <string name="android_fallback_17c4d9381ad5aa89" formatted="false">Si disfrutas Double Triangle, dedica un momento a valorarla en Google Play.</string>
+    <string name="android_fallback_5a8338c653a66542" formatted="false">NO SE PUDO GENERAR CON IA</string>
+    <string name="android_fallback_a548146eea4b93d6" formatted="false">USAR PLANTILLA LOCAL</string>
+    <string name="android_fallback_aac77df347205252">@string/feedback</string>
+    <string name="android_fallback_ed911e568099bf51" formatted="false">Cuéntanos qué podemos mejorar.</string>
+    <string name="android_fallback_c35ce8f329c93131" formatted="false">Tu mensaje</string>
+    <string name="android_fallback_ce033ecdd4c7ed84" formatted="false">ADAPTAR ENTRENAMIENTO</string>
+    <string name="android_fallback_e610ce89bce53e88" formatted="false">UBICACIÓN DE ENTRENAMIENTO</string>
+    <string name="android_fallback_4f8f1b6d130128cf" formatted="false">DÍA OMITIDO</string>
+    <string name="android_fallback_6d67523a3c2efeff" formatted="false">Este entrenamiento se ha marcado como descanso.</string>
+    <string name="android_fallback_22521a61f6aadd7b" formatted="false">DESHACER</string>
+    <string name="android_fallback_35e7032fdd21e5f2" formatted="false">EMPEZAR EN WEAR OS</string>
+    <string name="android_fallback_6f27726318df3809" formatted="false">Abrir el entrenamiento en el reloj conectado</string>
+    <string name="android_fallback_e868d979b693438b" formatted="false">¿OMITIR ENTRENAMIENTO?</string>
+    <string name="android_fallback_9230242151559170" formatted="false">El día quedará marcado como descanso y podrás volver a abrirlo después.</string>
+    <string name="android_fallback_74be332575411a26" formatted="false">¿CANCELAR ENTRENAMIENTO?</string>
+    <string name="android_fallback_e843f0002491aaa9" formatted="false">Se eliminará el progreso guardado de esta sesión. Esta acción no se puede deshacer.</string>
+    <string name="android_fallback_1daf179b6751ecd3" formatted="false">SEGUIR</string>
+    <string name="android_fallback_ad63682fd261030f" formatted="false">ADAPTANDO ENTRENAMIENTO</string>
+    <string name="android_fallback_1f186c370603e755" formatted="false">La IA conserva el objetivo de la sesión y sustituye solo lo necesario.</string>
+    <string name="android_fallback_94fd46fb2ebefd8c" formatted="false">NO SE PUDO ADAPTAR</string>
+    <string name="android_fallback_7da4232d06825169" formatted="false">ENTRENAMIENTO ADAPTADO</string>
+    <string name="android_fallback_66b7a9375ddc733a" formatted="false">Revisa los cambios antes de sustituir la sesión actual.</string>
+    <string name="android_fallback_ed3b48a690d2135a" formatted="false">La sesión original se conservará hasta confirmar.</string>
+    <string name="android_fallback_3db550736adeaaf3" formatted="false">APLICAR</string>
+    <string name="android_fallback_f882bae2c871a1bc" formatted="false">¿ELIMINAR EJERCICIO?</string>
+    <string name="android_fallback_01398e25b10ed715" formatted="false">Esta acción eliminará el ejercicio de este entrenamiento.</string>
+    <string name="android_fallback_34fbf2a18984301a" formatted="false">Se eliminará todo el progreso de esta sesión.</string>
+    <string name="android_fallback_71c9925afe473640" formatted="false">Completa el movimiento con control y sin buscar fatiga.</string>
+    <string name="android_fallback_85bf5aae0c21e80f">@string/reps</string>
+    <string name="android_fallback_276591fdc76a8e39" formatted="false">EJERCICIO COMPLETADO</string>
+    <string name="android_fallback_b20ae2dc3aacf09e" formatted="false">Esta información ayudará a personalizar las siguientes sesiones.</string>
+    <string name="android_fallback_690d2168621b5112" formatted="false">MARCAR COMO COMPLETADO</string>
+    <string name="android_fallback_177fbe3bbd460630" formatted="false">SESIONES DE LA SEMANA</string>
+    <string name="android_fallback_962180b7dadf0cd5" formatted="false">PLANES ANTERIORES</string>
+    <string name="android_fallback_3a15f792414be5a6" formatted="false">Selecciona el esfuerzo del ejercicio</string>
+    <string name="android_fallback_6fb0040d5ea0199f" formatted="false">RUTA DEL ENTRENAMIENTO</string>
+    <string name="android_fallback_098d6f49e32bbe41">Media %1$s</string>
+    <string name="android_fallback_786ac57173131b91">No hay ejercicios que coincidan con «%1$s»</string>
+    <string name="android_fallback_f1fdb8c054140c2d">%1$s completados</string>
+    <string name="android_fallback_5e08a99c835e696d">%1$s ejercicios completados en total</string>
+    <string name="android_fallback_2040464160c3581e">@string/you_can_cancel_for_free_up_to____before_it_starts_</string>
+    <string name="android_fallback_84744cf2ee7e93cc">%1$s kcal</string>
+    <string name="android_fallback_f607a4511eaa0bad">%1$s (%2$sg)</string>
+    <string name="android_fallback_2e2d59534a6894d1">REGISTRADA · %1$s kcal</string>
+    <string name="android_fallback_09c91686cd8d5922">Se eliminará «%1$s» de este día.</string>
+    <string name="android_fallback_b3122afa77bde834">• %1$s · %2$s kcal</string>
+    <string name="android_fallback_ac0bf93ae7af8c28">%1$s kcal · %2$sg proteína · %3$sg carbos · %4$sg grasa</string>
+    <string name="android_fallback_35b530b7e1763c2b">%1$sg</string>
+    <string name="android_fallback_618a60f5e4f90716">%1$s · %2$s kcal</string>
+    <string name="android_fallback_3f4914f1230c64c2">P %1$s g · C %2$s g · G %3$s g</string>
+    <string name="android_fallback_d1f2ddc3f0afa4ca">Imagen seleccionada · %1$s</string>
+    <string name="android_fallback_584502d1af2144e3">Total para %1$s g</string>
+    <string name="android_fallback_88d179af1ae196cf">Los campos son por 100 g. Se guardará el total para %1$s g.</string>
+    <string name="android_fallback_dcd86bc975fc4e85">%1$s g</string>
+    <string name="android_fallback_a1c85981ac49db92">%1$s / %2$s kcal</string>
+    <string name="android_fallback_d4e40e04e8a03696">Sugerida · %1$s</string>
+    <string name="android_fallback_34179e7bbd699808">%1$s kcal restantes</string>
+    <string name="android_fallback_4f08c4860c67da6d">%1$s / %2$s g</string>
+    <string name="android_fallback_45881d23fdac1d2c">Paso %1$s de 3</string>
+    <string name="android_fallback_caa7246aae3a7b91">Di %1$s para hacer la foto</string>
+    <string name="android_fallback_fd4cf155018f52bb">Grasa estimada: %1$s</string>
+    <string name="android_fallback_76f0763a556d39c7">Confianza: %1$s</string>
+    <string name="android_fallback_3936d9755e257277">Te unes a %1$s</string>
+    <string name="android_fallback_28429eaaf00312ca">Último %1$s</string>
+    <string name="android_fallback_6045f625b4dddde3">Se eliminará el registro de %1$s para %2$s.</string>
+    <string name="android_fallback_3481712cc5fee35c">@string/log___</string>
+    <string name="android_fallback_11a14b6a6f7a431f">Nivel %1$s</string>
+    <string name="android_fallback_4646748156abd6a3">%1$s / %2$s XP</string>
+    <string name="android_fallback_41854e3d1657578c">%1$s elementos</string>
+    <string name="android_fallback_228a7432c23d5256">Has completado %1$s.</string>
+    <string name="android_fallback_452c2b03d5053d8a">%1$s XP</string>
+    <string name="android_fallback_f9af631634ddf30d">+%1$s XP</string>
+    <string name="android_fallback_938dcead4d66655b">A%1$s</string>
+    <string name="android_fallback_18423c54a5c7ac9c">No se pudo generar el plan: %1$s</string>
+    <string name="android_fallback_247465696a9e46a7">%1$s de %2$s sesiones finalizadas</string>
+    <string name="android_fallback_8c1f2fcbdf15dcce">DÍA %1$s</string>
+    <string name="android_fallback_b2636d897f370e98">%1$s RONDAS</string>
+    <string name="android_fallback_33292775312c232f">Descansa %1$ss al terminar el bloque</string>
+    <string name="android_fallback_4db754c1635a189f">%1$s ejercicios · %2$s min</string>
+    <string name="android_fallback_8c9f2c9321a63344">CORREGIR SERIE %1$s</string>
+    <string name="android_fallback_44d1064e89430456">%1$ss</string>
+    <string name="android_fallback_4acff08d209d2081">EDITAR %1$s</string>
+    <string name="android_fallback_4cab546bb49505c2">%1$s semanas</string>
+    <string name="android_fallback_38f03af9e95ae2cb">%1$s · semana %2$s</string>
+    <string name="android_fallback_6334941613f202f4">PLAN %1$s  ·  MESOCICLO %2$s  ·  SEMANA %3$s/%4$s</string>
+    <string name="android_fallback_7bc4873e06901e86">%1$s · SEMANA DE FASE %2$s</string>
+    <string name="android_fallback_932171ddecdd9f81">%1$s sesión(es) omitida(s)</string>
+    <string name="android_fallback_b221067dab9b73d3">Plan %1$s · Mesociclo %2$s · Semana %3$s/%4$s</string>
+    <string name="android_fallback_beb27d1c23e4f96d">%1$s sesiones · %2$s</string>
+    <string name="android_fallback_d145c96a3b10150c">%1$s BPM</string>
+    <string name="android_fallback_a8a72f1464bbe773">Serie %1$s/%2$s</string>
+    <string name="android_fallback_f9cc6a832cb57072" formatted="false">Todavía no hay ejercicios completados.</string>
+    <string name="android_fallback_3b0d6594a966bb69">@string/no_completed_exercises_in_this_period_</string>
+    <string name="android_fallback_56b4f7ccc60fba1d" formatted="false">Analizando foto…</string>
+    <string name="android_fallback_85218e9164f8e4c6" formatted="false">Creando ideas…</string>
+    <string name="android_fallback_777e520cc57e6515" formatted="false">Añadir etiqueta</string>
+    <string name="android_fallback_f0c5047c35dc8745" formatted="false">Fotografía o selecciona la etiqueta nutricional para leer sus valores.</string>
+    <string name="android_fallback_e9fee245e2a1b8fe" formatted="false">Haz una foto ahora o selecciona una de tu galería para analizar la comida.</string>
+    <string name="android_fallback_08c640c10c2f46d2" formatted="false">Número de raciones</string>
+    <string name="android_fallback_4db237896d44016e" formatted="false">Ocultar corrección</string>
+    <string name="android_fallback_12d19f946dae05f3" formatted="false">Corregir estimación</string>
+    <string name="android_fallback_ed8122aba6f5d044" formatted="false">Describe lo que has comido</string>
+    <string name="android_fallback_357c5a3bbf21e059" formatted="false">Alimento o comida</string>
+    <string name="android_fallback_b591629ee036e383" formatted="false">Leyendo etiqueta…</string>
+    <string name="android_fallback_88f37ba6156531bd" formatted="false">Analizando nutrición…</string>
+    <string name="android_fallback_32bd9d0a0678c1d9" formatted="false">Frontal</string>
+    <string name="android_fallback_accbff606281196f" formatted="false">Foto nutrición</string>
+    <string name="android_fallback_b48d3b47d0f1621e" formatted="false">Foto nutricional</string>
+    <string name="android_fallback_576e9ad314e4c59b">@string/your_plan_will_be_saved_and_ready_on_every_device_</string>
+    <string name="android_fallback_811c3bab8d3f6c54" formatted="false">Registrarme con email</string>
+    <string name="android_fallback_f08c192f1634c46c" formatted="false">Iniciar sesión con email</string>
+    <string name="android_fallback_64027eb54f7319b4" formatted="false">Obtén la experiencia Wildforce completa, creada alrededor de tu progreso.</string>
+    <string name="android_fallback_09d0552889efc208">@string/log_your_meals_in_seconds_with_ai__ideal_if_a_coach_or_your_gym_already_plans_your_training_</string>
+    <string name="android_fallback_11102b29326ef97a" formatted="false">Arrastra y pellizca para alinear tu último check-in</string>
+    <string name="android_fallback_3657487951193daf" formatted="false">Alinea tu cuerpo dentro de la guía</string>
+    <string name="android_fallback_fd035357b83dd14f" formatted="false">Disparar</string>
+    <string name="android_fallback_e160381847c42d4d" formatted="false">Preparando</string>
+    <string name="android_fallback_21f51ef777460b14" formatted="false">Escuchando</string>
+    <string name="android_fallback_c9566ca43bdcc78f" formatted="false">Voz</string>
+    <string name="android_fallback_601986ca2a0a0305" formatted="false">Continuar al perfil</string>
+    <string name="android_fallback_97992b805fa065cf" formatted="false">Guardar check-in</string>
+    <string name="android_fallback_f79424eb7f17047c" formatted="false">Inclina hacia delante</string>
+    <string name="android_fallback_d77ee55e1cbc8ec0" formatted="false">Inclina hacia atrás</string>
+    <string name="android_fallback_879aca039a8a9db7" formatted="false">Ver previsión a 6 meses</string>
+    <string name="android_fallback_b989f191a70f69da" formatted="false">Regenerar previsión</string>
+    <string name="android_fallback_f12a8ada4dfd091e" formatted="false">VALIDANDO…</string>
+    <string name="android_fallback_535139f051f45a12" formatted="false">Estamos preparando tus entrenamientos.</string>
+    <string name="android_fallback_d2b925965ea8d2b9" formatted="false">Preparando…</string>
+    <string name="android_fallback_59b4cecc3ad11b01" formatted="false">AÑADIR FOTO DEL LUGAR</string>
+    <string name="android_fallback_39f21ad6de26c344" formatted="false">CAMBIAR FOTO DEL LUGAR</string>
+    <string name="android_fallback_e34b6abaeaebfa07" formatted="false">NUEVOS RÉCORDS</string>
+    <string name="android_fallback_4a9232af2bc6e80d" formatted="false">DÍA DE RACHA</string>
+    <string name="android_fallback_e1855ede78c165c8" formatted="false">DÍAS DE RACHA</string>
+    <string name="android_fallback_3a2a4b75e5f5742f" formatted="false">¿SALTAR BLOQUE?</string>
+    <string name="android_fallback_87e24da452a03eda" formatted="false">¿SALTAR EJERCICIO?</string>
+    <string name="android_fallback_3c695985e74f6e76" formatted="false">Se omitirá todo el bloque actual y pasarás al siguiente.</string>
+    <string name="android_fallback_c9ac2cb120cfe227" formatted="false">Este ejercicio quedará sin completar y pasarás al siguiente.</string>
+    <string name="android_fallback_4584ab778135a0fb" formatted="false">PREPÁRATE PARA ENTRENAR</string>
+    <string name="android_fallback_2775726f473ccdf1" formatted="false">RECUPERA Y BAJA PULSACIONES</string>
+    <string name="android_fallback_816b51f9414f1ce3" formatted="false">Peso/lado</string>
+    <string name="android_fallback_f79916caa78b0ee0" formatted="false">Repeticiones</string>
+    <string name="android_fallback_69665fe06cb63113" formatted="false">DESCANSO · SIN CONEXIÓN</string>
+</resources>

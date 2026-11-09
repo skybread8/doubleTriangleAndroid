@@ -231,6 +231,7 @@ object CustomWorkoutStore {
                     repRange = exercise.optIntOrNull("repsMin")?.let { minimum -> RepRange(minimum, (exercise.optIntOrNull("repsMax") ?: minimum).coerceAtLeast(minimum)) },
                     coachExerciseId = exercise.optString("coachExerciseId").takeIf(String::isNotBlank),
                     skippedAt = exercise.optString("skippedAt").trim().takeIf { it.isNotEmpty() && !it.equals("null", true) },
+                    role = exercise.optString("role").takeIf { it == "main" || it == "accessory" },
                     plannedExerciseId = exercise.optString("plannedExerciseId").trim().takeIf { it.isNotEmpty() && !it.equals("null", true) },
                 ),
             )
@@ -245,6 +246,7 @@ object CustomWorkoutStore {
             .put("targetRir", exercise.setStyleParameters.targetRir).put("appliesToFinalSetOnly", exercise.setStyleParameters.appliesToFinalSetOnly)
         return JSONObject().put("name", exercise.name).put("imageKey", exercise.imageKey ?: "").put("coachExerciseId", exercise.coachExerciseId ?: JSONObject.NULL).put("sets", exercise.sets)
             .put("skippedAt", exercise.skippedAt ?: JSONObject.NULL)
+            .put("role", exercise.role ?: JSONObject.NULL)
             .put("plannedExerciseId", exercise.plannedExerciseId ?: JSONObject.NULL)
             .put("reps", exercise.reps).put("restSeconds", exercise.restSeconds).put("setStyle", exercise.setStyle.name)
             .put("setStyleParameters", parameters)
@@ -287,6 +289,7 @@ internal data class ExerciseChoice(
     val trackingMode: ExerciseTrackingMode = ExerciseTrackingMode.Repetitions,
     val durationUsesMinutes: Boolean = false,
     val isPerSideLoad: Boolean = false,
+    val mechanic: String? = null,
 )
 
 // Timed entries from WildforceShared's ExerciseCatalog. Other catalog entries use repetitions.
@@ -429,7 +432,9 @@ internal object CustomExerciseCatalog {
     )
 
     fun load(context: Context): List<ExerciseChoice> = runCatching {
-        val catalog = JSONArray(context.resources.openRawResource(R.raw.exercise_catalog).bufferedReader().use { it.readText() })
+        val metadata = JSONObject(context.resources.openRawResource(R.raw.ios_exercise_metadata).bufferedReader().use { it.readText() })
+        val catalog = JSONObject(context.resources.openRawResource(R.raw.exercise_catalog).bufferedReader().use { it.readText() })
+            .getJSONArray("exercises")
         List(catalog.length()) { index ->
             val item = catalog.getJSONObject(index)
             val key = item.getString("id")
@@ -437,6 +442,7 @@ internal object CustomExerciseCatalog {
             // canonical variants are already present in the resource.
             if (key == "inclineBenchPress") return@List null
             val canonicalKey = canonicalExerciseMediaKey(key) ?: key
+            if (!metadata.has(canonicalKey)) return@List null
             catalogExerciseChoice(
                 name = spanishNames[canonicalKey] ?: item.optString("name").ifBlank { humanize(canonicalKey) },
                 key = canonicalKey,
@@ -445,8 +451,23 @@ internal object CustomExerciseCatalog {
                     .map { candidate -> canonicalExerciseMediaKey(candidate) ?: candidate }
                     .distinct(),
                 primaryMuscles = item.stringList("primaryMuscles").toSet(),
+                mechanic = metadata.optJSONObject(canonicalKey)?.optString("mechanic")?.takeIf { it == "compound" || it == "isolation" },
             )
-        }.filterNotNull().distinctBy { it.imageKey }.let(::withLatestExercises).sortedBy { it.name }
+        }.filterNotNull().distinctBy { it.imageKey }.let(::withLatestExercises).map { choice ->
+            choice.copy(
+                mechanic = metadata.optJSONObject(choice.imageKey)?.optString("mechanic")?.takeIf { it == "compound" || it == "isolation" },
+                isPerSideLoad = metadata.optJSONObject(choice.imageKey)?.optBoolean("isPerSideLoad") ?: choice.isPerSideLoad,
+            )
+        }.let { existing ->
+            val ids = metadata.keys().asSequence().toList()
+            existing + ids.filterNot { id -> existing.any { it.imageKey == id } }.mapNotNull { id ->
+                metadata.optJSONObject(id)?.let { meta -> catalogExerciseChoice(meta.optString("name"), id).copy(
+                    substitutionCandidates = meta.stringList("substitutionCandidates"), primaryMuscles = meta.stringList("primaryMuscles").toSet(),
+                    mechanic = meta.optString("mechanic").takeIf { it == "compound" || it == "isolation" },
+                    isPerSideLoad = meta.optBoolean("isPerSideLoad"),
+                ) }
+            }
+        }.sortedBy { it.name }
     }.getOrDefault(spanishNames.map { catalogExerciseChoice(it.value, it.key) }.sortedBy { it.name })
 
     /** Keep Android's picker compatible with the two exercises added to iOS's catalog. */

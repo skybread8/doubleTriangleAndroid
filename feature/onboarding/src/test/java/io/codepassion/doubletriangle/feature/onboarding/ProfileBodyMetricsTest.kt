@@ -24,7 +24,7 @@ class ProfileBodyMetricsTest {
             hipCm = null,
         )
 
-        assertEquals(12.0, estimate ?: error("Expected a valid estimate"), 0.2)
+        assertEquals(18.462, estimate ?: error("Expected a valid estimate"), 0.001)
     }
 
     @Test

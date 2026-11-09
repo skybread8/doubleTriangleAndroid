@@ -5,6 +5,7 @@ import io.codepassion.wildforce.android.BuildConfig
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
 import android.content.pm.PackageManager
@@ -31,7 +32,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
@@ -68,7 +73,7 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.ArrowCircleDown
 import androidx.compose.material.icons.filled.ArrowCircleUp
 import androidx.compose.material.icons.filled.AccessibilityNew
-import androidx.compose.material.icons.filled.DirectionsWalk
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Hotel
 import androidx.compose.material.icons.filled.SelfImprovement
@@ -117,7 +122,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.core.view.WindowCompat
-import android.graphics.Color as AndroidColor
 import java.util.Locale
 import io.codepassion.doubletriangle.core.model.confirmGeneratedPlan
 import io.codepassion.doubletriangle.core.model.PreviewWorkoutRepository
@@ -305,7 +309,7 @@ class MainActivity : ComponentActivity() {
         // applies system-bar insets differently depending on the OEM and
         // navigation mode (notably on Galaxy S23 vs Pixel). Composables below
         // own the top and bottom insets explicitly.
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 7203)
         }
@@ -320,10 +324,11 @@ class MainActivity : ComponentActivity() {
             val systemDarkTheme = isSystemInDarkTheme()
             val savedTheme = remember { getSharedPreferences("wildforce_profile_details", 0).getString("theme", "Sistema") ?: "Sistema" }
             WildforceTheme(darkTheme = when (savedTheme) { "Claro" -> false; "Oscuro" -> true; else -> systemDarkTheme }) {
-                // Apply only the top inset here. The bottom navigation owns the
-                // navigation-bar inset; applying safeDrawing at the root as
-                // well created an extra bottom gap on devices such as S23 Ultra.
-                Box(Modifier.fillMaxSize().statusBarsPadding()) {
+                // Protect the top and sides, including cutouts and caption bars.
+                // The bottom navigation owns the bottom inset to avoid adding it twice.
+                Box(Modifier.fillMaxSize().windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
+                )) {
                     WildforceRoot(
                         requestedDestination = requestedRootDestination.value,
                         openNutritionLogging = openNutritionLogging.value,
@@ -413,12 +418,15 @@ internal enum class RootDestination(
     val icon: ImageVector,
     val usesCarrotIcon: Boolean = false,
 ) {
-    Workout(R.string.ios_catalog_7b3abf24fddda1de, Icons.Filled.FitnessCenter),
+    Workout(io.codepassion.doubletriangle.core.designsystem.R.string.workout, Icons.Filled.FitnessCenter),
     // iOS uses `carrot.fill`; the Material set has no carrot glyph, so the
     // root dock renders the same silhouette with CarrotFillIcon below.
-    Nutrition(R.string.ios_catalog_7ab78b7058dd1c09, Icons.Filled.Restaurant, usesCarrotIcon = true),
-    Analytics(R.string.ios_catalog_94c116ee118a7299, Icons.Filled.BarChart), Gym(R.string.ios_catalog_fbeb6d88367ec305, Icons.Filled.Apartment), Profile(R.string.ios_catalog_d696a35bdd1883da, Icons.Filled.AccountCircle),
+    Nutrition(io.codepassion.doubletriangle.core.designsystem.R.string.nutrition, Icons.Filled.Restaurant, usesCarrotIcon = true),
+    Analytics(io.codepassion.doubletriangle.core.designsystem.R.string.analytics, Icons.Filled.BarChart), Gym(io.codepassion.doubletriangle.core.designsystem.R.string.gym, Icons.Filled.Apartment), Profile(io.codepassion.doubletriangle.core.designsystem.R.string.profile, Icons.Filled.AccountCircle),
 }
+
+internal fun showsMandatoryAccessPaywall(subscriptionRequired: Boolean, member: Boolean): Boolean = subscriptionRequired && !member
+internal fun showsMemberNutritionOffer(member: Boolean, destination: RootDestination): Boolean = member && destination == RootDestination.Nutrition
 
 /**
  * Mirrors iOS's InitialSyncView: a newly authenticated account stays outside
@@ -465,12 +473,12 @@ private fun InitialSyncScreen(
                     color = WildforceThemeTokens.accent,
                 )
                 Text(
-                    text = androidx.compose.ui.res.stringResource(R.string.ios_catalog_6a38b69e9fc567c1),
+                    text = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.syncing_your_data___),
                     style = androidx.compose.material.MaterialTheme.typography.subtitle1,
                     color = WildforceThemeTokens.textPrimary,
                 )
                 Text(
-                    text = androidx.compose.ui.res.stringResource(R.string.ios_catalog_5e05fbfeb6e4b7d6),
+                    text = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_will_only_take_a_moment_),
                     fontSize = 15.sp,
                     color = WildforceThemeTokens.textSecondary,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -495,7 +503,7 @@ private fun InitialSyncScreen(
                         contentColor = WildforceThemeTokens.primaryButtonText,
                     ),
                 ) {
-                    Text("REINTENTAR")
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase())
                 }
             }
         }
@@ -554,13 +562,13 @@ private fun RootBottomNavigation(destinations: List<RootDestination>, selected: 
                                 modifier = Modifier
                                     .size(28.dp)
                                     .semantics {
-                                        contentDescription = if (selected == destination) "$label, seleccionada" else label
+                                        contentDescription = label
                                     },
                             )
                         } else {
                             Icon(
                                 destination.icon,
-                                contentDescription = if (selected == destination) "$label, seleccionada" else label,
+                                contentDescription = label,
                                 modifier = Modifier.size(28.dp),
                                 tint = tint,
                             )
@@ -1337,7 +1345,7 @@ private fun WildforceRoot(
                         }
                         if (nextPlanRequested) {
                             WorkoutPlanGenerator.generateNext(updated, restoredState, context)
-                        } else WorkoutPlanGenerator.generate(updated, context, recreate = true)
+                        } else WorkoutPlanGenerator.generate(updated, context, replacingPlanId = restoredState.planId)
                     }
                         .onSuccess { (json, state) ->
                             pendingGeneratedPlan = json to state
@@ -1449,9 +1457,9 @@ private fun WorkoutPlanPreviewSheet(
                     Modifier.fillMaxWidth().padding(start = 24.dp, top = 18.dp, end = 12.dp, bottom = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("TU NUEVO PLAN", Modifier.weight(1f), style = androidx.compose.material.MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_0672ca5254978ac1), Modifier.weight(1f), style = androidx.compose.material.MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
                     TextButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = androidx.compose.ui.res.stringResource(R.string.cancel), tint = WildforceThemeTokens.textSecondary)
+                        Icon(Icons.Filled.Close, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel), tint = WildforceThemeTokens.textSecondary)
                     }
                 }
                 Column(
@@ -1473,7 +1481,7 @@ private fun WorkoutPlanPreviewSheet(
                         contentColor = WildforceThemeTokens.background,
                     ),
                 ) {
-                    Text("¡ME COMPROMETO!", modifier = Modifier.padding(vertical = 4.dp), fontWeight = FontWeight.Bold)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.i_m_committed_).uppercase(), modifier = Modifier.padding(vertical = 4.dp), fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -1486,7 +1494,7 @@ private fun PlanPreviewSummary(state: WorkoutHubState) {
         Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text("ESTA SEMANA", style = androidx.compose.material.MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_week).uppercase(), style = androidx.compose.material.MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
         Text(state.planName, style = androidx.compose.material.MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, maxLines = 2)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             PlanPreviewPill(state.phase)
@@ -1528,7 +1536,7 @@ private fun PlanPreviewWorkoutCard(workout: WorkoutDaySummary, gender: String) {
             Text(workout.title, style = androidx.compose.material.MaterialTheme.typography.h6, color = Color.White, maxLines = 1)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.Timer, null, modifier = Modifier.size(14.dp), tint = Color.White.copy(alpha = .84f))
-                Text("${workout.estimatedMinutes} min", style = androidx.compose.material.MaterialTheme.typography.caption, color = Color.White.copy(alpha = .84f))
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_min, workout.estimatedMinutes), style = androidx.compose.material.MaterialTheme.typography.caption, color = Color.White.copy(alpha = .84f))
                 Icon(Icons.Filled.CenterFocusStrong, null, modifier = Modifier.size(14.dp), tint = Color.White.copy(alpha = .84f))
                 Text(workout.focus, style = androidx.compose.material.MaterialTheme.typography.caption, color = Color.White.copy(alpha = .84f), maxLines = 1)
             }
@@ -1574,8 +1582,6 @@ private fun WildforceApp(
     val view = LocalView.current
     SideEffect {
         activity?.let { host ->
-            host.window.statusBarColor = AndroidColor.TRANSPARENT
-            host.window.navigationBarColor = AndroidColor.TRANSPARENT
             val controller = WindowCompat.getInsetsController(host.window, view)
             controller.isAppearanceLightStatusBars = !darkTheme
             controller.isAppearanceLightNavigationBars = !darkTheme
@@ -1650,10 +1656,6 @@ private fun WildforceApp(
     LaunchedEffect(hasBookableGyms, requestedDestination) {
         if (!hasBookableGyms && selected == RootDestination.Gym) {
             selected = RootDestination.Workout
-        } else if (hasBookableGyms && isMemberMode && requestedDestination == null && selected == RootDestination.Workout) {
-            // iOS members land on their Gym tab as soon as the cached booking
-            // gyms are available. Explicit app-entry routes still win.
-            selected = RootDestination.Gym
         }
     }
     LaunchedEffect(requestedDestination) {
@@ -1701,11 +1703,7 @@ private fun WildforceApp(
                 !darkTheme && activeWorkout == null
         }
     }
-    // iOS's member mode keeps the Gym surface available but gates the rest of
-    // the root tabs behind the mandatory subscription screen. A successful
-    // sync is not an escape hatch here: booking-only access is a valid server
-    // mode, not a synchronization failure.
-    if (subscriptionRequired || (isMemberMode && selected != RootDestination.Gym)) {
+    if (showsMandatoryAccessPaywall(subscriptionRequired, isMemberMode)) {
         val accountPreferences = remember(appContext) { appContext.getSharedPreferences("wildforce_account", 0) }
         SubscriptionPaywall(
             accountId = accountPreferences.getString("id", null),
@@ -1895,7 +1893,7 @@ private fun WildforceApp(
             onPlanWorkoutUpdated(updatedState)
         }, adaptEquipmentPresets = profile.effectiveTrainingLocations().map { location -> location.name to location.equipment.joinToString(", ") { it.title } }, adaptEquipmentPresetIds = appContext.getSharedPreferences("wildforce_remote_sync", 0).getString("training_location_ids", "[]")?.let { raw -> org.json.JSONArray(raw) }?.let { ids -> profile.effectiveTrainingLocations().indices.map { ids.optString(it) } }.orEmpty(), adaptAiGenerator = if (showsAiCoach) ({ request ->
             WorkoutPlanGenerator.adaptWorkout(profile, workout, request, appContext)
-        }) else null, canUseAiCoach = canGenerateNextPlan, onShowAiCoachOffer = { isAiCoachOfferPresented = true })
+        }) else null, canUseAiCoach = canGenerateNextPlan, onShowAiCoachOffer = { isAiCoachOfferPresented = true }, onResultEdited = onRemoteSyncRequested)
             RootBottomNavigation(
                 destinations = rootDestinations,
                 selected = selected,
@@ -2009,7 +2007,13 @@ private fun WildforceApp(
                 )
             }
         } else if (selected == RootDestination.Nutrition) {
-            NutritionScreen(
+            if (showsMemberNutritionOffer(isMemberMode, selected)) SubscriptionPaywall(
+                accountId = appContext.getSharedPreferences("wildforce_account", 0).getString("id", null),
+                mandatory = true,
+                embedded = true,
+                contentPadding = overlayPadding,
+                onPurchaseCompleted = onSubscriptionPurchaseCompleted,
+            ) else NutritionScreen(
                 contentPadding = overlayPadding,
                 profile = profile,
                 openLogging = openNutritionLogging,
@@ -2041,6 +2045,7 @@ private fun WildforceApp(
                 contentPadding = overlayPadding,
                 gender = profile.gender.storedValue,
                 useImperial = profile.metricSystem == MetricSystem.Imperial,
+                onResultEdited = onRemoteSyncRequested,
             )
         } else if (selected == RootDestination.Gym) {
             BookingScreen(overlayPadding, onBookingVisibilityChanged = { bookingFlowOpen = it })
@@ -2138,7 +2143,7 @@ private fun WildforceApp(
                 }) { Text(androidx.compose.ui.res.stringResource(R.string.exit), color = Color(0xFFC62828)) }
             },
             dismissButton = {
-                androidx.compose.material.TextButton(onClick = { showExitAppDialog = false }) { Text(androidx.compose.ui.res.stringResource(R.string.cancel), color = WildforceThemeTokens.textSecondary) }
+                androidx.compose.material.TextButton(onClick = { showExitAppDialog = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel), color = WildforceThemeTokens.textSecondary) }
             },
         )
     }
@@ -2235,7 +2240,7 @@ private fun ActiveWorkoutAccessory(
                 )
             }
             Text(
-                text = androidx.compose.ui.res.stringResource(R.string.ios_catalog_d640c7421da06661),
+                text = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.resume),
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
                     // iOS uses AccentColor at 14% opacity here (not the
@@ -2256,7 +2261,7 @@ private fun workoutAccessoryFocusIcon(focus: String): ImageVector = when (focus.
     "fullbody", "full body", "cuerpo completo", "upperbody", "upper body", "tren superior", "lowerbody", "lower body", "tren inferior" -> Icons.Filled.AccessibilityNew
     "empuje", "push" -> Icons.Filled.ArrowCircleUp
     "tirón", "tiron", "pull" -> Icons.Filled.ArrowCircleDown
-    "piernas", "legs" -> Icons.Filled.DirectionsWalk
+    "piernas", "legs" -> Icons.AutoMirrored.Filled.DirectionsWalk
     "core" -> Icons.Filled.CenterFocusStrong
     "movilidad", "mobility" -> Icons.Filled.SelfImprovement
     "recuperación", "recuperacion", "recovery" -> Icons.Filled.Hotel
@@ -2286,11 +2291,13 @@ private fun encodeTrainingLocations(locations: List<TrainingLocationProfile>): M
         location.latitude?.toString().orEmpty(),
         location.longitude?.toString().orEmpty(),
         location.photoPath.orEmpty().replace(trainingLocationSeparator, " "),
+        location.id.orEmpty(),
+        location.gymId.orEmpty(),
     ).joinToString(trainingLocationSeparator)
 }
 
 private fun decodeTrainingLocations(encoded: Set<String>): List<TrainingLocationProfile> = encoded.mapNotNull { value ->
-    val fields = value.split(trainingLocationSeparator, limit = 7)
+    val fields = value.split(trainingLocationSeparator, limit = 9)
     val name = fields.getOrNull(0)?.trim().orEmpty()
     if (name.isBlank()) null else TrainingLocationProfile(
         name = name,
@@ -2300,6 +2307,8 @@ private fun decodeTrainingLocations(encoded: Set<String>): List<TrainingLocation
         latitude = fields.getOrNull(4)?.replace(',', '.')?.toDoubleOrNull()?.takeIf { it in -90.0..90.0 },
         longitude = fields.getOrNull(5)?.replace(',', '.')?.toDoubleOrNull()?.takeIf { it in -180.0..180.0 },
         photoPath = fields.getOrNull(6)?.trim()?.takeIf(String::isNotBlank),
+        id = fields.getOrNull(7)?.takeIf(String::isNotBlank),
+        gymId = fields.getOrNull(8)?.takeIf(String::isNotBlank),
     )
 }.let { locations ->
     if (locations.isEmpty() || locations.any { it.isDefault }) locations else locations.mapIndexed { index, location -> location.copy(isDefault = index == 0) }

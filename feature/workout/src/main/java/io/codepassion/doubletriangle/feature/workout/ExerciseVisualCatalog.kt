@@ -68,6 +68,9 @@ internal data class ExerciseVisualMetadata(
 
 internal enum class EquipmentVisual(val label: String, @param:DrawableRes val drawable: Int) {
     Bodyweight("Peso corporal", R.drawable.equipment_bodyweight),
+    FlatBench("Banco plano", R.drawable.equipment_flat_bench),
+    EzBar("Barra EZ", R.drawable.equipment_ez_bar),
+    SmithMachine("Máquina Smith", R.drawable.equipment_smith_machine),
     Dumbbells("Mancuernas", R.drawable.equipment_dumbbells),
     AdjustableBench("Banco ajustable", R.drawable.equipment_adjustable_bench),
     CableMachine("Máquina de poleas", R.drawable.equipment_cable_machine),
@@ -97,6 +100,10 @@ object ExerciseVisualCatalog {
     )
 
     private val definitions = mapOf(
+        "ezBarSkullCrusher" to ExerciseVisualMetadata(listOf(MuscleVisual.Triceps)),
+        "closeGripDumbbellBenchPress" to ExerciseVisualMetadata(listOf(MuscleVisual.Triceps), listOf(MuscleVisual.Chest, MuscleVisual.Shoulders)),
+        "lyingCableCurl" to ExerciseVisualMetadata(listOf(MuscleVisual.Biceps), listOf(MuscleVisual.Forearms)),
+        "smithMachineCalfRaise" to ExerciseVisualMetadata(listOf(MuscleVisual.Calves)),
         "airSquat" to ExerciseVisualMetadata(listOf(MuscleVisual.Quads), listOf(MuscleVisual.Hamstrings, MuscleVisual.Glutes)),
         "gobletSquat" to ExerciseVisualMetadata(listOf(MuscleVisual.Quads), listOf(MuscleVisual.Glutes, MuscleVisual.Abs)),
         "barbellBackSquat" to ExerciseVisualMetadata(listOf(MuscleVisual.Quads, MuscleVisual.Glutes), listOf(MuscleVisual.Hamstrings, MuscleVisual.LowerBack)),
@@ -284,6 +291,10 @@ object ExerciseVisualCatalog {
         ?.drawable
 
     fun equipmentFor(imageKey: String?): List<String> = when (imageKey?.trim()) {
+        "ezBarSkullCrusher" -> listOf("Barra EZ", "Banco plano")
+        "closeGripDumbbellBenchPress" -> listOf("Banco plano", "Mancuernas")
+        "lyingCableCurl" -> listOf("Máquina de poleas", "Banco plano")
+        "smithMachineCalfRaise" -> listOf("Máquina Smith")
         "benchPress", "inclineBenchPress", "chestDip" -> listOf("Banco ajustable")
         "dumbbellInclineBenchPress" -> listOf("Banco ajustable", "Mancuernas")
         "latPulldown", "cableLatPushdown", "seatedCableRow", "facePull", "tricepsPushdown" -> listOf("Máquina de poleas")
@@ -296,6 +307,10 @@ object ExerciseVisualCatalog {
 
     /** Uses the same equipment illustrations as iOS's WorkoutEquipmentScroll. */
     internal fun equipmentVisualsFor(imageKey: String?): List<EquipmentVisual> = when (imageKey?.trim()) {
+        "ezBarSkullCrusher" -> listOf(EquipmentVisual.EzBar, EquipmentVisual.FlatBench)
+        "closeGripDumbbellBenchPress" -> listOf(EquipmentVisual.FlatBench, EquipmentVisual.Dumbbells)
+        "lyingCableCurl" -> listOf(EquipmentVisual.CableMachine, EquipmentVisual.FlatBench)
+        "smithMachineCalfRaise" -> listOf(EquipmentVisual.SmithMachine)
         "benchPress", "inclineBenchPress", "chestDip" -> listOf(EquipmentVisual.AdjustableBench)
         "dumbbellInclineBenchPress" -> listOf(EquipmentVisual.AdjustableBench, EquipmentVisual.Dumbbells)
         "latPulldown", "cableLatPushdown", "seatedCableRow", "facePull", "tricepsPushdown" -> listOf(EquipmentVisual.CableMachine)
