@@ -37,8 +37,39 @@ if (Test-Path -LiteralPath $fallbackPath) {
         $_.'#text' -like '@string/*' -and !$referenceSet.Contains($_.'#text'.Substring(8))
     })
     if ($missing.Count) { throw "Fallback aliases reference missing Sheet keys: $(($missing | ForEach-Object { $_.name }) -join ', ')" }
-    $pending = @($fallbacks.resources.string | Where-Object { $_.'#text' -notlike '@string/*' }).Count
-    Write-Output "Sheet: $($reference.Count) base keys, $($locales.Count) locales; $pending Android fallbacks still need a verified Sheet key."
+    $fallbackEntries = @($fallbacks.resources.string | Where-Object { $_.'#text' -notlike '@string/*' })
+    $translated = $null
+    foreach ($directory in @('values-en', 'values-ca', 'values-de', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+        $file = Join-Path $ResRoot "$directory\android_fallback_translations.xml"
+        if (!(Test-Path -LiteralPath $file)) { throw "Missing Android fallback translations: $file" }
+        [xml]$localized = Get-Content -LiteralPath $file -Raw -Encoding utf8
+        $names = @($localized.resources.string | ForEach-Object { $_.name })
+        if (@($names | Select-Object -Unique).Count -ne $names.Count) { throw "Duplicate fallback translation in $file" }
+        $fallbackNames = @($fallbackEntries | ForEach-Object { $_.name })
+        $unexpected = @($names | Where-Object { $_ -notin $fallbackNames })
+        if ($unexpected.Count) { throw "Unknown or aliased fallback translations in $file`: $($unexpected -join ', ')" }
+        if (@($localized.resources.string | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) { throw "Empty fallback translation in $file" }
+        if ($null -eq $translated) { $translated = $names }
+        elseif (@(Compare-Object $translated $names).Count) { throw "Inconsistent fallback translation keys in $file" }
+    }
+    $pending = $fallbackEntries.Count - $translated.Count
+    Write-Output "Sheet: $($reference.Count) base keys, $($locales.Count) locales; $($translated.Count) fallback texts translated locally, $pending still need translation."
 } else {
     Write-Output "Sheet: $($reference.Count) base keys, $($locales.Count) locales."
 }
+
+# These iOS onboarding keys have no matching Sheet row. Keep the local
+# translations complete until the Sheet supplies those exact keys.
+$onboardingFallbacks = Get-Content (Join-Path $PSScriptRoot 'onboarding-local-fallbacks.json') -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable
+[xml]$onboardingBase = Get-Content (Join-Path $ResRoot 'values\ios_onboarding_fallbacks.xml') -Raw -Encoding utf8
+$onboardingNames = @($onboardingBase.resources.string | ForEach-Object { $_.name })
+$onboardingLocales = [ordered]@{ ca='values-ca'; de='values-de'; es='values-es'; fr='values-fr'; it='values-it'; ja='values-ja'; nl='values-nl'; pt='values-pt'; 'zh-Hans'='values-zh-rCN' }
+foreach ($locale in $onboardingLocales.Keys) {
+    if (!$onboardingFallbacks.ContainsKey($locale)) { throw "Missing onboarding fallback locale: $locale" }
+    [xml]$localized = Get-Content (Join-Path $ResRoot "$($onboardingLocales[$locale])\ios_onboarding_fallbacks.xml") -Raw -Encoding utf8
+    $localizedByName = @{}; foreach ($entry in $localized.resources.string) { $localizedByName[$entry.name] = $entry.'#text' }
+    foreach ($name in $onboardingNames) {
+        if (!$localizedByName.ContainsKey($name) -or [string]::IsNullOrWhiteSpace($localizedByName[$name])) { throw "Missing onboarding translation $name in $locale" }
+    }
+}
+Write-Output "Onboarding: $($onboardingNames.Count) iOS fallback keys available in all 10 locales."

@@ -108,6 +108,9 @@ internal fun CustomWorkoutsScreen(
     gender: String,
     appLanguage: String = "Español",
     defaultEquipment: String,
+    initialDuration: Int = 45,
+    skipsWarmups: Boolean = false,
+    skipsCooldowns: Boolean = false,
     equipmentPresets: List<Pair<String, String>> = emptyList(),
     allowAutomaticCreation: Boolean = true,
     onCreateManual: () -> Unit,
@@ -139,6 +142,9 @@ internal fun CustomWorkoutsScreen(
     if (showsAutomaticRequest) {
         AutomaticWorkoutRequestDialog(
             defaultEquipment = defaultEquipment,
+            initialDuration = initialDuration,
+            initialIncludeWarmup = !skipsWarmups,
+            initialIncludeCooldown = !skipsCooldowns,
             equipmentPresets = equipmentPresets,
             onDismiss = { showsAutomaticRequest = false },
             onGenerate = { request -> showsAutomaticRequest = false; onCreateAutomatic(request) },
@@ -148,7 +154,7 @@ internal fun CustomWorkoutsScreen(
         AlertDialog(
             onDismissRequest = { deleting = null }, title = { Text(stringResource(R.string.workout_delete_confirmation)) },
             text = { Text(workout.title) },
-            confirmButton = { TextButton(onClick = { deleting = null; onDelete(workout) }) { Text(stringResource(R.string.workout_delete), color = Color(0xFFC62828)) } },
+            confirmButton = { TextButton(onClick = { deleting = null; onDelete(workout) }) { Text(stringResource(R.string.workout_delete), color = WildforceThemeTokens.destructiveText) } },
             dismissButton = { TextButton(onClick = { deleting = null }) { Text(stringResource(R.string.workout_cancel)) } },
         )
     }
@@ -276,8 +282,8 @@ internal fun CustomWorkoutsScreen(
                             }
                             if (workout.status != WorkoutStatus.Completed) {
                                 DropdownMenuItem(onClick = { menuExpanded = false; deleting = workout }) {
-                                    Icon(Icons.Filled.Delete, contentDescription = null, tint = Color(0xFFC62828), modifier = Modifier.size(18.dp))
-                                    Text(stringResource(R.string.workout_delete), Modifier.padding(start = 12.dp), color = Color(0xFFC62828))
+                                    Icon(Icons.Filled.Delete, contentDescription = null, tint = WildforceThemeTokens.destructiveText, modifier = Modifier.size(18.dp))
+                                    Text(stringResource(R.string.workout_delete), Modifier.padding(start = 12.dp), color = WildforceThemeTokens.destructiveText)
                                 }
                             }
                         }
@@ -388,7 +394,7 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
                                 Icon(Icons.Filled.Layers, contentDescription = null, tint = WildforceThemeTokens.accent, modifier = Modifier.size(20.dp))
                                 Text(stringResource(R.string.workout_superset), Modifier.padding(start = 7.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accent)
                             }
-                            Text(splitSupersetLabel, Modifier.heightIn(min = 48.dp).semantics { contentDescription = splitSupersetLabel }.clickable { blocks = blocks.splitSupersetAt(blockIndex) }.padding(horizontal = 9.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = Color(0xFFC62828))
+                            Text(splitSupersetLabel, Modifier.heightIn(min = 48.dp).semantics { contentDescription = splitSupersetLabel }.clickable { blocks = blocks.splitSupersetAt(blockIndex) }.padding(horizontal = 9.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.destructiveText)
                         }
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                             EditorStepper(stringResource(R.string.workout_rounds), block.rounds.toString(), {
@@ -465,7 +471,7 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
                 Icon(Icons.Filled.ArrowDownward, contentDescription = null, tint = if (index < count - 1) WildforceThemeTokens.textPrimary else Color.Transparent, modifier = Modifier.size(20.dp))
             }
             Box(Modifier.size(48.dp).semantics { contentDescription = removeDescription }.clickable(onClick = onRemove), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.Delete, contentDescription = null, tint = Color(0xFFC62828), modifier = Modifier.size(20.dp))
+                Icon(Icons.Filled.Delete, contentDescription = null, tint = WildforceThemeTokens.destructiveText, modifier = Modifier.size(20.dp))
             }
         }
         Text(stringResource(R.string.workout_tracking), Modifier.padding(top = 9.dp, bottom = 5.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
@@ -596,7 +602,7 @@ private fun StyleParameterControls(exercise: ExerciseSummary, onChange: (Exercis
 }
 
 @Composable
-internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, equipmentPresets: List<Pair<String, String>> = emptyList(), equipmentPresetIds: List<String> = emptyList(), onDismiss: () -> Unit, onGenerate: (CustomWorkoutRequest) -> Unit, initialFocus: String = "Full body", initialDuration: Int = 45, title: String = "CREAR CON IA") {
+internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, equipmentPresets: List<Pair<String, String>> = emptyList(), equipmentPresetIds: List<String> = emptyList(), onDismiss: () -> Unit, onGenerate: (CustomWorkoutRequest) -> Unit, initialFocus: String = "Full body", initialDuration: Int = 45, initialIncludeWarmup: Boolean = true, initialIncludeCooldown: Boolean = true, title: String = "CREAR CON IA") {
     var selectedGoal by remember { mutableStateOf<String?>(null) }
     var selectedFocuses by remember { mutableStateOf(emptySet<String>()) }
     var selectedMuscles by remember { mutableStateOf(emptySet<String>()) }
@@ -607,8 +613,8 @@ internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, equipmentPr
     val goals = listOf("Perder peso", "Ganar músculo", "Ganar fuerza", "Mejorar resistencia", "Mejorar movilidad", "Recomposición corporal", "Fitness general")
     val focuses = listOf("Cuerpo completo", "Tren superior", "Tren inferior", "Empuje", "Tirón", "Piernas", "Core", "Cardio")
     val muscles = listOf("Pecho", "Espalda", "Hombros", "Bíceps", "Tríceps", "Cuádriceps", "Isquiotibiales", "Glúteos", "Gemelos", "Abdominales", "Cardio")
-    var includeWarmup by remember { mutableStateOf(true) }
-    var includeCooldown by remember { mutableStateOf(true) }
+    var includeWarmup by remember { mutableStateOf(initialIncludeWarmup) }
+    var includeCooldown by remember { mutableStateOf(initialIncludeCooldown) }
     val includeWarmupLabel = stringResource(R.string.workout_include_warmup)
     val includeCooldownLabel = stringResource(R.string.workout_include_cooldown)
     AlertDialog(
@@ -803,7 +809,7 @@ private fun DumbbellFillIcon(tint: Color, modifier: Modifier = Modifier) {
 }
 
 @Composable private fun PrimaryAction(label: String, modifier: Modifier = Modifier, onClick: () -> Unit) = Button(onClick, modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(15.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary)) { Text(label, fontWeight = FontWeight.Bold) }
-@Composable private fun SmallAction(label: String, onClick: () -> Unit) = Text(label, Modifier.heightIn(min = 48.dp).semantics { contentDescription = label }.clickable(onClick = onClick).padding(horizontal = 8.dp, vertical = 6.dp), style = MaterialTheme.typography.caption, color = if (label == "BORRAR") Color(0xFFC62828) else WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+@Composable private fun SmallAction(label: String, onClick: () -> Unit) = Text(label, Modifier.heightIn(min = 48.dp).semantics { contentDescription = label }.clickable(onClick = onClick).padding(horizontal = 8.dp, vertical = 6.dp), style = MaterialTheme.typography.caption, color = if (label == "BORRAR") WildforceThemeTokens.destructiveText else WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
 
 @Composable private fun EditorStepper(title: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit, modifier: Modifier) {
     // Keep the 48 dp touch target, but do not turn it into the visual affordance.

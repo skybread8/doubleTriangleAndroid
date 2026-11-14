@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_split_warning">Diese Struktur ist für deine Anzahl an Trainingstagen möglicherweise nicht optimal.</string>
+    <string name="onboarding_code_validation_error">Der Code konnte nicht überprüft werden.</string>
+    <string name="onboarding_scanner_error">Der QR-Scanner konnte nicht geöffnet werden. Gib den Code manuell ein.</string>
+</resources>

@@ -1,0 +1,22 @@
+<resources>
+    <string name="calendar_export">Export to calendar</string>
+    <string name="calendar_suggested_time">Suggested from your last 10 completed workouts with a recorded start time.</string>
+    <string name="calendar_default_time">No recent start times are available. Choose a time for your workouts.</string>
+    <string name="calendar_choose_time">WORKOUT TIME</string>
+    <string name="calendar_other_time">Choose another time (%1$s)</string>
+    <string name="calendar_missing_dates">Choose dates for sessions without a scheduled date.</string>
+    <string name="calendar_export_error">Could not share the calendar file. Please try again.</string>
+    <string name="calendar_share_title">Open or share calendar file</string>
+    <string name="calendar_cancel">Cancel</string>
+    <string name="calendar_pick_date">Choose date</string>
+    <string name="calendar_dates">WORKOUT DATES</string>
+    <string name="calendar_dates_suggested">Dates follow the plan and preferred weekdays. Tap a date to change it for this export.</string>
+    <string name="calendar_dates_current_week">No plan start date is available, so dates use your preferred weekdays in the current week. Tap a date to change it.</string>
+    <string name="calendar_no_pending">There are no pending workouts to export.</string>
+    <string name="calendar_pending_count">Pending workouts: %1$d</string>
+    <string name="calendar_review_dates">Review dates</string>
+    <string name="calendar_open">Open calendar file</string>
+    <string name="calendar_share">Share .ics file</string>
+    <string name="calendar_no_app">No app can open this calendar file. You can share it instead.</string>
+    <string name="calendar_choose_app">Choose a calendar app</string>
+</resources>

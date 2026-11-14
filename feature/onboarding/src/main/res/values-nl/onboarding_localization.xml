@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_split_warning">Deze indeling is mogelijk niet optimaal voor je aantal trainingsdagen.</string>
+    <string name="onboarding_code_validation_error">De code kon niet worden gevalideerd.</string>
+    <string name="onboarding_scanner_error">De QR-scanner kon niet worden geopend. Voer de code handmatig in.</string>
+</resources>

@@ -15,6 +15,7 @@ import java.net.HttpURLConnection
 import java.net.URLEncoder
 import java.net.URL
 import java.io.DataOutputStream
+import java.io.IOException
 import java.util.Locale
 
 internal data class NutritionAnalysis(
@@ -32,6 +33,22 @@ internal data class NutritionAnalysis(
     /** Optional packshot supplied by Open Food Facts for the barcode review card. */
     val imageUrl: String = "",
 )
+
+internal fun photoAnalysisError(error: Throwable): String = when (error) {
+    is IOException -> "No se pudo conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo."
+    is IllegalStateException -> error.message ?: "No se pudo analizar la foto. Inténtalo de nuevo."
+    else -> "No se pudo analizar la foto. Inténtalo de nuevo."
+}
+
+private fun photoHttpError(status: Int): String = when (status) {
+    401 -> "Tu sesión ha caducado. Inicia sesión de nuevo."
+    403 -> "Tu cuenta no tiene acceso al análisis de fotos."
+    413 -> "La imagen es demasiado grande. Prueba con otra foto."
+    422 -> "No se pudo procesar la imagen. Comprueba que contiene alimentos y prueba otra foto."
+    429 -> "Se han realizado demasiadas solicitudes. Inténtalo de nuevo más tarde."
+    in 500..599 -> "El servicio de análisis no está disponible en este momento. Inténtalo de nuevo más tarde."
+    else -> "No se pudo analizar la foto (error $status). Inténtalo de nuevo."
+}
 
 internal data class NutritionAnalysisFood(
     val name: String,
@@ -150,13 +167,14 @@ internal object NutritionAnalyzer {
         connection.setRequestProperty("Authorization", "Bearer $token")
         connection.setRequestProperty("Idempotency-Key", java.util.UUID.randomUUID().toString())
         connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
+        connection.setRequestProperty("Accept", "application/json")
         try {
             DataOutputStream(connection.outputStream).use { output ->
                 output.writeBytes("--$boundary\r\nContent-Disposition: form-data; name=\"image\"; filename=\"ingredients.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n")
                 output.write(normalizedBytes); output.writeBytes("\r\n--$boundary--\r\n")
             }
             val body = (if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream)?.bufferedReader()?.use { it.readText() }.orEmpty()
-            check(connection.responseCode in 200..299) { JSONObject(body).optString("message", "No se pudieron identificar los ingredientes") }
+            check(connection.responseCode in 200..299) { photoHttpError(connection.responseCode) }
             val values = (JSONObject(body).optJSONObject("data") ?: JSONObject()).optJSONArray("ingredients") ?: JSONArray()
             return buildList { for (index in 0 until values.length()) values.optString(index).trim().takeIf(String::isNotBlank)?.let(::add) }
         } finally { connection.disconnect() }
@@ -217,12 +235,8 @@ internal object NutritionAnalyzer {
     }
 
     fun image(context: Context, uri: Uri, isLabel: Boolean, correction: String? = null): NutritionAnalysis {
-        val resolver = context.contentResolver
-        val mime = resolver.getType(uri)?.takeIf { it.startsWith("image/") } ?: "image/jpeg"
-        val bytes = resolver.openInputStream(uri)?.use { it.readBytes() } ?: error("No se pudo leer la imagen")
-        check(bytes.size <= 18_000_000) { "La imagen es demasiado grande" }
-        if (!isLabel) return analyzeMealPhoto(context, bytes, mime, correction)
-        return analyzeNutritionLabel(context, normalizeLabelImage(bytes))
+        val bitmap = decodeNutritionImage(context, uri, 2048) ?: error("No se pudo leer la imagen")
+        return image(context, bitmap, isLabel, correction)
     }
 
     fun image(context: Context, bitmap: Bitmap, isLabel: Boolean, correction: String? = null): NutritionAnalysis {
@@ -307,20 +321,23 @@ internal object NutritionAnalyzer {
         connection.setRequestProperty("Authorization", "Bearer $token")
         connection.setRequestProperty("Idempotency-Key", java.util.UUID.randomUUID().toString())
         connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
+        connection.setRequestProperty("Accept", "application/json")
         try {
             DataOutputStream(connection.outputStream).use { output ->
                 output.writeBytes("--$boundary\r\nContent-Disposition: form-data; name=\"image\"; filename=\"meal.jpg\"\r\nContent-Type: $mime\r\n\r\n")
                 output.write(image)
                 output.writeBytes("\r\n")
                 notes?.trim()?.takeIf(String::isNotBlank)?.let { value ->
-                    output.writeBytes("--$boundary\r\nContent-Disposition: form-data; name=\"notes\"\r\n\r\n$value\r\n")
+                    output.writeBytes("--$boundary\r\nContent-Disposition: form-data; name=\"notes\"\r\n\r\n")
+                    output.write(value.toByteArray(Charsets.UTF_8))
+                    output.writeBytes("\r\n")
                 }
                 output.writeBytes("--$boundary--\r\n")
             }
             val body = (if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream)
                 ?.bufferedReader()?.use { it.readText() }.orEmpty()
             check(connection.responseCode in 200..299) {
-                JSONObject(body).optString("message").ifBlank { "No se pudo analizar la comida" }
+                photoHttpError(connection.responseCode)
             }
             return parseServerEstimate(JSONObject(body).optJSONObject("data") ?: JSONObject(body))
         } finally { connection.disconnect() }

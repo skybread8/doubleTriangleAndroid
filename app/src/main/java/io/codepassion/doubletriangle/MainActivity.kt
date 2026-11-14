@@ -4,7 +4,7 @@ import io.codepassion.wildforce.android.R
 import io.codepassion.wildforce.android.BuildConfig
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
@@ -53,6 +53,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.core.tween
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -286,7 +287,7 @@ private object AndroidFullFocusModeManager {
     }
 }
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     private val requestedRootDestination = androidx.compose.runtime.mutableStateOf<RootDestination?>(null)
     private val openNutritionLogging = androidx.compose.runtime.mutableStateOf(false)
     private val openActiveWorkout = androidx.compose.runtime.mutableStateOf(false)
@@ -303,8 +304,8 @@ class MainActivity : ComponentActivity() {
         openBodyMetrics.value = intent.opensBodyMetrics()
         openFeedback.value = intent.opensFeedback()
         val profileLanguage = getSharedPreferences("wildforce_profile", 0).getString("app_language", null)
-        val onboardingLanguage = getSharedPreferences("wildforce_profile_details", 0).getString("language", "Español")
-        AppLocale.apply(profileLanguage ?: onboardingLanguage)
+        val onboardingLanguage = getSharedPreferences("wildforce_profile_details", 0).getString("language", null)
+        AppLocale.apply(profileLanguage ?: onboardingLanguage ?: io.codepassion.doubletriangle.feature.onboarding.deviceLanguageName())
         // Opt into one consistent edge-to-edge policy. Without this, Android
         // applies system-bar insets differently depending on the OEM and
         // navigation mode (notably on Galaxy S23 vs Pixel). Composables below
@@ -441,6 +442,7 @@ private sealed interface InitialSyncState {
 private fun InitialSyncScreen(
     isSynchronizing: Boolean,
     message: String?,
+    progress: Float?,
     onRetry: () -> Unit,
 ) {
     Box(
@@ -468,10 +470,11 @@ private fun InitialSyncScreen(
             },
         ) {
             if (isSynchronizing) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(30.dp),
-                    color = WildforceThemeTokens.accent,
-                )
+                if (progress == null) {
+                    CircularProgressIndicator(modifier = Modifier.size(30.dp), color = WildforceThemeTokens.accent)
+                } else {
+                    LinearProgressIndicator(progress = progress, modifier = Modifier.fillMaxWidth(.6f), color = WildforceThemeTokens.accent)
+                }
                 Text(
                     text = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.syncing_your_data___),
                     style = androidx.compose.material.MaterialTheme.typography.subtitle1,
@@ -773,6 +776,10 @@ private fun WildforceRoot(
         )
     }
 
+    LaunchedEffect(profile?.appLanguage) {
+        profile?.appLanguage?.let(AppLocale::apply)
+    }
+
     var generatedWorkoutState by remember { mutableStateOf<WorkoutHubState?>(null) }
     var healthMetricsImported by remember { mutableStateOf(false) }
     var importedLeanBodyMassKg by remember { mutableStateOf<Double?>(null) }
@@ -783,12 +790,12 @@ private fun WildforceRoot(
     var isGenerating by remember { mutableStateOf(false) }
     var generationError by remember { mutableStateOf<String?>(null) }
     var initialSyncState by remember { mutableStateOf<InitialSyncState?>(null) }
+    var initialSyncProgress by remember { mutableStateOf<Float?>(null) }
     var initialSyncFallback by remember { mutableStateOf<OnboardingProfile?>(null) }
     var isInitialSyncPaywallPresented by remember { mutableStateOf(false) }
     var isInitialSyncGymJoinPresented by remember { mutableStateOf(false) }
 
     fun persistOnboardingProfile(value: OnboardingProfile) {
-        AppLocale.apply(value.appLanguage)
         preferences.edit()
             .putInt("profile_schema_version", PROFILE_SCHEMA_VERSION)
             .putString("name", value.name)
@@ -820,6 +827,7 @@ private fun WildforceRoot(
             .putString("gym_join_code", value.gymJoinCode)
             .putString("gym_join_name", value.gymJoinName)
             .apply()
+        AppLocale.apply(value.appLanguage)
         if (healthMetricsImported) {
             BodyMetricsStore.recordImported(
                 context,
@@ -834,16 +842,19 @@ private fun WildforceRoot(
         val fallback = initialSyncFallback ?: return
         if (initialSyncState == InitialSyncState.Synchronizing) return
         initialSyncState = InitialSyncState.Synchronizing
+        initialSyncProgress = null
         coroutineScope.launch {
             // Just like iOS InitialSyncView, a partial pull is not enough to
             // enter the app: the initial pull-and-push must finish as one sync.
-            when (val outcome = WorkoutRemoteSync.synchronize(context, fallback, preferences)) {
+            when (val outcome = WorkoutRemoteSync.synchronize(context, fallback, preferences, onPullProgress = { progress ->
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) { initialSyncProgress = progress }
+            })) {
                 is WorkoutRemoteSync.Outcome.Synchronized -> {
                     val resolvedProfile = outcome.importedProfile ?: fallback
                     persistOnboardingProfile(resolvedProfile)
                     workoutPlanStore.currentPlanJson()?.let { rawPlan ->
                         runCatching {
-                            WorkoutPlanGenerator.parse(rawPlan, resolvedProfile.name, resolvedProfile.goal.title, resolvedProfile.bodyCompositionPhase?.storedValue)
+                            WorkoutPlanGenerator.parse(rawPlan, resolvedProfile.name, resolvedProfile.goal.title, resolvedProfile.bodyCompositionPhase?.storedValue, allowEmpty = true)
                         }.onSuccess { importedPlan -> generatedWorkoutState = importedPlan }
                     }
                     profile = resolvedProfile
@@ -876,6 +887,7 @@ private fun WildforceRoot(
             InitialSyncScreen(
                 isSynchronizing = activeInitialSync == InitialSyncState.Synchronizing,
                 message = (activeInitialSync as? InitialSyncState.Failed)?.message,
+                progress = initialSyncProgress,
                 onRetry = ::synchronizeInitialAccount,
             )
             if (isInitialSyncPaywallPresented) {
@@ -997,7 +1009,14 @@ private fun WildforceRoot(
                 }
             } else {
                 workoutPlanStore.clearCurrentPlan()
-                generatedWorkoutState = PreviewWorkoutRepository.load(completedProfile.name, completedProfile.goal.title)
+                generatedWorkoutState = WorkoutHubState(
+                    user = UserSummary(completedProfile.name, completedProfile.goal.title, 0),
+                    trainingDays = emptySet(),
+                    completedDays = emptySet(),
+                    planName = "",
+                    phase = "",
+                    workouts = emptyList(),
+                )
                 val gymJoinCode = completedProfile.gymJoinCode
                 if (gymJoinCode != null) {
                     // iOS completes the post-registration gym join before it
@@ -1023,7 +1042,7 @@ private fun WildforceRoot(
         val persistedWorkoutState = remember(storedPlanJson, currentProfile.name, currentProfile.goal.title, currentProfile.bodyCompositionPhase) {
             storedPlanJson?.let { rawPlan ->
                 runCatching {
-                    WorkoutPlanGenerator.parse(rawPlan, currentProfile.name, currentProfile.goal.title, currentProfile.bodyCompositionPhase?.storedValue)
+                    WorkoutPlanGenerator.parse(rawPlan, currentProfile.name, currentProfile.goal.title, currentProfile.bodyCompositionPhase?.storedValue, allowEmpty = true)
                 }.getOrNull()
             }
         }
@@ -1069,10 +1088,10 @@ private fun WildforceRoot(
         fun applyPulledPlanIfAvailable() {
             if (!preferences.getBoolean("remote_plan_imported", false)) return
             preferences.edit().remove("remote_plan_imported").apply()
-            workoutPlanStore.currentPlanJson()?.let { remotePlan ->
-                runCatching { WorkoutPlanGenerator.parse(remotePlan, currentProfile.name, currentProfile.goal.title, currentProfile.bodyCompositionPhase?.storedValue) }
-                    .onSuccess { generatedWorkoutState = it }
-            }
+            val remotePlan = workoutPlanStore.currentPlanJson()
+            if (remotePlan == null) generatedWorkoutState = null
+            else runCatching { WorkoutPlanGenerator.parse(remotePlan, currentProfile.name, currentProfile.goal.title, currentProfile.bodyCompositionPhase?.storedValue, allowEmpty = true) }
+                .onSuccess { generatedWorkoutState = it }
         }
         // iOS debounces every SwiftData save before synchronizing. Android's
         // JSON stores do not emit database-save notifications, so centralize
@@ -1283,7 +1302,6 @@ private fun WildforceRoot(
                 if (workoutPlanStore.currentPlanJson() != null && !workoutPlanStore.hasProfileSignature()) {
                     workoutPlanStore.saveProfileSignature(currentProfile.workoutPlanProfileSignature())
                 }
-                AppLocale.apply(updated.appLanguage)
                 preferences.edit()
                     .putInt("profile_schema_version", PROFILE_SCHEMA_VERSION)
                     .putString("name", updated.name)
@@ -1313,6 +1331,7 @@ private fun WildforceRoot(
                     .apply { WorkoutRemoteSync.markResourcesDirty(context, "users", "training-preferences", "training-locations", "user-app-settings") }
                 .apply()
                 profile = updated
+                AppLocale.apply(updated.appLanguage)
                 scheduleRemoteSync(updated)
                 if (updated.isHealthConnectEnabled) {
                     coroutineScope.launch {
@@ -1532,7 +1551,7 @@ private fun PlanPreviewWorkoutCard(workout: WorkoutDaySummary, gender: String) {
             Modifier.align(Alignment.BottomStart).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Text(workout.scheduledDay.name.lowercase().replaceFirstChar(Char::titlecase), style = androidx.compose.material.MaterialTheme.typography.caption, color = Color.White.copy(alpha = .78f))
+            Text(workout.scheduledDay.getDisplayName(java.time.format.TextStyle.FULL, androidx.compose.ui.platform.LocalConfiguration.current.locales[0]).replaceFirstChar { it.titlecase() }, style = androidx.compose.material.MaterialTheme.typography.caption, color = Color.White.copy(alpha = .78f))
             Text(workout.title, style = androidx.compose.material.MaterialTheme.typography.h6, color = Color.White, maxLines = 1)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.Timer, null, modifier = Modifier.size(14.dp), tint = Color.White.copy(alpha = .84f))
@@ -1973,6 +1992,9 @@ private fun WildforceApp(
                 onWorkoutSelected = { workoutDetail = it },
                 gender = profile.gender.storedValue,
                 defaultCustomEquipment = profile.availableEquipment.joinToString(", ") { it.title },
+                customWorkoutDuration = profile.preferredWorkoutDurationMinutes,
+                skipsWarmups = profile.skipsWarmups,
+                skipsCooldowns = profile.skipsCooldowns,
                 customEquipmentPresets = profile.effectiveTrainingLocations().map { location -> location.name to location.equipment.joinToString(", ") { it.title } },
                 allowAutomaticCreation = showsAiCoach,
                 canRegeneratePlan = canGenerateNextPlan,
@@ -2140,7 +2162,7 @@ private fun WildforceApp(
                 androidx.compose.material.TextButton(onClick = {
                     showExitAppDialog = false
                     hostActivity?.finish()
-                }) { Text(androidx.compose.ui.res.stringResource(R.string.exit), color = Color(0xFFC62828)) }
+                }) { Text(androidx.compose.ui.res.stringResource(R.string.exit), color = WildforceThemeTokens.destructiveText) }
             },
             dismissButton = {
                 androidx.compose.material.TextButton(onClick = { showExitAppDialog = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel), color = WildforceThemeTokens.textSecondary) }

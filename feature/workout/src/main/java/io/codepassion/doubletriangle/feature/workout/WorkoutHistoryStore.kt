@@ -527,6 +527,7 @@ object WorkoutHistoryStore {
             val preferences = context.getSharedPreferences(PREFERENCES, 0)
             val keys = preferences.getStringSet(HISTORY_KEYS, emptySet()).orEmpty() + exercise.historyKey()
             preferences.edit().putString(exercise.historyKey(), json.toString()).putStringSet(HISTORY_KEYS, keys).apply()
+            updateExerciseProfileFromResult(context, exercise, result, feedback)
         }
     }
 

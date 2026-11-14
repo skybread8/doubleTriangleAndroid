@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_split_warning">この構成はトレーニング日数に最適ではない可能性があります。</string>
+    <string name="onboarding_code_validation_error">コードを確認できませんでした。</string>
+    <string name="onboarding_scanner_error">QRスキャナーを開けませんでした。コードを手動で入力してください。</string>
+</resources>

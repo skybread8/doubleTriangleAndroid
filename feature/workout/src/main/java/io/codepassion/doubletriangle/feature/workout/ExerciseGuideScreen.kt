@@ -136,8 +136,29 @@ private object LocalExerciseProfileStore {
         return profile
     }
 
+    fun updateFromResult(context: Context, exercise: ExerciseSummary, result: ExerciseSessionStats, feedback: String?) {
+        val current = load(context, exercise) ?: LocalExerciseProfile(level = "novice")
+        var weight = result.maxWeightKg.takeIf { it > 0 } ?: current.workingWeightKg
+        var reps = result.totalReps.takeIf { it > 0 }?.let { maxOf(current.maxReps ?: 0, it) } ?: current.maxReps
+        val factor = when (feedback?.uppercase(Locale.ROOT)) {
+            "MUY FÁCIL", "MUY FACIL", "VERY EASY", "VERYEASY" -> 1.15
+            "FÁCIL", "FACIL", "EASY" -> 1.05
+            "MUY DIFÍCIL", "MUY DIFICIL", "VERY HARD", "VERYHARD" -> 0.90
+            else -> 1.0
+        }
+        if (weight != null) weight = kotlin.math.round(weight * factor * 2) / 2
+        else if (reps != null) reps = (reps * factor).toInt()
+        save(context, exercise, current.copy(
+            workingWeightKg = weight,
+            maxReps = reps,
+            typicalDurationMinutes = (result.durationSeconds / 60).takeIf { it > 0 } ?: current.typicalDurationMinutes,
+            typicalDistanceKm = result.distanceKm.takeIf { it > 0 } ?: current.typicalDistanceKm,
+        ))
+    }
+
     fun save(context: Context, exercise: ExerciseSummary, profile: LocalExerciseProfile) {
         context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE).edit()
+            .putString("${exercise.historyKey()}.exercise", exercise.coachExerciseId?.let { "coach:${it.lowercase(Locale.ROOT)}" } ?: exercise.imageKey)
             .putString("${exercise.historyKey()}.level", profile.level)
             .putString("${exercise.historyKey()}.workingWeightKg", profile.workingWeightKg?.toString())
             .putString("${exercise.historyKey()}.estimatedOneRepMaxKg", profile.estimatedOneRepMaxKg?.toString())
@@ -149,12 +170,13 @@ private object LocalExerciseProfileStore {
             .putInt("${exercise.historyKey()}.typicalPaceSecondsPerKm", profile.typicalPaceSecondsPerKm ?: 0)
             .putString("${exercise.historyKey()}.notes", profile.notes.take(500))
             .apply()
+        io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker.mark(context, "exercise-profiles")
     }
 
     private fun remoteProfile(context: Context, exercise: ExerciseSummary): LocalExerciseProfile? = runCatching {
         val raw = context.getSharedPreferences("wildforce_remote_sync", Context.MODE_PRIVATE)
             .getString("exercise_profiles", null) ?: return null
-        val keys = listOfNotNull(exercise.imageKey, exercise.name).map(::normalizedKey).toSet()
+        val keys = listOfNotNull(exercise.historyKey(), exercise.imageKey, exercise.name).map(::normalizedKey).toSet()
         val profile = JSONArray(raw).let { records ->
             (0 until records.length()).asSequence()
                 .map { records.getJSONObject(it) }
@@ -209,6 +231,9 @@ private object LocalExerciseProfileStore {
         .mapNotNull { name -> optInt(name, 0).takeIf { it > 0 } }
         .firstOrNull()
 }
+
+internal fun updateExerciseProfileFromResult(context: Context, exercise: ExerciseSummary, result: ExerciseSessionStats, feedback: String?) =
+    LocalExerciseProfileStore.updateFromResult(context, exercise, result, feedback)
 
 internal object ExerciseGuideRepository {
     private var guides: Pair<String, Map<String, ExerciseGuide>>? = null
@@ -340,12 +365,13 @@ fun ExerciseGuideScreen(exercise: ExerciseSummary, gender: String, useImperial: 
                         exercise = exercise,
                         profile = profile,
                         history = history,
-                        onCreate = { profile = LocalExerciseProfileStore.create(context, exercise) },
+                        onCreate = { profile = LocalExerciseProfileStore.create(context, exercise); onResultEdited() },
                         onNotesChanged = { value ->
                             profile?.let { current ->
                                 val updated = current.copy(notes = value)
                                 profile = updated
                                 LocalExerciseProfileStore.save(context, exercise, updated)
+                                onResultEdited()
                             }
                         },
                     )

@@ -441,6 +441,7 @@ class AnalyticsScreenTest {
         assertEquals(1, records.size)
         assertEquals("Mejores repeticiones", records.single().title)
         assertEquals("12 reps", records.single().value)
+        assertEquals(exercise, records.single().exercise)
     }
 
     @Test

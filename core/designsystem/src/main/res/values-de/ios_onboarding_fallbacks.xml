@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generated iOS fallbacks for onboarding keys absent from the Sheet. -->
 <resources>
-    <string name="ios_onboarding_d0a9cd8fc1161c8d" formatted="false">Hackenschmidt-Maschine</string>
-    <string name="ios_onboarding_a5996633f5784abf" formatted="false">Hip-Thrust-Maschine</string>
+    <string name="ios_onboarding_3140100df131cf30" formatted="false">Muskelaufbau</string>
+    <string name="ios_onboarding_1f45f02561f41db9" formatted="false">Definition</string>
+    <string name="ios_onboarding_0f011be4a5ebbfff" formatted="false">Erhaltung</string>
+    <string name="ios_onboarding_71d833d9c4e0320e" formatted="false">Wir wählen den besten Schwerpunkt anhand deines Ziels, deiner Messwerte und deines Trainingsfeedbacks.</string>
+    <string name="ios_onboarding_fe1801cc7f83ff1c" formatted="false">Ein Kalorienüberschuss maximiert Muskelwachstum und Kraft. Ein höheres Trainingsvolumen wird empfohlen.</string>
+    <string name="ios_onboarding_e7f17d3498c15ece" formatted="false">Ein Kaloriendefizit reduziert Körperfett und erhält die Muskelmasse. Die Erholung kann länger dauern.</string>
+    <string name="ios_onboarding_0a53f51b99b12fae" formatted="false">Eine Erhaltungszufuhr verbessert die Körperzusammensetzung langsam oder hält das aktuelle Gewicht.</string>
+    <string name="ios_onboarding_816daad47ee5426f" formatted="false">Freihanteln</string>
+    <string name="ios_onboarding_c061da196eae7622" formatted="false">Maschinen</string>
+    <string name="ios_onboarding_b6656595756edfce" formatted="false">Funktionell</string>
 </resources>

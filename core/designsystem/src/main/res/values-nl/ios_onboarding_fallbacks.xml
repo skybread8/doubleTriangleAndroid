@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generated iOS fallbacks for onboarding keys absent from the Sheet. -->
 <resources>
+    <string name="ios_onboarding_3140100df131cf30" formatted="false">Spieropbouw</string>
+    <string name="ios_onboarding_1f45f02561f41db9" formatted="false">Droogtrainen</string>
+    <string name="ios_onboarding_0f011be4a5ebbfff" formatted="false">Onderhoud</string>
+    <string name="ios_onboarding_71d833d9c4e0320e" formatted="false">We kiezen de beste nadruk op basis van je doel, metingen en trainingsfeedback.</string>
+    <string name="ios_onboarding_fe1801cc7f83ff1c" formatted="false">Een calorieoverschot om spiergroei en kracht te maximaliseren. Een hoger trainingsvolume wordt aanbevolen.</string>
+    <string name="ios_onboarding_e7f17d3498c15ece" formatted="false">Een calorietekort om vet te verliezen en spiermassa te behouden. Herstel kan langer duren.</string>
+    <string name="ios_onboarding_0a53f51b99b12fae" formatted="false">Eten op onderhoud om je lichaamssamenstelling geleidelijk te verbeteren of je huidige gewicht te behouden.</string>
+    <string name="ios_onboarding_816daad47ee5426f" formatted="false">Vrije gewichten</string>
+    <string name="ios_onboarding_c061da196eae7622" formatted="false">Machines</string>
+    <string name="ios_onboarding_b6656595756edfce" formatted="false">Functioneel</string>
 </resources>

@@ -23,9 +23,14 @@ import io.codepassion.doubletriangle.core.model.WorkoutHubState
 import io.codepassion.doubletriangle.core.model.WildforceApiEnvironment
 import io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker
 import io.codepassion.doubletriangle.feature.workout.WorkoutHistoryStore
+import io.codepassion.doubletriangle.feature.workout.ExerciseProfileSync
 import io.codepassion.doubletriangle.feature.workout.CoachExerciseMediaStore
 import io.codepassion.doubletriangle.nutrition.NutritionStore
+import io.codepassion.doubletriangle.nutrition.missingNutritionLogIds
+import io.codepassion.doubletriangle.nutrition.nutritionEntryId
+import io.codepassion.doubletriangle.nutrition.nutritionPushDependencies
 import io.codepassion.doubletriangle.nutrition.nutritionLogTimestamp
+import io.codepassion.doubletriangle.nutrition.syncValue
 import io.codepassion.doubletriangle.nutrition.localNutritionLogId
 import io.codepassion.doubletriangle.nutrition.budgetSensitivitySyncValue
 import io.codepassion.doubletriangle.nutrition.cookingEffortSyncValue
@@ -87,13 +92,14 @@ internal object WorkoutRemoteSync {
     )
     private val pushableResources = setOf(
         "users", "user-app-settings", "training-preferences", "training-locations",
-        "body-metric-entries", "body-progress-photo-sessions", "nutrition-profiles",
+        "body-metric-entries", "body-progress-photo-sessions", "exercise-profiles", "nutrition-profiles",
         "workout-plans", "workout-days", "workout-blocks", "planned-exercises", "exercise-results",
         "nutrition-plans", "nutrition-days", "nutrition-meals", "nutrition-log-media", "nutrition-log-entries", "nutrition-log-items",
     )
     private val nutritionPlanResources = setOf("nutrition-plans", "nutrition-days", "nutrition-meals")
     private val nutritionLogResources = setOf("nutrition-log-media", "nutrition-log-entries", "nutrition-log-items")
     private val profileResources = setOf("users", "training-preferences", "training-locations", "user-app-settings")
+    private val workoutResources = setOf("workout-plans", "workout-days", "workout-blocks", "planned-exercises", "exercise-results")
     private val synchronizationMutex = Mutex()
     // `synchronize` is serialized by synchronizationMutex, so this scoped
     // selection safely gives the generic push helpers iOS-style per-resource
@@ -124,9 +130,9 @@ internal object WorkoutRemoteSync {
         // A nutrition entry can refer to its media row. Preserve the iOS
         // parent-before-child ordering even for data created by Android builds
         // that predate the explicit media dirty marker.
-        return if ("nutrition-log-entries" in selected || "nutrition-log-items" in selected) {
-            selected + "nutrition-log-media"
-        } else selected
+        // Media uploads require the entry to point at the media row first;
+        // item uploads likewise require their parent entry to exist.
+        return nutritionPushDependencies(selected)
     }
 
     private var activePushGenerations: Map<String, Long> = emptyMap()
@@ -176,6 +182,7 @@ internal object WorkoutRemoteSync {
         profile: OnboardingProfile,
         preferences: SharedPreferences,
         resourcesOnly: Set<String>? = null,
+        onPullProgress: suspend (Float) -> Unit = {},
     ): Outcome = synchronizationMutex.withLock {
         withContext(Dispatchers.IO) {
         val account = context.getSharedPreferences(accountPrefs, 0)
@@ -183,6 +190,7 @@ internal object WorkoutRemoteSync {
         val userId = account.getString("id", null) ?: return@withContext Outcome.NoAccount
         var importedRemotePlan = false
         var importedProfile: OnboardingProfile? = null
+        var missingNutritionEntries = emptySet<String>()
         val profileGenerations = profileResources.associateWith { RemoteSyncChangeTracker.generation(context, it) }
         var hadPendingProfile = false
         fun safeImportedProfile(): OnboardingProfile? = importedProfile?.takeUnless {
@@ -192,11 +200,25 @@ internal object WorkoutRemoteSync {
             }
         }
         try {
-            val hasPendingLocalChanges = preferences.getBoolean("remote_sync_pending", false)
             // An existing account signing in on a new Android device must import
             // the server graph before it can create any local sync records. iOS's
             // store has no generated fallback graph to upload in this case.
             val importingExistingAccount = preferences.getBoolean("remote_sync_import_required", false)
+            val profileMigrationKey = "exercise_profiles_uploaded_v2:$userId"
+            val syncState = context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
+            val nutritionHistoryRepairKey = "nutrition_history_full_pull_v1:$userId"
+            val needsNutritionHistoryRepair = !syncState.getBoolean(nutritionHistoryRepairKey, false)
+            if (needsNutritionHistoryRepair) {
+                // Earlier versions could advance the cursor with an incomplete
+                // projection. Re-fetch history once and merge it with the local
+                // graph; keep retrying from the start until the pull succeeds.
+                syncState.edit().remove("${pullWatermarkPrefix}nutrition-log-entries")
+                    .remove("${pullWatermarkPrefix}nutrition-log-items").apply()
+            }
+            if (!importingExistingAccount && !syncState.getBoolean(profileMigrationKey, false) && (ExerciseProfileSync.hasLocalProfiles(context) || WorkoutHistoryStore.remoteEntries(context).isNotEmpty())
+                && "exercise-profiles" !in RemoteSyncChangeTracker.dirty(context)) {
+                RemoteSyncChangeTracker.mark(context, "exercise-profiles")
+            }
             val shouldImportRemoteSnapshot = importingExistingAccount || preferences.getString("workout_plan_json", null).isNullOrBlank()
             // Match iOS: every synchronization pulls first and then pushes local
             // changes. Keep the local projection in memory while pulling so a
@@ -206,17 +228,17 @@ internal object WorkoutRemoteSync {
             val shouldPullRemote = true
             val resourcesToPush = dirtyResources(context, preferences, importingExistingAccount)
                 .let { dirty -> resourcesOnly?.let { allowed -> dirty.filterTo(mutableSetOf()) { it in allowed } } ?: dirty }
-                .let { selected -> if ("nutrition-log-entries" in selected) selected + "nutrition-log-media" else selected }
+                .let(::nutritionPushDependencies)
+                .toMutableSet()
+            val pendingWorkoutChanges = !importingExistingAccount && dirtyResources(context, preferences, false).any { it in workoutResources }
             hadPendingProfile = !importingExistingAccount && dirtyResources(context, preferences, false).any { it in profileResources }
-            val pushGenerations = resourcesToPush.associateWith { RemoteSyncChangeTracker.generation(context, it) }
-            val shouldPushLocal = resourcesToPush.isNotEmpty()
             importedProfile = if (shouldPullRemote) {
                 resetCoachContentIfCoachesChanged(context, token)
                 // iOS applies each changed row into SwiftData before using the
                 // graph. Materialize Android's incremental pages the same way;
                 // treating a delta as a full snapshot was the root cause of
                 // incomplete nutrition/profile imports after the first sync.
-                val remote = pullRemoteSnapshot(context, token).materialize(context)
+                val remote = pullRemoteSnapshot(context, token, onPullProgress).materialize(context)
                 val failedPullResources = mutableSetOf<String>()
                 fun apply(vararg resources: String, block: () -> Unit) {
                     runCatching(block).onFailure {
@@ -235,10 +257,28 @@ internal object WorkoutRemoteSync {
                 apply("users") { pullRemoteAccountProgress(context, remote) }
                 apply("exercise-profiles") { pullRemoteExerciseProfiles(context, remote) }
                 apply("workout-plans", "workout-days", "workout-blocks", "planned-exercises", "exercise-results") {
-                    importedRemotePlan = pullWorkoutPlans(context, remote, preferences)
+                    importedRemotePlan = pullWorkoutPlans(context, remote, preferences, !pendingWorkoutChanges)
                 }
                 apply("nutrition-profiles", "nutrition-plans", "nutrition-days", "nutrition-meals", "nutrition-log-entries", "nutrition-log-items") {
                     pullRemoteNutrition(context, token, remote, resourcesToPush)
+                }
+                // Older Android builds could save food without leaving a dirty
+                // marker. Recover local rows absent from the server after the
+                // remote graph has been merged, including server tombstones in
+                // the comparison so deleted entries are never resurrected.
+                if (!importingExistingAccount && resourcesOnly == null && failedPullResources.none { it in nutritionLogResources }) {
+                    val serverIds = (0 until remote.records("nutrition-log-entries").length()).mapNotNull {
+                        remote.records("nutrition-log-entries").optJSONObject(it)?.optString("id")?.lowercase()
+                    }.toSet()
+                    val ids = context.getSharedPreferences(syncPrefs, Context.MODE_PRIVATE)
+                        .getString(nutritionEntryIDsKey, "{}")?.let(::JSONObject) ?: JSONObject()
+                    missingNutritionEntries = missingNutritionLogIds(NutritionStore.allForSync(context).map { meal ->
+                        ids.optString(meal.id.toString()).takeIf(::isUuid) ?: nutritionEntryId(userId, meal.id)
+                    }, serverIds)
+                    if (missingNutritionEntries.isNotEmpty()) {
+                        RemoteSyncChangeTracker.mark(context, "nutrition-log-media", "nutrition-log-entries", "nutrition-log-items")
+                        resourcesToPush.addAll(nutritionLogResources)
+                    }
                 }
                 if ("body-metric-entries" !in resourcesToPush) {
                     apply("body-metric-entries") {
@@ -273,16 +313,21 @@ internal object WorkoutRemoteSync {
                 // outbound pass: a later push failure must not re-fetch and
                 // re-append an already-imported remote graph.
                 remote.savePullWatermarks(context, failedPullResources)
+                if (needsNutritionHistoryRepair && failedPullResources.none { it in nutritionLogResources }) {
+                    syncState.edit().putBoolean(nutritionHistoryRepairKey, true).apply()
+                }
                 if (shouldImportRemoteSnapshot && failedPullResources.isEmpty()) {
                     preferences.edit().remove("remote_sync_import_required").apply()
                 }
-                if (hasPendingLocalChanges && !importingExistingAccount && pendingPlanJson != null) {
+                if (pendingWorkoutChanges && pendingPlanJson != null) {
                     preferences.edit().putString("workout_plan_json", pendingPlanJson)
                         .apply { pendingPlanId?.let { putString(planKey, it) } }
                         .apply()
                 }
                 remoteProfile
             } else null
+            val shouldPushLocal = resourcesToPush.isNotEmpty()
+            val pushGenerations = resourcesToPush.associateWith { RemoteSyncChangeTracker.generation(context, it) }
             val profileToSync = if (shouldPushLocal) profile else importedProfile ?: profile
             if (shouldPushLocal) {
             activePushResources = resourcesToPush
@@ -371,7 +416,35 @@ internal object WorkoutRemoteSync {
             synchronizeAvatar(context, token)
             synchronizeBodyProgressPhotos(context, token, userId, now)
 
-            synchronizeNutrition(token, userId, profileToSync, now, context)
+            var exerciseProfileError: Exception? = null
+            if ("exercise-profiles" in activePushResources) {
+                try {
+                    val remoteProfiles = context.getSharedPreferences(syncPrefs, Context.MODE_PRIVATE)
+                        .getString(exerciseProfilesKey, "[]")?.let(::JSONArray) ?: JSONArray()
+                    val profileRecords = ExerciseProfileSync.records(context, userId, remoteProfiles, now, profileToSync.trainingLevel.storedValue)
+                    val records = profileRecords.values
+                    for (start in 0 until records.length() step 100) {
+                        val batch = JSONArray()
+                        for (index in start until minOf(start + 100, records.length())) batch.put(records.get(index))
+                        pushBatch(token, "exercise-profiles", batch)
+                    }
+                    val accepted = JSONObject()
+                    for (index in 0 until records.length()) {
+                        val record = records.getJSONObject(index)
+                        accepted.put(record.getString("id"), record)
+                    }
+                    updateRemoteProjectionAfterPush("exercise-profiles", accepted, JSONObject(), now)
+                    check(profileRecords.unresolved == 0) { "Hay perfiles locales con ejercicios que no se han podido identificar." }
+                    syncState.edit().putBoolean(profileMigrationKey, true).apply()
+                    clearDirtyResource("exercise-profiles")
+                } catch (error: Exception) {
+                    if (error is CancellationException) throw error
+                    exerciseProfileError = error
+                    Log.w("WorkoutRemoteSync", "Unable to upload exercise profiles", error)
+                }
+            }
+
+            synchronizeNutrition(token, userId, profileToSync, now, context, missingNutritionEntries)
             preferences.getString("workout_plan_json", null)?.let { rawPlan ->
                 synchronizeWorkoutPlan(token, userId, profileToSync, now, context, preferences, JSONObject(rawPlan))
             }
@@ -386,6 +459,7 @@ internal object WorkoutRemoteSync {
                     throw error
                 }
             }
+            exerciseProfileError?.let { throw it }
             activePushResources = emptySet()
             activePushGenerations = emptyMap()
             activePushContext = null
@@ -526,15 +600,17 @@ internal object WorkoutRemoteSync {
         }.orEmpty()
         val preferences = context.getSharedPreferences(syncPrefs, Context.MODE_PRIVATE)
         val previous = preferences.getStringSet(coachIDsKey, null)?.sorted()
-        if (previous == ids) return
+        val projectionRepairKey = "coach_content_projection_repaired_v1"
+        if (previous == ids && preferences.getBoolean(projectionRepairKey, false)) return
 
         CoachExerciseMediaStore.replace(context, JSONArray())
         context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE).edit()
             .remove("${pullWatermarkPrefix}coach-exercise-content")
+            .remove("remote_projection:coach-exercise-content")
             // Keep custom exercises for past workouts, but force a full pull so
             // a newly assigned coach's older library is available immediately.
             .remove("${pullWatermarkPrefix}coach-exercises").apply()
-        preferences.edit().putStringSet(coachIDsKey, ids.toSet()).apply()
+        preferences.edit().putStringSet(coachIDsKey, ids.toSet()).putBoolean(projectionRepairKey, true).apply()
     }
 
     private fun accountProgress(context: Context): AccountProgress {
@@ -621,7 +697,7 @@ internal object WorkoutRemoteSync {
         }
         val entries = remote.records("nutrition-log-entries")
         val items = remote.records("nutrition-log-items")
-        val knownLocalIds = knownNutritionLogIds(context)
+        val knownLocalIds = knownNutritionLogIds(context, context.getSharedPreferences(accountPrefs, Context.MODE_PRIVATE).getString("id", "").orEmpty())
         if (pendingLocalResources.none { it in nutritionLogResources }) {
             NutritionStore.importRemoteLogs(context, entries, items, remoteNutritionMealKeys(days, mealsByDay), knownLocalIds)
             // Imported rows must be part of the accepted baseline. Otherwise
@@ -649,6 +725,9 @@ internal object WorkoutRemoteSync {
         val directory = File(context.filesDir, "NutritionLogMedia").apply { mkdirs() }
         entries.liveRecords().forEach { entry ->
             val entryId = entry.optString("id").takeIf(::isUuid) ?: return@forEach
+            // The image endpoint can only serve an entry with a media row.
+            // Avoid one network request per text-only meal during history import.
+            if (!isUuid(entry.optString("nutrition_log_media_id"))) return@forEach
             val image = File(directory, "$entryId.jpg")
             if (image.isFile && image.length() in 1..(5 * 1024 * 1024)) {
                 NutritionStore.attachRemotePhoto(context, entryId, image.absolutePath, knownLocalIds)
@@ -688,13 +767,15 @@ internal object WorkoutRemoteSync {
     }
 
     /** Keeps iOS UUIDs when Android re-uploads an imported food log. */
-    private fun knownNutritionLogIds(context: Context): Map<String, Long> {
+    private fun knownNutritionLogIds(context: Context, userId: String): Map<String, Long> {
         val stored = context.getSharedPreferences(syncPrefs, Context.MODE_PRIVATE)
             .getString(nutritionEntryIDsKey, "{}")?.let { runCatching(::JSONObject).getOrNull() } ?: JSONObject()
-        return stored.keys().asSequence().mapNotNull { local ->
+        val known = NutritionStore.allForSync(context).associate { nutritionEntryId(userId, it.id) to it.id }.toMutableMap()
+        stored.keys().asSequence().mapNotNull { local ->
             val id = local.toLongOrNull() ?: return@mapNotNull null
             stored.optString(local).takeIf(::isUuid)?.let { it to id }
-        }.toMap()
+        }.forEach { (remote, local) -> known[remote] = local }
+        return known
     }
 
     private fun rememberRemoteNutritionIDs(context: Context, entries: JSONArray, items: JSONArray, knownLocalIds: Map<String, Long>) {
@@ -839,7 +920,7 @@ internal object WorkoutRemoteSync {
             ?.optBoolean("is_health_kit_enabled")
     }
 
-    private fun synchronizeNutrition(token: String, userId: String, profile: OnboardingProfile, now: String, context: Context) {
+    private fun synchronizeNutrition(token: String, userId: String, profile: OnboardingProfile, now: String, context: Context, missingEntries: Set<String>) {
         val prefs = NutritionStore.loadPreferences(context)
         val nutritionProfileId = remoteProjectionID(context, "nutrition-profiles", stableId("$userId:nutrition-profile"))
         push(token, "nutrition-profiles", JSONArray().put(recordFromRemoteProjection(context, "nutrition-profiles", nutritionProfileId, now)
@@ -888,7 +969,7 @@ internal object WorkoutRemoteSync {
                     val mealId = plannedMealIDs.optString(mealKey).takeIf(::isUuid) ?: stableId("$dayId:$index")
                     plannedMealIDs.put(mealKey, mealId)
                     meals.put(recordFromRemoteProjection(context, "nutrition-meals", mealId, now)
-                    .put("nutrition_day_id", dayId).put("title", meal.title).put("order_index", index).put("meal_type", meal.type.name.lowercase())
+                    .put("nutrition_day_id", dayId).put("title", meal.title).put("order_index", index).put("meal_type", meal.type.syncValue())
                     .put("target_calories", meal.targets.calories).put("target_protein_grams", meal.targets.protein)
                     .put("target_carbs_grams", meal.targets.carbs).put("target_fat_grams", meal.targets.fat)
                     .put("guidance", meal.guidance).put("example_foods", JSONArray().apply { meal.foods.forEach { (name, grams) -> put(JSONObject().put("name", name).put("grams", grams)) } })
@@ -903,7 +984,7 @@ internal object WorkoutRemoteSync {
         val entries = JSONArray(); val items = JSONArray(); val media = JSONArray()
         NutritionStore.allForSync(context).forEach { meal ->
             val entryKey = meal.id.toString()
-            val entryId = entryIDs.optString(entryKey).takeIf(::isUuid) ?: stableId("$userId:nutrition-entry:${meal.id}")
+            val entryId = entryIDs.optString(entryKey).takeIf(::isUuid) ?: nutritionEntryId(userId, meal.id)
             entryIDs.put(entryKey, entryId)
             val photo = meal.photoPath?.takeIf { File(it).isFile }
             // Match iOS's graph: a log entry references a separately synced
@@ -918,7 +999,7 @@ internal object WorkoutRemoteSync {
             val entryRecord = recordFromRemoteProjection(context, "nutrition-log-entries", entryId, now)
             val previousLoggedAt = entryRecord.optString("logged_at").takeIf(String::isNotBlank)
             entries.put(entryRecord.put("title", meal.name)
-                .put("logged_at", nutritionLogTimestamp(meal.loggedDate, previousLoggedAt, meal.id)).put("meal_type", meal.type.name.lowercase())
+                .put("logged_at", nutritionLogTimestamp(meal.loggedDate, previousLoggedAt, meal.id)).put("meal_type", meal.type.syncValue())
                 .put("notes", meal.notes).put("is_favorite", meal.isBookmarked)
                 .put("nutrition_log_media_id", mediaId ?: JSONObject.NULL)
                 .put("nutrition_meal_id", meal.plannedMealKey?.let { key -> plannedMealIDs.optString(key).takeIf(::isUuid) } ?: JSONObject.NULL))
@@ -938,8 +1019,12 @@ internal object WorkoutRemoteSync {
         // The local push baseline can outlive a missing server row. Re-send
         // parents before entries even when their local fingerprint is unchanged.
         push(token, "nutrition-log-media", media, forceCurrent = "nutrition-log-entries" in activePushResources)
-        push(token, "nutrition-log-entries", entries)
-        push(token, "nutrition-log-items", items)
+        push(token, "nutrition-log-entries", entries, forceIds = missingEntries)
+        val missingItemIds = (0 until items.length()).mapNotNull { index ->
+            items.optJSONObject(index)?.takeIf { it.optString("nutrition_log_entry_id").lowercase() in missingEntries }?.optString("id")
+        }.toSet()
+        push(token, "nutrition-log-items", items, forceIds = missingItemIds)
+        if ("nutrition-log-media" !in activePushResources) return
         // iOS stores meal photos separately from the sync graph and uploads
         // them after their entry exists. Do the same for Android photo logs.
         val mediaState = idsForNutritionMedia(context)
@@ -1019,7 +1104,7 @@ internal object WorkoutRemoteSync {
         }
     }
 
-    /** Uploads the two physical check-in images after their server-side session exists. */
+    /** Uploads the available check-in images after their server-side session exists. */
     private fun synchronizeBodyProgressPhotos(context: Context, token: String, userId: String, now: String) {
         val raw = context.getSharedPreferences("wildforce_body_progress", Context.MODE_PRIVATE)
             .getString("sessions", "[]") ?: "[]"
@@ -1031,7 +1116,7 @@ internal object WorkoutRemoteSync {
             val localId = session.optString("id").takeIf(String::isNotBlank) ?: continue
             val remoteId = bodyProgressRemoteID(context, userId, localId)
             records.put(recordFromRemoteProjection(context, "body-progress-photo-sessions", remoteId, now))
-            listOf("front" to session.optString("frontPath"), "profile" to session.optString("profilePath")).forEach { (angle, path) ->
+            listOf("front" to session.optString("frontPath"), "profile" to session.optString("profilePath"), "back" to session.optString("backPath")).forEach { (angle, path) ->
                 File(path).takeIf(File::isFile)?.let { uploadQueue += Triple(remoteId, angle, it) }
             }
         }
@@ -1115,11 +1200,15 @@ internal object WorkoutRemoteSync {
             }
             val front = File(folder, "${id}_front.jpg")
             val profile = File(folder, "${id}_profile.jpg")
+            val back = File(folder, "${id}_back.jpg")
             val frontDownloaded = download(token, WildforceApiEnvironment.apiUrl("body-progress-photo-sessions/$id/photos/front"), front)
             val profileDownloaded = download(token, WildforceApiEnvironment.apiUrl("body-progress-photo-sessions/$id/photos/profile"), profile)
+            val backDownloaded = download(token, WildforceApiEnvironment.apiUrl("body-progress-photo-sessions/$id/photos/back"), back)
             if (frontDownloaded && profileDownloaded) {
                 localById[id] = JSONObject().put("id", id).put("date", session.optString("created_at").take(10))
                     .put("frontPath", front.absolutePath).put("profilePath", profile.absolutePath)
+                    .put("backPath", if (backDownloaded) back.absolutePath else localById[id]?.optString("backPath"))
+                    .put("futurePath", localById[id]?.optString("futurePath"))
                 remoteIds.put(id, id)
             }
         }
@@ -1185,10 +1274,18 @@ internal object WorkoutRemoteSync {
      * records. Otherwise a freshly generated empty/default plan could win the
      * last-write-wins conflict and hide the user's iOS workouts.
      */
-    private fun pullWorkoutPlans(context: Context, remote: RemoteSnapshot, preferences: SharedPreferences): Boolean {
+    private fun pullWorkoutPlans(context: Context, remote: RemoteSnapshot, preferences: SharedPreferences, mayClearPlan: Boolean): Boolean {
         val remotePlans = remote.records("workout-plans").liveRecords()
         Log.d("WorkoutRemoteSync", "Pulled workout-plans=${remotePlans.size}, workout-days=${remote.records("workout-days").liveRecords().size}")
-        if (remotePlans.isEmpty()) return false
+        val previousId = preferences.getString(planKey, null)
+        fun clearPreviousIfKnown(): Boolean {
+            if (!mayClearPlan || previousId.isNullOrBlank()) return false
+            val records = remote.records("workout-plans")
+            if ((0 until records.length()).none { records.optJSONObject(it)?.optString("id") == previousId }) return false
+            preferences.edit().remove("workout_plan_json").remove(planKey).putBoolean("remote_plan_imported", true).apply()
+            return true
+        }
+        if (remotePlans.isEmpty()) return clearPreviousIfKnown()
         val remoteDays = pullRemoteWorkoutDays(remote)
         importRemoteWorkoutHistory(context, remoteDays)
         // The profile summary must come from the cross-device workout graph,
@@ -1204,16 +1301,12 @@ internal object WorkoutRemoteSync {
             val planId = plan.optString("id").takeIf(String::isNotBlank) ?: return@mapNotNull null
             remotePlanJson(context, plan, planId, remoteDays)
         }
-        if (plans.isEmpty()) return false
+        if (plans.isEmpty()) return clearPreviousIfKnown()
         // Match iOS User.currentWorkoutPlan exactly: active plans first, then
         // newest createdAt, updatedAt, and finally UUID as a deterministic tie
         // breaker. Do not infer the current plan from mesocycle numbers.
-        val activeCandidates = plans.filter { it.status.equals("active", ignoreCase = true) }
-        val active = (activeCandidates.ifEmpty { plans }).maxWithOrNull(
-            compareBy<RemotePlan> { it.createdAt }
-                .thenBy { it.updatedAt }
-                .thenBy { it.id }
-        ) ?: plans.first()
+        val active = selectCurrentRemoteWorkoutPlan(plans, { it.status }, { it.createdAt }, { it.updatedAt }, { it.id })
+            ?: return clearPreviousIfKnown()
         Log.d("WorkoutRemoteSync", "Selected plan id=${active.id}, status=${active.status}, mesocycle=${active.mesocycleNumber}, createdAt=${active.createdAt}, updatedAt=${active.updatedAt}")
         // Keep every completed mesocycle locally. The hub renders the selected
         // active plan while its history remains available to overview screens.
@@ -1232,10 +1325,21 @@ internal object WorkoutRemoteSync {
      * removed legacy `sync/workout-days` endpoint.
      */
     private fun pullRemoteWorkoutDays(remote: RemoteSnapshot): JSONArray {
+        // Sync pages are ordered by modification time, not by the coach's
+        // prescribed sequence. Preserve order_index when rebuilding the graph.
         fun records(resource: String) = remote.records(resource).liveRecords()
+            .sortedWith(compareBy<JSONObject> { it.optInt("order_index", 0) }.thenBy { it.optString("id") })
 
         val days = records("workout-days")
-        val blocks = records("workout-blocks")
+        val blocks = records("workout-blocks").sortedWith(
+            compareBy<JSONObject> {
+                when (it.optString("type").lowercase()) {
+                    "warmup" -> 0
+                    "cooldown" -> 2
+                    else -> 1
+                }
+            }.thenBy { it.optInt("order_index", 0) }.thenBy { it.optString("id") }
+        )
         val exercises = records("planned-exercises")
         val results = records("exercise-results")
         val resultsByExercise = results.groupBy { it.optString("planned_exercise_id") }
@@ -1284,11 +1388,11 @@ internal object WorkoutRemoteSync {
                 .put("focus", day.optString("focus", "Fitness general")).put("dayType", day.optString("day_type", "strength"))
                 .put("status", day.optString("status", "planned").uppercase()).put("kind", day.optString("kind", "workout"))
                 .put("creationSource", day.optString("creation_source", "generated"))
-                .put("scheduledFor", day.optString("scheduled_for").takeIf(String::isNotBlank))
-                .put("startedAt", day.optString("started_at").takeIf(String::isNotBlank))
-                .put("completedAt", day.optString("completed_at").takeIf(String::isNotBlank))
+                .put("scheduledFor", WorkoutPlanGenerator.normalizeNullableString(day.opt("scheduled_for")))
+                .put("startedAt", WorkoutPlanGenerator.normalizeNullableString(day.opt("started_at")))
+                .put("completedAt", WorkoutPlanGenerator.normalizeNullableString(day.opt("completed_at")))
                 .put("didCountTowardStreak", day.optBoolean("did_count_toward_streak", false))
-                .put("notes", day.optString("notes").takeIf(String::isNotBlank))
+                .put("notes", WorkoutPlanGenerator.normalizeNullableString(day.opt("notes")))
                 .put("activeDurationSeconds", day.optInt("active_duration_seconds").takeIf { day.has("active_duration_seconds") && !day.isNull("active_duration_seconds") })
                 .put("activeCaloriesBurned", day.optDouble("active_calories_burned").takeIf { day.has("active_calories_burned") && !day.isNull("active_calories_burned") })
                 .put("averageHeartRate", day.optDouble("average_heart_rate").takeIf { day.has("average_heart_rate") && !day.isNull("average_heart_rate") })
@@ -1297,7 +1401,6 @@ internal object WorkoutRemoteSync {
                 .put("weekday", day.optString("intended_weekday", "MONDAY").uppercase())
                 .put("estimatedDurationMinutes", day.optInt("estimated_duration_minutes", 50)).put("blocks", blocks))
         }
-        if (workouts.length() == 0) return null
         // The API normally returns snake_case, but Android also receives
         // locally-created/legacy payloads using the JSON names emitted by the
         // plan generator. Read both forms so a downloaded plan keeps its real
@@ -1498,9 +1601,17 @@ internal object WorkoutRemoteSync {
 
     private fun synchronizeWorkoutPlan(token: String, userId: String, profile: OnboardingProfile, now: String, context: Context, preferences: SharedPreferences, root: JSONObject) {
         val planId = WorkoutPlanGenerator.normalizeNullableString(root.opt("planId")) ?: preferences.getString(planKey, null) ?: stableId("$userId:${root.optString("planName")}").also { preferences.edit().putString(planKey, it).apply() }
+        val syncState = context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
+        fun previouslyPushed(resource: String) = syncState.getString("$pushedRecordsPrefix$resource", "{}")
+            ?.let { runCatching(::JSONObject).getOrNull() } ?: JSONObject()
+        val previousDays = previouslyPushed("workout-days")
+        val previousBlocks = previouslyPushed("workout-blocks")
+        val previousExercises = previouslyPushed("planned-exercises")
+        fun parentIds(records: JSONObject, key: String): Map<String, String?> = records.keys().asSequence().associateWith { records.optJSONObject(it)?.optString(key) }
+        val historical = historicalWorkoutGraph(planId, parentIds(previousDays, "workout_plan_id"), parentIds(previousBlocks, "workout_day_id"), parentIds(previousExercises, "workout_block_id"))
         val pendingArchives = preferences.getStringSet(plansToArchiveKey, emptySet()).orEmpty().toSet() - planId
-        for (previousId in pendingArchives) {
-            push(token, "workout-plans", JSONArray().put(record(previousId, now).put("status", "archived")))
+        for (previousId in pendingArchives.filter { "workout-plans" in activePushResources }) {
+            push(token, "workout-plans", JSONArray().put(recordFromRemoteProjection(context, "workout-plans", previousId, now).put("status", "archived")), preserveAllMissing = true, clearOnSuccess = false)
             preferences.edit().putStringSet(plansToArchiveKey, preferences.getStringSet(plansToArchiveKey, emptySet()).orEmpty() - previousId).apply()
         }
         preferences.edit().putString(planKey, planId).apply()
@@ -1511,7 +1622,7 @@ internal object WorkoutRemoteSync {
             .put("body_composition_phase", profile.bodyCompositionPhase?.storedValue ?: JSONObject.NULL)
             .put("notes", root.opt("planNotes") ?: JSONObject.NULL)
             .put("starts_on", root.opt("planStartsOn") ?: JSONObject.NULL)
-            .put("profile_settings_hash", root.opt("profileSettingsHash") ?: JSONObject.NULL)))
+            .put("profile_settings_hash", root.opt("profileSettingsHash") ?: JSONObject.NULL)), preserveAllMissing = true)
         val days = root.optJSONArray("workouts") ?: JSONArray(); val dayRecords = JSONArray(); val blocks = JSONArray(); val exercises = JSONArray(); val plannedExerciseReferences = mutableListOf<PlannedExerciseSyncReference>()
         val skippedExercises = skippedExerciseTimestamps(context)
         val uploadedSkippedExerciseKeys = mutableSetOf<String>()
@@ -1585,7 +1696,9 @@ internal object WorkoutRemoteSync {
                 executionIndex += workoutBlockExecutionCount(entries.length(), block.optInt("rounds", 1), block.optString("type"))
             }
         }
-        push(token, "workout-days", dayRecords); push(token, "workout-blocks", blocks); push(token, "planned-exercises", exercises)
+        push(token, "workout-days", dayRecords, preserveMissingIds = historical.days)
+        push(token, "workout-blocks", blocks, preserveMissingIds = historical.blocks)
+        push(token, "planned-exercises", exercises, preserveMissingIds = historical.exercises)
         if (uploadedSkippedExerciseKeys.isNotEmpty()) clearSkippedExercises(context, uploadedSkippedExerciseKeys)
         val results = JSONArray()
         val uploadedLocalEdits = mutableListOf<Triple<io.codepassion.doubletriangle.feature.workout.RemoteExerciseHistoryEntry, String, String>>()
@@ -1687,7 +1800,7 @@ internal object WorkoutRemoteSync {
     }
     private fun stableId(value: String) = UUID.nameUUIDFromBytes(value.toByteArray()).toString()
     /** The shared API accepts at most 100 generic records per request, like iOS. */
-    private fun push(token: String, resource: String, records: JSONArray, forceCurrent: Boolean = false) {
+    private fun push(token: String, resource: String, records: JSONArray, forceCurrent: Boolean = false, forceIds: Set<String> = emptySet(), preserveMissingIds: Set<String> = emptySet(), preserveAllMissing: Boolean = false, clearOnSuccess: Boolean = true) {
         if (resource !in activePushResources) return
         val state = activePushContext?.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
             ?: return
@@ -1700,8 +1813,15 @@ internal object WorkoutRemoteSync {
             val id = record.optString("id").takeIf(String::isNotBlank) ?: continue
             current.put(id, record)
             val previousRecord = previous.optJSONObject(id)
-            if (forceCurrent || previousRecord == null || syncFingerprint(previousRecord) != syncFingerprint(record)) {
+            if (forceCurrent || id.lowercase() in forceIds || previousRecord == null || syncFingerprint(previousRecord) != syncFingerprint(record)) {
                 changes.put(record)
+            }
+        }
+        // A plan projection contains only the current plan. Missing records
+        // from other plans remain valid history and must not become tombstones.
+        previous.keys().forEach { id ->
+            if (!current.has(id) && (preserveAllMissing || id in preserveMissingIds)) {
+                previous.optJSONObject(id)?.let { current.put(id, it) }
             }
         }
         // A result imported after its first upload is no longer emitted as a
@@ -1727,21 +1847,44 @@ internal object WorkoutRemoteSync {
             }
         }
         if (changes.length() == 0) {
-            clearDirtyResource(resource)
+            if (clearOnSuccess) clearDirtyResource(resource)
             return
         }
         for (start in 0 until changes.length() step 100) {
             val batch = JSONArray()
             for (index in start until minOf(start + 100, changes.length())) batch.put(changes.get(index))
-            pushBatch(token, resource, batch)
+            if (resource in workoutResources) {
+                val response = pushBatchWithResponse(token, resource, batch)
+                val returned = response.optJSONArray("data") ?: error("Falta la respuesta de sincronización de $resource.")
+                val byId = buildMap {
+                    for (index in 0 until returned.length()) {
+                        returned.optJSONObject(index)?.let { row -> put(row.optString("id").lowercase(), row) }
+                    }
+                }
+                for (index in 0 until batch.length()) {
+                    val sent = batch.getJSONObject(index)
+                    val received = byId[sent.optString("id").lowercase()]
+                        ?: error("Falta un registro de entrenamiento en la respuesta de sincronización.")
+                    if (serverHasNewerWorkoutRecord(sent.getString("updated_at"), received.getString("updated_at"))) {
+                        error("Un entrenamiento se ha actualizado en otro dispositivo; hay cambios pendientes de resolver.")
+                    }
+                }
+            } else pushBatch(token, resource, batch)
         }
         // iOS applies its own accepted writes to SwiftData immediately. Without
         // this equivalent, the next Android pull can materialize an older
         // cached User row and overwrite a just-saved weight before the server
         // happens to echo that row back through the pull watermark.
-        updateRemoteProjectionAfterPush(resource, current, previous, deletedAt)
+        val sentCurrent = JSONObject()
+        val sentDeletions = JSONObject()
+        for (index in 0 until changes.length()) {
+            val id = changes.optJSONObject(index)?.optString("id") ?: continue
+            if (current.has(id)) current.optJSONObject(id)?.let { sentCurrent.put(id, it) }
+            else previous.optJSONObject(id)?.let { sentDeletions.put(id, it) }
+        }
+        updateRemoteProjectionAfterPush(resource, sentCurrent, sentDeletions, deletedAt)
         state.edit().putString("$pushedRecordsPrefix$resource", current.toString()).apply()
-        clearDirtyResource(resource)
+        if (clearOnSuccess) clearDirtyResource(resource)
     }
 
     /** Make a successfully accepted local write part of the same record projection used by pulls. */
@@ -1811,7 +1954,7 @@ internal object WorkoutRemoteSync {
     }
 
     /** Mirrors iOS's paginated `/sync/pull/batch` pull state, per resource. */
-    private fun pullRemoteSnapshot(context: Context, token: String): RemoteSnapshot {
+    private suspend fun pullRemoteSnapshot(context: Context, token: String, onProgress: suspend (Float) -> Unit): RemoteSnapshot {
         val result = linkedMapOf<String, JSONArray>()
         val pullState = context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
         var request = JSONObject().put("resources", JSONArray().apply {
@@ -1821,6 +1964,7 @@ internal object WorkoutRemoteSync {
             }
         })
         var asOf: String? = null
+        var downloadedCount = 0
         do {
             val response = postJson(token, WildforceApiEnvironment.apiUrl("sync/pull/batch"), request)
             if (asOf == null) asOf = response.optJSONObject("meta")?.optString("as_of")?.takeIf(String::isNotBlank)
@@ -1831,6 +1975,9 @@ internal object WorkoutRemoteSync {
                 val record = item.optJSONObject("record") ?: continue
                 if (resource in batchResources) result.getOrPut(resource, ::JSONArray).put(record)
             }
+            downloadedCount += data.length()
+            val total = response.optJSONObject("meta")?.optInt("total", 0) ?: 0
+            if (total > 0) onProgress((downloadedCount.toFloat() / total).coerceIn(0f, 1f))
             // JSONObject.optString turns a JSON null into the literal string
             // "null". Treat both representations as the end of pagination;
             // otherwise Android posts cursor="null" after the final page and

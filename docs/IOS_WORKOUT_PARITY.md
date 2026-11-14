@@ -4,8 +4,34 @@ This document is the persistent source of truth for bringing the Android workout
 
 ## Reference implementation
 
+### Coach-assigned exercises (2026-11-14)
+
+- Android retains live custom coach exercises, removes newer tombstones, and
+  ignores older updates. When the active coach set changes it discards the
+  cached catalog-content projection and requests the new coaches' content.
+- Switching the current plan retains previously synced plans and their workout
+  graphs instead of interpreting their absence from the current plan as deletion.
+- Imported blocks retain their server identity through plan parsing and saving;
+  superset execution no longer changes the prescribed exercise set count.
+- Merge behavior has unit coverage. Full coach assignment, exercise media,
+  concurrent edits, and cross-device workout completion still require an
+  end-to-end environment; complete iOS parity remains unverified.
+
+### Dark theme contrast (2026-11-10)
+
+- Workout error and destructive-action foregrounds use a theme-aware color. Visual verification on a device and full workout parity remain outstanding.
+
+### Exercise profile synchronization (2026-11-10)
+
+- Android queues exercise profiles after editing or completing an exercise, using the iOS resource and server identity. Existing Android-only profiles and missing profiles represented by saved workout history are queued for recovery.
+- Unit and build checks cover the Android sync changes; cross-device delivery and the production account's existing data still require verification on a working device.
+
 ### Translation migration (2026-11-03)
 
+- 2026-11-10: The 169 remaining Android fallback resources, including workout
+  copy, have local translations for all supported languages. The generator
+  checks format arguments; these translations still require linguistic and
+  on-device review, and do not establish complete screen localization.
 - Workout labels with verified equivalents use the shared Sheet export, and the
   path's round count and add/back accessibility labels resolve through resources.
 - The localization checklist remains open: Android-only fallback resources and
@@ -95,6 +121,16 @@ Initial estimate: functional 70%, visual 55%, accessibility/localization/integra
 - [x] Haptics cover set, exercise, feedback, rest adjustment, and final completion. Android now maps the iOS selection/success cues across calendar/mode selection, set completion, exercise transitions, feedback, timers/rest adjustment, and completion records/summary/milestones.
 
 ## Implementation log
+
+### 2026-11-10 — personal record navigation
+
+- Personal record cards open the corresponding exercise details, preserving the selected units and refreshing analytics after an edit, as in iOS `PersonalRecordsCarousel`.
+- Unit coverage checks that the record retains its exercise; visual and device navigation verification remain pending.
+
+### 2026-11-10 — automatic single-workout defaults
+
+- The automatic custom-workout dialog initializes duration, warmup, and cooldown from the current profile, matching `SingleWorkoutSelectionSheet`. Users can still change each choice for that request.
+- Source comparison completed; device and matching iOS screenshot verification remain pending.
 
 ### 2026-11-02 — Android watch actions while backgrounded
 

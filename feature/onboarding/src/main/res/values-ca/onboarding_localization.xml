@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_split_warning">Aquesta estructura pot no ser òptima per al nombre de dies d’entrenament.</string>
+    <string name="onboarding_code_validation_error">No s’ha pogut validar el codi.</string>
+    <string name="onboarding_scanner_error">No s’ha pogut obrir el lector QR. Introdueix el codi manualment.</string>
+</resources>

@@ -238,8 +238,8 @@
     <string name="cancel" formatted="false">Cancel·la</string>
     <string name="cancel_timer" formatted="false">Cancel·la el temporitzador</string>
     <string name="cancel_workout" formatted="false">Cancel·la l\&apos;entrenament</string>
-    <string name="capture_both_photos_before_saving_" formatted="false">Captura les dues fotos abans de desar-les.</string>
-    <string name="capture_front_and_profile_photos_with_guides_so_every_check_in_is_easy_to_compare_over_time_" formatted="false">Captura fotos frontals i de perfil amb guies perquè cada registre sigui fàcil de comparar amb el temps.</string>
+    <string name="capture_all_three_photos_before_saving_" formatted="false">Fes les tres fotos abans de desar.</string>
+    <string name="capture_front__profile__and_back_photos_with_guides_so_every_check_in_is_easy_to_compare_over_time_" formatted="false">Fes fotos de front, de perfil i d’esquena seguint les guies perquè sigui fàcil comparar cada registre al llarg del temps.</string>
     <string name="carbohydrates" formatted="false">Carbohidrats</string>
     <string name="carbs" formatted="false">Carbs</string>
     <string name="carbs__100g" formatted="false">Carbs / 100 g</string>
@@ -402,7 +402,7 @@
     <string name="e_g__mushrooms__olives__liver" formatted="false">p. ex. bolets, olives, fetge</string>
     <string name="e_g__olives__liver__cottage_cheese" formatted="false">p. ex. olives, fetge, mató</string>
     <string name="e_g__peanuts__lactose" formatted="false">p. ex. cacauets, lactosa</string>
-    <string name="each_check_in_saves_one_profile_and_one_front_photo_" formatted="false">Cada registre desa un perfil i una foto frontal.</string>
+    <string name="each_check_in_saves_front__profile__and_back_photos_" formatted="false">Cada registre desa fotos de davant, de perfil i d’esquena.</string>
     <string name="each_drop_should_use_about__d___less_weight_than_the_effort_before_it_">Cada gota hauria de consumir aproximadament %1$d%% menys pes que l\&apos;esforç anterior.</string>
     <string name="each_point_is_one_logged____entry_">Cada punt és una entrada %1$s registrada.</string>
     <string name="earlier_results_for_this_exercise_will_appear_here_" formatted="false">Els resultats anteriors d\&apos;aquest exercici es mostraran aquí.</string>
@@ -586,13 +586,13 @@
     <string name="imported_your_body_metrics_from_apple_health_" formatted="false">S\&apos;ha importat les mètriques corporals d\&apos;Apple Health.</string>
     <string name="improves_pacing_and_repeatable_output_with_planned_recovery_" formatted="false">Millora el ritme i la sortida repetible amb la recuperació planificada.</string>
     <string name="in_progress" formatted="false">En curs</string>
-    <string name="include_cooldown" formatted="false">Inclou el temps de reutilització</string>
+    <string name="include_cooldown" formatted="false">Inclou refredament</string>
     <string name="include_warmup" formatted="false">Inclou l\&apos;escalfament</string>
     <string name="increase_the_weight_from_set_to_set_while_the_reps_usually_come_down__each_set_becomes_more_demanding__so_you_ramp_from_a_manageable_starting_set_into_your_hardest_work_at_the_end_" formatted="false">Augmenteu el pes d\&apos;una sèrie a una altre mentre les repeticions solen baixar. Cada sèrie es fa més exigent, de manera que passes d\&apos;una sèrie inicial manejable al teu treball més dur al final.</string>
     <string name="info" formatted="false">Informació</string>
     <string name="ingredient_name" formatted="false">Nom de l\&apos;ingredient</string>
     <string name="ingredients" formatted="false">Ingredients</string>
-    <string name="insights" formatted="false">Insights</string>
+    <string name="insights" formatted="false">Dades clau</string>
     <string name="instructions" formatted="false">Instruccions</string>
     <string name="integer_part" formatted="false">Part entera</string>
     <string name="intervals_are_useful_for_conditioning_because_they_let_you_accumulate_hard_efforts_with_a_clear_work_to_recovery_rhythm__they_improve_repeatable_output__pacing__and_cardiovascular_fitness_without_requiring_one_nonstop_maximal_push_" formatted="false">Els intervals són útils per condicionar perquè et permeten acumular esforços amb un ritme clar de treball a recuperació. Milloren el rendiment repetible, el ritme i l\&apos;aptitud cardiovascular sense requerir una empenta màxima sense parar.</string>
@@ -1554,7 +1554,7 @@
     <!-- Feedback enum desc -->
     <string name="comfortable_pace__you_could_have_done_many_more_reps_" formatted="false">Ritme còmode. Hauries pogut fer moltes més repeticions.</string>
     <!-- Feedback enum desc -->
-    <string name="challenging_but_can_complete_as_instructed_" formatted="false">Desafiante, però es pot completar tal com s\&apos;indica.</string>
+    <string name="challenging_but_can_complete_as_instructed_" formatted="false">Desafiant, però es pot completar tal com s\&apos;indica.</string>
     <!-- Feedback enum desc -->
     <string name="couldn_t_complete_as_required_" formatted="false">No es va poder completar segons el requerit.</string>
     <!-- Feedback enum desc -->
@@ -1832,7 +1832,7 @@
     <string name="adapt_this_session" formatted="false">Adapta aquesta sessió</string>
     <string name="adapt_this_session_to_the_equipment_available_at_another_training_location_" formatted="false">Adapta aquesta sessió a l\&apos;equipament disponible a un altre lloc d\&apos;entrenament.</string>
     <string name="adapt_to_another_location" formatted="false">Adaptar a una altra ubicació</string>
-    <string name="adapt_to_another_training_location" formatted="false">Adaptar a una altra ubicació d\&apos;entrenament</string>
+    <string name="adapt_to_another_training_location" formatted="false">Adaptar a una altra ubicació</string>
     <string name="add_a_training_location_in_your_profile_before_adapting_this_workout_" formatted="false">Afegeix una ubicació d\&apos;entrenament al teu perfil abans d\&apos;adaptar aquest entrenament.</string>
     <string name="add_ingredient" formatted="false">Afegeix ingredient</string>
     <string name="add_your_actual_distance_when_you_finish_" formatted="false">Afegeix la distància real quan acabis.</string>
@@ -2010,7 +2010,7 @@
     <string name="we_couldn_t_read_this_check_in_clearly_enough_to_estimate_body_composition_right_now_" formatted="false">No hem pogut analitzar aquest registre amb prou claredat per estimar el percentatge de greix corporal.</string>
     <string name="we_ll_analyse_your_current_check_in_photos_with_ai_and_return_a_non_medical_body_fat_estimate_plus_a_few_coaching_notes__accuracy_can_vary_with_pose__clothing__lighting__and_image_quality_" formatted="false">Analitzarem amb IA les teves fotos actuals del registre i et donarem una estimació no mèdica del percentatge de greix corporal, a més d’alguns consells d’entrenament. La precisió pot variar segons la postura, la roba, la il·luminació i la qualitat de la imatge.</string>
     <string name="we_ll_use_any_usable_photo_attached_to_this_check_in_" formatted="false">Farem servir qualsevol foto vàlida adjunta a aquest registre.</string>
-    <string name="we_re_reviewing_your_current_front_and_profile_photos_when_available__then_building_a_narrow_body_fat_estimate_" formatted="false">Revisarem les teves fotos actuals de front i de perfil, si estan disponibles, i després elaborarem una estimació precisa del percentatge de greix corporal.</string>
+    <string name="we_re_reviewing_your_current_front__profile__and_back_photos_when_available__then_building_a_narrow_body_fat_estimate_" formatted="false">Estem revisant les teves fotos actuals de front, de perfil i d’esquena, quan estiguin disponibles, i després elaborarem una estimació del teu percentatge de greix corporal amb un marge estret.</string>
     <string name="week_of___">Setmana del %1$s</string>
     <string name="weight_per_side" formatted="false">Pes per costat</string>
     <string name="weight_per_side__kg_" formatted="false">Pes per costat (kg)</string>
@@ -2026,10 +2026,141 @@
     <string name="your_results" formatted="false">Els teus resultats</string>
     <string name="your_saved_category_selection_is_no_longer_valid__run_setup_again_" formatted="false">La selecció de categories que has desat ja no és vàlida. Torna a fer la configuració.</string>
     <string name="your_selected_check_in_photos_are_sent_to_ai_for_analysis_" formatted="false">Les fotos de registre que seleccionis s\&apos;enviaran a una IA perquè les analitzi.</string>
+    <string name="____">@ %1$s</string>
+    <string name="__0fs">%1$.0fs</string>
+    <string name="__1fs">%1$.1fs</string>
+    <string name="__">%1$s</string>
+    <string name="_______">%1$s / %2$s</string>
+    <string name="_____">%1$s %2$s</string>
+    <string name="______of___">%1$s %2$s of %3$s</string>
+    <string name="___cm">%1$s cm</string>
+    <string name="___g">%1$s g</string>
+    <string name="___in">%1$s in</string>
+    <string name="___kg">%1$s kg</string>
+    <string name="___km">%1$s km</string>
+    <string name="___lb">%1$s lb</string>
+    <string name="___mi">%1$s mi</string>
+    <string name="___min">%1$s min</string>
+    <string name="______">%1$s, %2$s</string>
+    <string name="_____d">%1$s: %2$d</string>
+    <string name="_d____d_xp">%1$d / %2$d XP</string>
     <string name="_d_characters_remaining">%1$d caràcters restants</string>
+    <string name="_d_cm">%1$d cm</string>
     <string name="_d_exercises">%1$d exercicis</string>
+    <string name="_d_h">%1$d h</string>
+    <string name="_d_min">%1$d min</string>
+    <string name="_d_of__d">%1$d of %2$d</string>
     <string name="_d_of__d_calories_logged">%1$d de %2$d calories registrades</string>
+    <string name="_d_reps">%1$d reps</string>
+    <string name="_d_sec">%1$d sec</string>
+    <string name="_d__d_reps">%1$d-%2$d reps</string>
+    <string name="_d__02d">%1$d:%2$02d</string>
+    <string name="_d__">%1$d%%</string>
+    <string name="_ds">%1$ds</string>
     <string name="key_1_selected" formatted="false">1 seleccionat</string>
+    <string name="exercise_not_synced_yet" formatted="false">Exercici encara no sincronitzat</string>
+    <string name="loading_exercise_" formatted="false">Carregant l\&apos;exercici…</string>
+    <string name="your_coach_s_exercise_will_appear_after_the_next_sync_" formatted="false">L\&apos;exercici del teu entrenador apareixerà després de la propera sincronització.</string>
+    <string name="no_instructions" formatted="false">Sense instruccions</string>
+    <string name="your_coach_hasn_t_added_instructions_for_this_exercise_" formatted="false">El teu entrenador no ha afegit instruccions per a aquest exercici.</string>
+    <string name="you_logged____this_period_versus____in_the_previous_one_">Has registrat %1$s en aquest període, en comparació amb %2$s en el període anterior.</string>
+    <string name="_d_of__d_sessions_centered_on____this_period_">%1$d de %2$d sessions s’han centrat en %3$s durant aquest període.</string>
+    <string name="___scored_noticeably_lower_than_your_top_trained_muscle_groups_this_period_">%1$s ha obtingut una puntuació notablement inferior a la dels grups musculars que més has entrenat durant aquest període.</string>
+    <string name="you_completed__d_workouts_and_logged____in_this_period_">Has completat %1$d entrenaments i has registrat %2$s durant aquest període.</string>
+    <string name="you_completed__d_of__d_planned_sessions_in_this_period_">Has completat %1$d de les %2$d sessions planificades durant aquest període.</string>
+    <string name="managed_by_your_gym" formatted="false">Gestionat pel teu gimnàs</string>
+    <string name="your_default_location_is_your_gym__so_its_staff_keep_this_equipment_up_to_date_" formatted="false">La teva ubicació predeterminada és el teu gimnàs, així que el seu personal manté aquest equipament actualitzat.</string>
+    <string name="tap_value_to_edit_it" formatted="false">Toca el valor per editar-lo</string>
+    <string name="are_you_sure_you_want_to_redo_this_plan__a_replacement_will_be_generated_in_the_same_training_cycle__while_completed_workouts_and_results_are_kept_" formatted="false">Segur que vols refer aquest pla? Es generarà un pla de substitució dins del mateix cicle d\&apos;entrenament i es conservaran els entrenaments completats i els resultats.</string>
+    <string name="accessory" formatted="false">Complementari</string>
+    <string name="chest_circumference_tracks_changes_in_your_upper_body__it_is_useful_for_seeing_muscle_gain_in_the_chest_and_back_alongside_fat_loss_elsewhere_" formatted="false">El contorn del pit mostra els canvis a la part superior del cos. Et permet veure si guanyes múscul al pit i a l’esquena mentre perds greix en altres zones.</string>
+    <string name="thigh_circumference_tracks_changes_in_your_legs__it_is_useful_for_seeing_lower_body_muscle_gain_or_fat_loss_" formatted="false">El contorn de la cuixa mostra els canvis a les cames. Et permet veure si guanyes múscul o perds greix a la part inferior del cos.</string>
+    <string name="arm_circumference_tracks_changes_in_your_upper_arm__it_is_useful_for_seeing_arm_muscle_gain_over_time_" formatted="false">El contorn del braç mostra els canvis a la part superior del braç. Et permet veure com guanyes múscul al braç amb el temps.</string>
+    <string name="wrap_a_tape_measure_around_your_chest_at_nipple_level__under_your_armpits__keeping_it_level_and_measuring_after_a_normal_exhale_" formatted="false">Passa una cinta mètrica al voltant del pit, a l’altura dels mugrons i per sota de les aixelles. Mantén-la horitzontal i mesura després d’expirar amb normalitat.</string>
+    <string name="stand_relaxed_and_wrap_a_tape_measure_around_the_widest_part_of_one_thigh__just_below_the_buttock__measure_the_same_leg_each_time_" formatted="false">Posa’t dret i relaxa’t. Passa una cinta mètrica al voltant de la part més ampla d’una cuixa, just per sota del glutis. Mesura sempre la mateixa cama.</string>
+    <string name="let_your_arm_hang_relaxed_and_wrap_a_tape_measure_around_the_widest_part_of_the_upper_arm__measure_the_same_arm_each_time_" formatted="false">Deixa el braç penjant i relaxat. Passa una cinta mètrica al voltant de la part més ampla de la part superior del braç. Mesura sempre el mateix braç.</string>
+    <string name="check_in" formatted="false">Seguiment</string>
+    <string name="check_in_sent" formatted="false">Seguiment enviat</string>
+    <string name="from___">De %1$s</string>
+    <string name="from_your_coach" formatted="false">Del teu entrenador</string>
+    <string name="_d_questions">%1$d preguntes</string>
+    <string name="_d_questions___about__d_min">%1$d preguntes · uns %2$d min</string>
+    <string name="_d_of__d_answered__pick_up_where_you_left_off_">%1$d de %2$d respostes. Continua on ho vas deixar.</string>
+    <string name="it_s_a_little_late__but_you_can_still_send_it_" formatted="false">Ja és una mica tard, però encara ho pots enviar.</string>
+    <string name="finish_and_send" formatted="false">Acabar i enviar</string>
+    <string name="___will_review_it_soon_">%1$s ho revisarà aviat.</string>
+    <string name="your_coach_will_review_it_soon_" formatted="false">El teu entrenador ho revisarà aviat.</string>
+    <string name="new_message_from___">Missatge nou de %1$s</string>
+    <string name="new_message_from_your_coach" formatted="false">Missatge nou del teu entrenador</string>
+    <string name="about_your___">Sobre el teu %1$s</string>
+    <string name="opens_your_coach_s_reply" formatted="false">Obre la resposta del teu entrenador</string>
+    <string name="your_coach" formatted="false">El teu entrenador</string>
+    <string name="thigh" formatted="false">Cuixa</string>
+    <string name="arm" formatted="false">Braç</string>
+    <string name="_____d_10_">%1$s (%2$d/10)</string>
+    <string name="___will_review_it_soon__you_ll_get_a_notification_when_they_reply_">%1$s ho revisarà aviat. Rebràs una notificació quan et respongui.</string>
+    <string name="_d_required_questions_are_still_unanswered_">Encara hi ha %1$d preguntes obligatòries sense respondre.</string>
+    <string name="_d_10">%1$d/10</string>
+    <string name="front__side__and_back_photos__the_camera_guides_you_so_they_match_your_previous_ones_" formatted="false">Fotos de front, de costat i d’esquena. La càmera et guia perquè coincideixin amb les anteriors.</string>
+    <string name="about__d_min">Uns %1$d min</string>
+    <string name="check_your_answers__tap_any_of_them_to_change_it_" formatted="false">Revisa les teves respostes. Toca’n qualsevol per canviar-la.</string>
+    <string name="choose_all_that_apply" formatted="false">Selecciona totes les opcions que corresponguin</string>
+    <string name="how_much_does_it_hurt_" formatted="false">Quant et fa mal?</string>
+    <string name="measure_in_the_morning__relaxed__with_the_tape_snug_but_not_tight_" formatted="false">Mesura’t al matí, en una postura relaxada, amb la cinta ajustada però sense prémer.</string>
+    <string name="mild" formatted="false">Lleu</string>
+    <string name="not_answered" formatted="false">Sense respondre</string>
+    <string name="nothing_hurts" formatted="false">No em fa mal res</string>
+    <string name="only_you_and_your_coach_can_see_them_" formatted="false">Només tu i el teu entrenador les podeu veure.</string>
+    <string name="optional" formatted="false">Opcional</string>
+    <string name="photos_taken" formatted="false">Fotos fetes</string>
+    <string name="question__d_of__d">Pregunta %1$d de %2$d</string>
+    <string name="ready_to_send_" formatted="false">A punt per enviar?</string>
+    <string name="required" formatted="false">Obligatori</string>
+    <string name="retake_photos" formatted="false">Torna a fer les fotos</string>
+    <string name="send" formatted="false">Envia</string>
+    <string name="sent___">Enviat %1$s</string>
+    <string name="sent_" formatted="false">Enviat!</string>
+    <string name="severe" formatted="false">Greu</string>
+    <string name="side_photo" formatted="false">Foto lateral</string>
+    <string name="skip_for_now" formatted="false">Omet per ara</string>
+    <string name="take_photos" formatted="false">Fer fotos</string>
+    <string name="use___________">Fes servir %1$s %2$s · %3$s</string>
+    <string name="write_as_much_as_you_like_" formatted="false">Escriu tant com vulguis…</string>
+    <string name="your_answer" formatted="false">La teva resposta</string>
+    <string name="your_answers" formatted="false">Les teves respostes</string>
+    <string name="your_answers_are_saved" formatted="false">Les teves respostes s\&apos;han desat</string>
+    <string name="your_answers_are_saved_as_you_go__so_you_can_finish_it_later_" formatted="false">Les teves respostes es desen a mesura que avances, perquè puguis acabar-ho més tard.</string>
+    <string name="your_coach_will_review_it_soon__you_ll_get_a_notification_when_they_reply_" formatted="false">El teu entrenador ho revisarà aviat. Rebràs una notificació quan respongui.</string>
+    <string name="import_from_apple_health" formatted="false">Importa des d’Apple Health</string>
+    <string name="you_took_these____">Has fet aquestes %1$s.</string>
+    <string name="use_these_photos" formatted="false">Fes servir aquestes fotos</string>
+    <string name="take_new_ones" formatted="false">Fes-ne de noves</string>
+    <string name="none_of_these" formatted="false">Cap d’aquestes</string>
+    <string name="back_photo" formatted="false">Foto d’esquena</string>
+    <string name="face_away_from_the_camera__keep_your_arms_relaxed__and_fit_your_full_body_inside_the_guide_" formatted="false">Posa’t d’esquena a la càmera, mantén els braços relaxats i procura que tot el cos quedi dins de la guia.</string>
+    <string name="front__profile__and_back_photos_from_this_session_will_be_used_together_when_possible_" formatted="false">Les fotos frontal, de perfil i d’esquena d’aquesta sessió s’utilitzaran juntes sempre que sigui possible.</string>
+    <string name="only_the_back_photo_is_available__so_the_estimate_will_rely_on_that_single_angle_" formatted="false">Només hi ha disponible la foto d’esquena, de manera que l’estimació es basarà en aquest únic angle.</string>
+    <string name="how_is_this_calculated_" formatted="false">Com es calcula?</string>
+    <string name="calculated_with_the_mifflin_st_jeor_equation_from_your_weight__height__age__and_gender_" formatted="false">Calculat amb l’equació de Mifflin-St Jeor a partir del teu pes, alçada, edat i sexe.</string>
+    <string name="your_basal_metabolic_rate_multiplied_by_a_physical_activity_level_factor_for_your_lifestyle__1_2_sedentary__1_375_lightly_active__1_55_moderately_active__1_725_very_active_" formatted="false">La teva taxa metabòlica basal multiplicada per un factor d’activitat física segons el teu estil de vida: 1,2 sedentari, 1,375 lleugerament actiu, 1,55 moderadament actiu, 1,725 molt actiu.</string>
+    <string name="your_waist_circumference_divided_by_your_height__below_0_5_is_considered_healthy__0_5_to_0_59_increased_risk__and_0_6_or_above_high_risk_" formatted="false">El perímetre de la teva cintura dividit per la teva alçada. Per sota de 0,5 es considera saludable; de 0,5 a 0,59, risc augmentat; i 0,6 o més, risc alt.</string>
+    <string name="estimated_with_the_u_s__navy_circumference_method_from_your_height_and_your_waist_and_neck_measurements__plus_hip_for_women__ranges_follow_the_american_council_on_exercise_body_fat_classification_" formatted="false">Estimat amb el mètode de perímetres de la Marina dels EUA, a partir de la teva alçada i de les mesures de cintura i coll, i també de maluc en el cas de les dones. Els intervals segueixen la classificació del percentatge de greix corporal de l’American Council on Exercise.</string>
+    <string name="fao_who_unu__human_energy_requirements__fao_food_and_nutrition_technical_report_series_1__2004_" formatted="false">FAO/WHO/UNU. Necessitats energètiques humanes. FAO Food and Nutrition Technical Report Series 1, 2004.</string>
+    <string name="ashwell_m__gibson_s__waist_to_height_ratio_as_an_indicator_of__early_health_risk___bmj_open__2016_" formatted="false">Ashwell M, Gibson S. La relació entre cintura i alçada com a indicador de «risc precoç per a la salut». BMJ Open, 2016.</string>
+    <string name="nice__overweight_and_obesity_management__ng246___2025_" formatted="false">NICE. Tractament del sobrepès i l’obesitat (NG246), 2025.</string>
+    <string name="u_s__department_of_defense__dod_instruction_1308_03__dod_physical_fitness_and_body_composition_program_" formatted="false">Departament de Defensa dels EUA. DoD Instruction 1308.03, Programa d’aptitud física i composició corporal del Departament de Defensa.</string>
+    <string name="hodgdon_ja__beckett_mb__prediction_of_percent_body_fat_for_u_s__navy_men_and_women_from_body_circumferences_and_height__naval_health_research_center__reports_84_11_and_84_29__1984_" formatted="false">Hodgdon JA, Beckett MB. Predicció del percentatge de greix corporal en homes i dones de la Marina dels EUA a partir dels perímetres corporals i l’alçada. Naval Health Research Center, informes 84-11 i 84-29, 1984.</string>
+    <string name="american_council_on_exercise__ace_personal_trainer_manual__body_fat_classification_" formatted="false">American Council on Exercise. Manual de l’entrenador personal de l’ACE, classificació del greix corporal.</string>
+    <string name="mifflin_md__st_jeor_st__et_al__a_new_predictive_equation_for_resting_energy_expenditure_in_healthy_individuals__am_j_clin_nutr__1990_" formatted="false">Mifflin MD, St Jeor ST, et al. Una nova equació predictiva de la despesa energètica en repòs en persones sanes. Am J Clin Nutr, 1990.</string>
+    <string name="this_is_an_estimate_for_general_fitness_purposes_and_is_not_medical_advice_" formatted="false">Aquesta és una estimació per a finalitats generals de fitness i no és un consell mèdic.</string>
+    <string name="sources" formatted="false">Fonts</string>
+    <string name="herrmann_sd__willis_ea__ainsworth_be__et_al__2024_adult_compendium_of_physical_activities__j_sport_health_sci__2024_" formatted="false">Herrmann SD, Willis EA, Ainsworth BE, et al. Compendi d’activitats físiques per a adults de 2024. J Sport Health Sci, 2024.</string>
+    <string name="american_heart_association__target_heart_rates_chart_" formatted="false">American Heart Association. Taula de freqüències cardíaques objectiu.</string>
+    <string name="fox_sm__naughton_jp__haskell_wl__physical_activity_and_the_prevention_of_coronary_heart_disease__ann_clin_res__1971_" formatted="false">Fox SM, Naughton JP, Haskell WL. Activitat física i prevenció de la cardiopatia coronària. Ann Clin Res, 1971.</string>
+    <string name="downloading_additional_data___" formatted="false">S\&apos;estan baixant dades addicionals...</string>
+    <string name="couldn_t_download_your_history" formatted="false">No s\&apos;ha pogut baixar el teu historial</string>
+    <string name="you_can_start_once_your_history_finishes_downloading" formatted="false">Pots començar quan s\&apos;acabi de baixar el teu historial</string>
+    <string name="forgot_password_" formatted="false">Has oblidat la contrasenya?</string>
     <!-- Exercise sprawl: description -->
     <string name="a__down_and_up__movement_similar_to_a_burpee_but_without_the_push_up_and_jump__focused_on_speed_and_metabolic_conditioning_" formatted="false">Un moviment \&apos;down-and-up\&apos; similar a un burpee però sense la flexió ni el salt, enfocat en la velocitat i l\&apos;acondicionament metabòlic.</string>
     <!-- Exercise bayesianCableCurl: description -->
@@ -2301,11 +2432,11 @@
     <!-- Exercise barbellInclineBenchPress: name -->
     <string name="barbell_incline_bench_press" formatted="false">Press de banca inclinat amb barra</string>
     <!-- Catalog equipment: battleRopes -->
-    <string name="battle_ropes" formatted="false">Cordes de batalla</string>
+    <string name="battle_ropes" formatted="false">Cordes de combat</string>
     <!-- Exercise bayesianCableCurl: name -->
-    <string name="bayesian_cable_curl" formatted="false">Curl a polea Bayesian</string>
+    <string name="bayesian_cable_curl" formatted="false">Flexió de bíceps baiasiana amb politja</string>
     <!-- Exercise dumbbellDeclineBenchPress: tip 1 -->
-    <string name="be_careful_when_getting_into_and_out_of_position_with_heavy_dumbbells_" formatted="false">Tingues cura en col·locar-te i en sortir de la posició amb manuelles pesades.</string>
+    <string name="be_careful_when_getting_into_and_out_of_position_with_heavy_dumbbells_" formatted="false">Vigila en col·locar-te i en sortir de la posició amb manuelles pesades.</string>
     <!-- Exercise elliptical: instruction 2 -->
     <string name="begin_moving_your_legs_in_a_smooth__elliptical_motion__either_forward_or_backward_" formatted="false">Comença a moure les cames amb un moviment el·líptic suau, cap endavant o cap enrere.</string>
     <!-- Catalog trainingLevels: beginner -->
@@ -2317,13 +2448,13 @@
     <!-- Exercise quadStretch: instruction 2 -->
     <string name="bend_your_other_knee_and_reach_back_to_grab_your_foot_or_ankle_with_the_same_side_hand_" formatted="false">Flexiona l\&apos;altra cama i estira el braç cap enrere per agafar el peu o el turmell amb la mà del mateix costat.</string>
     <!-- Exercise bentOverRow: name -->
-    <string name="bent_over_row" formatted="false">Remada inclinada</string>
+    <string name="bent_over_row" formatted="false">Rem inclinat</string>
     <!-- Catalog muscleGroups: biceps -->
     <string name="biceps" formatted="false">Bíceps</string>
     <!-- Exercise bicepsCurl: name -->
-    <string name="biceps_curl" formatted="false">Curl de bíceps</string>
+    <string name="biceps_curl" formatted="false">Rull de bíceps</string>
     <!-- Exercise bicycleCrunch: name -->
-    <string name="bicycle_crunch" formatted="false">Abdominal en bicicleta</string>
+    <string name="bicycle_crunch" formatted="false">Encongiment en bicicleta</string>
     <!-- Exercise birdDog: name -->
     <string name="bird_dog" formatted="false">Bird Dog</string>
     <!-- Catalog goals: bodyRecomposition -->
@@ -2335,13 +2466,13 @@
     <!-- Exercise boxingBagWork: name -->
     <string name="boxing_bag_work" formatted="false">Treball amb sac de boxa</string>
     <!-- Exercise boxJump: name -->
-    <string name="box_jump" formatted="false">Salt al caixó</string>
+    <string name="box_jump" formatted="false">Salt al calaix</string>
     <!-- Exercise barbellBackSquat: instruction 3 -->
     <string name="brace_your_core_and_lower_your_hips_until_your_thighs_are_at_least_parallel_to_the_floor_" formatted="false">Activa el core i baixa els malucs fins que els teus quàdriceps estiguin com a mínim paral·lels al terra.</string>
     <!-- Exercise overheadPress: instruction 2 -->
     <string name="brace_your_core_and_press_the_bar_directly_overhead_until_your_arms_are_fully_extended_" formatted="false">Activa el core i empeny la barra directament per sobre del cap fins que els braços estiguin completament estirats.</string>
     <!-- Exercise cableHipAbduction: tip 2 -->
-    <string name="brace_your_core_so_the_hip_does_the_work_instead_of_your_trunk_" formatted="false">Activa el core perquè el maluc faci el treball en comptes del tronc.</string>
+    <string name="brace_your_core_so_the_hip_does_the_work_instead_of_your_trunk_" formatted="false">Activa el core perquè el maluc faci la feina en lloc del tronc.</string>
     <!-- Exercise cableOverheadTricepsExtension: tip 2 -->
     <string name="brace_your_core_so_your_lower_back_does_not_arch_during_the_set_" formatted="false">Activa el core perquè la part lumbar no s\&apos;arquegi durant la sèrie.</string>
     <!-- Exercise landmineRow: tip 1 -->
@@ -2367,43 +2498,43 @@
     <!-- Catalog goals: buildMuscle -->
     <string name="build_muscle" formatted="false">Guanyar massa muscular</string>
     <!-- Exercise bulgarianSplitSquat: name -->
-    <string name="bulgarian_split_squat" formatted="false">Gamdada búlgara</string>
+    <string name="bulgarian_split_squat" formatted="false">Gambada búlgara</string>
     <!-- Exercise burpee: name -->
     <string name="burpee" formatted="false">Burpee</string>
     <!-- Exercise butterflySitUp: name -->
-    <string name="butterfly_sit_up" formatted="false">Sit-up papallona</string>
+    <string name="butterfly_sit_up" formatted="false">Incorporació papallona</string>
     <!-- Exercise cableCrunchPress: name -->
-    <string name="cable_crunch_press" formatted="false">Cruiximent amb politja</string>
+    <string name="cable_crunch_press" formatted="false">Encongiment a la politja</string>
     <!-- Exercise cableCurl: name -->
-    <string name="cable_curl" formatted="false">Curl amb cable</string>
+    <string name="cable_curl" formatted="false">Rull a la politja</string>
     <!-- Exercise cableExternalRotation: name -->
-    <string name="cable_external_rotation" formatted="false">Rotació externa amb cable</string>
+    <string name="cable_external_rotation" formatted="false">Rotació externa a la politja</string>
     <!-- Exercise cableFly: name -->
-    <string name="cable_fly" formatted="false">Apertures amb cable</string>
+    <string name="cable_fly" formatted="false">Obertures a la politja</string>
     <!-- Exercise cableFrontRaise: name -->
-    <string name="cable_front_raise" formatted="false">Elevació frontal amb cable</string>
+    <string name="cable_front_raise" formatted="false">Elevació frontal a la politja</string>
     <!-- Exercise cableGluteKickback: name -->
-    <string name="cable_glute_kickback" formatted="false">Patada de gluti amb cable</string>
+    <string name="cable_glute_kickback" formatted="false">Patada de glutis a la politja</string>
     <!-- Exercise cableHipAbduction: name -->
-    <string name="cable_hip_abduction" formatted="false">Abducció de maluc amb cable</string>
+    <string name="cable_hip_abduction" formatted="false">Abducció de maluc a la politja</string>
     <!-- Exercise cableHipAdduction: name -->
-    <string name="cable_hip_adduction" formatted="false">Aducció de maluc amb cable</string>
+    <string name="cable_hip_adduction" formatted="false">Adducció de maluc a la politja</string>
     <!-- Exercise cableInternalRotation: name -->
-    <string name="cable_internal_rotation" formatted="false">Rotació interna amb cable</string>
+    <string name="cable_internal_rotation" formatted="false">Rotació interna a la politja</string>
     <!-- Exercise cableLateralRaise: name -->
-    <string name="cable_lateral_raise" formatted="false">Elevació lateral amb cable</string>
+    <string name="cable_lateral_raise" formatted="false">Elevació lateral a la politja</string>
     <!-- Catalog equipment: cableMachine -->
-    <string name="cable_machine" formatted="false">Màquina de cables</string>
+    <string name="cable_machine" formatted="false">Màquina de politges</string>
     <!-- Exercise cableOverheadTricepsExtension: name -->
-    <string name="cable_overhead_triceps_extension" formatted="false">Extensió de tríceps per sobre amb cable</string>
+    <string name="cable_overhead_triceps_extension" formatted="false">Extensió de tríceps sobre el cap a la politja</string>
     <!-- Exercise cableRearDeltFly: name -->
-    <string name="cable_rear_delt_fly" formatted="false">Apertures de deltoides posteriors amb cable</string>
+    <string name="cable_rear_delt_fly" formatted="false">Obertures per a deltoides posteriors a la politja</string>
     <!-- Exercise cableUprightRow: name -->
-    <string name="cable_upright_row" formatted="false">Rem al mentó amb cable</string>
+    <string name="cable_upright_row" formatted="false">Rem a la barbeta a la politja</string>
     <!-- Exercise cableWoodchop: name -->
-    <string name="cable_woodchop" formatted="false">Tallafusta amb cable</string>
+    <string name="cable_woodchop" formatted="false">Tallafustes a la politja</string>
     <!-- Exercise calfRaise: name -->
-    <string name="calf_raise" formatted="false">Elevació de bessons</string>
+    <string name="calf_raise" formatted="false">Elevació de talons</string>
     <!-- Catalog muscleGroups: calves -->
     <string name="calves" formatted="false">Bessons</string>
     <!-- Exercise burpee: tip 3 -->
@@ -2411,19 +2542,19 @@
     <!-- Exercise frontRaise: tip 3 -->
     <string name="can_be_performed_alternating_arms_or_both_together_" formatted="false">Es pot fer alternant els braços o amb tots dos alhora.</string>
     <!-- Exercise calfRaise: tip 3 -->
-    <string name="can_be_performed_on_one_leg_at_a_time_to_increase_difficulty_" formatted="false">Es pot fer amb una cama alhora per augmentar la dificultat.</string>
+    <string name="can_be_performed_on_one_leg_at_a_time_to_increase_difficulty_" formatted="false">Es pot fer amb una cama a la vegada per augmentar la dificultat.</string>
     <!-- Catalog exerciseCategories: cardio -->
-    <string name="cardio" formatted="false">Cardio</string>
+    <string name="cardio" formatted="false">Càrdio</string>
     <!-- Exercise catCow: name -->
     <string name="cat_cow" formatted="false">Gat-Vaca</string>
     <!-- Exercise catCow: instruction 3 -->
-    <string name="cat__exhale_as_you_arch_your_back_toward_the_ceiling__tuck_your_chin__and_pull_your_belly_button_in_" formatted="false">Gat: Exhala mentre arqueges l\&apos;esquena cap al sostre, doblega el mentó i porta el melic cap a dins.</string>
+    <string name="cat__exhale_as_you_arch_your_back_toward_the_ceiling__tuck_your_chin__and_pull_your_belly_button_in_" formatted="false">Gat: exhala mentre arqueges l\&apos;esquena cap al sostre, fica la barbeta i contreu el melic.</string>
     <!-- Catalog majorMuscleGroups: chest -->
     <string name="chest" formatted="false">Pit</string>
     <!-- Exercise chestDip: name -->
-    <string name="chest_dip" formatted="false">Dips per pit</string>
+    <string name="chest_dip" formatted="false">Fons de pit</string>
     <!-- Exercise chestFly: name -->
-    <string name="chest_fly" formatted="false">Apertures de pit</string>
+    <string name="chest_fly" formatted="false">Obertures de pit</string>
     <!-- Catalog equipment: chestPressMachine -->
     <string name="chest_press_machine" formatted="false">Màquina de press de pit</string>
     <!-- Exercise childsPose: name -->
@@ -2433,9 +2564,9 @@
     <!-- Exercise boxJump: tip 2 -->
     <string name="choose_a_box_height_that_allows_for_proper_landing_form_" formatted="false">Tria una alçada de caixa que permeti una tècnica d\&apos;aterratge correcta.</string>
     <!-- Exercise climber: name -->
-    <string name="climber" formatted="false">Mountain Climber</string>
+    <string name="climber" formatted="false">Escalador</string>
     <!-- Exercise cobraStretch: name -->
-    <string name="cobra_stretch" formatted="false">Estirament de la cobra</string>
+    <string name="cobra_stretch" formatted="false">Cobra</string>
     <!-- Exercise squatJump: description -->
     <string name="combines_a_traditional_squat_with_an_explosive_jump_to_build_power_and_increase_heart_rate_" formatted="false">Combina una esquat tradicional amb un salt explosiu per desenvolupar potència i augmentar la freqüència cardíaca.</string>
     <!-- Catalog trainingLevels: completeBeginner -->
@@ -2443,11 +2574,11 @@
     <!-- Exercise climber: instruction 4 -->
     <string name="continue_alternating_at_a_fast__rhythmic_pace_" formatted="false">Continua alternant a un ritme ràpid i rítmic.</string>
     <!-- Exercise highKnees: instruction 4 -->
-    <string name="continue_alternating_at_a_fast_pace__staying_on_the_balls_of_your_feet_" formatted="false">Continua alternant a un ritme ràpid, mantenint-te amb la punta dels peus.</string>
+    <string name="continue_alternating_at_a_fast_pace__staying_on_the_balls_of_your_feet_" formatted="false">Continua alternant a un ritme ràpid, mantenint-te sobre les puntes dels peus.</string>
     <!-- Exercise walkingLunge: instruction 4 -->
     <string name="continue_alternating_legs_as_you_walk_forward_" formatted="false">Continua alternant les cames mentre avances.</string>
     <!-- Exercise bicycleCrunch: instruction 4 -->
-    <string name="continue_alternating_sides_in_a_pedaling_motion_" formatted="false">Continua alternant els costats amb un moviment de pedalada.</string>
+    <string name="continue_alternating_sides_in_a_pedaling_motion_" formatted="false">Continua alternant els costats amb un moviment de pedaleig.</string>
     <!-- Exercise neckCircles: instruction 4 -->
     <string name="continue_the_circular_motion_slowly_and_smoothly_" formatted="false">Continua el moviment circular lentament i amb suavitat.</string>
     <!-- Exercise reverseLunge: tip 3 -->
@@ -2461,11 +2592,11 @@
     <!-- Exercise cableGluteKickback: tip 3 -->
     <string name="control_the_weight_on_the_way_back_down_rather_than_letting_the_cable_pull_your_leg_forward_" formatted="false">Controla el pes en el retorn en lloc de deixar que el cable arrossegui la teva cama cap endavant.</string>
     <!-- Exercise latPulldown: tip 3 -->
-    <string name="control_the_weight_on_the_way_up_to_maintain_tension_in_your_lats_" formatted="false">Controla el pes en la fase ascendent per mantenir la tensió als dorsals.</string>
+    <string name="control_the_weight_on_the_way_up_to_maintain_tension_in_your_lats_" formatted="false">Pes mort</string>
     <!-- Exercise cableFrontRaise: tip 2 -->
     <string name="control_the_weight_throughout_the_entire_range_of_motion_" formatted="false">Controla el pes durant tot el recorregut de moviment.</string>
     <!-- Exercise stepUp: tip 3 -->
-    <string name="control_your_descent_to_protect_your_joints_" formatted="false">Controla la baixada per protegir les teves articulacions.</string>
+    <string name="control_your_descent_to_protect_your_joints_" formatted="false">Fons de braços declinat</string>
     <!-- Exercise treadmillRunning: tip 3 -->
     <string name="cool_down_with_a_few_minutes_of_walking_before_stepping_off_" formatted="false">Fes un refredament amb uns minuts de caminada abans de baixar.</string>
     <!-- Catalog majorMuscleGroups: core -->
@@ -2475,17 +2606,17 @@
     <!-- Catalog movementPatterns: coreRotation -->
     <string name="core_rotation" formatted="false">Rotació del tronc</string>
     <!-- Catalog movementPatterns: coreStability -->
-    <string name="core_stability" formatted="false">Estabilitat del tronc</string>
+    <string name="core_stability" formatted="false">Estabilitat del core</string>
     <!-- Exercise catCow: instruction 2 -->
-    <string name="cow__inhale_as_you_drop_your_belly_toward_the_floor__lift_your_chest__and_look_up_" formatted="false">Vaca: Inspira mentre baixes la panxa cap a terra, aixeques el pit i mires cap amunt.</string>
+    <string name="cow__inhale_as_you_drop_your_belly_toward_the_floor__lift_your_chest__and_look_up_" formatted="false">Vaca: Inhala mentre deixes caure l\&apos;abdomen cap al terra, eleva el pit i mira cap amunt.</string>
     <!-- Exercise cableRearDeltFly: instruction 2 -->
     <string name="cross_your_arms_and_grab_the_left_handle_with_your_right_hand_and_the_right_handle_with_your_left_hand_" formatted="false">Creua els braços i agafa l\&apos;empunyadura esquerra amb la mà dreta i l\&apos;empunyadura dreta amb la mà esquerra.</string>
     <!-- Exercise cableCrunchPress: instruction 3 -->
-    <string name="crunch_your_ribcage_down_toward_your_pelvis_while_keeping_your_elbows_close_and_abs_fully_engaged_" formatted="false">Apropa la caixa toràcica a la pelvis mantenint els colzes a prop i l\&apos;abdomen totalment actiu.</string>
+    <string name="crunch_your_ribcage_down_toward_your_pelvis_while_keeping_your_elbows_close_and_abs_fully_engaged_" formatted="false">Encongeix la caixa toràcica cap a la pelvis mantenint els colzes a prop i l\&apos;abdomen completament activat.</string>
     <!-- Exercise cableCurl: instruction 3 -->
     <string name="curl_the_handle_toward_your_shoulders_while_keeping_your_upper_arms_mostly_still_" formatted="false">Arrossega la mànec cap a les espatlles mantenint els braços superiors gairebé immòbils.</string>
     <!-- Exercise bayesianCableCurl: instruction 3 -->
-    <string name="curl_the_handle_toward_your_shoulder_while_keeping_your_elbow_from_drifting_too_far_forward_" formatted="false">Arrossega la mànec cap a l\&apos;espatlla evitant que el colze s\&apos;avanci massa cap endavant.</string>
+    <string name="curl_the_handle_toward_your_shoulder_while_keeping_your_elbow_from_drifting_too_far_forward_" formatted="false">Porta l\&apos;empunyadura cap a l\&apos;espatlla evitant que el colze es desplaci massa endavant.</string>
     <!-- Exercise bicepsCurl: instruction 2 -->
     <string name="curl_the_weights_up_toward_your_shoulders_by_bending_your_elbows_" formatted="false">Eleva les peses cap a les espatlles flexionant els colzes.</string>
     <!-- Exercise hammerCurl: instruction 2 -->
@@ -2503,7 +2634,7 @@
     <!-- Catalog equipment: deadliftPlatform -->
     <string name="deadlift_platform" formatted="false">Plataforma per a pes mort</string>
     <!-- Exercise declinePushUp: name -->
-    <string name="decline_push_up" formatted="false">Flexió declinada</string>
+    <string name="decline_push_up" formatted="false">Fons de braços declinat</string>
     <!-- Exercise deepSquatHold: name -->
     <string name="deep_squat_hold" formatted="false">Manteniment en esquat profund</string>
     <!-- Catalog equipment: dipStation -->
@@ -2525,7 +2656,7 @@
     <!-- Exercise doorwayChestStretch: tip 1 -->
     <string name="don_t_lean_too_far__the_stretch_should_be_gentle_" formatted="false">No t\&apos;inclinis massa; l\&apos;estirament ha de ser suau.</string>
     <!-- Exercise stationaryBike: tip 3 -->
-    <string name="don_t_lean_too_heavily_on_the_handlebars_" formatted="false">No et recolzis massa en el manillar.</string>
+    <string name="don_t_lean_too_heavily_on_the_handlebars_" formatted="false">No et recolzis massa al manillar.</string>
     <!-- Exercise inclineBenchPress: tip 1 -->
     <string name="don_t_let_the_dumbbells_drift_too_far_forward_or_backward_" formatted="false">No deixis que les manuelles s\&apos;allunyin massa cap endavant o cap enrere.</string>
     <!-- Exercise machineHipAdduction: tip 3 -->
@@ -2537,19 +2668,19 @@
     <!-- Exercise sidePlank: tip 1 -->
     <string name="don_t_let_your_hips_sag_toward_the_floor_" formatted="false">No deixis que els malucs s\&apos;ensorrin cap al sòl.</string>
     <!-- Exercise overheadTricepsExtension: tip 2 -->
-    <string name="don_t_let_your_lower_back_arch_excessively__keep_your_core_tight_" formatted="false">No deixis que la part baixa de l\&apos;esquena s\&apos;arquegi excessivament; mantén el core tens.</string>
+    <string name="don_t_let_your_lower_back_arch_excessively__keep_your_core_tight_" formatted="false">Press de banca amb manuelles</string>
     <!-- Exercise pushUp: tip 1 -->
-    <string name="don_t_let_your_lower_back_sag__keep_your_core_tight_" formatted="false">No deixis que la part baixa de l\&apos;esquena s\&apos;ensorri; mantén el core tens.</string>
+    <string name="don_t_let_your_lower_back_sag__keep_your_core_tight_" formatted="false">Rem inclinat amb manuelles</string>
     <!-- Exercise frontRaise: tip 2 -->
-    <string name="don_t_lift_the_weights_above_shoulder_level_" formatted="false">No aixequis les peses per sobre del nivell de les espatlles.</string>
+    <string name="don_t_lift_the_weights_above_shoulder_level_" formatted="false">Press de banca declinat amb manuelles</string>
     <!-- Exercise birdDog: tip 2 -->
-    <string name="don_t_lift_your_arm_or_leg_too_high__focus_on_length_rather_than_height_" formatted="false">No aixequis massa el braç o la cama; enfoca\&apos;t en l\&apos;allargament més que en l\&apos;altura.</string>
+    <string name="don_t_lift_your_arm_or_leg_too_high__focus_on_length_rather_than_height_" formatted="false">Press militar amb manuelles</string>
     <!-- Exercise legExtension: tip 2 -->
-    <string name="don_t_lock_your_knees_forcefully_at_the_top_" formatted="false">No bloquegis els genolls amb força dalt del tot.</string>
+    <string name="don_t_lock_your_knees_forcefully_at_the_top_" formatted="false">Pes mort romanès amb manuelles</string>
     <!-- Exercise superman: tip 1 -->
     <string name="don_t_look_up__keep_your_neck_in_a_neutral_position_by_looking_at_the_floor_" formatted="false">No miris cap amunt; mantén el coll en posició neutra mirant al terra.</string>
     <!-- Exercise hipThrust: tip 3 -->
-    <string name="don_t_overextend_your_lower_back_at_the_top_of_the_movement_" formatted="false">No sobreestenguis la part baixa de l\&apos;esquena a la part alta del moviment.</string>
+    <string name="don_t_overextend_your_lower_back_at_the_top_of_the_movement_" formatted="false">Esquat amb manuelles</string>
     <!-- Exercise latPulldown: tip 1 -->
     <string name="don_t_pull_the_bar_behind_your_neck__pull_it_to_your_upper_chest_" formatted="false">No portis la barra darrere del coll; porta-la cap a la part superior del pit.</string>
     <!-- Exercise deadlift: tip 1 -->
@@ -2601,7 +2732,7 @@
     <!-- Exercise dumbbellBentOverRow: name -->
     <string name="dumbbell_bent_over_row" formatted="false">Rem inclinat amb manuelles</string>
     <!-- Exercise dumbbellDeclineBenchPress: name -->
-    <string name="dumbbell_decline_bench_press" formatted="false">Press declinat amb manuelles</string>
+    <string name="dumbbell_decline_bench_press" formatted="false">Press de banca declinat amb manuelles</string>
     <!-- Exercise dumbbellDeclineBenchPress: description -->
     <string name="dumbbell_decline_press_provides_a_deep_stretch_for_the_lower_chest_and_improved_range_of_motion_" formatted="false">El press declinat amb manuelles proporciona un estirament profund del pectoral inferior i millora l\&apos;amplitud de moviment.</string>
     <!-- Exercise dumbbellOverheadPress: name -->
@@ -2615,7 +2746,7 @@
     <!-- Exercise dumbbellOverheadPress: tip 3 -->
     <string name="dumbbells_offer_more_freedom_for_the_shoulder_joint_than_a_barbell_" formatted="false">Les manuelles ofereixen més llibertat per a l\&apos;articulació de l\&apos;espatlla que una barra.</string>
     <!-- Exercise dumbbellSquat: name -->
-    <string name="dumbbell_squat" formatted="false">Squat amb manuelles</string>
+    <string name="dumbbell_squat" formatted="false">Esquat amb manuelles</string>
     <!-- Exercise dumbbellBenchPress: tip 3 -->
     <string name="dumbbells_require_more_stabilization_than_a_barbell_" formatted="false">Les manuelles requereixen més estabilització que una barra.</string>
     <!-- Catalog trackingModes: durationMinutes -->
@@ -2637,7 +2768,7 @@
     <!-- Exercise airSquat: instruction 2 -->
     <string name="engage_your_core_and_keep_your_chest_up_as_you_begin_to_sit_back_into_your_hips_" formatted="false">Activa el teu core i mantén el pit aixecat mentre comences a seure cap enrere sobre els malucs.</string>
     <!-- Exercise hangingLegRaise: tip 1 -->
-    <string name="engage_your_core_and_lats_to_stabilize_your_body_" formatted="false">Activa el teu core i els dorsals per estabilitzar el cos.</string>
+    <string name="engage_your_core_and_lats_to_stabilize_your_body_" formatted="false">Activa el core i els dorsals per estabilitzar el cos.</string>
     <!-- Exercise butterflySitUp: instruction 3 -->
     <string name="engage_your_core_and_sit_up_fully__touching_the_floor_in_front_of_your_toes_" formatted="false">Activa el teu core i incorpora\&apos;t completament, tocant el terra davant dels teus dits dels peus.</string>
     <!-- Exercise dumbbellRomanianDeadlift: instruction 4 -->
@@ -2653,7 +2784,7 @@
     <!-- Exercise smithMachineBenchPress: tip 1 -->
     <string name="ensure_the_bench_is_perfectly_centered_under_the_bar_" formatted="false">Assegura\&apos;t que el banc estigui perfectament centrat sota la barra.</string>
     <!-- Exercise smithMachineDeclineBenchPress: tip 1 -->
-    <string name="ensure_the_bench_is_securely_positioned_and_centered_" formatted="false">Assegura\&apos;t que el banc estigui col·locat de manera segura i centrat.</string>
+    <string name="ensure_the_bench_is_securely_positioned_and_centered_" formatted="false">Assegura\&apos;t que el banc estigui ben col·locat i centrat.</string>
     <!-- Exercise legExtension: tip 3 -->
     <string name="ensure_the_padded_lever_is_positioned_just_above_your_ankles_" formatted="false">Assegura\&apos;t que la palanca acolxada estigui situada just per sobre dels teus turmells.</string>
     <!-- Exercise ringDip: tip 3 -->
@@ -2769,7 +2900,7 @@
     <!-- Exercise cableLateralRaise: tip 2 -->
     <string name="focus_on_leading_with_your_elbow_and_keep_the_movement_controlled_" formatted="false">Centra\&apos;t en liderar amb el colze i mantén el moviment controlat.</string>
     <!-- Exercise latPulldown: tip 2 -->
-    <string name="focus_on_leading_with_your_elbows_" formatted="false">Centra\&apos;t en liderar amb els colzes.</string>
+    <string name="focus_on_leading_with_your_elbows_" formatted="false">Esquat goblet</string>
     <!-- Exercise superman: tip 2 -->
     <string name="focus_on_length_rather_than_height_" formatted="false">Centra\&apos;t en la llargada més que en l\&apos;alçada.</string>
     <!-- Exercise cobraStretch: tip 3 -->
@@ -2847,19 +2978,19 @@
     <!-- Exercise scorpions: tip 2 -->
     <string name="focus_on_the_rotation_of_the_spine_and_opening_of_the_hips_" formatted="false">Focalitza\&apos;t en la rotació de la columna i en l\&apos;obertura dels malucs.</string>
     <!-- Exercise dumbbellDeclineBenchPress: tip 2 -->
-    <string name="focus_on_the_squeeze_at_the_top_of_the_movement_" formatted="false">Focalitza\&apos;t en la contracció a la part alta del moviment.</string>
+    <string name="focus_on_the_squeeze_at_the_top_of_the_movement_" formatted="false">Centra\&apos;t en la contracció a la part superior del moviment.</string>
     <!-- Exercise threadTheNeedle: tip 1 -->
-    <string name="focus_on_the_stretch_in_the_upper_back_and_rear_shoulder_" formatted="false">Focalitza\&apos;t en l\&apos;estirament de la part superior de l\&apos;esquena i de l\&apos;espatlla posterior.</string>
+    <string name="focus_on_the_stretch_in_the_upper_back_and_rear_shoulder_" formatted="false">Centra\&apos;t en l\&apos;estirament de la part alta de l\&apos;esquena i de l\&apos;espatlla posterior.</string>
     <!-- Exercise gluteBridge: tip 2 -->
-    <string name="focus_on_using_your_glutes_rather_than_your_lower_back_or_hamstrings_" formatted="false">Focalitza\&apos;t en fer servir els glutis en lloc de la zona lumbar o els isquiotibials.</string>
+    <string name="focus_on_using_your_glutes_rather_than_your_lower_back_or_hamstrings_" formatted="false">Centra\&apos;t a utilitzar els glutis en lloc de la zona lumbar.</string>
     <!-- Exercise machineHipAdduction: tip 2 -->
-    <string name="focus_on_using_your_inner_thigh_muscles__not_your_feet_" formatted="false">Focalitza\&apos;t en fer servir els músculs interns de la cuixa, no els peus.</string>
+    <string name="focus_on_using_your_inner_thigh_muscles__not_your_feet_" formatted="false">Centra\&apos;t a utilitzar la cara interna de la cuixa, no els peus.</string>
     <!-- Exercise rearDeltFly: tip 1 -->
-    <string name="focus_on_using_your_rear_deltoids__not_your_traps_" formatted="false">Focalitza\&apos;t en fer servir els deltóides posteriors, no els trapezis.</string>
+    <string name="focus_on_using_your_rear_deltoids__not_your_traps_" formatted="false">Centra\&apos;t a utilitzar els deltoides posteriors, no els trapezis.</string>
     <!-- Exercise russianTwist: tip 1 -->
     <string name="follow_your_hands_with_your_eyes_to_ensure_your_entire_torso_is_rotating_" formatted="false">Segueix les teves mans amb la mirada per assegurar-te que tot el tronc està girant.</string>
     <!-- Exercise russianTwist: tip 3 -->
-    <string name="for_added_challenge__hold_a_weight_or_medicine_ball_" formatted="false">Per a un repte addicional, sosté un pes o una pilota medicinal.</string>
+    <string name="for_added_challenge__hold_a_weight_or_medicine_ball_" formatted="false">Per a un repte addicional, sostén un pes o una pilota medicinal.</string>
     <!-- Exercise gluteBridge: tip 3 -->
     <string name="for_an_added_challenge__perform_the_bridge_with_one_leg_extended_" formatted="false">Per a un repte addicional, realitza el pont amb una cama estesa.</string>
     <!-- Exercise sidePlank: tip 3 -->
@@ -2877,7 +3008,7 @@
     <!-- Exercise bicepsCurl: tip 3 -->
     <string name="full_range_of_motion__extend_your_arms_fully_at_the_bottom_" formatted="false">Rang complet de moviment: estira completament els braços a la part baixa.</string>
     <!-- Catalog goals: gainStrength -->
-    <string name="gain_strength" formatted="false">Guanyar força</string>
+    <string name="gain_strength" formatted="false">Empenta de malucs</string>
     <!-- Catalog goals: generalFitness -->
     <string name="general_fitness" formatted="false">Condició física general</string>
     <!-- Exercise neckCircles: instruction 2 -->
@@ -2897,13 +3028,13 @@
     <!-- Catalog muscleGroups: glutes -->
     <string name="glutes" formatted="false">Glutis</string>
     <!-- Exercise gobletSquat: name -->
-    <string name="goblet_squat" formatted="false">Esquat amb pes en copa (goblet)</string>
+    <string name="goblet_squat" formatted="false">Esquat goblet</string>
     <!-- Exercise treadmillWalking: tip 3 -->
     <string name="gradually_decrease_speed_at_the_end_of_your_session_for_a_cooldown_" formatted="false">Redueix gradualment la velocitat al final de la sessió per fer el refredament.</string>
     <!-- Exercise armCircles: instruction 4 -->
     <string name="gradually_increase_the_size_of_the_circles_as_your_shoulders_feel_warmer_" formatted="false">Augmenta gradualment la mida dels cercles a mesura que les espatlles s\&apos;escalfen.</string>
     <!-- Exercise treadmillRunning: instruction 2 -->
-    <string name="gradually_increase_the_speed_to_your_desired_running_pace_" formatted="false">Augmenta gradualment la velocitat fins al ritme de cursa desitjat.</string>
+    <string name="gradually_increase_the_speed_to_your_desired_running_pace_" formatted="false">Augmenta gradualment la velocitat fins a arribar al ritme de cursa desitjat.</string>
     <!-- Exercise shoulderMobilityFlow: tip 3 -->
     <string name="great_as_a_warmup_for_any_upper_body_workout_" formatted="false">Ideal com a escalfament per a qualsevol entrenament de la part superior del cos.</string>
     <!-- Exercise smithMachineDeclineBenchPress: tip 3 -->
@@ -2951,31 +3082,31 @@
     <!-- Exercise cableCurl: instruction 2 -->
     <string name="grip_the_handle_with_palms_facing_up_and_keep_your_elbows_close_to_your_sides_" formatted="false">Agafa la nansa amb les palmes cap amunt i mantén els colzes a prop del cos.</string>
     <!-- Exercise cableExternalRotation: instruction 2 -->
-    <string name="grip_the_handle_with_the_far_hand__keeping_your_elbow_tucked_into_your_side_at_a_90_degree_angle_" formatted="false">Agafa la nansa amb la mà més allunyada, mantenint el colze ajustat al costat amb un angle de 90°.</string>
+    <string name="grip_the_handle_with_the_far_hand__keeping_your_elbow_tucked_into_your_side_at_a_90_degree_angle_" formatted="false">Agafa l\&apos;empunyadura amb la mà més allunyada, mantenint el colze enganxat al costat en un angle de 90 graus.</string>
     <!-- Exercise cableLateralRaise: instruction 2 -->
-    <string name="grip_the_handle_with_the_far_hand_and_pull_it_across_your_body__or_with_the_near_hand_behind_your_back_" formatted="false">Agafa la nansa amb la mà més allunyada i tira-la a través del cos, o amb la mà més propera darrere de l\&apos;esquena.</string>
+    <string name="grip_the_handle_with_the_far_hand_and_pull_it_across_your_body__or_with_the_near_hand_behind_your_back_" formatted="false">Agafa l\&apos;empunyadura amb la mà més allunyada i estira a través del cos, o amb la mà més propera darrere de l\&apos;esquena.</string>
     <!-- Exercise cableInternalRotation: instruction 2 -->
     <string name="grip_the_handle_with_the_near_hand__keeping_your_elbow_tucked_into_your_side_at_a_90_degree_angle_" formatted="false">Agafa la nansa amb la mà més propera, mantenint el colze ajustat al costat amb un angle de 90°.</string>
     <!-- Exercise chestDip: instruction 1 -->
     <string name="grip_the_parallel_bars_and_push_yourself_up_to_the_starting_position_" formatted="false">Agafa les barres paral·leles i empeny-te fins a la posició inicial.</string>
     <!-- Exercise tricepsDip: instruction 1 -->
-    <string name="grip_the_parallel_bars_and_push_yourself_up_until_your_arms_are_fully_extended_" formatted="false">Agafa les barres paral·leles i empeny-te fins que els braços estiguin completament estirats.</string>
+    <string name="grip_the_parallel_bars_and_push_yourself_up_until_your_arms_are_fully_extended_" formatted="false">Agafa les barres paral·leles i impulsa\&apos;t fins que els braços estiguin completament estesos.</string>
     <!-- Catalog equipment: gymnasticRings -->
     <string name="gymnastic_rings" formatted="false">Anelles de gimnàstica</string>
     <!-- Exercise hammerCurl: name -->
-    <string name="hammer_curl" formatted="false">Curl de martell</string>
+    <string name="hammer_curl" formatted="false">Rull de martell</string>
     <!-- Exercise hamstringCurl: name -->
-    <string name="hamstring_curl" formatted="false">Curl d\&apos;isquiotibials</string>
+    <string name="hamstring_curl" formatted="false">Flexió de cames</string>
     <!-- Catalog muscleGroups: hamstrings -->
     <string name="hamstrings" formatted="false">Isquiotibials</string>
     <!-- Exercise hamstringStretch: name -->
     <string name="hamstring_stretch" formatted="false">Estirament d\&apos;isquiotibials</string>
     <!-- Exercise handReleasePushUp: name -->
-    <string name="hand_release_push_up" formatted="false">Flexió amb alliberament de mans</string>
+    <string name="hand_release_push_up" formatted="false">Fons de braços amb alliberament de mans</string>
     <!-- Exercise hangingLegRaise: instruction 1 -->
-    <string name="hang_from_a_pull_up_bar_with_your_arms_fully_extended_and_a_shoulder_width_grip_" formatted="false">Penja d\&apos;una barra de dominades amb els braços completament estirats i les mans a l\&apos;amplada de les espatlles.</string>
+    <string name="hang_from_a_pull_up_bar_with_your_arms_fully_extended_and_a_shoulder_width_grip_" formatted="false">Penja\&apos;t amb els braços completament estesos.</string>
     <!-- Exercise hangingLegRaise: name -->
-    <string name="hanging_leg_raise" formatted="false">Elevació de cames penjant</string>
+    <string name="hanging_leg_raise" formatted="false">Elevació de cames en suspensió</string>
     <!-- Exercise chinUp: instruction 2 -->
     <string name="hang_with_your_arms_fully_extended_" formatted="false">Penja\&apos;t amb els braços completament estirats.</string>
     <!-- Exercise pullUp: instruction 2 -->
@@ -2985,9 +3116,9 @@
     <!-- Exercise boxingBagWork: description -->
     <string name="high_intensity_intervals_on_the_heavy_bag_build_cardiovascular_endurance__power__and_coordination_" formatted="false">Els intervals d\&apos;alta intensitat al sac de boxa desenvolupen la resistència cardiovascular, la potència i la coordinació.</string>
     <!-- Exercise highToLowCableFly: name -->
-    <string name="high_to_low_cable_fly" formatted="false">Apertures en polia d\&apos;alt a baix</string>
+    <string name="high_to_low_cable_fly" formatted="false">Obertures a la politja d\&apos;alt a baix</string>
     <!-- Exercise highKnees: name -->
-    <string name="high_knees" formatted="false">Genolls alts</string>
+    <string name="high_knees" formatted="false">Genolls amunt</string>
     <!-- Catalog exerciseCategories: hiit -->
     <string name="hiit" formatted="false">HIIT</string>
     <!-- Catalog movementPatterns: hinge -->
@@ -3007,7 +3138,7 @@
     <!-- Exercise dumbbellRomanianDeadlift: instruction 2 -->
     <string name="hinge_at_your_hips_and_lower_the_weights_toward_your_feet__keeping_your_back_flat_" formatted="false">Inclina\&apos;t des del maluc i baixa les peses cap als teus peus, mantenint l\&apos;esquena plana.</string>
     <!-- Exercise inchworm: instruction 2 -->
-    <string name="hinge_at_your_hips_and_place_your_hands_on_the_floor__bend_knees_slightly_if_needed__" formatted="false">Inclina\&apos;t des del maluc i col·loca les mans a terra (dobla lleugerament els genolls si cal).</string>
+    <string name="hinge_at_your_hips_and_place_your_hands_on_the_floor__bend_knees_slightly_if_needed__" formatted="false">Flexiona els malucs i recolza les mans a terra (flexiona lleugerament els genolls si cal).</string>
     <!-- Exercise hamstringStretch: instruction 2 -->
     <string name="hinge_at_your_hips_and_reach_toward_your_toes__keeping_your_back_flat_" formatted="false">Inclina\&apos;t des del maluc i estira\&apos;t cap als teus dits dels peus, mantenint l\&apos;esquena plana.</string>
     <!-- Catalog equipment: hipAbductionMachine -->
@@ -3021,7 +3152,7 @@
     <!-- Catalog muscleGroups: hips -->
     <string name="hips" formatted="false">Malucs</string>
     <!-- Exercise hipThrust: name -->
-    <string name="hip_thrust" formatted="false">Elevació de maluc</string>
+    <string name="hip_thrust" formatted="false">Empenta de malucs</string>
     <!-- Exercise threadTheNeedle: instruction 5 -->
     <string name="hold__then_return_to_center_and_repeat_on_the_other_side_" formatted="false">Mantén la posició, torna al centre i repeteix a l\&apos;altra banda.</string>
     <!-- Exercise singleArmDumbbellRow: instruction 2 -->
@@ -3127,7 +3258,7 @@
     <!-- Exercise jumpingJacks: instruction 3 -->
     <string name="jump_again_to_return_to_the_starting_position_" formatted="false">Salta de nou per tornar a la posició inicial.</string>
     <!-- Exercise jumpingJacks: name -->
-    <string name="jumping_jacks" formatted="false">Jumping Jacks</string>
+    <string name="jumping_jacks" formatted="false">Salts de tisora</string>
     <!-- Exercise jumpingJacks: instruction 2 -->
     <string name="jump_into_the_air_while_spreading_your_legs_to_shoulder_width_and_swinging_your_arms_over_your_head_" formatted="false">Salta a l\&apos;aire obrint les cames a l\&apos;amplada d\&apos;espatlles i balancejant els braços per sobre del cap.</string>
     <!-- Exercise jumpRope: instruction 2 -->
@@ -3221,7 +3352,7 @@
     <!-- Exercise outdoorRunning: instruction 4 -->
     <string name="keep_your_core_engaged_and_avoid_leaning_too_far_forward_or_backward_" formatted="false">Mantén el teu core actiu i evita inclinar-te massa cap endavant o cap enrere.</string>
     <!-- Exercise elliptical: instruction 3 -->
-    <string name="keep_your_core_engaged_and_your_back_straight_" formatted="false">Mantén el teu core actiu i mantén l\&apos;esquena recta.</string>
+    <string name="keep_your_core_engaged_and_your_back_straight_" formatted="false">Mantingues el core activat i l\&apos;esquena recta.</string>
     <!-- Exercise stepUp: tip 1 -->
     <string name="keep_your_core_engaged_and_your_chest_up_" formatted="false">Mantén el teu core actiu i mantén el pit aixecat.</string>
     <!-- Exercise stairClimber: instruction 4 -->
@@ -3369,7 +3500,7 @@
     <!-- Catalog equipment: kettlebells -->
     <string name="kettlebells" formatted="false">Peses russes</string>
     <!-- Exercise hipFlexorStretch: instruction 1 -->
-    <string name="kneel_on_one_knee_with_the_other_foot_flat_in_front_of_you__half_kneeling_position__" formatted="false">Agenolla\&apos;t sobre un genoll amb l\&apos;altre peu pla davant teu (posició de mig agenollat).</string>
+    <string name="kneel_on_one_knee_with_the_other_foot_flat_in_front_of_you__half_kneeling_position__" formatted="false">Agenolla\&apos;t sobre un genoll amb l\&apos;altre peu pla davant teu.</string>
     <!-- Exercise childsPose: instruction 1 -->
     <string name="kneel_on_the_floor_with_your_big_toes_touching_and_sit_on_your_heels_" formatted="false">Agenolla\&apos;t a terra amb els dits grossos dels peus tocant-se i seu sobre els talons.</string>
     <!-- Catalog movementRestrictions: kneePain -->
@@ -3385,19 +3516,19 @@
     <!-- Exercise jumpRope: instruction 3 -->
     <string name="land_softly_on_the_balls_of_your_feet_" formatted="false">Aterra suaument sobre les puntes dels peus.</string>
     <!-- Exercise outdoorRunning: instruction 3 -->
-    <string name="land_softly_on_the_midfoot_and_push_off_with_your_toes_" formatted="false">Aterra suaument sobre el medipeu i impulsa\&apos;t amb els dits dels peus.</string>
+    <string name="land_softly_on_the_midfoot_and_push_off_with_your_toes_" formatted="false">Aterra suaument sobre la part mitjana del peu i impulsa\&apos;t amb els dits.</string>
     <!-- Exercise burpee: tip 2 -->
-    <string name="land_softly_on_your_feet_after_the_jump_" formatted="false">Aterra suaument sobre els teus peus després del salt.</string>
+    <string name="land_softly_on_your_feet_after_the_jump_" formatted="false">Aterra suaument sobre els peus després del salt.</string>
     <!-- Exercise smithMachineSquat: instruction 4 -->
-    <string name="latch_the_bar_securely_after_completing_your_reps_" formatted="false">Bloqueja la barra amb seguretat un cop hagis acabat les repeticions.</string>
+    <string name="latch_the_bar_securely_after_completing_your_reps_" formatted="false">Bloqueja la barra amb seguretat després de completar les repeticions.</string>
     <!-- Exercise smithMachineBenchPress: instruction 4 -->
     <string name="latch_the_bar_securely_when_finished_" formatted="false">Bloqueja la barra amb seguretat quan hagis acabat.</string>
     <!-- Exercise lateralRaise: name -->
     <string name="lateral_raise" formatted="false">Elevació lateral</string>
     <!-- Exercise latPulldown: name -->
-    <string name="lat_pulldown" formatted="false">Jaló al pit</string>
+    <string name="lat_pulldown" formatted="false">Tracció de politja alta frontal</string>
     <!-- Exercise lateralRaise: tip 2 -->
-    <string name="lead_with_your_elbows__not_your_wrists_" formatted="false">Dirigeix el moviment amb els colzes, no amb els canells.</string>
+    <string name="lead_with_your_elbows__not_your_wrists_" formatted="false">Guia el moviment amb els colzes, no amb els canells.</string>
     <!-- Exercise russianTwist: instruction 2 -->
     <string name="lean_back_slightly__keeping_your_back_straight_and_core_engaged_" formatted="false">Inclina\&apos;t lleugerament cap enrere mantenint l\&apos;esquena recta i el core activat.</string>
     <!-- Exercise chestDip: instruction 2 -->
@@ -3479,9 +3610,9 @@
     <!-- Catalog goals: loseWeight -->
     <string name="lose_weight" formatted="false">Perdre pes</string>
     <!-- Exercise lowToHighCableFly: name -->
-    <string name="low_to_high_cable_fly" formatted="false">Obertures a polia de baix a dalt</string>
+    <string name="low_to_high_cable_fly" formatted="false">Obertures a la politja de baix a dalt</string>
     <!-- Catalog muscleGroups: lowerAbs -->
-    <string name="lower_abs" formatted="false">Abdomen inferior</string>
+    <string name="lower_abs" formatted="false">Obertures a la politja de baix a dalt</string>
     <!-- Catalog muscleGroups: lowerBack -->
     <string name="lower_back" formatted="false">Zona lumbar</string>
     <!-- Exercise calfRaise: instruction 4 -->
@@ -3501,7 +3632,7 @@
     <!-- Exercise smithMachineBentOverRow: instruction 4 -->
     <string name="lower_the_bar_back_down_and_repeat_" formatted="false">Baixa la barra de nou i repeteix.</string>
     <!-- Exercise bentOverRow: instruction 4 -->
-    <string name="lower_the_bar_back_to_the_starting_position_with_control_" formatted="false">Torna la barra a la posició inicial amb control.</string>
+    <string name="lower_the_bar_back_to_the_starting_position_with_control_" formatted="false">Baixa la barra de nou a la posició inicial amb control.</string>
     <!-- Exercise overheadPress: instruction 4 -->
     <string name="lower_the_bar_back_to_your_shoulders_with_control_" formatted="false">Baixa la barra de nou als teus espatlles amb control.</string>
     <!-- Exercise deadlift: tip 3 -->
@@ -3537,13 +3668,13 @@
     <!-- Exercise chestFly: instruction 2 -->
     <string name="lower_the_weights_out_to_the_sides_in_a_wide_arc__keeping_a_slight_bend_in_your_elbows_" formatted="false">Baixa les peses cap als costats en un arc ampli, mantenint una lleu flexió als colzes.</string>
     <!-- Exercise cableCurl: instruction 4 -->
-    <string name="lower_the_weight_under_control_until_your_elbows_are_fully_extended_again_" formatted="false">Baixa el pes amb control fins que els teus colzes estiguin completament estirats de nou.</string>
+    <string name="lower_the_weight_under_control_until_your_elbows_are_fully_extended_again_" formatted="false">Patada de glutis a màquina</string>
     <!-- Exercise dumbbellRomanianDeadlift: instruction 3 -->
-    <string name="lower_until_you_feel_a_good_stretch_in_your_hamstrings_" formatted="false">Baixa fins que sentis un bon estirament als isquiotibials.</string>
+    <string name="lower_until_you_feel_a_good_stretch_in_your_hamstrings_" formatted="false">Abducció de maluc a màquina</string>
     <!-- Exercise dumbbellSquat: instruction 3 -->
-    <string name="lower_until_your_thighs_are_parallel_to_the_floor_" formatted="false">Baixa fins que les teves cuixes siguin paral·leles al terra.</string>
+    <string name="lower_until_your_thighs_are_parallel_to_the_floor_" formatted="false">Adducció de maluc a màquina</string>
     <!-- Exercise tricepsDip: instruction 2 -->
-    <string name="lower_your_body_by_bending_your_elbows_until_your_upper_arms_are_at_least_parallel_to_the_floor_" formatted="false">Baixa el cos doblegant els colzes fins que els teus braços superiors siguin almenys paral·lels al terra.</string>
+    <string name="lower_your_body_by_bending_your_elbows_until_your_upper_arms_are_at_least_parallel_to_the_floor_" formatted="false">Obertures per a deltoides posteriors a màquina</string>
     <!-- Exercise airSquat: instruction 3 -->
     <string name="lower_your_body_until_your_thighs_are_at_least_parallel_to_the_floor_" formatted="false">Baixa el cos fins que les teves cuixes siguin almenys paral·leles al terra.</string>
     <!-- Exercise ringDip: instruction 2 -->
@@ -3579,9 +3710,9 @@
     <!-- Exercise machineHipAbduction: name -->
     <string name="machine_hip_abduction" formatted="false">Abducció de maluc a màquina</string>
     <!-- Exercise machineHipAdduction: name -->
-    <string name="machine_hip_adduction" formatted="false">Aducció de maluc a màquina</string>
+    <string name="machine_hip_adduction" formatted="false">Adducció de malucs en màquina</string>
     <!-- Exercise machineRearDeltFly: name -->
-    <string name="machine_rear_delt_fly" formatted="false">Apertura deltoide posterior (màquina)</string>
+    <string name="machine_rear_delt_fly" formatted="false">Obertures per a deltoides posteriors en màquina</string>
     <!-- Exercise pecDeckFly: tip 3 -->
     <string name="maintain_a_consistent__controlled_tempo_" formatted="false">Mantingues un ritme constant i controlat.</string>
     <!-- Exercise mountainClimber: instruction 4 -->
@@ -3597,13 +3728,13 @@
     <!-- Exercise skiErgWork: tip 2 -->
     <string name="maintain_a_flat_back_and_engaged_core_throughout_the_movement_" formatted="false">Mantingues l\&apos;esquena plana i el tronc activat durant tot el moviment.</string>
     <!-- Exercise boxingBagWork: instruction 4 -->
-    <string name="maintain_a_high_intensity_for_the_duration_of_the_round_" formatted="false">Mantingues una alta intensitat durant tota la ronda.</string>
+    <string name="maintain_a_high_intensity_for_the_duration_of_the_round_" formatted="false">Mantén una alta intensitat durant tota la ronda.</string>
     <!-- Exercise plank: tip 2 -->
-    <string name="maintain_a_neutral_neck_position__look_down_at_the_floor_" formatted="false">Mantingues una posició neutral del coll; mira cap al terra.</string>
+    <string name="maintain_a_neutral_neck_position__look_down_at_the_floor_" formatted="false">Mantén una posició neutra del coll; mira cap al terra.</string>
     <!-- Exercise gobletSquat: tip 3 -->
-    <string name="maintain_a_neutral_spine_and_avoid_rounding_your_back_" formatted="false">Mantingues la columna neutra i evita arrodonir l\&apos;esquena.</string>
+    <string name="maintain_a_neutral_spine_and_avoid_rounding_your_back_" formatted="false">Mantén la columna neutra i evita encorbar l\&apos;esquena.</string>
     <!-- Exercise dumbbellSquat: tip 2 -->
-    <string name="maintain_a_neutral_spine_and_avoid_rounding_your_shoulders_" formatted="false">Mantingues la columna neutra i evita arrodonir les espatlles.</string>
+    <string name="maintain_a_neutral_spine_and_avoid_rounding_your_shoulders_" formatted="false">Mantén la columna neutra i evita encorbar les espatlles.</string>
     <!-- Exercise airSquat: tip 3 -->
     <string name="maintain_a_neutral_spine_throughout_the_entire_movement_" formatted="false">Mantingues la columna neutra durant tot el moviment.</string>
     <!-- Exercise treadmillWalking: instruction 3 -->
@@ -3681,9 +3812,9 @@
     <!-- Exercise barbellFrontSquat: tip 2 -->
     <string name="maintain_a_tight_core_to_support_your_upright_posture_" formatted="false">Mantén el core contraigut per donar suport a la teva postura erguida.</string>
     <!-- Exercise chestPressMachine: tip 2 -->
-    <string name="maintain_contact_between_your_back_and_the_pad_at_all_times_" formatted="false">Mantén el contacte entre l\&apos;esquena i el coixí en tot moment.</string>
+    <string name="maintain_contact_between_your_back_and_the_pad_at_all_times_" formatted="false">Press militar</string>
     <!-- Exercise walkingLunge: tip 3 -->
-    <string name="maintain_your_balance_by_focusing_on_a_spot_in_front_of_you_" formatted="false">Mantén l\&apos;equilibri fixant la mirada en un punt davant teu.</string>
+    <string name="maintain_your_balance_by_focusing_on_a_spot_in_front_of_you_" formatted="false">Extensió de tríceps per sobre del cap</string>
     <!-- Catalog equipment: medicineBall -->
     <string name="medicine_ball" formatted="false">Pilota medicinal</string>
     <!-- Catalog exerciseCategories: mobility -->
@@ -3701,7 +3832,7 @@
     <!-- Exercise catCow: instruction 4 -->
     <string name="move_smoothly_between_the_two_positions__following_your_breath_" formatted="false">Mou-te suaument entre les dues posicions, seguint la teva respiració.</string>
     <!-- Exercise cableHipAbduction: instruction 3 -->
-    <string name="move_the_working_leg_out_to_the_side_against_the_cable_while_keeping_your_torso_mostly_still_" formatted="false">Mou la cama que treballa cap al costat contra el cable mentre mantens el tronc majoritàriament quiet.</string>
+    <string name="move_the_working_leg_out_to_the_side_against_the_cable_while_keeping_your_torso_mostly_still_" formatted="false">Obertures en màquina pec-deck</string>
     <!-- Exercise shoulderMobilityFlow: instruction 2 -->
     <string name="move_through_each_motion_slowly_and_through_its_full_range_of_motion_" formatted="false">Realitza cada moviment lentament i en tota la seva amplitud de moviment.</string>
     <!-- Exercise worldGreatestStretch: tip 1 -->
@@ -3715,7 +3846,7 @@
     <!-- Exercise bicycleCrunch: tip 3 -->
     <string name="move_with_control_rather_than_speed_for_better_muscle_engagement_" formatted="false">Mou-te amb control en comptes de velocitat per a una millor implicació muscular.</string>
     <!-- Catalog muscleGroups: neck -->
-    <string name="neck" formatted="false">Coll</string>
+    <string name="neck" formatted="false">Fons de braços en pica</string>
     <!-- Exercise neckCircles: name -->
     <string name="neck_circles" formatted="false">Rotacions de coll</string>
     <!-- Catalog movementRestrictions: neckPain -->
@@ -3739,7 +3870,7 @@
     <!-- Catalog movementRestrictions: overheadMovementLimitation -->
     <string name="overhead_movement_limitation" formatted="false">Limitació en moviments per sobre del cap</string>
     <!-- Exercise overheadPress: name -->
-    <string name="overhead_press" formatted="false">Press militar</string>
+    <string name="overhead_press" formatted="false">Press d\&apos;espatlles</string>
     <!-- Exercise overheadTricepsExtension: name -->
     <string name="overhead_triceps_extension" formatted="false">Extensió de tríceps per sobre del cap</string>
     <!-- Catalog targetMetrics: pace -->
@@ -3751,7 +3882,7 @@
     <!-- Exercise cableHipAbduction: instruction 4 -->
     <string name="pause_briefly__then_return_with_control_to_the_starting_position_" formatted="false">Fes una breu pausa, després torna amb control a la posició inicial.</string>
     <!-- Exercise inchworm: instruction 4 -->
-    <string name="pause_briefly__then_walk_your_feet_toward_your_hands_using_small_steps_while_keeping_legs_as_straight_as_possible_" formatted="false">Fes una breu pausa, després camina amb els peus cap a les teves mans amb passos petits, mantenint les cames tan rectes com sigui possible.</string>
+    <string name="pause_briefly__then_walk_your_feet_toward_your_hands_using_small_steps_while_keeping_legs_as_straight_as_possible_" formatted="false">Fes una pausa breu, després camina amb els peus cap a les mans amb passos petits, mantenint les cames tan rectes com sigui possible.</string>
     <!-- Exercise cableCurl: tip 3 -->
     <string name="pause_briefly_near_the_top_to_maximize_the_biceps_contraction_" formatted="false">Fes una breu pausa gairebé a la part superior per maximitzar la contracció del bíceps.</string>
     <!-- Exercise frontRaise: instruction 3 -->
@@ -3763,7 +3894,7 @@
     <!-- Exercise calfRaise: tip 2 -->
     <string name="pause_for_a_second_at_the_top_to_maximize_contraction_" formatted="false">Fes una pausa d\&apos;un segon a la part superior per maximitzar la contracció.</string>
     <!-- Exercise pecDeckFly: name -->
-    <string name="pec_deck_fly" formatted="false">Apertures a màquina (Pec Deck)</string>
+    <string name="pec_deck_fly" formatted="false">Obertures en màquina pec-deck</string>
     <!-- Catalog equipment: pecDeckMachine -->
     <string name="pec_deck_machine" formatted="false">Màquina Pec Deck</string>
     <!-- Exercise stationaryBike: instruction 3 -->
@@ -3779,17 +3910,17 @@
     <!-- Exercise armCircles: instruction 2 -->
     <string name="perform_small__controlled_circles_with_your_arms_in_a_forward_direction_" formatted="false">Realitza petits cercles controlats amb els braços en direcció cap endavant.</string>
     <!-- Exercise boxingBagWork: instruction 2 -->
-    <string name="perform_various_punches__jabs__crosses__hooks__uppercuts__against_the_heavy_bag_" formatted="false">Realitza diversos cops (jab, cross, hook, uppercut) contra el sac de boxa.</string>
+    <string name="perform_various_punches__jabs__crosses__hooks__uppercuts__against_the_heavy_bag_" formatted="false">Fes una sèrie de moviments controlats d\&apos;espatlles, com cercles de braços, rotacions d\&apos;espatlles i lliscaments a la paret.</string>
     <!-- Exercise pigeonPose: name -->
-    <string name="pigeon_pose" formatted="false">Postura del colom</string>
+    <string name="pigeon_pose" formatted="false">Fes cercles tant en sentit horari com antihorari.</string>
     <!-- Exercise pikePushUp: name -->
-    <string name="pike_push_up" formatted="false">Flexió pike</string>
+    <string name="pike_push_up" formatted="false">Fons de braços en pica</string>
     <!-- Exercise cableWoodchop: tip 2 -->
     <string name="pivot_your_back_foot_as_you_rotate_to_protect_your_knees_" formatted="false">Gira el peu posterior mentre gires per protegir els genolls.</string>
     <!-- Exercise cableExternalRotation: tip 1 -->
     <string name="place_a_towel_between_your_elbow_and_your_side_to_ensure_your_arm_stays_tucked_" formatted="false">Col·loca una tovallola entre el colze i el costat per assegurar que el braç es mantingui tancat.</string>
     <!-- Exercise stepUp: instruction 1 -->
-    <string name="place_one_foot_on_a_sturdy_bench_or_box_" formatted="false">Posa un peu sobre un banc o una caixa resistent.</string>
+    <string name="place_one_foot_on_a_sturdy_bench_or_box_" formatted="false">Col·loca un peu sobre un banc o caixó resistent.</string>
     <!-- Exercise thoracicRotation: instruction 2 -->
     <string name="place_one_hand_behind_your_head_" formatted="false">Col·loca una mà darrere del cap.</string>
     <!-- Exercise singleArmDumbbellRow: instruction 1 -->
@@ -3811,11 +3942,11 @@
     <!-- Exercise legExtension: instruction 2 -->
     <string name="place_your_shins_behind_the_padded_lever_" formatted="false">Col·loca les tíbies darrere de la palanca acolxada.</string>
     <!-- Exercise barbellFrontSquat: description -->
-    <string name="placing_the_barbell_on_the_front_of_the_shoulders_targets_the_quads_and_upper_back_more_intensely_" formatted="false">Col·locar la barra a la part frontal de les espatlles fa que els quàdriceps i la part superior de l\&apos;esquena s\&apos;activen més intensament.</string>
+    <string name="placing_the_barbell_on_the_front_of_the_shoulders_targets_the_quads_and_upper_back_more_intensely_" formatted="false">Col·loca un genoll i una mà sobre un banc com a suport, amb l\&apos;esquena plana.</string>
     <!-- Exercise plank: name -->
     <string name="plank" formatted="false">Planxa</string>
     <!-- Exercise hipThrust: instruction 2 -->
-    <string name="plant_your_feet_firmly_on_the_ground__about_shoulder_width_apart_" formatted="false">Col·loca els peus fermament a terra, a una distància aproximada a l\&apos;amplada de les espatlles.</string>
+    <string name="plant_your_feet_firmly_on_the_ground__about_shoulder_width_apart_" formatted="false">Recolza fermament els peus a terra, separats aproximadament a l\&apos;amplada de les espatlles.</string>
     <!-- Catalog equipment: plyoBox -->
     <string name="plyo_box" formatted="false">Caixa pliomètrica</string>
     <!-- Catalog movementPatterns: plyometric -->
@@ -3833,7 +3964,7 @@
     <!-- Exercise machineGluteKickback: instruction 1 -->
     <string name="position_yourself_in_the_machine_and_place_one_foot_on_the_platform_" formatted="false">Posiciona\&apos;t dins la màquina i posa un peu a la plataforma.</string>
     <!-- Exercise smithMachineSquat: instruction 1 -->
-    <string name="position_yourself_under_the_bar_with_your_feet_slightly_forward_and_shoulder_width_apart_" formatted="false">Posiciona\&apos;t sota la barra amb els peus lleugerament cap endavant i separats a l\&apos;amplada de les espatlles.</string>
+    <string name="position_yourself_under_the_bar_with_your_feet_slightly_forward_and_shoulder_width_apart_" formatted="false">Col·loca\&apos;t sota la barra amb els peus lleugerament cap endavant i separats a l\&apos;amplada de les espatlles.</string>
     <!-- Exercise barbellInclineBenchPress: description -->
     <string name="pressing_a_barbell_on_an_incline_bench_targets_the_upper_chest_and_shoulders_while_allowing_for_heavier_loads_" formatted="false">Pressionar una barra en un banc inclinat treballa la part superior del pit i les espatlles, permetent sovint càrregues més pesants.</string>
     <!-- Exercise dumbbellOverheadPress: description -->
@@ -3865,7 +3996,7 @@
     <!-- Exercise chestPressMachine: description -->
     <string name="provides_a_stable_and_controlled_way_to_target_the_chest_muscles_with_reduced_balance_requirements_" formatted="false">Proporciona una manera estable i controlada de treballar els músculs del pit amb menys requisits d\&apos;equilibri.</string>
     <!-- Exercise pullUp: name -->
-    <string name="pull_up" formatted="false">Dominada</string>
+    <string name="pull_up" formatted="false">Dominació</string>
     <!-- Exercise bentOverRow: instruction 3 -->
     <string name="pull_the_barbell_toward_your_lower_ribs__keeping_your_elbows_close_to_your_body_" formatted="false">Tira de la barra cap a les teves costelles baixes, mantenint els colzes a prop del cos.</string>
     <!-- Exercise latPulldown: instruction 3 -->
@@ -3899,7 +4030,7 @@
     <!-- Exercise facePull: instruction 3 -->
     <string name="pull_the_rope_toward_your_forehead__pulling_the_ends_apart_as_you_get_closer_to_your_face_" formatted="false">Tira de la corda cap al front, separant els extrems a mesura que s\&apos;acosta a la teva cara.</string>
     <!-- Exercise pullUp: instruction 3 -->
-    <string name="pull_your_chest_toward_the_bar_by_driving_your_elbows_down_toward_your_hips_" formatted="false">Tira el pit cap a la barra empenyent els colzes cap avall en direcció als malucs.</string>
+    <string name="pull_your_chest_toward_the_bar_by_driving_your_elbows_down_toward_your_hips_" formatted="false">Porta el pit cap a la barra dirigint els colzes cap avall en direcció als malucs.</string>
     <!-- Exercise suspensionRow: instruction 3 -->
     <string name="pull_your_chest_toward_the_handles_by_driving_your_elbows_back_" formatted="false">Tira el pit cap a les nanses empenyent els colzes cap enrere.</string>
     <!-- Exercise chinUp: instruction 3 -->
@@ -3907,7 +4038,7 @@
     <!-- Exercise highKnees: tip 3 -->
     <string name="pump_your_arms_to_help_maintain_momentum_" formatted="false">Balanceja els braços per ajudar a mantenir l\&apos;impuls.</string>
     <!-- Exercise pushUp: name -->
-    <string name="push_up" formatted="false">Flexió</string>
+    <string name="push_up" formatted="false">Fons de braços</string>
     <!-- Exercise worldGreatestStretch: instruction 5 -->
     <string name="push_back_into_a_hamstring_stretch_by_straightening_your_front_leg_and_lifting_your_toes_" formatted="false">Empeny cap enrere per fer un estirament dels isquiotibials estirant la cama davantera i aixecant els dits del peu.</string>
     <!-- Exercise pikePushUp: instruction 4 -->
@@ -3955,7 +4086,7 @@
     <!-- Exercise threadTheNeedle: instruction 2 -->
     <string name="reach_your_right_arm_under_your_body_to_the_left__sliding_the_back_of_your_hand_along_the_floor_" formatted="false">Porta el braç dret per sota del cos cap a l\&apos;esquerra, lliscant el dors de la mà pel terra.</string>
     <!-- Exercise rearDeltFly: name -->
-    <string name="rear_delt_fly" formatted="false">Pàjaros invertits (deltoides posteriors)</string>
+    <string name="rear_delt_fly" formatted="false">Obertures per a deltoides posteriors</string>
     <!-- Catalog equipment: rearDeltMachine -->
     <string name="rear_delt_machine" formatted="false">Màquina per a deltoides posteriors</string>
     <!-- Exercise wristCircles: tip 2 -->
@@ -3979,7 +4110,7 @@
     <!-- Exercise barbellFrontSquat: instruction 1 -->
     <string name="rest_the_barbell_across_the_front_of_your_shoulders__using_either_a__clean__grip_or_a__cross_arm__grip_" formatted="false">Reposa la barra sobre la part frontal de les espatlles, utilitzant l\&apos;agafada \&apos;clean\&apos; o l\&apos;agafada \&apos;cross-arm\&apos;.</string>
     <!-- Exercise deepSquatHold: instruction 3 -->
-    <string name="rest_your_elbows_on_the_inside_of_your_knees_to_gently_push_them_outward_" formatted="false">Reposa els colzes a la part interior dels genolls per empènyer-los suaument cap a fora.</string>
+    <string name="rest_your_elbows_on_the_inside_of_your_knees_to_gently_push_them_outward_" formatted="false">Recolza els colzes a la part interna dels genolls per empènyer-los suaument cap enfora.</string>
     <!-- Exercise childsPose: instruction 5 -->
     <string name="rest_your_forehead_on_the_floor_and_breathe_deeply_" formatted="false">Reposa el front a terra i respira profundament.</string>
     <!-- Exercise inchworm: instruction 5 -->
@@ -3997,9 +4128,9 @@
     <!-- Exercise reverseLunge: name -->
     <string name="reverse_lunge" formatted="false">Gambada enrere</string>
     <!-- Exercise ringDip: name -->
-    <string name="ring_dip" formatted="false">Dips amb anelles</string>
+    <string name="ring_dip" formatted="false">Fons amb anelles</string>
     <!-- Exercise romanianDeadlift: name -->
-    <string name="romanian_deadlift" formatted="false">Pes mort romanès</string>
+    <string name="barbell_romanian_deadlift" formatted="false">Pes mort romanès amb barra</string>
     <!-- Exercise ankleCircles: instruction 2 -->
     <string name="rotate_your_ankle_in_a_circular_motion__drawing_the_largest_circle_possible_with_your_toes_" formatted="false">Gira el turmell en un moviment circular, traçant el cercle més gran possible amb els dits del peu.</string>
     <!-- Exercise thoracicRotation: instruction 3 -->
@@ -4019,19 +4150,19 @@
     <!-- Exercise treadmillRunning: description -->
     <string name="running_on_a_treadmill_provides_a_consistent_surface_and_the_ability_to_track_metrics_easily_" formatted="false">Córrer a la cinta ofereix una superfície constant i la possibilitat de fer un seguiment de les mètriques fàcilment.</string>
     <!-- Exercise russianTwist: name -->
-    <string name="russian_twist" formatted="false">Giro rus</string>
+    <string name="russian_twist" formatted="false">Gir rus</string>
     <!-- Exercise scapularCircles: name -->
     <string name="scapular_circles" formatted="false">Rotacions escapulars</string>
     <!-- Exercise scorpions: name -->
-    <string name="scorpions" formatted="false">Escorpions</string>
+    <string name="scorpions" formatted="false">Escorpió</string>
     <!-- Exercise seatedCableRow: name -->
-    <string name="seated_cable_row" formatted="false">Rem assegut amb polea</string>
+    <string name="seated_cable_row" formatted="false">Rem assegut a la politja</string>
     <!-- Exercise seatedLegCurl: name -->
-    <string name="seated_leg_curl" formatted="false">Curl femoral assegut</string>
+    <string name="seated_leg_curl" formatted="false">Flexió de cames assegut</string>
     <!-- Exercise seatedMachineRow: name -->
-    <string name="seated_machine_row" formatted="false">Rem en màquina assegut</string>
+    <string name="seated_machine_row" formatted="false">Rem assegut en màquina</string>
     <!-- Catalog equipment: seatedRowMachine -->
-    <string name="seated_row_machine" formatted="false">Màquina de rem assegut</string>
+    <string name="seated_row_machine" formatted="false">Rem a màquina assegut</string>
     <!-- Exercise barbellDeclineBenchPress: instruction 1 -->
     <string name="secure_your_feet_in_the_decline_bench_and_lie_back_" formatted="false">Col·loca els peus al banc declinat i recosta\&apos;t.</string>
     <!-- Exercise childsPose: instruction 2 -->
@@ -4047,11 +4178,11 @@
     <!-- Exercise lowToHighCableFly: instruction 1 -->
     <string name="set_the_cable_pulleys_to_the_lowest_position_" formatted="false">Col·loca les politges del cable a la posició més baixa.</string>
     <!-- Exercise highToLowCableFly: description -->
-    <string name="setting_the_cables_high_and_pulling_downward_targets_the_lower_fibers_of_the_chest_" formatted="false">Col·locar els cables a dalt i tirar cap avall apunta a les fibres inferiors del pit.</string>
+    <string name="setting_the_cables_high_and_pulling_downward_targets_the_lower_fibers_of_the_chest_" formatted="false">Col·locar les politges a dalt i estirar cap avall treballa les fibres inferiors del pit.</string>
     <!-- Exercise lowToHighCableFly: description -->
-    <string name="setting_the_cables_low_and_pulling_upward_targets_the_upper_chest_and_front_deltoids_" formatted="false">Col·locar els cables a baix i tirar cap amunt apunta a la part superior del pit i als deltoides anteriors.</string>
+    <string name="setting_the_cables_low_and_pulling_upward_targets_the_upper_chest_and_front_deltoids_" formatted="false">Col·locar les politges a baix i estirar cap amunt treballa la part superior del pit i els deltoides anteriors.</string>
     <!-- Exercise bayesianCableCurl: tip 1 -->
-    <string name="set_up_enough_distance_from_the_machine_to_feel_a_stretch_in_the_biceps_at_the_bottom_" formatted="false">Col·loca\&apos;t a una distància suficient de la màquina per sentir un estirament al bíceps en la part baixa.</string>
+    <string name="set_up_enough_distance_from_the_machine_to_feel_a_stretch_in_the_biceps_at_the_bottom_" formatted="false">Allunya\&apos;t prou de la màquina per sentir un estirament al bíceps a la part baixa.</string>
     <!-- Exercise shoulderMobilityFlow: name -->
     <string name="shoulder_mobility_flow" formatted="false">Seqüència de mobilitat d\&apos;espatlles</string>
     <!-- Catalog movementRestrictions: shoulderPain -->
@@ -4111,15 +4242,15 @@
     <!-- Exercise seatedMachineRow: instruction 2 -->
     <string name="sit_with_your_chest_against_the_pad_and_grip_the_handles_" formatted="false">Seu amb el pit recolzat contra el coixí i agafa les empunyadures.</string>
     <!-- Exercise seatedCableRow: instruction 1 -->
-    <string name="sit_with_your_feet_on_the_platforms_and_your_knees_slightly_bent_" formatted="false">Seu amb els peus sobre les plataformes i els genolls lleugerament flexionats.</string>
+    <string name="sit_with_your_feet_on_the_platforms_and_your_knees_slightly_bent_" formatted="false">Seu amb els peus a les plataformes i els genolls lleugerament flexionats.</string>
     <!-- Catalog equipment: skiErg -->
     <string name="ski_erg" formatted="false">SkiErg</string>
     <!-- Exercise skiErgWork: name -->
     <string name="skierg" formatted="false">SkiErg</string>
     <!-- Exercise cableHipAbduction: tip 3 -->
-    <string name="slightly_turn_the_toes_forward_to_better_target_the_glute_medius_" formatted="false">Gira lleugerament les puntes dels peus cap endavant per activar millor el glutis mitjà.</string>
+    <string name="slightly_turn_the_toes_forward_to_better_target_the_glute_medius_" formatted="false">Gira lleugerament les puntes dels peus cap endavant per activar millor el gluti mitjà.</string>
     <!-- Exercise machineHipAdduction: instruction 4 -->
-    <string name="slowly_allow_your_legs_to_return_to_the_starting_position_" formatted="false">Deixa que les teves cames tornin lentament a la posició inicial.</string>
+    <string name="slowly_allow_your_legs_to_return_to_the_starting_position_" formatted="false">Deixa que les cames tornin lentament a la posició inicial.</string>
     <!-- Exercise machineHipAbduction: instruction 4 -->
     <string name="slowly_bring_your_legs_back_together_" formatted="false">Torna a ajuntar les cames lentament.</string>
     <!-- Exercise birdDog: instruction 2 -->
@@ -4141,13 +4272,13 @@
     <!-- Exercise latPulldown: instruction 4 -->
     <string name="slowly_return_the_bar_to_the_starting_position_" formatted="false">Retorna lentament la barra a la posició inicial.</string>
     <!-- Exercise chestPressMachine: instruction 4 -->
-    <string name="slowly_return_the_handles_to_the_starting_position_" formatted="false">Retorna lentament les nanses a la posició inicial.</string>
+    <string name="slowly_return_the_handles_to_the_starting_position_" formatted="false">Retorna lentament les empunyadures a la posició inicial.</string>
     <!-- Exercise seatedLegCurl: instruction 4 -->
     <string name="slowly_return_the_lever_to_the_starting_position_" formatted="false">Retorna lentament la palanca a la posició inicial.</string>
     <!-- Exercise tricepsPushdown: instruction 4 -->
     <string name="slowly_return_to_the_90_degree_starting_position_" formatted="false">Torna lentament a la posició inicial de 90 graus.</string>
     <!-- Exercise cableRearDeltFly: instruction 4 -->
-    <string name="slowly_return_to_the_starting_position__maintaining_tension_" formatted="false">Torna lentament a la posició inicial mantenint la tensió.</string>
+    <string name="slowly_return_to_the_starting_position__maintaining_tension_" formatted="false">Torna lentament a la posició inicial, mantenint la tensió.</string>
     <!-- Exercise cableFly: instruction 4 -->
     <string name="slowly_return_to_the_starting_position_" formatted="false">Torna lentament a la posició inicial.</string>
     <!-- Exercise machineGluteKickback: instruction 4 -->
@@ -4173,7 +4304,7 @@
     <!-- Exercise smithMachineInclineBenchPress: name -->
     <string name="smith_machine_incline_bench_press" formatted="false">Press de banca inclinat a la màquina Smith</string>
     <!-- Exercise smithMachineOverheadPress: name -->
-    <string name="smith_machine_overhead_press" formatted="false">Press per sobre del cap a la màquina Smith</string>
+    <string name="smith_machine_overhead_press" formatted="false">Press d\&apos;espatlles en màquina Smith</string>
     <!-- Exercise smithMachineSquat: name -->
     <string name="smith_machine_squat" formatted="false">Esquat a la màquina Smith</string>
     <!-- Exercise scapularCircles: instruction 6 -->
@@ -4187,7 +4318,7 @@
     <!-- Exercise barbellFrontSquat: instruction 3 -->
     <string name="squat_down_by_pushing_your_hips_back_and_bending_your_knees_" formatted="false">Baixa fent squat, empenyent els malucs cap enrere i doblegant els genolls.</string>
     <!-- Exercise squatJump: name -->
-    <string name="squat_jump" formatted="false">Salt de squat</string>
+    <string name="squat_jump" formatted="false">Esquat amb salt</string>
     <!-- Catalog equipment: squatRack -->
     <string name="squat_rack" formatted="false">Rack per squat</string>
     <!-- Exercise smithMachineSquat: description -->
@@ -4335,7 +4466,7 @@
     <!-- Exercise boxingBagWork: instruction 3 -->
     <string name="stay_light_on_your_feet_and_move_around_the_bag_" formatted="false">Mantingues els peus lleugers i mou-te al voltant del sac.</string>
     <!-- Exercise stepUp: name -->
-    <string name="step_up" formatted="false">Step-Up</string>
+    <string name="step_up" formatted="false">Pujada al calaix</string>
     <!-- Exercise reverseLunge: description -->
     <string name="step_backward_into_a_lunge_to_target_the_glutes_and_hamstrings_with_less_knee_pressure_" formatted="false">Fes un pas enrere en una estocada per treballar glutis i isquiotibials amb menys pressió al genoll.</string>
     <!-- Exercise reverseLunge: instruction 2 -->
@@ -4359,7 +4490,7 @@
     <!-- Exercise treadmillWalking: instruction 1 -->
     <string name="step_onto_the_treadmill_and_attach_the_safety_clip_to_your_clothing_" formatted="false">Puja a la cinta i fixa la pinça de seguretat a la teva roba.</string>
     <!-- Exercise stairClimber: instruction 3 -->
-    <string name="step_with_your_whole_foot_and_push_through_your_heels_to_engage_the_glutes_" formatted="false">Posa tot el peu i empeny amb els talons per activar els glutis.</string>
+    <string name="step_with_your_whole_foot_and_push_through_your_heels_to_engage_the_glutes_" formatted="false">Recolza tot el peu i empeny amb els talons per activar els glutis.</string>
     <!-- Exercise worldGreatestStretch: instruction 2 -->
     <string name="step_your_right_foot_forward_to_the_outside_of_your_right_hand_" formatted="false">Mou el peu dret cap endavant, fora de la teva mà dreta.</string>
     <!-- Exercise cableUprightRow: instruction 4 -->
@@ -4391,9 +4522,9 @@
     <!-- Exercise legSwings: instruction 2 -->
     <string name="swing_one_leg_forward_and_backward_in_a_controlled_motion__increasing_the_range_as_you_go_" formatted="false">Balanceja una cama endavant i enrere amb un moviment controlat, augmentant l\&apos;amplitud progressivament.</string>
     <!-- Exercise walking: instruction 2 -->
-    <string name="swing_your_arms_naturally_and_slightly_with_each_step_" formatted="false">Balanceja els braços de manera natural i lleu amb cada pas.</string>
+    <string name="swing_your_arms_naturally_and_slightly_with_each_step_" formatted="false">Balanceja els braços de manera natural a cada pas.</string>
     <!-- Exercise squatJump: tip 3 -->
-    <string name="swing_your_arms_to_help_generate_upward_power_" formatted="false">Balanceja els braços per ajudar a generar potència cap amunt.</string>
+    <string name="swing_your_arms_to_help_generate_upward_power_" formatted="false">Balanceja els braços per ajudar a generar impuls cap amunt.</string>
     <!-- Exercise ankleCircles: instruction 4 -->
     <string name="switch_feet_and_repeat_" formatted="false">Canvia els peus i repeteix.</string>
     <!-- Exercise legSwings: instruction 4 -->
@@ -4467,11 +4598,11 @@
     <!-- Catalog muscleGroups: triceps -->
     <string name="triceps" formatted="false">Tríceps</string>
     <!-- Exercise tricepsDip: name -->
-    <string name="triceps_dip" formatted="false">Dip de tríceps</string>
+    <string name="triceps_dip" formatted="false">Fons de tríceps</string>
     <!-- Exercise tricepsPushdown: name -->
-    <string name="triceps_pushdown" formatted="false">Extensió de tríceps en polea</string>
+    <string name="triceps_pushdown" formatted="false">Extensió de tríceps a la politja</string>
     <!-- Exercise stepUp: tip 2 -->
-    <string name="try_not_to_push_off_the_floor_with_your_trailing_foot__let_the_elevated_leg_do_the_work_" formatted="false">Intenta no impulsar-te amb el peu que queda enrere; deixa que la cama elevada faci la feina.</string>
+    <string name="try_not_to_push_off_the_floor_with_your_trailing_foot__let_the_elevated_leg_do_the_work_" formatted="false">Intenta no impulsar-te amb el peu del darrere; deixa que la cama elevada faci la feina.</string>
     <!-- Exercise scorpions: instruction 3 -->
     <string name="try_to_touch_the_floor_with_your_right_foot_while_keeping_your_chest_and_arms_as_flat_as_possible_" formatted="false">Intenta tocar el terra amb el peu dret mentre mantens el pit i els braços el més plans possible.</string>
     <!-- Exercise ringDip: instruction 4 -->
@@ -4499,7 +4630,7 @@
     <!-- Exercise cableCrunchPress: tip 3 -->
     <string name="use_a_controlled_load_that_lets_you_fully_shorten_the_abs_on_every_rep_" formatted="false">Utilitza una càrrega controlada que et permeti contraure completament els abdominals a cada repetició.</string>
     <!-- Exercise machineHipAbduction: tip 2 -->
-    <string name="use_a_controlled_tempo_for_both_the_opening_and_closing_phases_" formatted="false">Utilitza un ritme controlat tant en la fase d\&apos;obertura com en la de tancament.</string>
+    <string name="use_a_controlled_tempo_for_both_the_opening_and_closing_phases_" formatted="false">Hauries de notar l\&apos;estirament a la part frontal del maluc agenollat.</string>
     <!-- Exercise overheadTricepsExtension: tip 3 -->
     <string name="use_a_controlled_tempo_to_avoid_hitting_your_head_or_neck_" formatted="false">Utilitza un ritme controlat per evitar colpejar-te el cap o el coll.</string>
     <!-- Exercise cableHipAdduction: tip 3 -->
@@ -4513,9 +4644,9 @@
     <!-- Exercise barbellInclineBenchPress: tip 3 -->
     <string name="use_a_spotter_for_safety_" formatted="false">Utilitza un spotter per seguretat.</string>
     <!-- Exercise barbellBackSquat: tip 3 -->
-    <string name="use_a_squat_rack_and_a_spotter_for_safety_when_lifting_heavy_" formatted="false">Utilitza un rack per a squats i un spotter per seguretat quan aixequis molt de pes.</string>
+    <string name="use_a_squat_rack_and_a_spotter_for_safety_when_lifting_heavy_" formatted="false">Fes servir una gàbia de força i un ajudant per seguretat quan aixequis molt de pes.</string>
     <!-- Exercise cableExternalRotation: tip 2 -->
-    <string name="use_a_very_light_weight__this_is_about_joint_health_and_stability__not_maximum_load_" formatted="false">Fes servir un pes molt lleuger; es tracta de la salut i estabilitat de les articulacions, no de la càrrega màxima.</string>
+    <string name="use_a_very_light_weight__this_is_about_joint_health_and_stability__not_maximum_load_" formatted="false">Fes servir un pes molt lleuger; es tracta de la salut i l\&apos;estabilitat de les articulacions, no de la càrrega màxima.</string>
     <!-- Exercise facePull: tip 3 -->
     <string name="use_lighter_weights_and_focus_on_the_quality_of_the_contraction_" formatted="false">Fes servir pesos més lleugers i centra\&apos;t en la qualitat de la contracció.</string>
     <!-- Exercise bayesianCableCurl: tip 3 -->
@@ -4557,7 +4688,7 @@
     <!-- Exercise walking: name -->
     <string name="walking" formatted="false">Caminar</string>
     <!-- Exercise walkingLunge: name -->
-    <string name="walking_lunge" formatted="false">Estocada caminant</string>
+    <string name="walking_lunge" formatted="false">Gambada amb desplaçament</string>
     <!-- Exercise treadmillWalking: description -->
     <string name="walking_on_a_treadmill_allows_for_precise_control_of_pace_and_incline_in_a_controlled_environment_" formatted="false">Caminar a la cinta de córrer permet un control precís del ritme i de la inclinació en un entorn controlat.</string>
     <!-- Exercise inchworm: instruction 3 -->
@@ -4571,7 +4702,7 @@
     <!-- Exercise childsPose: tip 1 -->
     <string name="widen_your_knees_further_to_make_more_room_for_your_torso_if_needed_" formatted="false">Obre més els genolls, si cal, per fer més espai per al tronc.</string>
     <!-- Exercise worldGreatestStretch: name -->
-    <string name="world_s_greatest_stretch" formatted="false">L\&apos;estirament definitiu</string>
+    <string name="world_s_greatest_stretch" formatted="false">Millor estirament del món</string>
     <!-- Exercise wristCircles: name -->
     <string name="wrist_circles" formatted="false">Cercles de canell</string>
     <!-- Catalog movementRestrictions: wristPain -->
@@ -4581,7 +4712,7 @@
     <!-- Exercise wristCircles: instruction 4 -->
     <string name="you_can_also_interlace_your_fingers_and_rotate_your_wrists_together_" formatted="false">També pots entrellaçar els dits i girar els canells junts.</string>
     <!-- Exercise hipFlexorStretch: tip 2 -->
-    <string name="you_should_feel_the_stretch_in_the_front_of_your_kneeling_hip_" formatted="false">Hauries de notar l\&apos;estirament a la part frontal del maluc de la cama que està agenollada.</string>
+    <string name="you_should_feel_the_stretch_in_the_front_of_your_kneeling_hip_" formatted="false">Press inclinat amb manuelles</string>
     <!-- dumbbellInclineBenchPress -->
     <string name="dumbbell_incline_bench_press" formatted="false">Press inclinat amb manuelles</string>
     <!-- dumbbellInclineBenchPress -->
@@ -4597,9 +4728,9 @@
     <!-- dumbbellInclineBenchPress -->
     <string name="use_a_moderate_incline_to_keep_the_emphasis_on_your_upper_chest_" formatted="false">Utilitza una inclinació moderada per mantenir l\&apos;accent en la part superior del pit.</string>
     <!-- dumbbellInclineBenchPress -->
-    <string name="keep_your_wrists_stacked_over_your_elbows_throughout_the_press_" formatted="false">Mantingues els canells alineats sobre els colzes durant tot el press.</string>
+    <string name="keep_your_wrists_stacked_over_your_elbows_throughout_the_press_" formatted="false">Tracció de dorsals a la politja</string>
     <!-- cableLatPushdown -->
-    <string name="cable_lat_pushdown" formatted="false">Jaló de dorsals amb polea</string>
+    <string name="cable_lat_pushdown" formatted="false">Tracció de dorsals a la politja (braços estesos)</string>
     <!-- cableLatPushdown desc -->
     <string name="a_standing_cable_exercise_that_trains_the_lats_through_shoulder_extension_while_keeping_the_arms_nearly_straight_" formatted="false">Un exercici de peu amb polea que treballa els dorsals mitjançant l\&apos;extensió de l\&apos;espatlla, mantenint els braços gairebé estesos.</string>
     <!-- cableLatPushdown howto -->
@@ -4617,9 +4748,9 @@
     <!-- cableLatPushdown tip -->
     <string name="use_a_controlled_range_that_lets_you_feel_your_lats_stretch_at_the_top_and_contract_near_your_thighs_" formatted="false">Fes servir un rang controlat que et permeti sentir els dorsals estirar-se a la part alta i contraure\&apos;s a prop de les cuixes.</string>
     <!-- cableLatPushdown llm -->
-    <string name="straight_arm_cable_pulldown_or_lat_pushdown__keep_the_elbows_nearly_straight_and_pull_toward_the_thighs_" formatted="false">Jaló amb polea amb els braços estirats o empenta de dorsals; mantén els colzes gairebé rectes i tira cap a les cuixes.</string>
+    <string name="straight_arm_cable_pulldown_or_lat_pushdown__keep_the_elbows_nearly_straight_and_pull_toward_the_thighs_" formatted="false">Elevació de cames en decúbit supí</string>
     <!-- lyingLegRaise -->
-    <string name="lying_leg_raise" formatted="false">Elevació de cames estirat</string>
+    <string name="lying_leg_raise" formatted="false">Elevació de cames en decúbit supí</string>
     <!-- lyingLegRaise desc -->
     <string name="a_floor_based_core_exercise_that_trains_the_abs_to_control_the_pelvis_while_the_legs_move_through_hip_flexion_" formatted="false">Un exercici de core a terra que entrena els abdominals per controlar la pelvis mentre les cames es mouen amb flexió de maluc.</string>
     <!-- lyingLegRaise howto -->
@@ -4638,4 +4769,349 @@
     <string name="move_slowly_and_avoid_swinging_your_legs_so_your_abs__not_momentum__control_the_movement_" formatted="false">Mou-te lentament i evita balancejar les cames perquè siguin els teus abdominals, no l\&apos;impuls, els que controlin el moviment.</string>
     <!-- lyingLegRaise llm -->
     <string name="floor_based_leg_raise_that_involves_the_hip_flexors__cue_pelvic_control_and_regress_to_bent_knees_when_the_lower_back_arches_" formatted="false">Elevació de cames al terra que implica els flexors del maluc; indica control pèlvic i torna a la variant amb genolls flexionats quan la zona lumbar s\&apos;arequi.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="rope_triceps_pushdown" formatted="false">Extensió de tríceps a la politja amb corda</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="a_rope_cable_pushdown_that_isolates_the_triceps_and_allows_a_strong_contraction_at_the_bottom_of_each_rep_" formatted="false">Un exercici d’extensió de tríceps a la politja amb corda que aïlla els tríceps i permet una contracció intensa al final de cada repetició.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="attach_a_rope_to_a_high_cable_pulley_and_stand_facing_the_machine_" formatted="false">Connecta una corda a una politja alta i posa’t dret mirant cap a la màquina.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="grip_the_rope_ends_with_a_neutral_grip_and_keep_your_elbows_close_to_your_sides_" formatted="false">Agafa els extrems de la corda amb una presa neutra i mantén els colzes a prop dels costats.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="press_the_rope_down_until_your_elbows_are_fully_extended__separating_the_rope_ends_slightly_at_the_bottom_" formatted="false">Empeny la corda cap avall fins que els colzes estiguin completament estesos i separa’n lleugerament els extrems al final del moviment.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="return_the_rope_under_control_until_your_forearms_are_just_above_parallel_to_the_floor_" formatted="false">Torna a pujar la corda de manera controlada fins que els avantbraços quedin just per sobre de l’horitzontal.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="keep_your_shoulders_down_and_your_upper_arms_still_throughout_the_movement_" formatted="false">Mantén les espatlles baixes i els braços quiets durant tot el moviment.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="avoid_leaning_your_body_weight_into_the_cable_to_move_the_load_" formatted="false">Evita inclinar-te sobre el cable per moure la càrrega amb el pes del cos.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="use_a_full_but_controlled_range_of_motion_without_locking_the_elbows_aggressively_" formatted="false">Fes el moviment amb un recorregut complet però controlat, sense bloquejar els colzes bruscament.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="reverse_pec_deck" formatted="false">Obertures inverses a la màquina</string>
+    <!-- Reverse Pec Deck -->
+    <string name="a_reverse_fly_performed_on_a_pec_deck_machine_to_isolate_the_rear_deltoids_and_upper_back_" formatted="false">Un exercici d’obertures inverses a la màquina per aïllar els deltoides posteriors i la part superior de l’esquena.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="set_the_pec_deck_arms_behind_you_and_sit_facing_the_pad_with_your_chest_supported_" formatted="false">Col·loca els braços de la màquina darrere teu i seu mirant cap al suport, amb el pit recolzat al coixinet.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="grip_the_handles_with_your_arms_extended_in_front_of_you_at_shoulder_height_" formatted="false">Agafa les nanses amb els braços estesos davant teu a l’altura de les espatlles.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="open_your_arms_in_a_wide_arc_until_they_are_in_line_with_your_torso_" formatted="false">Obre els braços seguint un arc ampli fins que quedin alineats amb el tors.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="squeeze_your_rear_delts__then_return_slowly_to_the_starting_position_" formatted="false">Tensa els deltoides posteriors i torna lentament a la posició inicial.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="keep_your_chest_firmly_against_the_pad_throughout_the_set_" formatted="false">Mantén el pit ben recolzat al coixinet durant tota la sèrie.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="lead_with_your_elbows_and_avoid_shrugging_your_shoulders_upward_" formatted="false">Guia el moviment amb els colzes i evita encongir les espatlles.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="use_a_controlled_tempo_and_avoid_letting_the_weight_stack_touch_between_reps_" formatted="false">Mantén un ritme controlat i evita que les plaques de pes es toquin entre repeticions.</string>
+    <!-- Spider Curl -->
+    <string name="spider_curl" formatted="false">Curl aranya</string>
+    <!-- Spider Curl -->
+    <string name="a_chest_supported_curl_performed_face_down_on_an_incline_bench_to_isolate_the_biceps_and_limit_momentum_" formatted="false">Un curl amb el pit recolzat, fet de bocaterrosa en un banc inclinat per aïllar els bíceps i limitar l’impuls.</string>
+    <!-- Spider Curl -->
+    <string name="set_an_adjustable_bench_to_a_steep_incline_and_lie_face_down_with_your_chest_against_the_pad_" formatted="false">Col·loca un banc ajustable amb una inclinació pronunciada i estira’t de bocaterrosa amb el pit recolzat al respatller.</string>
+    <!-- Spider Curl -->
+    <string name="let_your_arms_hang_straight_toward_the_floor_while_holding_dumbbells_with_palms_facing_forward_" formatted="false">Deixa que els braços pengin rectes cap a terra mentre subjectes les manuelles amb els palmells mirant endavant.</string>
+    <!-- Spider Curl -->
+    <string name="curl_the_weights_toward_your_shoulders_without_letting_your_elbows_travel_forward_" formatted="false">Flexiona els braços i porta els pesos cap a les espatlles sense deixar que els colzes avancin.</string>
+    <!-- Spider Curl -->
+    <string name="lower_the_dumbbells_slowly_until_your_arms_are_fully_extended_again_" formatted="false">Baixa les manuelles lentament fins que tornis a tenir els braços completament estirats.</string>
+    <!-- Spider Curl -->
+    <string name="keep_your_upper_arms_perpendicular_to_the_floor_throughout_the_movement_" formatted="false">Mantén els braços perpendiculars a terra durant tot el moviment.</string>
+    <!-- Spider Curl -->
+    <string name="use_lighter_loads_than_in_standing_curls_to_keep_the_movement_strict_" formatted="false">Fes servir menys pes que en els curls de peu per mantenir una execució estricta.</string>
+    <!-- Spider Curl -->
+    <string name="pause_briefly_at_the_top_without_lifting_your_chest_from_the_bench_" formatted="false">Fes una breu pausa a dalt sense aixecar el pit del banc.</string>
+    <!-- Preacher Curl -->
+    <string name="preacher_curl" formatted="false">Curl predicador</string>
+    <!-- Preacher Curl -->
+    <string name="a_supported_curl_that_keeps_the_upper_arms_fixed_to_isolate_the_biceps_through_a_controlled_range_of_motion_" formatted="false">Un curl amb suport que manté els braços fixos per aïllar els bíceps al llarg d\&apos;un recorregut controlat.</string>
+    <!-- Preacher Curl -->
+    <string name="set_up_an_angled_preacher_support_or_an_adjustable_bench_so_your_upper_arms_rest_securely_on_the_pad_" formatted="false">Ajusta un banc predicador o un banc regulable perquè els braços descansin fermament sobre el suport.</string>
+    <!-- Preacher Curl -->
+    <string name="hold_an_ez_bar_with_an_underhand_grip_and_begin_with_your_arms_almost_fully_extended_" formatted="false">Agafa una barra EZ amb les mans en supinació i comença amb els braços gairebé del tot estirats.</string>
+    <!-- Preacher Curl -->
+    <string name="curl_the_bar_toward_your_shoulders_while_keeping_your_upper_arms_against_the_support_" formatted="false">Flexiona els braços i porta la barra cap a les espatlles mantenint els braços recolzats al suport.</string>
+    <!-- Preacher Curl -->
+    <string name="lower_the_bar_slowly_until_you_feel_a_stretch_in_your_biceps_without_forcing_your_elbows_straight_" formatted="false">Baixa la barra lentament fins que notis que s\&apos;estiren els bíceps, sense forçar l\&apos;extensió dels colzes.</string>
+    <!-- Preacher Curl -->
+    <string name="keep_your_wrists_neutral_and_avoid_bending_them_back_under_load_" formatted="false">Mantén els canells en una posició neutra i evita doblegar-los cap enrere quan aixequis pes.</string>
+    <!-- Preacher Curl -->
+    <string name="do_not_bounce_the_bar_from_the_bottom_position_" formatted="false">No deixis que la barra reboti a la posició més baixa.</string>
+    <!-- Preacher Curl -->
+    <string name="use_a_controlled_range_and_stop_short_of_painful_elbow_extension_" formatted="false">Controla el recorregut i atura\&apos;t abans d\&apos;estendre els colzes fins a un punt dolorós.</string>
+    <!-- Hack Squat -->
+    <string name="hack_squat" formatted="false">Esquat hack</string>
+    <!-- Hack Squat -->
+    <string name="a_guided_squat_machine_that_lets_you_train_the_quads_and_glutes_with_high_stability_and_minimal_balance_demand_" formatted="false">Una màquina guiada per fer esquats que permet entrenar els quàdriceps i els glutis amb molta estabilitat i poca exigència d\&apos;equilibri.</string>
+    <!-- Hack Squat -->
+    <string name="set_the_shoulder_pads_so_you_can_stand_tall_with_your_back_supported_against_the_pad_" formatted="false">Ajusta els coixinets de les espatlles perquè puguis estar dret amb l\&apos;esquena recolzada al respatller.</string>
+    <!-- Hack Squat -->
+    <string name="place_your_feet_shoulder_width_apart_on_the_platform__slightly_forward_of_your_hips_" formatted="false">Col·loca els peus a la plataforma separats a l\&apos;amplada de les espatlles i una mica per davant dels malucs.</string>
+    <!-- Hack Squat -->
+    <string name="unlock_the_safety_handles_and_lower_under_control_by_bending_your_knees_and_hips_" formatted="false">Desbloqueja els topalls de seguretat i baixa de manera controlada flexionant els genolls i els malucs.</string>
+    <!-- Hack Squat -->
+    <string name="drive_through_your_whole_feet_to_return_to_the_start_without_forcefully_locking_your_knees_" formatted="false">Empeny amb tota la planta dels peus per tornar a la posició inicial, sense bloquejar els genolls de cop.</string>
+    <!-- Hack Squat -->
+    <string name="keep_your_lower_back_in_contact_with_the_pad_throughout_the_movement_" formatted="false">Mantén la zona lumbar en contacte amb el respatller durant tot el moviment.</string>
+    <!-- Hack Squat -->
+    <string name="use_a_foot_position_that_lets_your_knees_track_comfortably_in_line_with_your_toes_" formatted="false">Col·loca els peus de manera que els genolls segueixin còmodament la línia dels dits.</string>
+    <!-- Hack Squat -->
+    <string name="control_the_bottom_position_and_use_the_safety_stops_at_an_appropriate_depth_" formatted="false">Controla la posició més baixa i utilitza els topalls de seguretat a una profunditat adequada.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="machine_hip_thrust" formatted="false">Empenta de maluc a màquina</string>
+    <!-- Machine Hip Thrust -->
+    <string name="a_guided_hip_thrust_machine_that_loads_the_glutes_directly_while_providing_a_stable_and_comfortable_setup_" formatted="false">Una màquina guiada d\&apos;empenta de maluc que treballa directament els glutis i ofereix una posició estable i còmoda.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="adjust_the_back_pad_and_belt_or_hip_pad_so_it_rests_securely_across_your_hips_" formatted="false">Ajusta el respatller i el cinturó o el coixinet per als malucs perquè quedi ben col·locat sobre els malucs.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="plant_your_feet_about_shoulder_width_apart_with_your_knees_bent_at_roughly_90_degrees_at_the_top_" formatted="false">Col·loca els peus separats aproximadament a l\&apos;amplada de les espatlles. A dalt, els genolls han d\&apos;estar flexionats uns 90 graus.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="drive_through_your_heels_to_extend_your_hips_until_your_torso_and_thighs_form_a_straight_line_" formatted="false">Empeny amb els talons i estén els malucs fins que el tors i les cuixes formin una línia recta.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="squeeze_your_glutes_at_the_top__then_lower_the_load_under_control_" formatted="false">Estreny els glutis a dalt i després baixa la càrrega de manera controlada.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="keep_your_ribs_down_and_avoid_overextending_your_lower_back_at_the_top_" formatted="false">Mantén les costelles avall i evita hiperestendre la zona lumbar a dalt.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="position_your_feet_so_you_feel_the_movement_primarily_in_your_glutes_rather_than_your_hamstrings_" formatted="false">Col·loca els peus de manera que notis el moviment principalment als glutis i no als isquiotibials.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="use_the_machine_s_safety_stops_before_loading_the_movement_heavily_" formatted="false">Utilitza els topalls de seguretat de la màquina abans de carregar molt de pes.</string>
+    <string name="hack_squat_machine" formatted="false">Màquina de sentadilles hack</string>
+    <string name="hip_thrust_machine" formatted="false">Màquina de hip thrust</string>
+    <!-- Barbell Overhead Press -->
+    <string name="barbell_overhead_press" formatted="false">Press militar amb barra</string>
+    <!-- Barbell Bent-Over Row -->
+    <string name="barbell_bent_over_row" formatted="false">Rem inclinat amb barra</string>
+    <string name="mechanic" formatted="false">Mecànica</string>
+    <string name="compound" formatted="false">Compost</string>
+    <string name="isolation" formatted="false">Aïllament</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="ez_bar_skull_crusher" formatted="false">Extensió de tríceps estirat amb barra EZ</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="a_lying_ez_bar_triceps_extension_that_emphasizes_the_triceps_through_a_deep_elbow_flexion_range_" formatted="false">Una extensió de tríceps estirat amb barra EZ que treballa el tríceps en un recorregut ampli amb una flexió profunda del colze.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="lie_flat_on_a_bench_holding_an_ez_bar_above_your_chest_with_a_narrow_overhand_grip_" formatted="false">Estira’t en un banc i subjecta una barra EZ damunt del pit amb una presa prona i tancada.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="keep_your_upper_arms_mostly_vertical_as_you_bend_your_elbows_to_lower_the_bar_toward_your_forehead_or_just_behind_it_" formatted="false">Mantén els braços gairebé verticals mentre flexiones els colzes per baixar la barra cap al front o just darrere.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="extend_your_elbows_to_return_the_bar_to_the_starting_position_without_moving_your_shoulders_excessively_" formatted="false">Estén els colzes per tornar la barra a la posició inicial sense moure massa les espatlles.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="keep_your_wrists_neutral_and_control_the_lowering_phase_" formatted="false">Mantén els canells en posició neutra i controla la fase de baixada.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="use_the_angled_grips_of_the_ez_bar_to_keep_your_wrists_comfortable_" formatted="false">Fes servir les nanses inclinades de la barra EZ per mantenir els canells còmodes.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="let_the_elbows_travel_back_only_slightly__do_not_turn_the_movement_into_a_pullover_" formatted="false">Deixa que els colzes es desplacin lleugerament cap enrere; no converteixis el moviment en un pullover.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="use_a_spotter_or_safety_setup_when_loading_heavily_" formatted="false">Fes servir l’ajuda d’un company o un sistema de seguretat si treballes amb molt de pes.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="close_grip_dumbbell_bench_press" formatted="false">Press de banca amb manuelles i presa tancada</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="a_dumbbell_bench_press_with_the_weights_held_close_together_to_increase_the_triceps_contribution_" formatted="false">Una variant del press de banca amb manuelles en què es mantenen els pesos molt junts per augmentar la participació dels tríceps.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="lie_flat_on_a_bench_with_a_dumbbell_in_each_hand_held_above_the_center_of_your_chest_" formatted="false">Estira’t en un banc amb una manuella a cada mà, damunt del centre del pit.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="keep_the_dumbbells_close_together_with_your_palms_facing_each_other_or_slightly_inward_" formatted="false">Mantén les manuelles juntes, amb els palmells encarats o lleugerament girats cap endins.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="lower_the_weights_with_your_elbows_tracking_close_to_your_torso_" formatted="false">Baixa els pesos mantenint els colzes a prop del tors.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="press_back_up_while_keeping_the_dumbbells_close_and_your_shoulders_stable_against_the_bench_" formatted="false">Torna a empènyer els pesos cap amunt mantenint les manuelles juntes i les espatlles estables contra el banc.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="do_not_force_the_dumbbells_to_touch_if_that_irritates_your_wrists_" formatted="false">No forcis que les manuelles es toquin si això et molesta els canells.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="keep_your_elbows_tucked_enough_to_feel_the_triceps__without_pinning_them_painfully_against_your_sides_" formatted="false">Mantén els colzes prou a prop del cos per notar els tríceps, però sense prémer-los dolorosament contra els costats.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="use_a_controlled_descent_and_avoid_bouncing_the_dumbbells_at_the_bottom_" formatted="false">Controla la baixada i evita que les manuelles rebotin a baix.</string>
+    <!-- Lying Cable Curl -->
+    <string name="lying_cable_curl" formatted="false">Curl de bíceps estirat a la politja</string>
+    <!-- Lying Cable Curl -->
+    <string name="a_supine_cable_curl_performed_with_a_straight_or_ez_style_cable_bar_to_load_the_biceps_through_elbow_flexion_" formatted="false">Un curl de bíceps estirat a la politja amb una barra recta o tipus EZ que treballa els bíceps mitjançant la flexió dels colzes.</string>
+    <!-- Lying Cable Curl -->
+    <string name="place_a_flat_bench_in_front_of_a_low_cable_pulley_and_lie_on_your_back_with_your_feet_toward_the_machine_" formatted="false">Col·loca un banc pla davant d\&apos;una politja baixa i estira\&apos;t de panxa enlaire amb els peus orientats cap a la màquina.</string>
+    <!-- Lying Cable Curl -->
+    <string name="hold_a_straight_or_ez_style_cable_bar_with_palms_facing_up_and_your_arms_extended_toward_the_pulley_" formatted="false">Agafa una barra recta o una barra EZ per a politja amb els palmells cap amunt i els braços estirats cap a la politja.</string>
+    <!-- Lying Cable Curl -->
+    <string name="keep_your_upper_arms_mostly_fixed_as_you_curl_the_bar_toward_your_forehead_or_upper_chest_" formatted="false">Mantén la part superior dels braços gairebé immòbil mentre flexiones els colzes per acostar la barra al front o a la part superior del pit.</string>
+    <!-- Lying Cable Curl -->
+    <string name="lower_the_bar_slowly_until_your_elbows_are_extended_again_while_keeping_tension_on_the_cable_" formatted="false">Baixa la barra lentament fins que tornis a tenir els colzes estirats, mantenint el cable tens.</string>
+    <!-- Lying Cable Curl -->
+    <string name="set_the_bench_far_enough_from_the_pulley_that_the_cable_stays_taut_at_the_bottom_" formatted="false">Col·loca el banc prou lluny de la politja perquè el cable es mantingui tens a la posició més baixa.</string>
+    <!-- Lying Cable Curl -->
+    <string name="keep_your_elbows_stable_instead_of_pulling_them_toward_your_ribs_" formatted="false">Mantén els colzes estables en lloc d\&apos;acostar-los a les costelles.</string>
+    <!-- Lying Cable Curl -->
+    <string name="use_smooth__controlled_repetitions_to_avoid_the_cable_stack_pulling_you_out_of_position_" formatted="false">Fes les repeticions de manera fluida i controlada per evitar que la politja et tregui de la posició.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="smith_machine_calf_raise" formatted="false">Elevació de bessons a la màquina Smith</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="a_standing_calf_raise_under_the_guided_bar_of_a_smith_machine_for_stable__progressively_loaded_calf_training_" formatted="false">Elevació de bessons dempeus sota la barra guiada d\&apos;una màquina Smith per entrenar els bessons amb estabilitat i augmentar la càrrega progressivament.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="stand_under_the_smith_bar_with_it_resting_across_your_upper_back_and_the_balls_of_your_feet_on_a_stable_raised_surface_if_available_" formatted="false">Col·loca\&apos;t sota la barra de la màquina Smith, recolzada sobre la part superior de l\&apos;esquena, i posa la part davantera dels peus sobre una superfície elevada i estable, si n\&apos;hi ha.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="unlock_the_bar_and_lower_your_heels_under_control_to_stretch_your_calves_" formatted="false">Desbloqueja la barra i abaixa els talons de manera controlada per estirar els bessons.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="press_through_the_balls_of_your_feet_to_raise_your_heels_as_high_as_possible_" formatted="false">Empeny amb la part davantera dels peus per aixecar els talons tant com puguis.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="pause_briefly_at_the_top__then_lower_slowly_without_bouncing_" formatted="false">Fes una breu pausa a dalt i després baixa lentament, sense rebotar.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="keep_your_knees_softly_unlocked_and_your_torso_upright_" formatted="false">Mantén els genolls lleugerament flexionats i el tronc recte.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="use_a_stable_step_or_platform_only_if_it_fits_safely_inside_the_smith_machine_" formatted="false">Fes servir un esglaó o una plataforma estable només si cap amb seguretat dins la màquina Smith.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="prioritize_full_range_of_motion_over_adding_load_" formatted="false">Dona prioritat a completar tot el recorregut del moviment abans que a afegir càrrega.</string>
+    <string name="french_press" formatted="false">Press francès</string>
+    <string name="lying_ez_bar_triceps_extension" formatted="false">Extensió de tríceps estirat amb barra EZ</string>
+    <string name="ez_bar_triceps_extension" formatted="false">Extensió de tríceps amb barra EZ</string>
+    <string name="dumbbell_triceps_press" formatted="false">Press de tríceps amb manuelles</string>
+    <string name="close_dumbbell_press" formatted="false">Press de manuelles tancat</string>
+    <string name="supine_cable_curl" formatted="false">Curl de bíceps supí a la politja</string>
+    <string name="cable_bar_curl" formatted="false">Curl de bíceps amb barra a la politja</string>
+    <string name="lying_cable_bar_curl" formatted="false">Curl de bíceps estirat amb barra a la politja</string>
+    <string name="smith_calf_raise" formatted="false">Elevació de talons a la Smith</string>
+    <string name="standing_smith_calf_raise" formatted="false">Elevació de talons dret a la Smith</string>
+    <string name="power_machine_calf_raise" formatted="false">Elevació de talons a la power machine</string>
+    <string name="walk" formatted="false">Caminar</string>
+    <string name="running__road_running" formatted="false">Córrer, cursa per carretera</string>
+    <string name="treadmill_walk" formatted="false">Caminar a la cinta</string>
+    <string name="treadmill_run" formatted="false">Córrer a la cinta</string>
+    <string name="exercise_bike__static_bike" formatted="false">Bicicleta estàtica</string>
+    <string name="cross_trainer" formatted="false">El·líptica</string>
+    <string name="rowing_machine__row_erg" formatted="false">Màquina de rem, ergòmetre de rem</string>
+    <string name="skipping__skipping_rope" formatted="false">Saltar a corda</string>
+    <string name="stair_stepper__stepmill" formatted="false">Escaladora, StepMill</string>
+    <string name="bodyweight_squat" formatted="false">Esquat amb el pes corporal</string>
+    <string name="dumbbell_goblet_squat" formatted="false">Esquat goblet amb manuella</string>
+    <string name="back_squat" formatted="false">Esquat amb barra al darrere</string>
+    <string name="front_squat" formatted="false">Esquat frontal</string>
+    <string name="smith_squat" formatted="false">Esquat a la màquina Smith</string>
+    <string name="db_squat" formatted="false">Esquat amb manuelles</string>
+    <string name="machine_leg_press__sled_leg_press" formatted="false">Premsa de cames, premsa de cames amb trineu</string>
+    <string name="walking_lunges" formatted="false">Passades caminant</string>
+    <string name="backward_lunge" formatted="false">Passada enrere</string>
+    <string name="rear_foot_elevated_split_squat__rfess" formatted="false">Esquat dividit amb el peu del darrere elevat, RFESS</string>
+    <string name="box_step_up" formatted="false">Pujada al calaix</string>
+    <string name="knee_extension" formatted="false">Extensió de genoll</string>
+    <string name="prone_leg_curl__hamstring_curl" formatted="false">Curl de cames estirat, curl dels isquiotibials</string>
+    <string name="sitting_leg_curl" formatted="false">Curl de cames assegut</string>
+    <string name="standing_calf_raise__heel_raise" formatted="false">Elevació de bessons dempeus, elevació de talons</string>
+    <string name="barbell_hip_thrust" formatted="false">Hip thrust amb barra</string>
+    <string name="floor_glute_bridge" formatted="false">Pont de glutis a terra</string>
+    <string name="conventional_deadlift" formatted="false">Pes mort convencional</string>
+    <string name="romanian_deadlift__barbell_rdl" formatted="false">Pes mort romanès, pes mort romanès amb barra</string>
+    <string name="dumbbell_rdl" formatted="false">Pes mort romanès amb manuelles</string>
+    <string name="machine_donkey_kick" formatted="false">Patada de glutis a la màquina</string>
+    <string name="cable_kickback__cable_donkey_kick" formatted="false">Patada de glutis a la politja, puntada de ruc a la politja</string>
+    <string name="hip_abductor_machine" formatted="false">Màquina d\&apos;abductors de maluc</string>
+    <string name="hip_adductor_machine" formatted="false">Màquina d\&apos;adductors de maluc</string>
+    <string name="standing_cable_hip_abduction" formatted="false">Abducció de maluc dempeus a la politja</string>
+    <string name="standing_cable_hip_adduction" formatted="false">Adducció de maluc dempeus a la politja</string>
+    <string name="box_jumps" formatted="false">Salts al calaix</string>
+    <string name="pushup__press_up" formatted="false">Flexió, push-up</string>
+    <string name="feet_elevated_push_up" formatted="false">Flexió amb els peus elevats</string>
+    <string name="bench_press" formatted="false">Press de banca</string>
+    <string name="dumbbell_bench__db_bench_press" formatted="false">Press de banca amb manuelles, press amb manuelles</string>
+    <string name="smith_bench_press" formatted="false">Press de banca a la màquina Smith</string>
+    <string name="incline_dumbbell_press" formatted="false">Press inclinat amb manuelles</string>
+    <string name="smith_incline_press" formatted="false">Press inclinat a la màquina Smith</string>
+    <string name="decline_bench_press" formatted="false">Press de banca declinat</string>
+    <string name="decline_dumbbell_press" formatted="false">Press declinat amb manuelles</string>
+    <string name="smith_decline_press" formatted="false">Press declinat a la màquina Smith</string>
+    <string name="machine_chest_press__seated_chest_press" formatted="false">Press de pit a la màquina, press de pit assegut</string>
+    <string name="dumbbell_flye__db_fly" formatted="false">Obertures amb manuelles, obertures amb manuelles</string>
+    <string name="cable_crossover__cable_flye" formatted="false">Encreuament de politges, obertures a la politja</string>
+    <string name="kneeling_cable_crunch__rope_crunch" formatted="false">Crunch de genolls a la politja, crunch amb corda</string>
+    <string name="high_cable_crossover" formatted="false">Encreuament de politges des de dalt</string>
+    <string name="low_cable_crossover" formatted="false">Encreuament de politges des de baix</string>
+    <string name="pec_deck__machine_fly" formatted="false">Pec deck, obertures a la màquina</string>
+    <string name="military_press__standing_barbell_press" formatted="false">Press militar, press d\&apos;espatlles dret amb barra</string>
+    <string name="dumbbell_shoulder_press" formatted="false">Press d\&apos;espatlles amb manuelles</string>
+    <string name="smith_shoulder_press" formatted="false">Press d\&apos;espatlles a la màquina Smith</string>
+    <string name="arnold_shoulder_press" formatted="false">Press Arnold</string>
+    <string name="side_lateral_raise" formatted="false">Elevació lateral</string>
+    <string name="cable_side_raise" formatted="false">Elevació lateral amb cable</string>
+    <string name="anterior_raise" formatted="false">Elevació frontal</string>
+    <string name="cable_anterior_raise" formatted="false">Elevació frontal amb cable</string>
+    <string name="cable_reverse_fly" formatted="false">Obertures inverses a la politja</string>
+    <string name="cable_high_pull" formatted="false">Rem al mentó a la politja</string>
+    <string name="cable_external_shoulder_rotation" formatted="false">Rotació externa de l’espatlla a la politja</string>
+    <string name="cable_internal_shoulder_rotation" formatted="false">Rotació interna de l’espatlla a la politja</string>
+    <string name="tricep_dip__triceps_dips" formatted="false">Fons de tríceps, fons per a tríceps</string>
+    <string name="parallel_bar_dip" formatted="false">Fons en paral·leles</string>
+    <string name="cable_triceps_pushdown__cable_pushdown" formatted="false">Extensió de tríceps a la politja, extensió a la politja</string>
+    <string name="overhead_extension" formatted="false">Extensió de tríceps per sobre del cap</string>
+    <string name="overhead_cable_extension" formatted="false">Extensió de tríceps per sobre del cap a la politja</string>
+    <string name="ring_dips" formatted="false">Fons en anelles</string>
+    <string name="chin_up__underhand_pull_up" formatted="false">Dominada amb agafada supina, dominada amb presa supina</string>
+    <string name="lat_pull_down__pulldown" formatted="false">Jaló al pit, jaló</string>
+    <string name="straight_arm_pulldown" formatted="false">Jaló amb els braços estirats</string>
+    <string name="cable_row__seated_row" formatted="false">Rem a la politja, rem assegut</string>
+    <string name="machine_row" formatted="false">Rem a màquina</string>
+    <string name="bent_over_barbell_row__barbell_row" formatted="false">Rem inclinat amb barra, rem amb barra</string>
+    <string name="smith_row" formatted="false">Rem a la màquina Smith</string>
+    <string name="one_arm_dumbbell_row" formatted="false">Rem a un braç amb manuella</string>
+    <string name="cable_face_pull" formatted="false">Face pull a la politja</string>
+    <string name="reverse_fly" formatted="false">Obertures inverses</string>
+    <string name="reverse_fly_machine" formatted="false">Màquina d’obertures inverses</string>
+    <string name="dumbbell_curl__db_curl" formatted="false">Curl amb manuelles, curl amb DB</string>
+    <string name="cable_biceps_curl" formatted="false">Curl de bíceps a la politja</string>
+    <string name="bayesian_curl__behind_the_body_cable_curl" formatted="false">Curl bayesià, curl a la politja darrere del cos</string>
+    <string name="dumbbell_hammer_curl__neutral_grip_curl" formatted="false">Curl martell amb manuelles, curl amb agafada neutra</string>
+    <string name="trx_row" formatted="false">Rem amb TRX</string>
+    <string name="landmine_t_bar_row" formatted="false">Rem T-bar amb landmine</string>
+    <string name="front_plank" formatted="false">Planxa frontal</string>
+    <string name="side_bridge" formatted="false">Planxa lateral</string>
+    <string name="deadbug" formatted="false">Dead bug</string>
+    <string name="quadruped_opposite_arm_and_leg_raise" formatted="false">Elevació del braç i la cama contraris en quadrupèdia</string>
+    <string name="mountain_climbers" formatted="false">Escaladors</string>
+    <string name="russian_twists" formatted="false">Rotacions russes</string>
+    <string name="bicycle_sit_up" formatted="false">Abdominals bicicleta</string>
+    <string name="hanging_leg_raises" formatted="false">Elevacions de cames penjat</string>
+    <string name="supine_leg_raise" formatted="false">Elevació de cames en decúbit supí</string>
+    <string name="cable_chop__wood_chop" formatted="false">Llenyataire amb politja, tall de llenyataire</string>
+    <string name="burpees" formatted="false">Burpees</string>
+    <string name="jumping_jack" formatted="false">Salt de tisora</string>
+    <string name="high_knee_run" formatted="false">Cursa amb genolls alts</string>
+    <string name="jump_squat" formatted="false">Esquat amb salt</string>
+    <string name="butterfly_situp" formatted="false">Abdominal en papallona</string>
+    <string name="down_and_up__burpee_without_push_up" formatted="false">Baixar i pujar, burpee sense flexió</string>
+    <string name="pike_press" formatted="false">Flexió en pica</string>
+    <string name="superman_hold" formatted="false">Isomètric de Superman</string>
+    <string name="hand_release_pushup__hrpu" formatted="false">Flexió amb aixecament de mans, HRPU</string>
+    <string name="spiderman_climber" formatted="false">Escalador Spiderman</string>
+    <string name="heavy_bag_work" formatted="false">Entrenament amb sac de boxa</string>
+    <string name="cat_cow_stretch" formatted="false">Estirament gat-vaca</string>
+    <string name="lunge_hip_flexor_stretch" formatted="false">Estirament dels flexors del maluc en gambada</string>
+    <string name="hamstring_flexibility_stretch" formatted="false">Estirament dels isquiotibials</string>
+    <string name="t_spine_rotation" formatted="false">Rotació de la columna toràcica</string>
+    <string name="shoulder_mobility_routine" formatted="false">Rutina de mobilitat de les espatlles</string>
+    <string name="world_s_greatest_lunge__lunge_with_rotation" formatted="false">La gambada més gran del món, gambada amb rotació</string>
+    <string name="pigeon_stretch" formatted="false">Estirament del colom</string>
+    <string name="cobra_pose__prone_press_up" formatted="false">Postura de la cobra, extensió en pron</string>
+    <string name="child_pose" formatted="false">Postura de l’infant</string>
+    <string name="inchworm_walk__walkout" formatted="false">Caminada d’eruga, walkout</string>
+    <string name="shoulder_circles" formatted="false">Cercles d’espatlles</string>
+    <string name="leg_swing" formatted="false">Balanceig de cama</string>
+    <string name="wrist_rotations" formatted="false">Rotacions de canell</string>
+    <string name="ankle_rotations" formatted="false">Rotacions de turmell</string>
+    <string name="deep_squat_stretch__atg_squat_hold" formatted="false">Estirament en esquat profund, manteniment de l’esquat ATG</string>
+    <string name="scapula_circles" formatted="false">Cercles d’escàpules</string>
+    <string name="standing_quad_stretch" formatted="false">Estirament de quàdriceps dret</string>
+    <string name="door_frame_chest_stretch" formatted="false">Estirament de pit al marc de la porta</string>
+    <string name="scorpion_stretch" formatted="false">Estirament de l’escorpí</string>
+    <string name="thread_the_needle_stretch" formatted="false">Estirament del fil a l’agulla</string>
+    <string name="rope_pushdown" formatted="false">Extensió de tríceps amb corda</string>
+    <string name="rear_delt_pec_deck" formatted="false">Obertures inverses a la màquina per al deltoide posterior</string>
+    <string name="spider_curls" formatted="false">Curl aranya</string>
+    <string name="scott_curl" formatted="false">Curl Scott</string>
+    <string name="dumbbell_triceps_press__close_dumbbell_press" formatted="false">Press de tríceps amb manuelles, press tancat amb manuelles</string>
+    <string name="supine_cable_curl__cable_bar_curl__lying_cable_bar_curl" formatted="false">Curl supí a la politja, curl amb barra a la politja, curl estirat amb barra a la politja</string>
+    <string name="smith_calf_raise__standing_smith_calf_raise__power_machine_calf_raise" formatted="false">Elevació de talons a la màquina Smith, elevació de talons dempeus a la màquina Smith, elevació de talons a la màquina de força</string>
+    <string name="neck_rotations" formatted="false">Rotacions del coll</string>
+    <string name="ez_bar_curl" formatted="false">Curl de bíceps amb barra Z</string>
+    <string name="a_standing_biceps_curl_using_an_ez_bar__with_angled_grips_that_can_feel_more_comfortable_on_the_wrists_" formatted="false">Un curl de bíceps dret amb una barra Z, les agafades inclinades de la qual poden resultar més còmodes per als canells.</string>
+    <string name="stand_with_your_feet_hip_width_apart__holding_an_ez_bar_with_an_underhand_grip_and_your_arms_extended_by_your_sides_" formatted="false">Posa\&apos;t dret amb els peus separats a l\&apos;amplada dels malucs. Agafa la barra Z amb les mans en supinació i els braços estesos als costats.</string>
+    <string name="keep_your_elbows_close_to_your_torso_and_curl_the_bar_toward_your_shoulders_" formatted="false">Mantén els colzes a prop del tors i flexiona els braços per portar la barra cap a les espatlles.</string>
+    <string name="squeeze_your_biceps_briefly_at_the_top_without_letting_your_elbows_move_forward_" formatted="false">Contreu els bíceps breument a la part superior del moviment, sense deixar que els colzes avancin.</string>
+    <string name="lower_the_bar_slowly_until_your_arms_are_almost_fully_extended_" formatted="false">Baixa la barra a poc a poc fins que els braços estiguin gairebé del tot estesos.</string>
+    <string name="choose_the_angled_hand_position_that_keeps_your_wrists_comfortable_" formatted="false">Tria la posició inclinada de les mans que et resulti còmoda per als canells.</string>
+    <string name="keep_your_torso_still_and_avoid_swinging_the_bar_to_lift_the_weight_" formatted="false">Mantén el tors quiet i evita balancejar la barra per aixecar el pes.</string>
 </resources>

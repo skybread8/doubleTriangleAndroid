@@ -63,7 +63,7 @@
             android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/body_progress_file_paths" />
         </provider>
-        <activity android:name="io.codepassion.doubletriangle.MainActivity" android:exported="true" android:launchMode="singleTop">
+        <activity android:name="io.codepassion.doubletriangle.MainActivity" android:exported="true" android:launchMode="singleTop" android:configChanges="locale|layoutDirection">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

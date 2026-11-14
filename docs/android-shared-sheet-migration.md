@@ -27,12 +27,14 @@ iOS, no comparar traducciones españolas de Android con el valor inglés del She
 
 ## Uso
 
-La copia incluida procede de la exportación local del 23/10/2026. Debe
-actualizarse desde el Sheet antes de considerarla vigente; no se ha podido
-acceder a la hoja desde este entorno el 03/11/2026. La presencia del catálogo
+La copia incluida se actualizó desde el Sheet el 10/11/2026. La presencia del catálogo
 no garantiza que todas las pantallas lo utilicen: aún hay literales en código y
 recursos específicos de Android que necesitan una revisión frente a iOS y al
-Sheet. No se debe declarar paridad completa hasta terminar esa revisión.
+Sheet. Hay 169 fallbacks sin clave compartida verificada: disponen de traducciones
+locales para los diez idiomas, mantenidas en `scripts/android-fallback-translations.txt`.
+El script las genera y comprueba sus parámetros; deben revisarse y sustituirse por
+claves del Sheet cuando exista una equivalencia. Esto no implica que se hayan
+localizado todos los textos escritos directamente en las pantallas.
 
 Desde el repositorio Android, en un entorno con acceso de lectura al Sheet:
 
@@ -53,3 +55,16 @@ descargada sin acceder a la red, ejecuta `sync-shared-translations.ps1
 Después de añadir una clave al Sheet, usa el nombre Android normalizado que informa
 el exportador (o un alias de compatibilidad si el código aún conserva un nombre
 histórico).
+
+## Auditoría de la copia del 14/11/2026
+
+La exportación de solo lectura del Sheet confirmó que japonés, neerlandés y
+chino simplificado contienen numerosas celdas vacías en claves utilizadas por
+Android. Android recurre al recurso base cuando falta una celda; esto no demuestra
+que la interfaz esté completamente traducida. La verificación de los 169 textos
+específicos de Android tampoco mide la cobertura de todas las claves del Sheet.
+
+Diez textos de onboarding proceden de claves de iOS que no existen en el Sheet.
+Sus traducciones locales se mantienen en `scripts/onboarding-local-fallbacks.json`
+y se generan mediante `sync-onboarding-sheet-map.ps1`; cuando el Sheet contiene
+una clave equivalente, se utiliza el recurso compartido.

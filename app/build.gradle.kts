@@ -19,7 +19,7 @@ android {
         applicationId = "io.codepassion.wildforce.android"
         minSdk = 28
         targetSdk = 37
-        versionCode = 15
+        versionCode = 20
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

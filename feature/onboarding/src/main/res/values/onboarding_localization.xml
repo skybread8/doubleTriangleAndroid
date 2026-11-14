@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_split_warning">This structure may not be optimal for your number of training days.</string>
+    <string name="onboarding_code_validation_error">Could not validate the code.</string>
+    <string name="onboarding_scanner_error">Could not open the QR scanner. Enter the code manually.</string>
+</resources>

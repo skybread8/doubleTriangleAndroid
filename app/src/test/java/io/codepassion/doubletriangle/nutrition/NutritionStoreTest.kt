@@ -15,6 +15,11 @@ class NutritionStoreTest {
     private val monday = LocalDate.of(2026, 8, 24)
 
     @Test
+    fun `meal types match the server sync contract`() {
+        assertEquals(listOf("breakfast", "lunch", "dinner", "snack", "preWorkout", "postWorkout"), MealType.entries.map { it.syncValue() })
+    }
+
+    @Test
     fun `recent search matches accents and only titles or food names`() {
         val meal = MealLog(1, "Merienda", 200, 10, 20, 5, loggedDate = monday, notes = "special note",
             items = listOf(MealItem("Plátano", 100, 1, 20, 0)))
@@ -47,6 +52,8 @@ class NutritionStoreTest {
         val remoteId = "b6cc2a81-a5bc-4e43-aec4-cd3d483c3c32"
         val localId = 1_792_000_000_000L
         assertEquals(localId, localNutritionLogId(remoteId, mapOf(remoteId to localId)))
+        assertEquals(localId, localNutritionLogId(remoteId.uppercase(), mapOf(remoteId to localId)))
+        assertEquals(localNutritionLogId(remoteId, emptyMap()), localNutritionLogId(remoteId.uppercase(), emptyMap()))
         assertTrue(localNutritionLogId(remoteId, emptyMap()) != localId)
     }
 

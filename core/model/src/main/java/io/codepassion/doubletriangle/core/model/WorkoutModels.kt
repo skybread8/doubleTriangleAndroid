@@ -138,6 +138,7 @@ data class WorkoutBlockSummary(
     val restAfterBlockSeconds: Int? = null,
     val notes: String? = null,
     val exercises: List<ExerciseSummary> = emptyList(),
+    val remoteId: String? = null,
 )
 
 fun WorkoutBlockSummary.executionExercises(): List<ExerciseSummary> {
