@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_split_warning">此训练结构可能不适合你的每周训练天数。</string>
+    <string name="onboarding_code_validation_error">无法验证代码。</string>
+    <string name="onboarding_scanner_error">无法打开二维码扫描器。请手动输入代码。</string>
+</resources>

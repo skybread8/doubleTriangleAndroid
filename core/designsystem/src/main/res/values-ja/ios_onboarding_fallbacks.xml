@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generated iOS fallbacks for onboarding keys absent from the Sheet. -->
 <resources>
+    <string name="ios_onboarding_3140100df131cf30" formatted="false">増量</string>
+    <string name="ios_onboarding_1f45f02561f41db9" formatted="false">減量</string>
+    <string name="ios_onboarding_0f011be4a5ebbfff" formatted="false">維持</string>
+    <string name="ios_onboarding_71d833d9c4e0320e" formatted="false">目標、測定値、トレーニングのフィードバックに基づいて最適な重点を選びます。</string>
+    <string name="ios_onboarding_fe1801cc7f83ff1c" formatted="false">筋肉の成長と筋力を最大化するためにカロリーを多めに摂取します。トレーニング量を増やすことを推奨します。</string>
+    <string name="ios_onboarding_e7f17d3498c15ece" formatted="false">筋肉量を維持しながら体脂肪を減らすためにカロリーを抑えます。回復が遅くなる場合があります。</string>
+    <string name="ios_onboarding_0a53f51b99b12fae" formatted="false">維持カロリーを摂取し、体組成をゆっくり改善するか、現在の体重を維持します。</string>
+    <string name="ios_onboarding_816daad47ee5426f" formatted="false">フリーウェイト</string>
+    <string name="ios_onboarding_c061da196eae7622" formatted="false">マシン</string>
+    <string name="ios_onboarding_b6656595756edfce" formatted="false">ファンクショナル</string>
 </resources>

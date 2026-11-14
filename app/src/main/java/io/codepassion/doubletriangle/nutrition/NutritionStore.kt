@@ -29,6 +29,8 @@ internal enum class MealType(val title: String) {
     }
 }
 
+internal fun MealType.syncValue(): String = name.replaceFirstChar { it.lowercaseChar() }
+
 internal data class NutritionTargets(val calories: Int = 2350, val protein: Int = 165, val carbs: Int = 250, val fat: Int = 75)
 
 /** Mirrors iOS NutritionLogItem so reviewed food metadata survives local storage and sync. */
@@ -114,7 +116,8 @@ internal fun applyNutritionBookmark(entry: MealLog, name: String?): MealLog =
 internal data class RemoteNutritionItem(val order: Int, val item: MealItem, val deleted: Boolean)
 
 internal fun localNutritionLogId(remoteId: String, knownIds: Map<String, Long>): Long =
-    knownIds[remoteId] ?: stableRemoteLogId(remoteId)
+    knownIds[remoteId] ?: knownIds.entries.firstOrNull { it.key.equals(remoteId, ignoreCase = true) }?.value
+    ?: stableRemoteLogId(remoteId.lowercase(java.util.Locale.ROOT))
 
 /** The caller supplies the materialized server snapshot, including tombstones. */
 internal fun activeRemoteNutritionItems(items: List<RemoteNutritionItem>): List<MealItem> =
@@ -389,7 +392,7 @@ internal object NutritionStore {
                 grams = item.optDouble("amount_grams", Double.NaN).takeUnless(Double::isNaN),
                 notes = item.optString("notes"),
             )
-            itemsByEntry.getOrPut(entryId) { mutableListOf() }
+            itemsByEntry.getOrPut(entryId.lowercase(java.util.Locale.ROOT)) { mutableListOf() }
                 .add(RemoteNutritionItem(orderIndex, mealItem, !item.isNull("deleted_at")))
         }
 
@@ -406,7 +409,7 @@ internal object NutritionStore {
             }
             val loggedDate = nutritionLogDate(entry.optString("logged_at")) ?: continue
             val existing = merged[localId]
-            val items = activeRemoteNutritionItems(itemsByEntry[remoteId].orEmpty())
+            val items = activeRemoteNutritionItems(itemsByEntry[remoteId.lowercase(java.util.Locale.ROOT)].orEmpty())
             merged[localId] = MealLog(
                 id = localId,
                 name = entry.optString("title").trim().ifBlank { "Comida" },

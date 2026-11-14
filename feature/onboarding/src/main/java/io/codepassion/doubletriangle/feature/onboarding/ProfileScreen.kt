@@ -259,7 +259,7 @@ fun ProfileScreen(
         }
     }
     val detailPreferences = remember(profileContext) { profileContext.getSharedPreferences("wildforce_profile_details", 0) }
-    var appLanguage by remember { mutableStateOf(detailPreferences.getString("language", "Español") ?: "Español") }
+    var appLanguage by remember(initial.appLanguage) { mutableStateOf(profileLanguageName(initial.appLanguage)) }
     var appTheme by remember { mutableStateOf(detailPreferences.getString("theme", "Sistema") ?: "Sistema") }
     var keepScreenOn by remember { mutableStateOf(detailPreferences.getBoolean("keep_screen_on", true)) }
     var wearAutoTrackingEnabled by remember { mutableStateOf(detailPreferences.getBoolean("wear_auto_tracking_enabled", false)) }
@@ -407,7 +407,7 @@ fun ProfileScreen(
                     }, contentAlignment = Alignment.Center) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.action_back), tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(22.dp))
                     }
-                    Text(if (showsPlannerNotesEditor) "Notas para el planificador" else selectedSection?.title.orEmpty(), fontFamily = Exo2FontFamily, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                    Text(if (showsPlannerNotesEditor) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_planner_notes) else selectedSection?.let { profileSectionTitle(it) }.orEmpty(), fontFamily = Exo2FontFamily, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                 }
             }
         }
@@ -439,7 +439,7 @@ fun ProfileScreen(
         // that entry point instead of hiding it until after the first join.
         if (selectedSection == null && currentAccount != null) { item {
             ProfileEntrance(entered, 400) {
-                Section(if (gymMemberships.size > 1) "Tus gimnasios" else "Tu gimnasio") {
+                Section(if (gymMemberships.size > 1) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_gyms) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_gym)) {
                     gymMemberships.forEach { membership ->
                         Row(
                             Modifier.fillMaxWidth().padding(vertical = 8.dp),
@@ -457,8 +457,8 @@ fun ProfileScreen(
                         }
                     }
                     ChoiceButton(
-                        "Unirse a un gimnasio",
-                        "Introducir código o escanear QR",
+                        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.join_a_gym),
+                        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.enter_the_code_your_gym_gave_you__or_scan_its_qr_),
                         icon = Icons.Filled.Apartment,
                         onClick = onJoinGymRequested,
                     )
@@ -467,7 +467,7 @@ fun ProfileScreen(
         } }
         if (selectedSection == null && coaches.isNotEmpty()) { item {
             ProfileEntrance(entered, 450) {
-                Section("Tus entrenadores") {
+                Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_coaches)) {
                     coaches.forEach { coach ->
                         Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                             RemoteTrainingImage(
@@ -493,7 +493,7 @@ fun ProfileScreen(
         // `achievementsSection` is intentionally disabled in the canonical iOS
         // profile view.  Do not render a placeholder rail here: it changes the
         // hierarchy and pushes the four profile destinations below the fold.
-        if (selectedSection == ProfileSection.Body) { item { ProfileEntrance(sectionEntered, 105) { Section("Cuerpo") {
+        if (selectedSection == ProfileSection.Body) { item { ProfileEntrance(sectionEntered, 105) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body)) {
                 val birthLocale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
                 val formattedBirthday = runCatching {
                     LocalDate.of(birthYearInput.toInt(), draft.birthMonth, birthDayInput.toInt())
@@ -515,7 +515,7 @@ fun ProfileScreen(
                     ).show()
                 }
                 ChoiceButton(
-                    "Altura",
+                    androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.height),
                     formatHeightChoice(heightInput, draft.metricSystem),
                     icon = Icons.Filled.Straighten,
                 ) {
@@ -525,8 +525,8 @@ fun ProfileScreen(
                 // The profile weight is the canonical current value, just like iOS.
                 // The body-metrics collection is history and can legitimately lag
                 // behind when the profile is edited from another entry point.
-                ChoiceButton("Métricas corporales", displayWeight(draft.weightKg, draft.metricSystem).let { "$it ${if (draft.metricSystem == MetricSystem.Imperial) "lb" else "kg"}" }, icon = Icons.Filled.Scale) { showsBodyMetrics = true }
-                ChoiceButton("Fotos de progreso corporal", BodyProgressStore.load(profileContext).size.let { if (it == 0) "Sin fotos todavía" else "$it check-ins" }, icon = Icons.Filled.PhotoCamera) { showsBodyProgress = !showsBodyProgress }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body_metrics), displayWeight(draft.weightKg, draft.metricSystem).let { "$it ${if (draft.metricSystem == MetricSystem.Imperial) "lb" else "kg"}" }, icon = Icons.Filled.Scale) { showsBodyMetrics = true }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body_progress_pics), BodyProgressStore.load(profileContext).size.let { if (it == 0) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_photos_yet) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_check_ins, it) }, icon = Icons.Filled.PhotoCamera) { showsBodyProgress = !showsBodyProgress }
             }
         } } }
         if (selectedSection == ProfileSection.Body) { item {
@@ -539,7 +539,7 @@ fun ProfileScreen(
             )
         } }
         if (selectedSection == ProfileSection.Fitness && showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 105) {
-            Section("Notas para el planificador") {
+            Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_planner_notes)) {
                 OutlinedTextField(
                     value = plannerNotesInput,
                     onValueChange = { plannerNotesInput = it },
@@ -549,19 +549,19 @@ fun ProfileScreen(
                     maxLines = 10,
                 )
                 Text(
-                    "Las notas deben ser específicas para tus entrenamientos. Se usarán para adaptar el plan y no pueden sustituir ajustes como el equipamiento o las restricciones.",
+                    androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.notes_must_be_workout_specific_and_will_be_used_to_tailor_your_plan__they_cannot_override_core_settings_like_equipment_or_restrictions_),
                     style = MaterialTheme.typography.caption,
                     color = WildforceThemeTokens.textSecondary,
                 )
             }
         } } }
-        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 105) { Section("Entrenamiento") {
+        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 105) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training)) {
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.goal), onboardingLabel("FitnessGoal", draft.goal.storedValue, draft.goal.title), icon = profileGoalIcon(draft.goal)) { picker = Picker.Goal }
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.lifestyle), onboardingLabel("LifestyleLevel", draft.lifestyle.storedValue, draft.lifestyle.title), onboardingLabel("LifestyleLevel", draft.lifestyle.storedValue, draft.lifestyle.description, true), profileLifestyleIcon(draft.lifestyle)) { picker = Picker.Lifestyle }
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training_level), onboardingLabel("TrainingLevel", draft.trainingLevel.storedValue, draft.trainingLevel.title), onboardingLabel("TrainingLevel", draft.trainingLevel.storedValue, draft.trainingLevel.description, true), Icons.Filled.FitnessCenter) { picker = Picker.Level }
                 if (draft.goal.supportsBodyComposition && draft.trainingLevel.supportsBodyComposition) ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body_composition_intent), onboardingLabel("BodyCompositionPhase", (draft.bodyCompositionPhase ?: BodyCompositionPhase.Automatic).storedValue, (draft.bodyCompositionPhase ?: BodyCompositionPhase.Automatic).title), icon = Icons.Filled.Scale) { picker = Picker.Body }
             } } } }
-        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 155) { Section("Configuración de entrenamiento") {
+        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 155) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training_setup)) {
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.program), onboardingLabel("TrainingSplitPreference", draft.trainingSplitPreference.storedValue, draft.trainingSplitPreference.title), icon = Icons.Filled.GridView) { picker = Picker.Split }
                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_days), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 draft.workoutDays.toList().let { days ->
@@ -612,15 +612,15 @@ fun ProfileScreen(
                     ) { Icon(Icons.Filled.Add, contentDescription = null, tint = WildforceThemeTokens.textPrimary) }
                 }
                 draft.workoutDays.sortedBy { it.ordinal }.forEach { day ->
-                    if (draft.trainingSplitPreference == TrainingSplitPreference.Custom) ChoiceButton(day.title, draft.customWorkoutFocuses[day]?.title ?: "Seleccionar foco") { picker = Picker.Focus(day) }
+                    if (draft.trainingSplitPreference == TrainingSplitPreference.Custom) ChoiceButton(java.time.DayOfWeek.of(day.ordinal + 1).getDisplayName(java.time.format.TextStyle.FULL, androidx.compose.ui.platform.LocalConfiguration.current.locales[0]).replaceFirstChar { it.titlecase() }, draft.customWorkoutFocuses[day]?.let { onboardingLabel("WorkoutFocus", it.storedValue, it.title) } ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.focus)) { picker = Picker.Focus(day) }
                 }
-                TogglePreference("Omitir calentamientos", "Oculta los bloques de activación y ajusta la duración objetivo.", draft.skipsWarmups, Icons.Filled.FastForward) { draft = draft.copy(skipsWarmups = !draft.skipsWarmups) }
-                TogglePreference("Omitir enfriamientos", "Oculta los bloques finales y mantiene el plan dentro de la duración objetivo.", draft.skipsCooldowns, Icons.AutoMirrored.Filled.DirectionsWalk) { draft = draft.copy(skipsCooldowns = !draft.skipsCooldowns) }
-                TogglePreference("Omitir periodos de descanso", "Salta directamente a la siguiente serie o ejercicio durante el entrenamiento.", draft.skipsRestPeriods, Icons.Filled.SkipNext) { draft = draft.copy(skipsRestPeriods = !draft.skipsRestPeriods) }
+                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip_warmups), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.hide_warmup_sections_and_ask_generated_plans_to_start_with_the_main_work_), draft.skipsWarmups, Icons.Filled.FastForward) { draft = draft.copy(skipsWarmups = !draft.skipsWarmups) }
+                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip_cooldowns), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.hide_cooldown_sections_and_keep_generated_plans_within_the_target_duration_), draft.skipsCooldowns, Icons.AutoMirrored.Filled.DirectionsWalk) { draft = draft.copy(skipsCooldowns = !draft.skipsCooldowns) }
+                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip_rest_periods), "Salta directamente a la siguiente serie o ejercicio durante el entrenamiento.", draft.skipsRestPeriods, Icons.Filled.SkipNext) { draft = draft.copy(skipsRestPeriods = !draft.skipsRestPeriods) }
                 val plannerNotes = draft.workoutPlannerNotes.takeUnless { it.equals("null", ignoreCase = true) }
                 ChoiceButton(
-                    "Notas para el planificador",
-                    plannerNotes ?: "Ninguna",
+                    androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_planner_notes),
+                    plannerNotes ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.none),
                     description = plannerNotes?.takeIf { it.isNotBlank() },
                     icon = Icons.AutoMirrored.Filled.Notes,
                 ) {
@@ -628,14 +628,15 @@ fun ProfileScreen(
                     showsPlannerNotesEditor = true
                 }
             } } } }
-        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 205) { Section("Entorno") {
+        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 205) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.environment)) {
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym_setup), onboardingLabel("GymType", draft.gymType.storedValue, draft.gymType.title), icon = profileGymTypeIcon(draft.gymType)) { picker = Picker.Gym }
-                ChoiceButton("Ubicaciones de entrenamiento", draft.effectiveTrainingLocations().joinToString(" · ") { if (it.isDefault) "${it.name} (principal)" else it.name }, icon = Icons.Filled.Home) { showsTrainingLocations = true }
-                ChoiceButton("Equipamiento disponible", "${draft.availableEquipment.size} seleccionado(s)", icon = Icons.Filled.FitnessCenter) { picker = Picker.Equipment }
-                ChoiceButton("Restricciones o molestias", draft.movementRestrictions.takeIf { it.isNotEmpty() }?.size?.let { "$it seleccionado(s)" } ?: "Ninguna", icon = Icons.Filled.SelfImprovement) { picker = Picker.Restrictions }
+                val defaultLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_default)
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training_locations), draft.effectiveTrainingLocations().joinToString(" · ") { if (it.isDefault) it.name + " (" + defaultLabel + ")" else it.name }, icon = Icons.Filled.Home) { showsTrainingLocations = true }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.equipment), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_selected, draft.availableEquipment.size), icon = Icons.Filled.FitnessCenter) { picker = Picker.Equipment }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.restrictions), draft.movementRestrictions.takeIf { it.isNotEmpty() }?.size?.let { androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_selected, it) } ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.none), icon = Icons.Filled.SelfImprovement) { picker = Picker.Restrictions }
             } } } }
         if (selectedSection == ProfileSection.Nutrition) { item { ProfileEntrance(sectionEntered, 235) {
-                if (!nutritionProfile.isConfigured) Section("Perfil nutricional") {
+                if (!nutritionProfile.isConfigured) Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.nutrition_profile)) {
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_edd63f33842687f3), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_your_nutrition_profile_to_save_food_preferences__restrictions__and_meal_planning_defaults_in_one_place_), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
                     Button(
@@ -644,38 +645,38 @@ fun ProfileScreen(
                         colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary),
                         shape = RoundedCornerShape(14.dp),
                     ) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.start_nutrition_setup).uppercase()) }
-                } else Section("Planificación") {
-                    ChoiceButton("Estilo alimentario", nutritionProfile.dietaryStyle, icon = Icons.Filled.Restaurant) { nutritionPicker = NutritionPicker.DietaryStyle }
-                    ChoiceButton("Comidas al día", "${nutritionProfile.mealsPerDay} comidas", icon = Icons.Filled.Restaurant) { nutritionPicker = NutritionPicker.MealsPerDay }
-                    ChoiceButton("Ventana de alimentación", nutritionProfile.eatingWindowLabel(), icon = Icons.Filled.Restaurant) { nutritionPicker = NutritionPicker.EatingWindow }
-                    TogglePreference("Sugerencias de comidas", "Muestra ideas sencillas junto a calorías, macros y recomendaciones para el entrenamiento.", nutritionProfile.wantsMealSuggestions, Icons.Filled.Restaurant) {
+                } else Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.planning)) {
+                    ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dietary_style), localizedNutritionOption(nutritionProfile.dietaryStyle), icon = Icons.Filled.Restaurant) { nutritionPicker = NutritionPicker.DietaryStyle }
+                    ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.meals_per_day), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_meals, nutritionProfile.mealsPerDay), icon = Icons.Filled.Restaurant) { nutritionPicker = NutritionPicker.MealsPerDay }
+                    ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.eating_window), localizedNutritionOption(nutritionProfile.eatingWindowLabel()), icon = Icons.Filled.Restaurant) { nutritionPicker = NutritionPicker.EatingWindow }
+                    TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.meal_suggestions), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_controls_whether_your_future_plan_should_include_meal_ideas_alongside_macro_targets_), nutritionProfile.wantsMealSuggestions, Icons.Filled.Restaurant) {
                         nutritionProfile = nutritionProfile.copy(wantsMealSuggestions = !nutritionProfile.wantsMealSuggestions)
                         saveNutritionProfile(nutritionProfile)
                     }
                 }
             }
         } }
-        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 255) { Section("Preferencias") {
-                ChoiceButton("Esfuerzo al cocinar", nutritionProfile.cookingEffort, icon = Icons.Filled.LocalFireDepartment) { nutritionPicker = NutritionPicker.CookingEffort }
-                ChoiceButton("Sensibilidad al presupuesto", nutritionProfile.budgetSensitivity, icon = Icons.Filled.Settings) { nutritionPicker = NutritionPicker.BudgetSensitivity }
-                ChoiceButton("Fuentes de proteína", nutritionProfile.preferredProteinSources.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.ProteinSources }
-                ChoiceButton("Alimentos que no te gustan", nutritionProfile.dislikes.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.Dislikes }
+        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 255) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.preferences)) {
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cooking_effort), localizedNutritionOption(nutritionProfile.cookingEffort), icon = Icons.Filled.LocalFireDepartment) { nutritionPicker = NutritionPicker.CookingEffort }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.budget_sensitivity), localizedNutritionOption(nutritionProfile.budgetSensitivity), icon = Icons.Filled.Settings) { nutritionPicker = NutritionPicker.BudgetSensitivity }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.protein_sources), nutritionProfile.preferredProteinSources.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.ProteinSources }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dislikes), nutritionProfile.dislikes.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.Dislikes }
             } } } }
-        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 275) { Section("Restricciones") {
-                ChoiceButton("Alimentos excluidos", nutritionProfile.excludedFoods.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.ExcludedFoods }
-                ChoiceButton("Alergias o intolerancias", nutritionProfile.allergiesAndIntolerances.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.Allergies }
+        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 275) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.restrictions)) {
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.excluded_foods), nutritionProfile.excludedFoods.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.ExcludedFoods }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.allergies_or_intolerances), nutritionProfile.allergiesAndIntolerances.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.Allergies }
             } } } }
-        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 295) { Section("Notas") {
-                ChoiceButton("Notas", nutritionProfile.notes.takeUnless { it.equals("null", ignoreCase = true) }?.ifBlank { "Ninguna" } ?: "Ninguna", icon = Icons.Filled.Settings) { nutritionTextEditor = NutritionTextField.Notes }
+        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 295) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.notes)) {
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.notes), nutritionProfile.notes.takeUnless { it.equals("null", ignoreCase = true) }?.ifBlank { "Ninguna" } ?: "Ninguna", icon = Icons.Filled.Settings) { nutritionTextEditor = NutritionTextField.Notes }
             } } } }
-        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 245) { Section("Preferencias") {
-                ChoiceButton("Idioma", appLanguage, icon = Icons.Filled.Settings) { settingsPicker = SettingsPicker.Language }
-                ChoiceButton("Sistema métrico", draft.metricSystem.title, icon = Icons.Filled.Settings) { picker = Picker.Metric }
-                ChoiceButton("Tema", appTheme, icon = Icons.Filled.Settings) { settingsPicker = SettingsPicker.Theme }
+        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 245) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.preferences)) {
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.language), localizedLanguageName(appLanguage), icon = Icons.Filled.Settings) { settingsPicker = SettingsPicker.Language }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.metric_system), localizedMetricSystem(draft.metricSystem), icon = Icons.Filled.Settings) { picker = Picker.Metric }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.theme), localizedNutritionOption(appTheme), icon = Icons.Filled.Settings) { settingsPicker = SettingsPicker.Theme }
             } } } }
-        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 265) { Section("Entorno") {
-                ChoiceButton("Gimnasio", "Unirse o gestionar tus gimnasios", icon = Icons.Filled.Apartment, onClick = onJoinGymRequested)
-                ChoiceButton("Preguntas frecuentes", "Respuestas sobre entrenamiento, nutrición, Android y tu cuenta.", icon = Icons.AutoMirrored.Filled.Help) { selectedSection = ProfileSection.Faq }
+        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 265) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.environment)) {
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym), "Unirse o gestionar tus gimnasios", icon = Icons.Filled.Apartment, onClick = onJoinGymRequested)
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.faq), "Respuestas sobre entrenamiento, nutrición, Android y tu cuenta.", icon = Icons.AutoMirrored.Filled.Help) { selectedSection = ProfileSection.Faq }
                 TogglePreference("Health Connect", "Guarda entrenamientos y sincroniza medidas corporales con Health Connect.", draft.isHealthConnectEnabled, Icons.Filled.Favorite) {
                     if (draft.isHealthConnectEnabled) {
                         draft = draft.copy(isHealthConnectEnabled = false)
@@ -698,7 +699,7 @@ fun ProfileScreen(
                     }
                 }
                 healthConnectMessage?.let { Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
-                TogglePreference("Recordatorios", "Recibe recordatorios de próximos entrenamientos y comidas pendientes de registrar.", reminderNotificationsEnabled, Icons.Filled.Settings) {
+                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.reminders), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.get_reminders_for_upcoming_workouts_and_meals_you_still_need_to_log_), reminderNotificationsEnabled, Icons.Filled.Settings) {
                     if (reminderNotificationsEnabled) {
                         reminderNotificationsEnabled = false
                         notificationPreferences.edit().putBoolean("reminders", false).apply()
@@ -707,14 +708,14 @@ fun ProfileScreen(
                         requestOrEnableNotification(NotificationPreference.Reminders)
                     }
                 }
-                TogglePreference("Mantener pantalla encendida durante el entrenamiento", "Evita que la pantalla se bloquee mientras hay un entrenamiento activo abierto.", keepScreenOn, Icons.Filled.Settings) {
+                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.keep_screen_on_during_workout), "Evita que la pantalla se bloquee mientras hay un entrenamiento activo abierto.", keepScreenOn, Icons.Filled.Settings) {
                     keepScreenOn = !keepScreenOn
                     detailPreferences.edit().putBoolean("keep_screen_on", keepScreenOn).apply()
                     RemoteSyncChangeTracker.mark(profileContext, "user-app-settings")
                     onRemoteSyncRequested()
                     onKeepScreenOnChanged(keepScreenOn)
                 }
-                TogglePreference("Modo concentración total", "Reduce las distracciones durante los entrenamientos mediante los ajustes de concentración de Android.", fullFocusEnabled, Icons.Filled.Settings) {
+                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.full_focus_mode), "Reduce las distracciones durante los entrenamientos mediante los ajustes de concentración de Android.", fullFocusEnabled, Icons.Filled.Settings) {
                     fullFocusEnabled = !fullFocusEnabled
                     detailPreferences.edit().putBoolean("full_focus", fullFocusEnabled).apply()
                     RemoteSyncChangeTracker.mark(profileContext, "user-app-settings")
@@ -731,7 +732,7 @@ fun ProfileScreen(
                 }
                 if (fullFocusEnabled) {
                     ChoiceButton(
-                        "Configurar categorías bloqueadas",
+                        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.choose_blocked_categories),
                         "Gestiona las aplicaciones y categorías que Android silencia durante el entrenamiento",
                         icon = Icons.Filled.Settings,
                     ) {
@@ -771,7 +772,7 @@ fun ProfileScreen(
                     onRemoteSyncRequested()
                 }
                 if (WATCH_MOTION_DETECTION_ENABLED) {
-                    TogglePreference("Seguimiento automático Wear OS", "Cuenta repeticiones y muestra insights de movimiento en ejercicios compatibles.", wearAutoTrackingEnabled, Icons.Filled.Settings) {
+                    TogglePreference("Seguimiento automático Wear OS", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_96bcd9d57aa889c8), wearAutoTrackingEnabled, Icons.Filled.Settings) {
                         wearAutoTrackingEnabled = !wearAutoTrackingEnabled
                         detailPreferences.edit().putBoolean("wear_auto_tracking_enabled", wearAutoTrackingEnabled).apply()
                         if (wearAutoTrackingEnabled) showsWearMotionOnboarding = true
@@ -782,13 +783,14 @@ fun ProfileScreen(
                     notificationPreferences.edit().putBoolean("rest_alerts", restAlertsEnabled).apply()
                 }
             } } } }
-        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 285) { Section("Privacidad") {
-                TogglePreference("Bloquear fotos de progreso", "Requiere la autenticación del dispositivo para abrir las fotos de progreso corporal.", progressPhotoLockEnabled, Icons.Filled.Settings) {
+        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 285) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.privacy)) {
+                val protectPhotosMessage = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.confirm_your_identity_to_protect_your_progress_photos_)
+                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.lock_progress_photos), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.require_device_authentication_to_open_body_progress_pics_), progressPhotoLockEnabled, Icons.Filled.Settings) {
                     val enable = !progressPhotoLockEnabled
                     pendingProgressPhotoLockValue = enable
                     progressPhotoLockError = null
                     authenticateProgressPhotoSetting(
-                        if (enable) "Confirma tu identidad para proteger tus fotos de progreso."
+                        if (enable) protectPhotosMessage
                         else "Confirma tu identidad para desactivar la protección de tus fotos de progreso.",
                     )
                 }
@@ -867,7 +869,7 @@ fun ProfileScreen(
         )
     }
     nutritionPicker?.let { current ->
-        ProfileOptionPickerDialog(current.title, current.options, onDismiss = { nutritionPicker = null }) { selected ->
+        ProfileOptionPickerDialog(localizedNutritionOption(current.title), current.options, onDismiss = { nutritionPicker = null }, localizeOption = { localizedNutritionOption(it) }) { selected ->
             nutritionProfile = current.apply(nutritionProfile, selected)
             saveNutritionProfile(nutritionProfile)
             nutritionPicker = null
@@ -881,7 +883,7 @@ fun ProfileScreen(
         }
     }
     settingsPicker?.let { current ->
-        ProfileOptionPickerDialog(current.title, current.options, onDismiss = { settingsPicker = null }) { selected ->
+        ProfileOptionPickerDialog(if (current == SettingsPicker.Language) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.language) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.theme), current.options, onDismiss = { settingsPicker = null }, localizeOption = { if (current == SettingsPicker.Language) localizedLanguageName(it) else localizedNutritionOption(it) }) { selected ->
             when (current) {
                 SettingsPicker.Language -> {
                     appLanguage = selected
@@ -1029,16 +1031,29 @@ private enum class ProfileSection(val title: String, val icon: ImageVector, val 
 }
 
 @Composable
+private fun profileSectionTitle(section: ProfileSection): String = androidx.compose.ui.res.stringResource(when (section) {
+    ProfileSection.Body -> io.codepassion.doubletriangle.core.designsystem.R.string.body_profile
+    ProfileSection.Fitness -> io.codepassion.doubletriangle.core.designsystem.R.string.fitness_profile
+    ProfileSection.Nutrition -> io.codepassion.doubletriangle.core.designsystem.R.string.nutrition_profile
+    ProfileSection.Settings -> io.codepassion.doubletriangle.core.designsystem.R.string.settings
+    ProfileSection.Subscription -> io.codepassion.doubletriangle.core.designsystem.R.string.subscription
+    ProfileSection.Account -> io.codepassion.doubletriangle.core.designsystem.R.string.account
+    ProfileSection.Faq -> io.codepassion.doubletriangle.core.designsystem.R.string.faq
+})
+
+@Composable
 private fun ProfileCategoryTree(profile: OnboardingProfile, nutritionProfile: NutritionProfilePreferences, appLanguage: String, accountRevision: Int, onSelect: (ProfileSection) -> Unit) {
     val context = LocalContext.current
     val account = remember(accountRevision) { currentWildforceAccount(context) }
     val subscription = SubscriptionAccessStore.load(context)
     val defaultTrainingLocation = profile.effectiveTrainingLocations().firstOrNull { it.isDefault }
         ?: profile.effectiveTrainingLocations().firstOrNull()
+    val onboardingGoal = onboardingLabel("FitnessGoal", profile.goal.storedValue, profile.goal.title)
+    val gymName = onboardingLabel("GymType", profile.gymType.storedValue, profile.gymType.title)
     val fitnessSummary = buildString {
-        append(profile.goal.title)
+        append(onboardingGoal)
         append(" • ")
-        append(defaultTrainingLocation?.name ?: profile.gymType.title)
+        append(defaultTrainingLocation?.name ?: gymName)
         defaultTrainingLocation?.displayAddress
             ?.trim()
             ?.takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) }
@@ -1050,10 +1065,10 @@ private fun ProfileCategoryTree(profile: OnboardingProfile, nutritionProfile: Nu
     val summaries = mapOf(
         ProfileSection.Body to displayWeight(profile.weightKg, profile.metricSystem).let { "$it ${if (profile.metricSystem == MetricSystem.Imperial) "lb" else "kg"}" },
         ProfileSection.Fitness to fitnessSummary,
-        ProfileSection.Nutrition to if (nutritionProfile.isConfigured) "${nutritionProfile.dietaryStyle} • ${nutritionProfile.mealsPerDay} comidas" else "Configuración necesaria",
-        ProfileSection.Settings to "$appLanguage • ${profile.metricSystem.title}",
+        ProfileSection.Nutrition to if (nutritionProfile.isConfigured) "${localizedNutritionOption(nutritionProfile.dietaryStyle)} • ${androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_meals, nutritionProfile.mealsPerDay)}" else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.setup_required),
+        ProfileSection.Settings to "${localizedLanguageName(appLanguage)} • ${localizedMetricSystem(profile.metricSystem)}",
         // iOS shows the current plan name here, not an action label.
-        ProfileSection.Subscription to (subscription?.plan?.let(::subscriptionPlanName) ?: "No disponible"),
+        ProfileSection.Subscription to (subscription?.plan?.let(::subscriptionPlanName) ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.not_available)),
         // iOS uses a plain Account label without a secondary value.
         ProfileSection.Account to "",
     )
@@ -1061,12 +1076,13 @@ private fun ProfileCategoryTree(profile: OnboardingProfile, nutritionProfile: Nu
         val visibleSections = ProfileSection.entries.filter { it != ProfileSection.Faq }
         visibleSections.forEachIndexed { index, section ->
             val summary = summaries.getValue(section)
+            val sectionTitle = profileSectionTitle(section)
             Row(
                 Modifier
                     .fillMaxWidth()
                     .clickable { onSelect(section) }
                     .semantics {
-                        contentDescription = if (summary.isBlank()) section.title else "${section.title}, $summary"
+                        contentDescription = if (summary.isBlank()) sectionTitle else "$sectionTitle, $summary"
                         role = Role.Button
                     }
                     .padding(horizontal = 16.dp, vertical = 13.dp),
@@ -1078,7 +1094,7 @@ private fun ProfileCategoryTree(profile: OnboardingProfile, nutritionProfile: Nu
                 } else {
                     Icon(section.icon, contentDescription = null, modifier = Modifier.size(21.dp), tint = WildforceThemeTokens.textPrimary)
                 }
-                Text(section.title, Modifier.weight(1f), fontFamily = Exo2FontFamily, fontSize = 16.sp, color = WildforceThemeTokens.textPrimary)
+                Text(sectionTitle, Modifier.weight(1f), fontFamily = Exo2FontFamily, fontSize = 16.sp, color = WildforceThemeTokens.textPrimary)
                 if (summary.isNotBlank()) {
                     Text(summary, Modifier.weight(1f), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.End, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
@@ -1218,7 +1234,7 @@ private fun BodyMetricsScreen(
                     // which pushed the import and add actions past the right edge on
                     // narrower devices. iOS reserves this trailing toolbar space.
                     Text(
-                        "MÉTRICAS CORPORALES",
+                        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body_metrics).uppercase(),
                         modifier = Modifier.weight(1f),
                         fontFamily = Exo2FontFamily,
                         fontSize = 24.sp,
@@ -1758,7 +1774,7 @@ private fun ProfileBodyMetrics(
         ReadOnlyProfileRow("Metabolismo basal", "$displayedBasalMetabolicRate kcal", "Calorías que quema tu cuerpo en reposo absoluto según altura, peso, edad y sexo.")
         ReadOnlyProfileRow("Metabolismo activo", "$activeMetabolicRate kcal", "TMB ajustada a tu estilo de vida ${profile.lifestyle.title.lowercase()}.")
     }
-    Section("Composición corporal") {
+    Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body_composition)) {
         val waistToHeight = measurements.waistCm?.div(safeHeightCm)
         if (waistToHeight != null) {
             val zone = waistToHeightZone(waistToHeight)
@@ -1769,7 +1785,7 @@ private fun ProfileBodyMetrics(
                 else -> Color(0xFFF44336)
             }
             ZoneMetricRow(
-                title = "Relación cintura-altura",
+                title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.waist_to_height_ratio),
                 value = "%.2f".format(waistToHeight),
                 zone = zone,
                 zoneColor = zoneColor,
@@ -1783,7 +1799,7 @@ private fun ProfileBodyMetrics(
                     Color(0xFFF44336).copy(alpha = .75f),
                 ),
             )
-        } else ReadOnlyProfileRow("Relación cintura-altura", "—", "Registra la cintura para ver este dato.")
+        } else ReadOnlyProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.waist_to_height_ratio), "—", "Registra la cintura para ver este dato.")
         val bodyFat = navyBodyFat(profile.gender, safeHeightCm.toDouble(), measurements)
         if (bodyFat != null) {
             val isFemale = profile.gender.storedValue == "female"
@@ -1991,7 +2007,7 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
                         Text(profile.name.ifBlank { "Tu perfil" }, fontFamily = AntonFontFamily, fontSize = 28.sp, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.heightIn(min = 48.dp).clickable(onClick = onEditName))
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             Icon(Icons.Filled.FitnessCenter, contentDescription = null, modifier = Modifier.size(15.dp), tint = WildforceThemeTokens.textSecondary)
-                            Text("${profile.goal.title} • ${profile.trainingLevel.title}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text("${onboardingLabel("FitnessGoal", profile.goal.storedValue, profile.goal.title)} • ${onboardingLabel("TrainingLevel", profile.trainingLevel.storedValue, profile.trainingLevel.title)}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
                 }
@@ -2198,14 +2214,14 @@ private fun WearMotionFeature(icon: ImageVector, title: String, description: Str
 }
 
 @Composable
-private fun ProfileOptionPickerDialog(title: String, options: List<String>, onDismiss: () -> Unit, onSelect: (String) -> Unit) {
+private fun ProfileOptionPickerDialog(title: String, options: List<String>, onDismiss: () -> Unit, localizeOption: @Composable (String) -> String = { it }, onSelect: (String) -> Unit) {
     androidx.compose.material.AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title, fontFamily = Exo2FontFamily, fontSize = 22.sp, fontWeight = FontWeight.SemiBold) },
         text = {
             LazyColumn(Modifier.height(if (options.size > 6) 380.dp else (options.size * 52).dp)) {
                 items(options) { option ->
-                    Text(option, Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onSelect(option) }.padding(vertical = 14.dp), color = WildforceThemeTokens.textPrimary)
+                    Text(localizeOption(option), Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onSelect(option) }.padding(vertical = 14.dp), color = WildforceThemeTokens.textPrimary)
                 }
             }
         },
@@ -2218,10 +2234,10 @@ private fun NutritionTextEditorDialog(field: NutritionTextField, profile: Nutrit
     var value by remember(field, profile) { mutableStateOf(field.value(profile)) }
     androidx.compose.material.AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(field.title, fontFamily = Exo2FontFamily, fontSize = 22.sp, fontWeight = FontWeight.SemiBold) },
+        title = { Text(localizedNutritionOption(field.title), fontFamily = Exo2FontFamily, fontSize = 22.sp, fontWeight = FontWeight.SemiBold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(value, { value = it.take(500) }, Modifier.fillMaxWidth(), placeholder = { Text(field.prompt) }, minLines = if (field.isList) 2 else 4, maxLines = 6)
+                OutlinedTextField(value, { value = it.take(500) }, Modifier.fillMaxWidth(), placeholder = { Text(nutritionTextPrompt(field)) }, minLines = if (field.isList) 2 else 4, maxLines = 6)
                 if (field.isList) Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_44e30460bdb88853), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
             }
         },
@@ -2281,9 +2297,9 @@ private sealed class Picker { data object Goal : Picker(); data object Level : P
             p.copy(gymType = it, availableEquipment = it.defaultEquipment, trainingLocations = locations)
         } } }
         Picker.Gender -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gender); values = Gender.entries.map { onboardingLabel("Gender", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(gender = it) } } }
-        Picker.Metric -> { title = "Unidades"; values = MetricSystem.entries.map { it.title to { p: OnboardingProfile -> p.copy(metricSystem = it) } } }
+        Picker.Metric -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.units); values = MetricSystem.entries.map { localizedMetricSystem(it) to { p: OnboardingProfile -> p.copy(metricSystem = it) } } }
         Picker.Equipment, Picker.Restrictions -> { title = ""; values = emptyList() }
-        is Picker.Focus -> { title = "Foco de ${picker.day.title}"; values = WorkoutFocus.customSelectionCases.map { onboardingLabel("WorkoutFocus", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(customWorkoutFocuses = p.customWorkoutFocuses + (picker.day to it)) } } }
+        is Picker.Focus -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.focus) + " · " + java.time.DayOfWeek.of(picker.day.ordinal + 1).getDisplayName(java.time.format.TextStyle.FULL, androidx.compose.ui.platform.LocalConfiguration.current.locales[0]); values = WorkoutFocus.customSelectionCases.map { onboardingLabel("WorkoutFocus", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(customWorkoutFocuses = p.customWorkoutFocuses + (picker.day to it)) } } }
     }
             androidx.compose.material.AlertDialog(onDismissRequest = { onSelect(profile) }, title = { Text(title, fontFamily = AntonFontFamily) }, text = { Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { values.forEach { (label, transform) -> Text(label, Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { onSelect(transform(profile)) }.padding(12.dp), color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis) } } }, confirmButton = {})
 }
@@ -2322,7 +2338,7 @@ private fun TrainingLocationsDialog(
     val isEditing = editingIndex != null
     androidx.compose.material.AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (!isEditing) "UBICACIONES" else if (editing == null) "AÑADIR UBICACIÓN" else "EDITAR UBICACIÓN", fontFamily = AntonFontFamily) },
+        title = { Text(if (!isEditing) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training_locations).uppercase() else if (editing == null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_location).uppercase() else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.edit).uppercase() + " " + androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training_location).uppercase(), fontFamily = AntonFontFamily) },
         text = {
             if (!isEditing) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -2335,7 +2351,7 @@ private fun TrainingLocationsDialog(
                                     Text(location.name, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_41854e3d1657578c, location.equipment.size), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1)
                                 }
-                                Text(if (location.gymId != null) "GIMNASIO" else if (location.isDefault) "PRINCIPAL" else "EDITAR", Modifier.heightIn(min = 48.dp).clickable(enabled = location.gymId == null) {
+                                Text(if (location.gymId != null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym).uppercase() else if (location.isDefault) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_default).uppercase() else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.edit).uppercase(), Modifier.heightIn(min = 48.dp).clickable(enabled = location.gymId == null) {
                                     editingIndex = locations.indexOf(location)
                                     editorName = location.name
                                     editorEquipment = location.equipment
@@ -2386,7 +2402,7 @@ private fun TrainingLocationsDialog(
                             val remaining = locations.filterIndexed { index, _ -> index != removedIndex }
                             locations = if (remaining.any { it.isDefault }) remaining else remaining.mapIndexed { index, location -> location.copy(isDefault = index == 0) }
                             editingIndex = null
-                        }.padding(10.dp), color = Color(0xFFC62828), fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                        }.padding(10.dp), color = WildforceThemeTokens.destructiveText, fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                     }
                 }
             }
@@ -2528,3 +2544,48 @@ private fun validatedProfile(draft: OnboardingProfile, height: String, weight: S
 }
 
 private fun monthName(month: Int, locale: Locale): String = Month.of(month.coerceIn(1, 12)).getDisplayName(TextStyle.FULL, locale).replaceFirstChar { it.titlecase(locale) }
+
+@Composable
+private fun localizedMetricSystem(value: MetricSystem): String = androidx.compose.ui.res.stringResource(
+    if (value == MetricSystem.Metric) io.codepassion.doubletriangle.core.designsystem.R.string.metric else io.codepassion.doubletriangle.core.designsystem.R.string.imperial
+)
+
+@Composable
+private fun localizedNutritionOption(value: String): String {
+    val id = when (value) {
+        "Estilo alimentario" -> io.codepassion.doubletriangle.core.designsystem.R.string.dietary_style
+        "Comidas al día" -> io.codepassion.doubletriangle.core.designsystem.R.string.meals_per_day
+        "Ventana de alimentación" -> io.codepassion.doubletriangle.core.designsystem.R.string.eating_window
+        "Esfuerzo al cocinar" -> io.codepassion.doubletriangle.core.designsystem.R.string.cooking_effort
+        "Sensibilidad al presupuesto" -> io.codepassion.doubletriangle.core.designsystem.R.string.budget_sensitivity
+        "Fuentes de proteína" -> io.codepassion.doubletriangle.core.designsystem.R.string.protein_sources
+        "Alimentos que no te gustan" -> io.codepassion.doubletriangle.core.designsystem.R.string.dislikes
+        "Alimentos excluidos" -> io.codepassion.doubletriangle.core.designsystem.R.string.excluded_foods
+        "Alergias o intolerancias" -> io.codepassion.doubletriangle.core.designsystem.R.string.allergies_or_intolerances
+        "Notas" -> io.codepassion.doubletriangle.core.designsystem.R.string.notes
+        "Vegetariana" -> io.codepassion.doubletriangle.core.designsystem.R.string.vegetarian
+        "Vegana" -> io.codepassion.doubletriangle.core.designsystem.R.string.vegan
+        "Pescetariana" -> io.codepassion.doubletriangle.core.designsystem.R.string.pescatarian
+        "Flexible" -> io.codepassion.doubletriangle.core.designsystem.R.string.flexible
+        "Bajo" -> io.codepassion.doubletriangle.core.designsystem.R.string.low
+        "Baja" -> io.codepassion.doubletriangle.core.designsystem.R.string.low
+        "Medio" -> io.codepassion.doubletriangle.core.designsystem.R.string.medium
+        "Media" -> io.codepassion.doubletriangle.core.designsystem.R.string.medium
+        "Alto" -> io.codepassion.doubletriangle.core.designsystem.R.string.high
+        "Alta" -> io.codepassion.doubletriangle.core.designsystem.R.string.high
+        "Sistema" -> io.codepassion.doubletriangle.core.designsystem.R.string.system
+        "Claro" -> io.codepassion.doubletriangle.core.designsystem.R.string.light
+        "Oscuro" -> io.codepassion.doubletriangle.core.designsystem.R.string.dark
+        else -> return value
+    }
+    return androidx.compose.ui.res.stringResource(id)
+}
+
+@Composable
+private fun nutritionTextPrompt(field: NutritionTextField): String = androidx.compose.ui.res.stringResource(when (field) {
+    NutritionTextField.ProteinSources -> io.codepassion.doubletriangle.core.designsystem.R.string.e_g__eggs__greek_yogurt__salmon__tofu
+    NutritionTextField.Dislikes -> io.codepassion.doubletriangle.core.designsystem.R.string.e_g__olives__liver__cottage_cheese
+    NutritionTextField.ExcludedFoods -> io.codepassion.doubletriangle.core.designsystem.R.string.e_g__mushrooms__olives__liver
+    NutritionTextField.Allergies -> io.codepassion.doubletriangle.core.designsystem.R.string.e_g__peanuts__lactose
+    NutritionTextField.Notes -> io.codepassion.doubletriangle.core.designsystem.R.string.additional_notes___
+})

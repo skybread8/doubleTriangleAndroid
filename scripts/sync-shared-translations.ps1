@@ -46,4 +46,5 @@ foreach ($locale in @('values') + $locales) {
 & (Join-Path $PSScriptRoot 'sync-ios-sheet-fallbacks.ps1') -ResRoot $ResRoot
 & (Join-Path $PSScriptRoot 'sync-sheet-tutorial-map.ps1')
 & (Join-Path $PSScriptRoot 'sync-onboarding-sheet-map.ps1')
+& (Join-Path $PSScriptRoot 'sync-android-fallback-translations.ps1') -ResRoot $ResRoot
 & (Join-Path $PSScriptRoot 'verify-shared-translations.ps1') -ResRoot $ResRoot

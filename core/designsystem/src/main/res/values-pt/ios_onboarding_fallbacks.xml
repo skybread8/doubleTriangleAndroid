@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generated iOS fallbacks for onboarding keys absent from the Sheet. -->
 <resources>
-    <string name="ios_onboarding_d0a9cd8fc1161c8d" formatted="false">Máquina de hack squat</string>
-    <string name="ios_onboarding_a5996633f5784abf" formatted="false">Máquina de hip thrust</string>
+    <string name="ios_onboarding_3140100df131cf30" formatted="false">Volume</string>
+    <string name="ios_onboarding_1f45f02561f41db9" formatted="false">Definição</string>
+    <string name="ios_onboarding_0f011be4a5ebbfff" formatted="false">Manutenção</string>
+    <string name="ios_onboarding_71d833d9c4e0320e" formatted="false">Escolheremos a prioridade mais adequada ao teu objetivo, às tuas métricas e ao teu feedback de treino.</string>
+    <string name="ios_onboarding_fe1801cc7f83ff1c" formatted="false">Um excedente calórico para maximizar o crescimento muscular e a força. Recomenda-se um maior volume de treino.</string>
+    <string name="ios_onboarding_e7f17d3498c15ece" formatted="false">Um défice calórico para perder gordura mantendo a massa muscular. A recuperação pode ser mais lenta.</string>
+    <string name="ios_onboarding_0a53f51b99b12fae" formatted="false">Uma ingestão de manutenção para melhorar gradualmente a composição corporal ou manter o peso atual.</string>
+    <string name="ios_onboarding_816daad47ee5426f" formatted="false">Pesos livres</string>
+    <string name="ios_onboarding_c061da196eae7622" formatted="false">Máquinas</string>
+    <string name="ios_onboarding_b6656595756edfce" formatted="false">Funcional</string>
 </resources>

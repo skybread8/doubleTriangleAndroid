@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -334,6 +335,9 @@ enum class BodyCompositionPhase(val storedValue: String, val title: String, val 
 val TrainingLevel.supportsBodyComposition: Boolean
     get() = this == TrainingLevel.Intermediate || this == TrainingLevel.Advanced || this == TrainingLevel.Elite
 
+val TrainingLevel.skipsWarmupsByDefault: Boolean
+    get() = this == TrainingLevel.Intermediate || this == TrainingLevel.Advanced || this == TrainingLevel.Elite
+
 val FitnessGoal.supportsBodyComposition: Boolean
     get() = this == FitnessGoal.LoseWeight || this == FitnessGoal.BuildMuscle ||
         this == FitnessGoal.GainStrength || this == FitnessGoal.BodyRecomposition
@@ -388,21 +392,17 @@ fun OnboardingScreen(
     var importedHeight by remember { mutableStateOf(false) }
     var importedWeight by remember { mutableStateOf(false) }
     var generationAttempt by remember { mutableStateOf(0) }
-    var appLanguage by remember { mutableStateOf("Español") }
+    var appLanguage by remember { mutableStateOf(context.getSharedPreferences("wildforce_profile_details", 0).getString("language", null)?.let(::profileLanguageName) ?: deviceLanguageName()) }
     var isLanguagePickerVisible by remember { mutableStateOf(false) }
     var isGymCodePickerVisible by remember { mutableStateOf(false) }
     var gymCodeInput by remember { mutableStateOf("") }
+    val invalidQrMessage = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_qr_is_not_a_gym_join_code_)
+    val validationErrorMessage = androidx.compose.ui.res.stringResource(R.string.onboarding_code_validation_error)
+    val scannerErrorMessage = androidx.compose.ui.res.stringResource(R.string.onboarding_scanner_error)
     var gymCodeError by remember { mutableStateOf<String?>(null) }
     var gymJoinCode by remember { mutableStateOf<String?>(null) }
     var gymJoinName by remember { mutableStateOf<String?>(null) }
     val gymCodeScope = rememberCoroutineScope()
-    val gymCodeScanner = remember(context) {
-        val options = GmsBarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-            .enableAutoZoom()
-            .build()
-        GmsBarcodeScanning.getClient(context, options)
-    }
     var isLoginVisible by remember { mutableStateOf(false) }
     var authenticationRegisters by remember { mutableStateOf(false) }
     var registrationCompletesOnboarding by remember { mutableStateOf(false) }
@@ -433,13 +433,23 @@ fun OnboardingScreen(
     }
     fun nextVisibleStep(after: Int) = visibleSteps().firstOrNull { it > after } ?: 18
     fun previousVisibleStep(before: Int) = visibleSteps().lastOrNull { it < before } ?: 0
+    fun advanceToNextStep(after: Int) {
+        val next = nextVisibleStep(after)
+        if (next == 18) {
+            authenticationRegisters = true
+            registrationCompletesOnboarding = true
+            isLoginVisible = true
+        } else {
+            step = next
+        }
+    }
     fun progressFor(current: Int): Float = ((visibleSteps().indexOf(current) + 1).coerceAtLeast(0).toFloat() / visibleSteps().size.coerceAtLeast(1))
     val completeProfile: (Boolean) -> Unit = { useAi ->
         val selectedGoal = goal
         val selectedLifestyle = lifestyle
         if (selectedGoal != null && selectedLifestyle != null) {
             val selectedBodyPhase = bodyPhase.takeIf { selectedGoal.supportsBodyComposition && trainingLevel.supportsBodyComposition }
-            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses.filterKeys { it in workoutDays }, gymType ?: GymType.SmallGym, equipment, restrictions, healthConnectEnabled == true, birthMonth, birthYear, gender ?: Gender.Male, metricSystem, heightCm, weightKg, appLanguage = appLanguage, gymJoinCode = gymJoinCode, gymJoinName = gymJoinName, birthDay = birthDay), useAi)
+            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses.filterKeys { it in workoutDays }, gymType ?: GymType.SmallGym, equipment, restrictions, healthConnectEnabled == true, birthMonth, birthYear, gender ?: Gender.Male, metricSystem, heightCm, weightKg, skipsWarmups = trainingLevel.skipsWarmupsByDefault, skipsCooldowns = true, appLanguage = appLanguage, gymJoinCode = gymJoinCode, gymJoinName = gymJoinName, birthDay = birthDay), useAi)
         }
     }
 
@@ -561,8 +571,8 @@ fun OnboardingScreen(
                 canContinue=trainingSplit!=TrainingSplitPreference.Custom||workoutDays.all{it in customFocuses},
                 onBack={step=6},onContinue={step=nextVisibleStep(7)},
             ){
-                trainingSplit.warning(workoutDays.size)?.let{Text(it,Modifier.fillMaxWidth().background(Color(0xFFFFB020).copy(alpha=.14f),RoundedCornerShape(12.dp)).padding(12.dp));Spacer(Modifier.height(12.dp))}
-                TrainingSplitPreference.entries.forEach{split->ChoiceOption(onboardingLabel("TrainingSplitPreference",split.storedValue,split.title),onboardingLabel("TrainingSplitPreference",split.storedValue,split.description,true),split.glyph,trainingSplit==split, {
+                trainingSplit.warning(workoutDays.size)?.let{Text(androidx.compose.ui.res.stringResource(R.string.onboarding_split_warning),Modifier.fillMaxWidth().background(Color(0xFFFFB020).copy(alpha=.14f),RoundedCornerShape(12.dp)).padding(12.dp));Spacer(Modifier.height(12.dp))}
+                TrainingSplitPreference.entries.forEach{split->ChoiceOption(onboardingLabel("TrainingSplitPreference",split.storedValue,split.title),onboardingSplitDescription(split),split.glyph,trainingSplit==split, {
                     val previousSplit = trainingSplit
                     trainingSplit=split
                     if(split==TrainingSplitPreference.Custom)customFocuses=normalizedCustomFocuses(customFocuses, workoutDays, previousSplit)
@@ -649,15 +659,15 @@ fun OnboardingScreen(
                     },
                 )
             }
-            13 -> FormStep(progress=progressFor(13),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.birth_date),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_helps_the_ai_tailor_the_volume_and_intensity_of_your_plans_),canContinue=true,onBack={step=previousVisibleStep(13)},onContinue={step=nextVisibleStep(13)}){
+            13 -> FormStep(progress=progressFor(13),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.birth_date),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_helps_the_ai_tailor_the_volume_and_intensity_of_your_plans_),canContinue=true,onBack={step=previousVisibleStep(13)},onContinue={advanceToNextStep(13)}){
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.day), (1..31).toList(), birthDay, { it.toString() }, Modifier.weight(.7f)) { birthDay = it }
                     WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.month), (1..12).toList(), birthMonth, { monthNames[it - 1] }, Modifier.weight(1.4f)) { birthMonth = it }
                     WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.year), (1920..currentYear).toList().reversed(), birthYear, { it.toString() }, Modifier.weight(1f)) { birthYear = it }
                 }
             }
-            14 -> FormStep(progress=progressFor(14),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.what_s_your_sex_),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.the_formula_to_get_better_results_differs_based_on_sex__we_need_this_information_to_serve_you_better_),canContinue=gender!=null,onBack={step=previousVisibleStep(14)},onContinue={step=nextVisibleStep(14)}){Gender.entries.forEach{item->ChoiceOption(onboardingLabel("Gender",item.storedValue,item.title),null,item.glyph,gender==item, onClick = {gender=item});Spacer(Modifier.height(10.dp))}}
-            15 -> FormStep(progress=progressFor(15),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.height),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_helps_us_calculate_your_needs_accurately_),canContinue=true,onBack={step=previousVisibleStep(15)},onContinue={step=nextVisibleStep(15)}){
+            14 -> FormStep(progress=progressFor(14),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.what_s_your_sex_),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.the_formula_to_get_better_results_differs_based_on_sex__we_need_this_information_to_serve_you_better_),canContinue=gender!=null,onBack={step=previousVisibleStep(14)},onContinue={advanceToNextStep(14)}){Gender.entries.forEach{item->ChoiceOption(onboardingLabel("Gender",item.storedValue,item.title),null,item.glyph,gender==item, onClick = {gender=item});Spacer(Modifier.height(10.dp))}}
+            15 -> FormStep(progress=progressFor(15),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.height),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_helps_us_calculate_your_needs_accurately_),canContinue=true,onBack={step=previousVisibleStep(15)},onContinue={advanceToNextStep(15)}){
                 MetricSystemSegmentedControl(metricSystem) { metricSystem = it }
                 Spacer(Modifier.height(20.dp))
                 val displayedHeight = if (metricSystem == MetricSystem.Metric) heightCm else (heightCm / 2.54).toInt()
@@ -687,7 +697,7 @@ fun OnboardingScreen(
     }
     if (step < 18) {
         Text(
-            "◎  $appLanguage",
+            "◎  ${localizedLanguageName(appLanguage)}",
             modifier = Modifier.align(Alignment.TopEnd).padding(16.dp).heightIn(min = 48.dp).clickable { isLanguagePickerVisible = true }.padding(horizontal = 12.dp, vertical = 9.dp),
             color = if (step == 0) Color.White else WildforceThemeTokens.textPrimary,
             style = MaterialTheme.typography.caption,
@@ -698,7 +708,7 @@ fun OnboardingScreen(
         AlertDialog(
             onDismissRequest = { isLanguagePickerVisible = false },
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.language)) },
-            text = { Column { languages.forEach { language -> Text(language, Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { appLanguage = language; onLanguageSelected(language); isLanguagePickerVisible = false }.padding(vertical = 12.dp), color = if (language == appLanguage) WildforceThemeTokens.accent else WildforceThemeTokens.textPrimary) } } },
+            text = { Column { languages.forEach { language -> Text(localizedLanguageName(language), Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { appLanguage = language; onLanguageSelected(language); isLanguagePickerVisible = false }.padding(vertical = 12.dp), color = if (language == appLanguage) WildforceThemeTokens.accent else WildforceThemeTokens.textPrimary) } } },
             confirmButton = {},
         )
     }
@@ -719,11 +729,16 @@ fun OnboardingScreen(
                         trailingIcon = {
                             Box(
                                 Modifier.size(48.dp).clickable(enabled = !checking) {
-                                    gymCodeScanner.startScan()
+                                    runCatching {
+                                        val options = GmsBarcodeScannerOptions.Builder()
+                                            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                                            .enableAutoZoom()
+                                            .build()
+                                        GmsBarcodeScanning.getClient(context, options).startScan()
                                         .addOnSuccessListener { barcode ->
                                             barcode.rawValue?.let { value ->
                                                 val parsed = parseGymJoinCode(value)
-                                                if (parsed == null) gymCodeError = "Este QR no contiene un código de gimnasio."
+                                                if (parsed == null) gymCodeError = invalidQrMessage
                                                 else {
                                                     gymCodeInput = parsed
                                                     gymCodeError = null
@@ -737,16 +752,18 @@ fun OnboardingScreen(
                                                             equipment = GymType.BigGym.defaultEquipment
                                                             isGymCodePickerVisible = false
                                                             step = 1
-                                                        } else gymCodeError = "No se pudo validar el código."
+                                                        } else gymCodeError = validationErrorMessage
                                                         checking = false
                                                     }
                                                 }
                                             }
                                         }
+                                        .addOnFailureListener { gymCodeError = scannerErrorMessage }
+                                    }.onFailure { gymCodeError = scannerErrorMessage }
                                 },
                                 contentAlignment = Alignment.Center,
                             ) {
-                                Icon(Icons.Filled.QrCodeScanner, contentDescription = "Escanear código QR", modifier = Modifier.size(24.dp))
+                                Icon(Icons.Filled.QrCodeScanner, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.scan_the_gym_s_qr), modifier = Modifier.size(24.dp))
                             }
                         },
                     )
@@ -769,7 +786,7 @@ fun OnboardingScreen(
                             gymCodeError = null
                             isGymCodePickerVisible = false
                             step = 1
-                        } else gymCodeError = "No se pudo validar el código."
+                        } else gymCodeError = validationErrorMessage
                         checking = false
                     }
                 }) { Text(if (checking) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f12a8ada4dfd091e) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_continue).uppercase()) }
@@ -792,6 +809,7 @@ fun OnboardingScreen(
             availableEquipment = equipment,
             movementRestrictions = restrictions,
             isHealthConnectEnabled = healthConnectEnabled == true,
+            birthDay = birthDay,
             birthMonth = birthMonth,
             birthYear = birthYear,
             gender = gender ?: Gender.Male,
@@ -887,7 +905,7 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit, onJoinGym: () ->
                 contentScale = ContentScale.Fit,
             )
             Text(
-                "Tu camino hacia una versión más fuerte y saludable empieza aquí.",
+                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_journey_to_a_stronger__healthier_you_starts_here_),
                 // The cover is always dark in iOS, independent of the app theme.
                 color = Color(0xFFA7A6AE),
                 textAlign = TextAlign.Center,
@@ -896,11 +914,11 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit, onJoinGym: () ->
             )
             Spacer(Modifier.height(40.dp))
             Box(Modifier.alpha(actionAlpha).offset(y = actionOffset.dp).graphicsLayer { scaleX = actionScale; scaleY = actionScale }) {
-                PrimaryAction("Empezar", true, onStart)
+                PrimaryAction(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.get_started), true, onStart)
             }
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_526484234b492b02), Modifier.padding(top = 18.dp).heightIn(min = 48.dp).clickable(onClick = onJoinGym).padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold)
             Text(
-                "Ya tengo una cuenta",
+                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.i_already_have_an_account),
                 modifier = Modifier.padding(top = 10.dp).heightIn(min = 48.dp).clickable(onClick = onLogin).padding(8.dp),
                 color = Color.White.copy(alpha = 0.80f),
                 style = MaterialTheme.typography.caption,
@@ -959,7 +977,7 @@ private fun PlanGenerationStep(
                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_8535879c75ac3c86), modifier = Modifier.fillMaxWidth(), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
                 Text(generationError, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = .10f)).padding(16.dp), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
                 Spacer(Modifier.height(20.dp))
-                PrimaryAction("Reintentar", !isGenerating, onGenerate)
+                PrimaryAction(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry), !isGenerating, onGenerate)
                 TextButton(
                     onClick = onContinueWithoutPlan,
                     modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -969,7 +987,7 @@ private fun PlanGenerationStep(
                 PlanWeekSummary(preview)
                 preview.workouts.forEach { workout -> PlanWorkoutPreviewCard(workout) }
                 Spacer(Modifier.height(12.dp))
-                PrimaryAction("Empezar a entrenar", true, onStartTraining)
+                PrimaryAction(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.start_training), true, onStartTraining)
             }
             else -> {
                 Spacer(Modifier.height(110.dp))
@@ -1016,7 +1034,7 @@ private fun FormStep(
     canContinue: Boolean,
     onBack: () -> Unit,
     onContinue: () -> Unit,
-    buttonTitle: String = "Continuar",
+    buttonTitle: String? = null,
     showBottomAction: Boolean = true,
     showTopBar: Boolean = true,
     lazyContent: (LazyListScope.() -> Unit)? = null,
@@ -1029,7 +1047,7 @@ private fun FormStep(
         animationSpec = spring(dampingRatio = .7f, stiffness = 520f),
         label = "onboarding-step-progress",
     )
-    Column(Modifier.fillMaxSize().background(WildforceThemeTokens.background)) {
+    Column(Modifier.fillMaxSize().background(WildforceThemeTokens.background).navigationBarsPadding()) {
         if (showTopBar) {
             LinearProgressIndicator(
                 progress = animatedProgress,
@@ -1068,7 +1086,7 @@ private fun FormStep(
         if (showBottomAction) {
             Divider(color = WildforceThemeTokens.textSecondary.copy(alpha = 0.16f))
             Box(Modifier.fillMaxWidth().padding(24.dp)) {
-                PrimaryAction(buttonTitle, canContinue, onContinue)
+                PrimaryAction(buttonTitle ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_continue), canContinue, onContinue)
             }
         }
     }
@@ -1104,16 +1122,16 @@ private fun HealthConnectStep(onConnect: () -> Unit, onNotNow: () -> Unit) {
         }
         Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f6f8978612a50da6), modifier = Modifier.alpha(contentAlpha), style = MaterialTheme.typography.h5, fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
         Text(
-            "Importa ahora tus datos corporales y mantén sincronizadas tus futuras métricas.",
+            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.import_your_details_from_apple_health_now_and_keep_future_metrics_in_sync_).replace("Apple Health", "Health Connect"),
             modifier = Modifier.padding(top = 12.dp).alpha(contentAlpha),
             color = WildforceThemeTokens.textSecondary,
             style = MaterialTheme.typography.body1,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(48.dp))
-        Box(Modifier.alpha(contentAlpha)) { PrimaryAction("Conectar Health Connect", true, onConnect) }
+        Box(Modifier.alpha(contentAlpha)) { PrimaryAction(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_79de068350f9e051), true, onConnect) }
         Text(
-            "Ahora no",
+            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.not_now),
             modifier = Modifier.padding(top = 18.dp).alpha(contentAlpha).clickable(onClick = onNotNow),
             color = WildforceThemeTokens.textSecondary,
             style = MaterialTheme.typography.body1,
@@ -1145,7 +1163,7 @@ private fun NameStepInput(name: String, onNameChange: (String) -> Unit) {
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     if (name.isBlank()) {
                         Text(
-                            "Tu nombre",
+                            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_name),
                             color = WildforceThemeTokens.textSecondary,
                             style = MaterialTheme.typography.h4.copy(fontFamily = Exo2FontFamily, fontSize = 34.sp, fontWeight = FontWeight.SemiBold),
                         )
@@ -1323,7 +1341,7 @@ private fun MetricSystemSegmentedControl(selected: MetricSystem, onSelect: (Metr
         MetricSystem.entries.forEach { system ->
             val isSelected = selected == system
             Text(
-                system.title,
+                androidx.compose.ui.res.stringResource(if (system == MetricSystem.Metric) io.codepassion.doubletriangle.core.designsystem.R.string.metric else io.codepassion.doubletriangle.core.designsystem.R.string.imperial),
                 Modifier.weight(1f).clip(RoundedCornerShape(7.dp)).background(if (isSelected) WildforceThemeTokens.background else Color.Transparent).clickable { onSelect(system) }.padding(vertical = 10.dp),
                 color = WildforceThemeTokens.textPrimary,
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
@@ -1361,17 +1379,58 @@ private fun WeightWheelPicker(weight: Double, metricSystem: MetricSystem, onSele
     val integer = weight.toInt().coerceIn(if (metricSystem == MetricSystem.Metric) 35 else 77, if (metricSystem == MetricSystem.Metric) 250 else 551)
     val decimal = ((weight - integer) * 10).toInt().coerceIn(0, 9)
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        WheelPicker("Peso", ((if (metricSystem == MetricSystem.Metric) 35 else 77)..(if (metricSystem == MetricSystem.Metric) 250 else 551)).toList(), integer, { it.toString() }, Modifier.weight(1f)) { onSelected(it + decimal / 10.0) }
-        WheelPicker("Decimal", (0..9).toList(), decimal, { ".$it ${if (metricSystem == MetricSystem.Metric) "kg" else "lb"}" }, Modifier.weight(1f)) { onSelected(integer + it / 10.0) }
+        WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.weight), ((if (metricSystem == MetricSystem.Metric) 35 else 77)..(if (metricSystem == MetricSystem.Metric) 250 else 551)).toList(), integer, { it.toString() }, Modifier.weight(1f)) { onSelected(it + decimal / 10.0) }
+        WheelPicker("", (0..9).toList(), decimal, { ".$it ${if (metricSystem == MetricSystem.Metric) "kg" else "lb"}" }, Modifier.weight(1f)) { onSelected(integer + it / 10.0) }
     }
 }
+
+private val Equipment.imageResource: Int
+    get() = when (this) {
+        Equipment.Bodyweight -> R.drawable.equipment_bodyweight
+        Equipment.ResistanceBands -> R.drawable.equipment_resistance_bands
+        Equipment.Dumbbells -> R.drawable.equipment_dumbbells
+        Equipment.Kettlebells -> R.drawable.equipment_kettlebells
+        Equipment.MedicineBall -> R.drawable.equipment_medicine_ball
+        Equipment.BattleRopes -> R.drawable.equipment_battle_ropes
+        Equipment.JumpRope -> R.drawable.equipment_jump_rope
+        Equipment.SuspensionTrainer -> R.drawable.equipment_suspension_trainer
+        Equipment.GymnasticRings -> R.drawable.equipment_gymnastic_rings
+        Equipment.CableMachine -> R.drawable.equipment_cable_machine
+        Equipment.SmithMachine -> R.drawable.equipment_smith_machine
+        Equipment.LegPressMachine -> R.drawable.equipment_leg_press_machine
+        Equipment.ChestPressMachine -> R.drawable.equipment_chest_press_machine
+        Equipment.LegCurlMachine -> R.drawable.equipment_leg_curl_machine
+        Equipment.RearDeltMachine -> R.drawable.equipment_rear_delt_machine
+        Equipment.SeatedRowMachine -> R.drawable.equipment_seated_row_machine
+        Equipment.GluteKickbackMachine -> R.drawable.equipment_glute_kickback_machine
+        Equipment.PecDeckMachine -> R.drawable.equipment_pec_deck_machine
+        Equipment.HipAbductionMachine -> R.drawable.equipment_hip_abduction_machine
+        Equipment.HipAdductionMachine -> R.drawable.equipment_hip_adduction_machine
+        Equipment.HackSquatMachine -> R.drawable.equipment_hack_squat_machine
+        Equipment.HipThrustMachine -> R.drawable.equipment_hip_thrust_machine
+        Equipment.RowingMachine -> R.drawable.equipment_rowing_machine
+        Equipment.Treadmill -> R.drawable.equipment_treadmill
+        Equipment.StationaryBike -> R.drawable.equipment_stationary_bike
+        Equipment.Elliptical -> R.drawable.equipment_elliptical
+        Equipment.StairClimber -> R.drawable.equipment_stair_climber
+        Equipment.SkiErg -> R.drawable.equipment_ski_erg
+        Equipment.FlatBench -> R.drawable.equipment_flat_bench
+        Equipment.AdjustableBench -> R.drawable.equipment_adjustable_bench
+        Equipment.SquatRack -> R.drawable.equipment_squat_rack
+        Equipment.OlympicBarbell -> R.drawable.equipment_olympic_barbell
+        Equipment.EzBar -> R.drawable.equipment_ez_bar
+        Equipment.TrapBar -> R.drawable.equipment_trap_bar
+        Equipment.DeadliftPlatform -> R.drawable.equipment_deadlift_platform
+        Equipment.PullUpBar -> R.drawable.equipment_pull_up_bar
+        Equipment.DipStation -> R.drawable.equipment_dip_station
+        Equipment.PlyoBox -> R.drawable.equipment_plyo_box
+        Equipment.BoxingBag -> R.drawable.equipment_boxing_bag
+        Equipment.LandmineAttachment -> R.drawable.equipment_landmine_attachment
+    }
 
 /** The iOS equipment grid uses charcoal selected cards; orange is not part of this state. */
 @Composable
 private fun EquipmentOption(equipment: Equipment, selected: Boolean, onClick: () -> Unit) {
-    val context = LocalContext.current
-    val resourceName = "equipment_" + equipment.storedValue.replace(Regex("([a-z])([A-Z])"), "${'$'}1_${'$'}2").lowercase(Locale.US)
-    val imageResource = remember(equipment) { context.resources.getIdentifier(resourceName, "drawable", context.packageName) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -1387,7 +1446,7 @@ private fun EquipmentOption(equipment: Equipment, selected: Boolean, onClick: ()
                 style = MaterialTheme.typography.h6,
             )
         }
-        if (imageResource != 0) Image(painterResource(imageResource), contentDescription = null, modifier = Modifier.fillMaxWidth().height(72.dp).padding(vertical = 6.dp), contentScale = ContentScale.Fit)
+        Image(painterResource(equipment.imageResource), contentDescription = null, modifier = Modifier.fillMaxWidth().height(72.dp).padding(vertical = 6.dp), contentScale = ContentScale.Fit)
         Text(
             onboardingLabel("Equipment", equipment.storedValue, equipment.title),
             color = if (selected) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary,
@@ -1409,7 +1468,7 @@ private fun PrimaryAction(title: String, enabled: Boolean, onClick: () -> Unit) 
             backgroundColor = WildforceThemeTokens.textPrimary,
             contentColor = WildforceThemeTokens.backgroundSecondary,
             disabledBackgroundColor = WildforceThemeTokens.textPrimary.copy(alpha = 0.20f),
-            disabledContentColor = WildforceThemeTokens.backgroundSecondary,
+            disabledContentColor = WildforceThemeTokens.textPrimary.copy(alpha = 0.75f),
         ),
     ) { Text(title, fontFamily = Exo2FontFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
 }

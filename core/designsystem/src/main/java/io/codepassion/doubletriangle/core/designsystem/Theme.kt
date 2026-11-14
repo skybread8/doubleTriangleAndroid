@@ -2,9 +2,11 @@ package io.codepassion.doubletriangle.core.designsystem
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -89,7 +91,9 @@ fun WildforceTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composa
             error = AccentRed,
         )
     }
-    MaterialTheme(colors = colors, typography = WildforceTypography, content = content)
+    MaterialTheme(colors = colors, typography = WildforceTypography) {
+        CompositionLocalProvider(LocalContentColor provides colors.onBackground, content = content)
+    }
 }
 
 object WildforceThemeTokens {
@@ -107,6 +111,11 @@ object WildforceThemeTokens {
         @Composable @ReadOnlyComposable get() = MaterialTheme.colors.onBackground
     val textSecondary: Color
         @Composable @ReadOnlyComposable get() = if (MaterialTheme.colors.isLight) SecondaryTextLight else SecondaryTextDark
+    /** Foreground colors for errors, destructive actions, and positive status text. */
+    val destructiveText: Color
+        @Composable @ReadOnlyComposable get() = if (MaterialTheme.colors.isLight) Color(0xFFC62828) else Color(0xFFFF6B6B)
+    val positiveText: Color
+        @Composable @ReadOnlyComposable get() = if (MaterialTheme.colors.isLight) Color(0xFF2E7D32) else Color(0xFF81C784)
     val accent: Color
         @Composable @ReadOnlyComposable get() = MaterialTheme.colors.primary
     /** Warm workout emphasis. Do not map this to iOS AccentColor2 (Nutrition). */

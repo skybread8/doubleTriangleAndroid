@@ -7,6 +7,15 @@ import org.junit.Test
 class WorkoutModelsTest {
     private val state = PreviewWorkoutRepository.load()
 
+    @Test fun coachBlockIdentityAndPrescribedSetsSurviveExecutionProjection() {
+        val exercise = ExerciseSummary("Press", sets = 4, reps = "8", restSeconds = 60)
+        val block = WorkoutBlockSummary(WorkoutBlockType.Superset, rounds = 3, exercises = listOf(exercise), remoteId = "coach-block-id")
+        assertEquals("coach-block-id", block.copy(rounds = 2).remoteId)
+        assertEquals(4, block.exercises.single().sets)
+        assertEquals(listOf(1, 1, 1), block.executionExercises().map { it.sets })
+        assertEquals(4, block.exercises.single().sets)
+    }
+
     @Test fun noSelectedDayReturnsWholePlan() = assertEquals(4, state.workoutsFor(null).size)
 
     @Test fun selectedDayFiltersPlan() {

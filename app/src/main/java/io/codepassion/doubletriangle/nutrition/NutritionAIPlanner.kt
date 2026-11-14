@@ -9,6 +9,9 @@ import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import io.codepassion.doubletriangle.AsyncOperationClient
+import io.codepassion.doubletriangle.WorkoutRemoteSync
+import io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker
+import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
@@ -19,7 +22,35 @@ import java.time.ZoneId
 import java.util.UUID
 
 internal object NutritionAIPlanner {
-    suspend fun generate(context: Context): List<NutritionDayPlan> = withContext(Dispatchers.IO) {
+    suspend fun generate(context: Context, profile: OnboardingProfile): List<NutritionDayPlan> = withContext(Dispatchers.IO) {
+        generateNutritionPlanAfterSync(
+            hasProfile = NutritionStore.hasNutritionProfile(context),
+            synchronize = {
+                val preferences = context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
+                suspend fun sync() {
+                    when (val result = WorkoutRemoteSync.synchronize(context, profile, preferences)) {
+                        is WorkoutRemoteSync.Outcome.Synchronized -> Unit
+                        is WorkoutRemoteSync.Outcome.Failed -> error(result.message ?: "No se pudo sincronizar el perfil nutricional.")
+                        WorkoutRemoteSync.Outcome.NoAccount -> error("Inicia sesión para generar el plan nutricional")
+                        WorkoutRemoteSync.Outcome.SubscriptionRequired -> error("Se necesita una suscripción para sincronizar el perfil nutricional")
+                    }
+                }
+                val importing = preferences.getBoolean("remote_sync_import_required", false)
+                sync()
+                // The first sync on a new device imports without pushing local changes.
+                if (importing && !preferences.getBoolean("remote_sync_import_required", false) &&
+                    "nutrition-profiles" in RemoteSyncChangeTracker.dirty(context)) sync()
+                check(!preferences.getBoolean("remote_sync_import_required", false) &&
+                    "nutrition-profiles" !in RemoteSyncChangeTracker.dirty(context) &&
+                    NutritionStore.hasNutritionProfile(context)) {
+                    "No se pudo sincronizar el perfil nutricional. Inténtalo de nuevo."
+                }
+            },
+            generate = { generateRemote(context) },
+        )
+    }
+
+    private suspend fun generateRemote(context: Context): List<NutritionDayPlan> {
         val token = context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE).getString("token", null)
             ?: error("Inicia sesión para generar el plan nutricional")
         val idempotencyKey = UUID.randomUUID().toString()
@@ -38,7 +69,7 @@ internal object NutritionAIPlanner {
         val generated = remoteDays(plan.optJSONArray("days") ?: JSONArray())
         NutritionStore.rememberRemotePlanId(context, plan.optString("id"))
         check(generated.isNotEmpty()) { "El generador no devolvió ningún día del plan." }
-        generated
+        return generated
     }
 
     /**

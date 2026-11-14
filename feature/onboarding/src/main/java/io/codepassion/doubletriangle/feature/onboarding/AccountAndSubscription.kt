@@ -2,7 +2,6 @@ package io.codepassion.doubletriangle.feature.onboarding
 
 import android.app.Activity
 import android.content.Context
-import android.app.Activity.RESULT_OK
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -46,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -247,7 +247,7 @@ fun clearLocalAccountData(context: Context) {
     listOf(
         "wildforce_profile", "wildforce_profile_details", "wildforce_body_progress", "wildforce_body_metrics",
         "wildforce_nutrition", "wildforce_nutrition_health", "wildforce_custom_workouts", "wildforce_active_workouts",
-        "wildforce_exercise_history", "wildforce_workout_completion_metrics", "wildforce_completion_progress",
+        "wildforce_exercise_history", "wildforce_exercise_profiles", "wildforce_workout_completion_metrics", "wildforce_completion_progress",
         "wildforce_completion_prompts", "wildforce_skipped_exercises", "wildforce_account_progress",
         "wildforce_coach_exercise_media", "wildforce_remote_media", "wildforce_sync_state", "wildforce_remote_sync",
         "wildforce_watch", "wildforce_watch_commands", "wildforce_subscription_access",
@@ -442,8 +442,8 @@ fun AccountSection(
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         if (destination == AccountProfileDestination.Account && account == null) {
             ProfileAccountCard(title = "Cuenta") {
-                ProfileRow("Crear una cuenta", "person.badge.plus") { dialog = AccountDialog.Register }
-                ProfileRow("Ya tengo una cuenta", "login") { dialog = AccountDialog.Login }
+                ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_an_account), "person.badge.plus") { dialog = AccountDialog.Register }
+                ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.i_already_have_an_account), "login") { dialog = AccountDialog.Login }
             }
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_an_account_to_keep_your_progress_available_on_every_device_), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(horizontal = 14.dp))
         } else if (destination == AccountProfileDestination.Account) {
@@ -452,7 +452,7 @@ fun AccountSection(
                     Icon(Icons.Filled.Email, null, tint = WildforceThemeTokens.textPrimary)
                     Column(Modifier.padding(start = 12.dp).weight(1f)) { Text(account!!.name, color = WildforceThemeTokens.textPrimary); Text(account!!.email, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 }
-                ProfileRow("Cerrar sesión", "exit_to_app", destructive = true) {
+                ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_out), "exit_to_app", destructive = true) {
                     logoutConfirmation = true
                 }
             }
@@ -486,7 +486,7 @@ fun AccountSection(
                     RemoteSyncChangeTracker.clearAll(context)
                     account = null
                     onAccountChanged()
-                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_out).uppercase(), color = Color(0xFFC62828)) }
+                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_out).uppercase(), color = WildforceThemeTokens.destructiveText) }
             },
             dismissButton = { TextButton(onClick = { logoutConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
         )
@@ -535,7 +535,7 @@ fun AccountLogoutAction(onAccountChanged: () -> Unit = {}) {
     if (account == null) return
 
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        ProfileRow("Cerrar sesión", "exit_to_app", destructive = true) { logoutConfirmation = true }
+        ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_out), "exit_to_app", destructive = true) { logoutConfirmation = true }
     }
     if (logoutConfirmation) {
         AlertDialog(
@@ -553,7 +553,7 @@ fun AccountLogoutAction(onAccountChanged: () -> Unit = {}) {
                     RemoteSyncChangeTracker.clearAll(context)
                     account = null
                     onAccountChanged()
-                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_out).uppercase(), color = Color(0xFFC62828)) }
+                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_out).uppercase(), color = WildforceThemeTokens.destructiveText) }
             },
             dismissButton = { TextButton(onClick = { logoutConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
         )
@@ -579,22 +579,22 @@ private fun SubscriptionDetailsCard(
             .onFailure { error = it.message ?: "No se ha podido consultar la suscripción." }
         loading = false
     }
-    ProfileAccountCard(title = "Suscripción") {
+    ProfileAccountCard(title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.subscription)) {
         when {
-            !hasAccount -> ProfileRow("Crea una cuenta para suscribirte", "person.badge.plus", onClick = onRegister)
+            !hasAccount -> ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_an_account_to_subscribe), "person.badge.plus", onClick = onRegister)
             loading -> Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_205443ee88568e8c), color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 10.dp))
             else -> {
                 access?.let { subscription ->
-                    SubscriptionDetailRow("Plan", subscriptionPlanName(subscription.plan))
-                    SubscriptionDetailRow("Estado", subscriptionStatusName(subscription.status, subscription.hasAccess))
-                    subscription.provider?.let { SubscriptionDetailRow("Proveedor", subscriptionProviderName(it)) }
-                    subscription.renewsAt?.let { SubscriptionDetailRow(if (subscription.autoRenews == true) "Renueva" else "Finaliza", formatSubscriptionDate(it)) }
-                    subscription.cancelledAt?.let { SubscriptionDetailRow("Cancelada", formatSubscriptionDate(it)) }
+                    SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.plan), subscriptionPlanName(subscription.plan))
+                    SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.status), subscriptionStatusName(subscription.status, subscription.hasAccess))
+                    subscription.provider?.let { SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.provider), subscriptionProviderName(it)) }
+                    subscription.renewsAt?.let { SubscriptionDetailRow(if (subscription.autoRenews == true) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.renews) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ends), formatSubscriptionDate(it)) }
+                    subscription.cancelledAt?.let { SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancelled), formatSubscriptionDate(it)) }
                 }
-                ProfileRow(if (access?.hasAccess == true) "Ver opciones de suscripción" else "Obtener Wildforce Premium", "crown.fill", onClick = onPaywall)
+                ProfileRow(if (access?.hasAccess == true) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.view_subscription_options) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.get_wildforce_premium), "crown.fill", onClick = onPaywall)
             }
         }
-        error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption, modifier = Modifier.padding(vertical = 6.dp)) }
+        error?.let { Text(it, color = WildforceThemeTokens.destructiveText, style = MaterialTheme.typography.caption, modifier = Modifier.padding(vertical = 6.dp)) }
     }
 }
 
@@ -608,7 +608,7 @@ private fun SubscriptionDetailRow(label: String, value: String) {
 
 private fun formatSubscriptionDate(value: String): String = runCatching {
     java.time.OffsetDateTime.parse(value).toLocalDate()
-        .format(java.time.format.DateTimeFormatter.ofPattern("d MMM uuuu", java.util.Locale.forLanguageTag("es-ES")))
+        .format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(java.util.Locale.getDefault()))
 }.getOrElse { value.substringBefore('T') }
 
 internal fun subscriptionPlanName(plan: String?): String = when (plan) {
@@ -661,7 +661,7 @@ private fun GoogleLinkedAccountCard(token: String?) {
         }.onFailure { error = it.message }
         loading = false
     }
-    ProfileAccountCard(title = "Cuentas vinculadas") {
+    ProfileAccountCard(title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.linked_accounts)) {
         if (loading) {
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_205443ee88568e8c), color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 10.dp))
         } else {
@@ -672,7 +672,7 @@ private fun GoogleLinkedAccountCard(token: String?) {
                 LinkedProviderStatusRow("Google")
             } else {
                 GoogleAuthenticationButton(
-                    title = "CONECTAR GOOGLE",
+                    title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.connect_google),
                     enabled = token != null,
                     onIdToken = { idToken ->
                         scope.launch {
@@ -686,7 +686,7 @@ private fun GoogleLinkedAccountCard(token: String?) {
             }
             if ("apple" in linkedProviders) LinkedProviderStatusRow("Apple")
         }
-        error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
+        error?.let { Text(it, color = WildforceThemeTokens.destructiveText, style = MaterialTheme.typography.caption) }
     }
 }
 
@@ -793,7 +793,7 @@ private fun ProfileAccountCard(title: String, content: @Composable ColumnScope.(
 @Composable
 private fun ProfileRow(label: String, systemIcon: String, destructive: Boolean = false, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-        val color = if (destructive) Color(0xFFC62828) else WildforceThemeTokens.textPrimary
+        val color = if (destructive) WildforceThemeTokens.destructiveText else WildforceThemeTokens.textPrimary
         val icon = when (systemIcon) {
             "crown.fill" -> Icons.Filled.Star
             "exit_to_app" -> Icons.AutoMirrored.Filled.ExitToApp
@@ -812,16 +812,18 @@ private enum class AccountDialog { Login, Register, Paywall }
 private fun GoogleAuthenticationButton(
     title: String,
     enabled: Boolean,
+    loading: Boolean = false,
     onIdToken: (String) -> Unit,
     onError: (String) -> Unit,
 ) {
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode != RESULT_OK) return@rememberLauncherForActivityResult
         try {
             val account = GoogleSignIn.getSignedInAccountFromIntent(result.data).getResult(ApiException::class.java)
             val idToken = account.idToken ?: throw IllegalStateException("Google no ha devuelto un token de identidad.")
             onIdToken(idToken)
+        } catch (error: ApiException) {
+            onError(googleSignInErrorMessage(error.statusCode))
         } catch (error: Exception) {
             onError(error.localizedMessage ?: "No se ha podido iniciar sesión con Google.")
         }
@@ -847,16 +849,26 @@ private fun GoogleAuthenticationButton(
             disabledBackgroundColor = WildforceThemeTokens.textPrimary.copy(alpha = .20f),
         ),
     ) {
-        Icon(
-            painter = painterResource(R.drawable.google_g),
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            tint = Color.Unspecified,
-        )
-        Spacer(Modifier.width(10.dp))
-        // Google keeps its own system type rather than the Wildforce display face.
-        Text(title, fontFamily = androidx.compose.ui.text.font.FontFamily.Default, fontWeight = FontWeight.Bold)
+        if (loading) {
+            CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp)
+        } else {
+            Icon(
+                painter = painterResource(R.drawable.google_g),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = Color.Unspecified,
+            )
+            Spacer(Modifier.width(10.dp))
+            // Google keeps its own system type rather than the Wildforce display face.
+            Text(title, fontFamily = androidx.compose.ui.text.font.FontFamily.Default, fontWeight = FontWeight.Bold)
+        }
     }
+}
+
+internal fun googleSignInErrorMessage(statusCode: Int): String = when (statusCode) {
+    12501 -> "Se ha cancelado el inicio de sesión con Google."
+    10, 12500 -> "No se ha podido iniciar sesión con Google (error $statusCode). Comprueba la configuración de Google Sign-In."
+    else -> "No se ha podido iniciar sesión con Google (error $statusCode)."
 }
 
 private enum class PasswordRequirement(val shortLabel: String) {
@@ -879,6 +891,7 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
     var isEmailLoginPresented by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current.applicationContext
+    val uriHandler = LocalUriHandler.current
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         // Dialogs dim their host window by default. That dark scrim made this
         // sheet appear opaque even though its own material is translucent,
@@ -946,12 +959,14 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
                     ) { emailFlow ->
                         if (!emailFlow) {
                             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
+                                error?.let { Text(it, color = WildforceThemeTokens.destructiveText, style = MaterialTheme.typography.caption) }
                                 GoogleAuthenticationButton(
                                     title = if (register) "Registrarme con Google" else "Iniciar sesión con Google",
                                     enabled = !submitting,
+                                    loading = submitting,
                                     onIdToken = { idToken -> scope.launch {
                                         submitting = true
+                                        error = null
                                         authenticateWithGoogle(context, idToken, profile.takeIf { register }).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión con Google." }
                                         submitting = false
                                     } },
@@ -983,16 +998,26 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
                                     modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)),
                                     colors = authenticationTextFieldColors(),
                                 )
+                                if (!register) {
+                                    Text(
+                                        androidx.compose.ui.res.stringResource(R.string.forgot_password),
+                                        modifier = Modifier.align(Alignment.End).heightIn(min = 48.dp)
+                                            .clickable { uriHandler.openUri("https://www.wildforce.app/forgot-password") }
+                                            .padding(vertical = 12.dp),
+                                        style = MaterialTheme.typography.caption,
+                                        color = WildforceThemeTokens.textSecondary,
+                                    )
+                                }
                                 if (register) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                                     PasswordRequirement.entries.forEach { requirement ->
                                         val satisfied = requirement.isSatisfiedBy(password)
                                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                            Icon(if (satisfied) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked, contentDescription = null, modifier = Modifier.size(14.dp), tint = if (satisfied) Color(0xFF2E7D32) else WildforceThemeTokens.textSecondary)
-                                            Text(requirement.shortLabel, style = MaterialTheme.typography.caption, color = if (satisfied) Color(0xFF2E7D32) else WildforceThemeTokens.textSecondary)
+                                            Icon(if (satisfied) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked, contentDescription = null, modifier = Modifier.size(14.dp), tint = if (satisfied) WildforceThemeTokens.positiveText else WildforceThemeTokens.textSecondary)
+                                            Text(requirement.shortLabel, style = MaterialTheme.typography.caption, color = if (satisfied) WildforceThemeTokens.positiveText else WildforceThemeTokens.textSecondary)
                                         }
                                     }
                                 }
-                                error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
+                                error?.let { Text(it, color = WildforceThemeTokens.destructiveText, style = MaterialTheme.typography.caption) }
                                 Button(enabled = !submitting && (!register || PasswordRequirement.entries.all { it.isSatisfiedBy(password) }), onClick = {
                                     if (email.isBlank() || password.isBlank()) { error = "Introduce tu email y contraseña para continuar."; return@Button }
                                     scope.launch { submitting = true; authenticate(context, if (register) "auth/register" else "auth/login", profile.takeIf { register }, email, password).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión." }; submitting = false }
@@ -1083,7 +1108,7 @@ fun SubscriptionPaywall(
         val selectedOffer = products[selected]?.renewableBaseOffer(selectedPeriod)
         val selectedPrice = selectedOffer?.pricingPhases?.pricingPhaseList
             ?.firstOrNull { it.recurrenceMode == ProductDetails.RecurrenceMode.INFINITE_RECURRING }?.formattedPrice
-        error?.let { Text(it, color = Color(0xFFC62828), style = MaterialTheme.typography.caption) }
+        error?.let { Text(it, color = WildforceThemeTokens.destructiveText, style = MaterialTheme.typography.caption) }
         Button(enabled = !loading && !purchasing && activity != null && !accountId.isNullOrBlank() && selectedOffer != null, onClick = {
             val detail = products[selected] ?: return@Button
             val offer = selectedOffer ?: return@Button

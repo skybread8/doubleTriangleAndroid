@@ -138,14 +138,14 @@ private fun PlanSessionRow(workout: WorkoutDaySummary, onClick: () -> Unit) {
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(workout.title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-            Text(workout.scheduledDay.getDisplayName(TextStyle.SHORT, Locale.forLanguageTag("es-ES")) + " · ${workout.estimatedMinutes} min", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            Text(workout.scheduledDay.getDisplayName(TextStyle.SHORT, androidx.compose.ui.platform.LocalConfiguration.current.locales[0]) + " · " + androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_min, workout.estimatedMinutes), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
         }
         Text(when (workout.status) {
-            WorkoutStatus.Completed -> "COMPLETADO"
-            WorkoutStatus.Skipped -> "OMITIDO"
-            WorkoutStatus.InProgress -> "EN CURSO"
-            WorkoutStatus.Draft -> "BORRADOR"
-            WorkoutStatus.Planned -> "ABRIR"
+            WorkoutStatus.Completed -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.completed).uppercase()
+            WorkoutStatus.Skipped -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skipped).uppercase()
+            WorkoutStatus.InProgress -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.in_progress).uppercase()
+            WorkoutStatus.Draft -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.draft).uppercase()
+            WorkoutStatus.Planned -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.planned).uppercase()
         }, Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = statusColor)
     }
 }

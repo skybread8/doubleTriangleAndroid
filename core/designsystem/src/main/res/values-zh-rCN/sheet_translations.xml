@@ -331,6 +331,34 @@
     <!-- Bookings -->
     <!-- Bookings -->
     <!-- Bookings -->
+    <string name="____">@ %1$s</string>
+    <string name="__0fs">%1$.0fs</string>
+    <string name="__1fs">%1$.1fs</string>
+    <string name="__">%1$s</string>
+    <string name="_______">%1$s / %2$s</string>
+    <string name="_____">%1$s %2$s</string>
+    <string name="______of___">%1$s %2$s of %3$s</string>
+    <string name="___cm">%1$s cm</string>
+    <string name="___g">%1$s g</string>
+    <string name="___in">%1$s in</string>
+    <string name="___kg">%1$s kg</string>
+    <string name="___km">%1$s km</string>
+    <string name="___lb">%1$s lb</string>
+    <string name="___mi">%1$s mi</string>
+    <string name="___min">%1$s min</string>
+    <string name="______">%1$s, %2$s</string>
+    <string name="_____d">%1$s: %2$d</string>
+    <string name="_d____d_xp">%1$d / %2$d XP</string>
+    <string name="_d_cm">%1$d cm</string>
+    <string name="_d_h">%1$d h</string>
+    <string name="_d_min">%1$d min</string>
+    <string name="_d_of__d">%1$d of %2$d</string>
+    <string name="_d_reps">%1$d reps</string>
+    <string name="_d_sec">%1$d sec</string>
+    <string name="_d__d_reps">%1$d-%2$d reps</string>
+    <string name="_d__02d">%1$d:%2$02d</string>
+    <string name="_d__">%1$d%%</string>
+    <string name="_ds">%1$ds</string>
     <!-- Exercise sprawl: description -->
     <!-- Exercise bayesianCableCurl: description -->
     <!-- Exercise gluteBridge: description -->
@@ -1635,4 +1663,96 @@
     <!-- lyingLegRaise tip -->
     <!-- lyingLegRaise tip -->
     <!-- lyingLegRaise llm -->
+    <!-- Rope Triceps Pushdown -->
+    <!-- Rope Triceps Pushdown -->
+    <!-- Rope Triceps Pushdown -->
+    <!-- Rope Triceps Pushdown -->
+    <!-- Rope Triceps Pushdown -->
+    <!-- Rope Triceps Pushdown -->
+    <!-- Rope Triceps Pushdown -->
+    <!-- Rope Triceps Pushdown -->
+    <!-- Rope Triceps Pushdown -->
+    <!-- Reverse Pec Deck -->
+    <!-- Reverse Pec Deck -->
+    <!-- Reverse Pec Deck -->
+    <!-- Reverse Pec Deck -->
+    <!-- Reverse Pec Deck -->
+    <!-- Reverse Pec Deck -->
+    <!-- Reverse Pec Deck -->
+    <!-- Reverse Pec Deck -->
+    <!-- Reverse Pec Deck -->
+    <!-- Spider Curl -->
+    <!-- Spider Curl -->
+    <!-- Spider Curl -->
+    <!-- Spider Curl -->
+    <!-- Spider Curl -->
+    <!-- Spider Curl -->
+    <!-- Spider Curl -->
+    <!-- Spider Curl -->
+    <!-- Spider Curl -->
+    <!-- Preacher Curl -->
+    <!-- Preacher Curl -->
+    <!-- Preacher Curl -->
+    <!-- Preacher Curl -->
+    <!-- Preacher Curl -->
+    <!-- Preacher Curl -->
+    <!-- Preacher Curl -->
+    <!-- Preacher Curl -->
+    <!-- Preacher Curl -->
+    <!-- Hack Squat -->
+    <!-- Hack Squat -->
+    <!-- Hack Squat -->
+    <!-- Hack Squat -->
+    <!-- Hack Squat -->
+    <!-- Hack Squat -->
+    <!-- Hack Squat -->
+    <!-- Hack Squat -->
+    <!-- Hack Squat -->
+    <!-- Machine Hip Thrust -->
+    <!-- Machine Hip Thrust -->
+    <!-- Machine Hip Thrust -->
+    <!-- Machine Hip Thrust -->
+    <!-- Machine Hip Thrust -->
+    <!-- Machine Hip Thrust -->
+    <!-- Machine Hip Thrust -->
+    <!-- Machine Hip Thrust -->
+    <!-- Machine Hip Thrust -->
+    <!-- Barbell Overhead Press -->
+    <!-- Barbell Bent-Over Row -->
+    <!-- EZ Bar Skull Crusher -->
+    <!-- EZ Bar Skull Crusher -->
+    <!-- EZ Bar Skull Crusher -->
+    <!-- EZ Bar Skull Crusher -->
+    <!-- EZ Bar Skull Crusher -->
+    <!-- EZ Bar Skull Crusher -->
+    <!-- EZ Bar Skull Crusher -->
+    <!-- EZ Bar Skull Crusher -->
+    <!-- EZ Bar Skull Crusher -->
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <!-- Lying Cable Curl -->
+    <!-- Lying Cable Curl -->
+    <!-- Lying Cable Curl -->
+    <!-- Lying Cable Curl -->
+    <!-- Lying Cable Curl -->
+    <!-- Lying Cable Curl -->
+    <!-- Lying Cable Curl -->
+    <!-- Lying Cable Curl -->
+    <!-- Lying Cable Curl -->
+    <!-- Smith Machine Calf Raise -->
+    <!-- Smith Machine Calf Raise -->
+    <!-- Smith Machine Calf Raise -->
+    <!-- Smith Machine Calf Raise -->
+    <!-- Smith Machine Calf Raise -->
+    <!-- Smith Machine Calf Raise -->
+    <!-- Smith Machine Calf Raise -->
+    <!-- Smith Machine Calf Raise -->
+    <!-- Smith Machine Calf Raise -->
 </resources>

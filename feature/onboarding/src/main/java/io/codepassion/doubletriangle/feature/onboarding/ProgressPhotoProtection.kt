@@ -191,7 +191,7 @@ private fun LockedProgressPhotos(
 ) {
     Box(Modifier.fillMaxWidth().padding(top = 12.dp), contentAlignment = Alignment.CenterStart) {
         Box(Modifier.size(48.dp).clickable(onClick = onClose), contentAlignment = Alignment.Center) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver", Modifier.size(22.dp), WildforceThemeTokens.textPrimary)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.go_back), Modifier.size(22.dp), WildforceThemeTokens.textPrimary)
         }
     }
     Spacer(Modifier.height(36.dp))
@@ -206,7 +206,7 @@ private fun LockedProgressPhotos(
         else Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.unlock_progress_photos), color = WildforceThemeTokens.primaryButtonText)
     }
     Text(
-        "Volver",
+        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.go_back),
         Modifier
             .heightIn(min = 48.dp)
             .clickable(enabled = !authenticating, onClick = onClose)

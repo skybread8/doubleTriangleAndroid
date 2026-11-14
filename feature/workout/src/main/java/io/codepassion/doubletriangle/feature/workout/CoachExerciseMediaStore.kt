@@ -64,16 +64,13 @@ object CoachExerciseMediaStore {
             val id = entry.optString("id").trim().lowercase()
             if (id.isBlank()) continue
             val key = "coach:$id"
-            if (entry.isNull("deleted_at")) {
-                latest.remove(key)
-                customImageUrls.remove(key)
-                continue
-            }
             val current = latest.optJSONObject(key)
-            if (current == null || entry.optString("updated_at") >= current.optString("updated_at")) {
-                latest.put(key, entry)
+            when (coachExerciseMergeAction(current?.optString("updated_at"), entry.optString("updated_at"), !entry.isNull("deleted_at"))) {
+                CoachExerciseMergeAction.Remove -> { latest.remove(key); customImageUrls.remove(key); continue }
+                CoachExerciseMergeAction.Ignore -> continue
+                CoachExerciseMergeAction.Replace -> latest.put(key, entry)
             }
-            entry.imageUrl()?.let { customImageUrls[key] = it }
+            entry.imageUrl()?.let { customImageUrls[key] = it } ?: customImageUrls.remove(key)
         }
         context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE).edit()
             .putString(entriesKey, latest.toString()).apply()
@@ -85,17 +82,17 @@ object CoachExerciseMediaStore {
         val entry = entries(context).optJSONObject(key) ?: return null
         CoachExerciseMedia(
             id = entry.optString("id").ifBlank { key.removePrefix("coach:").ifBlank { null } },
-            name = entry.optString("name").trim().ifBlank { null },
-            imageUrl = entry.optString("image_url").ifBlank { null },
-            youtubeVideoId = entry.optString("youtube_video_id").ifBlank { null },
-            notes = entry.optString("notes").trim().ifBlank { null },
+            name = entry.nullableText("name"),
+            imageUrl = entry.nullableText("image_url"),
+            youtubeVideoId = entry.nullableText("youtube_video_id"),
+            notes = entry.nullableText("notes"),
             instructions = entry.stringList("instructions"),
             tips = entry.stringList("tips"),
             requiredEquipment = entry.stringList("required_equipment"),
             primaryMuscles = entry.stringList("primary_muscles"),
             secondaryMuscles = entry.stringList("secondary_muscles"),
-            trackingMode = entry.optString("tracking_mode").trim().ifBlank { null },
-            category = entry.optString("category").trim().ifBlank { null },
+            trackingMode = entry.nullableText("tracking_mode"),
+            category = entry.nullableText("category"),
             targetMetrics = entry.stringList("target_metrics"),
             supportsExternalLoad = entry.optBoolean("supports_external_load", false),
             isUnilateral = entry.optBoolean("is_unilateral", false),
@@ -142,14 +139,23 @@ object CoachExerciseMediaStore {
         List(values.length()) { index -> values.optString(index).trim() }.filter(String::isNotBlank)
     }.orEmpty()
 
+    private fun JSONObject.nullableText(name: String): String? =
+        if (isNull(name)) null else optString(name).trim().takeIf(String::isNotBlank)
+
     private fun JSONObject.imageUrl(): String? =
-        optString("image_url").trim().takeIf(String::isNotBlank)
-            ?: optString("youtube_video_id").trim().takeIf(String::isNotBlank)
-                ?.let { "https://img.youtube.com/vi/$it/hqdefault.jpg" }
+        nullableText("image_url") ?: nullableText("youtube_video_id")
+            ?.let { "https://img.youtube.com/vi/$it/hqdefault.jpg" }
 
     private fun String?.androidTrackingMode(): ExerciseTrackingMode = when (this?.trim()?.lowercase()) {
         "durationseconds", "duration_seconds", "durationminutes", "duration_minutes" -> ExerciseTrackingMode.Duration
         "durationminutesanddistance", "duration_minutes_and_distance" -> ExerciseTrackingMode.DurationAndDistance
         else -> ExerciseTrackingMode.Repetitions
     }
+}
+
+internal enum class CoachExerciseMergeAction { Remove, Ignore, Replace }
+
+internal fun coachExerciseMergeAction(currentUpdatedAt: String?, incomingUpdatedAt: String, deleted: Boolean): CoachExerciseMergeAction {
+    if (currentUpdatedAt != null && incomingUpdatedAt <= currentUpdatedAt) return CoachExerciseMergeAction.Ignore
+    return if (deleted) CoachExerciseMergeAction.Remove else CoachExerciseMergeAction.Replace
 }

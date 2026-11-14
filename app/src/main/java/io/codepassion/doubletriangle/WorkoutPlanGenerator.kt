@@ -138,7 +138,8 @@ object WorkoutPlanGenerator {
             val blocks = day.optJSONArray("blocks") ?: JSONArray()
             for (blockIndex in 0 until blocks.length()) {
                 val block = blocks.optJSONObject(blockIndex) ?: continue
-                put(JSONObject().put("type", block.optString("type", "standard"))
+                put(JSONObject().put("remoteId", block.opt("id"))
+                    .put("type", block.optString("type", "standard"))
                     .put("rounds", block.optInt("rounds", 1))
                     .put("restAfterBlockSeconds", block.opt("rest_after_block_seconds"))
                     .put("notes", block.opt("notes"))
@@ -317,7 +318,7 @@ object WorkoutPlanGenerator {
         }
     }
 
-    fun parse(json: String, userName: String, goal: String, bodyCompositionPhase: String? = null): WorkoutHubState {
+    fun parse(json: String, userName: String, goal: String, bodyCompositionPhase: String? = null, allowEmpty: Boolean = false): WorkoutHubState {
         val root = JSONObject(json)
         val daysJson = root.getJSONArray("workouts")
         val workouts = buildList {
@@ -327,7 +328,7 @@ object WorkoutPlanGenerator {
                 val exercises = if (blocks.isNotEmpty()) {
                     blocks.executionExercises()
                 } else {
-                    parseExercises(day.getJSONArray("exercises"))
+                    parseExercises(day.optJSONArray("exercises") ?: JSONArray())
                 }
                 val weekday = day.optString("weekday", day.optString("intendedWeekday", "MONDAY"))
                     .uppercase().let { value -> runCatching { DayOfWeek.valueOf(value) }.getOrDefault(DayOfWeek.MONDAY) }
@@ -356,7 +357,7 @@ object WorkoutPlanGenerator {
                 ))
             }
         }
-        check(workouts.isNotEmpty()) { "La IA devolvió un plan vacío" }
+        check(allowEmpty || workouts.isNotEmpty()) { "La IA devolvió un plan vacío" }
         val cycleLength = root.optInt("cycleLength", 1).coerceAtLeast(1)
         val weekIndex = root.optInt("weekIndex", 1).coerceIn(1, cycleLength)
         val mesocycleNumber = root.optInt("mesocycleNumber", root.optInt("planNumber", 1)).coerceAtLeast(1)
@@ -474,6 +475,7 @@ object WorkoutPlanGenerator {
                         .put("setStyleParameters", parameters))
                 }
                 blocks.put(JSONObject()
+                    .put("remoteId", block.remoteId)
                     .put("type", block.type.name.lowercase())
                     .put("rounds", block.rounds)
                     .put("restAfterBlockSeconds", block.restAfterBlockSeconds)
@@ -613,13 +615,12 @@ Ciclo recomendado por nivel: ${cycleLengthFor(profile)} semanas. En acumulación
             val type = parseBlockType(block.optString("type"))
             add(
                 WorkoutBlockSummary(
+                    remoteId = block.nullableString("remoteId"),
                     type = type,
                     rounds = block.optInt("rounds", 1).coerceIn(1, 10),
                     restAfterBlockSeconds = block.optInt("restAfterBlockSeconds").takeIf { it > 0 }?.coerceIn(15, 600),
                     notes = block.nullableString("notes"),
-                    exercises = parseExercises(block.getJSONArray("exercises")).map {
-                        if (type == WorkoutBlockType.Superset) it.copy(sets = 1) else it
-                    },
+                    exercises = parseExercises(block.getJSONArray("exercises")),
                 ),
             )
         }

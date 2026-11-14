@@ -1,0 +1,22 @@
+<resources>
+    <string name="calendar_export">Exportar al calendario</string>
+    <string name="calendar_suggested_time">Hora sugerida según tus últimos 10 entrenamientos completados con hora de inicio.</string>
+    <string name="calendar_default_time">No hay horas de inicio recientes. Elige una hora para tus entrenamientos.</string>
+    <string name="calendar_choose_time">HORA DE ENTRENAMIENTO</string>
+    <string name="calendar_other_time">Elegir otra hora (%1$s)</string>
+    <string name="calendar_missing_dates">Elige una fecha para las sesiones que no la tienen programada.</string>
+    <string name="calendar_export_error">No se ha podido compartir el archivo de calendario. Inténtalo de nuevo.</string>
+    <string name="calendar_share_title">Abrir o compartir archivo de calendario</string>
+    <string name="calendar_cancel">Cancelar</string>
+    <string name="calendar_pick_date">Elegir fecha</string>
+    <string name="calendar_dates">FECHAS DE ENTRENAMIENTO</string>
+    <string name="calendar_dates_suggested">Las fechas siguen el plan y los días preferidos. Toca una fecha para cambiarla en esta exportación.</string>
+    <string name="calendar_dates_current_week">El plan no tiene fecha de inicio. Se proponen tus días preferidos de esta semana; toca una fecha para cambiarla.</string>
+    <string name="calendar_no_pending">No hay entrenamientos pendientes para exportar.</string>
+    <string name="calendar_pending_count">Entrenamientos pendientes: %1$d</string>
+    <string name="calendar_review_dates">Revisar fechas</string>
+    <string name="calendar_open">Abrir archivo de calendario</string>
+    <string name="calendar_share">Compartir archivo .ics</string>
+    <string name="calendar_no_app">No hay ninguna aplicación que pueda abrir este archivo. Puedes compartirlo.</string>
+    <string name="calendar_choose_app">Elige una aplicación de calendario</string>
+</resources>

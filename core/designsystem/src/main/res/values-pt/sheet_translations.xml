@@ -238,8 +238,8 @@
     <string name="cancel" formatted="false">Cancel</string>
     <string name="cancel_timer" formatted="false">Cancelar temporizador</string>
     <string name="cancel_workout" formatted="false">Cancelar treino</string>
-    <string name="capture_both_photos_before_saving_" formatted="false">Tire ambas as fotos antes de salvar.</string>
-    <string name="capture_front_and_profile_photos_with_guides_so_every_check_in_is_easy_to_compare_over_time_" formatted="false">Tire fotos frontais e de perfil com guias para que cada check-in seja fácil de comparar ao longo do tempo.</string>
+    <string name="capture_all_three_photos_before_saving_" formatted="false">Tire as três fotos antes de salvar.</string>
+    <string name="capture_front__profile__and_back_photos_with_guides_so_every_check_in_is_easy_to_compare_over_time_" formatted="false">Tire fotos de frente, de perfil e de costas com as guias para facilitar a comparação de cada registro ao longo do tempo.</string>
     <string name="carbohydrates" formatted="false">Carboidratos</string>
     <string name="carbs" formatted="false">Carboidratos</string>
     <string name="carbs__100g" formatted="false">Carboidratos /100g</string>
@@ -401,7 +401,7 @@
     <string name="e_g__mushrooms__olives__liver" formatted="false">p. ex. cogumelos, azeitonas, fígado</string>
     <string name="e_g__olives__liver__cottage_cheese" formatted="false">p. ex. azeitonas, fígado, queijo cottage</string>
     <string name="e_g__peanuts__lactose" formatted="false">p. ex. amendoins, lactose</string>
-    <string name="each_check_in_saves_one_profile_and_one_front_photo_" formatted="false">Cada check-in salva um perfil e uma foto frontal.</string>
+    <string name="each_check_in_saves_front__profile__and_back_photos_" formatted="false">Cada check-in guarda fotos de frente, de perfil e de costas.</string>
     <string name="each_drop_should_use_about__d___less_weight_than_the_effort_before_it_">Cada drop deve usar cerca de %1$d%% menos peso que o esforço anterior.</string>
     <string name="each_point_is_one_logged____entry_">Cada ponto é uma entrada %1$s registrada.</string>
     <string name="earlier_results_for_this_exercise_will_appear_here_" formatted="false">Resultados anteriores deste exercício aparecerão aqui.</string>
@@ -1825,7 +1825,7 @@
     <string name="adapt_this_session" formatted="false">Adaptar esta sessão</string>
     <string name="adapt_this_session_to_the_equipment_available_at_another_training_location_" formatted="false">Adapte esta sessão ao equipamento disponível em outro local de treino.</string>
     <string name="adapt_to_another_location" formatted="false">Adaptar a outro local</string>
-    <string name="adapt_to_another_training_location" formatted="false">Adaptar a outro local de treino</string>
+    <string name="adapt_to_another_training_location" formatted="false">Adaptar a outro local</string>
     <string name="add_a_training_location_in_your_profile_before_adapting_this_workout_" formatted="false">Adicione um local de treino no seu perfil antes de adaptar este treino.</string>
     <string name="add_ingredient" formatted="false">Adicionar ingrediente</string>
     <string name="add_your_actual_distance_when_you_finish_" formatted="false">Adicione a sua distância real quando terminar.</string>
@@ -2003,7 +2003,7 @@
     <string name="we_couldn_t_read_this_check_in_clearly_enough_to_estimate_body_composition_right_now_" formatted="false">Não foi possível analisar este registo com clareza suficiente para estimar a percentagem de gordura corporal.</string>
     <string name="we_ll_analyse_your_current_check_in_photos_with_ai_and_return_a_non_medical_body_fat_estimate_plus_a_few_coaching_notes__accuracy_can_vary_with_pose__clothing__lighting__and_image_quality_" formatted="false">Vamos analisar com IA as suas fotos atuais do registo e apresentar uma estimativa não médica da percentagem de gordura corporal, além de algumas dicas de treino. A precisão pode variar consoante a pose, a roupa, a iluminação e a qualidade da imagem.</string>
     <string name="we_ll_use_any_usable_photo_attached_to_this_check_in_" formatted="false">Vamos usar todas as fotos utilizáveis anexadas a este registo.</string>
-    <string name="we_re_reviewing_your_current_front_and_profile_photos_when_available__then_building_a_narrow_body_fat_estimate_" formatted="false">Vamos analisar as suas fotos atuais de frente e de perfil, se disponíveis, e depois elaborar uma estimativa mais precisa da percentagem de gordura corporal.</string>
+    <string name="we_re_reviewing_your_current_front__profile__and_back_photos_when_available__then_building_a_narrow_body_fat_estimate_" formatted="false">Estamos analisando suas fotos atuais de frente, de perfil e de costas, quando disponíveis, e depois elaboraremos uma estimativa do seu percentual de gordura corporal dentro de um intervalo reduzido.</string>
     <string name="week_of___">Semana de %1$s</string>
     <string name="weight_per_side" formatted="false">Peso por lado</string>
     <string name="weight_per_side__kg_" formatted="false">Peso por lado (kg)</string>
@@ -2019,10 +2019,141 @@
     <string name="your_results" formatted="false">Seus resultados</string>
     <string name="your_saved_category_selection_is_no_longer_valid__run_setup_again_" formatted="false">A seleção de categorias salva não é mais válida. Faça a configuração novamente.</string>
     <string name="your_selected_check_in_photos_are_sent_to_ai_for_analysis_" formatted="false">As fotos de check-in selecionadas são enviadas para uma IA analisar.</string>
+    <string name="____">@ %1$s</string>
+    <string name="__0fs">%1$.0fs</string>
+    <string name="__1fs">%1$.1fs</string>
+    <string name="__">%1$s</string>
+    <string name="_______">%1$s / %2$s</string>
+    <string name="_____">%1$s %2$s</string>
+    <string name="______of___">%1$s %2$s of %3$s</string>
+    <string name="___cm">%1$s cm</string>
+    <string name="___g">%1$s g</string>
+    <string name="___in">%1$s in</string>
+    <string name="___kg">%1$s kg</string>
+    <string name="___km">%1$s km</string>
+    <string name="___lb">%1$s lb</string>
+    <string name="___mi">%1$s mi</string>
+    <string name="___min">%1$s min</string>
+    <string name="______">%1$s, %2$s</string>
+    <string name="_____d">%1$s: %2$d</string>
+    <string name="_d____d_xp">%1$d / %2$d XP</string>
     <string name="_d_characters_remaining">%1$d caracteres restantes</string>
+    <string name="_d_cm">%1$d cm</string>
     <string name="_d_exercises">%1$d exercícios</string>
+    <string name="_d_h">%1$d h</string>
+    <string name="_d_min">%1$d min</string>
+    <string name="_d_of__d">%1$d of %2$d</string>
     <string name="_d_of__d_calories_logged">%1$d de %2$d calorias registadas</string>
+    <string name="_d_reps">%1$d reps</string>
+    <string name="_d_sec">%1$d sec</string>
+    <string name="_d__d_reps">%1$d-%2$d reps</string>
+    <string name="_d__02d">%1$d:%2$02d</string>
+    <string name="_d__">%1$d%%</string>
+    <string name="_ds">%1$ds</string>
     <string name="key_1_selected" formatted="false">1 selecionado</string>
+    <string name="exercise_not_synced_yet" formatted="false">Exercício ainda não sincronizado</string>
+    <string name="loading_exercise_" formatted="false">A carregar o exercício…</string>
+    <string name="your_coach_s_exercise_will_appear_after_the_next_sync_" formatted="false">O exercício do teu treinador aparecerá após a próxima sincronização.</string>
+    <string name="no_instructions" formatted="false">Sem instruções</string>
+    <string name="your_coach_hasn_t_added_instructions_for_this_exercise_" formatted="false">O teu treinador não adicionou instruções para este exercício.</string>
+    <string name="you_logged____this_period_versus____in_the_previous_one_">Registou %1$s neste período, em comparação com %2$s no período anterior.</string>
+    <string name="_d_of__d_sessions_centered_on____this_period_">%1$d de %2$d sessões tiveram como foco %3$s neste período.</string>
+    <string name="___scored_noticeably_lower_than_your_top_trained_muscle_groups_this_period_">%1$s obteve uma pontuação claramente inferior à dos grupos musculares que mais treinou neste período.</string>
+    <string name="you_completed__d_workouts_and_logged____in_this_period_">Concluiu %1$d treinos e registou %2$s neste período.</string>
+    <string name="you_completed__d_of__d_planned_sessions_in_this_period_">Concluiu %1$d de %2$d sessões planeadas neste período.</string>
+    <string name="managed_by_your_gym" formatted="false">Gerenciado pela sua academia</string>
+    <string name="your_default_location_is_your_gym__so_its_staff_keep_this_equipment_up_to_date_" formatted="false">Sua localização padrão é sua academia, então a equipe de lá mantém este equipamento atualizado.</string>
+    <string name="tap_value_to_edit_it" formatted="false">Toque no valor para editá-lo</string>
+    <string name="are_you_sure_you_want_to_redo_this_plan__a_replacement_will_be_generated_in_the_same_training_cycle__while_completed_workouts_and_results_are_kept_" formatted="false">Tem certeza de que quer refazer este plano? Será gerado um plano substituto no mesmo ciclo de treino, e os treinos concluídos e os resultados serão mantidos.</string>
+    <string name="accessory" formatted="false">Complementar</string>
+    <string name="chest_circumference_tracks_changes_in_your_upper_body__it_is_useful_for_seeing_muscle_gain_in_the_chest_and_back_alongside_fat_loss_elsewhere_" formatted="false">A circunferência do peito acompanha as mudanças na parte superior do corpo. Ajuda a perceber se está a ganhar massa muscular no peito e nas costas enquanto perde gordura noutras zonas.</string>
+    <string name="thigh_circumference_tracks_changes_in_your_legs__it_is_useful_for_seeing_lower_body_muscle_gain_or_fat_loss_" formatted="false">A circunferência da coxa acompanha as mudanças nas pernas. Ajuda a perceber se está a ganhar massa muscular ou a perder gordura na parte inferior do corpo.</string>
+    <string name="arm_circumference_tracks_changes_in_your_upper_arm__it_is_useful_for_seeing_arm_muscle_gain_over_time_" formatted="false">A circunferência do braço acompanha as mudanças na parte superior do braço. Ajuda a perceber o aumento da massa muscular ao longo do tempo.</string>
+    <string name="wrap_a_tape_measure_around_your_chest_at_nipple_level__under_your_armpits__keeping_it_level_and_measuring_after_a_normal_exhale_" formatted="false">Passe uma fita métrica à volta do peito, ao nível dos mamilos e por baixo das axilas. Mantenha-a nivelada e meça depois de expirar normalmente.</string>
+    <string name="stand_relaxed_and_wrap_a_tape_measure_around_the_widest_part_of_one_thigh__just_below_the_buttock__measure_the_same_leg_each_time_" formatted="false">Fique de pé e descontraia. Passe uma fita métrica à volta da parte mais larga de uma coxa, logo abaixo do glúteo. Meça sempre a mesma perna.</string>
+    <string name="let_your_arm_hang_relaxed_and_wrap_a_tape_measure_around_the_widest_part_of_the_upper_arm__measure_the_same_arm_each_time_" formatted="false">Deixe o braço pendurado e descontraído. Passe uma fita métrica à volta da parte mais larga do braço. Meça sempre o mesmo braço.</string>
+    <string name="check_in" formatted="false">Acompanhamento</string>
+    <string name="check_in_sent" formatted="false">Acompanhamento enviado</string>
+    <string name="from___">De %1$s</string>
+    <string name="from_your_coach" formatted="false">Do seu treinador</string>
+    <string name="_d_questions">%1$d perguntas</string>
+    <string name="_d_questions___about__d_min">%1$d perguntas · cerca de %2$d min</string>
+    <string name="_d_of__d_answered__pick_up_where_you_left_off_">%1$d de %2$d respondidas. Continue de onde ficou.</string>
+    <string name="it_s_a_little_late__but_you_can_still_send_it_" formatted="false">Já é um pouco tarde, mas ainda pode enviar.</string>
+    <string name="finish_and_send" formatted="false">Concluir e enviar</string>
+    <string name="___will_review_it_soon_">%1$s irá analisar em breve.</string>
+    <string name="your_coach_will_review_it_soon_" formatted="false">O seu treinador irá analisar em breve.</string>
+    <string name="new_message_from___">Nova mensagem de %1$s</string>
+    <string name="new_message_from_your_coach" formatted="false">Nova mensagem do seu treinador</string>
+    <string name="about_your___">Sobre o seu %1$s</string>
+    <string name="opens_your_coach_s_reply" formatted="false">Abre a resposta do seu treinador</string>
+    <string name="your_coach" formatted="false">O seu treinador</string>
+    <string name="thigh" formatted="false">Coxa</string>
+    <string name="arm" formatted="false">Braço</string>
+    <string name="_____d_10_">%1$s (%2$d/10)</string>
+    <string name="___will_review_it_soon__you_ll_get_a_notification_when_they_reply_">%1$s vai analisar em breve. Receberá uma notificação quando responder.</string>
+    <string name="_d_required_questions_are_still_unanswered_">Ainda há %1$d perguntas obrigatórias sem resposta.</string>
+    <string name="_d_10">%1$d/10</string>
+    <string name="front__side__and_back_photos__the_camera_guides_you_so_they_match_your_previous_ones_" formatted="false">Fotos de frente, de lado e de costas. A câmera orienta você para que elas correspondam às anteriores.</string>
+    <string name="about__d_min">Cerca de %1$d min</string>
+    <string name="check_your_answers__tap_any_of_them_to_change_it_" formatted="false">Verifique as suas respostas. Toque em qualquer uma para a alterar.</string>
+    <string name="choose_all_that_apply" formatted="false">Selecione todas as opções aplicáveis</string>
+    <string name="how_much_does_it_hurt_" formatted="false">Quanto lhe dói?</string>
+    <string name="measure_in_the_morning__relaxed__with_the_tape_snug_but_not_tight_" formatted="false">Meça de manhã, descontraído, com a fita métrica justa, mas sem apertar.</string>
+    <string name="mild" formatted="false">Ligeiro</string>
+    <string name="not_answered" formatted="false">Sem resposta</string>
+    <string name="nothing_hurts" formatted="false">Não me dói nada</string>
+    <string name="only_you_and_your_coach_can_see_them_" formatted="false">Só você e o seu treinador podem vê-las.</string>
+    <string name="optional" formatted="false">Opcional</string>
+    <string name="photos_taken" formatted="false">Fotos tiradas</string>
+    <string name="question__d_of__d">Pergunta %1$d de %2$d</string>
+    <string name="ready_to_send_" formatted="false">Pronto para enviar?</string>
+    <string name="required" formatted="false">Obrigatório</string>
+    <string name="retake_photos" formatted="false">Tirar as fotos novamente</string>
+    <string name="send" formatted="false">Enviar</string>
+    <string name="sent___">Enviado %1$s</string>
+    <string name="sent_" formatted="false">Enviado!</string>
+    <string name="severe" formatted="false">Grave</string>
+    <string name="side_photo" formatted="false">Foto de lado</string>
+    <string name="skip_for_now" formatted="false">Ignorar por enquanto</string>
+    <string name="take_photos" formatted="false">Tirar fotos</string>
+    <string name="use___________">Use %1$s %2$s · %3$s</string>
+    <string name="write_as_much_as_you_like_" formatted="false">Escreva o quanto quiser…</string>
+    <string name="your_answer" formatted="false">A sua resposta</string>
+    <string name="your_answers" formatted="false">As suas respostas</string>
+    <string name="your_answers_are_saved" formatted="false">As suas respostas foram guardadas</string>
+    <string name="your_answers_are_saved_as_you_go__so_you_can_finish_it_later_" formatted="false">As suas respostas são guardadas à medida que avança, para que possa terminar mais tarde.</string>
+    <string name="your_coach_will_review_it_soon__you_ll_get_a_notification_when_they_reply_" formatted="false">O seu treinador irá analisar em breve. Receberá uma notificação quando responder.</string>
+    <string name="import_from_apple_health" formatted="false">Importar do Apple Health</string>
+    <string name="you_took_these____">Você tirou estas %1$s.</string>
+    <string name="use_these_photos" formatted="false">Usar estas fotos</string>
+    <string name="take_new_ones" formatted="false">Tirar novas</string>
+    <string name="none_of_these" formatted="false">Nenhuma destas</string>
+    <string name="back_photo" formatted="false">Fotografia de costas</string>
+    <string name="face_away_from_the_camera__keep_your_arms_relaxed__and_fit_your_full_body_inside_the_guide_" formatted="false">Fique de costas para a câmara, mantenha os braços descontraídos e certifique-se de que o corpo inteiro fica dentro do guia.</string>
+    <string name="front__profile__and_back_photos_from_this_session_will_be_used_together_when_possible_" formatted="false">As fotografias de frente, de perfil e de costas desta sessão serão utilizadas em conjunto, sempre que possível.</string>
+    <string name="only_the_back_photo_is_available__so_the_estimate_will_rely_on_that_single_angle_" formatted="false">Só está disponível a fotografia de costas, por isso a estimativa basear-se-á apenas nesse ângulo.</string>
+    <string name="how_is_this_calculated_" formatted="false">Como é calculado?</string>
+    <string name="calculated_with_the_mifflin_st_jeor_equation_from_your_weight__height__age__and_gender_" formatted="false">Calculado com a equação de Mifflin-St Jeor com base no seu peso, altura, idade e sexo.</string>
+    <string name="your_basal_metabolic_rate_multiplied_by_a_physical_activity_level_factor_for_your_lifestyle__1_2_sedentary__1_375_lightly_active__1_55_moderately_active__1_725_very_active_" formatted="false">A sua taxa metabólica basal multiplicada por um fator correspondente ao seu nível de atividade física: 1,2 sedentário, 1,375 ligeiramente ativo, 1,55 moderadamente ativo, 1,725 muito ativo.</string>
+    <string name="your_waist_circumference_divided_by_your_height__below_0_5_is_considered_healthy__0_5_to_0_59_increased_risk__and_0_6_or_above_high_risk_" formatted="false">O perímetro da cintura dividido pela sua altura. Um valor inferior a 0,5 é considerado saudável; de 0,5 a 0,59, risco aumentado; e 0,6 ou superior, risco elevado.</string>
+    <string name="estimated_with_the_u_s__navy_circumference_method_from_your_height_and_your_waist_and_neck_measurements__plus_hip_for_women__ranges_follow_the_american_council_on_exercise_body_fat_classification_" formatted="false">Estimativa calculada através do método das circunferências da Marinha dos EUA, com base na sua altura e nas medidas da cintura e do pescoço, além da anca no caso das mulheres. Os intervalos seguem a classificação da percentagem de gordura corporal do American Council on Exercise.</string>
+    <string name="fao_who_unu__human_energy_requirements__fao_food_and_nutrition_technical_report_series_1__2004_" formatted="false">FAO/WHO/UNU. Necessidades energéticas humanas. FAO Food and Nutrition Technical Report Series 1, 2004.</string>
+    <string name="ashwell_m__gibson_s__waist_to_height_ratio_as_an_indicator_of__early_health_risk___bmj_open__2016_" formatted="false">Ashwell M, Gibson S. A relação entre cintura e altura como indicador de «risco precoce para a saúde». BMJ Open, 2016.</string>
+    <string name="nice__overweight_and_obesity_management__ng246___2025_" formatted="false">NICE. Tratamento do excesso de peso e da obesidade (NG246), 2025.</string>
+    <string name="u_s__department_of_defense__dod_instruction_1308_03__dod_physical_fitness_and_body_composition_program_" formatted="false">Departamento de Defesa dos EUA. DoD Instruction 1308.03, Programa de condição física e composição corporal do Departamento de Defesa.</string>
+    <string name="hodgdon_ja__beckett_mb__prediction_of_percent_body_fat_for_u_s__navy_men_and_women_from_body_circumferences_and_height__naval_health_research_center__reports_84_11_and_84_29__1984_" formatted="false">Hodgdon JA, Beckett MB. Previsão da percentagem de gordura corporal em homens e mulheres da Marinha dos EUA com base nas circunferências corporais e na altura. Naval Health Research Center, relatórios 84-11 e 84-29, 1984.</string>
+    <string name="american_council_on_exercise__ace_personal_trainer_manual__body_fat_classification_" formatted="false">American Council on Exercise. Manual de personal trainer da ACE, classificação da gordura corporal.</string>
+    <string name="mifflin_md__st_jeor_st__et_al__a_new_predictive_equation_for_resting_energy_expenditure_in_healthy_individuals__am_j_clin_nutr__1990_" formatted="false">Mifflin MD, St Jeor ST, et al. Uma nova equação de previsão do gasto energético em repouso em indivíduos saudáveis. Am J Clin Nutr, 1990.</string>
+    <string name="this_is_an_estimate_for_general_fitness_purposes_and_is_not_medical_advice_" formatted="false">Esta é uma estimativa para fins gerais de fitness e não constitui aconselhamento médico.</string>
+    <string name="sources" formatted="false">Fontes</string>
+    <string name="herrmann_sd__willis_ea__ainsworth_be__et_al__2024_adult_compendium_of_physical_activities__j_sport_health_sci__2024_" formatted="false">Herrmann SD, Willis EA, Ainsworth BE, et al. Compêndio de atividades físicas para adultos de 2024. J Sport Health Sci, 2024.</string>
+    <string name="american_heart_association__target_heart_rates_chart_" formatted="false">American Heart Association. Tabela de frequências cardíacas-alvo.</string>
+    <string name="fox_sm__naughton_jp__haskell_wl__physical_activity_and_the_prevention_of_coronary_heart_disease__ann_clin_res__1971_" formatted="false">Fox SM, Naughton JP, Haskell WL. Atividade física e prevenção da doença coronariana. Ann Clin Res, 1971.</string>
+    <string name="downloading_additional_data___" formatted="false">A transferir dados adicionais...</string>
+    <string name="couldn_t_download_your_history" formatted="false">Não foi possível transferir o teu histórico</string>
+    <string name="you_can_start_once_your_history_finishes_downloading" formatted="false">Podes começar assim que o teu histórico terminar de ser transferido</string>
+    <string name="forgot_password_" formatted="false">Esqueceste-te da palavra-passe?</string>
     <!-- Exercise sprawl: description -->
     <string name="a__down_and_up__movement_similar_to_a_burpee_but_without_the_push_up_and_jump__focused_on_speed_and_metabolic_conditioning_" formatted="false">Um movimento \&apos;down-and-up\&apos; semelhante a um burpee, mas sem a flexão nem o salto, focado na velocidade e no condicionamento metabólico.</string>
     <!-- Exercise bayesianCableCurl: description -->
@@ -3992,7 +4123,7 @@
     <!-- Exercise ringDip: name -->
     <string name="ring_dip" formatted="false">Dips nas argolas</string>
     <!-- Exercise romanianDeadlift: name -->
-    <string name="romanian_deadlift" formatted="false">Peso morto romeno</string>
+    <string name="barbell_romanian_deadlift" formatted="false">Peso morto romeno</string>
     <!-- Exercise ankleCircles: instruction 2 -->
     <string name="rotate_your_ankle_in_a_circular_motion__drawing_the_largest_circle_possible_with_your_toes_" formatted="false">Gire o tornozelo em movimento circular, desenhando o maior círculo possível com os dedos do pé.</string>
     <!-- Exercise thoracicRotation: instruction 3 -->
@@ -4631,4 +4762,338 @@
     <string name="move_slowly_and_avoid_swinging_your_legs_so_your_abs__not_momentum__control_the_movement_" formatted="false">Movimente-se devagar e evite balançar as pernas para que sejam os abdominais, e não o impulso, a controlar o movimento.</string>
     <!-- lyingLegRaise llm -->
     <string name="floor_based_leg_raise_that_involves_the_hip_flexors__cue_pelvic_control_and_regress_to_bent_knees_when_the_lower_back_arches_" formatted="false">Elevação de pernas no chão que envolve os flexores do quadril; oriente o controlo pélvico e reduza para a variação com joelhos dobrados quando a parte inferior das costas arquear.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="rope_triceps_pushdown" formatted="false">Extensão de tríceps na polia com corda</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="a_rope_cable_pushdown_that_isolates_the_triceps_and_allows_a_strong_contraction_at_the_bottom_of_each_rep_" formatted="false">Um exercício de extensão de tríceps na polia com corda que isola os tríceps e permite uma contração intensa no final de cada repetição.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="attach_a_rope_to_a_high_cable_pulley_and_stand_facing_the_machine_" formatted="false">Prenda uma corda a uma polia alta e fique de pé de frente para a máquina.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="grip_the_rope_ends_with_a_neutral_grip_and_keep_your_elbows_close_to_your_sides_" formatted="false">Segure as extremidades da corda com uma pegada neutra e mantenha os cotovelos junto ao corpo.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="press_the_rope_down_until_your_elbows_are_fully_extended__separating_the_rope_ends_slightly_at_the_bottom_" formatted="false">Empurre a corda para baixo até estender completamente os cotovelos e afaste ligeiramente as extremidades no final do movimento.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="return_the_rope_under_control_until_your_forearms_are_just_above_parallel_to_the_floor_" formatted="false">Retorne a corda de forma controlada até que os antebraços fiquem um pouco acima da horizontal.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="keep_your_shoulders_down_and_your_upper_arms_still_throughout_the_movement_" formatted="false">Mantenha os ombros baixos e os braços parados durante todo o movimento.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="avoid_leaning_your_body_weight_into_the_cable_to_move_the_load_" formatted="false">Evite inclinar o corpo sobre o cabo para movimentar a carga usando o peso do corpo.</string>
+    <!-- Rope Triceps Pushdown -->
+    <string name="use_a_full_but_controlled_range_of_motion_without_locking_the_elbows_aggressively_" formatted="false">Faça o movimento com amplitude completa, mas controlada, sem travar os cotovelos bruscamente.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="reverse_pec_deck" formatted="false">Crucifixo inverso na máquina</string>
+    <!-- Reverse Pec Deck -->
+    <string name="a_reverse_fly_performed_on_a_pec_deck_machine_to_isolate_the_rear_deltoids_and_upper_back_" formatted="false">Um exercício de crucifixo inverso na máquina para isolar os deltoides posteriores e a parte superior das costas.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="set_the_pec_deck_arms_behind_you_and_sit_facing_the_pad_with_your_chest_supported_" formatted="false">Posicione os braços da máquina atrás de si e sente-se de frente para o apoio, com o peito encostado no acolchoamento.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="grip_the_handles_with_your_arms_extended_in_front_of_you_at_shoulder_height_" formatted="false">Segure as empunhaduras com os braços estendidos à sua frente, à altura dos ombros.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="open_your_arms_in_a_wide_arc_until_they_are_in_line_with_your_torso_" formatted="false">Abra os braços em um arco amplo até que fiquem alinhados com o tronco.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="squeeze_your_rear_delts__then_return_slowly_to_the_starting_position_" formatted="false">Contraia os deltoides posteriores e volte lentamente à posição inicial.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="keep_your_chest_firmly_against_the_pad_throughout_the_set_" formatted="false">Mantenha o peito bem apoiado no acolchoamento durante toda a série.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="lead_with_your_elbows_and_avoid_shrugging_your_shoulders_upward_" formatted="false">Inicie o movimento com os cotovelos e evite encolher os ombros.</string>
+    <!-- Reverse Pec Deck -->
+    <string name="use_a_controlled_tempo_and_avoid_letting_the_weight_stack_touch_between_reps_" formatted="false">Mantenha um ritmo controlado e evite que as placas de peso se toquem entre as repetições.</string>
+    <!-- Spider Curl -->
+    <string name="spider_curl" formatted="false">Rosca spider</string>
+    <!-- Spider Curl -->
+    <string name="a_chest_supported_curl_performed_face_down_on_an_incline_bench_to_isolate_the_biceps_and_limit_momentum_" formatted="false">Uma rosca com o peito apoiado, feita de bruços em um banco inclinado para isolar os bíceps e limitar o impulso.</string>
+    <!-- Spider Curl -->
+    <string name="set_an_adjustable_bench_to_a_steep_incline_and_lie_face_down_with_your_chest_against_the_pad_" formatted="false">Ajuste um banco regulável para uma inclinação acentuada e deite-se de barriga para baixo, com o peito apoiado no encosto.</string>
+    <!-- Spider Curl -->
+    <string name="let_your_arms_hang_straight_toward_the_floor_while_holding_dumbbells_with_palms_facing_forward_" formatted="false">Deixe os braços estendidos na direção do chão enquanto segura os halteres com as palmas das mãos viradas para a frente.</string>
+    <!-- Spider Curl -->
+    <string name="curl_the_weights_toward_your_shoulders_without_letting_your_elbows_travel_forward_" formatted="false">Flexione os braços e leve os pesos em direção aos ombros sem deixar os cotovelos avançarem.</string>
+    <!-- Spider Curl -->
+    <string name="lower_the_dumbbells_slowly_until_your_arms_are_fully_extended_again_" formatted="false">Baixe os halteres lentamente até estender novamente os braços por completo.</string>
+    <!-- Spider Curl -->
+    <string name="keep_your_upper_arms_perpendicular_to_the_floor_throughout_the_movement_" formatted="false">Mantenha os braços perpendiculares ao chão durante todo o movimento.</string>
+    <!-- Spider Curl -->
+    <string name="use_lighter_loads_than_in_standing_curls_to_keep_the_movement_strict_" formatted="false">Use uma carga mais leve do que nos curls em pé para manter a execução rigorosa.</string>
+    <!-- Spider Curl -->
+    <string name="pause_briefly_at_the_top_without_lifting_your_chest_from_the_bench_" formatted="false">Faça uma breve pausa no topo sem levantar o peito do banco.</string>
+    <!-- Preacher Curl -->
+    <string name="preacher_curl" formatted="false">Rosca Scott</string>
+    <!-- Preacher Curl -->
+    <string name="a_supported_curl_that_keeps_the_upper_arms_fixed_to_isolate_the_biceps_through_a_controlled_range_of_motion_" formatted="false">Um curl com apoio que mantém os braços fixos para isolar os bíceps ao longo de uma amplitude de movimento controlada.</string>
+    <!-- Preacher Curl -->
+    <string name="set_up_an_angled_preacher_support_or_an_adjustable_bench_so_your_upper_arms_rest_securely_on_the_pad_" formatted="false">Prepare um banco Scott ou um banco regulável de modo que os braços fiquem bem apoiados no suporte.</string>
+    <!-- Preacher Curl -->
+    <string name="hold_an_ez_bar_with_an_underhand_grip_and_begin_with_your_arms_almost_fully_extended_" formatted="false">Segure uma barra EZ com as palmas das mãos viradas para cima e comece com os braços quase totalmente estendidos.</string>
+    <!-- Preacher Curl -->
+    <string name="curl_the_bar_toward_your_shoulders_while_keeping_your_upper_arms_against_the_support_" formatted="false">Flexione os braços e leve a barra em direção aos ombros, mantendo os braços apoiados no suporte.</string>
+    <!-- Preacher Curl -->
+    <string name="lower_the_bar_slowly_until_you_feel_a_stretch_in_your_biceps_without_forcing_your_elbows_straight_" formatted="false">Baixe a barra lentamente até sentir o alongamento dos bíceps, sem forçar a extensão dos cotovelos.</string>
+    <!-- Preacher Curl -->
+    <string name="keep_your_wrists_neutral_and_avoid_bending_them_back_under_load_" formatted="false">Mantenha os pulsos numa posição neutra e evite dobrá-los para trás sob carga.</string>
+    <!-- Preacher Curl -->
+    <string name="do_not_bounce_the_bar_from_the_bottom_position_" formatted="false">Não deixe a barra ressaltar na posição mais baixa.</string>
+    <!-- Preacher Curl -->
+    <string name="use_a_controlled_range_and_stop_short_of_painful_elbow_extension_" formatted="false">Controle a amplitude do movimento e pare antes de estender os cotovelos até sentir dor.</string>
+    <!-- Hack Squat -->
+    <string name="hack_squat" formatted="false">Agachamento hack</string>
+    <!-- Hack Squat -->
+    <string name="a_guided_squat_machine_that_lets_you_train_the_quads_and_glutes_with_high_stability_and_minimal_balance_demand_" formatted="false">Uma máquina guiada para agachamento que permite treinar os quadríceps e os glúteos com elevada estabilidade e pouca exigência de equilíbrio.</string>
+    <!-- Hack Squat -->
+    <string name="set_the_shoulder_pads_so_you_can_stand_tall_with_your_back_supported_against_the_pad_" formatted="false">Ajuste os apoios para os ombros para conseguir ficar de pé, com as costas apoiadas no encosto.</string>
+    <!-- Hack Squat -->
+    <string name="place_your_feet_shoulder_width_apart_on_the_platform__slightly_forward_of_your_hips_" formatted="false">Coloque os pés na plataforma à largura dos ombros, ligeiramente à frente das ancas.</string>
+    <!-- Hack Squat -->
+    <string name="unlock_the_safety_handles_and_lower_under_control_by_bending_your_knees_and_hips_" formatted="false">Desbloqueie as travas de segurança e desça de forma controlada, dobrando os joelhos e as ancas.</string>
+    <!-- Hack Squat -->
+    <string name="drive_through_your_whole_feet_to_return_to_the_start_without_forcefully_locking_your_knees_" formatted="false">Empurre com toda a planta dos pés para voltar à posição inicial, sem esticar os joelhos de forma brusca.</string>
+    <!-- Hack Squat -->
+    <string name="keep_your_lower_back_in_contact_with_the_pad_throughout_the_movement_" formatted="false">Mantenha a zona lombar em contacto com o encosto durante todo o movimento.</string>
+    <!-- Hack Squat -->
+    <string name="use_a_foot_position_that_lets_your_knees_track_comfortably_in_line_with_your_toes_" formatted="false">Posicione os pés de forma que os joelhos acompanhem confortavelmente a direção dos dedos.</string>
+    <!-- Hack Squat -->
+    <string name="control_the_bottom_position_and_use_the_safety_stops_at_an_appropriate_depth_" formatted="false">Controle a posição mais baixa e utilize os batentes de segurança a uma profundidade adequada.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="machine_hip_thrust" formatted="false">Hip thrust na máquina</string>
+    <!-- Machine Hip Thrust -->
+    <string name="a_guided_hip_thrust_machine_that_loads_the_glutes_directly_while_providing_a_stable_and_comfortable_setup_" formatted="false">Uma máquina guiada de hip thrust que trabalha diretamente os glúteos e proporciona uma posição estável e confortável.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="adjust_the_back_pad_and_belt_or_hip_pad_so_it_rests_securely_across_your_hips_" formatted="false">Ajuste o encosto e o cinto ou apoio para a anca, de modo que fique bem apoiado sobre as ancas.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="plant_your_feet_about_shoulder_width_apart_with_your_knees_bent_at_roughly_90_degrees_at_the_top_" formatted="false">Coloque os pés afastados aproximadamente à largura dos ombros. No topo do movimento, os joelhos devem estar dobrados a cerca de 90 graus.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="drive_through_your_heels_to_extend_your_hips_until_your_torso_and_thighs_form_a_straight_line_" formatted="false">Empurre com os calcanhares e estenda as ancas até o tronco e as coxas formarem uma linha reta.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="squeeze_your_glutes_at_the_top__then_lower_the_load_under_control_" formatted="false">Contraia os glúteos no topo do movimento e depois baixe a carga de forma controlada.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="keep_your_ribs_down_and_avoid_overextending_your_lower_back_at_the_top_" formatted="false">Mantenha as costelas baixas e evite hiperestender a zona lombar no topo do movimento.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="position_your_feet_so_you_feel_the_movement_primarily_in_your_glutes_rather_than_your_hamstrings_" formatted="false">Posicione os pés de forma a sentir o movimento sobretudo nos glúteos, e não nos músculos posteriores da coxa.</string>
+    <!-- Machine Hip Thrust -->
+    <string name="use_the_machine_s_safety_stops_before_loading_the_movement_heavily_" formatted="false">Utilize os batentes de segurança da máquina antes de aumentar muito a carga.</string>
+    <string name="hack_squat_machine" formatted="false">Máquina de hack squat</string>
+    <string name="hip_thrust_machine" formatted="false">Máquina de hip thrust</string>
+    <!-- Barbell Overhead Press -->
+    <string name="barbell_overhead_press" formatted="false">Desenvolvimento militar com barra</string>
+    <!-- Barbell Bent-Over Row -->
+    <string name="barbell_bent_over_row" formatted="false">Remada curvada com barra</string>
+    <string name="mechanic" formatted="false">Mecânica</string>
+    <string name="compound" formatted="false">Composto</string>
+    <string name="isolation" formatted="false">Isolamento</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="ez_bar_skull_crusher" formatted="false">Tríceps testa com barra EZ</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="a_lying_ez_bar_triceps_extension_that_emphasizes_the_triceps_through_a_deep_elbow_flexion_range_" formatted="false">Uma extensão de tríceps deitado com barra EZ, que trabalha os tríceps numa grande amplitude com flexão profunda dos cotovelos.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="lie_flat_on_a_bench_holding_an_ez_bar_above_your_chest_with_a_narrow_overhand_grip_" formatted="false">Deite-se num banco e segure uma barra EZ sobre o peito com uma pega pronada e fechada.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="keep_your_upper_arms_mostly_vertical_as_you_bend_your_elbows_to_lower_the_bar_toward_your_forehead_or_just_behind_it_" formatted="false">Mantenha os braços quase verticais enquanto dobra os cotovelos para baixar a barra em direção à testa ou ligeiramente atrás.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="extend_your_elbows_to_return_the_bar_to_the_starting_position_without_moving_your_shoulders_excessively_" formatted="false">Estenda os cotovelos para voltar a barra à posição inicial sem mexer demasiado os ombros.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="keep_your_wrists_neutral_and_control_the_lowering_phase_" formatted="false">Mantenha os pulsos numa posição neutra e controle a fase de descida.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="use_the_angled_grips_of_the_ez_bar_to_keep_your_wrists_comfortable_" formatted="false">Use as pegas anguladas da barra EZ para manter os pulsos confortáveis.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="let_the_elbows_travel_back_only_slightly__do_not_turn_the_movement_into_a_pullover_" formatted="false">Deixe os cotovelos recuarem apenas ligeiramente; não transforme o movimento num pullover.</string>
+    <!-- EZ Bar Skull Crusher -->
+    <string name="use_a_spotter_or_safety_setup_when_loading_heavily_" formatted="false">Peça ajuda a um parceiro ou use um sistema de segurança ao treinar com cargas elevadas.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="close_grip_dumbbell_bench_press" formatted="false">Supino fechado com halteres</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="a_dumbbell_bench_press_with_the_weights_held_close_together_to_increase_the_triceps_contribution_" formatted="false">Uma variante do supino com halteres em que os pesos são mantidos juntos para aumentar o trabalho dos tríceps.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="lie_flat_on_a_bench_with_a_dumbbell_in_each_hand_held_above_the_center_of_your_chest_" formatted="false">Deite-se num banco com um haltere em cada mão, acima do centro do peito.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="keep_the_dumbbells_close_together_with_your_palms_facing_each_other_or_slightly_inward_" formatted="false">Mantenha os halteres juntos, com as palmas das mãos viradas uma para a outra ou ligeiramente para dentro.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="lower_the_weights_with_your_elbows_tracking_close_to_your_torso_" formatted="false">Baixe os pesos mantendo os cotovelos junto ao tronco.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="press_back_up_while_keeping_the_dumbbells_close_and_your_shoulders_stable_against_the_bench_" formatted="false">Empurre os pesos para cima, mantendo os halteres juntos e os ombros estáveis contra o banco.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="do_not_force_the_dumbbells_to_touch_if_that_irritates_your_wrists_" formatted="false">Não force os halteres a tocarem-se se isso causar desconforto nos pulsos.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="keep_your_elbows_tucked_enough_to_feel_the_triceps__without_pinning_them_painfully_against_your_sides_" formatted="false">Mantenha os cotovelos suficientemente junto ao corpo para sentir os tríceps, sem os pressionar dolorosamente contra os lados.</string>
+    <!-- Close-Grip Dumbbell Bench Press -->
+    <string name="use_a_controlled_descent_and_avoid_bouncing_the_dumbbells_at_the_bottom_" formatted="false">Controle a descida e evite que os halteres ressaltem na posição inferior.</string>
+    <!-- Lying Cable Curl -->
+    <string name="lying_cable_curl" formatted="false">Rosca de bíceps deitado na polia</string>
+    <!-- Lying Cable Curl -->
+    <string name="a_supine_cable_curl_performed_with_a_straight_or_ez_style_cable_bar_to_load_the_biceps_through_elbow_flexion_" formatted="false">Uma rosca de bíceps deitado na polia, feita com uma barra reta ou tipo EZ, que trabalha os bíceps através da flexão dos cotovelos.</string>
+    <!-- Lying Cable Curl -->
+    <string name="place_a_flat_bench_in_front_of_a_low_cable_pulley_and_lie_on_your_back_with_your_feet_toward_the_machine_" formatted="false">Coloque um banco plano em frente a uma polia baixa e deite-se de costas com os pés voltados para a máquina.</string>
+    <!-- Lying Cable Curl -->
+    <string name="hold_a_straight_or_ez_style_cable_bar_with_palms_facing_up_and_your_arms_extended_toward_the_pulley_" formatted="false">Segure uma barra reta ou uma barra EZ para polia com as palmas das mãos voltadas para cima e os braços estendidos em direção à polia.</string>
+    <!-- Lying Cable Curl -->
+    <string name="keep_your_upper_arms_mostly_fixed_as_you_curl_the_bar_toward_your_forehead_or_upper_chest_" formatted="false">Mantenha a parte superior dos braços quase imóvel enquanto flexiona os cotovelos para levar a barra em direção à testa ou à parte superior do peito.</string>
+    <!-- Lying Cable Curl -->
+    <string name="lower_the_bar_slowly_until_your_elbows_are_extended_again_while_keeping_tension_on_the_cable_" formatted="false">Baixe a barra lentamente até voltar a estender os cotovelos, mantendo o cabo sob tensão.</string>
+    <!-- Lying Cable Curl -->
+    <string name="set_the_bench_far_enough_from_the_pulley_that_the_cable_stays_taut_at_the_bottom_" formatted="false">Coloque o banco suficientemente afastado da polia para que o cabo permaneça tenso na posição inferior.</string>
+    <!-- Lying Cable Curl -->
+    <string name="keep_your_elbows_stable_instead_of_pulling_them_toward_your_ribs_" formatted="false">Mantenha os cotovelos estáveis em vez de os puxar em direção às costelas.</string>
+    <!-- Lying Cable Curl -->
+    <string name="use_smooth__controlled_repetitions_to_avoid_the_cable_stack_pulling_you_out_of_position_" formatted="false">Faça repetições suaves e controladas para evitar que a polia o tire da posição.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="smith_machine_calf_raise" formatted="false">Elevação de gémeos na máquina Smith</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="a_standing_calf_raise_under_the_guided_bar_of_a_smith_machine_for_stable__progressively_loaded_calf_training_" formatted="false">Um exercício de elevação de gémeos em pé sob a barra guiada de uma máquina Smith, para treinar os gémeos com estabilidade e aumentar a carga progressivamente.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="stand_under_the_smith_bar_with_it_resting_across_your_upper_back_and_the_balls_of_your_feet_on_a_stable_raised_surface_if_available_" formatted="false">Posicione-se sob a barra da máquina Smith, apoiada na parte superior das costas, e coloque a parte da frente dos pés numa superfície elevada e estável, se disponível.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="unlock_the_bar_and_lower_your_heels_under_control_to_stretch_your_calves_" formatted="false">Desbloqueie a barra e baixe os calcanhares de forma controlada para alongar os gémeos.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="press_through_the_balls_of_your_feet_to_raise_your_heels_as_high_as_possible_" formatted="false">Empurre com a parte da frente dos pés para elevar os calcanhares o mais alto possível.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="pause_briefly_at_the_top__then_lower_slowly_without_bouncing_" formatted="false">Faça uma breve pausa no topo e depois baixe lentamente, sem dar impulso.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="keep_your_knees_softly_unlocked_and_your_torso_upright_" formatted="false">Mantenha os joelhos ligeiramente flexionados e o tronco direito.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="use_a_stable_step_or_platform_only_if_it_fits_safely_inside_the_smith_machine_" formatted="false">Utilize um degrau ou uma plataforma estável apenas se couber com segurança dentro da máquina Smith.</string>
+    <!-- Smith Machine Calf Raise -->
+    <string name="prioritize_full_range_of_motion_over_adding_load_" formatted="false">Dê prioridade à amplitude total do movimento em vez de aumentar a carga.</string>
+    <string name="walk" formatted="false">Caminhada</string>
+    <string name="running__road_running" formatted="false">Corrida, corrida de estrada</string>
+    <string name="treadmill_walk" formatted="false">Caminhada na passadeira</string>
+    <string name="treadmill_run" formatted="false">Corrida na passadeira</string>
+    <string name="exercise_bike__static_bike" formatted="false">Bicicleta estática</string>
+    <string name="cross_trainer" formatted="false">Elíptica</string>
+    <string name="rowing_machine__row_erg" formatted="false">Máquina de remo, ergómetro de remo</string>
+    <string name="skipping__skipping_rope" formatted="false">Saltar à corda</string>
+    <string name="stair_stepper__stepmill" formatted="false">Simulador de escadas, StepMill</string>
+    <string name="bodyweight_squat" formatted="false">Agachamento com o peso corporal</string>
+    <string name="dumbbell_goblet_squat" formatted="false">Agachamento goblet com haltere</string>
+    <string name="back_squat" formatted="false">Agachamento com barra nas costas</string>
+    <string name="front_squat" formatted="false">Agachamento frontal</string>
+    <string name="smith_squat" formatted="false">Agachamento na máquina Smith</string>
+    <string name="db_squat" formatted="false">Agachamento com halteres</string>
+    <string name="machine_leg_press__sled_leg_press" formatted="false">Prensa de pernas, prensa de pernas com trenó</string>
+    <string name="walking_lunges" formatted="false">Afundos a caminhar</string>
+    <string name="backward_lunge" formatted="false">Afundo para trás</string>
+    <string name="rear_foot_elevated_split_squat__rfess" formatted="false">Agachamento dividido com o pé traseiro elevado, RFESS</string>
+    <string name="box_step_up" formatted="false">Subida no caixote</string>
+    <string name="knee_extension" formatted="false">Extensão de pernas</string>
+    <string name="prone_leg_curl__hamstring_curl" formatted="false">Flexão de pernas deitado, flexão dos isquiotibiais</string>
+    <string name="sitting_leg_curl" formatted="false">Flexão de pernas sentado</string>
+    <string name="standing_calf_raise__heel_raise" formatted="false">Elevação de panturrilhas em pé, elevação dos calcanhares</string>
+    <string name="barbell_hip_thrust" formatted="false">Hip thrust com barra</string>
+    <string name="floor_glute_bridge" formatted="false">Ponte de glúteos no chão</string>
+    <string name="conventional_deadlift" formatted="false">Peso morto convencional</string>
+    <string name="romanian_deadlift__barbell_rdl" formatted="false">Peso morto romeno, peso morto romeno com barra</string>
+    <string name="dumbbell_rdl" formatted="false">Peso morto romeno com halteres</string>
+    <string name="machine_donkey_kick" formatted="false">Coice de glúteo na máquina</string>
+    <string name="cable_kickback__cable_donkey_kick" formatted="false">Coice de glúteo na polia, coice de burro na polia</string>
+    <string name="hip_abductor_machine" formatted="false">Máquina abdutora de quadril</string>
+    <string name="hip_adductor_machine" formatted="false">Máquina adutora de quadril</string>
+    <string name="standing_cable_hip_abduction" formatted="false">Abdução de quadril em pé na polia</string>
+    <string name="standing_cable_hip_adduction" formatted="false">Adução de quadril em pé na polia</string>
+    <string name="box_jumps" formatted="false">Saltos para o caixote</string>
+    <string name="pushup__press_up" formatted="false">Flexão de braços, push-up</string>
+    <string name="feet_elevated_push_up" formatted="false">Flexão de braços com os pés elevados</string>
+    <string name="bench_press" formatted="false">Supino</string>
+    <string name="dumbbell_bench__db_bench_press" formatted="false">Supino com halteres, press de peito com halteres</string>
+    <string name="smith_bench_press" formatted="false">Supino na máquina Smith</string>
+    <string name="incline_dumbbell_press" formatted="false">Supino inclinado com halteres</string>
+    <string name="smith_incline_press" formatted="false">Supino inclinado na máquina Smith</string>
+    <string name="decline_bench_press" formatted="false">Supino declinado</string>
+    <string name="decline_dumbbell_press" formatted="false">Supino declinado com halteres</string>
+    <string name="smith_decline_press" formatted="false">Supino declinado na máquina Smith</string>
+    <string name="machine_chest_press__seated_chest_press" formatted="false">Supino na máquina, supino sentado na máquina</string>
+    <string name="dumbbell_flye__db_fly" formatted="false">Crucifixo com halteres, crucifixo com halteres</string>
+    <string name="cable_crossover__cable_flye" formatted="false">Crossover na polia, crucifixo na polia</string>
+    <string name="kneeling_cable_crunch__rope_crunch" formatted="false">Abdominal ajoelhado na polia, abdominal com corda</string>
+    <string name="high_cable_crossover" formatted="false">Crossover na polia alta</string>
+    <string name="low_cable_crossover" formatted="false">Crossover na polia baixa</string>
+    <string name="pec_deck__machine_fly" formatted="false">Peck deck, crucifixo na máquina</string>
+    <string name="military_press__standing_barbell_press" formatted="false">Desenvolvimento militar, desenvolvimento de ombros em pé com barra</string>
+    <string name="dumbbell_shoulder_press" formatted="false">Desenvolvimento de ombros com halteres</string>
+    <string name="smith_shoulder_press" formatted="false">Desenvolvimento de ombros na máquina Smith</string>
+    <string name="arnold_shoulder_press" formatted="false">Desenvolvimento Arnold</string>
+    <string name="side_lateral_raise" formatted="false">Elevação lateral</string>
+    <string name="cable_side_raise" formatted="false">Elevação lateral na polia</string>
+    <string name="anterior_raise" formatted="false">Elevação frontal</string>
+    <string name="cable_anterior_raise" formatted="false">Elevação frontal na polia</string>
+    <string name="cable_reverse_fly" formatted="false">Crucifixo inverso na polia</string>
+    <string name="cable_high_pull" formatted="false">Remada alta na polia</string>
+    <string name="cable_external_shoulder_rotation" formatted="false">Rotação externa do ombro na polia</string>
+    <string name="cable_internal_shoulder_rotation" formatted="false">Rotação interna do ombro na polia</string>
+    <string name="tricep_dip__triceps_dips" formatted="false">Fundos para tríceps, fundos de tríceps</string>
+    <string name="parallel_bar_dip" formatted="false">Fundos nas barras paralelas</string>
+    <string name="cable_triceps_pushdown__cable_pushdown" formatted="false">Extensão de tríceps na polia, extensão na polia</string>
+    <string name="overhead_extension" formatted="false">Extensão de tríceps acima da cabeça</string>
+    <string name="overhead_cable_extension" formatted="false">Extensão de tríceps acima da cabeça na polia</string>
+    <string name="ring_dips" formatted="false">Fundos nas argolas</string>
+    <string name="chin_up__underhand_pull_up" formatted="false">Barra fixa com pegada supinada, puxada com pegada supinada</string>
+    <string name="lat_pull_down__pulldown" formatted="false">Puxada alta, puxada</string>
+    <string name="straight_arm_pulldown" formatted="false">Puxada na polia com os braços estendidos</string>
+    <string name="cable_row__seated_row" formatted="false">Remada na polia, remada sentada</string>
+    <string name="machine_row" formatted="false">Remada na máquina</string>
+    <string name="bent_over_barbell_row__barbell_row" formatted="false">Remada curvada com barra, remada com barra</string>
+    <string name="smith_row" formatted="false">Remada na máquina Smith</string>
+    <string name="one_arm_dumbbell_row" formatted="false">Remada unilateral com halter</string>
+    <string name="cable_face_pull" formatted="false">Face pull na polia</string>
+    <string name="reverse_fly" formatted="false">Crucifixo inverso</string>
+    <string name="reverse_fly_machine" formatted="false">Máquina de crucifixo inverso</string>
+    <string name="dumbbell_curl__db_curl" formatted="false">Rosca com halteres, rosca com halteres (DB)</string>
+    <string name="cable_biceps_curl" formatted="false">Rosca bíceps na polia</string>
+    <string name="bayesian_curl__behind_the_body_cable_curl" formatted="false">Rosca bayesiana, rosca na polia por trás do corpo</string>
+    <string name="dumbbell_hammer_curl__neutral_grip_curl" formatted="false">Rosca martelo com halteres, rosca com pegada neutra</string>
+    <string name="trx_row" formatted="false">Remada no TRX</string>
+    <string name="landmine_t_bar_row" formatted="false">Remada T-bar na landmine</string>
+    <string name="front_plank" formatted="false">Prancha frontal</string>
+    <string name="side_bridge" formatted="false">Prancha lateral</string>
+    <string name="deadbug" formatted="false">Dead bug</string>
+    <string name="quadruped_opposite_arm_and_leg_raise" formatted="false">Elevação do braço e da perna opostos em quatro apoios</string>
+    <string name="mountain_climbers" formatted="false">Mountain climbers</string>
+    <string name="russian_twists" formatted="false">Giros russos</string>
+    <string name="bicycle_sit_up" formatted="false">Abdominal bicicleta</string>
+    <string name="hanging_leg_raises" formatted="false">Elevação de pernas suspenso</string>
+    <string name="supine_leg_raise" formatted="false">Elevação de pernas em decúbito dorsal</string>
+    <string name="cable_chop__wood_chop" formatted="false">Lenhador na polia, corte de lenhador</string>
+    <string name="burpees" formatted="false">Burpees</string>
+    <string name="jumping_jack" formatted="false">Polichinelo</string>
+    <string name="high_knee_run" formatted="false">Corrida com joelhos altos</string>
+    <string name="jump_squat" formatted="false">Agachamento com salto</string>
+    <string name="butterfly_situp" formatted="false">Abdominal borboleta</string>
+    <string name="down_and_up__burpee_without_push_up" formatted="false">Descer e subir, burpee sem flexão</string>
+    <string name="pike_press" formatted="false">Flexão em pike</string>
+    <string name="superman_hold" formatted="false">Isometria Superman</string>
+    <string name="hand_release_pushup__hrpu" formatted="false">Flexão com elevação das mãos, HRPU</string>
+    <string name="spiderman_climber" formatted="false">Escalador Spiderman</string>
+    <string name="heavy_bag_work" formatted="false">Treino com saco de boxe</string>
+    <string name="cat_cow_stretch" formatted="false">Alongamento gato-vaca</string>
+    <string name="lunge_hip_flexor_stretch" formatted="false">Alongamento dos flexores da anca em avanço</string>
+    <string name="hamstring_flexibility_stretch" formatted="false">Alongamento dos isquiotibiais</string>
+    <string name="t_spine_rotation" formatted="false">Rotação da coluna torácica</string>
+    <string name="shoulder_mobility_routine" formatted="false">Rotina de mobilidade dos ombros</string>
+    <string name="world_s_greatest_lunge__lunge_with_rotation" formatted="false">O maior avanço do mundo, avanço com rotação</string>
+    <string name="pigeon_stretch" formatted="false">Alongamento do pombo</string>
+    <string name="cobra_pose__prone_press_up" formatted="false">Postura da cobra, extensão em decúbito ventral</string>
+    <string name="child_pose" formatted="false">Postura da criança</string>
+    <string name="inchworm_walk__walkout" formatted="false">Caminhada da lagarta, walkout</string>
+    <string name="shoulder_circles" formatted="false">Rotações dos ombros</string>
+    <string name="leg_swing" formatted="false">Balanço de perna</string>
+    <string name="wrist_rotations" formatted="false">Rotações dos pulsos</string>
+    <string name="ankle_rotations" formatted="false">Rotações dos tornozelos</string>
+    <string name="deep_squat_stretch__atg_squat_hold" formatted="false">Alongamento em agachamento profundo, manutenção do agachamento ATG</string>
+    <string name="scapula_circles" formatted="false">Rotações das omoplatas</string>
+    <string name="standing_quad_stretch" formatted="false">Alongamento dos quadríceps em pé</string>
+    <string name="door_frame_chest_stretch" formatted="false">Alongamento do peito no umbral da porta</string>
+    <string name="scorpion_stretch" formatted="false">Alongamento do escorpião</string>
+    <string name="thread_the_needle_stretch" formatted="false">Alongamento do fio na agulha</string>
+    <string name="rope_pushdown" formatted="false">Extensão de tríceps com corda</string>
+    <string name="rear_delt_pec_deck" formatted="false">Peck deck inverso para deltoides posteriores</string>
+    <string name="spider_curls" formatted="false">Curl aranha</string>
+    <string name="scott_curl" formatted="false">Curl Scott</string>
+    <string name="dumbbell_triceps_press__close_dumbbell_press" formatted="false">Supino para tríceps com halteres, supino fechado com halteres</string>
+    <string name="supine_cable_curl__cable_bar_curl__lying_cable_bar_curl" formatted="false">Rosca supinada no cabo, rosca com barra no cabo, rosca deitado com barra no cabo</string>
+    <string name="smith_calf_raise__standing_smith_calf_raise__power_machine_calf_raise" formatted="false">Elevação de panturrilhas na máquina Smith, elevação de panturrilhas em pé na máquina Smith, elevação de panturrilhas na máquina de força</string>
+    <string name="neck_rotations" formatted="false">Rotações do pescoço</string>
+    <string name="ez_bar_curl" formatted="false">Rosca de bíceps com barra EZ</string>
+    <string name="a_standing_biceps_curl_using_an_ez_bar__with_angled_grips_that_can_feel_more_comfortable_on_the_wrists_" formatted="false">Uma rosca de bíceps em pé com uma barra EZ, cujas pegas anguladas podem ser mais confortáveis para os pulsos.</string>
+    <string name="stand_with_your_feet_hip_width_apart__holding_an_ez_bar_with_an_underhand_grip_and_your_arms_extended_by_your_sides_" formatted="false">Fique de pé com os pés afastados à largura das ancas. Segure a barra EZ com uma pegada supinada e os braços estendidos ao lado do corpo.</string>
+    <string name="keep_your_elbows_close_to_your_torso_and_curl_the_bar_toward_your_shoulders_" formatted="false">Mantenha os cotovelos junto ao tronco e flexione os braços para levar a barra em direção aos ombros.</string>
+    <string name="squeeze_your_biceps_briefly_at_the_top_without_letting_your_elbows_move_forward_" formatted="false">Contraia brevemente os bíceps no topo do movimento, sem deixar os cotovelos avançarem.</string>
+    <string name="lower_the_bar_slowly_until_your_arms_are_almost_fully_extended_" formatted="false">Baixe a barra lentamente até os braços ficarem quase totalmente estendidos.</string>
+    <string name="choose_the_angled_hand_position_that_keeps_your_wrists_comfortable_" formatted="false">Escolha a posição angulada das mãos que seja confortável para os pulsos.</string>
+    <string name="keep_your_torso_still_and_avoid_swinging_the_bar_to_lift_the_weight_" formatted="false">Mantenha o tronco imóvel e evite balançar a barra para levantar o peso.</string>
 </resources>

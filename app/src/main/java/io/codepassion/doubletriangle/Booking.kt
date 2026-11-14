@@ -161,13 +161,6 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
     val locale = LocalLocale.current.platformLocale
     val context = androidx.compose.ui.platform.LocalContext.current
     val api = remember { BookingApi(context.applicationContext) }
-    val gymCodeScanner = remember(context) {
-        val options = GmsBarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-            .enableAutoZoom()
-            .build()
-        GmsBarcodeScanning.getClient(context, options)
-    }
     var gyms by remember { mutableStateOf<List<BookingGym>>(emptyList()) }
     val bookingPreferences = remember { context.getSharedPreferences("wildforce_booking", Context.MODE_PRIVATE) }
     var selectedGymId by remember { mutableStateOf(bookingPreferences.getString(SELECTED_BOOKING_GYM_ID, null)) }
@@ -236,11 +229,6 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
     }
     if (joiningGym) JoinGymDialog(
         onDismiss = { joiningGym = false },
-        onScan = { onCode ->
-            gymCodeScanner.startScan().addOnSuccessListener { barcode ->
-                barcode.rawValue?.let(onCode)
-            }
-        },
         onJoin = { code ->
             api.joinGym(code)
             joiningGym = false
@@ -259,7 +247,8 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
 }
 
 /** Android counterpart of iOS's JoinGymView for an authenticated user. */
-@Composable private fun JoinGymDialog(onDismiss: () -> Unit, onScan: (((String) -> Unit) -> Unit), onJoin: suspend (String) -> Unit) {
+@Composable private fun JoinGymDialog(onDismiss: () -> Unit, onJoin: suspend (String) -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     var code by remember { mutableStateOf("") }
     var submitting by remember { mutableStateOf(false) }
     var localError by remember { mutableStateOf<String?>(null) }
@@ -279,9 +268,15 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
                     trailingIcon = {
                         Icon(
                             Icons.Filled.QrCodeScanner,
-                            contentDescription = "Escanear código QR",
+                            contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.scan_the_gym_s_qr),
                             modifier = Modifier.clickable(enabled = !submitting) {
-                                onScan { value ->
+                                runCatching {
+                                    val options = GmsBarcodeScannerOptions.Builder()
+                                        .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                                        .enableAutoZoom()
+                                        .build()
+                                    GmsBarcodeScanning.getClient(context, options).startScan()
+                                    .addOnSuccessListener { barcode -> barcode.rawValue?.let { value ->
                                     val parsed = parseGymJoinCode(value)
                                     if (parsed == null) localError = "Este QR no contiene un código de gimnasio."
                                     else {
@@ -293,7 +288,9 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
                                             submitting = false
                                         }
                                     }
-                                }
+                                    } }
+                                    .addOnFailureListener { localError = "No se pudo abrir el lector QR. Introduce el código manualmente." }
+                                }.onFailure { localError = "No se pudo abrir el lector QR. Introduce el código manualmente." }
                             },
                         )
                     },
@@ -322,18 +319,8 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
 internal fun AuthenticatedJoinGymDialog(onDismiss: () -> Unit, onJoined: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val api = remember { BookingApi(context.applicationContext) }
-    val gymCodeScanner = remember(context) {
-        val options = GmsBarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-            .enableAutoZoom()
-            .build()
-        GmsBarcodeScanning.getClient(context, options)
-    }
     JoinGymDialog(
         onDismiss = onDismiss,
-        onScan = { onCode ->
-            gymCodeScanner.startScan().addOnSuccessListener { barcode -> barcode.rawValue?.let(onCode) }
-        },
         onJoin = { code -> api.joinGym(code); onJoined() },
     )
 }
@@ -411,7 +398,7 @@ private fun ReservationCard(reservation: BookingReservation, onCancel: () -> Uni
                     BookingStatusBadge(reservation.status)
                     if (reservation.isCancellable) {
                         Box {
-                            IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(32.dp)) { Icon(Icons.Filled.MoreVert, "Más opciones", tint = WildforceThemeTokens.textPrimary) }
+                            IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(32.dp)) { Icon(Icons.Filled.MoreVert, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.more_options), tint = WildforceThemeTokens.textPrimary) }
                             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                                 DropdownMenuItem(onClick = { menuOpen = false; onCancel() }) {
                                     Icon(Icons.Filled.Close, null, tint = Color(0xFFE26D5A), modifier = Modifier.size(18.dp))
@@ -818,31 +805,15 @@ private fun RoomChoice(room: BookingRoom, selected: Boolean, showsImages: Boolea
 
 @Composable
 private fun FlowTimes(starts: List<BookingStart>, selected: BookingStart?, zone: ZoneId, locale: Locale, onSelected: (BookingStart) -> Unit) {
-    BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val columns = ((maxWidth.value + 8f) / 108f).toInt().coerceAtLeast(1)
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            starts.chunked(columns).forEach { row ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    row.forEach { start ->
-                        val isSelected = selected?.startsAt?.toInstant() == start.startsAt.toInstant()
-                        val foreground = if (isSelected) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.textPrimary
-                        val placesColor = if (isSelected) foreground.copy(alpha = .7f) else if (start.availablePlaces == 1) Color(0xFFFF9500) else WildforceThemeTokens.textSecondary
-                        Column(
-                            Modifier.weight(1f).clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) WildforceThemeTokens.textPrimary else WildforceThemeTokens.backgroundSecondary)
-                                .semantics { this.selected = isSelected }.clickable { onSelected(start) }
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(2.dp),
-                        ) {
-                            Text(formatTime(start.startsAt, zone, locale), fontWeight = FontWeight.SemiBold, color = foreground)
-                            Text(stringResource(R.string.ios_catalog_885c42f8b9f562c6).replace("%d", start.availablePlaces.toString()), fontSize = 11.sp, color = placesColor)
-                        }
-                    }
-                    repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
-                }
-            }
-        }
-    }
+    val places = stringResource(R.string.ios_catalog_885c42f8b9f562c6)
+    io.codepassion.doubletriangle.core.designsystem.TimeChoiceGrid(
+        options = starts,
+        selected = starts.firstOrNull { it.startsAt.toInstant() == selected?.startsAt?.toInstant() },
+        label = { formatTime(it.startsAt, zone, locale) },
+        detail = { places.replace("%d", it.availablePlaces.toString()) },
+        detailColor = { if (it.availablePlaces == 1) Color(0xFFFF9500) else WildforceThemeTokens.textSecondary },
+        onSelect = onSelected,
+    )
 }
 /** Every booking instant is rendered in the gym's time zone, as on iOS. */
 private fun formatDateTime(time: OffsetDateTime, zone: ZoneId, locale: Locale) = time.atZoneSameInstant(zone).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(locale))

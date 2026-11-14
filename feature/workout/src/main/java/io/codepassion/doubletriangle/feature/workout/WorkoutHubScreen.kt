@@ -231,6 +231,9 @@ fun WorkoutHubScreen(
     onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
     gender: String = "male",
     defaultCustomEquipment: String = "Peso corporal",
+    customWorkoutDuration: Int = 45,
+    skipsWarmups: Boolean = false,
+    skipsCooldowns: Boolean = false,
     customEquipmentPresets: List<Pair<String, String>> = emptyList(),
     allowAutomaticCreation: Boolean = true,
     canRegeneratePlan: Boolean = true,
@@ -312,7 +315,7 @@ fun WorkoutHubScreen(
                     .liquidGlass(RoundedCornerShape(14.dp)).padding(start = 12.dp, end = 6.dp, top = 10.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_18423c54a5c7ac9c, error), Modifier.weight(1f), color = Color(0xFFC62828), style = MaterialTheme.typography.caption)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_18423c54a5c7ac9c, error), Modifier.weight(1f), color = WildforceThemeTokens.destructiveText, style = MaterialTheme.typography.caption)
                 TextButton(onClick = onRetryGeneration) {
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
                 }
@@ -360,6 +363,8 @@ fun WorkoutHubScreen(
         ) {
             WorkoutPlan(
                 state = state,
+                planHistory = planHistory,
+                customWorkouts = customWorkouts,
                 selectedDay = selectedDay,
                 onWorkoutSelected = onWorkoutSelected,
                 onMesocycleSelected = { showingMesocycleDetails = true },
@@ -383,6 +388,9 @@ fun WorkoutHubScreen(
                 workouts = customWorkouts.filter { selectedDay == null || it.scheduledDay == selectedDay }, gender = gender,
                 appLanguage = appLanguage,
                 defaultEquipment = defaultCustomEquipment,
+                initialDuration = customWorkoutDuration,
+                skipsWarmups = skipsWarmups,
+                skipsCooldowns = skipsCooldowns,
                 equipmentPresets = customEquipmentPresets,
                 allowAutomaticCreation = allowAutomaticCreation,
                 onCreateManual = { editingCustomWorkout = CustomWorkoutStore.empty(selectedDay ?: LocalDate.now().dayOfWeek) },
@@ -593,10 +601,11 @@ private fun WorkoutHeader(
             }
         }
         Box(Modifier.padding(start = 12.dp)) {
+            val moreOptionsLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.more_options)
             Box(
                 Modifier.size(48.dp).clip(CircleShape)
                     .liquidGlass(CircleShape).clickable { showsMoreOptions = true }
-                    .semantics { contentDescription = "Más opciones" },
+                    .semantics { contentDescription = moreOptionsLabel },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(Icons.Filled.MoreHoriz, contentDescription = null, tint = WildforceThemeTokens.textPrimary)
@@ -734,7 +743,7 @@ private fun StreakCalendarDialog(
                                         }, contentAlignment = Alignment.Center) {
                                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                                 Text(date.dayOfMonth.toString(), color = if (date == LocalDate.now()) WildforceThemeTokens.accent else WildforceThemeTokens.textPrimary, fontWeight = if (date == LocalDate.now()) FontWeight.Bold else FontWeight.Normal)
-                                                if (workouts.isNotEmpty()) Icon(Icons.Filled.CheckCircle, "Entrenamiento completado", Modifier.size(12.dp), tint = Color(0xFF34C759)) else Spacer(Modifier.height(12.dp))
+                                                if (workouts.isNotEmpty()) Icon(Icons.Filled.CheckCircle, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_complete), Modifier.size(12.dp), tint = Color(0xFF34C759)) else Spacer(Modifier.height(12.dp))
                                             }
                                         }
                                     }
@@ -1051,6 +1060,8 @@ private fun WorkoutModeSelector(
 @Composable
 private fun WorkoutPlan(
     state: WorkoutHubState,
+    planHistory: List<WorkoutHubState>,
+    customWorkouts: List<WorkoutDaySummary>,
     selectedDay: DayOfWeek?,
     onWorkoutSelected: (WorkoutDaySummary) -> Unit,
     onMesocycleSelected: () -> Unit,
@@ -1108,7 +1119,7 @@ private fun WorkoutPlan(
             MesocycleHeaderCard(state, onMesocycleSelected)
         }
         item {
-            WeeklyPlanHeaderCard(state, onRecreatePlan, canRegeneratePlan, appLanguage)
+            WeeklyPlanHeaderCard(state, planHistory, customWorkouts, onRecreatePlan, canRegeneratePlan, appLanguage)
         }
         if (workouts.isEmpty()) {
             item { RestDayCard() }
@@ -1305,10 +1316,11 @@ private fun MesocycleHeaderCard(state: WorkoutHubState, onClick: () -> Unit) {
 }
 
 @Composable
-private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> Unit, canRegeneratePlan: Boolean, appLanguage: String) {
+private fun WeeklyPlanHeaderCard(state: WorkoutHubState, planHistory: List<WorkoutHubState>, customWorkouts: List<WorkoutDaySummary>, onRecreatePlan: () -> Unit, canRegeneratePlan: Boolean, appLanguage: String) {
     val finalized = state.workouts.count { it.status.isPlanFinalized }
     var showsPlanMenu by remember { mutableStateOf(false) }
     var showsPlanNotes by remember { mutableStateOf(false) }
+    var showsCalendarExport by remember { mutableStateOf(false) }
     val isCompleted = state.planStatus.equals("completed", ignoreCase = true)
     val planGoal = state.planGoal?.takeIf(String::isNotBlank) ?: state.user.goal
     val planGoalLabel = localizedWorkoutLabel(planGoal, appLanguage)
@@ -1328,7 +1340,7 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> U
             }
                 if (isCompleted) {
                     StatusBadge("COMPLETADO", Color(0xFF26A269))
-                } else if (planNotes != null || canRegeneratePlan) {
+                } else if (planNotes != null || canRegeneratePlan || state.workouts.isNotEmpty()) {
                     Box {
                         Box(
                             Modifier.size(48.dp)
@@ -1345,6 +1357,12 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> U
                             }
                         }
                         DropdownMenu(expanded = showsPlanMenu, onDismissRequest = { showsPlanMenu = false }) {
+                            if (state.workouts.isNotEmpty()) {
+                                DropdownMenuItem(onClick = { showsPlanMenu = false; showsCalendarExport = true }) {
+                                    Icon(Icons.Filled.CalendarToday, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.textPrimary)
+                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.feature.workout.R.string.calendar_export), Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
+                                }
+                            }
                             if (planNotes != null) {
                                 DropdownMenuItem(onClick = {
                                     showsPlanMenu = false
@@ -1393,6 +1411,9 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, onRecreatePlan: () -> U
                 }
             }
         }
+    }
+    if (showsCalendarExport) {
+        CalendarExportScreen(state, planHistory, customWorkouts, onDismiss = { showsCalendarExport = false })
     }
     if (showsPlanNotes && planNotes != null) {
         AlertDialog(
@@ -1928,7 +1949,7 @@ private fun AdaptWorkoutLocationDialog(
                                 .padding(horizontal = 12.dp, vertical = 10.dp),
                         ) {
                             Text(name, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
-                            Text(equipment.ifBlank { "Peso corporal" }, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                            Text(equipment.ifBlank { androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.bodyweight) }, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                         }
                     }
                 }
@@ -2085,12 +2106,13 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                     }
                 } else {
                     Box {
+                        val workoutMenuLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_menu)
                         Box(
-                            Modifier.size(48.dp).semantics { contentDescription = "Menú del entrenamiento" }.clickable { showMenu = true },
+                            Modifier.size(48.dp).semantics { contentDescription = workoutMenuLabel }.clickable { showMenu = true },
                             contentAlignment = Alignment.Center,
                         ) {
                             Box(Modifier.size(34.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.24f)), contentAlignment = Alignment.Center) {
-                                Icon(Icons.Filled.MoreHoriz, contentDescription = "Menú del entrenamiento", tint = Color.White, modifier = Modifier.size(21.dp))
+                                Icon(Icons.Filled.MoreHoriz, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_menu), tint = Color.White, modifier = Modifier.size(21.dp))
                             }
                         }
                         DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
@@ -2301,7 +2323,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
             onDismissRequest = { showSkipConfirmation = false },
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_e868d979b693438b), fontFamily = AntonFontFamily) },
             text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_9230242151559170)) },
-            confirmButton = { TextButton(onClick = { skipped = true; showSkipConfirmation = false; onSkip() }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip).uppercase(), color = Color(0xFFC62828)) } },
+            confirmButton = { TextButton(onClick = { skipped = true; showSkipConfirmation = false; onSkip() }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip).uppercase(), color = WildforceThemeTokens.destructiveText) } },
             dismissButton = { TextButton(onClick = { showSkipConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
@@ -2318,7 +2340,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                         workout.resetCancelledWorkout(),
                     )
                     showCancelConfirmation = false
-                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), color = Color(0xFFC62828)) }
+                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), color = WildforceThemeTokens.destructiveText) }
             },
             dismissButton = { TextButton(onClick = { showCancelConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_1daf179b6751ecd3), color = WildforceThemeTokens.textSecondary) } },
         )
@@ -2498,11 +2520,11 @@ private fun ActiveWorkoutMenuItem(
                 Icon(
                     menuIcon(glyph),
                     contentDescription = null,
-                    tint = if (!enabled) WildforceThemeTokens.textSecondary.copy(alpha = 0.5f) else if (destructive) Color(0xFFC62828) else WildforceThemeTokens.textPrimary,
+                    tint = if (!enabled) WildforceThemeTokens.textSecondary.copy(alpha = 0.5f) else if (destructive) WildforceThemeTokens.destructiveText else WildforceThemeTokens.textPrimary,
                     modifier = Modifier.size(18.dp),
                 )
             }
-            Text(label, color = if (!enabled) WildforceThemeTokens.textSecondary.copy(alpha = 0.5f) else if (destructive) Color(0xFFC62828) else WildforceThemeTokens.textPrimary)
+            Text(label, color = if (!enabled) WildforceThemeTokens.textSecondary.copy(alpha = 0.5f) else if (destructive) WildforceThemeTokens.destructiveText else WildforceThemeTokens.textPrimary)
         }
     }
 }
@@ -3715,7 +3737,7 @@ fun ActiveWorkoutScreen(
                 TextButton(onClick = {
                     showsRemoveExerciseConfirmation = false
                     removeCurrentExercise()
-                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.delete).uppercase(), color = Color(0xFFC62828)) }
+                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.delete).uppercase(), color = WildforceThemeTokens.destructiveText) }
             },
             dismissButton = {
                 TextButton(onClick = { showsRemoveExerciseConfirmation = false }) {
@@ -3735,7 +3757,7 @@ fun ActiveWorkoutScreen(
                     showsCancelWorkoutConfirmation = false
                     cancelWorkoutSession(context, workout.id)
                     onExit()
-                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), color = Color(0xFFC62828)) }
+                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), color = WildforceThemeTokens.destructiveText) }
             },
             dismissButton = {
                 TextButton(onClick = { showsCancelWorkoutConfirmation = false }) {
@@ -4359,12 +4381,13 @@ fun ActiveWorkoutScreen(
                             Spacer(Modifier.height(8.dp))
                         }
                         if (exercise.blockType == WorkoutBlockType.Standard && exercise.resolvedTargetDurationSeconds() == null && effectiveSets < 20) {
+                            val addSetLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_set)
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                                 Row(Modifier
                                     .heightIn(min = 48.dp)
                                     .clip(CircleShape)
                                     .background(WildforceThemeTokens.textPrimary.copy(alpha = 0.10f))
-                                    .semantics { contentDescription = "Añadir serie" }
+                                    .semantics { contentDescription = addSetLabel }
                                     .clickable { addedSetsByExercise = addedSetsByExercise + (exerciseIndex to ((addedSetsByExercise[exerciseIndex] ?: 0) + 1)) }
                                     .padding(horizontal = 14.dp, vertical = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically,
@@ -4615,7 +4638,7 @@ private fun ActiveWorkoutConfirmationDialogs(
             onDismissRequest = onDismissRemove,
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f882bae2c871a1bc), fontFamily = AntonFontFamily) },
             text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_01398e25b10ed715)) },
-            confirmButton = { TextButton(onClick = onConfirmRemove) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.delete).uppercase(), color = Color(0xFFC62828)) } },
+            confirmButton = { TextButton(onClick = onConfirmRemove) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.delete).uppercase(), color = WildforceThemeTokens.destructiveText) } },
             dismissButton = { TextButton(onClick = onDismissRemove) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
@@ -4624,7 +4647,7 @@ private fun ActiveWorkoutConfirmationDialogs(
             onDismissRequest = onDismissCancel,
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_74be332575411a26), fontFamily = AntonFontFamily) },
             text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_34fbf2a18984301a)) },
-            confirmButton = { TextButton(onClick = onConfirmCancel) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), color = Color(0xFFC62828)) } },
+            confirmButton = { TextButton(onClick = onConfirmCancel) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), color = WildforceThemeTokens.destructiveText) } },
             dismissButton = { TextButton(onClick = onDismissCancel) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.continue_with_your_workout).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
@@ -4880,12 +4903,13 @@ private fun ActiveWorkoutPhaseContent(
                             Spacer(Modifier.height(8.dp))
                         }
                         if (exercise.blockType == WorkoutBlockType.Standard && exercise.resolvedTargetDurationSeconds() == null && state.effectiveSets < 20) {
+                            val addSetLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_set)
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                                 Row(
                                     Modifier.heightIn(min = 48.dp)
                                         .clip(CircleShape)
                                         .background(WildforceThemeTokens.textPrimary.copy(alpha = 0.10f))
-                                        .semantics { contentDescription = "Añadir serie" }
+                                        .semantics { contentDescription = addSetLabel }
                                         .clickable(onClick = actions.onAddSet)
                                         .padding(horizontal = 14.dp, vertical = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically,

@@ -17,4 +17,12 @@ class AppLocaleTest {
         assertEquals("nl", AppLocale.languageTag("Nederlands"))
         assertEquals("ja", AppLocale.languageTag("日本語"))
     }
+
+    @Test
+    fun accepts_language_codes_from_the_server() {
+        assertEquals("en", AppLocale.languageTag("en"))
+        assertEquals("pt", AppLocale.languageTag("pt-BR"))
+        assertEquals("zh-Hans", AppLocale.languageTag("zh-CN"))
+        assertEquals("es", AppLocale.languageTag(null))
+    }
 }
