@@ -195,6 +195,7 @@ data class WorkoutDaySummary(
     val averageHeartRate: Double? = null,
     val maximumHeartRate: Double? = null,
     val totalVolumeKg: Double? = null,
+    val createdAt: String? = null,
 )
 
 fun WorkoutDaySummary.displayBlocks(): List<WorkoutBlockSummary> =

@@ -9,22 +9,29 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+// Keep local builds usable until a Firebase project is configured. When the
+// configuration is supplied, compile the real FCM service and its SDK.
+val firebaseConfigured = file("google-services.json").isFile
+if (firebaseConfigured) apply(plugin = "com.google.gms.google-services")
+
 android {
     // The namespace is used by Android Studio's developer-verification flow;
     // it must match the Play package registered for this application.
     namespace = "io.codepassion.wildforce.android"
+    sourceSets.getByName("main").kotlin.srcDir(if (firebaseConfigured) "src/fcm/java" else "src/noFcm/java")
     compileSdk = 37
 
     defaultConfig {
         applicationId = "io.codepassion.wildforce.android"
         minSdk = 28
         targetSdk = 37
-        versionCode = 20
+        versionCode = 24
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         buildConfigField("String", "OPENAI_API_KEY", buildConfigString(localProperties.getProperty("OPENAI_API_KEY", "")))
         buildConfigField("String", "OPENAI_MODEL", buildConfigString(localProperties.getProperty("OPENAI_MODEL", "gpt-5.6-luna")))
+        buildConfigField("boolean", "FCM_CONFIGURED", firebaseConfigured.toString())
     }
 
     buildFeatures {
@@ -53,6 +60,10 @@ android {
 }
 
 dependencies {
+    if (firebaseConfigured) {
+        implementation(platform("com.google.firebase:firebase-bom:35.2.0"))
+        implementation("com.google.firebase:firebase-messaging")
+    }
     implementation(platform("androidx.compose:compose-bom:2026.08.00"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:model"))

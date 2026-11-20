@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared Sheet labels with local fallbacks for untranslated cells. -->
+    <string name="settings_sheet_none">@string/none</string>
+    <string name="settings_sheet_join_your_gym">@string/join_your_gym</string>
+    <string name="settings_sheet_live_progress">@string/live_progress</string>
+    <string name="settings_sheet_enabled">@string/enabled</string>
+    <string name="settings_sheet_open_settings">@string/open_settings</string>
+    <string name="settings_sheet_watch_auto_tracking">@string/watch_auto_tracking</string>
+    <string name="settings_sheet_prevents_auto_lock_while_an_active_workout_is_open_">@string/prevents_auto_lock_while_an_active_workout_is_open_</string>
+    <string name="settings_sheet_confirm_your_identity_to_turn_off_progress_photo_protection_">@string/confirm_your_identity_to_turn_off_progress_photo_protection_</string>
+</resources>

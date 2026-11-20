@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="faq_intro">Tot el que necessites per entrenar, menjar millor i continuar progressant amb Wildforce.</string>
+    <string name="faq_getting_started">Primers passos</string>
+    <string name="faq_training">Entrenament i progrés</string>
+    <string name="faq_nutrition">Nutrició</string>
+    <string name="faq_devices">Android i dispositius</string>
+    <string name="faq_account">Compte, dades i ajustos</string>
+    <string name="faq_help">Necessites més ajuda? Des d’Ajuda, envia’ns el model de mòbil, la versió d’Android i de Wildforce i una breu descripció.</string>
+    <string-array name="faq_questions">
+        <item>Què és Wildforce?</item>
+        <item>Com es crea el meu pla d’entrenament?</item>
+        <item>Què necessito per utilitzar Wildforce a Android?</item>
+        <item>Puc entrenar sense connexió?</item>
+        <item>Puc canviar un exercici durant un entrenament?</item>
+        <item>Puc crear els meus propis entrenaments?</item>
+        <item>Com funcionen els descansos?</item>
+        <item>On puc veure la meva evolució?</item>
+        <item>Què passa quan acabo un entrenament?</item>
+        <item>Com registro el que menjo?</item>
+        <item>Pot proposar àpats amb el que tinc a casa?</item>
+        <item>Què passa si no arribo als meus macros?</item>
+        <item>Puc veure la planificació per dies?</item>
+        <item>Quina integració de salut utilitza Android?</item>
+        <item>Per a què serveixen les notificacions?</item>
+        <item>Hi ha un giny de Wildforce per a Android?</item>
+        <item>Funciona amb Wear OS?</item>
+        <item>Puc utilitzar Wildforce a l’iPhone?</item>
+        <item>Puc utilitzar unitats imperials?</item>
+        <item>Tindré les dades en un dispositiu nou?</item>
+        <item>Puc canviar l’idioma, el tema o les preferències?</item>
+        <item>Què faig si Health Connect no se sincronitza?</item>
+        <item>Què faig si alguna cosa no funciona?</item>
+    </string-array>
+    <string-array name="faq_answers">
+        <item>Wildforce és la teva plataforma d’entrenament i nutrició per a iPhone i Android. Crea plans adaptats al teu objectiu, registra cada sessió, controla els macros i converteix la constància en progrés.</item>
+        <item>Durant la configuració tries objectiu, experiència, disponibilitat, equipament, preferències i limitacions. Wildforce utilitza aquestes dades per crear un pla progressiu que pots seguir i ajustar.</item>
+        <item>Necessites Android 9 o posterior i la versió més recent de Wildforce disponible a la teva regió.</item>
+        <item>Pots consultar i registrar el contingut disponible localment. Generar plans o analitzar informació amb IA requereix connexió. Els canvis pendents se sincronitzen quan torna internet si la sincronització al núvol està activada.</item>
+        <item>Sí. Pots cercar una alternativa, substituir l’exercici o retirar-lo de la sessió activa per adaptar-te a l’equipament disponible.</item>
+        <item>Sí. Pots crear, editar, fer i eliminar entrenaments personalitzats quan vulguis sortir del pla o necessitis una sessió a mida.</item>
+        <item>En acabar una sèrie, Wildforce controla el descans. L’entrenament actiu pot continuar accessible mitjançant una notificació si les has permès.</item>
+        <item>A Progrés trobaràs l’historial per exercici, volum, estadístiques, ratxes i evolució corporal per comprovar què funciona.</item>
+        <item>La sessió es desa a l’historial i actualitza estadístiques, progrés i ratxa. La podràs comparar amb sessions anteriors quan hi hagi prou dades.</item>
+        <item>Pots utilitzar una foto, codi de barres, etiqueta nutricional, text, cerca d’aliments, recents o registre manual. Tria l’opció més ràpida per a tu.</item>
+        <item>Sí. Afegeix els ingredients disponibles i utilitza les idees d’àpats per rebre propostes ajustades als teus objectius nutricionals.</item>
+        <item>Wildforce pot suggerir aliments o àpats per cobrir els macros que et falten. L’objectiu no és la perfecció, sinó prendre millors decisions amb constància.</item>
+        <item>Sí. La planificació inclou un calendari setmanal, objectius d’energia i macros, i dies de dèficit, manteniment o superàvit segons la teva meta.</item>
+        <item>Wildforce es connecta amb Health Connect. Tu tries els permisos per a alçada, pes, calories, nutrició i entrenaments, i els pots revocar a Ajustos.</item>
+        <item>Mantenen visibles l’entrenament i el descans actius i permeten rebre recordatoris. Si no veus la sessió activa, comprova el permís de notificacions de Wildforce.</item>
+        <item>Hi ha un accés ràpid a l’entrenament des de la pantalla d’inici. Mantén premut un espai buit, obre el selector de ginys i cerca Wildforce quan estigui disponible a la teva versió.</item>
+        <item>L’app Wear OS permet veure l’estat de l’entrenament, completar sèries i controlar els descansos per Bluetooth. Health Services i la validació amb un rellotge real continuen en desenvolupament.</item>
+        <item>Sí. A l’iPhone, Wildforce s’integra amb Apple Health i Apple Watch per als entrenaments actius, descansos i dades de repeticions en exercicis compatibles.</item>
+        <item>Sí. Tria el sistema mètric o imperial a Ajustos. El pes i les mesures es mostraran en el format que prefereixis.</item>
+        <item>La informació es desa localment i es pot sincronitzar amb el compte si la sincronització al núvol està activada. Inicia sessió amb el mateix compte per recuperar les dades sincronitzades.</item>
+        <item>Sí. Des de Perfil i Ajustos pots canviar l’idioma, les unitats, les preferències del pla, els recordatoris i el tema visual.</item>
+        <item>Revisa els permisos a Health Connect, actualitza Wildforce i torna a obrir l’app. Si continua, contacta amb suport i indica la plataforma i la versió de l’app.</item>
+        <item>Actualitza Wildforce, reinicia l’app i revisa els permisos. Si el problema continua, contacta amb suport i inclou el model de mòbil, la versió d’Android i de Wildforce i una breu descripció.</item>
+    </string-array>
+</resources>

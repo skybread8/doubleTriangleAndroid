@@ -10,10 +10,13 @@ import androidx.health.connect.client.time.TimeRangeFilter
 import io.codepassion.doubletriangle.WorkoutPlanGenerator
 import io.codepassion.doubletriangle.WorkoutPlanStateStore
 import io.codepassion.doubletriangle.core.model.WorkoutStatus
+import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.workout.CustomWorkoutStore
 import io.codepassion.doubletriangle.feature.workout.WorkoutCompletionMetricsStore
 import java.time.Instant
 import java.time.LocalDate
+import java.time.Period
+import java.time.YearMonth
 import java.time.ZoneId
 
 internal data class NutritionEnergyPoint(val activeCalories: Double?, val totalCalories: Double?, val eatenCalories: Int)
@@ -86,6 +89,25 @@ internal fun localWorkoutNutritionEnergyHistory(
         )
     }
 
+internal fun estimatedRestingCalories(profile: OnboardingProfile?, date: LocalDate): Double? {
+    profile ?: return null
+    if (!profile.weightKg.isFinite() || profile.weightKg <= 0 || profile.heightCm <= 0 || profile.birthYear !in 1900..date.year) return null
+    val month = profile.birthMonth.coerceIn(1, 12)
+    val day = profile.birthDay.coerceIn(1, YearMonth.of(profile.birthYear, month).lengthOfMonth())
+    val birth = LocalDate.of(profile.birthYear, month, day)
+    if (birth.isAfter(date)) return null
+    val age = Period.between(birth, date).years
+    val genderOffset = if (profile.gender.storedValue == "female") -161.0 else 5.0
+    return (10 * profile.weightKg + 6.25 * profile.heightCm - 5 * age + genderOffset).takeIf { it > 0 }
+}
+
+internal fun nutritionEnergyPoint(active: Double?, healthTotal: Double?, resting: Double?, eaten: Int): NutritionEnergyPoint {
+    val validActive = active?.takeIf { it.isFinite() && it > 0 }
+    val total = healthTotal?.takeIf { it.isFinite() && it > 0 }
+        ?: resting?.takeIf { it.isFinite() && it > 0 }?.plus(validActive ?: 0.0)
+    return NutritionEnergyPoint(validActive, total, eaten)
+}
+
 internal fun energyCaloriesOrNull(values: Iterable<Double>): Double? {
     val collected = values.toList()
     return collected.takeIf { it.isNotEmpty() }?.sum()
@@ -147,7 +169,7 @@ private fun localPersistedWorkoutCaloriesByDate(context: Context, zone: ZoneId):
 }
 
 internal object NutritionEnergyBalance {
-    suspend fun read(context: Context, eatenFor: (LocalDate) -> Int, days: Int = 15): Map<LocalDate, NutritionEnergyPoint> {
+    suspend fun read(context: Context, eatenFor: (LocalDate) -> Int, profile: OnboardingProfile? = null, days: Int = 15): Map<LocalDate, NutritionEnergyPoint> {
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         // iOS always constructs the complete window and keeps intake-only days;
@@ -168,7 +190,9 @@ internal object NutritionEnergyBalance {
             }
         }
         fun localWorkoutHistory(): Map<LocalDate, NutritionEnergyPoint> =
-            localWorkoutNutritionEnergyHistory(today, days, eatenFor) { date -> localActiveByDate[date] }
+            windowDates.associateWith { date ->
+                nutritionEnergyPoint(localActiveByDate[date], null, estimatedRestingCalories(profile, date), eatenFor(date))
+            }
 
         if (HealthConnectClient.getSdkStatus(context) != HealthConnectClient.SDK_AVAILABLE) return localWorkoutHistory()
         val client = runCatching { HealthConnectClient.getOrCreate(context) }.getOrNull()
@@ -203,7 +227,7 @@ internal object NutritionEnergyBalance {
                 .filter { it.startTime.atZone(zone).toLocalDate() == date }
                 .map { it.energy.inKilocalories }
             val healthConnectTotal = energyCaloriesOrNull(totalForDate)?.takeIf { it > 0.0 }
-            NutritionEnergyPoint(
+            nutritionEnergyPoint(
                 // A completed Android workout already has the same local
                 // active-calorie estimate used by the workout completion UI.
                 // Use it when Health Connect has no active record for the day;
@@ -211,9 +235,10 @@ internal object NutritionEnergyBalance {
                 // is unavailable or empty.
                 // A zero-valued provider record is not useful activity data;
                 // keep the local workout estimate available in that case too.
-                activeCalories = preferredActiveCalories(activeForDate, localActiveByDate[date]),
-                totalCalories = healthConnectTotal,
-                eatenCalories = eatenFor(date),
+                active = preferredActiveCalories(activeForDate, localActiveByDate[date]),
+                healthTotal = healthConnectTotal,
+                resting = estimatedRestingCalories(profile, date),
+                eaten = eatenFor(date),
             )
         }
     }

@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import io.codepassion.doubletriangle.core.designsystem.localizedContentDescription
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
@@ -44,6 +45,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -94,6 +96,7 @@ import androidx.compose.material.icons.filled.Campaign
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CenterFocusStrong
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Close
@@ -149,6 +152,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -190,6 +194,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
+import io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext
+import io.codepassion.doubletriangle.core.designsystem.R as SharedR
 import io.codepassion.doubletriangle.core.designsystem.AntonFontFamily
 import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceTheme
@@ -223,12 +229,52 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+enum class WorkoutDayMenuAction { AddExercise, Skip, Adapt, Cancel }
+
+/** The same request key is reused if either the request or graph pull fails. */
+@Composable
+private fun rememberWorkoutDuplicator(
+    duplicate: (suspend (WorkoutDaySummary, String) -> WorkoutDaySummary)?,
+    onDuplicated: (WorkoutDaySummary) -> Unit,
+    owner: Any,
+): Pair<Boolean, (WorkoutDaySummary) -> Unit> {
+    val scope = rememberCoroutineScope()
+    var busy by remember(owner) { mutableStateOf(false) }
+    var sourceId by remember(owner) { mutableStateOf<String?>(null) }
+    var requestKey by remember(owner) { mutableStateOf<String?>(null) }
+    var error by remember(owner) { mutableStateOf<String?>(null) }
+    val fallback = androidx.compose.ui.res.stringResource(R.string.duplicate_workout_retry)
+    if (error != null) AlertDialog(
+        onDismissRequest = { error = null },
+        title = { Text(androidx.compose.ui.res.stringResource(R.string.duplicate_workout_error)) },
+        text = { Text(error ?: fallback) },
+        confirmButton = { TextButton(onClick = { error = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ok)) } },
+    )
+    return busy to { source ->
+        if (!busy && duplicate != null) {
+            if (sourceId != source.id) { sourceId = source.id; requestKey = null }
+            val key = requestKey ?: java.util.UUID.randomUUID().toString().also { requestKey = it }
+            busy = true
+            scope.launch {
+                try {
+                    val copy = duplicate(source, key)
+                    requestKey = null
+                    onDuplicated(copy)
+                } catch (cancel: kotlinx.coroutines.CancellationException) { throw cancel }
+                catch (failure: Exception) { error = failure.localizedMessage?.takeIf(String::isNotBlank) ?: fallback }
+                finally { busy = false }
+            }
+        }
+    }
+}
+
 @Composable
 fun WorkoutHubScreen(
     contentPadding: PaddingValues,
     state: WorkoutHubState = PreviewWorkoutRepository.load(),
     planHistory: List<WorkoutHubState> = emptyList(),
     onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
+    onWorkoutAction: (WorkoutDaySummary, WorkoutDayMenuAction) -> Unit = { workout, _ -> onWorkoutSelected(workout) },
     gender: String = "male",
     defaultCustomEquipment: String = "Peso corporal",
     customWorkoutDuration: Int = 45,
@@ -251,6 +297,8 @@ fun WorkoutHubScreen(
     onFeedbackOpened: () -> Unit = {},
     customAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null,
     onCustomEditorVisibilityChanged: (Boolean) -> Unit = {},
+    duplicateWorkout: (suspend (WorkoutDaySummary, String) -> WorkoutDaySummary)? = null,
+    checkInContent: (@Composable () -> Unit)? = null,
 ) {
     var selectedDay by remember { mutableStateOf<DayOfWeek?>(null) }
     var mode by remember { mutableStateOf(WorkoutMode.Plan) }
@@ -262,6 +310,7 @@ fun WorkoutHubScreen(
     var customGenerationError by remember { mutableStateOf<String?>(null) }
     var lastCustomRequest by remember { mutableStateOf<CustomWorkoutRequest?>(null) }
     val coroutineScope = rememberCoroutineScope()
+    val (duplicating, duplicate) = rememberWorkoutDuplicator(duplicateWorkout, onWorkoutSelected, "hub")
     var hubEntered by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { hubEntered = true }
     LaunchedEffect(editingCustomWorkout != null) {
@@ -317,7 +366,7 @@ fun WorkoutHubScreen(
             ) {
                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_18423c54a5c7ac9c, error), Modifier.weight(1f), color = WildforceThemeTokens.destructiveText, style = MaterialTheme.typography.caption)
                 TextButton(onClick = onRetryGeneration) {
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_retry).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -367,6 +416,9 @@ fun WorkoutHubScreen(
                 customWorkouts = customWorkouts,
                 selectedDay = selectedDay,
                 onWorkoutSelected = onWorkoutSelected,
+                onDuplicate = if (duplicateWorkout != null) duplicate else null,
+                onWorkoutAction = onWorkoutAction,
+                duplicating = duplicating,
                 onMesocycleSelected = { showingMesocycleDetails = true },
                 onRecreatePlan = onRecreatePlan,
                 requiresPlanRegeneration = requiresPlanRegeneration,
@@ -377,6 +429,7 @@ fun WorkoutHubScreen(
                 onShowAiCoachOffer = onShowAiCoachOffer,
                 gender = gender,
                 appLanguage = appLanguage,
+                checkInContent = checkInContent,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -385,7 +438,7 @@ fun WorkoutHubScreen(
             modifier = Modifier.weight(1f),
         ) {
             CustomWorkoutsScreen(
-                workouts = customWorkouts.filter { selectedDay == null || it.scheduledDay == selectedDay }, gender = gender,
+                workouts = customWorkouts.filter { selectedDay == null || it.customWorkoutWeekday() == selectedDay }, gender = gender,
                 appLanguage = appLanguage,
                 defaultEquipment = defaultCustomEquipment,
                 initialDuration = customWorkoutDuration,
@@ -406,11 +459,11 @@ fun WorkoutHubScreen(
                         coroutineScope.launch {
                             runCatching { customAiGenerator.invoke(request) }
                                 .onSuccess { generated ->
-                                    CustomWorkoutStore.save(customContext, generated.copy(scheduledDay = selectedDay ?: LocalDate.now().dayOfWeek))
+                                    CustomWorkoutStore.save(customContext, generated)
                                     customWorkouts = CustomWorkoutStore.load(customContext)
                                     lastCustomRequest = null
                                 }
-                                .onFailure { error -> customGenerationError = error.message?.takeIf(String::isNotBlank) ?: "No se pudo generar el entrenamiento." }
+                                .onFailure { error -> customGenerationError = io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext(customContext).getString(io.codepassion.doubletriangle.core.designsystem.R.string.failed_to_generate_workout__please_try_again_) }
                             generatingCustomWorkout = false
                         }
                     }
@@ -422,7 +475,7 @@ fun WorkoutHubScreen(
                     editingCustomWorkout = draft
                     customWorkouts = CustomWorkoutStore.load(customContext)
                 },
-                onAdapt = onWorkoutSelected,
+                onAdapt = { onWorkoutAction(it, WorkoutDayMenuAction.Adapt) },
                 onDuplicate = { source ->
                     editingCustomWorkout = CustomWorkoutStore.duplicate(customContext, source)
                     customWorkouts = CustomWorkoutStore.load(customContext)
@@ -456,15 +509,15 @@ fun WorkoutHubScreen(
                                 coroutineScope.launch {
                                     runCatching { customAiGenerator.invoke(request) }
                                         .onSuccess { generated ->
-                                            CustomWorkoutStore.save(customContext, generated.copy(scheduledDay = selectedDay ?: LocalDate.now().dayOfWeek))
+                                            CustomWorkoutStore.save(customContext, generated)
                                             customWorkouts = CustomWorkoutStore.load(customContext)
                                             lastCustomRequest = null
                                         }
-                                        .onFailure { retryError -> customGenerationError = retryError.message?.takeIf(String::isNotBlank) ?: "No se pudo generar el entrenamiento." }
+                                        .onFailure { retryError -> customGenerationError = io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext(customContext).getString(io.codepassion.doubletriangle.core.designsystem.R.string.failed_to_generate_workout__please_try_again_) }
                                     generatingCustomWorkout = false
                                 }
                             }
-                        }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase(), color = WildforceThemeTokens.accent) }
+                        }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_retry).uppercase(), color = WildforceThemeTokens.accent) }
                     }
                     TextButton(onClick = {
                         customGenerationError = null
@@ -477,7 +530,7 @@ fun WorkoutHubScreen(
                     }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_a548146eea4b93d6), color = WildforceThemeTokens.accent) }
                 }
             },
-            dismissButton = { TextButton(onClick = { customGenerationError = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = WildforceThemeTokens.textSecondary) } },
+            dismissButton = { TextButton(onClick = { customGenerationError = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dismiss).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
 }
@@ -523,6 +576,8 @@ private fun WorkoutHeader(
         } == true
     }
     val isWorkoutIncomplete = today in state.trainingDays && today !in state.completedDays && !customCompletedToday
+    val streakLabel = androidx.compose.ui.res.stringResource(SharedR.string.ui_sheet_streak___d, state.user.currentStreak)
+    val plannedTodayLabel = androidx.compose.ui.res.stringResource(SharedR.string.ui_sheet_planned_workout) + ", " + androidx.compose.ui.res.stringResource(SharedR.string.ui_sheet_today)
     Row(Modifier.fillMaxWidth().padding(horizontal = 28.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(
             Modifier.size(42.dp).clip(CircleShape).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.10f)),
@@ -532,7 +587,7 @@ private fun WorkoutHeader(
             if (avatar != null) {
                 Image(
                     bitmap = avatar.asImageBitmap(),
-                    contentDescription = "Foto de perfil de ${state.user.name}",
+                    contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.profile_photo) + ": " + state.user.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
                 )
@@ -554,15 +609,15 @@ private fun WorkoutHeader(
                     modifier = Modifier.size(14.dp),
                     tint = WildforceThemeTokens.textSecondary,
                 )
-                Text(" ${state.user.goal}", fontFamily = FontFamily.Default, fontSize = 12.sp, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(" " + localizedWorkoutLabel(state.user.goal, appLanguage), fontFamily = FontFamily.Default, fontSize = 12.sp, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         Box(
             modifier = Modifier.semantics {
                 contentDescription = if (isWorkoutIncomplete) {
-                    "Racha actual: ${state.user.currentStreak}. Entrenamiento pendiente hoy"
+                    "$streakLabel. $plannedTodayLabel"
                 } else {
-                    "Racha actual: ${state.user.currentStreak}"
+                    streakLabel
                 }
             },
             contentAlignment = Alignment.Center,
@@ -601,7 +656,7 @@ private fun WorkoutHeader(
             }
         }
         Box(Modifier.padding(start = 12.dp)) {
-            val moreOptionsLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.more_options)
+            val moreOptionsLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_more_options)
             Box(
                 Modifier.size(48.dp).clip(CircleShape)
                     .liquidGlass(CircleShape).clickable { showsMoreOptions = true }
@@ -693,19 +748,19 @@ private fun StreakCalendarDialog(
                     Column(Modifier.weight(1f)) {
                         Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_history).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary)
                         Text(
-                            if (state.user.currentStreak == 1) "1 día de racha" else "${state.user.currentStreak} días de racha",
+                            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.current_streak___d_days, state.user.currentStreak),
                             color = WildforceThemeTokens.textSecondary,
                         )
                     }
                     TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ready).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold) }
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(onClick = { month = month.minusMonths(1) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Mes anterior", modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.textPrimary) }
+                    TextButton(onClick = { month = month.minusMonths(1) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.previous), modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.textPrimary) }
                     Text(
                         month.format(java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy", monthLocale)).replaceFirstChar { it.titlecase(monthLocale) },
                         Modifier.weight(1f), textAlign = TextAlign.Center, style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary,
                     )
-                    TextButton(onClick = { month = month.plusMonths(1) }) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Mes siguiente", modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.textPrimary) }
+                    TextButton(onClick = { month = month.plusMonths(1) }) { Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.next), modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.textPrimary) }
                 }
                 val firstDayOfMonth = month.withDayOfMonth(1)
                 val leadingDays = firstDayOfMonth.dayOfWeek.value - DayOfWeek.MONDAY.value
@@ -743,7 +798,7 @@ private fun StreakCalendarDialog(
                                         }, contentAlignment = Alignment.Center) {
                                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                                 Text(date.dayOfMonth.toString(), color = if (date == LocalDate.now()) WildforceThemeTokens.accent else WildforceThemeTokens.textPrimary, fontWeight = if (date == LocalDate.now()) FontWeight.Bold else FontWeight.Normal)
-                                                if (workouts.isNotEmpty()) Icon(Icons.Filled.CheckCircle, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_complete), Modifier.size(12.dp), tint = Color(0xFF34C759)) else Spacer(Modifier.height(12.dp))
+                                                if (workouts.isNotEmpty()) Icon(Icons.Filled.CheckCircle, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_workout_complete), Modifier.size(12.dp), tint = Color(0xFF34C759)) else Spacer(Modifier.height(12.dp))
                                             }
                                         }
                                     }
@@ -758,7 +813,7 @@ private fun StreakCalendarDialog(
     selectedWorkoutsForDay?.let { workouts ->
         AlertDialog(
             onDismissRequest = { selectedWorkoutsForDay = null },
-            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.completed_workouts).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_completed_workouts).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     workouts.forEach { workout ->
@@ -784,7 +839,7 @@ private fun StreakCalendarDialog(
             },
             confirmButton = {
                 TextButton(onClick = { selectedWorkoutsForDay = null }) {
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dismiss).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
                 }
             },
         )
@@ -816,20 +871,20 @@ private fun FeedbackDialog(onDismiss: () -> Unit) {
             onDismissRequest = onDismiss,
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.thank_you), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
             text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_feedback_helps_us_understand_what_to_improve_next_), color = WildforceThemeTokens.textSecondary) },
-            confirmButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = WildforceThemeTokens.textPrimary) } },
+            confirmButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dismiss).uppercase(), color = WildforceThemeTokens.textPrimary) } },
         )
         return
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.feedback).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
+        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_feedback).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_ed911e568099bf51), color = WildforceThemeTokens.textSecondary)
                 Box {
                     OutlinedButton(onClick = { categoriesExpanded = true }, modifier = Modifier.fillMaxWidth()) {
                         Text(category, Modifier.weight(1f), color = WildforceThemeTokens.textPrimary)
-                        Icon(Icons.Filled.ExpandMore, contentDescription = "Abrir categorías", tint = WildforceThemeTokens.textSecondary)
+                        Icon(Icons.Filled.ExpandMore, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_exercise_categories), tint = WildforceThemeTokens.textSecondary)
                     }
                     DropdownMenu(expanded = categoriesExpanded, onDismissRequest = { categoriesExpanded = false }) {
                         categories.forEach { option ->
@@ -863,14 +918,14 @@ private fun FeedbackDialog(onDismiss: () -> Unit) {
                         }.onSuccess {
                             sent = true
                         }.onFailure {
-                            error = it.message ?: "No se pudo enviar el feedback"
+                            error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_)
                         }
                         sending = false
                     }
                 },
             ) { if (sending) CircularProgressIndicator(Modifier.size(18.dp)) else Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.submit).uppercase(), color = WildforceThemeTokens.textPrimary) }
         },
-        dismissButton = { TextButton(enabled = !sending, onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
+        dismissButton = { TextButton(enabled = !sending, onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
     )
 }
 
@@ -897,7 +952,7 @@ private fun FaqDialog(onDismiss: () -> Unit) {
                         color = WildforceThemeTokens.textPrimary,
                     )
                     TextButton(onClick = onDismiss) {
-                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = WildforceThemeTokens.textPrimary)
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dismiss).uppercase(), color = WildforceThemeTokens.textPrimary)
                     }
                 }
                 AndroidView(
@@ -932,6 +987,9 @@ private fun WeekCalendar(
         "Nederlands" -> "nl"; "日本語" -> "ja"; else -> "es"
     })
     val monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+    val todayLabel = androidx.compose.ui.res.stringResource(SharedR.string.ui_sheet_today)
+    val plannedLabel = androidx.compose.ui.res.stringResource(SharedR.string.ui_sheet_planned_workout)
+    val completedLabel = androidx.compose.ui.res.stringResource(SharedR.string.ui_sheet_workout_complete)
     // Mirrors SevenDayWorkoutCalendarView on iOS: planned days have a 6 dp
     // accent dot, while completed days use the system-green filled checkmark.
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -957,11 +1015,10 @@ private fun WeekCalendar(
                     .semantics {
                         contentDescription = buildString {
                             append(day.getDisplayName(TextStyle.FULL, locale))
-                            if (date == today) append(", hoy")
-                            if (hasWorkout) append(", entrenamiento programado")
-                            if (completed) append(", entrenamiento completado")
+                            if (date == today) append(", $todayLabel")
+                            if (hasWorkout) append(", $plannedLabel")
+                            if (completed) append(", $completedLabel")
                         }
-                        stateDescription = if (selected) "Seleccionado" else "No seleccionado"
                         this.selected = selected
                     }
                     .clickable {
@@ -984,7 +1041,7 @@ private fun WeekCalendar(
                     when {
                         completed -> Icon(
                             imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = "Entrenamiento completado",
+                            contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_workout_complete),
                             modifier = Modifier.size(12.dp),
                             tint = if (selected) MaterialTheme.colors.onPrimary else Color(0xFF34C759),
                         )
@@ -1029,11 +1086,15 @@ private fun WorkoutModeSelector(
         ) {
             WorkoutMode.values().forEach { mode ->
                 val isSelected = selected == mode
+                val modeLabel = androidx.compose.ui.res.stringResource(when (mode) {
+                    WorkoutMode.Plan -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_your_plan
+                    WorkoutMode.Custom -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_custom_workouts
+                })
                 Box(
                     Modifier.weight(1f).fillMaxHeight().clip(CircleShape)
                         .background(if (isSelected) WildforceThemeTokens.textPrimary else Color.Transparent)
                         .semantics {
-                            contentDescription = mode.label
+                            contentDescription = modeLabel
                             this.selected = isSelected
                         }
                         .clickable {
@@ -1043,7 +1104,7 @@ private fun WorkoutModeSelector(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        mode.label,
+                        modeLabel,
                         color = if (isSelected) WildforceThemeTokens.primaryButtonText else WildforceThemeTokens.textPrimary,
                         fontFamily = FontFamily.Default,
                         fontSize = 13.sp,
@@ -1064,6 +1125,9 @@ private fun WorkoutPlan(
     customWorkouts: List<WorkoutDaySummary>,
     selectedDay: DayOfWeek?,
     onWorkoutSelected: (WorkoutDaySummary) -> Unit,
+    onDuplicate: ((WorkoutDaySummary) -> Unit)?,
+    onWorkoutAction: (WorkoutDaySummary, WorkoutDayMenuAction) -> Unit,
+    duplicating: Boolean,
     onMesocycleSelected: () -> Unit,
     onRecreatePlan: () -> Unit,
     requiresPlanRegeneration: Boolean,
@@ -1074,6 +1138,7 @@ private fun WorkoutPlan(
     onShowAiCoachOffer: () -> Unit,
     gender: String,
     appLanguage: String,
+    checkInContent: (@Composable () -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val workouts = state.workoutsFor(selectedDay)
@@ -1087,6 +1152,7 @@ private fun WorkoutPlan(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 160.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        if (checkInContent != null) item(key = "coach_check_in") { checkInContent() }
         if (state.workouts.isEmpty() && state.planName.isBlank()) {
             item {
                 PlanGenerationSection(
@@ -1126,7 +1192,7 @@ private fun WorkoutPlan(
         } else {
             itemsIndexed(upNextWorkouts, key = { _, workout -> workout.id }) { index, workout ->
                 AnimatedVisibility(visible = cardsEntered, enter = fadeIn(tween(280, delayMillis = 70 + index * 55)) + slideInVertically(tween(280, delayMillis = 70 + index * 55)) { it / 16 }) {
-                    WorkoutCard(workout, gender, appLanguage) { onWorkoutSelected(workout) }
+                    WorkoutCard(workout, gender, appLanguage, onDuplicate, onWorkoutAction, showsAiCoach, duplicating) { onWorkoutSelected(workout) }
                 }
             }
             if (completedWorkouts.isNotEmpty()) {
@@ -1141,7 +1207,7 @@ private fun WorkoutPlan(
                 }
                 itemsIndexed(completedWorkouts, key = { _, workout -> workout.id }) { index, workout ->
                     AnimatedVisibility(visible = cardsEntered, enter = fadeIn(tween(280, delayMillis = 70 + (upNextWorkouts.size + index) * 55)) + slideInVertically(tween(280, delayMillis = 70 + (upNextWorkouts.size + index) * 55)) { it / 16 }) {
-                        WorkoutCard(workout, gender, appLanguage) { onWorkoutSelected(workout) }
+                        WorkoutCard(workout, gender, appLanguage, onDuplicate, onWorkoutAction, showsAiCoach, duplicating) { onWorkoutSelected(workout) }
                     }
                 }
             }
@@ -1283,7 +1349,7 @@ private fun MesocycleHeaderCard(state: WorkoutHubState, onClick: () -> Unit) {
         // surface, rather than a translucent material.
         Modifier.fillMaxWidth()
             .background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(20.dp))
-            .semantics { contentDescription = "Mesociclo ${state.mesocycleIndex}, semana $currentWeek de $totalWeeks" }
+            .localizedMesocycleDescription(state.mesocycleIndex, currentWeek, totalWeeks)
             .clickable(onClick = onClick)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -1291,7 +1357,7 @@ private fun MesocycleHeaderCard(state: WorkoutHubState, onClick: () -> Unit) {
         Row(verticalAlignment = Alignment.Top) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    "MESOCICLO ${state.mesocycleIndex}",
+                    androidx.compose.ui.res.stringResource(SharedR.string.mesocycle__d, state.mesocycleIndex).uppercase(),
                     fontFamily = Exo2FontFamily,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Normal,
@@ -1300,8 +1366,8 @@ private fun MesocycleHeaderCard(state: WorkoutHubState, onClick: () -> Unit) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     // Match iOS's `calendar` and phase SF Symbols with their
                     // Material counterparts instead of using text glyphs.
-                    ContextPill("Semana $currentWeek de $totalWeeks", Icons.Filled.CalendarToday)
-                    ContextPill(currentPhase.label, phaseIcon(currentPhase))
+                    ContextPill(androidx.compose.ui.res.stringResource(SharedR.string.week__d_of__d, currentWeek, totalWeeks), Icons.Filled.CalendarToday)
+                    ContextPill(workoutPhaseLabel(currentPhase), phaseIcon(currentPhase))
                 }
             }
             Icon(
@@ -1335,7 +1401,7 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, planHistory: List<Worko
     ) {
         Row(verticalAlignment = Alignment.Top) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_week).uppercase(), fontFamily = FontFamily.Default, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_this_week).uppercase(), fontFamily = FontFamily.Default, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
                 Text(state.planName, fontFamily = Exo2FontFamily, fontSize = 22.sp, fontWeight = FontWeight.Normal, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
                 if (isCompleted) {
@@ -1345,7 +1411,7 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, planHistory: List<Worko
                         Box(
                             Modifier.size(48.dp)
                                 .clip(CircleShape)
-                                .semantics { contentDescription = "Opciones del plan" }
+                                .localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_plan_options)
                                 .clickable { showsPlanMenu = true },
                             contentAlignment = Alignment.Center,
                         ) {
@@ -1369,7 +1435,7 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, planHistory: List<Worko
                                     showsPlanNotes = true
                                 }) {
                                     Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.textPrimary)
-                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.view_notes), Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
+                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_view_notes), Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
                                 }
                             }
                             if (canRegeneratePlan) {
@@ -1379,7 +1445,7 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, planHistory: List<Worko
                                 }) {
                                     // Mirrors iOS PlanHeaderView's `Label(..., systemImage: "trash")`.
                                     Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.textPrimary)
-                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.redo_plan), Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
+                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_redo_plan), Modifier.padding(start = 12.dp), color = WildforceThemeTokens.textPrimary)
                                 }
                             }
                         }
@@ -1422,7 +1488,7 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, planHistory: List<Worko
             text = { Text(planNotes, color = WildforceThemeTokens.textSecondary) },
             confirmButton = {
                 TextButton(onClick = { showsPlanNotes = false }) {
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dismiss).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
                 }
             },
         )
@@ -1497,7 +1563,7 @@ internal fun phaseIcon(phase: io.codepassion.doubletriangle.core.model.Mesocycle
 }
 
 @Composable
-private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage: String, onClick: () -> Unit) {
+private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage: String, onDuplicate: ((WorkoutDaySummary) -> Unit)?, onAction: (WorkoutDaySummary, WorkoutDayMenuAction) -> Unit, showsAiCoach: Boolean, duplicating: Boolean, onClick: () -> Unit) {
     // iOS persists `.inProgress` on the workout day. Android persists the active
     // session separately, so its presence is the equivalent source of truth.
     val sessionContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
@@ -1509,16 +1575,18 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage:
     val focusLabel = localizedWorkoutLabel(workout.focus, appLanguage)
     val dayTypeLabel = localizedWorkoutLabel(workout.dayType, appLanguage)
     val statusLabel = workoutCardStatus(workout.status, isInProgress)?.first
-    val actionLabel = if (isInProgress) "Reanudar" else if (workout.status == WorkoutStatus.Completed) "Ver resultados" else "Abrir entrenamiento"
+    val dayLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_day) + " " + workout.order
+    val durationLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_estimated_duration___d_minutes, workout.estimatedMinutes)
     val cardAccessibilityLabel = buildString {
-        append("Día ${workout.order}, ${workout.title}")
+        append("$dayLabel, ${workout.title}")
         statusLabel?.let { append(", $it") }
-        append(", $actionLabel")
-        append(", $focusLabel, $dayTypeLabel, ${workout.estimatedMinutes} minutos")
+        append(", $focusLabel")
+        if (workout.dayType.isNotBlank()) append(", $dayTypeLabel")
+        append(", $durationLabel")
     }
     Card(
         Modifier.fillMaxWidth()
-            .clearAndSetSemantics { contentDescription = cardAccessibilityLabel }
+            .semantics { contentDescription = cardAccessibilityLabel }
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(14.dp),
         elevation = 0.dp,
@@ -1554,12 +1622,40 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage:
                     ),
                 ),
             )
+            if (onDuplicate != null && workout.kind != "template" && workout.status in setOf(WorkoutStatus.Planned, WorkoutStatus.InProgress, WorkoutStatus.Completed)) {
+                var expanded by remember(workout.id) { mutableStateOf(false) }
+                Box(Modifier.align(Alignment.TopEnd).fillMaxWidth().wrapContentSize(Alignment.TopEnd).padding(end = 12.dp).zIndex(1f)) {
+                    androidx.compose.material.IconButton(onClick = { expanded = true }, modifier = Modifier.size(44.dp)) {
+                        Box(Modifier.size(30.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.20f)), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Filled.MoreHoriz, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_menu), tint = Color.White, modifier = Modifier.size(20.dp))
+                        }
+                    }
+                    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                        androidx.compose.material.DropdownMenuItem(enabled = !duplicating, onClick = { expanded = false; onDuplicate(workout) }) {
+                            Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Text(androidx.compose.ui.res.stringResource(R.string.duplicate_workout), Modifier.padding(start = 12.dp))
+                        }
+                        if (workout.status == WorkoutStatus.Planned || isInProgress) {
+                            ActiveWorkoutMenuItem("＋", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_exercise)) { expanded = false; onAction(workout, WorkoutDayMenuAction.AddExercise) }
+                            ActiveWorkoutMenuItem("⏭", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip_workout)) { expanded = false; onAction(workout, WorkoutDayMenuAction.Skip) }
+                            if (showsAiCoach) ActiveWorkoutMenuItem("🏢", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.adapt_to_another_location)) { expanded = false; onAction(workout, WorkoutDayMenuAction.Adapt) }
+                        }
+                        if (workout.status == WorkoutStatus.Completed && completedWorkoutShareId(sessionContext, workout.id) != null) {
+                            ActiveWorkoutMenuItem("↗", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.share_workout)) { expanded = false; shareCompletedWorkout(sessionContext, workout.id) }
+                        }
+                        if (isInProgress) {
+                            Divider()
+                            ActiveWorkoutMenuItem("cancel", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout), destructive = true) { expanded = false; onAction(workout, WorkoutDayMenuAction.Cancel) }
+                        }
+                    }
+                }
+            }
             Column(
                 Modifier.fillMaxWidth()
                     .padding(start = 12.dp, top = 6.dp, end = 12.dp, bottom = 10.dp),
             ) {
                 Text(
-                    "DÍA ${workout.order}",
+                    dayLabel.uppercase(),
                     fontFamily = AntonFontFamily,
                     fontSize = 30.sp,
                     color = Color.White,
@@ -1597,7 +1693,7 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage:
                     // descriptive fields therefore truncate cleanly instead
                     // of exposing clipped, scrollable fragments.
                     WorkoutCardMetadata(Icons.Filled.MyLocation, focusLabel, modifier = Modifier.weight(1f))
-                    WorkoutCardMetadata(workoutDayTypeIcon(workout.dayType), dayTypeLabel, modifier = Modifier.weight(1f))
+                    if (workout.dayType.isNotBlank()) WorkoutCardMetadata(workoutDayTypeIcon(workout.dayType), dayTypeLabel, modifier = Modifier.weight(1f))
                     WorkoutCardMetadata(
                         Icons.Filled.Timer,
                         if (workout.status == WorkoutStatus.Completed) {
@@ -1649,14 +1745,13 @@ fun localizedWorkoutLabel(rawValue: String, appLanguage: String): String {
     val configuration = LocalConfiguration.current
     val canonical = canonicalWorkoutLabelKey(rawValue)
     val fallback = workoutEnglishLabel(canonical)
-    val resourceName = workoutLabelResourceName(canonical)
+    val resourceId = workoutLabelResourceId(canonical)
     return remember(rawValue, appLanguage, configuration) {
         val localizedConfiguration = Configuration(configuration).apply {
             setLocale(Locale.forLanguageTag(workoutLanguageTag(appLanguage)))
         }
         val resources = context.createConfigurationContext(localizedConfiguration).resources
-        val resourceId = resourceName?.let { resources.getIdentifier(it, "string", context.packageName) } ?: 0
-        resourceId.takeIf { it != 0 }?.let(resources::getString) ?: fallback
+        resourceId?.let(resources::getString) ?: fallback
     }
 }
 
@@ -1699,9 +1794,10 @@ internal fun canonicalWorkoutLabelKey(value: String): String = when (
     "loseweight", "perderpeso" -> "loseWeight"
     "buildmuscle", "ganarmusculo", "ganarmúsculo" -> "buildMuscle"
     "gainstrength", "ganarfuerza" -> "gainStrength"
-    "improveendurance", "mejorarlaresistencia" -> "improveEndurance"
-    "improvemobility", "mejorarlamovilidad" -> "improveMobility"
+    "improveendurance", "mejorarlaresistencia", "mejorarresistencia" -> "improveEndurance"
+    "improvemobility", "mejorarlamovilidad", "mejorarmovilidad" -> "improveMobility"
     "bodyrecomposition", "recomposicioncorporal", "recomposicióncorporal" -> "bodyRecomposition"
+    "generalfitness", "fitnessgeneral" -> "generalFitness"
     "draft", "borrador" -> "draft"
     "active", "activo" -> "active"
     "completed", "completado", "completada" -> "completed"
@@ -1733,6 +1829,7 @@ private fun workoutEnglishLabel(canonical: String): String = when (canonical) {
     "improveEndurance" -> "Improve Endurance"
     "improveMobility" -> "Improve Mobility"
     "bodyRecomposition" -> "Body Recomposition"
+    "generalFitness" -> "General Fitness"
     "draft" -> "Draft"
     "active" -> "Active"
     "completed" -> "Completed"
@@ -1741,32 +1838,71 @@ private fun workoutEnglishLabel(canonical: String): String = when (canonical) {
     else -> canonical
 }
 
-private fun workoutLabelResourceName(canonical: String): String? = when (canonical) {
-    "fullBody" -> "ios_catalog_a54b18ef18c61ad3"
-    "upperBody" -> "ios_catalog_b34453338002924c"
-    "lowerBody" -> "ios_catalog_ced7f4270522aa64"
-    "push" -> "ios_catalog_731ce7ed808913b2"
-    "pull" -> "ios_catalog_b66d044181a0e296"
-    "legs" -> "ios_catalog_38557594d0fce7fe"
-    "core" -> "ios_catalog_70ea1983c983deac"
-    "cardio" -> "ios_catalog_d67148a9c39d88d0"
-    "mobility" -> "ios_catalog_e8f000eec8570e3b"
-    "recovery" -> "ios_catalog_48f6a8d5688b0cf5"
-    "strength" -> "ios_catalog_63ee3a1b965a7bd2"
-    "volume" -> "ios_catalog_b10fb966d72063f5"
-    "loseWeight" -> "ios_catalog_37863c9d5d8c70c7"
-    "buildMuscle" -> "ios_catalog_365f6737d6298d3c"
-    "gainStrength" -> "ios_catalog_777451d1a0293a42"
-    "improveEndurance" -> "ios_catalog_7ea7d1954f278312"
-    "improveMobility" -> "ios_catalog_41be78122a4d85ab"
-    "bodyRecomposition" -> "ios_catalog_5b24f8d6c1fd8e35"
-    "draft" -> "ios_catalog_ebf12ef47cf575b3"
-    "active" -> "ios_catalog_92340695899bd2d8"
-    "completed" -> "ios_catalog_22a970d2e5b1cc23"
-    "archived" -> "ios_catalog_bdb86505f8062d15"
-    "startDate" -> "ios_catalog_8169693101a4536c"
+internal fun workoutLabelResourceName(canonical: String): String? = when (canonical) {
+    "fullBody" -> "ui_sheet_full_body"
+    "upperBody" -> "ui_sheet_upper_body"
+    "lowerBody" -> "ui_sheet_lower_body"
+    "push" -> "ui_sheet_push"
+    "pull" -> "ui_sheet_pull"
+    "legs" -> "ui_sheet_legs"
+    "core" -> "ui_sheet_core"
+    "cardio" -> "ui_sheet_cardio"
+    "mobility" -> "ui_sheet_mobility"
+    "recovery" -> "ui_sheet_recovery"
+    "strength" -> "ui_sheet_strength"
+    "hypertrophy" -> "workout_daytype_hypertrophy"
+    "technique" -> "workout_daytype_technique"
+    "deload" -> "workout_daytype_deload"
+    "conditioning" -> "workout_daytype_conditioning"
+    "volume" -> "ui_sheet_volume"
+    "loseWeight" -> "ui_sheet_lose_weight"
+    "buildMuscle" -> "ui_sheet_build_muscle"
+    "gainStrength" -> "ui_sheet_gain_strength"
+    "improveEndurance" -> "ui_sheet_improve_endurance"
+    "improveMobility" -> "ui_sheet_improve_mobility"
+    "bodyRecomposition" -> "ui_sheet_body_recomposition"
+    "generalFitness" -> "ui_sheet_general_fitness"
+    "draft" -> "ui_sheet_draft"
+    "active" -> "ui_sheet_active"
+    "completed" -> "ui_sheet_completed"
+    "archived" -> "ui_sheet_archived"
+    "startDate" -> "ui_sheet_start_date"
     else -> null
 }
+
+/** Static references keep the resources available in minified release builds. */
+internal fun workoutLabelResourceId(canonical: String): Int? = when (workoutLabelResourceName(canonical)) {
+    "ui_sheet_full_body" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_full_body
+    "ui_sheet_upper_body" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_upper_body
+    "ui_sheet_lower_body" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_lower_body
+    "ui_sheet_push" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_push
+    "ui_sheet_pull" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_pull
+    "ui_sheet_legs" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_legs
+    "ui_sheet_core" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_core
+    "ui_sheet_cardio" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cardio
+    "ui_sheet_mobility" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_mobility
+    "ui_sheet_recovery" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_recovery
+    "ui_sheet_strength" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_strength
+    "workout_daytype_hypertrophy" -> R.string.workout_daytype_hypertrophy
+    "workout_daytype_technique" -> R.string.workout_daytype_technique
+    "workout_daytype_deload" -> R.string.workout_daytype_deload
+    "workout_daytype_conditioning" -> R.string.workout_daytype_conditioning
+    "ui_sheet_volume" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_volume
+    "ui_sheet_lose_weight" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_lose_weight
+    "ui_sheet_build_muscle" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_build_muscle
+    "ui_sheet_gain_strength" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_gain_strength
+    "ui_sheet_improve_endurance" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_improve_endurance
+    "ui_sheet_improve_mobility" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_improve_mobility
+    "ui_sheet_body_recomposition" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_body_recomposition
+    "ui_sheet_general_fitness" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_general_fitness
+    "ui_sheet_draft" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_draft
+    "ui_sheet_active" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_active
+    "ui_sheet_completed" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_completed
+    "ui_sheet_archived" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_archived
+    "ui_sheet_start_date" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_start_date
+    else -> null
+}
+
 
 internal fun workoutLanguageTag(language: String): String = when (language) {
     "English" -> "en"
@@ -1778,24 +1914,28 @@ internal fun workoutLanguageTag(language: String): String = when (language) {
     "中文（简体）" -> "zh-Hans"
     "Nederlands" -> "nl"
     "日本語" -> "ja"
-    else -> "es"
+    else -> when (language.trim().lowercase(Locale.ROOT).substringBefore('-').substringBefore('_')) {
+        "en", "ca", "de", "fr", "it", "nl", "pt", "ja" -> language.trim().lowercase(Locale.ROOT).substringBefore('-').substringBefore('_')
+        "zh" -> "zh-Hans"
+        else -> "es"
+    }
 }
 
 @Composable
 private fun workoutCardStatus(status: WorkoutStatus, isInProgress: Boolean): Pair<String, Color>? = when (status) {
-    WorkoutStatus.Completed -> "COMPLETADO" to Color(0xFF26A269)
-    WorkoutStatus.Skipped -> "OMITIDO" to WildforceThemeTokens.textSecondary
-    WorkoutStatus.Draft -> "BORRADOR" to WildforceThemeTokens.textSecondary
-    WorkoutStatus.InProgress -> "EN CURSO" to Color(0xFFF28A29)
-    WorkoutStatus.Planned -> if (isInProgress) "EN CURSO" to Color(0xFFF28A29) else null
+    WorkoutStatus.Completed -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_completed).uppercase() to Color(0xFF26A269)
+    WorkoutStatus.Skipped -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_skipped).uppercase() to WildforceThemeTokens.textSecondary
+    WorkoutStatus.Draft -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_draft).uppercase() to WildforceThemeTokens.textSecondary
+    WorkoutStatus.InProgress -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_in_progress).uppercase() to Color(0xFFF28A29)
+    WorkoutStatus.Planned -> if (isInProgress) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_in_progress).uppercase() to Color(0xFFF28A29) else null
 }
 
 @Composable
 private fun workoutDetailStatus(status: WorkoutStatus): Pair<String, Color>? = when (status) {
-    WorkoutStatus.Completed -> "COMPLETADO" to Color(0xFF26A269)
-    WorkoutStatus.Skipped -> "OMITIDO" to WildforceThemeTokens.textSecondary
-    WorkoutStatus.Draft -> "BORRADOR" to WildforceThemeTokens.textSecondary
-    WorkoutStatus.InProgress -> "EN CURSO" to Color(0xFFF28A29)
+    WorkoutStatus.Completed -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_completed).uppercase() to Color(0xFF26A269)
+    WorkoutStatus.Skipped -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_skipped).uppercase() to WildforceThemeTokens.textSecondary
+    WorkoutStatus.Draft -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_draft).uppercase() to WildforceThemeTokens.textSecondary
+    WorkoutStatus.InProgress -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_in_progress).uppercase() to Color(0xFFF28A29)
     WorkoutStatus.Planned -> null
 }
 
@@ -1863,10 +2003,12 @@ private fun StatusBadge(label: String, background: Color) {
 
 @Composable
 private fun RestDayCard() {
+    val restLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.rest_day)
+    val restDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_workout_is_planned_for_this_day__use_it_to_recover__stretch__or_take_a_light_walk_)
     Column(
         Modifier.fillMaxWidth()
             .liquidGlass(RoundedCornerShape(16.dp))
-            .semantics { contentDescription = "Día de descanso. No hay entrenamiento planificado. Úsalo para recuperarte, estirar o dar un paseo ligero." }
+            .semantics { contentDescription = "$restLabel. $restDescription" }
             .padding(vertical = 20.dp, horizontal = 24.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -1949,7 +2091,7 @@ private fun AdaptWorkoutLocationDialog(
                                 .padding(horizontal = 12.dp, vertical = 10.dp),
                         ) {
                             Text(name, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
-                            Text(equipment.ifBlank { androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.bodyweight) }, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                            Text(equipment.ifBlank { androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_bodyweight) }, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                         }
                     }
                 }
@@ -1969,12 +2111,12 @@ private fun AdaptWorkoutLocationDialog(
                 },
             ) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.generate).uppercase(), color = WildforceThemeTokens.accent) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
     )
 }
 
 @Composable
-fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial: Boolean = false, showWearStartOption: Boolean = false, appLanguage: String = "Español", mesocyclePhase: io.codepassion.doubletriangle.core.model.MesocyclePhase? = null, onBack: () -> Unit, onStart: (Boolean) -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}, adaptEquipmentPresets: List<Pair<String, String>> = emptyList(), adaptEquipmentPresetIds: List<String> = emptyList(), adaptAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null, canUseAiCoach: Boolean = true, onShowAiCoachOffer: () -> Unit = {}, onResultEdited: () -> Unit = {}) {
+fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, historyReady: Boolean = true, useImperial: Boolean = false, showWearStartOption: Boolean = false, appLanguage: String = "Español", mesocyclePhase: io.codepassion.doubletriangle.core.model.MesocyclePhase? = null, onBack: () -> Unit, onStart: (Boolean) -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}, adaptEquipmentPresets: List<Pair<String, String>> = emptyList(), adaptEquipmentPresetIds: List<String> = emptyList(), adaptAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null, canUseAiCoach: Boolean = true, onShowAiCoachOffer: () -> Unit = {}, onResultEdited: () -> Unit = {}, duplicateWorkout: (suspend (WorkoutDaySummary, String) -> WorkoutDaySummary)? = null, onDuplicated: (WorkoutDaySummary) -> Unit = {}, initialMenuAction: WorkoutDayMenuAction? = null, onMenuActionConsumed: () -> Unit = {}) {
     val detailHeroHeight = (LocalConfiguration.current.screenHeightDp * 0.43f).dp.coerceIn(330.dp, 430.dp)
     val focusLabel = localizedWorkoutLabel(workout.focus, appLanguage)
     val dayTypeLabel = localizedWorkoutLabel(workout.dayType, appLanguage)
@@ -1985,6 +2127,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
     var startingWorkout by remember(workout.id) { mutableStateOf(false) }
     var startOnWear by remember(workout.id) { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
+    val (duplicating, duplicate) = rememberWorkoutDuplicator(duplicateWorkout, onDuplicated, workout.id)
     var showingEditor by remember(workout.id) { mutableStateOf(false) }
     var showingAdaptation by remember(workout.id) { mutableStateOf(false) }
     var adapting by remember(workout.id) { mutableStateOf(false) }
@@ -1997,6 +2140,16 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
     var skipped by remember(workout.id) { mutableStateOf(workout.status == WorkoutStatus.Skipped) }
     var skipAppeared by remember(workout.id, skipped) { mutableStateOf(false) }
     var selectedTab by remember(workout.id) { mutableStateOf(WorkoutDetailTab.Exercises) }
+    LaunchedEffect(workout.id, initialMenuAction) {
+        when (initialMenuAction) {
+            WorkoutDayMenuAction.AddExercise -> showingEditor = true
+            WorkoutDayMenuAction.Skip -> showSkipConfirmation = true
+            WorkoutDayMenuAction.Adapt -> showingAdaptation = true
+            WorkoutDayMenuAction.Cancel -> showCancelConfirmation = true
+            null -> Unit
+        }
+        if (initialMenuAction != null) onMenuActionConsumed()
+    }
     LaunchedEffect(skipped) {
         if (skipped) skipAppeared = true
     }
@@ -2029,7 +2182,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                 coroutineScope.launch {
                     runCatching { generator(request) }
                         .onSuccess { pendingAdapted = it }
-                        .onFailure { adaptationError = it.message ?: "No se pudo adaptar el entrenamiento." }
+                        .onFailure { adaptationError = io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext(detailContext).getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }
                     adapting = false
                 }
             },
@@ -2048,17 +2201,17 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
         Box(Modifier.fillMaxSize().liquidGlassBackground(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
                 Row(
-                    Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Volver" }.clickable(onClick = onBack).padding(horizontal = 12.dp),
+                    Modifier.heightIn(min = 48.dp).localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_go_back).clickable(onClick = onBack).padding(horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.go_back).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_go_back).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
                 }
                 Icon(Icons.Filled.FastForward, contentDescription = null, modifier = Modifier.size(64.dp).graphicsLayer { scaleX = skipIconScale; scaleY = skipIconScale }, tint = WildforceThemeTokens.accent)
                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_4f8f1b6d130128cf), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary)
                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_6d67523a3c2efeff), Modifier.padding(top = 8.dp), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_22521a61f6aadd7b), Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Deshacer" }.clickable { skipped = false; onUnskip() }.padding(horizontal = 14.dp), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_22521a61f6aadd7b), Modifier.heightIn(min = 48.dp).localizedContentDescription(SharedR.string.android_fallback_22521a61f6aadd7b).clickable { skipped = false; onUnskip() }.padding(horizontal = 14.dp), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
             }
         }
         return
@@ -2095,16 +2248,8 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                     workoutDetailStatus(workout.status)?.let { (label, color) ->
                         StatusBadge(label, color)
                     }
-                    if (workout.status == WorkoutStatus.Completed && completedWorkoutShareId(detailContext, workout.id) != null) {
-                        Text(
-                            "COMPARTIR",
-                            Modifier.heightIn(min = 48.dp).padding(start = 10.dp, end = 12.dp).semantics { contentDescription = "Compartir entrenamiento" }.clickable { shareCompletedWorkout(detailContext, workout.id) }.padding(10.dp),
-                            color = Color.White,
-                            style = MaterialTheme.typography.caption,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
-                } else {
+                }
+                if (workout.status == WorkoutStatus.Planned || workout.status == WorkoutStatus.InProgress || workout.status == WorkoutStatus.Completed) {
                     Box {
                         val workoutMenuLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_menu)
                         Box(
@@ -2116,15 +2261,24 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                             }
                         }
                         DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                            val canModify = workout.status == WorkoutStatus.Planned || workout.status == WorkoutStatus.InProgress || hasSavedSession
-                            if (canModify) {
-                                ActiveWorkoutMenuItem("＋", "Añadir ejercicio") { showMenu = false; showingEditor = true }
-                                ActiveWorkoutMenuItem("⏭", "Saltar entrenamiento") { showMenu = false; showSkipConfirmation = true }
-                                if (adaptAiGenerator != null) ActiveWorkoutMenuItem("🏢", "Adaptar a otra ubicación") { showMenu = false; showingAdaptation = true }
+                            if (workout.kind != "template" && duplicateWorkout != null) {
+                                androidx.compose.material.DropdownMenuItem(enabled = !duplicating, onClick = { showMenu = false; duplicate(workout) }) {
+                                    Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Text(androidx.compose.ui.res.stringResource(R.string.duplicate_workout), Modifier.padding(start = 12.dp))
+                                }
                             }
-                            if (hasSavedSession || workout.status == WorkoutStatus.InProgress) {
+                            if (workout.status == WorkoutStatus.Completed && completedWorkoutShareId(detailContext, workout.id) != null) {
+                                ActiveWorkoutMenuItem("↗", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.share_workout)) { showMenu = false; shareCompletedWorkout(detailContext, workout.id) }
+                            }
+                            val canModify = workout.status == WorkoutStatus.Planned || workout.status == WorkoutStatus.InProgress
+                            if (canModify) {
+                                ActiveWorkoutMenuItem("＋", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_add_exercise)) { showMenu = false; showingEditor = true }
+                                ActiveWorkoutMenuItem("⏭", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip_workout)) { showMenu = false; showSkipConfirmation = true }
+                                if (adaptAiGenerator != null) ActiveWorkoutMenuItem("🏢", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.adapt_to_another_location)) { showMenu = false; showingAdaptation = true }
+                            }
+                            if (workout.status == WorkoutStatus.InProgress || (workout.status == WorkoutStatus.Planned && hasSavedSession)) {
                                 Divider()
-                                ActiveWorkoutMenuItem("cancel", "Cancelar entrenamiento", destructive = true) { showMenu = false; showCancelConfirmation = true }
+                                ActiveWorkoutMenuItem("cancel", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel_workout), destructive = true) { showMenu = false; showCancelConfirmation = true }
                             }
                         }
                     }
@@ -2148,9 +2302,9 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     WorkoutDetailMetadataPill(workoutFocusIcon(workout.focus), focusLabel)
-                    WorkoutDetailMetadataPill(workoutDayTypeIcon(workout.dayType), dayTypeLabel)
+                    if (workout.dayType.isNotBlank()) WorkoutDetailMetadataPill(workoutDayTypeIcon(workout.dayType), dayTypeLabel)
                     mesocyclePhase?.let { phase ->
-                        WorkoutDetailMetadataPill(phaseIcon(phase), phase.label)
+                        WorkoutDetailMetadataPill(phaseIcon(phase), workoutPhaseLabel(phase))
                     }
                     WorkoutDetailMetadataPill(Icons.Filled.AccessTime, "${workout.estimatedMinutes} min")
                 }
@@ -2175,13 +2329,16 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                             Switch(checked = startOnWear, onCheckedChange = { startOnWear = it }, enabled = !startingWorkout)
                         }
                     }
-                    Button(onClick = { if (!startingWorkout) { startingWorkout = true; onStart(startOnWear) } }, enabled = !startingWorkout, modifier = Modifier.fillMaxWidth().padding(16.dp).height(48.dp), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 0.dp, disabledElevation = 0.dp)) {
+                    Button(onClick = { if (!startingWorkout) { startingWorkout = true; onStart(startOnWear) } }, enabled = !startingWorkout && (historyReady || workout.status == WorkoutStatus.InProgress), modifier = Modifier.fillMaxWidth().padding(16.dp).height(48.dp), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 0.dp, disabledElevation = 0.dp)) {
                         Text(
                             if (startingWorkout) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_opening_workout)
-                            else if (hasSavedSession || workout.status == WorkoutStatus.InProgress) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.resume_workout).uppercase()
-                            else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.start_workout).uppercase(),
+                            else if (hasSavedSession || workout.status == WorkoutStatus.InProgress) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_resume_workout).uppercase()
+                            else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_start_workout).uppercase(),
                             fontWeight = FontWeight.Bold,
                         )
+                    }
+                    if (!historyReady && workout.status != WorkoutStatus.InProgress) {
+                        Text(androidx.compose.ui.res.stringResource(R.string.history_download_required), modifier = Modifier.padding(horizontal = 16.dp), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
                     }
                 }
                 Divider(Modifier.padding(horizontal = 16.dp))
@@ -2206,18 +2363,20 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                 workout.displayBlocks().forEachIndexed { blockIndex, block ->
                     val collapsible = block.type == WorkoutBlockType.Warmup || block.type == WorkoutBlockType.Cooldown
                     val collapsed = blockIndex in collapsedBlocks
+                    val blockLabel = workoutBlockLabel(block.type)
+                    val blockAction = androidx.compose.ui.res.stringResource(if (collapsed) io.codepassion.doubletriangle.core.designsystem.R.string.expand_items else io.codepassion.doubletriangle.core.designsystem.R.string.collapse_items)
                     // iOS does not render an artificial “Main block” heading for
                     // standard exercises. Headers are reserved for warmup,
                     // cooldown and supersets.
                     val showHeader = block.type != WorkoutBlockType.Standard
                     if (showHeader) {
                         Column(
-                            Modifier.fillMaxWidth().semantics { contentDescription = "${block.type.label}, ${if (collapsed) "plegado" else "desplegado"}" }.clickable(enabled = collapsible) {
+                            Modifier.fillMaxWidth().semantics { contentDescription = if (collapsible) "$blockLabel, $blockAction" else blockLabel }.clickable(enabled = collapsible) {
                                 collapsedBlocks = if (collapsed) collapsedBlocks - blockIndex else collapsedBlocks + blockIndex
                             }.padding(top = 14.dp, bottom = 8.dp),
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                if (collapsible) Icon(if (collapsed) Icons.Filled.ExpandMore else Icons.Filled.ExpandLess, contentDescription = if (collapsed) "Expandir" else "Contraer", modifier = Modifier.padding(end = 8.dp), tint = WildforceThemeTokens.textSecondary)
+                                if (collapsible) Icon(if (collapsed) Icons.Filled.ExpandMore else Icons.Filled.ExpandLess, contentDescription = blockAction, modifier = Modifier.padding(end = 8.dp), tint = WildforceThemeTokens.textSecondary)
                                 when (block.type) {
                                     WorkoutBlockType.Warmup -> Box(
                                         Modifier.size(width = 4.dp, height = 24.dp).clip(RoundedCornerShape(3.dp)).background(WildforceThemeTokens.warmupAccent),
@@ -2228,7 +2387,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                                     WorkoutBlockType.Standard, WorkoutBlockType.Superset -> Unit
                                 }
                                 Text(
-                                    block.type.label.uppercase(),
+                                    blockLabel.uppercase(),
                                     Modifier.padding(start = if (block.type == WorkoutBlockType.Warmup || block.type == WorkoutBlockType.Cooldown) 10.dp else 0.dp),
                                     fontWeight = FontWeight.Bold,
                                     color = WildforceThemeTokens.textPrimary,
@@ -2261,7 +2420,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                                     // iOS navigates directly to ExerciseDetailsView.  Do the same
                                     // here instead of exposing a partial inline guide.
                                     .heightIn(min = 48.dp)
-                                    .semantics { contentDescription = "Guía de ${exerciseDisplayName(exercise.imageKey, exercise.name)}" }
+                                    .localizedExerciseGuideDescription(exerciseDisplayName(exercise.imageKey, exercise.name))
                                     .clickable { guideExercise = exercise }.padding(horizontal = 12.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
@@ -2297,7 +2456,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                                         useImperial = useImperial,
                                     )
                                 }
-                                Icon(Icons.Filled.MoreHoriz, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.more_options), tint = WildforceThemeTokens.textPrimary)
+                                Icon(Icons.Filled.MoreHoriz, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_more_options), tint = WildforceThemeTokens.textPrimary)
                             }
                             if (exerciseIndex < block.exercises.lastIndex) {
                                 Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp).height(1.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.14f)))
@@ -2324,7 +2483,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_e868d979b693438b), fontFamily = AntonFontFamily) },
             text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_9230242151559170)) },
             confirmButton = { TextButton(onClick = { skipped = true; showSkipConfirmation = false; onSkip() }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip).uppercase(), color = WildforceThemeTokens.destructiveText) } },
-            dismissButton = { TextButton(onClick = { showSkipConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
+            dismissButton = { TextButton(onClick = { showSkipConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
     if (showCancelConfirmation) {
@@ -2340,7 +2499,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                         workout.resetCancelledWorkout(),
                     )
                     showCancelConfirmation = false
-                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), color = WildforceThemeTokens.destructiveText) }
+                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel_workout).uppercase(), color = WildforceThemeTokens.destructiveText) }
             },
             dismissButton = { TextButton(onClick = { showCancelConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_1daf179b6751ecd3), color = WildforceThemeTokens.textSecondary) } },
         )
@@ -2364,12 +2523,12 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                     coroutineScope.launch {
                         runCatching { generator(request) }
                             .onSuccess { pendingAdapted = it }
-                            .onFailure { adaptationError = it.message ?: "No se pudo adaptar el entrenamiento." }
+                            .onFailure { adaptationError = io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext(detailContext).getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }
                         adapting = false
                     }
                 } else adaptationError = null
-            }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase(), color = WildforceThemeTokens.accent) }
-        }, dismissButton = { TextButton(onClick = { adaptationError = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = WildforceThemeTokens.textSecondary) } })
+            }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_retry).uppercase(), color = WildforceThemeTokens.accent) }
+        }, dismissButton = { TextButton(onClick = { adaptationError = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dismiss).uppercase(), color = WildforceThemeTokens.textSecondary) } })
     }
     pendingAdapted?.let { adapted ->
         AlertDialog(onDismissRequest = { pendingAdapted = null }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_7da4232d06825169), fontFamily = AntonFontFamily) }, text = {
@@ -2385,7 +2544,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                         Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f)).padding(10.dp),
                         verticalArrangement = Arrangement.spacedBy(5.dp),
                     ) {
-                        Text(block.type.label.uppercase(), style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accent)
+                        Text(workoutBlockLabel(block.type).uppercase(), style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.accent)
                         block.exercises.forEachIndexed { index, exercise ->
                             Text(
                                 "${index + 1}. ${exerciseDisplayName(exercise.imageKey, exercise.name)} · ${restTimerExercisePrescription(exercise, false).joinToString(" · ")}",
@@ -2397,7 +2556,7 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, useImperial:
                 }
                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_ed3b48a690d2135a), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accent)
             }
-        }, confirmButton = { TextButton(onClick = { pendingAdapted = null; onWorkoutUpdated(adapted) }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3db550736adeaaf3), color = WildforceThemeTokens.accent) } }, dismissButton = { TextButton(onClick = { pendingAdapted = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } })
+        }, confirmButton = { TextButton(onClick = { pendingAdapted = null; onWorkoutUpdated(adapted) }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3db550736adeaaf3), color = WildforceThemeTokens.accent) } }, dismissButton = { TextButton(onClick = { pendingAdapted = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } })
     }
 }
 
@@ -2611,11 +2770,11 @@ private fun WorkoutExercisePrescription(exercise: ExerciseSummary, setCount: Int
     }
     exercise.targetPaceSecondsPerKm?.takeIf { it > 0 }?.let { pace ->
         val seconds = (if (useImperial) pace / 0.621371 else pace.toDouble()).roundToInt().coerceAtLeast(0)
-        Text("Ritmo ${seconds / 60}:${(seconds % 60).toString().padStart(2, '0')} /${if (useImperial) "mi" else "km"}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text("${androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.pace)} ${seconds / 60}:${(seconds % 60).toString().padStart(2, '0')} /${if (useImperial) "mi" else "km"}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
     if (exercise.hasNonDefaultSetStyle()) {
-        val styleScope = if (exercise.setStyleParameters.appliesToFinalSetOnly) " · solo última serie" else ""
-        Text("= ${exercise.setStyle.label}$styleScope", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        val styleScope = if (exercise.setStyleParameters.appliesToFinalSetOnly) " · " + androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.final_set_only) else ""
+        Text("= ${workoutSetStyleLabel(exercise.setStyle)}$styleScope", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -2638,12 +2797,16 @@ private fun WorkoutDetailTabSelector(selected: WorkoutDetailTab, onSelected: (Wo
     Row(modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.12f)).padding(4.dp)) {
         WorkoutDetailTab.entries.forEach { tab ->
             val active = tab == selected
+            val label = androidx.compose.ui.res.stringResource(when (tab) {
+                WorkoutDetailTab.Exercises -> io.codepassion.doubletriangle.core.designsystem.R.string.exercises
+                WorkoutDetailTab.Information -> io.codepassion.doubletriangle.core.designsystem.R.string.info
+            }).uppercase()
             Text(
-                tab.label,
+                label,
                 Modifier.weight(1f).clip(RoundedCornerShape(14.dp))
                     .background(if (active) WildforceThemeTokens.textPrimary else Color.Transparent)
                     .semantics {
-                        contentDescription = tab.label
+                        contentDescription = label
                         this.selected = active
                     }
                     .clickable { onSelected(tab) }.padding(vertical = 11.dp),
@@ -2670,7 +2833,7 @@ private fun WorkoutInformationTab(workout: WorkoutDaySummary, appLanguage: Strin
         Text(notes, Modifier.padding(top = 9.dp), color = WildforceThemeTokens.textSecondary)
         Spacer(Modifier.height(18.dp))
     }
-    Row(
+    if (workout.dayType.isNotBlank()) Row(
         Modifier.fillMaxWidth().padding(top = 8.dp),
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -3037,6 +3200,17 @@ fun ActiveWorkoutScreen(
         val updated = oldBlocks.map { block -> block.copy(exercises = block.exercises.map { all[cursor++] }) }
         applyReindexedBlocks(oldBlocks, updated, (exerciseIndex + 1).coerceAtMost(workout.exercises.lastIndex))
     }
+    fun movePathExercise(blockIndex: Int, index: Int, direction: Int) {
+        val old = workout.editableBlocks()
+        val block = old.getOrNull(blockIndex) ?: return
+        val target = index + direction
+        if (workout.pathBlocks().getOrNull(blockIndex)?.canMoveUpcoming(index, target, exerciseIndex) != true) return
+        val reordered = block.exercises.toMutableList()
+        val item = reordered.removeAt(index)
+        reordered.add(target, item)
+        val updated = old.toMutableList().apply { set(blockIndex, block.copy(exercises = reordered)) }
+        applyReindexedBlocks(old, updated)
+    }
     fun removeCurrentExercise() {
         val sourceBlocks = workout.editableBlocks()
         val removedSourceIndex = currentSourceIndex() ?: return
@@ -3115,7 +3289,11 @@ fun ActiveWorkoutScreen(
     }
 
     fun completeCurrentStep() {
+        if (restRemaining != null || pendingFeedback || showsSummary) return
         val activeExercise = exercise ?: return
+        // A manually completed timed set must not continue ticking through
+        // feedback or the following rest and complete another set later.
+        exerciseTimerRunning = false
         runCatching {
             val isWarmupOrCooldown = activeExercise.blockType == WorkoutBlockType.Warmup || activeExercise.blockType == WorkoutBlockType.Cooldown
             val newCompleted = if (isWarmupOrCooldown) effectiveSets else completedForExercise + 1
@@ -3417,14 +3595,14 @@ fun ActiveWorkoutScreen(
     LaunchedEffect(showsSummary) { while (!showsSummary) { delay(1_000); elapsedSeconds++ } }
     LaunchedEffect(exerciseIndex, completedByExercise, restRemaining, restInitialSeconds, restTimerPaused, restBetweenExercises, showsSummary, notificationArtwork) {
         if (!showsSummary) {
-        val currentName = exercise?.let { exerciseDisplayName(it.imageKey, it.name) } ?: "Entrenamiento"
+        val currentName = exercise?.let { exerciseDisplayName(it.imageKey, it.name) } ?: localizedBackgroundContext(context).getString(SharedR.string.ui_sheet_workout)
             val completedExercises = workout.exercises.indices.count { index ->
                 index < exerciseIndex || (completedByExercise[index] ?: 0) >= (workout.exercises[index].sets + (addedSetsByExercise[index] ?: 0)).coerceAtLeast(1)
             }
             val detail = if (restRemaining != null) {
-                if (restTimerPaused) "Pausado" else "${restRemaining}s"
+                if (restTimerPaused) localizedBackgroundContext(context).getString(SharedR.string.pause) else "${restRemaining}s"
             } else {
-                "$currentName · $completedForExercise/$effectiveSets series"
+                "$currentName · ${localizedBackgroundContext(context).getString(SharedR.string.ui_sheet__d_of__d, completedForExercise, effectiveSets)} ${localizedBackgroundContext(context).getString(SharedR.string.ui_sheet_sets)}"
             }
             // Mientras la app está en segundo plano, el servicio foreground es el
             // único dueño de la notificación. Evita que Compose publique otra
@@ -3591,7 +3769,8 @@ fun ActiveWorkoutScreen(
         restContext = null
         exerciseTimerRunning = exercise?.resolvedTargetDurationSeconds() != null
     }
-    LaunchedEffect(exerciseTimerRunning, exerciseTimeRemaining) {
+    LaunchedEffect(exerciseIndex, initializedExerciseIndex, restRemaining != null, pendingFeedback, showsSummary, exerciseTimerRunning, exerciseTimeRemaining) {
+        if (exerciseIndex != initializedExerciseIndex || restRemaining != null || pendingFeedback || showsSummary || exercise?.resolvedTargetDurationSeconds() == null) return@LaunchedEffect
         val remaining = exerciseTimeRemaining ?: return@LaunchedEffect
         if (exerciseTimerRunning && remaining > 0) {
             delay(1_000)
@@ -3652,6 +3831,7 @@ fun ActiveWorkoutScreen(
         showsExerciseHistory = showsExerciseHistory,
         onDismissWorkoutPath = { showsWorkoutPath = false },
         onAddExerciseToBlock = { blockIndex -> addTargetBlockIndex = blockIndex; exercisePickerMode = ExercisePickerMode.Add },
+        onMovePathExercise = ::movePathExercise,
         onDismissExerciseHistory = { showsExerciseHistory = false },
     )
 
@@ -3724,7 +3904,7 @@ fun ActiveWorkoutScreen(
                     exerciseIndex = nextIndex
                 }
             }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip).uppercase(), color = WildforceThemeTokens.accent) } },
-            dismissButton = { TextButton(onClick = { showsSkipExerciseConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
+            dismissButton = { TextButton(onClick = { showsSkipExerciseConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
 
@@ -3741,7 +3921,7 @@ fun ActiveWorkoutScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showsRemoveExerciseConfirmation = false }) {
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), color = WildforceThemeTokens.textSecondary)
                 }
             },
         )
@@ -3757,7 +3937,7 @@ fun ActiveWorkoutScreen(
                     showsCancelWorkoutConfirmation = false
                     cancelWorkoutSession(context, workout.id)
                     onExit()
-                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), color = WildforceThemeTokens.destructiveText) }
+                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel_workout).uppercase(), color = WildforceThemeTokens.destructiveText) }
             },
             dismissButton = {
                 TextButton(onClick = { showsCancelWorkoutConfirmation = false }) {
@@ -3843,8 +4023,6 @@ fun ActiveWorkoutScreen(
             completedDistanceKm = lastRecord.distanceKm
         }
         pendingFeedback = false
-        selectedFeedback = "JUSTO"
-        pendingNote = ""
         restRemaining = null
         restEndsAtMillis = null
         restInitialSeconds = 0
@@ -3905,7 +4083,7 @@ fun ActiveWorkoutScreen(
             WorkoutActiveNotification.show(
                 context,
                 workout.title,
-                "${exercise?.let { exerciseDisplayName(it.imageKey, it.name) } ?: "Entrenamiento"} · ${completedExercises}/${workout.exercises.size} ejercicios",
+                "${exercise?.let { exerciseDisplayName(it.imageKey, it.name) } ?: localizedBackgroundContext(context).getString(SharedR.string.ui_sheet_workout)} · ${localizedBackgroundContext(context).getString(SharedR.string.ui_sheet__d_of__d, completedExercises, workout.exercises.size)}",
                 progress = completedExercises,
                 progressMax = workout.exercises.size.coerceAtLeast(1),
                 type = WorkoutNotificationType.PROGRESS,
@@ -4033,7 +4211,9 @@ fun ActiveWorkoutScreen(
             // when the first set is empty. Without a minimum, Bicycle Crunch
             // collapses to the measured controls and leaves an oversized gap
             // below the muscle strip, making the scene look vertically split.
-            val minSheetHeight = if (timerMode) 420.dp else 390.dp
+            // The rest phase has optional next-exercise content. Like iOS,
+            // let it wrap its contents when there is nothing below the timer.
+            val minSheetHeight = if (restRemaining != null) 0.dp else if (timerMode) 420.dp else 390.dp
             val maxSheetHeight = (LocalConfiguration.current.screenHeightDp.dp * 0.66f)
                 .coerceAtLeast(minSheetHeight)
             Column(
@@ -4217,7 +4397,7 @@ fun ActiveWorkoutScreen(
                             runCatching { WorkoutActiveNotification.show(
                                 context,
                                 workout.title,
-                                "${exercise?.let { exerciseDisplayName(it.imageKey, it.name) } ?: "Entrenamiento"} · ${completedExercises}/${workout.exercises.size} ejercicios",
+                                "${exercise?.let { exerciseDisplayName(it.imageKey, it.name) } ?: localizedBackgroundContext(context).getString(SharedR.string.ui_sheet_workout)} · ${localizedBackgroundContext(context).getString(SharedR.string.ui_sheet__d_of__d, completedExercises, workout.exercises.size)}",
                                 progress = completedExercises,
                                 progressMax = workout.exercises.size.coerceAtLeast(1),
                                 type = WorkoutNotificationType.PROGRESS,
@@ -4269,8 +4449,8 @@ fun ActiveWorkoutScreen(
                                 SetStyleGlyph(exercise.setStyle, Modifier.size(17.dp), WildforceThemeTokens.backgroundSecondary)
                             }
                             Column(Modifier.weight(1f)) {
-                                Text(exercise.setStyle.label, Modifier.padding(start = 10.dp), fontFamily = Exo2FontFamily, fontSize = 18.sp, color = WildforceThemeTokens.textPrimary)
-                                setStyleScopeLabel(exercise.setStyle, effectiveSets, exercise.setStyleParameters.appliesToFinalSetOnly)?.let { scopeLabel ->
+                                Text(workoutSetStyleLabel(exercise.setStyle), Modifier.padding(start = 10.dp), fontFamily = Exo2FontFamily, fontSize = 18.sp, color = WildforceThemeTokens.textPrimary)
+                                localizedSetStyleScope(exercise.setStyle, effectiveSets, exercise.setStyleParameters.appliesToFinalSetOnly)?.let { scopeLabel ->
                                     Text(
                                         scopeLabel,
                                         Modifier.padding(start = 10.dp),
@@ -4282,7 +4462,7 @@ fun ActiveWorkoutScreen(
                             }
                             Box(
                                 Modifier.size(48.dp)
-                                    .semantics { contentDescription = "Información de la serie" }
+                                    .localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_set_style)
                                     .clickable { showsSetStyleInfo = true },
                                 contentAlignment = Alignment.Center,
                             ) {
@@ -4297,7 +4477,7 @@ fun ActiveWorkoutScreen(
                             Modifier.fillMaxWidth().padding(top = 8.dp).horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            styleParameterLabels(exercise.setStyle, exercise.setStyleParameters).forEach { label ->
+                            localizedStyleParameterDetails(exercise.setStyle, exercise.setStyleParameters, "").map { it.label }.forEach { label ->
                                 Text(
                                     label,
                                     Modifier.clip(CircleShape)
@@ -4310,14 +4490,7 @@ fun ActiveWorkoutScreen(
                             }
                         }
                         Spacer(Modifier.height(10.dp))
-                        Row(Modifier.fillMaxWidth().height(6.dp).clearAndSetSemantics {
-                            contentDescription = "Progreso de series"
-                            stateDescription = "$completedForExercise de $effectiveSets series"
-                            progressBarRangeInfo = androidx.compose.ui.semantics.ProgressBarRangeInfo(
-                                completedForExercise.toFloat().coerceIn(0f, effectiveSets.coerceAtLeast(1).toFloat()),
-                                0f..effectiveSets.coerceAtLeast(1).toFloat(),
-                            )
-                        }.focusable(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                        Row(Modifier.fillMaxWidth().height(6.dp).localizedWorkoutProgress(SharedR.string.ui_sheet_sets, completedForExercise, effectiveSets).focusable(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                             repeat(effectiveSets) { setIndex ->
                                 val setCompleted = setIndex < completedForExercise
                                 val setCurrent = setIndex == completedForExercise
@@ -4381,7 +4554,7 @@ fun ActiveWorkoutScreen(
                             Spacer(Modifier.height(8.dp))
                         }
                         if (exercise.blockType == WorkoutBlockType.Standard && exercise.resolvedTargetDurationSeconds() == null && effectiveSets < 20) {
-                            val addSetLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_set)
+                            val addSetLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_add_set)
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                                 Row(Modifier
                                     .heightIn(min = 48.dp)
@@ -4394,7 +4567,7 @@ fun ActiveWorkoutScreen(
                                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 ) {
                                     Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.textPrimary)
-                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_set).uppercase(), fontFamily = Exo2FontFamily, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_add_set).uppercase(), fontFamily = Exo2FontFamily, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                                 }
                             }
                         }
@@ -4501,37 +4674,30 @@ private fun ActiveWorkoutHeroHeader(
         ) {
             val canCreateSuperset = workout.editableBlocks().canCreateActiveSuperset(exerciseIndex)
             val canEditSuperset = currentPathBlock?.type == WorkoutBlockType.Superset
-            ActiveWorkoutMenuItem("＋", "Añadir ejercicio", onClick = onAddExercise)
-            ActiveWorkoutMenuItem("↔", "Sustituir ejercicio", onClick = onReplaceExercise)
-            ActiveWorkoutMenuItem("⏭", "Saltar ejercicio", destructive = true, onClick = onSkipExercise)
-            ActiveWorkoutMenuItem("↓", "Mover abajo", enabled = canMoveDown, onClick = onMoveExercise)
+            ActiveWorkoutMenuItem("＋", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_add_exercise), onClick = onAddExercise)
+            ActiveWorkoutMenuItem("↔", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.swap_exercise), onClick = onReplaceExercise)
+            ActiveWorkoutMenuItem("⏭", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip), destructive = true, onClick = onSkipExercise)
+            ActiveWorkoutMenuItem("↓", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.move_down), enabled = canMoveDown, onClick = onMoveExercise)
             if (canCreateSuperset) {
                 Divider()
-                ActiveWorkoutMenuItem("⛓", "Crear superserie", onClick = onCreateSuperset)
+                ActiveWorkoutMenuItem("⛓", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_superset), onClick = onCreateSuperset)
             }
             if (canEditSuperset) {
                 Divider()
-                ActiveWorkoutMenuItem("□", "Quitar superserie", onClick = onRemoveSuperset)
-                ActiveWorkoutMenuItem("round+", "Añadir ronda", onClick = onAddRound)
-                ActiveWorkoutMenuItem("round-", "Quitar ronda", enabled = currentPathBlock.rounds > 1, onClick = onRemoveRound)
-                ActiveWorkoutMenuItem("◷", "Añadir 15 s de descanso", onClick = onAddSupersetRest)
-                ActiveWorkoutMenuItem("◷", "Quitar 15 s de descanso", enabled = (currentPathBlock.restAfterBlockSeconds ?: 0) > 0, onClick = onRemoveSupersetRest)
+                ActiveWorkoutMenuItem("□", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.remove_superset), onClick = onRemoveSuperset)
+                ActiveWorkoutMenuItem("round+", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_round), onClick = onAddRound)
+                ActiveWorkoutMenuItem("round-", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.remove_round), enabled = currentPathBlock.rounds > 1, onClick = onRemoveRound)
+                ActiveWorkoutMenuItem("◷", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_15s_rest), onClick = onAddSupersetRest)
+                ActiveWorkoutMenuItem("◷", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.remove_15s_rest), enabled = (currentPathBlock.restAfterBlockSeconds ?: 0) > 0, onClick = onRemoveSupersetRest)
             }
             Divider()
-            ActiveWorkoutMenuItem("×", "Eliminar ejercicio", destructive = true, onClick = onRemoveExercise)
+            ActiveWorkoutMenuItem("×", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.remove_exercise), destructive = true, onClick = onRemoveExercise)
             Divider()
-            ActiveWorkoutMenuItem("cancel", "Cancelar entrenamiento", destructive = true, onClick = onCancelWorkout)
+            ActiveWorkoutMenuItem("cancel", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel_workout), destructive = true, onClick = onCancelWorkout)
         }
     }
     Row(
-        Modifier.fillMaxWidth().height(10.dp).clearAndSetSemantics {
-            contentDescription = "Progreso del entrenamiento"
-            stateDescription = "Ejercicio ${(exerciseIndex + 1).coerceAtMost(workout.exercises.size)} de ${workout.exercises.size}"
-            progressBarRangeInfo = androidx.compose.ui.semantics.ProgressBarRangeInfo(
-                (exerciseIndex + 1).toFloat().coerceIn(0f, workout.exercises.size.coerceAtLeast(1).toFloat()),
-                0f..workout.exercises.size.coerceAtLeast(1).toFloat(),
-            )
-        }.focusable(),
+        Modifier.fillMaxWidth().height(10.dp).localizedWorkoutProgress(SharedR.string.ui_sheet_workout, (exerciseIndex + 1).coerceAtMost(workout.exercises.size), workout.exercises.size).focusable(),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         workout.exercises.forEachIndexed { index, item ->
@@ -4583,11 +4749,12 @@ private fun ActiveWorkoutToolbarDialogs(
     showsExerciseHistory: Boolean,
     onDismissWorkoutPath: () -> Unit,
     onAddExerciseToBlock: (Int) -> Unit,
+    onMovePathExercise: (Int, Int, Int) -> Unit,
     onDismissExerciseHistory: () -> Unit,
 ) {
     if (showsWorkoutPath) {
         Dialog(onDismissRequest = onDismissWorkoutPath, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-            Box(Modifier.fillMaxWidth().widthIn(max = 380.dp).height(520.dp).clip(RoundedCornerShape(28.dp))) {
+            Box(Modifier.fillMaxWidth().widthIn(max = 380.dp).fillMaxHeight(0.85f).clip(RoundedCornerShape(28.dp))) {
                 WorkoutPathScreen(
                     workout,
                     gender,
@@ -4597,6 +4764,7 @@ private fun ActiveWorkoutToolbarDialogs(
                     elapsedSeconds,
                     useImperial,
                     onAddExerciseToBlock = onAddExerciseToBlock,
+                    onMoveExercise = onMovePathExercise,
                     onBack = onDismissWorkoutPath,
                 )
             }
@@ -4630,7 +4798,7 @@ private fun ActiveWorkoutConfirmationDialogs(
             title = { Text(if (isSkippingWholeBlock) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3a2a4b75e5f5742f) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_87e24da452a03eda), fontFamily = AntonFontFamily) },
             text = { Text(if (isSkippingWholeBlock) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3c695985e74f6e76) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_c9ac2cb120cfe227)) },
             confirmButton = { TextButton(onClick = onConfirmSkip) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip).uppercase(), color = WildforceThemeTokens.accent) } },
-            dismissButton = { TextButton(onClick = onDismissSkip) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
+            dismissButton = { TextButton(onClick = onDismissSkip) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
     if (showsRemoveExerciseConfirmation) {
@@ -4639,7 +4807,7 @@ private fun ActiveWorkoutConfirmationDialogs(
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f882bae2c871a1bc), fontFamily = AntonFontFamily) },
             text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_01398e25b10ed715)) },
             confirmButton = { TextButton(onClick = onConfirmRemove) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.delete).uppercase(), color = WildforceThemeTokens.destructiveText) } },
-            dismissButton = { TextButton(onClick = onDismissRemove) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
+            dismissButton = { TextButton(onClick = onDismissRemove) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
     if (showsCancelWorkoutConfirmation) {
@@ -4647,7 +4815,7 @@ private fun ActiveWorkoutConfirmationDialogs(
             onDismissRequest = onDismissCancel,
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_74be332575411a26), fontFamily = AntonFontFamily) },
             text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_34fbf2a18984301a)) },
-            confirmButton = { TextButton(onClick = onConfirmCancel) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_workout).uppercase(), color = WildforceThemeTokens.destructiveText) } },
+            confirmButton = { TextButton(onClick = onConfirmCancel) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel_workout).uppercase(), color = WildforceThemeTokens.destructiveText) } },
             dismissButton = { TextButton(onClick = onDismissCancel) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.continue_with_your_workout).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
@@ -4712,9 +4880,13 @@ private fun ActiveWorkoutPhaseContent(
     state: ActiveWorkoutPhaseState,
     actions: ActiveWorkoutPhaseActions,
 ) {
-    val resting = state.restRemaining
+    val phaseKey = "${state.exerciseIndex}_${state.pendingFeedback}_${state.restRemaining != null}"
+    // Timer ticks update the current phase without restarting its transition.
+    // Retain the last snapshot of an outgoing phase until its animation ends.
+    val phaseSnapshots = remember { mutableMapOf<String, ActiveWorkoutPhaseState>() }
+    phaseSnapshots[phaseKey] = state
     AnimatedContent(
-        targetState = "${state.exerciseIndex}_${state.pendingFeedback}_${resting != null}",
+        targetState = phaseKey,
         transitionSpec = {
             (slideInHorizontally(animationSpec = tween(320)) { fullWidth -> fullWidth } + fadeIn(tween(320)))
                 .togetherWith(
@@ -4722,8 +4894,10 @@ private fun ActiveWorkoutPhaseContent(
                 )
         },
         label = "active-workout-sheet-transition",
-    ) { targetState ->
-        androidx.compose.runtime.key(targetState) {
+    ) { visiblePhaseKey ->
+        val state = if (visiblePhaseKey == phaseKey) state else phaseSnapshots.getValue(visiblePhaseKey)
+        val resting = state.restRemaining
+        androidx.compose.runtime.key(visiblePhaseKey) {
             Column(Modifier.fillMaxWidth()) {
                 if (state.pendingFeedback && state.exercise != null) {
                     ExerciseFeedbackContent(
@@ -4804,13 +4978,13 @@ private fun ActiveWorkoutPhaseContent(
                                 SetStyleGlyph(exercise.setStyle, Modifier.size(17.dp), WildforceThemeTokens.backgroundSecondary)
                             }
                             Column(Modifier.weight(1f)) {
-                                Text(exercise.setStyle.label, Modifier.padding(start = 10.dp), fontFamily = Exo2FontFamily, fontSize = 18.sp, color = WildforceThemeTokens.textPrimary)
-                                setStyleScopeLabel(exercise.setStyle, state.effectiveSets, exercise.setStyleParameters.appliesToFinalSetOnly)?.let { scopeLabel ->
+                                Text(workoutSetStyleLabel(exercise.setStyle), Modifier.padding(start = 10.dp), fontFamily = Exo2FontFamily, fontSize = 18.sp, color = WildforceThemeTokens.textPrimary)
+                                localizedSetStyleScope(exercise.setStyle, state.effectiveSets, exercise.setStyleParameters.appliesToFinalSetOnly)?.let { scopeLabel ->
                                     Text(scopeLabel, Modifier.padding(start = 10.dp), color = WildforceThemeTokens.textSecondary, fontFamily = Exo2FontFamily, fontSize = 14.sp)
                                 }
                             }
                             Box(
-                                Modifier.size(48.dp).semantics { contentDescription = "Información de la serie" }.clickable(onClick = actions.onSetStyleInfo),
+                                Modifier.size(48.dp).localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_set_style).clickable(onClick = actions.onSetStyleInfo),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Icon(Icons.Outlined.Info, contentDescription = null, tint = WildforceThemeTokens.accent, modifier = Modifier.size(22.dp))
@@ -4820,7 +4994,7 @@ private fun ActiveWorkoutPhaseContent(
                             Modifier.fillMaxWidth().padding(top = 8.dp).horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            styleParameterLabels(exercise.setStyle, exercise.setStyleParameters).forEach { label ->
+                            localizedStyleParameterDetails(exercise.setStyle, exercise.setStyleParameters, "").map { it.label }.forEach { label ->
                                 Text(
                                     label,
                                     Modifier.clip(CircleShape).background(WildforceThemeTokens.textPrimary.copy(alpha = 0.06f)).padding(horizontal = 10.dp, vertical = 6.dp),
@@ -4832,14 +5006,7 @@ private fun ActiveWorkoutPhaseContent(
                         }
                         Spacer(Modifier.height(10.dp))
                         Row(
-                            Modifier.fillMaxWidth().height(6.dp).clearAndSetSemantics {
-                                contentDescription = "Progreso de series"
-                                stateDescription = "${state.completedForExercise} de ${state.effectiveSets} series"
-                                progressBarRangeInfo = androidx.compose.ui.semantics.ProgressBarRangeInfo(
-                                    state.completedForExercise.toFloat().coerceIn(0f, state.effectiveSets.coerceAtLeast(1).toFloat()),
-                                    0f..state.effectiveSets.coerceAtLeast(1).toFloat(),
-                                )
-                            }.focusable(),
+                            Modifier.fillMaxWidth().height(6.dp).localizedWorkoutProgress(SharedR.string.ui_sheet_sets, state.completedForExercise, state.effectiveSets).focusable(),
                             horizontalArrangement = Arrangement.spacedBy(7.dp),
                         ) {
                             repeat(state.effectiveSets) { setIndex ->
@@ -4903,7 +5070,7 @@ private fun ActiveWorkoutPhaseContent(
                             Spacer(Modifier.height(8.dp))
                         }
                         if (exercise.blockType == WorkoutBlockType.Standard && exercise.resolvedTargetDurationSeconds() == null && state.effectiveSets < 20) {
-                            val addSetLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_set)
+                            val addSetLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_add_set)
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                                 Row(
                                     Modifier.heightIn(min = 48.dp)
@@ -4916,7 +5083,7 @@ private fun ActiveWorkoutPhaseContent(
                                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                                 ) {
                                     Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.textPrimary)
-                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_set).uppercase(), fontFamily = Exo2FontFamily, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_add_set).uppercase(), fontFamily = Exo2FontFamily, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                                 }
                             }
                         }
@@ -5052,7 +5219,7 @@ private fun SetTrackingRows(
                     .padding(horizontal = 14.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (completed) Icon(Icons.Filled.CheckCircle, contentDescription = "Serie completada", modifier = Modifier.width(34.dp).graphicsLayer { scaleX = completionScale; scaleY = completionScale }, tint = Color(0xFF2EAF68))
+                if (completed) Icon(Icons.Filled.CheckCircle, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_completed), modifier = Modifier.width(34.dp).graphicsLayer { scaleX = completionScale; scaleY = completionScale }, tint = Color(0xFF2EAF68))
                 else Text(setNumber.toString(), Modifier.width(34.dp).graphicsLayer { scaleX = completionScale; scaleY = completionScale }, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_85bf5aae0c21e80f), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
@@ -5061,7 +5228,7 @@ private fun SetTrackingRows(
                 }
                 if (showWeight) {
                     Row(Modifier.weight(1.25f), verticalAlignment = Alignment.CenterVertically) {
-                        Text(if (exercise.isPerSideLoad) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_816b51f9414f1ce3) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.weight), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                        Text(if (exercise.isPerSideLoad) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_816b51f9414f1ce3) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_weight), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                         Spacer(Modifier.width(6.dp))
                         Text(record?.let { formatTrainingWeight(it.weightKg, useImperial) } ?: exercise.targetWeightsKg?.getOrNull(setIndex)?.let { formatTrainingWeight(it, useImperial) } ?: exercise.targetWeightKg?.let { formatTrainingWeight(it, useImperial) }.orEmpty().ifBlank { "—" }, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
@@ -5084,8 +5251,8 @@ private fun SetTrackingRows(
                     onWeightChanged = { editWeightKg = it },
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Cancelar" }.clickable { editingSetNumber = null }.padding(horizontal = 10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase(), Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Guardar" }.clickable {
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), Modifier.heightIn(min = 48.dp).localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).clickable { editingSetNumber = null }.padding(horizontal = 10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase(), Modifier.heightIn(min = 48.dp).localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.save).clickable {
                         onRecordChanged(record, record.copy(reps = editReps, weightKg = editWeightKg))
                         editingSetNumber = null
                     }.padding(10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
@@ -5234,7 +5401,7 @@ internal fun WorkoutNumericInputDialog(
                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ready).uppercase(), color = WildforceThemeTokens.accent)
             }
         },
-        dismissButton = { TextButton(onClick = onDismissRequest) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
+        dismissButton = { TextButton(onClick = onDismissRequest) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
     )
 }
 
@@ -5251,15 +5418,13 @@ private fun ActiveSetMetricRow(
     onEdit: () -> Unit,
 ) {
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        // iOS expanded rows use a fixed title, a small target caption and the
-        // compact controls on the same baseline. Do not switch to a vertical
-        // layout: an S23 Ultra can cross an arbitrary dp breakpoint when its
-        // display or font scale changes, even though it has ample screen area.
+        // Keep the target beside the iOS-style controls, allowing it to wrap
+        // when font scaling or a narrow screen leaves insufficient width.
         val narrowControls = maxWidth < 390.dp
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Row(Modifier.weight(1f).padding(end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(label, fontFamily = Exo2FontFamily, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(target, Modifier.weight(1f).padding(start = 8.dp), fontFamily = Exo2FontFamily, fontSize = 14.sp, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Column(Modifier.weight(1f).padding(end = 8.dp)) {
+                Text(label, fontFamily = Exo2FontFamily, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                Text(target, fontFamily = Exo2FontFamily, fontSize = 14.sp, color = WildforceThemeTokens.textSecondary)
             }
             // SF Symbols minus.circle.fill/plus.circle.fill render as
             // compact ~22pt controls on iOS, not large filled buttons.
@@ -5280,13 +5445,16 @@ private fun MetricControls(
 ) {
     // iOS uses `HStack(spacing: 10)` around a 48 pt value frame. Keep that
     // visible rhythm exactly; CenteredRoundControl expands only its hit area.
+    val lessLabel = androidx.compose.ui.res.stringResource(SharedR.string.less) + " " + accessibilityLabel
+    val moreLabel = androidx.compose.ui.res.stringResource(SharedR.string.more) + " " + accessibilityLabel
+    val editLabel = androidx.compose.ui.res.stringResource(SharedR.string.edit) + " " + accessibilityLabel
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        CenteredRoundControl("−", controlSize, onMinus, "Reducir $accessibilityLabel")
+        CenteredRoundControl("−", controlSize, onMinus, lessLabel)
         Text(
             value,
             Modifier
                 .widthIn(min = 48.dp, max = 64.dp)
-                .semantics { contentDescription = "Editar $accessibilityLabel"; stateDescription = value }
+                .semantics { contentDescription = editLabel; stateDescription = value }
                 .clickable(onClick = onEdit)
                 .padding(horizontal = 4.dp),
             fontFamily = Exo2FontFamily,
@@ -5297,7 +5465,7 @@ private fun MetricControls(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        CenteredRoundControl("+", controlSize, onPlus, "Aumentar $accessibilityLabel")
+        CenteredRoundControl("+", controlSize, onPlus, moreLabel)
     }
 }
 @Composable
@@ -5320,11 +5488,11 @@ private fun ExerciseFeedbackContent(
     val choices = listOf(
         // Keep these in the same order and with the same icons as
         // ExerciseFeedback.icon in the canonical iOS implementation.
-        Triple("😴", "MUY FÁCIL", "Podías haber hecho muchas más repeticiones."),
-        Triple("😊", "FÁCIL", "Te quedaban varias repeticiones en reserva."),
-        Triple("👍", "JUSTO", "El esfuerzo y la técnica han sido adecuados."),
-        Triple("🥵", "DIFÍCIL", "Has terminado cerca de tu límite."),
-        Triple("💀", "MUY DIFÍCIL", "No habrías podido completar otra repetición."),
+        Triple("😴", "MUY FÁCIL", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.felt_like_a_warm_up__little_to_no_effort_required_)),
+        Triple("😊", "FÁCIL", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.comfortable_pace__you_could_have_done_many_more_reps_)),
+        Triple("👍", "JUSTO", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.challenging_but_can_complete_as_instructed_)),
+        Triple("🥵", "DIFÍCIL", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.couldn_t_complete_as_required_)),
+        Triple("💀", "MUY DIFÍCIL", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.couldn_t_complete_it_by_far_as_the_intensity_required_)),
     )
     // This content already lives inside the active sheet's verticalScroll.
     // A second scroll container receives infinite height constraints and
@@ -5337,7 +5505,7 @@ private fun ExerciseFeedbackContent(
             ) {
                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_results).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.duration), color = WildforceThemeTokens.textSecondary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_duration), color = WildforceThemeTokens.textSecondary)
                     Text(formatClock(elapsedSeconds), fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                 }
                 targetDistanceKm?.let {
@@ -5354,7 +5522,7 @@ private fun ExerciseFeedbackContent(
                 Modifier
                     .fillMaxWidth()
                     .heightIn(min = 48.dp)
-                    .semantics { contentDescription = "Editar series" }
+                    .localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.edit_sets)
                     .clickable(onClick = editSets)
                     .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -5366,10 +5534,11 @@ private fun ExerciseFeedbackContent(
         }
         Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_276591fdc76a8e39), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
         Text(exerciseName, color = WildforceThemeTokens.textSecondary)
-        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.how_was_it_).uppercase(), Modifier.fillMaxWidth().padding(top = 12.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_how_was_it_).uppercase(), Modifier.fillMaxWidth().padding(top = 12.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
         Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_b20ae2dc3aacf09e), Modifier.fillMaxWidth().padding(top = 2.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Row(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             choices.forEach { (emoji, title, _) ->
+                val localizedTitle = localizedFeedbackTitle(title)
                 val isSelected = selected == title
                 val selectionOffset by animateDpAsState(
                     targetValue = if (isSelected) (-6).dp else 0.dp,
@@ -5389,8 +5558,8 @@ private fun ExerciseFeedbackContent(
                         .background(if (isSelected) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = 0.12f))
                         .border(1.dp, if (isSelected) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = 0.16f), RoundedCornerShape(14.dp))
                         .semantics {
-                            contentDescription = "Esfuerzo $title"
-                            stateDescription = if (isSelected) "Seleccionado" else "No seleccionado"
+                            contentDescription = localizedTitle
+                            this.selected = isSelected
                         }
                         .clickable { haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove); onSelected(title) }
                         .heightIn(min = 92.dp)
@@ -5399,11 +5568,11 @@ private fun ExerciseFeedbackContent(
                     verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically),
                 ) {
                     Text(emoji, style = MaterialTheme.typography.h6)
-                    Text(title, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = if (isSelected) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2)
+                    Text(localizedTitle, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = if (isSelected) WildforceThemeTokens.backgroundSecondary else WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2)
                 }
             }
         }
-        val description = choices.firstOrNull { it.second == selected }?.third ?: "Selecciona la sensación que mejor describa el ejercicio."
+        val description = choices.firstOrNull { it.second == selected }?.third ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.describe_how_you_feel_to_better_personalize_next_sessions_)
         Text(description, Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         if (!isTimeBased && targetDistanceKm != null) {
             FeedbackDistanceStepper(completedDistanceKm, useImperial, onDistanceChanged)
@@ -5412,7 +5581,7 @@ private fun ExerciseFeedbackContent(
             value = note,
             onValueChange = { onNoteChanged(it.take(300)) },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_notes___)) },
+            placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_add_notes___)) },
             maxLines = 3,
             colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent),
             shape = RoundedCornerShape(13.dp),
@@ -5433,7 +5602,7 @@ private fun FeedbackDistanceStepper(
     val displayedDistance = if (useImperial) completedDistanceKm * MILES_PER_KM else completedDistanceKm
     val distanceStepKm = if (useImperial) 0.1 / MILES_PER_KM else 0.1
     CompactMetricStepper(
-        title = if (useImperial) "DISTANCIA (MI)" else "DISTANCIA (KM)",
+        title = androidx.compose.ui.res.stringResource(if (useImperial) SharedR.string.ui_sheet_distance__mi_ else SharedR.string.ui_sheet_distance__km_).uppercase(),
         value = String.format(Locale.US, "%.1f", displayedDistance),
         inputValue = String.format(Locale.US, "%.1f", displayedDistance),
         decimalInput = true,
@@ -5462,6 +5631,14 @@ private fun RestTimerContent(
     onSkip: () -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
+    val restLabel = androidx.compose.ui.res.stringResource(when (context) {
+        WorkoutRestContext.BetweenSets -> SharedR.string.rest_before_next_set
+        WorkoutRestContext.BetweenRounds -> SharedR.string.rest_before_next_round
+        WorkoutRestContext.BeforeNextBlock -> SharedR.string.rest_before_next_block
+    })
+    val restTimerDescription = androidx.compose.ui.res.stringResource(SharedR.string._d_seconds_remaining, seconds)
+    val addRestDescription = androidx.compose.ui.res.stringResource(SharedR.string.add_30_seconds)
+    val removeRestDescription = androidx.compose.ui.res.stringResource(SharedR.string.remove) + " 30 s"
     val animatedProgress by animateFloatAsState((seconds.toFloat() / totalSeconds.coerceAtLeast(1)).coerceIn(0f, 1f), animationSpec = tween(1_000, easing = LinearEasing))
     Column(
         // Match the iOS rest phase: its VStack takes only the space its
@@ -5473,11 +5650,7 @@ private fun RestTimerContent(
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         Text(
-            when (context) {
-                WorkoutRestContext.BetweenSets -> "DESCANSO ANTES DE LA SIGUIENTE SERIE"
-                WorkoutRestContext.BetweenRounds -> "DESCANSO ANTES DE LA SIGUIENTE RONDA"
-                WorkoutRestContext.BeforeNextBlock -> "DESCANSO ANTES DEL SIGUIENTE BLOQUE"
-            },
+            restLabel.uppercase(),
             fontFamily = Exo2FontFamily, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis,
         )
@@ -5485,20 +5658,16 @@ private fun RestTimerContent(
             RestActionButton(Icons.Filled.Add, "+30s", primary = false, onClick = onAddTime)
             Box(
                 Modifier.padding(horizontal = 8.dp).size(148.dp).semantics {
-                    contentDescription = "Temporizador de descanso, $seconds segundos restantes"
-                    stateDescription = when (context) {
-                        WorkoutRestContext.BetweenSets -> "Antes de la siguiente serie"
-                        WorkoutRestContext.BetweenRounds -> "Antes de la siguiente ronda"
-                        WorkoutRestContext.BeforeNextBlock -> "Antes del siguiente bloque"
-                    }
+                    contentDescription = restTimerDescription
+                    stateDescription = restLabel
                     progressBarRangeInfo = androidx.compose.ui.semantics.ProgressBarRangeInfo(animatedProgress, 0f..1f)
                         customActions = listOf(
-                            CustomAccessibilityAction("Añadir 30 segundos") {
+                            CustomAccessibilityAction(addRestDescription) {
                                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 onAddTime()
                                 true
                             },
-                            CustomAccessibilityAction("Quitar 30 segundos") {
+                            CustomAccessibilityAction(removeRestDescription) {
                                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 onRemoveTime()
                                 true
@@ -5516,9 +5685,9 @@ private fun RestTimerContent(
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_44d1064e89430456, seconds), fontFamily = Exo2FontFamily, fontSize = 42.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                     Text(
                         when (context) {
-                            WorkoutRestContext.BetweenSets -> "SERIE"
-                            WorkoutRestContext.BetweenRounds -> "RONDA"
-                            WorkoutRestContext.BeforeNextBlock -> "BLOQUE"
+                            WorkoutRestContext.BetweenSets -> androidx.compose.ui.res.stringResource(SharedR.string.set).uppercase()
+                            WorkoutRestContext.BetweenRounds -> androidx.compose.ui.res.stringResource(SharedR.string.round_rest).uppercase()
+                            WorkoutRestContext.BeforeNextBlock -> androidx.compose.ui.res.stringResource(SharedR.string.block_rest).uppercase()
                         },
                         style = MaterialTheme.typography.caption,
                         color = WildforceThemeTokens.textSecondary,
@@ -5699,9 +5868,9 @@ private fun CompactMetricStepper(title: String, value: String, onMinus: () -> Un
             text = { TextField(manualInput, { value ->
                 val sanitized = sanitizeNumericInput(value.text, allowsDecimal = decimalInput)
                 manualInput = value.copy(text = sanitized, selection = TextRange(sanitized.length))
-            }, modifier = Modifier.focusRequester(manualInputFocusRequester), label = { Text(if (decimalInput) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.value) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.reps)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = if (decimalInput) KeyboardType.Decimal else KeyboardType.Number)) },
+            }, modifier = Modifier.focusRequester(manualInputFocusRequester), label = { Text(if (decimalInput) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.value) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_reps)) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = if (decimalInput) KeyboardType.Decimal else KeyboardType.Number)) },
             confirmButton = { TextButton(onClick = { onValueEntered(manualInput.text); showManualInput = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase(), color = WildforceThemeTokens.accent) } },
-            dismissButton = { TextButton(onClick = { showManualInput = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
+            dismissButton = { TextButton(onClick = { showManualInput = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), color = WildforceThemeTokens.textSecondary) } },
         )
     }
 }
@@ -5817,3 +5986,17 @@ private fun statsForExercise(records: List<CompletedSetRecord>, exerciseIndex: I
         averageWeightKg = exerciseRecords.map { it.weightKg }.filter { it > 0 }.average().takeUnless(Double::isNaN) ?: 0.0,
     )
 }
+
+internal fun feedbackTitleResource(value: String): Int? = when (value) {
+    "MUY FÁCIL" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_very_easy
+    "FÁCIL" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_easy
+    "JUSTO" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_just_right
+    "DIFÍCIL" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_hard
+    "MUY DIFÍCIL" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_very_hard
+    else -> null
+}
+
+@Composable
+private fun localizedFeedbackTitle(value: String): String = feedbackTitleResource(value)?.let {
+    androidx.compose.ui.res.stringResource(it).uppercase()
+} ?: value

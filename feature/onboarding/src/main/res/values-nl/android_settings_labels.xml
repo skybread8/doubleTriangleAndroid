@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android-specific copy without an equivalent in the shared Sheet. -->
+    <string name="settings_faq_description">Antwoorden over training, voeding, Android en je account.</string>
+    <string name="settings_health_description">Sla trainingen op en synchroniseer lichaamsmetingen met Health Connect.</string>
+    <string name="settings_health_disabled">Health Connect is uitgeschakeld voor Wildforce.</string>
+    <string name="settings_health_imported">Lichaamsmetingen geïmporteerd uit Health Connect.</string>
+    <string name="settings_health_connected">Health Connect is verbonden.</string>
+    <string name="settings_health_denied">Toegang tot Health Connect is niet verleend.</string>
+    <string name="settings_focus_description">Verminder afleiding tijdens trainingen met de focusinstellingen van Android.</string>
+    <string name="settings_focus_categories_description">Beheer apps en categorieën die Android tijdens trainingen dempt.</string>
+    <string name="settings_live_update_description">Toon de sessie als kaart of chip wanneer Android 16 en het apparaat dit ondersteunen.</string>
+    <string name="settings_workout_notifications">Trainingsmeldingen</string>
+    <string name="settings_workout_notifications_description">Toon de actieve sessie in het meldingenpaneel en op het vergrendelscherm.</string>
+    <string name="settings_amazfit_description">Synchroniseer de actieve training met Wildforce op je Amazfit. Alleen actief tijdens een training.</string>
+    <string name="settings_rest_alerts">Meldingen bij het begin van rust</string>
+    <string name="settings_rest_alerts_description">Geef een melding wanneer de rusttimer begint.</string>
+    <string name="settings_lock_photo_description">Vereis apparaatverificatie om voortgangsfoto’s te openen.</string>
+</resources>

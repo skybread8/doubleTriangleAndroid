@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sheet strings remain authoritative; these fallbacks cover untranslated cells. -->
+    <string name="onboarding_title_welcome">欢迎</string>
+    <string name="onboarding_title_your_goals">你的目标</string>
+    <string name="onboarding_title_lifestyle">生活方式</string>
+    <string name="onboarding_title_availability">可训练时间</string>
+    <string name="onboarding_title_workout_duration">训练时长</string>
+    <string name="onboarding_title_experience">经验</string>
+    <string name="onboarding_title_program">训练计划</string>
+    <string name="onboarding_title_body_phase">身体阶段</string>
+    <string name="onboarding_title_gym">健身房</string>
+    <string name="onboarding_title_equipment">器械</string>
+    <string name="onboarding_title_restrictions">身体限制</string>
+    <string name="onboarding_title_when_is_your_birthday">你的生日是什么时候</string>
+    <string name="onboarding_title_what_s_your_sex_">你的生理性别是什么</string>
+    <string name="onboarding_title_height">身高</string>
+    <string name="onboarding_title_weight">体重</string>
+</resources>

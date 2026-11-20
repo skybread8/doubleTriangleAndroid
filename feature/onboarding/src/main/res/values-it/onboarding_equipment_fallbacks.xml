@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sheet-aware equipment and mobility fallbacks. -->
+    <string name="onboarding_equipment_01">Parte superiore/inferiore</string>
+    <string name="onboarding_equipment_02">Spinta/Trazione/Gambe</string>
+</resources>

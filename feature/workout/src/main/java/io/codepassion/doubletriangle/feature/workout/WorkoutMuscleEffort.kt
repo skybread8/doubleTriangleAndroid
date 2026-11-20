@@ -21,6 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import io.codepassion.doubletriangle.core.designsystem.R as SharedR
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -68,7 +70,7 @@ internal fun WorkoutMuscleEffort(workout: WorkoutDaySummary, modifier: Modifier 
 
     Column(modifier) {
         Text(
-            "MÚSCULOS OBJETIVO",
+            stringResource(SharedR.string.muscle_groups).uppercase(),
             color = WildforceThemeTokens.textSecondary,
             style = MaterialTheme.typography.caption,
             fontWeight = FontWeight.Bold,
@@ -85,12 +87,14 @@ internal fun WorkoutMuscleEffort(workout: WorkoutDaySummary, modifier: Modifier 
 @Composable
 private fun MuscleStimulusCard(stimulus: MuscleStimulus) {
     val displayedValue = stimulus.effectiveSets.coerceIn(0, MaxWorkoutMuscleStimulus)
+    val muscleLabel = tutorialMuscleName(stimulus.muscle)
+    val accessibilityLabel = stringResource(SharedR.string.___stimulus___d_of__d_sets, muscleLabel, displayedValue, MaxWorkoutMuscleStimulus)
     Column(
         Modifier.width(112.dp)
             .liquidGlass(RoundedCornerShape(12.dp))
             .padding(horizontal = 8.dp, vertical = 8.dp)
             .semantics {
-                contentDescription = "${stimulus.muscle.label}: $displayedValue de $MaxWorkoutMuscleStimulus series efectivas"
+                contentDescription = accessibilityLabel
             },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -100,7 +104,7 @@ private fun MuscleStimulusCard(stimulus: MuscleStimulus) {
             modifier = Modifier.size(68.dp),
         )
         Text(
-            stimulus.muscle.label,
+            muscleLabel,
             Modifier.padding(top = 8.dp).height(34.dp),
             color = WildforceThemeTokens.textPrimary,
             style = MaterialTheme.typography.caption,

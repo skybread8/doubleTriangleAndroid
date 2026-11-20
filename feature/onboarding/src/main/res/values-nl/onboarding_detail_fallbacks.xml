@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sheet-aware onboarding option fallbacks. -->
+    <string name="onboarding_detail_00">Zittend</string>
+    <string name="onboarding_detail_01">Licht actief</string>
+    <string name="onboarding_detail_02">Matig actief</string>
+    <string name="onboarding_detail_03">Zeer actief</string>
+    <string name="onboarding_detail_04">Je zit het grootste deel van de dag, bijvoorbeeld op kantoor.</string>
+    <string name="onboarding_detail_05">Je staat een groot deel van de dag, bijvoorbeeld in het onderwijs of de winkel.</string>
+    <string name="onboarding_detail_06">Je bent veel van de dag in beweging, bijvoorbeeld als ober of postbezorger.</string>
+    <string name="onboarding_detail_07">Je doet het grootste deel van de dag fysiek werk, bijvoorbeeld in de bouw of als sporter.</string>
+    <string name="onboarding_detail_08">Afvallen</string>
+    <string name="onboarding_detail_09">Spieren opbouwen</string>
+    <string name="onboarding_detail_10">Sterker worden</string>
+    <string name="onboarding_detail_11">Conditie verbeteren</string>
+    <string name="onboarding_detail_12">Mobiliteit verbeteren</string>
+    <string name="onboarding_detail_13">Lichaamssamenstelling verbeteren</string>
+    <string name="onboarding_detail_14">Algemene fitheid</string>
+    <string name="onboarding_detail_15">Verbrand vet en verbeter je stofwisseling met cardio en krachttraining.</string>
+    <string name="onboarding_detail_16">Vergroot spiermassa en definitie met krachttraining gericht op spiergroei.</string>
+    <string name="onboarding_detail_17">Richt je op zwaarder tillen en een betere neuromusculaire efficiëntie bij basisoefeningen.</string>
+    <string name="onboarding_detail_18">Verbeter je uithoudingsvermogen voor langere lichamelijke inspanning.</string>
+    <string name="onboarding_detail_19">Verbeter mobiliteit, flexibiliteit en gewrichtsgezondheid voor beter bewegen met minder pijn.</string>
+    <string name="onboarding_detail_20">Verlies vet en bouw tegelijk spieren op voor een atletischer lichaam.</string>
+    <string name="onboarding_detail_21">Behoud een gezonde leefstijl en verbeter je welzijn met evenwichtige training.</string>
+    <string name="onboarding_detail_22">Volledige beginner</string>
+    <string name="onboarding_detail_23">Beginner</string>
+    <string name="onboarding_detail_24">Beginner met enige ervaring</string>
+    <string name="onboarding_detail_25">Gevorderd</string>
+    <string name="onboarding_detail_26">Vergevorderd</string>
+    <string name="onboarding_detail_27">Elite</string>
+    <string name="onboarding_detail_28">Je begint met gestructureerd trainen en leert nog de basisbewegingen.</string>
+    <string name="onboarding_detail_29">Je hebt enige ervaring en bouwt aan regelmaat, techniek en vertrouwen.</string>
+    <string name="onboarding_detail_30">Je traint redelijk regelmatig en kunt eenvoudige progressie bij basisoefeningen aan.</string>
+    <string name="onboarding_detail_31">Je hebt goede trainingsgewoonten en herstelt goed van een matig trainingsvolume.</string>
+    <string name="onboarding_detail_32">Je traint consequent, begrijpt progressie en kunt zware programma’s aan.</string>
+    <string name="onboarding_detail_33">Je hebt een zeer sterke trainingsbasis en kunt gespecialiseerde of topsportprogramma’s aan.</string>
+</resources>

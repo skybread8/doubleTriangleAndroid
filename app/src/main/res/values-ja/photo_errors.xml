@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="photo_error_session">セッションの有効期限が切れました。もう一度ログインしてください。</string>
+    <string name="photo_error_access">このアカウントでは写真分析を利用できません。</string>
+    <string name="photo_error_size">画像が大きすぎます。別の写真をお試しください。</string>
+    <string name="photo_error_invalid">画像を処理できませんでした。食べ物が写っていることを確認し、別の写真をお試しください。</string>
+    <string name="photo_error_limit">リクエストが多すぎます。後でもう一度お試しください。</string>
+    <string name="photo_error_service">現在、写真分析を利用できません。後でもう一度お試しください。</string>
+    <string name="photo_error_connection">サーバーに接続できませんでした。接続を確認してもう一度お試しください。</string>
+    <string name="photo_error_generic">写真を分析できませんでした。もう一度お試しください。</string>
+    <string name="photo_error_camera_permission">カメラへのアクセスが必要です。設定で許可するか、ギャラリーから写真を選択してください。</string>
+    <string name="photo_error_camera_open">カメラを開けませんでした。もう一度試すか、ギャラリーから写真を選択してください。</string>
+    <string name="sync_subscription_required">データを同期するには有効なサブスクリプションが必要です。</string>
+</resources>

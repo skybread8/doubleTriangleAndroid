@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import java.io.ByteArrayOutputStream
 import android.util.Base64
 import io.codepassion.wildforce.android.BuildConfig
+import io.codepassion.wildforce.android.R
 import io.codepassion.doubletriangle.core.model.WildforceApiEnvironment
 import io.codepassion.doubletriangle.feature.onboarding.SubscriptionAccessStore
 import org.json.JSONArray
@@ -34,20 +35,23 @@ internal data class NutritionAnalysis(
     val imageUrl: String = "",
 )
 
-internal fun photoAnalysisError(error: Throwable): String = when (error) {
-    is IOException -> "No se pudo conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo."
-    is IllegalStateException -> error.message ?: "No se pudo analizar la foto. Inténtalo de nuevo."
-    else -> "No se pudo analizar la foto. Inténtalo de nuevo."
-}
+private class PhotoHttpException(val status: Int) : IOException()
 
-private fun photoHttpError(status: Int): String = when (status) {
-    401 -> "Tu sesión ha caducado. Inicia sesión de nuevo."
-    403 -> "Tu cuenta no tiene acceso al análisis de fotos."
-    413 -> "La imagen es demasiado grande. Prueba con otra foto."
-    422 -> "No se pudo procesar la imagen. Comprueba que contiene alimentos y prueba otra foto."
-    429 -> "Se han realizado demasiadas solicitudes. Inténtalo de nuevo más tarde."
-    in 500..599 -> "El servicio de análisis no está disponible en este momento. Inténtalo de nuevo más tarde."
-    else -> "No se pudo analizar la foto (error $status). Inténtalo de nuevo."
+internal fun photoAnalysisError(context: Context, error: Throwable): String {
+    val resource = when (error) {
+        is PhotoHttpException -> when (error.status) {
+            401 -> R.string.photo_error_session
+            403 -> R.string.photo_error_access
+            413 -> R.string.photo_error_size
+            422 -> R.string.photo_error_invalid
+            429 -> R.string.photo_error_limit
+            in 500..599 -> R.string.photo_error_service
+            else -> R.string.photo_error_generic
+        }
+        is IOException -> R.string.photo_error_connection
+        else -> R.string.photo_error_generic
+    }
+    return context.getString(resource)
 }
 
 internal data class NutritionAnalysisFood(
@@ -174,7 +178,7 @@ internal object NutritionAnalyzer {
                 output.write(normalizedBytes); output.writeBytes("\r\n--$boundary--\r\n")
             }
             val body = (if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream)?.bufferedReader()?.use { it.readText() }.orEmpty()
-            check(connection.responseCode in 200..299) { photoHttpError(connection.responseCode) }
+            if (connection.responseCode !in 200..299) throw PhotoHttpException(connection.responseCode)
             val values = (JSONObject(body).optJSONObject("data") ?: JSONObject()).optJSONArray("ingredients") ?: JSONArray()
             return buildList { for (index in 0 until values.length()) values.optString(index).trim().takeIf(String::isNotBlank)?.let(::add) }
         } finally { connection.disconnect() }
@@ -336,9 +340,7 @@ internal object NutritionAnalyzer {
             }
             val body = (if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream)
                 ?.bufferedReader()?.use { it.readText() }.orEmpty()
-            check(connection.responseCode in 200..299) {
-                photoHttpError(connection.responseCode)
-            }
+            if (connection.responseCode !in 200..299) throw PhotoHttpException(connection.responseCode)
             return parseServerEstimate(JSONObject(body).optJSONObject("data") ?: JSONObject(body))
         } finally { connection.disconnect() }
     }

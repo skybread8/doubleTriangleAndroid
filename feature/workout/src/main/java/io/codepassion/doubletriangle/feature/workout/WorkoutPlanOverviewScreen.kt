@@ -1,5 +1,6 @@
 package io.codepassion.doubletriangle.feature.workout
 
+import io.codepassion.doubletriangle.core.designsystem.localizedContentDescription
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -62,9 +63,9 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, planHistory: List
     val animatedProgress by animateFloatAsState(progress, animationSpec = tween(650))
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(contentPadding).padding(horizontal = 18.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth().padding(bottom = 16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Row(Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Volver" }.clickable(onClick = onBack).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(Modifier.heightIn(min = 48.dp).localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_go_back).clickable(onClick = onBack).padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
-                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.go_back).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_go_back).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.weight(1f))
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training_plan).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
@@ -78,7 +79,7 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, planHistory: List
                     Text(state.planName.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h4, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     Text(state.phase, Modifier.padding(top = 3.dp), color = WildforceThemeTokens.textSecondary, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_6334941613f202f4, state.mesocycleNumber, state.mesocycleIndex, state.weekIndex, state.cycleLength), Modifier.padding(top = 4.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                    state.mesocyclePhase?.let { phase -> Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_7bc4873e06901e86, phase.label.uppercase(), state.phaseWeek), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                    state.mesocyclePhase?.let { phase -> Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_7bc4873e06901e86, workoutPhaseLabel(phase).uppercase(), state.phaseWeek), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                     Spacer(Modifier.height(18.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(Modifier.size(64.dp).clip(CircleShape).background(WildforceThemeTokens.textPrimary.copy(alpha = 0.10f)), contentAlignment = Alignment.Center) {
@@ -107,7 +108,7 @@ internal fun WorkoutPlanOverviewScreen(state: WorkoutHubState, planHistory: List
                     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).padding(14.dp)) {
                         Text(archived.planName, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                         Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_b221067dab9b73d3, archived.mesocycleNumber, archived.mesocycleIndex, archived.weekIndex, archived.cycleLength), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
-                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_beb27d1c23e4f96d, archived.workouts.size, archived.mesocyclePhase?.label ?: archived.phase), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_beb27d1c23e4f96d, archived.workouts.size, archived.mesocyclePhase?.let { workoutPhaseLabel(it) } ?: archived.phase), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -125,27 +126,34 @@ private fun PlanSessionRow(workout: WorkoutDaySummary, onClick: () -> Unit) {
         // for an in-progress workout and explicit regeneration warnings.
         WorkoutStatus.Planned -> Color(0xFF0A84FF)
     }
+    val statusLabel = androidx.compose.ui.res.stringResource(when (workout.status) {
+        WorkoutStatus.Completed -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_completed
+        WorkoutStatus.Skipped -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_skipped
+        WorkoutStatus.InProgress -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_in_progress
+        WorkoutStatus.Draft -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_draft
+        WorkoutStatus.Planned -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_planned
+    })
     val statusScale = remember(workout.status) { Animatable(.78f) }
     LaunchedEffect(workout.status) { statusScale.animateTo(1f, spring(dampingRatio = .55f, stiffness = 560f)) }
-    Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).semantics { contentDescription = "${workout.title}, ${workout.status}, ${workout.estimatedMinutes} minutos" }.clickable(onClick = onClick).padding(13.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(16.dp)).localizedWorkoutCardDescription(workout.title, statusLabel, workout.estimatedMinutes).clickable(onClick = onClick).padding(13.dp), verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(42.dp).clip(CircleShape).background(statusColor.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {
             when (workout.status) {
-                WorkoutStatus.Completed -> Icon(Icons.Filled.CheckCircle, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.completed), modifier = Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, tint = statusColor)
-                WorkoutStatus.Skipped -> Icon(Icons.Filled.Remove, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skipped), modifier = Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, tint = statusColor)
-                WorkoutStatus.InProgress -> Icon(Icons.Filled.PlayArrow, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.in_progress), modifier = Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, tint = statusColor)
+                WorkoutStatus.Completed -> Icon(Icons.Filled.CheckCircle, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_completed), modifier = Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, tint = statusColor)
+                WorkoutStatus.Skipped -> Icon(Icons.Filled.Remove, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_skipped), modifier = Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, tint = statusColor)
+                WorkoutStatus.InProgress -> Icon(Icons.Filled.PlayArrow, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_in_progress), modifier = Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, tint = statusColor)
                 WorkoutStatus.Draft, WorkoutStatus.Planned -> Text(workout.order.toString(), Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, fontWeight = FontWeight.Bold, color = statusColor)
             }
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(workout.title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-            Text(workout.scheduledDay.getDisplayName(TextStyle.SHORT, androidx.compose.ui.platform.LocalConfiguration.current.locales[0]) + " · " + androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_min, workout.estimatedMinutes), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            Text(workout.scheduledDay.getDisplayName(TextStyle.SHORT, androidx.compose.ui.platform.LocalConfiguration.current.locales[0]) + " · " + androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_min, workout.estimatedMinutes), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
         }
         Text(when (workout.status) {
-            WorkoutStatus.Completed -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.completed).uppercase()
-            WorkoutStatus.Skipped -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skipped).uppercase()
-            WorkoutStatus.InProgress -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.in_progress).uppercase()
-            WorkoutStatus.Draft -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.draft).uppercase()
-            WorkoutStatus.Planned -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.planned).uppercase()
+            WorkoutStatus.Completed -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_completed).uppercase()
+            WorkoutStatus.Skipped -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_skipped).uppercase()
+            WorkoutStatus.InProgress -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_in_progress).uppercase()
+            WorkoutStatus.Draft -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_draft).uppercase()
+            WorkoutStatus.Planned -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_planned).uppercase()
         }, Modifier.graphicsLayer { scaleX = statusScale.value; scaleY = statusScale.value }, style = MaterialTheme.typography.overline, fontWeight = FontWeight.Bold, color = statusColor)
     }
 }

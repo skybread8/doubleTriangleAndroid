@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android-specific copy without an equivalent in the shared Sheet. -->
+    <string name="settings_faq_description">有关训练、营养、Android和账户的问题解答。</string>
+    <string name="settings_health_description">使用Health Connect保存训练并同步身体测量数据。</string>
+    <string name="settings_health_disabled">已为Wildforce停用Health Connect。</string>
+    <string name="settings_health_imported">已从Health Connect导入身体测量数据。</string>
+    <string name="settings_health_connected">Health Connect已连接。</string>
+    <string name="settings_health_denied">未获得Health Connect访问权限。</string>
+    <string name="settings_focus_description">使用Android专注设置减少训练期间的干扰。</string>
+    <string name="settings_focus_categories_description">管理Android在训练期间静音的应用和类别。</string>
+    <string name="settings_live_update_description">当Android 16和设备支持时，以卡片或状态提示显示训练。</string>
+    <string name="settings_workout_notifications">训练通知</string>
+    <string name="settings_workout_notifications_description">在通知面板和锁屏上显示当前训练。</string>
+    <string name="settings_amazfit_description">将当前训练同步到Amazfit上的Wildforce，仅在训练期间启用。</string>
+    <string name="settings_rest_alerts">休息开始提醒</string>
+    <string name="settings_rest_alerts_description">休息计时器启动时发出提醒。</string>
+    <string name="settings_lock_photo_description">打开进度照片时需要设备身份验证。</string>
+</resources>

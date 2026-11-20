@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="purchase_none_to_restore">未找到可恢复的有效购买。</string>
+</resources>

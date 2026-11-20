@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="photo_error_session">A sessão expirou. Inicia sessão novamente.</string>
+    <string name="photo_error_access">A tua conta não tem acesso à análise de fotografias.</string>
+    <string name="photo_error_size">A imagem é demasiado grande. Experimenta outra fotografia.</string>
+    <string name="photo_error_invalid">Não foi possível processar a imagem. Confirma que contém alimentos e experimenta outra fotografia.</string>
+    <string name="photo_error_limit">Demasiados pedidos. Tenta novamente mais tarde.</string>
+    <string name="photo_error_service">A análise de fotografias está indisponível. Tenta novamente mais tarde.</string>
+    <string name="photo_error_connection">Não foi possível ligar ao servidor. Verifica a ligação e tenta novamente.</string>
+    <string name="photo_error_generic">Não foi possível analisar a fotografia. Tenta novamente.</string>
+    <string name="photo_error_camera_permission">É necessário acesso à câmara. Permite-o nas definições ou escolhe uma fotografia da galeria.</string>
+    <string name="photo_error_camera_open">Não foi possível abrir a câmara. Tenta novamente ou escolhe uma fotografia da galeria.</string>
+    <string name="sync_subscription_required">Precisas de uma subscrição ativa para sincronizar os dados.</string>
+</resources>

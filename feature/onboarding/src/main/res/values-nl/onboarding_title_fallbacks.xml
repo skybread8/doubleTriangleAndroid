@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sheet strings remain authoritative; these fallbacks cover untranslated cells. -->
+    <string name="onboarding_title_welcome">Welkom</string>
+    <string name="onboarding_title_your_goals">Je doelen</string>
+    <string name="onboarding_title_lifestyle">Leefstijl</string>
+    <string name="onboarding_title_availability">Beschikbaarheid</string>
+    <string name="onboarding_title_workout_duration">Trainingsduur</string>
+    <string name="onboarding_title_experience">Ervaring</string>
+    <string name="onboarding_title_program">Programma</string>
+    <string name="onboarding_title_body_phase">Lichaamsfase</string>
+    <string name="onboarding_title_gym">Sportschool</string>
+    <string name="onboarding_title_equipment">Uitrusting</string>
+    <string name="onboarding_title_restrictions">Beperkingen</string>
+    <string name="onboarding_title_when_is_your_birthday">Wanneer ben je jarig</string>
+    <string name="onboarding_title_what_s_your_sex_">Wat is je geslacht?</string>
+    <string name="onboarding_title_height">Lengte</string>
+    <string name="onboarding_title_weight">Gewicht</string>
+</resources>

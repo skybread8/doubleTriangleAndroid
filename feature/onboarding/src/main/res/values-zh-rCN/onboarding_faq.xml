@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="faq_intro">使用 Wildforce 训练、改善饮食并持续进步所需的一切。</string>
+    <string name="faq_getting_started">开始使用</string>
+    <string name="faq_training">训练与进度</string>
+    <string name="faq_nutrition">营养</string>
+    <string name="faq_devices">Android 和设备</string>
+    <string name="faq_account">账户、数据与设置</string>
+    <string name="faq_help">需要更多帮助？请通过“帮助”发送手机型号、Android 和 Wildforce 版本以及简要说明。</string>
+    <string-array name="faq_questions">
+        <item>Wildforce 是什么？</item>
+        <item>我的训练计划如何制定？</item>
+        <item>在 Android 上使用 Wildforce 需要什么？</item>
+        <item>可以离线训练吗？</item>
+        <item>训练时可以更换动作吗？</item>
+        <item>可以创建自己的训练吗？</item>
+        <item>休息时间如何运作？</item>
+        <item>在哪里查看进步？</item>
+        <item>完成训练后会发生什么？</item>
+        <item>如何记录饮食？</item>
+        <item>可以根据家里的食材推荐餐食吗？</item>
+        <item>没有达到营养素目标怎么办？</item>
+        <item>可以按天查看计划吗？</item>
+        <item>Android 使用哪种健康数据集成？</item>
+        <item>通知有什么作用？</item>
+        <item>Android 有 Wildforce 小组件吗？</item>
+        <item>支持 Wear OS 吗？</item>
+        <item>可以在 iPhone 上使用 Wildforce 吗？</item>
+        <item>可以使用英制单位吗？</item>
+        <item>换设备后还能使用我的数据吗？</item>
+        <item>可以更改语言、主题或偏好吗？</item>
+        <item>健康连接无法同步怎么办？</item>
+        <item>遇到其他问题怎么办？</item>
+    </string-array>
+    <string-array name="faq_answers">
+        <item>Wildforce 是适用于 iPhone 和 Android 的训练与营养平台。你可以创建适合自己的计划，记录训练和营养，追踪进步。</item>
+        <item>初始设置时选择目标、经验、可用时间、器材、偏好和限制。Wildforce 会据此创建可调整的渐进训练计划。</item>
+        <item>你需要 Android 9 或更高版本，以及你所在地区提供的最新版本 Wildforce。</item>
+        <item>可以查看和记录本地已有的内容。生成计划和使用 AI 分析需要联网。启用云同步时，待同步的更改会在恢复网络后同步。</item>
+        <item>可以。你可以查找替代动作、更换动作，或将其从当前训练中移除。</item>
+        <item>可以。你可以创建、编辑、执行和删除自定义训练。</item>
+        <item>Wildforce 会在每组结束后记录休息时间。允许通知后，你可以通过通知访问正在进行的训练。</item>
+        <item>在“进度”中可以查看动作历史、训练量、统计、连续记录和身体变化。</item>
+        <item>训练会保存到历史记录并更新统计和进度。数据足够时，你可以与之前的训练进行比较。</item>
+        <item>可以使用照片、条形码、营养标签、文字、食物搜索、最近记录或手动输入。</item>
+        <item>可以。添加现有食材后，使用餐食灵感获取符合营养目标的建议。</item>
+        <item>Wildforce 可以推荐食物或餐食来补足剩余的营养素。目标是持续做出更好的选择。</item>
+        <item>可以。计划包含每周日历、热量和营养素目标，以及根据目标安排的热量不足、维持或盈余日。</item>
+        <item>Wildforce 连接健康连接。你可以选择身高、体重、热量、营养和训练权限，并在设置中撤销。</item>
+        <item>通知显示正在进行的训练和休息，并提供提醒。如果看不到当前训练，请检查 Wildforce 的通知权限。</item>
+        <item>主屏幕提供训练快捷入口。长按空白区域，在小组件列表中查找 Wildforce；具体取决于当前版本是否启用。</item>
+        <item>Wear OS 应用可通过蓝牙显示训练状态、完成组数并控制休息。Health Services 和真实手表验证仍在进行中。</item>
+        <item>可以。iPhone 版可与 Apple Health 和 Apple Watch 集成，支持进行中的训练、休息以及适用动作的重复次数信息。</item>
+        <item>可以。在设置中选择公制或英制，体重和尺寸会按所选格式显示。</item>
+        <item>数据保存在本地，启用云同步后可以与账户同步。使用同一账户登录即可恢复已同步的数据。</item>
+        <item>可以。在个人资料和设置中更改语言、单位、计划偏好、提醒和主题。</item>
+        <item>检查健康连接权限，更新 Wildforce 并重新打开应用。如果问题仍然存在，请联系支持并提供平台和应用版本。</item>
+        <item>更新 Wildforce、重启应用并检查权限。如果问题仍然存在，请联系支持并提供手机型号、Android 版本、Wildforce 版本和简要描述。</item>
+    </string-array>
+</resources>

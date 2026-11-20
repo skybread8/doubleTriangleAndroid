@@ -172,7 +172,15 @@ internal fun analyticsExerciseCategory(exercise: ExerciseSummary): String = anal
 
 internal data class Kpi(val title: String, val value: String, val subtitle: String = "", val glyph: String)
 internal data class MuscleScore(val name: String, val score: Double)
-internal data class Insight(val title: String, val body: String, val glyph: String)
+internal data class Insight(
+    val title: String,
+    val body: String,
+    val glyph: String,
+    val titleResource: Int? = null,
+    val titleArguments: List<Any> = emptyList(),
+    val bodyResource: Int? = null,
+    val bodyArguments: List<Any> = emptyList(),
+)
 internal data class PersonalRecord(
     val exerciseName: String,
     val title: String,
@@ -340,16 +348,22 @@ fun AnalyticsScreen(
             last = allSessions.maxByOrNull { it.timestampMillis },
         )
         if (empty) EmptyAnalyticsCard() else {
+            val plannedSessions = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_of__d_sessions, completed, planned)
+            val averageVolumeLabel = averageVolume?.let { androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.avg____per_workout, formatWeight(it, useImperial)) }.orEmpty()
+            val longestLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_longest__d, longest)
+            val noPlan = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_plan)
+            val noScheduledDays = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_scheduled_training_days_in_this_period)
+            val averageMinutesLabel = averageMinutes?.let { androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_average) + " " + formatMinutes(it) }.orEmpty()
             KpiStrip(buildList {
-                add(Kpi("Entrenamientos totales", completed.toString(), if (timeframe.comparesPlan) "$completed de $planned planificados" else "", "✓"))
-                add(Kpi("Volumen total", formatWeight(volume, useImperial), averageVolume?.let { "Media de ${formatWeight(it, useImperial)} por entrenamiento" }.orEmpty(), "▥"))
-                add(Kpi("Racha actual", state.user.currentStreak.toString(), "Máxima $longest", "♨"))
-                if (timeframe.comparesPlan) add(Kpi("Consistencia", if (planned == 0) "Sin plan" else "${analyticsCompletionPercentage(completed, planned)}%", if (planned == 0) "No hay días programados" else "$completed de $planned planificados", "▣"))
-                else if (minutes > 0) add(Kpi("Tiempo entrenando", formatMinutes(minutes), averageMinutes?.let { "Media de ${formatMinutes(it)}" }.orEmpty(), "◷"))
+                add(Kpi("Entrenamientos totales", completed.toString(), if (timeframe.comparesPlan) plannedSessions else "", "✓"))
+                add(Kpi("Volumen total", formatWeight(volume, useImperial), averageVolumeLabel, "▥"))
+                add(Kpi("Racha actual", state.user.currentStreak.toString(), longestLabel, "♨"))
+                if (timeframe.comparesPlan) add(Kpi("Consistencia", if (planned == 0) noPlan else "${analyticsCompletionPercentage(completed, planned)}%", if (planned == 0) noScheduledDays else plannedSessions, "▣"))
+                else if (minutes > 0) add(Kpi("Tiempo entrenando", formatMinutes(minutes), averageMinutesLabel, "◷"))
             })
             val buckets = volumeBuckets(data, timeframe)
             if (buckets.any { it.second > 0 }) DashboardCard {
-                SectionHeader("Tendencia de volumen", timeframe.description, "▥")
+                SectionHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.volume_trend), androidx.compose.ui.res.stringResource(timeframe.descriptionRes), "▥")
                 VolumeTrendSummary(
                     totalVolumeKg = volume,
                     previousVolumeKg = previousAnalyticsVolume(allSessions, timeframe),
@@ -367,9 +381,9 @@ fun AnalyticsScreen(
             val focus = analyticsFocusDistribution(data.sessions)
             AnalyticsMiniCharts(data.sessions, focus, appLanguage)
             val balance = muscleDistribution(data.histories)
-            if (balance.isNotEmpty()) MuscleSection("Equilibrio muscular", timeframe.description, null, balance, false)
+            if (balance.isNotEmpty()) MuscleSection(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.muscle_balance), androidx.compose.ui.res.stringResource(timeframe.descriptionRes), null, balance, false)
             val fatigue = muscleFatigue(data.histories)
-            if (fatigue.isNotEmpty()) MuscleSection("Fatiga muscular", timeframe.description, "Estrés de entrenamiento reciente por grupo muscular, dando más peso a las sesiones más nuevas.", fatigue, true)
+            if (fatigue.isNotEmpty()) MuscleSection(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.muscle_fatigue), androidx.compose.ui.res.stringResource(timeframe.descriptionRes), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.recent_training_stress_by_major_muscle_group__with_newer_sessions_weighted_more_heavily_), fatigue, true)
             if (data.sessions.isNotEmpty()) ConsistencyHeatmap(data.sessions, timeframe)
             val insights = analyticsInsights(
                 data = data,
@@ -379,7 +393,7 @@ fun AnalyticsScreen(
                 plannedWorkoutCount = planned,
                 previousVolumeKg = previousAnalyticsVolume(allSessions, timeframe),
             )
-            if (insights.isNotEmpty()) InsightsCard(insights)
+            if (insights.isNotEmpty()) InsightsCard(insights, appLanguage)
             ExerciseList(timeframe, data.exercises, gender, useImperial) { selected = it }
         }
         Spacer(Modifier.height(12.dp))
@@ -406,7 +420,7 @@ private fun AnalyticsHeader(
     val timeframeLabelMaxLines = if (fontScale > 1.15f) 2 else 1
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(localizedResources.getString(io.codepassion.doubletriangle.core.designsystem.R.string.analytics), fontFamily = Exo2FontFamily, fontSize = 30.sp, lineHeight = 36.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+            Text(localizedResources.getString(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_analytics), fontFamily = Exo2FontFamily, fontSize = 30.sp, lineHeight = 36.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Text(localizedResources.getString(timeframe.descriptionRes), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
         }
         // Match SwiftUI's compact .pickerStyle(.segmented) geometry.
@@ -456,8 +470,11 @@ private fun AnalyticsHeader(
             }
         }
         last?.let {
+            val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+            val formattedDate = DateFormat.getDateInstance(DateFormat.MEDIUM, locale).format(Date(it.timestampMillis))
+            val lastWorkoutLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.last_workout___, formattedDate)
             Row(
-                Modifier.fillMaxWidth().semantics { contentDescription = "Último entrenamiento ${mediumDate(it.timestampMillis)}" },
+                Modifier.fillMaxWidth().semantics { contentDescription = lastWorkoutLabel },
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -468,7 +485,7 @@ private fun AnalyticsHeader(
                     modifier = Modifier.size(15.dp),
                 )
                 Text(
-                    "Último entrenamiento ${mediumDate(it.timestampMillis)}",
+                    lastWorkoutLabel,
                     style = MaterialTheme.typography.caption,
                     color = WildforceThemeTokens.textSecondary,
                 )
@@ -480,7 +497,7 @@ private fun AnalyticsHeader(
 @Composable private fun EmptyAnalyticsCard() = DashboardCard {
     Column(Modifier.fillMaxWidth().padding(vertical = 20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Badge("▥", 48)
-        Text(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_analytics_yet), style = MaterialTheme.typography.h6, modifier = Modifier.padding(top = 14.dp))
+        Text(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_no_analytics_yet), style = MaterialTheme.typography.h6, modifier = Modifier.padding(top = 14.dp))
         Text(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_analytics_data_available_for_this_exercise_), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 6.dp))
     }
 }
@@ -744,19 +761,19 @@ private fun AnalyticsMiniCharts(
         val wideLayout = maxWidth >= 424.dp
         val content: @Composable () -> Unit = {
             if (sessions.isNotEmpty()) DashboardCard {
-                SectionHeader("Cuándo entrenas", "Entrenamientos completados por día de la semana", "◷")
+                SectionHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_when_you_train), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_completed_workouts_by_weekday), "◷")
                 WeekdayChart(sessions)
             }
             if (focus.isNotEmpty()) DashboardCard {
-                SectionHeader("Enfoque del entrenamiento", "Distribución de sesiones en este periodo", "◉")
+                SectionHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_workout_focus), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_session_mix_in_this_period), "◉")
                 FocusChart(focus, appLanguage)
             }
         }
 
         if (wideLayout) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (sessions.isNotEmpty()) Box(Modifier.weight(1f)) { DashboardCard { SectionHeader("Cuándo entrenas", "Entrenamientos completados por día de la semana", "◷"); WeekdayChart(sessions) } }
-                if (focus.isNotEmpty()) Box(Modifier.weight(1f)) { DashboardCard { SectionHeader("Enfoque del entrenamiento", "Distribución de sesiones en este periodo", "◉"); FocusChart(focus, appLanguage) } }
+                if (sessions.isNotEmpty()) Box(Modifier.weight(1f)) { DashboardCard { SectionHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_when_you_train), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_completed_workouts_by_weekday), "◷"); WeekdayChart(sessions) } }
+                if (focus.isNotEmpty()) Box(Modifier.weight(1f)) { DashboardCard { SectionHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_workout_focus), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_session_mix_in_this_period), "◉"); FocusChart(focus, appLanguage) } }
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) { content() }
@@ -792,7 +809,7 @@ private fun analyticsFocusEnglishName(raw: String): String = when (raw.lowercase
 
 @Composable private fun PersonalRecords(records: List<PersonalRecord>, onExerciseSelected: (ExerciseSummary) -> Unit) = DashboardCard {
     val colors = analyticsColors()
-    SectionHeader("Récords personales", "Mejores marcas de ejercicios en este periodo", "★")
+    SectionHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_personal_records), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.best_exercise_achievements_in_this_period), "★")
     Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         records.forEach { record ->
             // The iOS 188 × 168 frame describes the content, before padding.
@@ -881,7 +898,7 @@ private fun analyticsFocusEnglishName(raw: String): String = when (raw.lowercase
     val max = if (fatigue) 100.0 else scores.maxOfOrNull { it.score }?.coerceAtLeast(1.0) ?: 1.0
     val colors = analyticsColors()
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) { scores.sortedByDescending { it.score }.forEach { item -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(item.name, style = MaterialTheme.typography.subtitle2); Text(if (fatigue) "${item.score.toInt()}%" else item.score.toInt().toString(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text(localizedAnalyticsTitle(item.name), style = MaterialTheme.typography.subtitle2); Text(if (fatigue) "${item.score.toInt()}%" else item.score.toInt().toString(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
         Box(Modifier.fillMaxWidth().height(12.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = .14f), CircleShape)) {
             val gradient = if (fatigue) listOf(colors.orange.copy(alpha = .55f), colors.red.copy(alpha = .9f)) else listOf(colors.accentText.copy(alpha = .55f), colors.accentText)
             Box(Modifier.fillMaxWidth((item.score / max).toFloat().coerceIn(.08f, 1f)).height(12.dp).background(Brush.horizontalGradient(gradient), CircleShape))
@@ -900,7 +917,7 @@ private fun analyticsFocusEnglishName(raw: String): String = when (raw.lowercase
         scores.indices.forEach { drawLine(gridColor.copy(alpha = .12f), center, p(it, 1f), 1.dp.toPx()) }
         val path = Path(); scores.forEachIndexed { i, item -> val point = p(i, (item.score / max).toFloat().coerceIn(0f, 1f)); if (i == 0) path.moveTo(point.x, point.y) else path.lineTo(point.x, point.y) }; path.close(); drawPath(path, accent.copy(alpha = .28f)); drawPath(path, accent, style = Stroke(2.dp.toPx()))
     }
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) { scores.take(6).forEach { Text(it.name.take(8), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary) } }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) { scores.take(6).forEach { Text(localizedAnalyticsTitle(it.name).take(8), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary) } }
 }
 
 @Composable private fun ConsistencyHeatmap(sessions: List<TrainingSessionHistoryEntry>, timeframe: AnalyticsTimeframe) = DashboardCard {
@@ -914,20 +931,20 @@ private fun analyticsFocusEnglishName(raw: String): String = when (raw.lowercase
     val days = generateSequence(firstDay) { day -> day.plusDays(1).takeIf { it <= today } }.toList()
     val counts = sessions.groupingBy { localDate(it.timestampMillis) }.eachCount()
     val activeDays = counts.keys.count { it in days }
-    SectionHeader("Consistencia", "${sessions.size} sesiones en $activeDays días activos", "▦")
+    SectionHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_consistency), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_sessions_across__d_active_days, sessions.size, activeDays), "▦")
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) { days.chunked(12).forEach { row -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) { row.forEach { date -> val level = (counts[date] ?: 0).coerceAtMost(3); Box(Modifier.weight(1f).height(18.dp).background(if (level == 0) WildforceThemeTokens.textSecondary.copy(alpha = .12f) else WildforceThemeTokens.accent.copy(alpha = if (level == 1) .35f else if (level == 2) .6f else 1f), RoundedCornerShape(4.dp))) } } } }
 }
 
-@Composable private fun InsightsCard(insights: List<Insight>) = DashboardCard {
-    SectionHeader("Claves", "Señales breves de tus entrenamientos recientes", "✦")
-    insights.forEachIndexed { i, insight -> Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) { Badge(insight.glyph, 36); Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(insight.title, style = MaterialTheme.typography.subtitle2); Text(insight.body, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary) } }; if (i < insights.lastIndex) Divider(color = WildforceThemeTokens.textSecondary.copy(alpha = .15f)) }
+@Composable private fun InsightsCard(insights: List<Insight>, appLanguage: String) = DashboardCard {
+    SectionHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.insights), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.short_signals_from_your_recent_training), "✦")
+    insights.forEachIndexed { i, insight -> Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) { Badge(insight.glyph, 36); Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(insight.titleResource?.let { androidx.compose.ui.res.stringResource(it, *insight.titleArguments.map { arg -> if (arg is String && insight.titleResource == io.codepassion.doubletriangle.core.designsystem.R.string.focus____) localizedWorkoutLabel(arg, appLanguage) else if (arg is String) localizedAnalyticsTitle(arg) else arg }.toTypedArray()) } ?: insight.title, style = MaterialTheme.typography.subtitle2); Text(insight.bodyResource?.let { androidx.compose.ui.res.stringResource(it, *insight.bodyArguments.map { arg -> if (arg is String && insight.titleResource == io.codepassion.doubletriangle.core.designsystem.R.string.focus____) localizedWorkoutLabel(arg, appLanguage) else if (arg is String) localizedAnalyticsTitle(arg) else arg }.toTypedArray()) } ?: insight.body, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary) } }; if (i < insights.lastIndex) Divider(color = WildforceThemeTokens.textSecondary.copy(alpha = .15f)) }
 }
 
 @Composable private fun ExerciseList(timeframe: AnalyticsTimeframe, exercises: List<ExerciseAnalyticsSummary>, gender: String, useImperial: Boolean, onSelect: (ExerciseAnalyticsSummary) -> Unit) = DashboardCard {
     val searchContext = androidx.compose.ui.platform.LocalContext.current
     var query by remember { mutableStateOf("") }; val filtered = exercises.filter { exerciseMatchesSearch(searchContext, it.exercise.imageKey, it.exercise.name, query) }
     val colors = analyticsColors()
-    SectionHeader(if (timeframe == AnalyticsTimeframe.AllTime) "Todos los ejercicios completados" else "Ejercicios de este periodo", if (timeframe == AnalyticsTimeframe.AllTime) "Historial completo de ejercicios" else "Desglose de ejercicios completados recientemente", "☷")
+    SectionHeader(if (timeframe == AnalyticsTimeframe.AllTime) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.all_completed_exercises) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.exercises_in_this_period), if (timeframe == AnalyticsTimeframe.AllTime) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.lifetime_exercise_history) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.recent_completed_exercise_breakdown), "☷")
     if (exercises.isEmpty()) Text(if (timeframe == AnalyticsTimeframe.AllTime) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f9cc6a832cb57072) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3b0d6594a966bb69), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary) else {
         Row(Modifier.fillMaxWidth().background(colors.inset, RoundedCornerShape(12.dp)).border(1.dp, colors.border, RoundedCornerShape(12.dp)).padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Icon(Icons.Filled.Search, contentDescription = null, tint = WildforceThemeTokens.textSecondary); BasicTextField(query, { query = it }, Modifier.weight(1f), singleLine = true, textStyle = MaterialTheme.typography.body2.copy(color = WildforceThemeTokens.textPrimary), decorationBox = { inner -> if (query.isEmpty()) Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.search_exercises), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); inner() }); if (query.isNotEmpty()) Box(Modifier.size(48.dp).clickable { query = "" }, contentAlignment = Alignment.Center) { Icon(Icons.Filled.Close, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.clear), modifier = Modifier.size(24.dp), tint = WildforceThemeTokens.textSecondary) }
@@ -946,8 +963,8 @@ private fun analyticsFocusEnglishName(raw: String): String = when (raw.lowercase
             modifier = Modifier.size(width = 56.dp, height = 68.dp).clip(RoundedCornerShape(10.dp)),
             contentScale = ContentScale.Crop,
         )
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(exerciseDisplayName(summary.exercise.imageKey, summary.exercise.name), style = MaterialTheme.typography.subtitle1, maxLines = 2); Text(analyticsExerciseCategory(summary.exercise), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f1fdb8c054140c2d, summary.sessions), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary) }
-        Column(horizontalAlignment = Alignment.End) { if (summary.personalBestKg > 0) { Text(formatWeight(summary.personalBestKg, useImperial), style = MaterialTheme.typography.subtitle1); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.best_weight).uppercase(), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary) }; Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.textSecondary) }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(exerciseDisplayName(summary.exercise.imageKey, summary.exercise.name), style = MaterialTheme.typography.subtitle1, maxLines = 2); Text(localizedAnalyticsTitle(analyticsExerciseCategory(summary.exercise)), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f1fdb8c054140c2d, summary.sessions), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary) }
+        Column(horizontalAlignment = Alignment.End) { if (summary.personalBestKg > 0) { Text(formatWeight(summary.personalBestKg, useImperial), style = MaterialTheme.typography.subtitle1); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_best_weight).uppercase(), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary) }; Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.textSecondary) }
     }
 }
 
@@ -975,17 +992,17 @@ private fun analyticsFocusEnglishName(raw: String): String = when (raw.lowercase
                 modifier = Modifier.size(width = 84.dp, height = 100.dp).clip(RoundedCornerShape(20.dp)),
                 contentScale = ContentScale.Crop,
             )
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { Text(exerciseDisplayName(summary.exercise.imageKey, summary.exercise.name), fontSize = 22.sp, lineHeight = 27.sp, fontWeight = FontWeight.Bold); Text(analyticsExerciseCategory(summary.exercise), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_5e08a99c835e696d, history.size), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_in_the_last_30_days, history.count { it.timestampMillis >= startMillis(29) }), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary) }
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { Text(exerciseDisplayName(summary.exercise.imageKey, summary.exercise.name), fontSize = 22.sp, lineHeight = 27.sp, fontWeight = FontWeight.Bold); Text(localizedAnalyticsTitle(analyticsExerciseCategory(summary.exercise)), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_5e08a99c835e696d, history.size), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_in_the_last_30_days, history.count { it.timestampMillis >= startMillis(29) }), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary) }
         }
-        if (history.isEmpty()) DashboardCard { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.complete_this_exercise_in_a_workout_to_unlock_detailed_analytics_), color = WildforceThemeTokens.textSecondary) }
+        if (history.isEmpty()) DashboardCard { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_complete_this_exercise_in_a_workout_to_unlock_detailed_analytics_), color = WildforceThemeTokens.textSecondary) }
         else {
             ExerciseHistoryCharts(summary.exercise, useImperial, history.hashCode())
             exerciseRecordMetrics(history, summary.exercise, useImperial).takeIf { it.isNotEmpty() }?.let { metrics ->
                 HighlightGrid(metrics, title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.records))
             }
-            HighlightGrid(exerciseOverviewMetrics(history), title = "Resumen")
+            HighlightGrid(exerciseOverviewMetrics(history), title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_overview))
             exerciseCategoryMetrics(history, summary.exercise, useImperial).takeIf { it.isNotEmpty() }?.let { metrics ->
-                HighlightGrid(metrics, title = "Rendimiento")
+                HighlightGrid(metrics, title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_performance))
             }
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.sessions), style = MaterialTheme.typography.h6)
             history.forEach { point ->
@@ -1362,7 +1379,7 @@ internal fun analyticsInsights(
     if (data.sessions.isEmpty()) return emptyList()
     val prioritized = buildList {
         if (currentStreak >= 3 && currentStreak == longestStreak) {
-            add(100 to Insight("Has igualado tu mejor racha", "$currentStreak sesiones seguidas igualan tu racha más larga.", "♨"))
+            add(100 to Insight("Has igualado tu mejor racha", "$currentStreak sesiones seguidas igualan tu racha más larga.", "♨", titleResource = io.codepassion.doubletriangle.core.designsystem.R.string.you_ve_matched_your_best_streak, bodyResource = io.codepassion.doubletriangle.core.designsystem.R.string._d_sessions_in_a_row_ties_your_longest_run_so_far_, bodyArguments = listOf(currentStreak)))
         }
         if (timeframe.comparesPlan && plannedWorkoutCount > 0) {
             val completionRate = data.sessions.size.toDouble() / plannedWorkoutCount
@@ -1372,7 +1389,7 @@ internal fun analyticsInsights(
                 completionRate < .5 -> "La consistencia ha bajado" to 80
                 else -> "El plan sigue avanzando" to 75
             }
-            add(priority to Insight(title, "Has completado ${data.sessions.size} de $plannedWorkoutCount sesiones planificadas en este periodo.", "▣"))
+            add(priority to Insight(title, "Has completado ${data.sessions.size} de $plannedWorkoutCount sesiones planificadas en este periodo.", "▣", titleResource = when { completionRate >= 1.0 -> io.codepassion.doubletriangle.core.designsystem.R.string.perfect_consistency; completionRate >= .8 -> io.codepassion.doubletriangle.core.designsystem.R.string.training_stayed_on_track; completionRate < .5 -> io.codepassion.doubletriangle.core.designsystem.R.string.consistency_dipped; else -> io.codepassion.doubletriangle.core.designsystem.R.string.you_kept_the_plan_moving }, bodyResource = io.codepassion.doubletriangle.core.designsystem.R.string.you_completed__d_of__d_planned_sessions_in_this_period_, bodyArguments = listOf(data.sessions.size, plannedWorkoutCount)))
         }
         previousVolumeKg?.takeIf { it > 0.0 }?.let { previous ->
             val current = data.sessions.sumOf { it.volumeKg }
@@ -1380,12 +1397,12 @@ internal fun analyticsInsights(
             if (abs(change) >= .15) {
                 val percent = (abs(change) * 100).roundToInt()
                 val direction = if (change > 0) "subido" else "bajado"
-                add(84 to Insight("La carga ha $direction un $percent%", "Has registrado ${formatWeight(current)} este periodo frente a ${formatWeight(previous)} en el anterior.", if (change > 0) "↗" else "↘"))
+                add(84 to Insight("La carga ha $direction un $percent%", "Has registrado ${formatWeight(current)} este periodo frente a ${formatWeight(previous)} en el anterior.", if (change > 0) "↗" else "↘", titleResource = if (change > 0) io.codepassion.doubletriangle.core.designsystem.R.string.training_load_is_up__d__ else io.codepassion.doubletriangle.core.designsystem.R.string.training_load_is_down__d__, titleArguments = listOf(percent), bodyResource = io.codepassion.doubletriangle.core.designsystem.R.string.you_logged____this_period_versus____in_the_previous_one_, bodyArguments = listOf(formatWeight(current), formatWeight(previous))))
             }
         }
         val topFocus = data.sessions.mapNotNull { it.focus }.groupingBy { it }.eachCount().maxByOrNull { it.value }
         if (topFocus != null && data.sessions.size >= 3 && topFocus.value.toDouble() / data.sessions.size >= .45) {
-            add(68 to Insight("Te estás centrando en ${topFocus.key}", "${topFocus.value} de ${data.sessions.size} sesiones se centraron en ${topFocus.key.lowercase()} este periodo.", "◈"))
+            add(68 to Insight("Te estás centrando en ${topFocus.key}", "${topFocus.value} de ${data.sessions.size} sesiones se centraron en ${topFocus.key.lowercase()} este periodo.", "◈", titleResource = io.codepassion.doubletriangle.core.designsystem.R.string.focus____, titleArguments = listOf(topFocus.key), bodyResource = io.codepassion.doubletriangle.core.designsystem.R.string._d_of__d_sessions_centered_on____this_period_, bodyArguments = listOf(topFocus.value, data.sessions.size, topFocus.key)))
         }
         val relevantMuscles = muscleDistribution(data.histories)
             .associate { it.name to it.score }
@@ -1394,12 +1411,12 @@ internal fun analyticsInsights(
             val strongest = relevantMuscles.maxByOrNull { it.value }
             val weakest = relevantMuscles.minByOrNull { it.value }
             if (strongest != null && weakest != null && weakest.value <= strongest.value * .45) {
-                add(64 to Insight("${weakest.key} está poco representado", "${weakest.key} puntúa bastante menos que tus grupos más entrenados en este periodo.", "◈"))
+                add(64 to Insight("${weakest.key} está poco representado", "${weakest.key} puntúa bastante menos que tus grupos más entrenados en este periodo.", "◈", titleResource = io.codepassion.doubletriangle.core.designsystem.R.string.___work_is_underrepresented, titleArguments = listOf(weakest.key), bodyResource = io.codepassion.doubletriangle.core.designsystem.R.string.___scored_noticeably_lower_than_your_top_trained_muscle_groups_this_period_, bodyArguments = listOf(weakest.key)))
             }
         }
     }
     return if (prioritized.isEmpty()) {
-        listOf(Insight("Has creado un buen impulso", "Has completado ${data.sessions.size} entrenamientos y registrado ${formatWeight(data.sessions.sumOf { it.volumeKg })} en este periodo.", "✦"))
+        listOf(Insight("Has creado un buen impulso", "Has completado ${data.sessions.size} entrenamientos y registrado ${formatWeight(data.sessions.sumOf { it.volumeKg })} en este periodo.", "✦", titleResource = io.codepassion.doubletriangle.core.designsystem.R.string.you_built_solid_momentum, bodyResource = io.codepassion.doubletriangle.core.designsystem.R.string.you_completed__d_workouts_and_logged____in_this_period_, bodyArguments = listOf(data.sessions.size, formatWeight(data.sessions.sumOf { it.volumeKg }))))
     } else {
         prioritized.sortedWith(compareByDescending<Pair<Int, Insight>> { it.first }.thenBy { it.second.title }).take(3).map { it.second }
     }
@@ -1489,27 +1506,40 @@ internal fun formatDistance(distanceKm: Double, useImperial: Boolean = false): S
 @Composable
 private fun localizedAnalyticsTitle(title: String): String {
     val resource = when (title) {
-        "Aguante más largo" -> io.codepassion.doubletriangle.core.designsystem.R.string.longest_hold
-        "Completados" -> io.codepassion.doubletriangle.core.designsystem.R.string.completed
-        "Consistencia" -> io.codepassion.doubletriangle.core.designsystem.R.string.consistency
-        "Distancia total" -> io.codepassion.doubletriangle.core.designsystem.R.string.total_distance
-        "Duración total" -> io.codepassion.doubletriangle.core.designsystem.R.string.total_duration
+        "Fuerza" -> io.codepassion.doubletriangle.core.designsystem.R.string.strength
+        "Peso corporal" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_bodyweight
+        "Movilidad" -> io.codepassion.doubletriangle.core.designsystem.R.string.mobility
+        "Piernas" -> io.codepassion.doubletriangle.core.designsystem.R.string.legs
+        "Espalda" -> io.codepassion.doubletriangle.core.designsystem.R.string.back
+        "Hombros" -> io.codepassion.doubletriangle.core.designsystem.R.string.shoulders
+        "Pecho" -> io.codepassion.doubletriangle.core.designsystem.R.string.chest
+        "Bíceps" -> io.codepassion.doubletriangle.core.designsystem.R.string.biceps
+        "Tríceps" -> io.codepassion.doubletriangle.core.designsystem.R.string.triceps
+        "Glúteos" -> io.codepassion.doubletriangle.core.designsystem.R.string.glutes
+        "Brazos" -> io.codepassion.doubletriangle.core.designsystem.R.string.arms
+        "Isquiotibiales" -> io.codepassion.doubletriangle.core.designsystem.R.string.hamstrings
+        "Gemelos" -> io.codepassion.doubletriangle.core.designsystem.R.string.calves
+        "Aguante más largo" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_longest_hold
+        "Completados" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_completed
+        "Consistencia" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_consistency
+        "Distancia total" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_total_distance
+        "Duración total" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_total_duration
         "Entrenamientos totales" -> io.codepassion.doubletriangle.core.designsystem.R.string.total_workouts
-        "Mayor distancia" -> io.codepassion.doubletriangle.core.designsystem.R.string.longest_distance
-        "Mayor duración" -> io.codepassion.doubletriangle.core.designsystem.R.string.longest_duration
+        "Mayor distancia" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_longest_distance
+        "Mayor duración" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_longest_duration
         "Mejor duración" -> io.codepassion.doubletriangle.core.designsystem.R.string.best_duration
-        "Mejor peso" -> io.codepassion.doubletriangle.core.designsystem.R.string.best_weight
-        "Mejor volumen" -> io.codepassion.doubletriangle.core.designsystem.R.string.best_volume
-        "Mejores repeticiones" -> io.codepassion.doubletriangle.core.designsystem.R.string.best_reps
-        "Primera vez" -> io.codepassion.doubletriangle.core.designsystem.R.string.first_performed
-        "Racha actual" -> io.codepassion.doubletriangle.core.designsystem.R.string.current_streak
-        "Ritmo más rápido" -> io.codepassion.doubletriangle.core.designsystem.R.string.fastest_pace
-        "Récord personal" -> io.codepassion.doubletriangle.core.designsystem.R.string.personal_records
-        "Sesiones totales" -> io.codepassion.doubletriangle.core.designsystem.R.string.total_sessions
+        "Mejor peso" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_best_weight
+        "Mejor volumen" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_best_volume
+        "Mejores repeticiones" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_best_reps
+        "Primera vez" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_first_performed
+        "Racha actual" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_current_streak
+        "Ritmo más rápido" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_fastest_pace
+        "Récord personal" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_personal_records
+        "Sesiones totales" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_total_sessions
         "Tiempo entrenando" -> io.codepassion.doubletriangle.core.designsystem.R.string.training_time
-        "Tiempo total" -> io.codepassion.doubletriangle.core.designsystem.R.string.total_duration
+        "Tiempo total" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_total_duration
         "Volumen total" -> io.codepassion.doubletriangle.core.designsystem.R.string.total_volume
-        "Última vez" -> io.codepassion.doubletriangle.core.designsystem.R.string.last_performed
+        "Última vez" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_last_performed
         "Último mejor" -> io.codepassion.doubletriangle.core.designsystem.R.string.last_best
         "Últimos 30 días" -> io.codepassion.doubletriangle.core.designsystem.R.string.last_30_days
         else -> return title

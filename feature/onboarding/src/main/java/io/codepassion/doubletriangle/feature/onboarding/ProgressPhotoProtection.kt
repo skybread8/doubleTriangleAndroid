@@ -68,6 +68,7 @@ internal fun ProgressPhotoAccessGate(
     var authenticating by remember { mutableStateOf(false) }
     var attemptedAutomatically by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var isForeground by remember(lifecycleOwner) {
         mutableStateOf(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
@@ -106,7 +107,7 @@ internal fun ProgressPhotoAccessGate(
         if (isForeground && !unlocked && !authenticating && !attemptedAutomatically) {
             attemptedAutomatically = true
             authenticating = true
-            authenticate("Desbloquea tus fotos de progreso")
+            authenticate(context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.unlock_your_progress_photos_))
         }
     }
 
@@ -116,7 +117,7 @@ internal fun ProgressPhotoAccessGate(
         onUnlock = {
             authenticating = true
             error = null
-            authenticate("Desbloquea tus fotos de progreso")
+            authenticate(context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.unlock_your_progress_photos_))
         },
         onClose = onClose,
     )
@@ -133,21 +134,21 @@ internal fun rememberDeviceAuthenticator(
     val latestFailure by rememberUpdatedState(onFailure)
     val credentialLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) latestSuccess()
-        else latestFailure("No se pudo verificar tu identidad.")
+        else latestFailure(context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_))
     }
 
     @Suppress("DEPRECATION") // Android 9 needs the legacy credential confirmation API.
     fun showCredentialPrompt(reason: String) {
         val keyguard = context.getSystemService(KeyguardManager::class.java)
-        val intent = keyguard?.createConfirmDeviceCredentialIntent("Desbloquear fotos", reason)
-        if (intent == null) latestFailure("Configura un bloqueo de pantalla para proteger tus fotos de progreso.")
+        val intent = keyguard?.createConfirmDeviceCredentialIntent(context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.unlock_progress_photos), reason)
+        if (intent == null) latestFailure(context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.set_up_device_authentication_in_settings_to_protect_your_progress_photos_))
         else credentialLauncher.launch(intent)
     }
 
     return remember(activity, context) {
         { reason ->
             if (activity == null) {
-                latestFailure("No se pudo abrir la autenticación del dispositivo.")
+                latestFailure(context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.device_authentication_is_not_available_right_now_))
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val callback = object : BiometricPrompt.AuthenticationCallback() {
                     override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) = latestSuccess()
@@ -156,7 +157,7 @@ internal fun rememberDeviceAuthenticator(
                 }
                 runCatching<Unit> {
                     val builder = BiometricPrompt.Builder(activity)
-                        .setTitle("Desbloquear fotos de progreso")
+                        .setTitle(context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.unlock_progress_photos))
                         .setDescription(reason)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         builder.setAllowedAuthenticators(
@@ -168,7 +169,7 @@ internal fun rememberDeviceAuthenticator(
                     }
                     builder.build()
                         .authenticate(CancellationSignal(), context.mainExecutor, callback)
-                }.onFailure { latestFailure(it.message ?: "No se pudo abrir la autenticación del dispositivo.") }
+                }.onFailure { latestFailure(context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.device_authentication_is_not_available_right_now_)) }
             } else {
                 // Android 9 cannot combine credentials with BiometricPrompt. The
                 // platform credential prompt is the reliable fallback on that release.
@@ -191,7 +192,7 @@ private fun LockedProgressPhotos(
 ) {
     Box(Modifier.fillMaxWidth().padding(top = 12.dp), contentAlignment = Alignment.CenterStart) {
         Box(Modifier.size(48.dp).clickable(onClick = onClose), contentAlignment = Alignment.Center) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.go_back), Modifier.size(22.dp), WildforceThemeTokens.textPrimary)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_go_back), Modifier.size(22.dp), WildforceThemeTokens.textPrimary)
         }
     }
     Spacer(Modifier.height(36.dp))
@@ -206,7 +207,7 @@ private fun LockedProgressPhotos(
         else Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.unlock_progress_photos), color = WildforceThemeTokens.primaryButtonText)
     }
     Text(
-        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.go_back),
+        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_go_back),
         Modifier
             .heightIn(min = 48.dp)
             .clickable(enabled = !authenticating, onClick = onClose)

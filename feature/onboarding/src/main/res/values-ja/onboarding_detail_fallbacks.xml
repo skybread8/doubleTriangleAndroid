@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sheet-aware onboarding option fallbacks. -->
+    <string name="onboarding_detail_00">座りがち</string>
+    <string name="onboarding_detail_01">やや活動的</string>
+    <string name="onboarding_detail_02">適度に活動的</string>
+    <string name="onboarding_detail_03">非常に活動的</string>
+    <string name="onboarding_detail_04">一日の大半を座って過ごします（事務職など）。</string>
+    <string name="onboarding_detail_05">一日のかなりの時間を立って過ごします（教師や販売員など）。</string>
+    <string name="onboarding_detail_06">一日の多くを動いて過ごします（接客業や配達員など）。</string>
+    <string name="onboarding_detail_07">一日の大半で体を使う仕事をします（建設作業員やアスリートなど）。</string>
+    <string name="onboarding_detail_08">減量</string>
+    <string name="onboarding_detail_09">筋肉をつける</string>
+    <string name="onboarding_detail_10">筋力を高める</string>
+    <string name="onboarding_detail_11">持久力を高める</string>
+    <string name="onboarding_detail_12">可動性を高める</string>
+    <string name="onboarding_detail_13">体組成を改善</string>
+    <string name="onboarding_detail_14">全身の健康</string>
+    <string name="onboarding_detail_15">有酸素運動と筋力トレーニングを組み合わせ、脂肪を減らし代謝の健康を高めます。</string>
+    <string name="onboarding_detail_16">筋肥大を重視した筋力トレーニングで筋肉量と引き締まりを高めます。</string>
+    <string name="onboarding_detail_17">主要種目でより重い重量を扱い、神経と筋肉の連携を高めます。</string>
+    <string name="onboarding_detail_18">長時間の運動に向けて心肺機能と持久力を高めます。</string>
+    <string name="onboarding_detail_19">可動域、柔軟性、関節の健康を改善し、動きやすさを高めます。</string>
+    <string name="onboarding_detail_20">脂肪を減らしながら筋肉を増やし、引き締まった体を目指します。</string>
+    <string name="onboarding_detail_21">バランスの取れたトレーニングで健康的な生活と全体的な健康を維持します。</string>
+    <string name="onboarding_detail_22">まったくの初心者</string>
+    <string name="onboarding_detail_23">初心者</string>
+    <string name="onboarding_detail_24">初級者</string>
+    <string name="onboarding_detail_25">中級者</string>
+    <string name="onboarding_detail_26">上級者</string>
+    <string name="onboarding_detail_27">エリート</string>
+    <string name="onboarding_detail_28">体系的なトレーニングを始めたばかりで、基本動作を学んでいます。</string>
+    <string name="onboarding_detail_29">初歩的な経験があり、継続性、技術、自信を身につけています。</string>
+    <string name="onboarding_detail_30">ある程度定期的に運動し、主要種目で簡単な漸進ができます。</string>
+    <string name="onboarding_detail_31">安定した運動習慣があり、適度なトレーニング量から十分に回復できます。</string>
+    <string name="onboarding_detail_32">継続的に運動し、漸進を理解していて、負荷の高いプログラムにも対応できます。</string>
+    <string name="onboarding_detail_33">非常に高い運動基盤があり、専門的または競技向けのプランに対応できます。</string>
+</resources>

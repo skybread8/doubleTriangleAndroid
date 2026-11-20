@@ -15,6 +15,26 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CustomWorkoutBlocksTest {
+    @Test fun customWeekdayUsesStartThenCompletionScheduleAndCreation() {
+        val base = WorkoutDaySummary("custom", 1, "Workout", "Full body", "custom", DayOfWeek.SUNDAY, 30, WorkoutStatus.Planned,
+            createdAt = "2026-11-16T12:00:00Z", scheduledFor = "2026-11-17T12:00:00Z",
+            completedAt = "2026-11-18T12:00:00Z", startedAt = "2026-11-19T12:00:00Z")
+        val zone = java.time.ZoneOffset.UTC
+        assertEquals(DayOfWeek.THURSDAY, base.customWorkoutWeekday(zone))
+        assertEquals(DayOfWeek.WEDNESDAY, base.copy(startedAt = null).customWorkoutWeekday(zone))
+        assertEquals(DayOfWeek.TUESDAY, base.copy(startedAt = null, completedAt = null).customWorkoutWeekday(zone))
+        assertEquals(DayOfWeek.MONDAY, base.copy(startedAt = null, completedAt = null, scheduledFor = null).customWorkoutWeekday(zone))
+        assertEquals(DayOfWeek.SUNDAY, base.copy(startedAt = null, completedAt = null, scheduledFor = null, createdAt = null).customWorkoutWeekday(zone))
+    }
+
+    @Test fun reorderingSupersetPreservesExecutionProgressPerExerciseAndRound() {
+        val a = ExerciseSummary("A", sets = 2, reps = "8", restSeconds = 0)
+        val b = ExerciseSummary("B", sets = 2, reps = "8", restSeconds = 0)
+        val old = listOf(WorkoutBlockSummary(WorkoutBlockType.Superset, rounds = 2, exercises = listOf(a, b)))
+        val reordered = listOf(old.single().copy(exercises = listOf(b, a)))
+        assertEquals(mapOf(0 to 1, 1 to 0, 2 to 3, 3 to 2), executionIndexRemap(old, reordered))
+    }
+
     @Test fun importedRoleIsRetainedOnMergeAndDuplication() {
         val original = ExerciseSummary("Press", imageKey = "barbellBenchPress", sets = 3, reps = "8", restSeconds = 90, plannedExerciseId = "id")
         val local = WorkoutBlockSummary(WorkoutBlockType.Standard, exercises = listOf(original))
@@ -53,6 +73,14 @@ class CustomWorkoutBlocksTest {
         assertEquals("2026-10-28T08:00:00Z", merged[1].skippedAt)
     }
 
+    @Test fun `duplicate receives independent block and exercise identities`() {
+        val exercise = workout.exercises.first().copy(plannedExerciseId = "source-exercise")
+        val source = workout.copy(blocks = listOf(WorkoutBlockSummary(WorkoutBlockType.Standard, remoteId = "source-block", exercises = listOf(exercise))))
+        val copy = source.asIndependentWorkoutCopy()
+        assertTrue(copy.blocks.single().remoteId != "source-block")
+        assertTrue(copy.blocks.single().exercises.single().plannedExerciseId != "source-exercise")
+        assertEquals("source-block", source.blocks.single().remoteId)
+    }
     @Test fun `duplicated workout clears planned exercise ids and omissions`() {
         val source = workout.copy(exercises = listOf(workout.exercises.first().copy(plannedExerciseId = "id-1", skippedAt = "2026-10-28T08:00:00Z")))
         val copied = source.asIndependentWorkoutCopy().exercises.single()

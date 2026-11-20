@@ -3,7 +3,6 @@ package io.codepassion.doubletriangle.feature.workout
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
-import io.codepassion.doubletriangle.core.model.displayBlocks
 
 internal data class WorkoutPathExercise(
     val exercise: ExerciseSummary,
@@ -22,7 +21,7 @@ internal data class WorkoutPathBlock(
 
 internal fun WorkoutDaySummary.pathBlocks(): List<WorkoutPathBlock> {
     var executionCursor = 0
-    return displayBlocks().map { block ->
+    return editableBlocks().map { block ->
         val items = if (block.type == WorkoutBlockType.Superset) {
             block.exercises.mapIndexed { exerciseIndex, exercise ->
                 WorkoutPathExercise(
@@ -61,3 +60,11 @@ internal fun List<WorkoutPathExercise>.skippedExerciseCount(skipped: Set<Int>): 
 
 internal fun WorkoutPathExercise.isCompleted(workout: WorkoutDaySummary, completedSets: Map<Int, Int>, addedSets: Map<Int, Int> = emptyMap()): Boolean =
     executionIndices.all { index -> (completedSets[index] ?: 0) >= workout.exercises[index].sets + (addedSets[index] ?: 0) }
+
+/** Only exercises that have not started may move; both ends stay in the same block. */
+internal fun WorkoutPathBlock.canMoveUpcoming(from: Int, to: Int, currentIndex: Int): Boolean {
+    if (from == to || from !in exercises.indices || to !in exercises.indices) return false
+    return listOf(from, to).all { index ->
+        exercises[index].executionIndices.minOrNull()?.let { it > currentIndex } == true
+    }
+}

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="faq_intro">Todo lo que necesitas para entrenar, comer mejor y seguir avanzando con Wildforce.</string>
+    <string name="faq_getting_started">Primeros pasos</string>
+    <string name="faq_training">Entrenamiento y progreso</string>
+    <string name="faq_nutrition">Nutrición</string>
+    <string name="faq_devices">Android y dispositivos</string>
+    <string name="faq_account">Cuenta, datos y ajustes</string>
+    <string name="faq_help">¿Necesitas más ayuda? Envíanos desde Ayuda el modelo de móvil, versión de Android y de Wildforce, junto con una breve descripción.</string>
+    <string-array name="faq_questions">
+        <item>¿Qué es Wildforce?</item>
+        <item>¿Cómo se crea mi plan de entrenamiento?</item>
+        <item>¿Qué necesito para usar Wildforce en Android?</item>
+        <item>¿Puedo entrenar sin conexión?</item>
+        <item>¿Puedo cambiar un ejercicio durante un entreno?</item>
+        <item>¿Puedo crear mis propios entrenamientos?</item>
+        <item>¿Cómo funcionan los descansos?</item>
+        <item>¿Dónde veo mi evolución?</item>
+        <item>¿Qué ocurre al terminar un entreno?</item>
+        <item>¿Cómo registro lo que como?</item>
+        <item>¿Puede proponer comidas con lo que tengo en casa?</item>
+        <item>¿Qué pasa si no llego a mis macros?</item>
+        <item>¿Puedo ver mi planificación por días?</item>
+        <item>¿Qué integración de salud usa Android?</item>
+        <item>¿Para qué sirven las notificaciones?</item>
+        <item>¿Hay widget de Wildforce para Android?</item>
+        <item>¿Funciona con Wear OS?</item>
+        <item>¿Puedo usar Wildforce en iPhone?</item>
+        <item>¿Puedo usar unidades imperiales?</item>
+        <item>¿Mis datos estarán en un dispositivo nuevo?</item>
+        <item>¿Puedo cambiar idioma, tema o preferencias?</item>
+        <item>¿Qué hago si Health Connect no sincroniza?</item>
+        <item>¿Qué hago si algo no funciona?</item>
+    </string-array>
+    <string-array name="faq_answers">
+        <item>Wildforce es tu plataforma de entrenamiento y nutrición para iPhone y Android. Crea planes adaptados a tu objetivo, registra cada sesión, controla tus macros y convierte la constancia en progreso real.</item>
+        <item>Durante el inicio eliges objetivo, experiencia, disponibilidad, equipo, preferencias y limitaciones. Wildforce usa esa información para crear un plan progresivo que puedes seguir y ajustar.</item>
+        <item>Necesitas Android 9 o posterior y la versión más reciente de Wildforce disponible para tu región.</item>
+        <item>Puedes consultar y registrar contenido disponible localmente. Generar planes o analizar información con IA requiere conexión. Los cambios pendientes se sincronizan al recuperar internet cuando la sincronización en la nube está activa.</item>
+        <item>Sí. Puedes buscar una alternativa, sustituir el ejercicio o retirarlo de la sesión activa para adaptarte al equipo que tengas disponible.</item>
+        <item>Sí. Puedes crear, editar, ejecutar y eliminar entrenamientos personalizados cuando quieras salir de tu plan o necesites una sesión a medida.</item>
+        <item>Al terminar una serie, Wildforce controla el descanso. El entreno activo puede seguir accesible mediante una notificación si has permitido las notificaciones.</item>
+        <item>En Progreso encontrarás el historial por ejercicio, volumen, estadísticas, rachas y evolución corporal para comprobar qué funciona.</item>
+        <item>La sesión queda en tu historial y actualiza estadísticas, progreso y racha. Podrás compararla con sesiones anteriores cuando haya datos suficientes.</item>
+        <item>Puedes usar foto, código de barras, etiqueta nutricional, texto, búsqueda de alimentos, recientes o registro manual. Elige la opción más rápida para ti.</item>
+        <item>Sí. Añade los ingredientes disponibles y usa ideas de comida para recibir propuestas alineadas con tus objetivos nutricionales.</item>
+        <item>Wildforce puede sugerir alimentos o comidas para cubrir los macros que te quedan. El objetivo no es la perfección, sino tomar mejores decisiones de forma constante.</item>
+        <item>Sí. La planificación incluye calendario semanal, objetivos de energía y macros, y días de déficit, mantenimiento o superávit según tu meta.</item>
+        <item>Wildforce se conecta con Health Connect. Tú eliges los permisos para altura, peso, calorías, nutrición y entrenamientos, y puedes revocarlos desde Ajustes.</item>
+        <item>Mantienen visible el entreno y el descanso activos y permiten recibir recordatorios. Si no ves la sesión activa, comprueba el permiso de notificaciones de Wildforce.</item>
+        <item>Hay un acceso rápido al entreno desde la pantalla de inicio. Mantén pulsado un espacio vacío, abre el selector de widgets y busca Wildforce cuando esté habilitado en tu versión.</item>
+        <item>La app Wear OS permite ver el estado del entrenamiento, completar series y controlar los descansos mediante Bluetooth. Health Services y la validación con un reloj real siguen en progreso.</item>
+        <item>Sí. En iPhone, Wildforce se integra con Apple Health y Apple Watch para entrenos activos, descansos e información de repeticiones en ejercicios compatibles.</item>
+        <item>Sí. Elige sistema métrico o imperial en Ajustes. El peso y las medidas se mostrarán en el formato que prefieras.</item>
+        <item>La información se guarda localmente y puede sincronizarse con tu cuenta si la sincronización en la nube está activa. Inicia sesión con la misma cuenta para recuperar los datos sincronizados.</item>
+        <item>Sí. Desde Perfil y Ajustes puedes cambiar idioma, unidades, preferencias de plan, recordatorios y tema visual.</item>
+        <item>Revisa los permisos en Health Connect, actualiza Wildforce y vuelve a abrir la app. Si continúa, contacta con soporte e indica plataforma y versión de la app.</item>
+        <item>Actualiza Wildforce, reinicia la app y revisa permisos. Si el problema continúa, contacta con soporte e incluye modelo de móvil, versión de Android, versión de Wildforce y una breve descripción.</item>
+    </string-array>
+</resources>

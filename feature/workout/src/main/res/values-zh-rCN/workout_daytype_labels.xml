@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- iOS workout-day names absent from the Sheet. -->
+    <string name="workout_daytype_hypertrophy">肌肉增长</string>
+    <string name="workout_daytype_technique">技巧</string>
+    <string name="workout_daytype_deload">减量</string>
+    <string name="workout_daytype_conditioning">体能</string>
+</resources>

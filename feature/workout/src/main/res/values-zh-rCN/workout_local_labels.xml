@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Local fallbacks for iOS keys absent from the shared Sheet. -->
+<resources>
+    <string name="workout_local_straight">常规组</string>
+    <string name="workout_local_top_backoff">顶峰组＋降重组</string>
+    <string name="workout_local_pyramid">递增金字塔</string>
+    <string name="workout_local_drop">递减组</string>
+    <string name="workout_local_rest_pause">休息暂停</string>
+    <string name="workout_local_intervals">间歇</string>
+    <string name="workout_local_accumulation">积累期</string>
+    <string name="workout_local_intensification">强化期</string>
+    <string name="workout_local_deload">减载期</string>
+</resources>

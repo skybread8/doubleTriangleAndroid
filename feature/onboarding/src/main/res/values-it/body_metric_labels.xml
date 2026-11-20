@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Local fallbacks for iOS keys absent from the shared Sheet. -->
+<resources>
+    <string name="body_metric_body_fat">Grasso corporeo</string>
+    <string name="body_metric_lean_mass">Massa magra</string>
+    <string name="body_metric_waist">Vita</string>
+    <string name="body_metric_hip">Fianchi</string>
+</resources>

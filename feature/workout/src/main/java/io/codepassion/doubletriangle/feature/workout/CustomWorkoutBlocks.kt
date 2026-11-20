@@ -63,7 +63,7 @@ internal fun reconcileImportedSkips(local: List<WorkoutBlockSummary>, imported: 
 internal fun WorkoutDaySummary.asIndependentWorkoutCopy(): WorkoutDaySummary {
     fun ExerciseSummary.independentCopy() = copy(skippedAt = null, plannedExerciseId = java.util.UUID.randomUUID().toString())
     if (blocks.isEmpty()) return copy(exercises = exercises.map { it.independentCopy() })
-    val copied = blocks.map { block -> block.copy(exercises = block.exercises.map { it.independentCopy() }) }
+    val copied = blocks.map { block -> block.copy(remoteId = java.util.UUID.randomUUID().toString(), exercises = block.exercises.map { it.independentCopy() }) }
     return copy(blocks = copied, exercises = copied.executionExercises())
 }
 

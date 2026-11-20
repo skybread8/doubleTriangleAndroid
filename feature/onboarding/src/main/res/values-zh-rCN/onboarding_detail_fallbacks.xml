@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sheet-aware onboarding option fallbacks. -->
+    <string name="onboarding_detail_00">久坐</string>
+    <string name="onboarding_detail_01">轻度活跃</string>
+    <string name="onboarding_detail_02">中度活跃</string>
+    <string name="onboarding_detail_03">高度活跃</string>
+    <string name="onboarding_detail_04">一天中大部分时间坐着，例如办公室工作。</string>
+    <string name="onboarding_detail_05">一天中较多时间站立，例如教师或零售人员。</string>
+    <string name="onboarding_detail_06">一天中较多时间走动，例如服务员或邮递员。</string>
+    <string name="onboarding_detail_07">一天中大部分时间从事体力活动，例如建筑工人或运动员。</string>
+    <string name="onboarding_detail_08">减重</string>
+    <string name="onboarding_detail_09">增加肌肉</string>
+    <string name="onboarding_detail_10">增强力量</string>
+    <string name="onboarding_detail_11">提高耐力</string>
+    <string name="onboarding_detail_12">改善灵活性</string>
+    <string name="onboarding_detail_13">改善身体成分</string>
+    <string name="onboarding_detail_14">全面健身</string>
+    <string name="onboarding_detail_15">结合有氧和力量训练，减少脂肪并改善代谢健康。</string>
+    <string name="onboarding_detail_16">通过以增肌为重点的抗阻训练增加肌肉量和肌肉线条。</string>
+    <string name="onboarding_detail_17">专注于提高主要动作的负重和神经肌肉效率。</string>
+    <string name="onboarding_detail_18">提高心肺功能和耐力，以支持更长时间的运动。</string>
+    <string name="onboarding_detail_19">改善活动范围、柔韧性和关节健康，让动作更顺畅并减少疼痛。</string>
+    <string name="onboarding_detail_20">同时减少脂肪并增加肌肉，塑造更强健的体型。</string>
+    <string name="onboarding_detail_21">通过均衡训练保持健康的生活方式并提升整体健康。</string>
+    <string name="onboarding_detail_22">完全新手</string>
+    <string name="onboarding_detail_23">初学者</string>
+    <string name="onboarding_detail_24">入门者</string>
+    <string name="onboarding_detail_25">中级</string>
+    <string name="onboarding_detail_26">高级</string>
+    <string name="onboarding_detail_27">精英</string>
+    <string name="onboarding_detail_28">你刚开始系统训练，仍在学习基本动作模式。</string>
+    <string name="onboarding_detail_29">你已有少量经验，正在建立规律性、技术和信心。</string>
+    <string name="onboarding_detail_30">你有一定的规律训练经验，能够完成主要动作的简单渐进训练。</string>
+    <string name="onboarding_detail_31">你已有良好的训练习惯，能够从中等训练量中充分恢复。</string>
+    <string name="onboarding_detail_32">你持续训练，了解渐进原则，能够承受较高强度的训练计划。</string>
+    <string name="onboarding_detail_33">你有非常扎实的训练基础，能够应对专业化或高水平训练计划。</string>
+</resources>

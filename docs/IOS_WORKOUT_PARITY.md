@@ -1,6 +1,60 @@
 # iOS Workout Parity Specification
 
+## Return from exercise feedback (2026-11-20)
+
+- Android's Edit sets action returns to the current exercise and restores its last set for correction. It now retains the selected feedback and notes when returning, as iOS does. Source comparison is complete; dedicated transition coverage, an end-to-end device check and matched screenshots remain outstanding.
+
+## Workout path reordering (2026-11-20)
+
+- The Android path dialog now uses 85% of the available height, and its title and exercise thumbnails follow the iOS proportions more closely. Drag hit testing excludes the moving row so it can no longer mask the destination; the accessible move buttons remain available. Upcoming exercises remain restricted to their block. Workout unit tests and compilation pass; drag gestures, scrolling, persistence and visual parity still require device verification. Android retains a close header and move buttons that are not present in the iOS popover.
+
+## Timed set completion (2026-11-20)
+
+- Completing a set stops its work timer, and timer ticks are ignored during feedback, rest, summary, and exercise initialization. Workout Kotlin compilation and unit tests pass; end-to-end visual verification of the feedback-to-rest transition remains outstanding.
+
+## Rest skip transition (2026-11-20)
+
+- The animated phase is keyed by its stable identity rather than the changing timer state, while outgoing content keeps its last snapshot. This prevents timer updates from interfering with transitions when rest is skipped. Build and device verification remain outstanding.
+
+## Active phase transition (2026-11-20)
+
+- Android renders each outgoing and incoming workout phase from its own state during the slide, avoiding a duplicate of the next phase. Source comparison with iOS is complete; build and visual device verification remain outstanding.
+
+## Rest sheet sizing (2026-11-20)
+
+- The Android rest sheet wraps its content, matching the iOS rest phase when no next exercise or round is shown. Visual device verification remains outstanding.
+
 This document is the persistent source of truth for bringing the Android workout experience to functional and visual parity with iOS. Every change to the Android workout detail, active session, timers, exercise completion, rest, or completion celebrations must be checked against this document.
+
+## Duplicating a workout day (2026-11-20)
+
+- The workout-day menu uses the same backend duplication request as iOS, then pulls the returned day and its blocks and exercises before opening it. Failed attempts retain their idempotency key for retry. The existing custom-workout list continues to use its separate draft-and-editor flow.
+- The Android workout-card menu currently exposes the new duplication action; the other iOS day-menu actions are still available from Android's detail screen rather than that card. A live API test and matched iOS/Android visual and accessibility verification remain outstanding. Local-only custom workouts without a persisted server ID cannot use the remote day-menu action.
+
+## History download (2026-11-19)
+
+- New workouts wait for the initial history download; an in-progress workout can still resume, as in iOS. The download is retried from the accessory after a failure. Build and real-device cross-account verification remain necessary; this does not establish full workout parity.
+
+## Error localization update (2026-11-18)
+
+- Single-workout generation and retry use the shared iOS generation error; workout adaptation and feedback failures use a localized fallback instead of exposing technical messages. Device and complete workout error-flow parity remain unverified.
+
+## Localization update (2026-11-17)
+
+- Workout card focus and day-type labels now use Sheet-aware fallbacks, including four iOS day-type names absent from the Sheet. The emulator audit used an isolated offline profile; complete workout and locale verification remain outstanding.
+
+- Active workout and rest notifications now resolve the profile language in services as well as activities, and use shared strings for the rest alert and notification actions. Workout timers, progress semantics, muscle labels and profile statistics have additional shared translations. Unit, delivery and screen-reader verification remain necessary.
+
+- Workout goals, focus and status labels now resolve to the shared Sheet resources; legacy Spanish labels and stored language tags are mapped without changing the saved values. Feedback choices retain their persisted values while displaying translated iOS labels and descriptions.
+- Workout card, rest-day accessibility and detail tabs use localized resources. Unit checks cover goal, language and feedback mappings; device and full workout localization verification remain outstanding.
+- Workout block headings, set styles and mesocycle phases use localized presentation labels without changing their stored enum values. Names absent from the Sheet have local fallbacks for the supported languages; unit checks cover the mappings.
+
+## Recent parity work (2026-11-16)
+
+- Active-set targets can wrap beneath their metric label beside the controls, avoiding truncation on narrow screens and with larger text. iOS places the label and target inline; Android uses two lines to preserve the complete target. Device visual verification remains outstanding.
+- Scheduled and draft plans are excluded from current-plan selection; scheduled plans are hidden from the Android history. Generated one-off workouts receive a scheduled timestamp.
+- The active workout path supports long-press dragging and accessible move controls for upcoming exercises within their block; the current and earlier exercises remain fixed and session progress is remapped to the new execution order. An Android emulator verified drag ordering, persistence and the fixed current exercise, including a legacy block regression. Cross-device verification remains outstanding.
+- Training split changes discard stale custom focuses and prefill a new custom split from the previous choice.
 
 ## Reference implementation
 

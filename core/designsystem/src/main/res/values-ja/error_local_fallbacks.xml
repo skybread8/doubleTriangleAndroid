@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="someone_just_took_the_last_place_for_this_time__availability_has_been_refreshed_">最後の空き枠が埋まりました。空き状況を更新しました。</string>
+    <string name="this_time_is_no_longer_available__the_room_may_have_been_closed_">この時間は予約できなくなりました。部屋が閉鎖された可能性があります。</string>
+    <string name="this_time_has_already_started__choose_a_later_one_">この時間は既に開始しています。後の時間を選択してください。</string>
+    <string name="this_time_is_outside_the_room_s_booking_window_">この時間は予約可能期間外です。</string>
+    <string name="this_duration_isn_t_allowed_in_this_room_">この部屋ではこの時間の長さを選択できません。</string>
+    <string name="you_already_have_another_reservation_at_this_time_">この時間には既に別の予約があります。</string>
+    <string name="this_room_can_t_be_booked_right_now_">現在この部屋は予約できません。</string>
+    <string name="your_gym_membership_is_no_longer_active_">ジムの会員資格は有効ではありません。</string>
+    <string name="it_s_too_late_to_cancel_this_reservation_">この予約のキャンセル期限が過ぎています。</string>
+    <string name="you_seem_to_be_offline__connect_to_the_internet_and_try_again_">オフラインのようです。インターネットに接続してもう一度お試しください。</string>
+    <string name="the_operation_could_not_be_completed__please_try_again_">操作を完了できませんでした。もう一度お試しください。</string>
+    <string name="we_couldn_t_sign_you_in__check_your_details_and_try_again_">ログインできませんでした。入力内容を確認してもう一度お試しください。</string>
+    <string name="google_sign_in_is_not_configured_yet_">Google ログインはまだ設定されていません。</string>
+    <string name="enter_your_email_and_password_to_continue_">続行するにはメールアドレスとパスワードを入力してください。</string>
+    <string name="we_couldn_t_finish_the_estimate_right_now__please_try_again_">現在、推定を完了できませんでした。もう一度お試しください。</string>
+    <string name="couldn_t_generate_the_future_preview_right_now__please_try_again_">現在、将来の予測を作成できませんでした。もう一度お試しください。</string>
+    <string name="couldn_t_save_these_progress_photos__please_try_again_">進捗写真を保存できませんでした。もう一度お試しください。</string>
+    <string name="failed_to_generate_workout__please_try_again_">ワークアウトを生成できませんでした。もう一度お試しください。</string>
+    <string name="this_qr_is_not_a_gym_join_code_">この QR コードはジムへの参加コードではありません。</string>
+    <string name="device_authentication_is_not_available_right_now_">現在、端末認証を利用できません。</string>
+    <string name="set_up_device_authentication_in_settings_to_protect_your_progress_photos_">進捗写真を保護するには、設定で端末認証を設定してください。</string>
+    <string name="unlock_progress_photos">進捗写真のロックを解除</string>
+    <string name="unlock_your_progress_photos_">進捗写真のロックを解除します。</string>
+    <string name="couldn_t_load_your_reservations">予約を読み込めませんでした</string>
+    <string name="couldn_t_load_the_rooms">部屋を読み込めませんでした</string>
+    <string name="couldn_t_load_availability">空き状況を読み込めませんでした</string>
+    <string name="something_went_wrong">問題が発生しました</string>
+    <string name="couldn_t_sync_your_data">データを同期できませんでした</string>
+    <string name="check_your_connection_and_try_again_">接続を確認してもう一度お試しください。</string>
+</resources>

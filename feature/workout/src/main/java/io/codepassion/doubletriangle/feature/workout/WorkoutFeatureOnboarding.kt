@@ -219,16 +219,7 @@ private fun SetStyleOnboarding(exercise: ExerciseSummary, onDismiss: () -> Unit)
         ExerciseSetStyle.Tempo -> "This cue means the speed and control of each rep matter as much as the reps themselves."
         else -> "This cue means the exercise uses a steady, repeatable working pattern."
     })
-    val title = tutorialText(when (style) {
-        ExerciseSetStyle.Warmup -> "Warmup"
-        ExerciseSetStyle.TopSetBackoff -> "Top Set + Backoff"
-        ExerciseSetStyle.AscendingPyramid -> "Ascending Pyramid"
-        ExerciseSetStyle.DropSet -> "Drop Set"
-        ExerciseSetStyle.RestPause -> "Rest-Pause"
-        ExerciseSetStyle.Intervals -> "Intervals"
-        ExerciseSetStyle.Tempo -> "Tempo"
-        else -> "Straight Sets"
-    })
+    val title = workoutSetStyleLabel(style)
     val description = if (step == 0) intro else tutorialText(if (step == 1) "When this cue appears, follow the pattern and then log the set like usual." else "This style changes the goal of the set, not the whole workout flow.")
     OnboardingScaffold(3, step, tutorialText("New workout cue"), title, description, { HeroIcon { Icon(setStyleIcon(style), contentDescription = null, modifier = Modifier.size(28.dp), tint = WildforceThemeTokens.primaryButtonText) } }, { _ ->
         if (step > 0) Column(Modifier.padding(top = 34.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {

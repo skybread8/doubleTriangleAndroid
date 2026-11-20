@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="faq_intro">Alles wat je nodig hebt om te trainen, beter te eten en vooruitgang te blijven boeken met Wildforce.</string>
+    <string name="faq_getting_started">Aan de slag</string>
+    <string name="faq_training">Training en voortgang</string>
+    <string name="faq_nutrition">Voeding</string>
+    <string name="faq_devices">Android en apparaten</string>
+    <string name="faq_account">Account, gegevens en instellingen</string>
+    <string name="faq_help">Meer hulp nodig? Stuur ons via Help je telefoonmodel, Android- en Wildforce-versie en een korte beschrijving.</string>
+    <string-array name="faq_questions">
+        <item>Wat is Wildforce?</item>
+        <item>Hoe wordt mijn trainingsplan gemaakt?</item>
+        <item>Wat heb ik nodig om Wildforce op Android te gebruiken?</item>
+        <item>Kan ik offline trainen?</item>
+        <item>Kan ik tijdens een training een oefening wijzigen?</item>
+        <item>Kan ik eigen trainingen maken?</item>
+        <item>Hoe werken rusttijden?</item>
+        <item>Waar zie ik mijn voortgang?</item>
+        <item>Wat gebeurt er na een training?</item>
+        <item>Hoe registreer ik wat ik eet?</item>
+        <item>Kan de app maaltijden voorstellen met ingrediënten die ik thuis heb?</item>
+        <item>Wat als ik mijn macro’s niet haal?</item>
+        <item>Kan ik mijn plan per dag bekijken?</item>
+        <item>Welke gezondheidsintegratie gebruikt Android?</item>
+        <item>Waarvoor dienen meldingen?</item>
+        <item>Is er een Wildforce-widget voor Android?</item>
+        <item>Werkt het met Wear OS?</item>
+        <item>Kan ik Wildforce op iPhone gebruiken?</item>
+        <item>Kan ik imperiale eenheden gebruiken?</item>
+        <item>Zijn mijn gegevens beschikbaar op een nieuw apparaat?</item>
+        <item>Kan ik taal, thema of voorkeuren wijzigen?</item>
+        <item>Wat als Health Connect niet synchroniseert?</item>
+        <item>Wat als iets niet werkt?</item>
+    </string-array>
+    <string-array name="faq_answers">
+        <item>Wildforce is je platform voor training en voeding op iPhone en Android. Maak plannen op maat, registreer trainingen en macro’s en volg je voortgang.</item>
+        <item>Bij de start kies je je doel, ervaring, beschikbaarheid, uitrusting, voorkeuren en beperkingen. Wildforce maakt hiermee een aanpasbaar trainingsplan.</item>
+        <item>Je hebt Android 9 of hoger nodig en de nieuwste Wildforce-versie die in jouw regio beschikbaar is.</item>
+        <item>Je kunt lokaal beschikbare inhoud bekijken en registreren. Voor nieuwe plannen en AI-analyses is verbinding nodig. Wijzigingen worden later gesynchroniseerd als cloudsynchronisatie aanstaat.</item>
+        <item>Ja. Je kunt een alternatief zoeken, de oefening vervangen of uit de actieve training verwijderen.</item>
+        <item>Ja. Je kunt aangepaste trainingen maken, bewerken, uitvoeren en verwijderen.</item>
+        <item>Wildforce houdt na elke set je rust bij. De actieve training blijft via een melding beschikbaar als meldingen zijn toegestaan.</item>
+        <item>Bij Voortgang vind je je oefengeschiedenis, volume, statistieken, reeksen en lichamelijke veranderingen.</item>
+        <item>De training wordt opgeslagen in je geschiedenis en werkt je statistieken en voortgang bij. Met voldoende gegevens kun je eerdere sessies vergelijken.</item>
+        <item>Gebruik een foto, barcode, voedingsetiket, tekst, voedselzoekfunctie, recente producten of handmatige invoer.</item>
+        <item>Ja. Voeg je ingrediënten toe en gebruik maaltijdideeën voor suggesties passend bij je voedingsdoelen.</item>
+        <item>Wildforce kan voedingsmiddelen of maaltijden voorstellen om je resterende macro’s aan te vullen. Het doel is om steeds betere keuzes te maken.</item>
+        <item>Ja. Het plan bevat een weekkalender, calorie- en macrodoelen en dagen met een tekort, onderhoud of overschot passend bij je doel.</item>
+        <item>Wildforce verbindt met Health Connect. Je kiest rechten voor lengte, gewicht, calorieën, voeding en trainingen en kunt ze intrekken in Instellingen.</item>
+        <item>Ze houden de actieve training en rust zichtbaar en geven herinneringen. Controleer de meldingsrechten van Wildforce als je de actieve sessie niet ziet.</item>
+        <item>Er is een trainingssnelkoppeling op het startscherm. Houd een lege plek ingedrukt en zoek Wildforce in het widgetmenu als dit in jouw versie is ingeschakeld.</item>
+        <item>De Wear OS-app kan de trainingsstatus tonen, sets afronden en rust via Bluetooth bedienen. Health Services en tests met een echt horloge zijn nog in ontwikkeling.</item>
+        <item>Ja. Op iPhone werkt Wildforce samen met Apple Health en Apple Watch voor actieve trainingen, rust en herhalingsinformatie bij ondersteunde oefeningen.</item>
+        <item>Ja. Kies metrische of imperiale eenheden in Instellingen. Gewicht en afmetingen worden in je voorkeursformaat getoond.</item>
+        <item>Gegevens worden lokaal opgeslagen en kunnen met je account synchroniseren als cloudsynchronisatie aanstaat. Meld je aan met hetzelfde account om gesynchroniseerde gegevens te herstellen.</item>
+        <item>Ja. Via Profiel en Instellingen wijzig je de taal, eenheden, planvoorkeuren, herinneringen en het thema.</item>
+        <item>Controleer de rechten in Health Connect, werk Wildforce bij en open de app opnieuw. Neem anders contact op met ondersteuning en vermeld je platform en appversie.</item>
+        <item>Werk Wildforce bij, start de app opnieuw en controleer de rechten. Neem bij aanhoudende problemen contact op met ondersteuning met je telefoonmodel, Android-versie, Wildforce-versie en een korte beschrijving.</item>
+    </string-array>
+</resources>

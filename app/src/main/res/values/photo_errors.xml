@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="photo_error_session">Your session has expired. Sign in again.</string>
+    <string name="photo_error_access">Your account cannot use photo analysis.</string>
+    <string name="photo_error_size">The image is too large. Try another photo.</string>
+    <string name="photo_error_invalid">Could not process the image. Check that it contains food and try another photo.</string>
+    <string name="photo_error_limit">Too many requests. Try again later.</string>
+    <string name="photo_error_service">Photo analysis is unavailable right now. Try again later.</string>
+    <string name="photo_error_connection">Could not connect to the server. Check your connection and try again.</string>
+    <string name="photo_error_generic">Could not analyze the photo. Try again.</string>
+    <string name="photo_error_camera_permission">Camera access is required. Allow it in Settings or choose a photo from the gallery.</string>
+    <string name="photo_error_camera_open">Could not open the camera. Try again or choose a photo from the gallery.</string>
+    <string name="sync_subscription_required">An active subscription is required to sync your data.</string>
+</resources>

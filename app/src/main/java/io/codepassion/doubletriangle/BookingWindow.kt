@@ -14,7 +14,7 @@ internal fun normalizeBookingOptionalString(value: String?): String? = value?.tr
 internal fun bookingZone(value: String?, fallback: ZoneId = ZoneId.systemDefault()): ZoneId =
     normalizeBookingOptionalString(value)?.let { runCatching { ZoneId.of(it) }.getOrNull() } ?: fallback
 
-internal class BookingHttpException(val status: Int, message: String) : IllegalStateException(message)
+internal class BookingHttpException(val status: Int, message: String, val code: String? = null) : IllegalStateException(message)
 
 internal fun isDefiniteBookingRejection(error: Throwable): Boolean =
     error is BookingHttpException && error.status in 400..499 && error.status !in setOf(408, 429)

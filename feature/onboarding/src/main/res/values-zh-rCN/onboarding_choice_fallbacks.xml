@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fallbacks for untranslated Sheet choices. -->
+    <string name="onboarding_choice_automatic">自动</string>
+    <string name="onboarding_choice_body_part_split">按肌群分化</string>
+    <string name="onboarding_choice_big_gym">大型健身房</string>
+    <string name="onboarding_choice_small_gym">小型健身房</string>
+    <string name="onboarding_choice_home_gym">家庭健身房</string>
+    <string name="onboarding_choice_some_accessories">部分器械</string>
+    <string name="onboarding_choice_bodyweight_only">仅自重</string>
+    <string name="onboarding_choice_pull_up_bar">引体向上杆</string>
+    <string name="onboarding_choice_cardio">有氧</string>
+    <string name="onboarding_choice_male">男性</string>
+    <string name="onboarding_choice_female">女性</string>
+    <string name="onboarding_choice_upper_body">上肢</string>
+    <string name="onboarding_choice_lower_body">下肢</string>
+    <string name="onboarding_choice_push">推</string>
+    <string name="onboarding_choice_pull">拉</string>
+    <string name="onboarding_choice_core">核心</string>
+    <string name="onboarding_choice_recovery">恢复</string>
+</resources>

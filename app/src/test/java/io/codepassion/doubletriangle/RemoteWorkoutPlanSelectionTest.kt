@@ -14,8 +14,9 @@ class RemoteWorkoutPlanSelectionTest {
     }
 
     @Test fun archivedAndSupersededPlansNeverBecomeCurrent() {
-        val draft = Plan("a", "draft", "2026-01-01")
-        assertEquals(draft, select(draft, Plan("b", "archived", "2026-02-01"), Plan("c", "superseded", "2026-03-01")))
+        val completed = Plan("a", "completed", "2026-01-01")
+        assertEquals(completed, select(completed, Plan("d", "draft", "2026-04-01"), Plan("s", "scheduled", "2026-05-01"), Plan("b", "archived", "2026-02-01"), Plan("c", "superseded", "2026-03-01")))
+        assertNull(select(Plan("d", "draft", "2026-04-01"), Plan("s", "scheduled", "2026-05-01")))
         assertNull(select(Plan("b", "archived", "2026-02-01"), Plan("c", "superseded", "2026-03-01")))
     }
 

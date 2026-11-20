@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="photo_error_session">Votre session a expiré. Reconnectez-vous.</string>
+    <string name="photo_error_access">Votre compte ne permet pas l’analyse de photos.</string>
+    <string name="photo_error_size">L’image est trop volumineuse. Essayez une autre photo.</string>
+    <string name="photo_error_invalid">Impossible de traiter l’image. Vérifiez qu’elle contient des aliments et essayez une autre photo.</string>
+    <string name="photo_error_limit">Trop de demandes. Réessayez plus tard.</string>
+    <string name="photo_error_service">L’analyse de photos est indisponible. Réessayez plus tard.</string>
+    <string name="photo_error_connection">Impossible de se connecter au serveur. Vérifiez votre connexion et réessayez.</string>
+    <string name="photo_error_generic">Impossible d’analyser la photo. Réessayez.</string>
+    <string name="photo_error_camera_permission">L’accès à la caméra est nécessaire. Autorisez-le dans les réglages ou choisissez une photo de la galerie.</string>
+    <string name="photo_error_camera_open">Impossible d’ouvrir la caméra. Réessayez ou choisissez une photo de la galerie.</string>
+    <string name="sync_subscription_required">Un abonnement actif est nécessaire pour synchroniser vos données.</string>
+</resources>

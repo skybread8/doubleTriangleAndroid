@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Local fallbacks for iOS keys absent from the shared Sheet. -->
+<resources>
+    <string name="workout_local_straight">通常セット</string>
+    <string name="workout_local_top_backoff">トップセット＋バックオフ</string>
+    <string name="workout_local_pyramid">上昇ピラミッド</string>
+    <string name="workout_local_drop">ドロップセット</string>
+    <string name="workout_local_rest_pause">レストポーズ</string>
+    <string name="workout_local_intervals">インターバル</string>
+    <string name="workout_local_accumulation">蓄積</string>
+    <string name="workout_local_intensification">強度向上</string>
+    <string name="workout_local_deload">負荷軽減</string>
+</resources>

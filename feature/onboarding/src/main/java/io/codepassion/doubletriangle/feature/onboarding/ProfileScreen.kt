@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.widget.NumberPicker
 
+import io.codepassion.doubletriangle.core.designsystem.localizedContentDescription
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -61,6 +62,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -191,6 +193,7 @@ fun ProfileScreen(
     gymMembershipRevision: Int = 0,
     onRequestHealthConnect: (((Boolean, Int?, Double?, Double?, Double?) -> Unit) -> Unit) = { _ -> },
     onSyncHealthConnect: (((Boolean, List<ImportedBodyMetric>) -> Unit) -> Unit) = { result -> result(false, emptyList()) },
+    onAutoSyncHealthConnect: suspend () -> List<ImportedBodyMetric> = { emptyList() },
     onBodyMetricSaved: (String, Double) -> Unit = { _, _ -> },
     onSave: (OnboardingProfile) -> Unit,
     onRegenerate: (OnboardingProfile) -> Unit = {},
@@ -202,6 +205,9 @@ fun ProfileScreen(
     onKeepScreenOnChanged: (Boolean) -> Unit = {},
     onNotificationPreferencesChanged: () -> Unit = {},
     onAccountChanged: () -> Unit = {},
+    showsAiCoach: Boolean = true,
+    canUseAiCoach: Boolean = true,
+    onShowAiCoachOffer: () -> Unit = {},
     onGenerateFuturePreview: suspend (String, String) -> android.graphics.Bitmap = { _, _ -> error("La vista a futuro no está configurada") },
     onLoadFuturePreview: suspend (String, String) -> android.graphics.Bitmap? = { _, _ -> null },
     onAnalyzeBodyComposition: suspend (String) -> BodyCompositionAnalysis = { error("El análisis no está configurado") },
@@ -269,6 +275,21 @@ fun ProfileScreen(
     var progressPhotoLockError by remember { mutableStateOf<String?>(null) }
     var nutritionProfile by remember { mutableStateOf(ProfileDetailPreferencesStore.loadNutrition(profileContext)) }
     var bodyComposition by remember { mutableStateOf(ProfileDetailPreferencesStore.loadBodyComposition(profileContext)) }
+    DisposableEffect(detailPreferences) {
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            when (key) {
+                "nutrition_profile" -> nutritionProfile = ProfileDetailPreferencesStore.loadNutrition(profileContext)
+                "body_composition" -> bodyComposition = ProfileDetailPreferencesStore.loadBodyComposition(profileContext)
+                "keep_screen_on" -> keepScreenOn = detailPreferences.getBoolean(key, true)
+                "full_focus" -> fullFocusEnabled = detailPreferences.getBoolean(key, false)
+                "amazfit_watch_enabled" -> amazfitWatchEnabled = detailPreferences.getBoolean(key, false)
+                "wear_auto_tracking_enabled" -> wearAutoTrackingEnabled = detailPreferences.getBoolean(key, false)
+                "progress_photo_lock" -> progressPhotoLockEnabled = detailPreferences.getBoolean(key, false)
+            }
+        }
+        detailPreferences.registerOnSharedPreferenceChangeListener(listener)
+        onDispose { detailPreferences.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
     var nutritionPicker by remember { mutableStateOf<NutritionPicker?>(null) }
     var nutritionTextEditor by remember { mutableStateOf<NutritionTextField?>(null) }
     var settingsPicker by remember { mutableStateOf<SettingsPicker?>(null) }
@@ -299,25 +320,46 @@ fun ProfileScreen(
             progressPhotoLockError = it
         },
     )
-    val bodyMetrics = remember(profileContext, initial) { BodyMetricsStore.load(profileContext) }
+    var bodyMetrics by remember(profileContext, initial) { mutableStateOf(BodyMetricsStore.load(profileContext)) }
+    DisposableEffect(profileContext) {
+        val metrics = profileContext.getSharedPreferences("wildforce_body_metrics", 0)
+        val metricsListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
+            bodyMetrics = BodyMetricsStore.load(profileContext)
+        }
+        val notificationsListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+            when (key) {
+                "enabled" -> notificationsEnabled = prefs.getBoolean(key, true)
+                "rest_alerts" -> restAlertsEnabled = prefs.getBoolean(key, true)
+                "reminders" -> reminderNotificationsEnabled = prefs.getBoolean(key, true)
+            }
+        }
+        metrics.registerOnSharedPreferenceChangeListener(metricsListener)
+        notificationPreferences.registerOnSharedPreferenceChangeListener(notificationsListener)
+        onDispose {
+            metrics.unregisterOnSharedPreferenceChangeListener(metricsListener)
+            notificationPreferences.unregisterOnSharedPreferenceChangeListener(notificationsListener)
+        }
+    }
     if (selectedSection == ProfileSection.Body && showsBodyMetrics) {
         BodyMetricsScreen(
             profile = validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput),
             composition = bodyComposition,
             history = bodyMetrics,
-            onClose = { showsBodyMetrics = false },
+            onClose = { bodyMetrics = BodyMetricsStore.load(profileContext); showsBodyMetrics = false },
             onRequestHealthConnect = onRequestHealthConnect,
             onSyncHealthConnect = onSyncHealthConnect,
+            onAutoSyncHealthConnect = onAutoSyncHealthConnect,
             onSave = { updatedProfile, updatedComposition, leanBodyMass, bodyFat ->
                 draft = updatedProfile
                 heightInput = displayHeight(updatedProfile.heightCm, updatedProfile.metricSystem)
                 weightInput = displayWeight(updatedProfile.weightKg, updatedProfile.metricSystem)
                 bodyComposition = updatedComposition
+                bodyMetrics = BodyMetricsStore.load(profileContext)
                 ProfileDetailPreferencesStore.saveBodyComposition(profileContext, updatedComposition)
-                BodyMetricsStore.record(profileContext, updatedProfile, updatedComposition, leanBodyMass, bodyFat)
                 onSave(updatedProfile)
             },
             onMetricSaved = onBodyMetricSaved,
+            onHistoryChanged = onRemoteSyncRequested,
         )
         return
     }
@@ -328,13 +370,16 @@ fun ProfileScreen(
                 generateFuturePreview = onGenerateFuturePreview,
                 loadFuturePreview = onLoadFuturePreview,
                 analyzeComposition = onAnalyzeBodyComposition,
+                showsAiCoach = showsAiCoach,
+                canUseAiCoach = canUseAiCoach,
+                onShowAiCoachOffer = onShowAiCoachOffer,
+                onChanged = onRemoteSyncRequested,
                 onClose = { showsBodyProgress = false; onRemoteSyncRequested() },
             )
         }
         return
     }
     fun saveProfile(value: OnboardingProfile) {
-        BodyMetricsStore.record(profileContext, value)
         onSave(value)
     }
     // Nutrition can be edited from this profile tab or from its own hub. Both
@@ -407,7 +452,7 @@ fun ProfileScreen(
                     }, contentAlignment = Alignment.Center) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.action_back), tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(22.dp))
                     }
-                    Text(if (showsPlannerNotesEditor) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_planner_notes) else selectedSection?.let { profileSectionTitle(it) }.orEmpty(), fontFamily = Exo2FontFamily, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+                    Text(if (showsPlannerNotesEditor) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_workout_planner_notes) else selectedSection?.let { profileSectionTitle(it) }.orEmpty(), fontFamily = Exo2FontFamily, fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                 }
             }
         }
@@ -458,7 +503,7 @@ fun ProfileScreen(
                     }
                     ChoiceButton(
                         androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.join_a_gym),
-                        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.enter_the_code_your_gym_gave_you__or_scan_its_qr_),
+                        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_enter_the_code_your_gym_gave_you__or_scan_its_qr_),
                         icon = Icons.Filled.Apartment,
                         onClick = onJoinGymRequested,
                     )
@@ -493,14 +538,14 @@ fun ProfileScreen(
         // `achievementsSection` is intentionally disabled in the canonical iOS
         // profile view.  Do not render a placeholder rail here: it changes the
         // hierarchy and pushes the four profile destinations below the fold.
-        if (selectedSection == ProfileSection.Body) { item { ProfileEntrance(sectionEntered, 105) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body)) {
+        if (selectedSection == ProfileSection.Body) { item { ProfileEntrance(sectionEntered, 105) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_body)) {
                 val birthLocale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
                 val formattedBirthday = runCatching {
                     LocalDate.of(birthYearInput.toInt(), draft.birthMonth, birthDayInput.toInt())
                         .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(birthLocale))
                 }.getOrElse { "$birthDayInput ${monthName(draft.birthMonth, birthLocale)} $birthYearInput" }
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gender), onboardingLabel("Gender", draft.gender.storedValue, draft.gender.title), icon = Icons.Filled.Person) { picker = Picker.Gender }
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.birth_date), formattedBirthday, icon = Icons.Filled.CalendarMonth) {
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_gender), onboardingLabel("Gender", draft.gender.storedValue, draft.gender.title), icon = Icons.Filled.Person) { picker = Picker.Gender }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_birth_date), formattedBirthday, icon = Icons.Filled.CalendarMonth) {
                     val validProfile = validatedProfile(draft, heightInput, weightInput, durationInput, birthYearInput, birthDayInput)
                     android.app.DatePickerDialog(
                         profileContext,
@@ -515,7 +560,7 @@ fun ProfileScreen(
                     ).show()
                 }
                 ChoiceButton(
-                    androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.height),
+                    androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_height),
                     formatHeightChoice(heightInput, draft.metricSystem),
                     icon = Icons.Filled.Straighten,
                 ) {
@@ -525,7 +570,7 @@ fun ProfileScreen(
                 // The profile weight is the canonical current value, just like iOS.
                 // The body-metrics collection is history and can legitimately lag
                 // behind when the profile is edited from another entry point.
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body_metrics), displayWeight(draft.weightKg, draft.metricSystem).let { "$it ${if (draft.metricSystem == MetricSystem.Imperial) "lb" else "kg"}" }, icon = Icons.Filled.Scale) { showsBodyMetrics = true }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_body_metrics), displayWeight(latestRecordedWeight(bodyMetrics) ?: draft.weightKg, draft.metricSystem).let { "$it ${if (draft.metricSystem == MetricSystem.Imperial) "lb" else "kg"}" }, icon = Icons.Filled.Scale) { showsBodyMetrics = true }
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body_progress_pics), BodyProgressStore.load(profileContext).size.let { if (it == 0) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_photos_yet) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_check_ins, it) }, icon = Icons.Filled.PhotoCamera) { showsBodyProgress = !showsBodyProgress }
             }
         } } }
@@ -539,7 +584,7 @@ fun ProfileScreen(
             )
         } }
         if (selectedSection == ProfileSection.Fitness && showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 105) {
-            Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_planner_notes)) {
+            Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_workout_planner_notes)) {
                 OutlinedTextField(
                     value = plannerNotesInput,
                     onValueChange = { plannerNotesInput = it },
@@ -555,14 +600,14 @@ fun ProfileScreen(
                 )
             }
         } } }
-        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 105) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training)) {
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.goal), onboardingLabel("FitnessGoal", draft.goal.storedValue, draft.goal.title), icon = profileGoalIcon(draft.goal)) { picker = Picker.Goal }
+        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 105) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_training)) {
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_goal), onboardingLabel("FitnessGoal", draft.goal.storedValue, draft.goal.title), icon = profileGoalIcon(draft.goal)) { picker = Picker.Goal }
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.lifestyle), onboardingLabel("LifestyleLevel", draft.lifestyle.storedValue, draft.lifestyle.title), onboardingLabel("LifestyleLevel", draft.lifestyle.storedValue, draft.lifestyle.description, true), profileLifestyleIcon(draft.lifestyle)) { picker = Picker.Lifestyle }
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training_level), onboardingLabel("TrainingLevel", draft.trainingLevel.storedValue, draft.trainingLevel.title), onboardingLabel("TrainingLevel", draft.trainingLevel.storedValue, draft.trainingLevel.description, true), Icons.Filled.FitnessCenter) { picker = Picker.Level }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_training_level), onboardingLabel("TrainingLevel", draft.trainingLevel.storedValue, draft.trainingLevel.title), onboardingLabel("TrainingLevel", draft.trainingLevel.storedValue, draft.trainingLevel.description, true), Icons.Filled.FitnessCenter) { picker = Picker.Level }
                 if (draft.goal.supportsBodyComposition && draft.trainingLevel.supportsBodyComposition) ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body_composition_intent), onboardingLabel("BodyCompositionPhase", (draft.bodyCompositionPhase ?: BodyCompositionPhase.Automatic).storedValue, (draft.bodyCompositionPhase ?: BodyCompositionPhase.Automatic).title), icon = Icons.Filled.Scale) { picker = Picker.Body }
             } } } }
         if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 155) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training_setup)) {
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.program), onboardingLabel("TrainingSplitPreference", draft.trainingSplitPreference.storedValue, draft.trainingSplitPreference.title), icon = Icons.Filled.GridView) { picker = Picker.Split }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_program), onboardingLabel("TrainingSplitPreference", draft.trainingSplitPreference.storedValue, draft.trainingSplitPreference.title), icon = Icons.Filled.GridView) { picker = Picker.Split }
                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_days), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 draft.workoutDays.toList().let { days ->
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
@@ -602,13 +647,13 @@ fun ProfileScreen(
                     IconButton(
                         onClick = { durationInput = (durationValue - 5).coerceAtLeast(15).toString() },
                         enabled = durationValue > 15,
-                        modifier = Modifier.semantics { contentDescription = "Reducir duración preferida" },
+                        modifier = Modifier.localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.less),
                     ) { Icon(Icons.Filled.Remove, contentDescription = null, tint = WildforceThemeTokens.textPrimary) }
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_min, durationValue), Modifier.width(64.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_min, durationValue), Modifier.width(64.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
                     IconButton(
                         onClick = { durationInput = (durationValue + 5).coerceAtMost(180).toString() },
                         enabled = durationValue < 180,
-                        modifier = Modifier.semantics { contentDescription = "Aumentar duración preferida" },
+                        modifier = Modifier.localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.more),
                     ) { Icon(Icons.Filled.Add, contentDescription = null, tint = WildforceThemeTokens.textPrimary) }
                 }
                 draft.workoutDays.sortedBy { it.ordinal }.forEach { day ->
@@ -619,8 +664,8 @@ fun ProfileScreen(
                 TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.skip_rest_periods), "Salta directamente a la siguiente serie o ejercicio durante el entrenamiento.", draft.skipsRestPeriods, Icons.Filled.SkipNext) { draft = draft.copy(skipsRestPeriods = !draft.skipsRestPeriods) }
                 val plannerNotes = draft.workoutPlannerNotes.takeUnless { it.equals("null", ignoreCase = true) }
                 ChoiceButton(
-                    androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_planner_notes),
-                    plannerNotes ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.none),
+                    androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_workout_planner_notes),
+                    plannerNotes ?: androidx.compose.ui.res.stringResource(R.string.settings_sheet_none),
                     description = plannerNotes?.takeIf { it.isNotBlank() },
                     icon = Icons.AutoMirrored.Filled.Notes,
                 ) {
@@ -628,15 +673,15 @@ fun ProfileScreen(
                     showsPlannerNotesEditor = true
                 }
             } } } }
-        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 205) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.environment)) {
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym_setup), onboardingLabel("GymType", draft.gymType.storedValue, draft.gymType.title), icon = profileGymTypeIcon(draft.gymType)) { picker = Picker.Gym }
+        if (selectedSection == ProfileSection.Fitness && !showsPlannerNotesEditor) { item { ProfileEntrance(sectionEntered, 205) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_environment)) {
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_gym_setup), onboardingLabel("GymType", draft.gymType.storedValue, draft.gymType.title), icon = profileGymTypeIcon(draft.gymType)) { picker = Picker.Gym }
                 val defaultLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_default)
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training_locations), draft.effectiveTrainingLocations().joinToString(" · ") { if (it.isDefault) it.name + " (" + defaultLabel + ")" else it.name }, icon = Icons.Filled.Home) { showsTrainingLocations = true }
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.equipment), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_selected, draft.availableEquipment.size), icon = Icons.Filled.FitnessCenter) { picker = Picker.Equipment }
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.restrictions), draft.movementRestrictions.takeIf { it.isNotEmpty() }?.size?.let { androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_selected, it) } ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.none), icon = Icons.Filled.SelfImprovement) { picker = Picker.Restrictions }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_equipment), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_selected, draft.availableEquipment.size), icon = Icons.Filled.FitnessCenter) { picker = Picker.Equipment }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_restrictions), draft.movementRestrictions.takeIf { it.isNotEmpty() }?.size?.let { androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_selected, it) } ?: androidx.compose.ui.res.stringResource(R.string.settings_sheet_none), icon = Icons.Filled.SelfImprovement) { picker = Picker.Restrictions }
             } } } }
         if (selectedSection == ProfileSection.Nutrition) { item { ProfileEntrance(sectionEntered, 235) {
-                if (!nutritionProfile.isConfigured) Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.nutrition_profile)) {
+                if (!nutritionProfile.isConfigured) Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_nutrition_profile)) {
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_edd63f33842687f3), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary)
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_your_nutrition_profile_to_save_food_preferences__restrictions__and_meal_planning_defaults_in_one_place_), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
                     Button(
@@ -645,43 +690,47 @@ fun ProfileScreen(
                         colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary),
                         shape = RoundedCornerShape(14.dp),
                     ) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.start_nutrition_setup).uppercase()) }
-                } else Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.planning)) {
-                    ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dietary_style), localizedNutritionOption(nutritionProfile.dietaryStyle), icon = Icons.Filled.Restaurant) { nutritionPicker = NutritionPicker.DietaryStyle }
-                    ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.meals_per_day), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_meals, nutritionProfile.mealsPerDay), icon = Icons.Filled.Restaurant) { nutritionPicker = NutritionPicker.MealsPerDay }
+                } else Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_planning)) {
+                    ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dietary_style), localizedNutritionOption(nutritionProfile.dietaryStyle), icon = Icons.Filled.Restaurant) { nutritionPicker = NutritionPicker.DietaryStyle }
+                    ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_meals_per_day), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_meals, nutritionProfile.mealsPerDay), icon = Icons.Filled.Restaurant) { nutritionPicker = NutritionPicker.MealsPerDay }
                     ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.eating_window), localizedNutritionOption(nutritionProfile.eatingWindowLabel()), icon = Icons.Filled.Restaurant) { nutritionPicker = NutritionPicker.EatingWindow }
-                    TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.meal_suggestions), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_controls_whether_your_future_plan_should_include_meal_ideas_alongside_macro_targets_), nutritionProfile.wantsMealSuggestions, Icons.Filled.Restaurant) {
+                    TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_meal_suggestions), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_controls_whether_your_future_plan_should_include_meal_ideas_alongside_macro_targets_), nutritionProfile.wantsMealSuggestions, Icons.Filled.Restaurant) {
                         nutritionProfile = nutritionProfile.copy(wantsMealSuggestions = !nutritionProfile.wantsMealSuggestions)
                         saveNutritionProfile(nutritionProfile)
                     }
                 }
             }
         } }
-        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 255) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.preferences)) {
+        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 255) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_preferences)) {
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cooking_effort), localizedNutritionOption(nutritionProfile.cookingEffort), icon = Icons.Filled.LocalFireDepartment) { nutritionPicker = NutritionPicker.CookingEffort }
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.budget_sensitivity), localizedNutritionOption(nutritionProfile.budgetSensitivity), icon = Icons.Filled.Settings) { nutritionPicker = NutritionPicker.BudgetSensitivity }
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.protein_sources), nutritionProfile.preferredProteinSources.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.ProteinSources }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_protein_sources), nutritionProfile.preferredProteinSources.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.ProteinSources }
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dislikes), nutritionProfile.dislikes.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.Dislikes }
             } } } }
-        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 275) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.restrictions)) {
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.excluded_foods), nutritionProfile.excludedFoods.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.ExcludedFoods }
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.allergies_or_intolerances), nutritionProfile.allergiesAndIntolerances.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.Allergies }
+        if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 275) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_restrictions)) {
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_excluded_foods), nutritionProfile.excludedFoods.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.ExcludedFoods }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_allergies_or_intolerances), nutritionProfile.allergiesAndIntolerances.listSummary(), icon = Icons.Filled.Restaurant) { nutritionTextEditor = NutritionTextField.Allergies }
             } } } }
         if (selectedSection == ProfileSection.Nutrition && nutritionProfile.isConfigured) { item { ProfileEntrance(sectionEntered, 295) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.notes)) {
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.notes), nutritionProfile.notes.takeUnless { it.equals("null", ignoreCase = true) }?.ifBlank { "Ninguna" } ?: "Ninguna", icon = Icons.Filled.Settings) { nutritionTextEditor = NutritionTextField.Notes }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.notes), nutritionProfile.notes.takeUnless { it.equals("null", ignoreCase = true) }?.takeIf { it.isNotBlank() } ?: androidx.compose.ui.res.stringResource(R.string.settings_sheet_none), icon = Icons.Filled.Settings) { nutritionTextEditor = NutritionTextField.Notes }
             } } } }
-        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 245) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.preferences)) {
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.language), localizedLanguageName(appLanguage), icon = Icons.Filled.Settings) { settingsPicker = SettingsPicker.Language }
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.metric_system), localizedMetricSystem(draft.metricSystem), icon = Icons.Filled.Settings) { picker = Picker.Metric }
+        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 245) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_preferences)) {
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_language), localizedLanguageName(appLanguage), icon = Icons.Filled.Settings) { settingsPicker = SettingsPicker.Language }
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_metric_system), localizedMetricSystem(draft.metricSystem), icon = Icons.Filled.Settings) { picker = Picker.Metric }
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.theme), localizedNutritionOption(appTheme), icon = Icons.Filled.Settings) { settingsPicker = SettingsPicker.Theme }
             } } } }
-        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 265) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.environment)) {
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym), "Unirse o gestionar tus gimnasios", icon = Icons.Filled.Apartment, onClick = onJoinGymRequested)
-                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.faq), "Respuestas sobre entrenamiento, nutrición, Android y tu cuenta.", icon = Icons.AutoMirrored.Filled.Help) { selectedSection = ProfileSection.Faq }
-                TogglePreference("Health Connect", "Guarda entrenamientos y sincroniza medidas corporales con Health Connect.", draft.isHealthConnectEnabled, Icons.Filled.Favorite) {
+        if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 265) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_environment)) {
+                val healthDisabledMessage = androidx.compose.ui.res.stringResource(R.string.settings_health_disabled)
+                val healthImportedMessage = androidx.compose.ui.res.stringResource(R.string.settings_health_imported)
+                val healthConnectedMessage = androidx.compose.ui.res.stringResource(R.string.settings_health_connected)
+                val healthDeniedMessage = androidx.compose.ui.res.stringResource(R.string.settings_health_denied)
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym), androidx.compose.ui.res.stringResource(R.string.settings_sheet_join_your_gym), icon = Icons.Filled.Apartment, onClick = onJoinGymRequested)
+                ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.faq), androidx.compose.ui.res.stringResource(R.string.settings_faq_description), icon = Icons.AutoMirrored.Filled.Help) { selectedSection = ProfileSection.Faq }
+                TogglePreference("Health Connect", androidx.compose.ui.res.stringResource(R.string.settings_health_description), draft.isHealthConnectEnabled, Icons.Filled.Favorite) {
                     if (draft.isHealthConnectEnabled) {
                         draft = draft.copy(isHealthConnectEnabled = false)
                         saveProfile(draft)
-                        healthConnectMessage = "Health Connect se ha desactivado para Wildforce."
+                        healthConnectMessage = healthDisabledMessage
                     } else onRequestHealthConnect { granted, importedHeight, importedWeight, importedLeanMass, importedBodyFat ->
                         if (granted) {
                             importedHeight?.let { heightInput = displayHeight(it, draft.metricSystem) }
@@ -690,12 +739,15 @@ fun ProfileScreen(
                             BodyMetricsStore.record(
                                 profileContext,
                                 draft,
+                                composition = BodyCompositionMeasurements(),
                                 leanBodyMassKg = importedLeanMass,
                                 bodyFatPercentage = importedBodyFat,
+                                source = BodyMetricSource.HealthConnect,
+                                recordWeight = importedWeight != null,
                             )
                             saveProfile(draft)
-                            healthConnectMessage = if (importedHeight != null || importedWeight != null) "Medidas importadas desde Health Connect." else "Health Connect está conectado."
-                        } else healthConnectMessage = "No se concedió el acceso a Health Connect."
+                            healthConnectMessage = if (importedHeight != null || importedWeight != null) healthImportedMessage else healthConnectedMessage
+                        } else healthConnectMessage = healthDeniedMessage
                     }
                 }
                 healthConnectMessage?.let { Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
@@ -708,14 +760,14 @@ fun ProfileScreen(
                         requestOrEnableNotification(NotificationPreference.Reminders)
                     }
                 }
-                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.keep_screen_on_during_workout), "Evita que la pantalla se bloquee mientras hay un entrenamiento activo abierto.", keepScreenOn, Icons.Filled.Settings) {
+                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.keep_screen_on_during_workout), androidx.compose.ui.res.stringResource(R.string.settings_sheet_prevents_auto_lock_while_an_active_workout_is_open_), keepScreenOn, Icons.Filled.Settings) {
                     keepScreenOn = !keepScreenOn
                     detailPreferences.edit().putBoolean("keep_screen_on", keepScreenOn).apply()
                     RemoteSyncChangeTracker.mark(profileContext, "user-app-settings")
                     onRemoteSyncRequested()
                     onKeepScreenOnChanged(keepScreenOn)
                 }
-                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.full_focus_mode), "Reduce las distracciones durante los entrenamientos mediante los ajustes de concentración de Android.", fullFocusEnabled, Icons.Filled.Settings) {
+                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.full_focus_mode), androidx.compose.ui.res.stringResource(R.string.settings_focus_description), fullFocusEnabled, Icons.Filled.Settings) {
                     fullFocusEnabled = !fullFocusEnabled
                     detailPreferences.edit().putBoolean("full_focus", fullFocusEnabled).apply()
                     RemoteSyncChangeTracker.mark(profileContext, "user-app-settings")
@@ -733,7 +785,7 @@ fun ProfileScreen(
                 if (fullFocusEnabled) {
                     ChoiceButton(
                         androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.choose_blocked_categories),
-                        "Gestiona las aplicaciones y categorías que Android silencia durante el entrenamiento",
+                        androidx.compose.ui.res.stringResource(R.string.settings_focus_categories_description),
                         icon = Icons.Filled.Settings,
                     ) {
                         runCatching { profileContext.startActivity(android.content.Intent("android.settings.ZEN_MODE_SETTINGS")) }
@@ -742,8 +794,8 @@ fun ProfileScreen(
                 if (android.os.Build.VERSION.SDK_INT >= 36) {
                     val notificationManager = profileContext.getSystemService(android.content.Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
                     val promotedEnabled = runCatching { notificationManager.canPostPromotedNotifications() }.getOrDefault(false)
-                    val liveUpdateDescription = "Muestra la sesión como tarjeta/chip cuando Android 16 y el fabricante lo permitan."
-                    ChoiceButton("Live Update de entrenamiento", if (promotedEnabled) "Activada" else "Activar en Ajustes", liveUpdateDescription) {
+                    val liveUpdateDescription = androidx.compose.ui.res.stringResource(R.string.settings_live_update_description)
+                    ChoiceButton(androidx.compose.ui.res.stringResource(R.string.settings_sheet_live_progress), if (promotedEnabled) androidx.compose.ui.res.stringResource(R.string.settings_sheet_enabled) else androidx.compose.ui.res.stringResource(R.string.settings_sheet_open_settings), liveUpdateDescription) {
                         val promotedIntent = android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_PROMOTION_SETTINGS).apply {
                             putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, profileContext.packageName)
                         }
@@ -753,7 +805,7 @@ fun ProfileScreen(
                         runCatching { profileContext.startActivity(promotedIntent) }.onFailure { runCatching { profileContext.startActivity(fallbackIntent) } }
                     }
                 }
-                TogglePreference("Notificaciones de entrenamiento", "Muestra la sesión activa en el panel y la pantalla bloqueada.", notificationsEnabled, Icons.Filled.Settings) {
+                TogglePreference(androidx.compose.ui.res.stringResource(R.string.settings_workout_notifications), androidx.compose.ui.res.stringResource(R.string.settings_workout_notifications_description), notificationsEnabled, Icons.Filled.Settings) {
                     if (notificationsEnabled) {
                         notificationsEnabled = false
                         notificationPreferences.edit().putBoolean("enabled", false).apply()
@@ -764,7 +816,7 @@ fun ProfileScreen(
                         requestOrEnableNotification(NotificationPreference.Training)
                     }
                 }
-                TogglePreference("Reloj Amazfit", "Sincroniza el entrenamiento activo con Wildforce en tu Amazfit. Solo se activa durante el workout.", amazfitWatchEnabled, Icons.Filled.Settings) {
+                TogglePreference("Amazfit", androidx.compose.ui.res.stringResource(R.string.settings_amazfit_description), amazfitWatchEnabled, Icons.Filled.Settings) {
                     amazfitWatchEnabled = !amazfitWatchEnabled
                     WildforceWatchLocalBridge.setEnabled(profileContext, amazfitWatchEnabled)
                     detailPreferences.edit().putBoolean("amazfit_watch_enabled", amazfitWatchEnabled).apply()
@@ -772,26 +824,27 @@ fun ProfileScreen(
                     onRemoteSyncRequested()
                 }
                 if (WATCH_MOTION_DETECTION_ENABLED) {
-                    TogglePreference("Seguimiento automático Wear OS", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_96bcd9d57aa889c8), wearAutoTrackingEnabled, Icons.Filled.Settings) {
+                    TogglePreference(androidx.compose.ui.res.stringResource(R.string.settings_sheet_watch_auto_tracking), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_96bcd9d57aa889c8), wearAutoTrackingEnabled, Icons.Filled.Settings) {
                         wearAutoTrackingEnabled = !wearAutoTrackingEnabled
                         detailPreferences.edit().putBoolean("wear_auto_tracking_enabled", wearAutoTrackingEnabled).apply()
                         if (wearAutoTrackingEnabled) showsWearMotionOnboarding = true
                     }
                 }
-                TogglePreference("Avisos al comenzar el descanso", "Emite un aviso cuando empieza el temporizador de descanso.", restAlertsEnabled, Icons.Filled.Settings) {
+                TogglePreference(androidx.compose.ui.res.stringResource(R.string.settings_rest_alerts), androidx.compose.ui.res.stringResource(R.string.settings_rest_alerts_description), restAlertsEnabled, Icons.Filled.Settings) {
                     restAlertsEnabled = !restAlertsEnabled
                     notificationPreferences.edit().putBoolean("rest_alerts", restAlertsEnabled).apply()
                 }
             } } } }
         if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 285) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.privacy)) {
                 val protectPhotosMessage = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.confirm_your_identity_to_protect_your_progress_photos_)
-                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.lock_progress_photos), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.require_device_authentication_to_open_body_progress_pics_), progressPhotoLockEnabled, Icons.Filled.Settings) {
+                val unprotectPhotosMessage = androidx.compose.ui.res.stringResource(R.string.settings_sheet_confirm_your_identity_to_turn_off_progress_photo_protection_)
+                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.lock_progress_photos), androidx.compose.ui.res.stringResource(R.string.settings_lock_photo_description), progressPhotoLockEnabled, Icons.Filled.Settings) {
                     val enable = !progressPhotoLockEnabled
                     pendingProgressPhotoLockValue = enable
                     progressPhotoLockError = null
                     authenticateProgressPhotoSetting(
                         if (enable) protectPhotosMessage
-                        else "Confirma tu identidad para desactivar la protección de tus fotos de progreso.",
+                        else unprotectPhotosMessage,
                     )
                 }
         } } } }
@@ -840,7 +893,7 @@ fun ProfileScreen(
         val maximum = if (draft.metricSystem == MetricSystem.Imperial) 91 else 230
         androidx.compose.material.AlertDialog(
             onDismissRequest = { showHeightPicker = false },
-            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.height), fontFamily = AntonFontFamily) },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_height), fontFamily = AntonFontFamily) },
             text = {
                 AndroidView(
                     factory = { viewContext ->
@@ -865,7 +918,7 @@ fun ProfileScreen(
             confirmButton = {
                 TextButton(onClick = { heightInput = selectedHeight.toString(); showHeightPicker = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase()) }
             },
-            dismissButton = { TextButton(onClick = { showHeightPicker = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
+            dismissButton = { TextButton(onClick = { showHeightPicker = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } },
         )
     }
     nutritionPicker?.let { current ->
@@ -883,7 +936,7 @@ fun ProfileScreen(
         }
     }
     settingsPicker?.let { current ->
-        ProfileOptionPickerDialog(if (current == SettingsPicker.Language) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.language) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.theme), current.options, onDismiss = { settingsPicker = null }, localizeOption = { if (current == SettingsPicker.Language) localizedLanguageName(it) else localizedNutritionOption(it) }) { selected ->
+        ProfileOptionPickerDialog(if (current == SettingsPicker.Language) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_language) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.theme), current.options, onDismiss = { settingsPicker = null }, localizeOption = { if (current == SettingsPicker.Language) localizedLanguageName(it) else localizedNutritionOption(it) }) { selected ->
             when (current) {
                 SettingsPicker.Language -> {
                     appLanguage = selected
@@ -919,7 +972,7 @@ fun ProfileScreen(
         Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.58f)).clickable { }, contentAlignment = Alignment.Center) {
             Column(Modifier.padding(28.dp).liquidGlass(RoundedCornerShape(24.dp), emphasized = true).padding(26.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 CircularProgressIndicator(color = WildforceThemeTokens.accent)
-                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.generating_your_workout_plan_).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_generating_your_workout_plan_).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_c9e05a29f31f33fe), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -955,7 +1008,7 @@ fun ProfileScreen(
                     nameEditorVisible = false
                 }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase()) }
             },
-            dismissButton = { androidx.compose.material.TextButton(onClick = { nameEditorVisible = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
+            dismissButton = { androidx.compose.material.TextButton(onClick = { nameEditorVisible = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } },
         )
     }
 }
@@ -1034,10 +1087,10 @@ private enum class ProfileSection(val title: String, val icon: ImageVector, val 
 private fun profileSectionTitle(section: ProfileSection): String = androidx.compose.ui.res.stringResource(when (section) {
     ProfileSection.Body -> io.codepassion.doubletriangle.core.designsystem.R.string.body_profile
     ProfileSection.Fitness -> io.codepassion.doubletriangle.core.designsystem.R.string.fitness_profile
-    ProfileSection.Nutrition -> io.codepassion.doubletriangle.core.designsystem.R.string.nutrition_profile
+    ProfileSection.Nutrition -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_nutrition_profile
     ProfileSection.Settings -> io.codepassion.doubletriangle.core.designsystem.R.string.settings
     ProfileSection.Subscription -> io.codepassion.doubletriangle.core.designsystem.R.string.subscription
-    ProfileSection.Account -> io.codepassion.doubletriangle.core.designsystem.R.string.account
+    ProfileSection.Account -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_account
     ProfileSection.Faq -> io.codepassion.doubletriangle.core.designsystem.R.string.faq
 })
 
@@ -1045,7 +1098,7 @@ private fun profileSectionTitle(section: ProfileSection): String = androidx.comp
 private fun ProfileCategoryTree(profile: OnboardingProfile, nutritionProfile: NutritionProfilePreferences, appLanguage: String, accountRevision: Int, onSelect: (ProfileSection) -> Unit) {
     val context = LocalContext.current
     val account = remember(accountRevision) { currentWildforceAccount(context) }
-    val subscription = SubscriptionAccessStore.load(context)
+    val subscription = rememberProfileSubscription()
     val defaultTrainingLocation = profile.effectiveTrainingLocations().firstOrNull { it.isDefault }
         ?: profile.effectiveTrainingLocations().firstOrNull()
     val onboardingGoal = onboardingLabel("FitnessGoal", profile.goal.storedValue, profile.goal.title)
@@ -1063,12 +1116,12 @@ private fun ProfileCategoryTree(profile: OnboardingProfile, nutritionProfile: Nu
             }
     }
     val summaries = mapOf(
-        ProfileSection.Body to displayWeight(profile.weightKg, profile.metricSystem).let { "$it ${if (profile.metricSystem == MetricSystem.Imperial) "lb" else "kg"}" },
+        ProfileSection.Body to if (profile.weightKg > 0) displayWeight(profile.weightKg, profile.metricSystem).let { "$it ${if (profile.metricSystem == MetricSystem.Imperial) "lb" else "kg"}" } else "",
         ProfileSection.Fitness to fitnessSummary,
-        ProfileSection.Nutrition to if (nutritionProfile.isConfigured) "${localizedNutritionOption(nutritionProfile.dietaryStyle)} • ${androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_meals, nutritionProfile.mealsPerDay)}" else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.setup_required),
+        ProfileSection.Nutrition to if (nutritionProfile.isConfigured) "${localizedNutritionOption(nutritionProfile.dietaryStyle)} • ${androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_meals, nutritionProfile.mealsPerDay)}" else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.setup_required),
         ProfileSection.Settings to "${localizedLanguageName(appLanguage)} • ${localizedMetricSystem(profile.metricSystem)}",
         // iOS shows the current plan name here, not an action label.
-        ProfileSection.Subscription to (subscription?.plan?.let(::subscriptionPlanName) ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.not_available)),
+        ProfileSection.Subscription to (subscription?.plan?.let(::subscriptionPlanName) ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_not_available)),
         // iOS uses a plain Account label without a secondary value.
         ProfileSection.Account to "",
     )
@@ -1115,6 +1168,9 @@ internal enum class BodyMetricKind(val title: String, val unit: String, val icon
     Waist("Cintura", "cm", Icons.Filled.Straighten),
     Neck("Cuello", "cm", Icons.Filled.Person),
     Hip("Cadera", "cm", Icons.Filled.Straighten),
+    Chest("Pecho", "cm", Icons.Filled.Straighten),
+    Thigh("Muslo", "cm", Icons.Filled.Straighten),
+    Arm("Brazo", "cm", Icons.Filled.Straighten),
 }
 
 /**
@@ -1130,10 +1186,13 @@ private fun BodyMetricsScreen(
     onClose: () -> Unit,
     onRequestHealthConnect: (((Boolean, Int?, Double?, Double?, Double?) -> Unit) -> Unit),
     onSyncHealthConnect: (((Boolean, List<ImportedBodyMetric>) -> Unit) -> Unit),
+    onAutoSyncHealthConnect: suspend () -> List<ImportedBodyMetric>,
     onSave: (OnboardingProfile, BodyCompositionMeasurements, Double?, Double?) -> Unit,
     onMetricSaved: (String, Double) -> Unit,
+    onHistoryChanged: () -> Unit,
 ) {
     val context = LocalContext.current
+    BackHandler(onBack = onClose)
     val configuration = LocalConfiguration.current
     val localizedResources = remember(context, configuration, profile.appLanguage) {
         val selectedLocale = Locale.forLanguageTag(
@@ -1171,9 +1230,13 @@ private fun BodyMetricsScreen(
     val timeframeSelectorHeight = maxOf(32f, 38f * fontScale).dp
     val timeframeLabelMaxLines = if (fontScale > 1.15f) 2 else 1
     var selected by remember { mutableStateOf(BodyMetricKind.Weight) }
+    val selectedMetricLabel = bodyMetricLabel(selected)
+    val healthImportFailed = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_something_went_wrong)
+    val noHealthMetrics = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_body_metrics_were_found_in_apple_health_).replace("Apple Health", "Health Connect")
+    val healthMetricsImported = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.imported_your_body_metrics_from_apple_health_).replace("Apple Health", "Health Connect")
     var timeframeDays by remember { mutableStateOf(30) }
     var metricHistory by remember(history) { mutableStateOf(history) }
-    var pendingDeleteDate by remember { mutableStateOf<String?>(null) }
+    var pendingDeleteEntry by remember { mutableStateOf<BodyMetricEntry?>(null) }
     var selectedPointIndex by remember(selected, timeframeDays) { mutableStateOf<Int?>(null) }
     var quickLogVisible by remember { mutableStateOf(false) }
     var quickLogInput by remember { mutableStateOf("") }
@@ -1195,6 +1258,26 @@ private fun BodyMetricsScreen(
         bodyMetricChartPoints(visibleEntries, selected, timeframeDays)
     }
     val latest = entries.lastOrNull()?.valueFor(selected)
+    LaunchedEffect(Unit) {
+        if (profile.isHealthConnectEnabled) {
+            val imports = onAutoSyncHealthConnect()
+            if (imports.isNotEmpty()) {
+                val before = BodyMetricsStore.load(context)
+                val newWeight = imports.lastOrNull { item ->
+                    val value = item.weightKg ?: return@lastOrNull false
+                    val instant = item.recordedAt?.let { runCatching { java.time.Instant.parse(it) }.getOrNull() } ?: return@lastOrNull false
+                    before.none { matchesImportedMetric(it, BodyMetricKind.Weight, value, instant) }
+                }?.weightKg
+                BodyMetricsStore.recordImportedHistory(context, profile, imports)
+                val after = BodyMetricsStore.load(context)
+                if (after != before) {
+                    metricHistory = after
+                    if (newWeight != null) onSave(profile.copy(weightKg = newWeight), composition, null, null)
+                    else onHistoryChanged()
+                }
+            }
+        }
+    }
     fun saveMetricValue(rawValue: String): Boolean {
         val canonical = canonicalBodyMetric(selected, rawValue.bodyMetricDouble(), profile.metricSystem) ?: return false
         var updatedProfile = profile
@@ -1208,7 +1291,17 @@ private fun BodyMetricsScreen(
             BodyMetricKind.Neck -> updatedComposition = composition.copy(neckCm = canonical)
             BodyMetricKind.Hip -> updatedComposition = composition.copy(hipCm = canonical)
             BodyMetricKind.BodyFat -> bodyFat = canonical
+            BodyMetricKind.Chest, BodyMetricKind.Thigh, BodyMetricKind.Arm -> Unit
         }
+        val recordedComposition = BodyCompositionMeasurements(
+            waistCm = canonical.takeIf { selected == BodyMetricKind.Waist },
+            neckCm = canonical.takeIf { selected == BodyMetricKind.Neck },
+            hipCm = canonical.takeIf { selected == BodyMetricKind.Hip },
+        )
+        BodyMetricsStore.record(context, updatedProfile, recordedComposition, leanBodyMassKg = leanBodyMass, bodyFatPercentage = bodyFat, recordWeight = selected == BodyMetricKind.Weight,
+            chestCm = canonical.takeIf { selected == BodyMetricKind.Chest },
+            thighCm = canonical.takeIf { selected == BodyMetricKind.Thigh },
+            armCm = canonical.takeIf { selected == BodyMetricKind.Arm })
         onSave(updatedProfile, updatedComposition, leanBodyMass, bodyFat)
         onMetricSaved(selected.name, canonical)
         metricHistory = BodyMetricsStore.load(context)
@@ -1234,7 +1327,7 @@ private fun BodyMetricsScreen(
                     // which pushed the import and add actions past the right edge on
                     // narrower devices. iOS reserves this trailing toolbar space.
                     Text(
-                        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body_metrics).uppercase(),
+                        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_body_metrics).uppercase(),
                         modifier = Modifier.weight(1f),
                         fontFamily = Exo2FontFamily,
                         fontSize = 24.sp,
@@ -1255,28 +1348,31 @@ private fun BodyMetricsScreen(
                                 onSyncHealthConnect { granted, imports ->
                                     syncingHealthConnect = false
                                     if (!granted) {
-                                        healthConnectSyncMessage = "No se pudieron importar las métricas desde Salud."
+                                        healthConnectSyncMessage = healthImportFailed
                                     } else {
                                         BodyMetricsStore.recordImportedHistory(context, profile, imports)
-                                        val latest = imports.maxByOrNull { it.date }
+                                        val latestHeight = imports.lastOrNull { it.heightCm != null }?.heightCm
+                                        val latestLeanMass = imports.lastOrNull { it.leanBodyMassKg != null }?.leanBodyMassKg
+                                        val latestBodyFat = imports.lastOrNull { it.bodyFatPercentage != null }?.bodyFatPercentage
+                                        val latestWeight = latestRecordedWeight(BodyMetricsStore.load(context))
                                         val importedProfile = profile.copy(
-                                            heightCm = latest?.heightCm?.coerceIn(120.0, 230.0)?.toInt() ?: profile.heightCm,
-                                            weightKg = latest?.weightKg?.takeIf { it.isFinite() && it in 35.0..250.0 } ?: profile.weightKg,
+                                            heightCm = latestHeight?.coerceIn(120.0, 230.0)?.toInt() ?: profile.heightCm,
+                                            weightKg = latestWeight ?: profile.weightKg,
                                         )
-                                        onSave(importedProfile, composition, latest?.leanBodyMassKg, latest?.bodyFatPercentage)
+                                        onSave(importedProfile, composition, latestLeanMass, latestBodyFat)
                                         metricHistory = BodyMetricsStore.load(context)
                                         input = bodyMetricDisplayValue(selected, importedProfile, composition, metricHistory.lastOrNull())
                                         healthConnectSyncMessage = if (imports.isEmpty()) {
-                                            "No se encontraron métricas en Salud."
+                                            noHealthMetrics
                                         } else {
-                                            "Se han importado ${imports.size} días de métricas desde Salud."
+                                            healthMetricsImported
                                         }
                                     }
                                 }
                             },
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(Icons.Filled.ArrowDownward, contentDescription = "Importar desde Salud", tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(22.dp))
+                        Icon(Icons.Filled.ArrowDownward, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.import_from_apple_health).replace("Apple Health", "Health Connect"), tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(22.dp))
                     }
                     Box(
                         Modifier
@@ -1291,7 +1387,7 @@ private fun BodyMetricsScreen(
                             },
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(Icons.Filled.Add, contentDescription = "Registrar ${selected.title.lowercase()}", tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(24.dp))
+                        Icon(Icons.Filled.Add, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log) + " " + selectedMetricLabel.lowercase(), tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(24.dp))
                     }
                 }
             }
@@ -1302,9 +1398,10 @@ private fun BodyMetricsScreen(
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         row.forEach { kind ->
                             val isSelected = kind == selected
-                            val cardValue = metricHistory.lastOrNull()?.valueFor(kind)
+                            val kindLabel = bodyMetricLabel(kind)
+                            val cardValue = metricHistory.lastOrNull { it.valueFor(kind) != null }?.valueFor(kind)
                                 ?.let { formatBodyMetric(kind, it, profile.metricSystem) }
-                                ?: bodyMetricDisplayValue(kind, profile, composition, metricHistory.lastOrNull()).ifBlank { "—" }
+                                ?: "—"
                             Box(
                                 Modifier.weight(1f)
                                     .clip(RoundedCornerShape(16.dp))
@@ -1315,7 +1412,7 @@ private fun BodyMetricsScreen(
                                         shape = RoundedCornerShape(16.dp),
                                     )
                                     .semantics {
-                                        contentDescription = "${kind.title}: $cardValue"
+                                        contentDescription = "$kindLabel: $cardValue"
                                         role = Role.Button
                                         this.selected = isSelected
                                     }
@@ -1331,7 +1428,7 @@ private fun BodyMetricsScreen(
             }
         }
         item {
-            Section("Progreso de ${selected.title.lowercase()}") {
+            Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.___progress, selectedMetricLabel)) {
                 val latestValue = latest?.let { formatBodyMetric(selected, it, profile.metricSystem) } ?: "—"
                 AnimatedContent(
                     targetState = latestValue,
@@ -1375,7 +1472,6 @@ private fun BodyMetricsScreen(
                                 .background(if (active) WildforceThemeTokens.textPrimary else Color.Transparent)
                                 .semantics {
                                     contentDescription = label
-                                    stateDescription = if (active) "Seleccionado" else "No seleccionado"
                                     this.selected = active
                                 }
                                 .clickable { timeframeDays = days },
@@ -1410,7 +1506,7 @@ private fun BodyMetricsScreen(
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.SpaceBetween) {
                         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(formatBodyMetric(selected, latest ?: chartValues.last(), profile.metricSystem), fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
-                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_28429eaaf00312ca, selected.title.lowercase()), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_28429eaaf00312ca, selectedMetricLabel.lowercase()), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                         }
                         if (chartValues.size > 1) {
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -1478,7 +1574,7 @@ private fun BodyMetricsScreen(
                                         color = WildforceThemeTokens.textSecondary,
                                         maxLines = 1,
                                         modifier = Modifier.semantics {
-                                            contentDescription = "Eje: ${bodyMetricAxisLabel(point.date, timeframeDays, axisLocale)}"
+                                            contentDescription = bodyMetricAxisLabel(point.date, timeframeDays, axisLocale)
                                         },
                                     )
                                 }
@@ -1514,9 +1610,9 @@ private fun BodyMetricsScreen(
                             Text(formatBodyMetric(selected, value, profile.metricSystem), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary)
                             Icon(
                                 Icons.Filled.Delete,
-                                contentDescription = "Eliminar registro",
+                                contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.delete),
                                 tint = WildforceThemeTokens.textSecondary,
-                                modifier = Modifier.size(48.dp).clickable { pendingDeleteDate = entry.date },
+                                modifier = Modifier.size(48.dp).clickable { pendingDeleteEntry = entry },
                             )
                         }
                     }
@@ -1524,33 +1620,39 @@ private fun BodyMetricsScreen(
             }
         }
         item {
-            Section(selected.title) {
+            Section(selectedMetricLabel) {
                 Text(bodyMetricHint(selected), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
             }
         }
+        item {
+            Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.how_to_measure)) {
+                Text(bodyMetricMeasurementHint(selected), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
+            }
+        }
     }
-    pendingDeleteDate?.let { date ->
+    pendingDeleteEntry?.let { entry ->
         androidx.compose.material.AlertDialog(
-            onDismissRequest = { pendingDeleteDate = null },
+            onDismissRequest = { pendingDeleteEntry = null },
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_c564319129b0cdb7)) },
-            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_6045f625b4dddde3, date.takeLast(5), selected.title.lowercase())) },
+            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_6045f625b4dddde3, entry.date.takeLast(5), selectedMetricLabel.lowercase())) },
             confirmButton = {
                 Button(onClick = {
-                    BodyMetricsStore.deleteMetric(context, date, selected)
+                    BodyMetricsStore.deleteMetric(context, entry, selected)
+                    onHistoryChanged()
                     metricHistory = BodyMetricsStore.load(context)
-                    pendingDeleteDate = null
+                    pendingDeleteEntry = null
                 }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.delete)) }
             },
-            dismissButton = { Button(onClick = { pendingDeleteDate = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel)) } },
+            dismissButton = { Button(onClick = { pendingDeleteEntry = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel)) } },
         )
     }
     if (quickLogVisible) {
         androidx.compose.material.AlertDialog(
             onDismissRequest = { quickLogVisible = false },
-            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3481712cc5fee35c, selected.title.lowercase())) },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3481712cc5fee35c, selectedMetricLabel.lowercase())) },
             text = {
                 NumberField(
-                    label = "${selected.title} (${displayBodyMetricUnit(selected, profile.metricSystem)})",
+                    label = "$selectedMetricLabel (${displayBodyMetricUnit(selected, profile.metricSystem)})",
                     value = quickLogInput,
                     onValueChange = { quickLogInput = it.profileDecimal() },
                     modifier = Modifier.fillMaxWidth(),
@@ -1562,17 +1664,17 @@ private fun BodyMetricsScreen(
                     if (saveMetricValue(quickLogInput)) quickLogVisible = false
                 }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase()) }
             },
-            dismissButton = { Button(onClick = { quickLogVisible = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
+            dismissButton = { Button(onClick = { quickLogVisible = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } },
         )
     }
     if (syncingHealthConnect || healthConnectSyncMessage != null) {
         androidx.compose.material.AlertDialog(
             onDismissRequest = { if (!syncingHealthConnect) healthConnectSyncMessage = null },
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_9b5943016c3ffc7f)) },
-            text = { Text(if (syncingHealthConnect) "Sincronizando métricas desde Salud…" else healthConnectSyncMessage.orEmpty()) },
+            text = { Text(if (syncingHealthConnect) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.syncing_from_apple_health___).replace("Apple Health", "Health Connect") else healthConnectSyncMessage.orEmpty()) },
             confirmButton = {
                 if (!syncingHealthConnect) {
-                    TextButton(onClick = { healthConnectSyncMessage = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase()) }
+                    TextButton(onClick = { healthConnectSyncMessage = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dismiss).uppercase()) }
                 }
             },
         )
@@ -1598,7 +1700,7 @@ private fun BodyMetricStatCard(
             if (values.size >= 2) BodyMetricSparkline(values, kind, iconColor)
         }
         Text(value, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = foreground, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Text(kind.title, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Medium, color = foreground, maxLines = 2)
+        Text(bodyMetricLabel(kind), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Medium, color = foreground, maxLines = 2)
     }
 }
 
@@ -1692,6 +1794,9 @@ private fun BodyMetricEntry.valueFor(kind: BodyMetricKind): Double? = when (kind
     BodyMetricKind.Neck -> neckCm
     BodyMetricKind.Hip -> hipCm
     BodyMetricKind.BodyFat -> bodyFatPercentage
+    BodyMetricKind.Chest -> chestCm
+    BodyMetricKind.Thigh -> thighCm
+    BodyMetricKind.Arm -> armCm
 }
 
 private fun bodyMetricDisplayValue(kind: BodyMetricKind, profile: OnboardingProfile, composition: BodyCompositionMeasurements, latest: BodyMetricEntry?): String = when (kind) {
@@ -1699,19 +1804,19 @@ private fun bodyMetricDisplayValue(kind: BodyMetricKind, profile: OnboardingProf
     BodyMetricKind.Waist -> composition.waistCm?.let { formatBodyMetric(kind, it, profile.metricSystem).substringBefore(' ') }.orEmpty()
     BodyMetricKind.Neck -> composition.neckCm?.let { formatBodyMetric(kind, it, profile.metricSystem).substringBefore(' ') }.orEmpty()
     BodyMetricKind.Hip -> composition.hipCm?.let { formatBodyMetric(kind, it, profile.metricSystem).substringBefore(' ') }.orEmpty()
-    BodyMetricKind.LeanBodyMass, BodyMetricKind.BodyFat -> latest?.valueFor(kind)?.let { formatBodyMetric(kind, it, profile.metricSystem).substringBefore(' ') }.orEmpty()
+    BodyMetricKind.LeanBodyMass, BodyMetricKind.BodyFat, BodyMetricKind.Chest, BodyMetricKind.Thigh, BodyMetricKind.Arm -> latest?.valueFor(kind)?.let { formatBodyMetric(kind, it, profile.metricSystem).substringBefore(' ') }.orEmpty()
 }
 
 private fun displayBodyMetricUnit(kind: BodyMetricKind, metricSystem: MetricSystem): String = when (kind) {
     BodyMetricKind.Weight, BodyMetricKind.LeanBodyMass -> if (metricSystem == MetricSystem.Imperial) "lb" else "kg"
-    BodyMetricKind.Waist, BodyMetricKind.Neck, BodyMetricKind.Hip -> if (metricSystem == MetricSystem.Imperial) "in" else "cm"
+    BodyMetricKind.Waist, BodyMetricKind.Neck, BodyMetricKind.Hip, BodyMetricKind.Chest, BodyMetricKind.Thigh, BodyMetricKind.Arm -> if (metricSystem == MetricSystem.Imperial) "in" else "cm"
     BodyMetricKind.BodyFat -> "%"
 }
 
 private fun formatBodyMetric(kind: BodyMetricKind, canonical: Double, metricSystem: MetricSystem): String {
     val displayed = when (kind) {
         BodyMetricKind.Weight, BodyMetricKind.LeanBodyMass -> if (metricSystem == MetricSystem.Imperial) canonical * PoundsPerKilogram else canonical
-        BodyMetricKind.Waist, BodyMetricKind.Neck, BodyMetricKind.Hip -> if (metricSystem == MetricSystem.Imperial) canonical / 2.54 else canonical
+        BodyMetricKind.Waist, BodyMetricKind.Neck, BodyMetricKind.Hip, BodyMetricKind.Chest, BodyMetricKind.Thigh, BodyMetricKind.Arm -> if (metricSystem == MetricSystem.Imperial) canonical / 2.54 else canonical
         BodyMetricKind.BodyFat -> canonical
     }
     return "%.1f %s".format(Locale.US, displayed, displayBodyMetricUnit(kind, metricSystem))
@@ -1719,34 +1824,46 @@ private fun formatBodyMetric(kind: BodyMetricKind, canonical: Double, metricSyst
 
 private fun bodyMetricChartMinimumPadding(kind: BodyMetricKind): Double = when (kind) {
     BodyMetricKind.Weight, BodyMetricKind.LeanBodyMass, BodyMetricKind.BodyFat -> 0.25
-    BodyMetricKind.Waist, BodyMetricKind.Neck, BodyMetricKind.Hip -> 0.5
+    BodyMetricKind.Waist, BodyMetricKind.Neck, BodyMetricKind.Hip, BodyMetricKind.Chest, BodyMetricKind.Thigh, BodyMetricKind.Arm -> 0.5
 }
 
 internal fun canonicalBodyMetric(kind: BodyMetricKind, value: Double?, metricSystem: MetricSystem): Double? {
     val input = value ?: return null
     val canonical = when (kind) {
         BodyMetricKind.Weight, BodyMetricKind.LeanBodyMass -> if (metricSystem == MetricSystem.Imperial) input / PoundsPerKilogram else input
-        BodyMetricKind.Waist, BodyMetricKind.Neck, BodyMetricKind.Hip -> if (metricSystem == MetricSystem.Imperial) input * 2.54 else input
+        BodyMetricKind.Waist, BodyMetricKind.Neck, BodyMetricKind.Hip, BodyMetricKind.Chest, BodyMetricKind.Thigh, BodyMetricKind.Arm -> if (metricSystem == MetricSystem.Imperial) input * 2.54 else input
         BodyMetricKind.BodyFat -> input
     }
-    return canonical.takeIf { it.isFinite() && when (kind) {
-        BodyMetricKind.Weight -> it in 20.0..400.0
-        BodyMetricKind.LeanBodyMass -> it in 1.0..300.0
-        BodyMetricKind.Waist, BodyMetricKind.Neck, BodyMetricKind.Hip -> it in 20.0..300.0
-        BodyMetricKind.BodyFat -> it in 1.0..90.0
-    } }
+    return canonical.takeIf { it.isFinite() && it > 0.0 }
 }
 
 private fun String.bodyMetricDouble(): Double? = replace(',', '.').toDoubleOrNull()
 
-private fun bodyMetricHint(kind: BodyMetricKind): String = when (kind) {
-    BodyMetricKind.Weight -> "Registra el peso en condiciones similares para que la tendencia sea comparable."
-    BodyMetricKind.LeanBodyMass -> "Usa una medición fiable y registra siempre con el mismo método cuando sea posible."
-    BodyMetricKind.Waist -> "Mide alrededor de la cintura, relajado y tras exhalar normalmente."
-    BodyMetricKind.Neck -> "Mide justo por debajo de la laringe, con la cinta horizontal."
-    BodyMetricKind.Hip -> "Mide en la parte más ancha de las caderas y los glúteos."
-    BodyMetricKind.BodyFat -> "Registra el porcentaje de grasa corporal de tu método de medición habitual."
-}
+@Composable
+private fun bodyMetricMeasurementHint(kind: BodyMetricKind): String = androidx.compose.ui.res.stringResource(when (kind) {
+    BodyMetricKind.Weight -> io.codepassion.doubletriangle.core.designsystem.R.string.weigh_yourself_on_the_same_scale__ideally_in_the_morning_after_using_the_bathroom_and_before_eating_or_drinking_
+    BodyMetricKind.BodyFat -> io.codepassion.doubletriangle.core.designsystem.R.string.use_a_smart_scale__calipers__or_a_professional_scan__and_try_to_use_the_same_method_each_time_for_consistent_comparisons_
+    BodyMetricKind.LeanBodyMass -> io.codepassion.doubletriangle.core.designsystem.R.string.estimate_it_from_a_body_composition_reading_such_as_a_smart_scale_or_dexa_scan__then_track_it_with_the_same_method_over_time_
+    BodyMetricKind.Waist -> io.codepassion.doubletriangle.core.designsystem.R.string.for_men__wrap_a_tape_measure_around_your_waist_at_navel_level__for_women__measure_at_the_narrowest_part_of_your_abdomen__keep_it_snug_but_not_tight_and_measure_after_a_normal_exhale_
+    BodyMetricKind.Neck -> io.codepassion.doubletriangle.core.designsystem.R.string.wrap_a_tape_measure_around_your_neck_just_below_the_larynx__adam_s_apple___keeping_it_level_and_snug_but_not_tight_
+    BodyMetricKind.Hip -> io.codepassion.doubletriangle.core.designsystem.R.string.wrap_a_tape_measure_around_the_widest_part_of_your_hips_and_buttocks__keeping_it_level_and_parallel_to_the_floor_
+    BodyMetricKind.Chest -> io.codepassion.doubletriangle.core.designsystem.R.string.wrap_a_tape_measure_around_your_chest_at_nipple_level__under_your_armpits__keeping_it_level_and_measuring_after_a_normal_exhale_
+    BodyMetricKind.Thigh -> io.codepassion.doubletriangle.core.designsystem.R.string.stand_relaxed_and_wrap_a_tape_measure_around_the_widest_part_of_one_thigh__just_below_the_buttock__measure_the_same_leg_each_time_
+    BodyMetricKind.Arm -> io.codepassion.doubletriangle.core.designsystem.R.string.let_your_arm_hang_relaxed_and_wrap_a_tape_measure_around_the_widest_part_of_the_upper_arm__measure_the_same_arm_each_time_
+})
+
+@Composable
+private fun bodyMetricHint(kind: BodyMetricKind): String = androidx.compose.ui.res.stringResource(when (kind) {
+    BodyMetricKind.Weight -> io.codepassion.doubletriangle.core.designsystem.R.string.weight_helps_you_monitor_overall_body_mass_trends__it_is_useful_for_seeing_whether_your_nutrition_and_training_are_moving_you_toward_fat_loss__maintenance__or_muscle_gain_
+    BodyMetricKind.LeanBodyMass -> io.codepassion.doubletriangle.core.designsystem.R.string.lean_body_mass_estimates_everything_in_your_body_except_fat__including_muscle__it_is_useful_for_tracking_whether_you_are_maintaining_or_building_muscle_over_time_
+    BodyMetricKind.Waist -> io.codepassion.doubletriangle.core.designsystem.R.string.waist_circumference_tracks_changes_around_your_midsection__it_is_useful_for_spotting_fat_loss_progress_and_is_the_primary_measurement_used_in_the_u_s__navy_formula_to_estimate_body_fat_percentage_
+    BodyMetricKind.Neck -> io.codepassion.doubletriangle.core.designsystem.R.string.neck_circumference_is_used_together_with_waist_and_height_to_estimate_body_fat_percentage_using_the_u_s__navy_formula__a_reliable_tape_measure_method_
+    BodyMetricKind.Hip -> io.codepassion.doubletriangle.core.designsystem.R.string.hip_circumference_is_used_together_with_waist__neck__and_height_to_estimate_body_fat_percentage_for_women_using_the_u_s__navy_formula_
+    BodyMetricKind.BodyFat -> io.codepassion.doubletriangle.core.designsystem.R.string.body_fat_percentage_estimates_how_much_of_your_body_is_fat_mass__it_is_useful_for_judging_physique_changes_more_accurately_than_scale_weight_alone_
+    BodyMetricKind.Chest -> io.codepassion.doubletriangle.core.designsystem.R.string.chest_circumference_tracks_changes_in_your_upper_body__it_is_useful_for_seeing_muscle_gain_in_the_chest_and_back_alongside_fat_loss_elsewhere_
+    BodyMetricKind.Thigh -> io.codepassion.doubletriangle.core.designsystem.R.string.thigh_circumference_tracks_changes_in_your_legs__it_is_useful_for_seeing_lower_body_muscle_gain_or_fat_loss_
+    BodyMetricKind.Arm -> io.codepassion.doubletriangle.core.designsystem.R.string.arm_circumference_tracks_changes_in_your_upper_arm__it_is_useful_for_seeing_arm_muscle_gain_over_time_
+})
 
 @Composable
 private fun ProfileBodyMetrics(
@@ -1770,14 +1887,19 @@ private fun ProfileBodyMetrics(
     }
     val displayedBasalMetabolicRate = basalMetabolicRate.roundToInt()
     val activeMetabolicRate = (basalMetabolicRate * activityFactor).roundToInt()
-    Section("TMB") {
-        ReadOnlyProfileRow("Metabolismo basal", "$displayedBasalMetabolicRate kcal", "Calorías que quema tu cuerpo en reposo absoluto según altura, peso, edad y sexo.")
-        ReadOnlyProfileRow("Metabolismo activo", "$activeMetabolicRate kcal", "TMB ajustada a tu estilo de vida ${profile.lifestyle.title.lowercase()}.")
+    Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.bmr)) {
+        ReadOnlyProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.basal_metabolic_rate), "$displayedBasalMetabolicRate kcal", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.calories_your_body_burns_at_complete_rest__based_on_height__weight__age__and_gender_))
+        ReadOnlyProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.active_metabolic_rate), "$activeMetabolicRate kcal", onboardingLabel("LifestyleLevel", profile.lifestyle.storedValue, profile.lifestyle.title))
     }
     Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body_composition)) {
         val waistToHeight = measurements.waistCm?.div(safeHeightCm)
         if (waistToHeight != null) {
-            val zone = waistToHeightZone(waistToHeight)
+            val zone = androidx.compose.ui.res.stringResource(when {
+                waistToHeight < .40 -> io.codepassion.doubletriangle.core.designsystem.R.string.low
+                waistToHeight < .50 -> io.codepassion.doubletriangle.core.designsystem.R.string.healthy
+                waistToHeight < .60 -> io.codepassion.doubletriangle.core.designsystem.R.string.elevated_risk
+                else -> io.codepassion.doubletriangle.core.designsystem.R.string.high_risk
+            })
             val zoneColor = when {
                 waistToHeight < .40 -> WildforceThemeTokens.textSecondary
                 waistToHeight < .50 -> Color(0xFF4CAF50)
@@ -1799,23 +1921,23 @@ private fun ProfileBodyMetrics(
                     Color(0xFFF44336).copy(alpha = .75f),
                 ),
             )
-        } else ReadOnlyProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.waist_to_height_ratio), "—", "Registra la cintura para ver este dato.")
+        } else ReadOnlyProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.waist_to_height_ratio), "—", androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_your_waist_circumference_in_body_metrics_to_see_this_))
         val bodyFat = navyBodyFat(profile.gender, safeHeightCm.toDouble(), measurements)
         if (bodyFat != null) {
             val isFemale = profile.gender.storedValue == "female"
             val zone = if (isFemale) {
                 when {
-                    bodyFat < 21 -> "Atlético"
-                    bodyFat < 25 -> "En forma"
-                    bodyFat < 32 -> "Promedio"
-                    else -> "Elevado"
+                    bodyFat < 21 -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.athletic)
+                    bodyFat < 25 -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.fit)
+                    bodyFat < 32 -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_average)
+                    else -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.high)
                 }
             } else {
                 when {
-                    bodyFat < 14 -> "Atlético"
-                    bodyFat < 18 -> "En forma"
-                    bodyFat < 25 -> "Promedio"
-                    else -> "Elevado"
+                    bodyFat < 14 -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.athletic)
+                    bodyFat < 18 -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.fit)
+                    bodyFat < 25 -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_average)
+                    else -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.high)
                 }
             }
             val lowerBoundaries = if (isFemale) listOf(21.0, 25.0, 32.0) else listOf(14.0, 18.0, 25.0)
@@ -1830,7 +1952,7 @@ private fun ProfileBodyMetrics(
                 else -> Color(0xFFF44336)
             }
             ZoneMetricRow(
-                title = "Grasa corporal estimada",
+                title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.estimated_body_fat),
                 value = "%.1f%%".format(bodyFat),
                 zone = zone,
                 zoneColor = zoneColor,
@@ -1843,9 +1965,9 @@ private fun ProfileBodyMetrics(
                     Color(0xFFFF9800).copy(alpha = .75f),
                     Color(0xFFF44336).copy(alpha = .75f),
                 ),
-                description = "Estimación mediante la fórmula de la Marina de EE. UU. usando cintura${if (isFemale) ", cadera" else ""} y cuello.",
+                description = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.estimated_with_the_u_s__navy_circumference_method_from_your_height_and_your_waist_and_neck_measurements__plus_hip_for_women__ranges_follow_the_american_council_on_exercise_body_fat_classification_),
             )
-        } else ReadOnlyProfileRow("Grasa corporal estimada", "—", if (profile.gender.storedValue == "female") "Registra cintura, cuello y cadera para verla." else "Registra cintura y cuello para verla.")
+        } else ReadOnlyProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.estimated_body_fat), "—", if (profile.gender.storedValue == "female") androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_waist__neck__and_hip_circumference_in_body_metrics_to_see_this_) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_waist_and_neck_circumference_in_body_metrics_to_see_this_))
     }
 }
 
@@ -1975,7 +2097,7 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
             ProfileEntrance(entered, 100) {
                 Box(
                     Modifier.size(avatarSize)
-                        .semantics { contentDescription = "Cambiar foto de perfil" }
+                        .localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.change_photo)
                         .clickable(onClick = onChangeAvatar),
                 ) {
                     val bitmap = remember(avatarPath, avatarRevision) { avatarPath?.let { BitmapFactory.decodeFile(it) } }
@@ -1997,7 +2119,7 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
                             .border(4.dp, WildforceThemeTokens.background, CircleShape),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(Icons.Filled.PhotoCamera, contentDescription = "Cambiar foto de perfil", modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.primaryButtonText)
+                        Icon(Icons.Filled.PhotoCamera, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.change_photo), modifier = Modifier.size(16.dp), tint = WildforceThemeTokens.primaryButtonText)
                     }
                 }
             }
@@ -2012,9 +2134,9 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
                     }
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                    ProfileEntrance(entered, 180, Modifier.weight(1f)) { ProfileStat("Racha", currentStreak.toString(), Modifier.fillMaxWidth()) }
-                    ProfileEntrance(entered, 220, Modifier.weight(1f)) { ProfileStat("Más larga", longestStreak.toString(), Modifier.fillMaxWidth()) }
-                    ProfileEntrance(entered, 260, Modifier.weight(1f)) { ProfileStat("Entrenos", completedWorkouts.toString(), Modifier.fillMaxWidth()) }
+                    ProfileEntrance(entered, 180, Modifier.weight(1f)) { ProfileStat(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_current_streak), currentStreak.toString(), Modifier.fillMaxWidth()) }
+                    ProfileEntrance(entered, 220, Modifier.weight(1f)) { ProfileStat(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.longest), longestStreak.toString(), Modifier.fillMaxWidth()) }
+                    ProfileEntrance(entered, 260, Modifier.weight(1f)) { ProfileStat(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workouts), completedWorkouts.toString(), Modifier.fillMaxWidth(), isWorkouts = true) }
                 }
             }
         }
@@ -2025,12 +2147,14 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
 private fun ProfileExperience(experienceXp: Int, experienceLevel: Int, experienceProgress: Float) {
     val animatedExperienceProgress by animateFloatAsState(experienceProgress.coerceIn(0f, 1f), animationSpec = tween(650), label = "profile-experience")
     val nextLevelXp = minimumTotalXp(experienceLevel + 1)
+    val levelDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.level__d, experienceLevel)
+    val experienceDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_of__d, experienceXp, nextLevelXp) + " XP"
     Column(
         Modifier.fillMaxWidth()
             .padding(vertical = 8.dp)
             .semantics {
-                contentDescription = "Nivel $experienceLevel"
-                stateDescription = "$experienceXp de $nextLevelXp XP"
+                contentDescription = levelDescription
+                stateDescription = experienceDescription
             },
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -2048,11 +2172,8 @@ private fun ProfileExperience(experienceXp: Int, experienceLevel: Int, experienc
 }
 
 @Composable
-private fun ProfileStat(label: String, value: String, modifier: Modifier) {
-    val icon = when (label) {
-        "Entrenos" -> Icons.Filled.EmojiEvents
-        else -> Icons.Filled.LocalFireDepartment
-    }
+private fun ProfileStat(label: String, value: String, modifier: Modifier, isWorkouts: Boolean = false) {
+    val icon = if (isWorkouts) Icons.Filled.EmojiEvents else Icons.Filled.LocalFireDepartment
     Column(
         modifier.padding(4.dp).semantics {
             contentDescription = label
@@ -2061,7 +2182,7 @@ private fun ProfileStat(label: String, value: String, modifier: Modifier) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = if (label == "Entrenos") Color(0xFFF2C21A) else WildforceThemeTokens.accentGold)
+            Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = if (isWorkouts) Color(0xFFF2C21A) else WildforceThemeTokens.accentGold)
             Text(value, style = MaterialTheme.typography.body1, color = WildforceThemeTokens.textPrimary, maxLines = 1)
         }
         Text(label, fontFamily = Exo2FontFamily, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -2181,13 +2302,13 @@ private fun WearMotionOnboardingDialog(onDismiss: () -> Unit) {
                     Icon(Icons.Filled.FitnessCenter, contentDescription = null, tint = Color.White, modifier = Modifier.size(25.dp))
                 }
             }
-            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.watch_auto_tracking), fontFamily = Exo2FontFamily, fontSize = 27.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+            Text(androidx.compose.ui.res.stringResource(R.string.settings_sheet_watch_auto_tracking), fontFamily = Exo2FontFamily, fontSize = 27.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_96bcd9d57aa889c8), style = MaterialTheme.typography.body1, color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
 
             Column(Modifier.fillMaxWidth().padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-                WearMotionFeature(Icons.Filled.FitnessCenter, "Repeticiones automáticas", "El reloj cuenta tus repeticiones mientras te concentras en el movimiento.")
-                WearMotionFeature(Icons.Filled.Star, "Insights de movimiento", "Consulta cadencia, rango de movimiento y consistencia de las series.")
-                WearMotionFeature(Icons.Filled.Check, "Sincronización en directo", "El progreso se mantiene actualizado entre el teléfono y el reloj.")
+                WearMotionFeature(Icons.Filled.FitnessCenter, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.auto_reps), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.let_your_watch_count_your_reps_automatically_while_you_focus_on_the_movement_))
+                WearMotionFeature(Icons.Filled.Star, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.motion_insights), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.analyze_your_cadence__range_of_motion__and_set_consistency_to_improve_your_form_))
+                WearMotionFeature(Icons.Filled.Check, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.live_sync), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.real_time_synchronization_ensures_your_progress_is_always_up_to_date_across_devices_))
             }
 
             Button(
@@ -2242,7 +2363,7 @@ private fun NutritionTextEditorDialog(field: NutritionTextField, profile: Nutrit
             }
         },
         confirmButton = { Button(onClick = { onSave(value) }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase()) } },
-        dismissButton = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), Modifier.heightIn(min = 48.dp).clickable(onClick = onDismiss).padding(12.dp), color = WildforceThemeTokens.textSecondary) },
+        dismissButton = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), Modifier.heightIn(min = 48.dp).clickable(onClick = onDismiss).padding(12.dp), color = WildforceThemeTokens.textSecondary) },
     )
 }
 
@@ -2250,7 +2371,8 @@ private fun NutritionProfilePreferences.eatingWindowLabel(): String = eatingWind
     eatingWindowEndHour?.let { end -> "%02d:00 - %02d:00".format(start, end) }
 } ?: "Flexible"
 
-private fun List<String>.listSummary(): String = if (isEmpty()) "Ninguno" else joinToString(", ")
+@Composable
+private fun List<String>.listSummary(): String = if (isEmpty()) androidx.compose.ui.res.stringResource(R.string.settings_sheet_none) else joinToString(", ")
 
 private fun String.profileDecimal(): String = filter { it.isDigit() || it == ',' || it == '.' }.take(6)
 private fun String.profileDouble(): Double? = replace(',', '.').toDoubleOrNull()?.takeIf { it in 20.0..300.0 }
@@ -2287,16 +2409,16 @@ private sealed class Picker { data object Goal : Picker(); data object Level : P
     val title: String
     val values: List<Pair<String, (OnboardingProfile) -> OnboardingProfile>>
     when (picker) {
-        Picker.Goal -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.goal); values = FitnessGoal.entries.map { onboardingLabel("FitnessGoal", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(goal = it) } } }
-        Picker.Level -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.training_level); values = TrainingLevel.entries.map { onboardingLabel("TrainingLevel", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(trainingLevel = it) } } }
+        Picker.Goal -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_goal); values = FitnessGoal.entries.map { onboardingLabel("FitnessGoal", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(goal = it) } } }
+        Picker.Level -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_training_level); values = TrainingLevel.entries.map { onboardingLabel("TrainingLevel", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(trainingLevel = it) } } }
         Picker.Lifestyle -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.lifestyle); values = LifestyleLevel.entries.map { onboardingLabel("LifestyleLevel", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(lifestyle = it) } } }
-        Picker.Split -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.program); values = TrainingSplitPreference.entries.map { onboardingLabel("TrainingSplitPreference", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(trainingSplitPreference = it) } } }
+        Picker.Split -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_program); values = TrainingSplitPreference.entries.map { onboardingLabel("TrainingSplitPreference", it.storedValue, it.title) to { p: OnboardingProfile -> p.selectTrainingSplit(it) } } }
         Picker.Body -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body_composition); values = BodyCompositionPhase.entries.map { onboardingLabel("BodyCompositionPhase", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(bodyCompositionPhase = it) } } }
-        Picker.Gym -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym_setup); values = GymType.entries.map { onboardingLabel("GymType", it.storedValue, it.title) to { p: OnboardingProfile ->
+        Picker.Gym -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_gym_setup); values = GymType.entries.map { onboardingLabel("GymType", it.storedValue, it.title) to { p: OnboardingProfile ->
             val locations = p.effectiveTrainingLocations().map { location -> if (location.isDefault && location.gymId == null) location.copy(equipment = it.defaultEquipment) else location }
             p.copy(gymType = it, availableEquipment = it.defaultEquipment, trainingLocations = locations)
         } } }
-        Picker.Gender -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gender); values = Gender.entries.map { onboardingLabel("Gender", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(gender = it) } } }
+        Picker.Gender -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_gender); values = Gender.entries.map { onboardingLabel("Gender", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(gender = it) } } }
         Picker.Metric -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.units); values = MetricSystem.entries.map { localizedMetricSystem(it) to { p: OnboardingProfile -> p.copy(metricSystem = it) } } }
         Picker.Equipment, Picker.Restrictions -> { title = ""; values = emptyList() }
         is Picker.Focus -> { title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.focus) + " · " + java.time.DayOfWeek.of(picker.day.ordinal + 1).getDisplayName(java.time.format.TextStyle.FULL, androidx.compose.ui.platform.LocalConfiguration.current.locales[0]); values = WorkoutFocus.customSelectionCases.map { onboardingLabel("WorkoutFocus", it.storedValue, it.title) to { p: OnboardingProfile -> p.copy(customWorkoutFocuses = p.customWorkoutFocuses + (picker.day to it)) } } }
@@ -2309,10 +2431,10 @@ private fun EquipmentPickerDialog(initial: Set<Equipment>, onSave: (Set<Equipmen
     var selected by remember { mutableStateOf(initial) }
     androidx.compose.material.AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.equipment).uppercase(), fontFamily = AntonFontFamily) },
+        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_equipment).uppercase(), fontFamily = AntonFontFamily) },
         text = { LazyColumn(Modifier.height(360.dp)) { items(Equipment.entries) { equipment -> TogglePickerRow(onboardingLabel("Equipment", equipment.storedValue, equipment.title), equipment in selected) { selected = if (equipment in selected) selected - equipment else selected + equipment } } } },
         confirmButton = { Button(onClick = { onSave(selected); onDismiss() }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase()) } },
-        dismissButton = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), Modifier.heightIn(min = 48.dp).clickable(onClick = onDismiss).padding(12.dp), color = WildforceThemeTokens.textSecondary) },
+        dismissButton = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), Modifier.heightIn(min = 48.dp).clickable(onClick = onDismiss).padding(12.dp), color = WildforceThemeTokens.textSecondary) },
     )
 }
 
@@ -2430,7 +2552,7 @@ private fun TrainingLocationsDialog(
             }) { Text(if (!isEditing) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase() else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ready).uppercase()) }
         },
         dismissButton = {
-            Text(if (!isEditing) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase() else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.go_back).uppercase(), Modifier.heightIn(min = 48.dp).clickable {
+            Text(if (!isEditing) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase() else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_go_back).uppercase(), Modifier.heightIn(min = 48.dp).clickable {
                 if (!isEditing) onDismiss() else editingIndex = null
             }.padding(12.dp), color = WildforceThemeTokens.textSecondary)
         },
@@ -2442,10 +2564,10 @@ private fun RestrictionsPickerDialog(initial: Set<MovementRestriction>, onSave: 
     var selected by remember { mutableStateOf(initial) }
     androidx.compose.material.AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.restrictions).uppercase(), fontFamily = AntonFontFamily) },
+        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_restrictions).uppercase(), fontFamily = AntonFontFamily) },
         text = { LazyColumn(Modifier.height(320.dp)) { items(MovementRestriction.entries) { restriction -> TogglePickerRow(onboardingLabel("MovementRestriction", restriction.storedValue, restriction.title), restriction in selected) { selected = if (restriction in selected) selected - restriction else selected + restriction } } } },
         confirmButton = { Button(onClick = { onSave(selected); onDismiss() }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase()) } },
-        dismissButton = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase(), Modifier.heightIn(min = 48.dp).clickable(onClick = onDismiss).padding(12.dp), color = WildforceThemeTokens.textSecondary) },
+        dismissButton = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), Modifier.heightIn(min = 48.dp).clickable(onClick = onDismiss).padding(12.dp), color = WildforceThemeTokens.textSecondary) },
     )
 }
 
@@ -2453,7 +2575,7 @@ private fun RestrictionsPickerDialog(initial: Set<MovementRestriction>, onSave: 
 private fun TogglePickerRow(label: String, selected: Boolean, onToggle: () -> Unit) {
     Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(onClick = onToggle).padding(vertical = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
         Text(label, color = WildforceThemeTokens.textPrimary)
-        if (selected) Icon(Icons.Filled.Check, contentDescription = "Seleccionado", tint = WildforceThemeTokens.accent)
+        if (selected) Icon(Icons.Filled.Check, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_key_1_selected), tint = WildforceThemeTokens.accent)
     }
 }
 
@@ -2533,7 +2655,7 @@ private fun validatedProfile(draft: OnboardingProfile, height: String, weight: S
         ?: draft.heightCm,
     weightKg = weight.replace(',', '.').toDoubleOrNull()
         ?.let { entered -> if (draft.metricSystem == MetricSystem.Imperial) entered / PoundsPerKilogram else entered }
-        ?.takeIf { it in 35.0..250.0 }
+        ?.takeIf { it.isFinite() && it > 0.0 }
         ?: draft.weightKg,
     preferredWorkoutDurationMinutes = duration.toIntOrNull()
         ?.takeIf { it in 15..180 }
@@ -2547,25 +2669,26 @@ private fun monthName(month: Int, locale: Locale): String = Month.of(month.coerc
 
 @Composable
 private fun localizedMetricSystem(value: MetricSystem): String = androidx.compose.ui.res.stringResource(
-    if (value == MetricSystem.Metric) io.codepassion.doubletriangle.core.designsystem.R.string.metric else io.codepassion.doubletriangle.core.designsystem.R.string.imperial
+    if (value == MetricSystem.Metric) io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_metric else io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_imperial
 )
 
 @Composable
 private fun localizedNutritionOption(value: String): String {
     val id = when (value) {
-        "Estilo alimentario" -> io.codepassion.doubletriangle.core.designsystem.R.string.dietary_style
-        "Comidas al día" -> io.codepassion.doubletriangle.core.designsystem.R.string.meals_per_day
+        "Estilo alimentario" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dietary_style
+        "Comidas al día" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_meals_per_day
         "Ventana de alimentación" -> io.codepassion.doubletriangle.core.designsystem.R.string.eating_window
         "Esfuerzo al cocinar" -> io.codepassion.doubletriangle.core.designsystem.R.string.cooking_effort
         "Sensibilidad al presupuesto" -> io.codepassion.doubletriangle.core.designsystem.R.string.budget_sensitivity
-        "Fuentes de proteína" -> io.codepassion.doubletriangle.core.designsystem.R.string.protein_sources
+        "Fuentes de proteína" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_protein_sources
         "Alimentos que no te gustan" -> io.codepassion.doubletriangle.core.designsystem.R.string.dislikes
-        "Alimentos excluidos" -> io.codepassion.doubletriangle.core.designsystem.R.string.excluded_foods
-        "Alergias o intolerancias" -> io.codepassion.doubletriangle.core.designsystem.R.string.allergies_or_intolerances
+        "Alimentos excluidos" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_excluded_foods
+        "Alergias o intolerancias" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_allergies_or_intolerances
         "Notas" -> io.codepassion.doubletriangle.core.designsystem.R.string.notes
-        "Vegetariana" -> io.codepassion.doubletriangle.core.designsystem.R.string.vegetarian
-        "Vegana" -> io.codepassion.doubletriangle.core.designsystem.R.string.vegan
-        "Pescetariana" -> io.codepassion.doubletriangle.core.designsystem.R.string.pescatarian
+        "Omnívora", "standard" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_standard
+        "Vegetariana" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_vegetarian
+        "Vegana" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_vegan
+        "Pescetariana" -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_pescatarian
         "Flexible" -> io.codepassion.doubletriangle.core.designsystem.R.string.flexible
         "Bajo" -> io.codepassion.doubletriangle.core.designsystem.R.string.low
         "Baja" -> io.codepassion.doubletriangle.core.designsystem.R.string.low
@@ -2586,6 +2709,19 @@ private fun nutritionTextPrompt(field: NutritionTextField): String = androidx.co
     NutritionTextField.ProteinSources -> io.codepassion.doubletriangle.core.designsystem.R.string.e_g__eggs__greek_yogurt__salmon__tofu
     NutritionTextField.Dislikes -> io.codepassion.doubletriangle.core.designsystem.R.string.e_g__olives__liver__cottage_cheese
     NutritionTextField.ExcludedFoods -> io.codepassion.doubletriangle.core.designsystem.R.string.e_g__mushrooms__olives__liver
-    NutritionTextField.Allergies -> io.codepassion.doubletriangle.core.designsystem.R.string.e_g__peanuts__lactose
+    NutritionTextField.Allergies -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_e_g__peanuts__lactose
     NutritionTextField.Notes -> io.codepassion.doubletriangle.core.designsystem.R.string.additional_notes___
+})
+
+@Composable
+private fun bodyMetricLabel(kind: BodyMetricKind): String = androidx.compose.ui.res.stringResource(when (kind) {
+    BodyMetricKind.Weight -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_weight
+    BodyMetricKind.BodyFat -> R.string.body_metric_body_fat
+    BodyMetricKind.LeanBodyMass -> R.string.body_metric_lean_mass
+    BodyMetricKind.Waist -> R.string.body_metric_waist
+    BodyMetricKind.Neck -> io.codepassion.doubletriangle.core.designsystem.R.string.neck
+    BodyMetricKind.Hip -> R.string.body_metric_hip
+    BodyMetricKind.Chest -> io.codepassion.doubletriangle.core.designsystem.R.string.chest
+    BodyMetricKind.Thigh -> io.codepassion.doubletriangle.core.designsystem.R.string.thigh
+    BodyMetricKind.Arm -> io.codepassion.doubletriangle.core.designsystem.R.string.arm
 })

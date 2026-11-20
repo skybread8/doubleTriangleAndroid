@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fallbacks for untranslated Sheet choices. -->
+    <string name="onboarding_choice_automatic">Automatisch</string>
+    <string name="onboarding_choice_body_part_split">Muskelgruppen-Split</string>
+    <string name="onboarding_choice_big_gym">Großes Fitnessstudio</string>
+    <string name="onboarding_choice_small_gym">Kleines Fitnessstudio</string>
+    <string name="onboarding_choice_home_gym">Heimstudio</string>
+    <string name="onboarding_choice_some_accessories">Einige Zubehörteile</string>
+    <string name="onboarding_choice_bodyweight_only">Nur Körpergewicht</string>
+    <string name="onboarding_choice_pull_up_bar">Klimmzugstange</string>
+    <string name="onboarding_choice_cardio">Cardio</string>
+    <string name="onboarding_choice_male">Männlich</string>
+    <string name="onboarding_choice_female">Weiblich</string>
+    <string name="onboarding_choice_upper_body">Oberkörper</string>
+    <string name="onboarding_choice_lower_body">Unterkörper</string>
+    <string name="onboarding_choice_push">Drücken</string>
+    <string name="onboarding_choice_pull">Ziehen</string>
+    <string name="onboarding_choice_recovery">Erholung</string>
+</resources>

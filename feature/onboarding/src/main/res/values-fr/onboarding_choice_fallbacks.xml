@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fallbacks for untranslated Sheet choices. -->
+    <string name="onboarding_choice_automatic">Automatique</string>
+    <string name="onboarding_choice_body_part_split">Répartition par groupes musculaires</string>
+    <string name="onboarding_choice_cardio">Cardio</string>
+    <string name="onboarding_choice_male">Masculin</string>
+    <string name="onboarding_choice_female">Féminin</string>
+    <string name="onboarding_choice_upper_body">Haut du corps</string>
+    <string name="onboarding_choice_lower_body">Bas du corps</string>
+    <string name="onboarding_choice_push">Poussée</string>
+    <string name="onboarding_choice_pull">Tirage</string>
+    <string name="onboarding_choice_recovery">Récupération</string>
+</resources>

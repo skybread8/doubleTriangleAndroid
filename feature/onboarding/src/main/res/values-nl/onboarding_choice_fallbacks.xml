@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fallbacks for untranslated Sheet choices. -->
+    <string name="onboarding_choice_automatic">Automatisch</string>
+    <string name="onboarding_choice_body_part_split">Indeling per spiergroep</string>
+    <string name="onboarding_choice_big_gym">Grote sportschool</string>
+    <string name="onboarding_choice_small_gym">Kleine sportschool</string>
+    <string name="onboarding_choice_home_gym">Thuisgym</string>
+    <string name="onboarding_choice_some_accessories">Enkele accessoires</string>
+    <string name="onboarding_choice_bodyweight_only">Alleen lichaamsgewicht</string>
+    <string name="onboarding_choice_pull_up_bar">Optrekstang</string>
+    <string name="onboarding_choice_cardio">Cardio</string>
+    <string name="onboarding_choice_male">Man</string>
+    <string name="onboarding_choice_female">Vrouw</string>
+    <string name="onboarding_choice_upper_body">Bovenlichaam</string>
+    <string name="onboarding_choice_lower_body">Onderlichaam</string>
+    <string name="onboarding_choice_push">Duwen</string>
+    <string name="onboarding_choice_pull">Trekken</string>
+    <string name="onboarding_choice_core">Romp</string>
+    <string name="onboarding_choice_recovery">Herstel</string>
+</resources>

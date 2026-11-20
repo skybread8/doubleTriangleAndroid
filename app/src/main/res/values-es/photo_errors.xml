@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="photo_error_session">Tu sesión ha caducado. Inicia sesión de nuevo.</string>
+    <string name="photo_error_access">Tu cuenta no tiene acceso al análisis de fotos.</string>
+    <string name="photo_error_size">La imagen es demasiado grande. Prueba con otra foto.</string>
+    <string name="photo_error_invalid">No se pudo procesar la imagen. Comprueba que contiene alimentos y prueba otra foto.</string>
+    <string name="photo_error_limit">Se han realizado demasiadas solicitudes. Inténtalo de nuevo más tarde.</string>
+    <string name="photo_error_service">El análisis de fotos no está disponible ahora. Inténtalo de nuevo más tarde.</string>
+    <string name="photo_error_connection">No se pudo conectar con el servidor. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="photo_error_generic">No se pudo analizar la foto. Inténtalo de nuevo.</string>
+    <string name="photo_error_camera_permission">Necesitamos acceso a la cámara. Permítelo en Ajustes o elige una foto de la galería.</string>
+    <string name="photo_error_camera_open">No se pudo abrir la cámara. Inténtalo de nuevo o elige una foto de la galería.</string>
+    <string name="sync_subscription_required">Necesitas una suscripción activa para sincronizar tus datos.</string>
+</resources>

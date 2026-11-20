@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.codepassion.doubletriangle.core.designsystem.R as SharedR
 import io.codepassion.doubletriangle.core.designsystem.Exo2FontFamily
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
@@ -49,19 +50,22 @@ import io.codepassion.doubletriangle.core.model.ExerciseSummary
 internal fun ExerciseWorkTimer(seconds: Int, initialSeconds: Int, running: Boolean, onToggle: () -> Unit, onAddTime: () -> Unit, onRemoveTime: () -> Unit) {
     val progress by animateFloatAsState((seconds.toFloat() / initialSeconds.coerceAtLeast(1)).coerceIn(0f, 1f), animationSpec = tween(1_000, easing = LinearEasing))
     val timerDescription = stringResource(R.string.workout_work_timer_description, formatWorkDuration(seconds))
+    val runningDescription = stringResource(if (running) SharedR.string.ui_sheet_in_progress else SharedR.string.pause)
+    val addDescription = stringResource(SharedR.string.add_15_seconds)
+    val removeDescription = stringResource(SharedR.string.remove) + " 15 s"
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
         TimerButton("+", "+15s", false, onAddTime)
         Box(
             Modifier.padding(horizontal = 16.dp).size(132.dp).semantics {
                 contentDescription = timerDescription
-                stateDescription = if (running) "En marcha" else "Pausado"
+                stateDescription = runningDescription
                 progressBarRangeInfo = androidx.compose.ui.semantics.ProgressBarRangeInfo(progress, 0f..1f)
                 customActions = listOf(
-                    CustomAccessibilityAction("Añadir 15 segundos") {
+                    CustomAccessibilityAction(addDescription) {
                         onAddTime()
                         true
                     },
-                    CustomAccessibilityAction("Quitar 15 segundos") {
+                    CustomAccessibilityAction(removeDescription) {
                         onRemoveTime()
                         true
                     },
@@ -75,7 +79,7 @@ internal fun ExerciseWorkTimer(seconds: Int, initialSeconds: Int, running: Boole
                 Text(stringResource(R.string.workout_remaining), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
             }
         }
-        TimerButton(if (running) "Ⅱ" else "▶", if (running) "PAUSA" else "INICIAR", true, onToggle)
+        TimerButton(if (running) "Ⅱ" else "▶", stringResource(if (running) SharedR.string.pause else SharedR.string.start).uppercase(), true, onToggle)
     }
 }
 

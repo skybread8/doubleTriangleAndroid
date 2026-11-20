@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Local fallbacks for iOS keys absent from the shared Sheet. -->
+<resources>
+    <string name="workout_local_straight">Sèries normals</string>
+    <string name="workout_local_top_backoff">Sèrie principal i sèries de descàrrega</string>
+    <string name="workout_local_pyramid">Piràmide ascendent</string>
+    <string name="workout_local_drop">Sèrie descendent</string>
+    <string name="workout_local_rest_pause">Descans-pausa</string>
+    <string name="workout_local_intervals">Intervals</string>
+    <string name="workout_local_accumulation">Acumulació</string>
+    <string name="workout_local_intensification">Intensificació</string>
+    <string name="workout_local_deload">Descàrrega</string>
+</resources>

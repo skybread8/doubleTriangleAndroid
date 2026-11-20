@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Local fallbacks for Sheet entries that are missing or still in English. -->
+    <string name="ui_sheet_feedback">Valoració</string>
+    <string name="ui_sheet_total_sessions">Sessions totals</string>
+    <string name="ui_sheet__d_of__d">%1$d de %2$d</string>
+    <string name="ui_sheet_imperial">Imperial</string>
+    <string name="ui_sheet_reps">Repeticions</string>
+    <string name="ui_sheet__d_min">%1$d min</string>
+    <string name="ui_sheet__d_sessions">%1$d sessions</string>
+    <string name="ui_sheet_no">No</string>
+    <string name="ui_sheet_original">Original</string>
+    <string name="ui_sheet_core">Zona central</string>
+    <string name="ui_sheet_per_100_g">Per 100 g</string>
+</resources>

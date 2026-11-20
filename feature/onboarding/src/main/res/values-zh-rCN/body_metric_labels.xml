@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Local fallbacks for iOS keys absent from the shared Sheet. -->
+<resources>
+    <string name="body_metric_body_fat">体脂</string>
+    <string name="body_metric_lean_mass">去脂体重</string>
+    <string name="body_metric_waist">腰围</string>
+    <string name="body_metric_hip">臀围</string>
+</resources>

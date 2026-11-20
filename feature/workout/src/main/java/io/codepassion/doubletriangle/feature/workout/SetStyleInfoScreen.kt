@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -92,25 +93,26 @@ internal fun SetStyleGlyph(style: ExerciseSetStyle, modifier: Modifier = Modifie
 
 @Composable
 internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, parameters: SetStyleParameters, onBack: () -> Unit) {
-    val copy = style.copyText(parameters)
+    val copy = style.localizedCopy(parameters)
+    val backLabel = stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_go_back)
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 18.dp, vertical = 12.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Row(Modifier.weight(1f).heightIn(min = 48.dp).semantics { contentDescription = "Volver" }.clickable(onClick = onBack).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(Modifier.weight(1f).heightIn(min = 48.dp).semantics { contentDescription = backLabel }.clickable(onClick = onBack).padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp), tint = WildforceThemeTokens.accent)
-                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.go_back).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_go_back).uppercase(), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
             }
-            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.set_style).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_set_style).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, fontWeight = FontWeight.Bold)
         }
         Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             SetStyleGlyph(style, Modifier.size(52.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.14f), RoundedCornerShape(14.dp)).padding(14.dp), WildforceThemeTokens.textPrimary)
             Column(Modifier.padding(start = 14.dp)) {
-                Text(style.label.uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-                style.scopeLabel(totalSets, parameters.appliesToFinalSetOnly)?.let {
+                Text(workoutSetStyleLabel(style).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
+                localizedSetStyleScope(style, totalSets, parameters.appliesToFinalSetOnly)?.let {
                     Text(it, color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.caption)
                 }
             }
         }
-        val planDetails = styleParameterDetails(style, parameters)
+        val planDetails = localizedStyleParameterDetails(style, parameters, copy.operation)
         if (planDetails.isNotEmpty()) {
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_plan_details).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 8.dp, bottom = 6.dp))
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -137,8 +139,8 @@ internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, paramet
             }
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            InfoSection("QUÉ SIGNIFICA", copy.meaning)
-            InfoSection("CÓMO FUNCIONA", copy.operation)
+            InfoSection(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.what_it_means).uppercase(), copy.meaning)
+            InfoSection(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.how_it_works).uppercase(), copy.operation)
             SetStyleMiniDiagram(style, totalSets, parameters)
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_22447c9c12d49c89), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 12.dp, bottom = 8.dp))
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -158,7 +160,7 @@ internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, paramet
                     }
                 }
             }
-            InfoSection("POR QUÉ ES ÚTIL", copy.usefulness)
+            InfoSection(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.why_it_s_useful).uppercase(), copy.usefulness)
             Spacer(Modifier.padding(bottom = 12.dp))
         }
     }
@@ -167,14 +169,14 @@ internal fun SetStyleInfoScreen(style: ExerciseSetStyle, totalSets: Int, paramet
 @Composable
 private fun SetStyleMiniDiagram(style: ExerciseSetStyle, totalSets: Int, parameters: SetStyleParameters) {
     val items = when (style) {
-        ExerciseSetStyle.Warmup -> listOf("LIGERA", "SUBE", "LISTA")
+        ExerciseSetStyle.Warmup -> listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.light), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.build), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ready))
         ExerciseSetStyle.Straight -> List(totalSets.coerceAtLeast(1).coerceAtMost(6)) { "S${it + 1}" }
-        ExerciseSetStyle.TopSetBackoff -> listOf("TOP SET") + List(parameters.backoffSetCount.coerceAtLeast(1).coerceAtMost(4)) { "BACKOFF" }
+        ExerciseSetStyle.TopSetBackoff -> listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.top)) + List(parameters.backoffSetCount.coerceAtLeast(1).coerceAtMost(4)) { stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.backoff) }
         ExerciseSetStyle.AscendingPyramid -> List(totalSets.coerceAtLeast(1).coerceAtMost(6)) { "${it + 1}" }
-        ExerciseSetStyle.DropSet -> listOf("SERIE", "-${parameters.dropWeightPercent}%", "-${parameters.dropWeightPercent}%")
-        ExerciseSetStyle.RestPause -> listOf("DURO", "${parameters.intraSetRestSeconds}s", "MINI", "${parameters.intraSetRestSeconds}s", "MINI")
-        ExerciseSetStyle.Intervals -> listOf("TRABAJO", "${parameters.intraSetRestSeconds}s", "TRABAJO", "${parameters.intraSetRestSeconds}s")
-        ExerciseSetStyle.Tempo -> parameters.tempo.split('-').filter { it.isNotBlank() }.ifEmpty { listOf("BAJA", "PAUSA", "SUBE") }.map { "${it}s" }
+        ExerciseSetStyle.DropSet -> listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.set), "-${parameters.dropWeightPercent}%", "-${parameters.dropWeightPercent}%")
+        ExerciseSetStyle.RestPause -> listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.hard_set), "${parameters.intraSetRestSeconds}s", stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.mini), "${parameters.intraSetRestSeconds}s", stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.mini))
+        ExerciseSetStyle.Intervals -> listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.work), "${parameters.intraSetRestSeconds}s", stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.work), "${parameters.intraSetRestSeconds}s")
+        ExerciseSetStyle.Tempo -> parameters.tempo.split('-').filter { it.isNotBlank() }.map { "${it}s" }.ifEmpty { listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.down), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.pause), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.up)) }
     }
     Row(
         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(vertical = 10.dp),
@@ -217,8 +219,16 @@ internal fun setStyleScopeLabel(style: ExerciseSetStyle, totalSets: Int, applies
     else -> "Se aplica en todas las series"
 }
 
-private fun ExerciseSetStyle.scopeLabel(totalSets: Int, appliesToFinalSetOnly: Boolean): String? =
-    setStyleScopeLabel(this, totalSets, appliesToFinalSetOnly)
+@Composable
+internal fun localizedSetStyleScope(style: ExerciseSetStyle, totalSets: Int, appliesToFinalSetOnly: Boolean): String? {
+    if (totalSets <= 1) return null
+    val id = when {
+        style == ExerciseSetStyle.TopSetBackoff -> io.codepassion.doubletriangle.core.designsystem.R.string.top_set_first
+        appliesToFinalSetOnly -> io.codepassion.doubletriangle.core.designsystem.R.string.final_set_only
+        else -> io.codepassion.doubletriangle.core.designsystem.R.string.all_sets
+    }
+    return stringResource(id)
+}
 
 internal fun styleParameterDetails(style: ExerciseSetStyle, parameters: SetStyleParameters): List<SetStyleDetail> = buildList {
     when (style) {
@@ -244,17 +254,84 @@ internal fun styleParameterDetails(style: ExerciseSetStyle, parameters: SetStyle
     }
 }
 
+@Composable
+internal fun localizedStyleParameterDetails(style: ExerciseSetStyle, parameters: SetStyleParameters, operation: String): List<SetStyleDetail> {
+    val result = mutableListOf<SetStyleDetail>()
+    when (style) {
+        ExerciseSetStyle.TopSetBackoff -> {
+            val count = parameters.backoffSetCount
+            result.add(SetStyleDetail("$count ${stringResource(if (count == 1) io.codepassion.doubletriangle.core.designsystem.R.string.backoff_set else io.codepassion.doubletriangle.core.designsystem.R.string.backoff_sets)}", operation))
+            result.add(SetStyleDetail(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.__d___backoff_load, parameters.backoffWeightPercent), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.for_the_backoff_work__reduce_the_weight_by_about__d___from_your_top_set_, parameters.backoffWeightPercent)))
+        }
+        ExerciseSetStyle.DropSet -> {
+            result.add(SetStyleDetail("${stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.drop_count)}: ${parameters.dropCount}", operation))
+            result.add(SetStyleDetail(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.__d___load, parameters.dropWeightPercent), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.each_drop_should_use_about__d___less_weight_than_the_effort_before_it_, parameters.dropWeightPercent)))
+        }
+        ExerciseSetStyle.RestPause, ExerciseSetStyle.Intervals -> result.add(SetStyleDetail(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_sec_rest, parameters.intraSetRestSeconds), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.pause_for_about__d_seconds_before_starting_the_next_mini_effort_inside_the_same_style_sequence_, parameters.intraSetRestSeconds)))
+        ExerciseSetStyle.Tempo -> result.add(SetStyleDetail(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.tempo___, parameters.tempo), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.tempo____tells_you_how_controlled_each_rep_should_be__usually_covering_the_lowering__pauses__and_lifting_phases_in_order_, parameters.tempo)))
+        else -> Unit
+    }
+    if (style != ExerciseSetStyle.Warmup) {
+        val rir = parameters.targetRir
+        val explanation = if (rir == 0) stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.rir_0_means_finish_the_set_at_failure__with_no_reps_left_in_reserve_)
+        else stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.rir__d_means_finish_the_set_feeling_like_you_could_still_do_about__d_more____with_good_form_, rir, rir, stringResource(if (rir == 1) io.codepassion.doubletriangle.core.designsystem.R.string.rep else io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_reps))
+        result.add(SetStyleDetail(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.rir__d, rir), explanation))
+    }
+    return result
+}
+
 /** Kept as a compact representation for the inline active-workout card. */
 internal fun styleParameterLabels(style: ExerciseSetStyle, parameters: SetStyleParameters): List<String> =
     styleParameterDetails(style, parameters).map(SetStyleDetail::label)
 
-private fun ExerciseSetStyle.copyText(parameters: SetStyleParameters): SetStyleCopy = when (this) {
-    ExerciseSetStyle.Warmup -> SetStyleCopy("Series más ligeras que preparan músculos, articulaciones y técnica.", "Empieza con series fáciles antes de las exigentes; sube la temperatura, practica el movimiento y acércate a tu carga de trabajo sin acumular demasiada fatiga.", "Te prepara para el trabajo pesado, mejora la calidad del movimiento y evita que la primera serie dura llegue de golpe.", listOf("Preparación", "Técnica", "Movilidad"))
-    ExerciseSetStyle.Straight -> SetStyleCopy("Mismo peso y esfuerzo parecido en todas las series.", "Usa la misma carga de trabajo y un esfuerzo similar. Cada serie debe sentirse consistente para seguir el rendimiento y detectar el progreso.", "Son fáciles de repetir y progresar: puedes comparar serie a serie y semana a semana sin demasiadas variables.", listOf("Consistencia", "Progreso", "Simplicidad"))
-    ExerciseSetStyle.TopSetBackoff -> SetStyleCopy("Una primera serie pesada seguida de trabajo más ligero.", "Llega a una serie principal muy exigente y luego reduce la carga aproximadamente un ${parameters.backoffWeightPercent}% durante ${parameters.backoffSetCount} backoff para sumar volumen de calidad.", "Combina intensidad y volumen: el top set practica el esfuerzo alto y los backoff añaden repeticiones productivas sin mantener tu peso máximo.", listOf("Intensidad", "Volumen", "Control"))
-    ExerciseSetStyle.AscendingPyramid -> SetStyleCopy("El peso aumenta serie a serie y normalmente bajan las repeticiones.", "Aumenta el peso en cada serie mientras normalmente bajan las repeticiones. Empiezas manejable y terminas con el trabajo más exigente.", "Te permite entrar progresivamente en cargas altas, mejora la confianza y el ritmo técnico para el trabajo de fuerza.", listOf("Progresión", "Carga", "Fuerza"))
-    ExerciseSetStyle.DropSet -> SetStyleCopy("Una serie extendida reduciendo peso con poco o ningún descanso.", "Completa el esfuerzo principal, reduce inmediatamente la carga aproximadamente un ${parameters.dropWeightPercent}% y continúa. Repite ese descenso ${parameters.dropCount} ${if (parameters.dropCount == 1) "vez" else "veces"} con descanso mínimo.", "Aporta estímulo extra de hipertrofia en poco tiempo; concentra mucha fatiga y funciona especialmente bien como finalizador.", listOf("Hipertrofia", "Intensidad", "Finalizador"))
-    ExerciseSetStyle.RestPause -> SetStyleCopy("Una serie dura dividida en mini-series con pausas muy breves.", "Acércate al fallo, descansa unos ${parameters.intraSetRestSeconds} segundos y continúa con el mismo peso en otro mini-set. Puedes repetir el patrón para conseguir más repeticiones de calidad.", "Permite hacer más repeticiones exigentes con una carga desafiante sin añadir muchas series completas.", listOf("Más repeticiones", "Pausa breve", "Esfuerzo"))
-    ExerciseSetStyle.Intervals -> SetStyleCopy("Esfuerzos repetidos alternados con recuperaciones planificadas.", "Alterna bloques de trabajo con unos ${parameters.intraSetRestSeconds} segundos de recuperación. Cada intervalo debe ser exigente pero repetible para mantener la intensidad objetivo.", "Mejora el acondicionamiento, el ritmo y la capacidad de repetir esfuerzos intensos con una estructura clara de trabajo y recuperación.", listOf("Ritmo", "Resistencia", "Repetición"))
-    ExerciseSetStyle.Tempo -> SetStyleCopy("Cada fase de la repetición se realiza a una velocidad controlada.", "Usa el tempo ${parameters.tempo} en cada repetición. Define cómo controlar bajada, pausa y subida para que el estímulo dependa de la calidad del movimiento, no solo de la carga.", "Mejora el control y la tensión sobre el músculo objetivo; hace eficaces cargas ligeras cuando importan la técnica y la colocación.", listOf("Control", "Tensión", "Técnica"))
+@Composable
+private fun ExerciseSetStyle.localizedCopy(parameters: SetStyleParameters): SetStyleCopy = when (this) {
+    ExerciseSetStyle.Warmup -> SetStyleCopy(
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_cue_means_the_set_is_here_to_prepare_you_for_the_harder_work_ahead_),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.start_with_easier_sets_before_your_hard_work_sets__the_goal_is_to_raise_body_temperature__practice_the_movement__and_gradually_get_closer_to_your_working_weight_without_creating_too_much_fatigue_),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.warmup_sets_help_you_feel_more_prepared_before_heavy_work__improve_movement_quality__and_reduce_the_chance_that_your_first_hard_set_feels_abrupt_or_sloppy_),
+        listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.get_ready), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.practice_form), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.move_better)),
+    )
+    ExerciseSetStyle.Straight -> SetStyleCopy(
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_cue_means_the_exercise_uses_a_steady__repeatable_working_pattern_),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.use_the_same_working_weight_and_a_similar_effort_target_across_your_sets__each_set_should_feel_consistent__which_makes_it_easier_to_track_performance_and_notice_when_you_re_getting_stronger_),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.straight_sets_are_simple__repeatable__and_easy_to_progress__they_re_great_for_building_consistency_because_you_can_compare_set_to_set_and_week_to_week_without_too_many_moving_parts_),
+        listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.stay_consistent), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.track_progress), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.keep_it_simple)),
+    )
+    ExerciseSetStyle.TopSetBackoff -> SetStyleCopy(
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_cue_means_you_will_push_one_hardest_set__then_continue_with_lighter_backoff_work_),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.build_up_to_one_hardest_set_first__then_reduce_the_load_by_about__d___for__d_____the_top_set_gives_you_the_main_high_effort_stimulus__and_the_lighter_backoff_work_adds_more_quality_volume_after_it_, parameters.backoffWeightPercent, parameters.backoffSetCount, stringResource(if (parameters.backoffSetCount == 1) io.codepassion.doubletriangle.core.designsystem.R.string.backoff_set else io.codepassion.doubletriangle.core.designsystem.R.string.backoff_sets)),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_style_gives_you_both_intensity_and_volume__the_top_set_helps_you_practice_pushing_hard__while_the_backoff_work_lets_you_accumulate_more_productive_reps_without_needing_to_stay_at_your_heaviest_load_),
+        listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.push_intensity), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_volume), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.manage_fatigue)),
+    )
+    ExerciseSetStyle.AscendingPyramid -> SetStyleCopy(
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_cue_means_the_sets_build_up_as_you_go__usually_with_more_load_and_fewer_reps_),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.increase_the_weight_from_set_to_set_while_the_reps_usually_come_down__each_set_becomes_more_demanding__so_you_ramp_from_a_manageable_starting_set_into_your_hardest_work_at_the_end_),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ascending_pyramids_let_you_ease_into_heavy_work_instead_of_jumping_straight_to_it__they_can_help_with_confidence__technical_rhythm__and_strength_focused_training_where_ramping_up_matters_),
+        listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.build_momentum), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ramp_load), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.peak_late)),
+    )
+    ExerciseSetStyle.DropSet -> SetStyleCopy(
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_cue_means_the_set_continues_after_a_quick_weight_drop_to_extend_the_effort_),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.complete_your_main_effort__then_immediately_reduce_the_load_by_about__d___and_continue__repeat_that__d____with_minimal_rest_so_one_set_turns_into_an_extended_high_fatigue_sequence_, parameters.dropWeightPercent, parameters.dropCount, stringResource(if (parameters.dropCount == 1) io.codepassion.doubletriangle.core.designsystem.R.string.time else io.codepassion.doubletriangle.core.designsystem.R.string.times)),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.drop_sets_are_useful_when_you_want_extra_hypertrophy_stimulus_in_less_time__they_drive_a_lot_of_fatigue_and_effort_quickly__which_makes_them_especially_effective_as_a_finisher_or_last_hard_set_),
+        listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.extend_effort), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.fast_stimulus), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.finish_strong)),
+    )
+    ExerciseSetStyle.RestPause -> SetStyleCopy(
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_cue_means_one_hard_set_is_broken_into_short_mini_efforts_with_tiny_rests_),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.take_one_hard_effort_close_to_failure__rest_for_about__d_seconds__then_continue_with_the_same_weight_for_another_mini_set__you_can_repeat_that_short_rest_and_repeat_pattern_to_squeeze_more_quality_reps_out_of_the_same_load_, parameters.intraSetRestSeconds),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.rest_pause_helps_you_get_more_high_quality_reps_with_a_challenging_weight_than_you_could_in_one_uninterrupted_set__it_s_a_time_efficient_way_to_push_effort_without_adding_a_lot_of_extra_full_sets_),
+        listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.more_hard_reps), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.short_rests), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.high_effort)),
+    )
+    ExerciseSetStyle.Intervals -> SetStyleCopy(
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_cue_means_the_exercise_follows_a_work_and_recovery_rhythm_instead_of_one_continuous_push_),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.alternate_repeated_work_bouts_with_about__d_seconds_of_planned_recovery_between_efforts__the_goal_is_to_keep_each_interval_purposeful_while_giving_you_just_enough_recovery_to_repeat_the_target_intensity_across_the_full_set_sequence_, parameters.intraSetRestSeconds),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.intervals_are_useful_for_conditioning_because_they_let_you_accumulate_hard_efforts_with_a_clear_work_to_recovery_rhythm__they_improve_repeatable_output__pacing__and_cardiovascular_fitness_without_requiring_one_nonstop_maximal_push_),
+        listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.control_pace), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.repeat_output), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.build_conditioning)),
+    )
+    ExerciseSetStyle.Tempo -> SetStyleCopy(
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_cue_means_the_speed_and_control_of_each_rep_matter_as_much_as_the_reps_themselves_),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.use_the_planned_rep_speed_of____for_every_rep__that_tempo_tells_you_how_controlled_the_lowering__pause__and_lifting_phases_should_be_so_the_set_is_driven_by_movement_quality__not_just_by_load_, parameters.tempo),
+        stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.tempo_work_improves_control__keeps_tension_on_the_target_muscle__and_can_make_lighter_loads_more_effective__it_s_especially_useful_when_technique__positioning__or_muscle_awareness_matters_more_than_moving_the_most_weight_possible_),
+        listOf(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.control_speed), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.more_tension), stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.better_form)),
+    )
 }

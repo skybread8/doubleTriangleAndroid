@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="photo_error_session">Deine Sitzung ist abgelaufen. Melde dich erneut an.</string>
+    <string name="photo_error_access">Dein Konto hat keinen Zugriff auf die Fotoanalyse.</string>
+    <string name="photo_error_size">Das Bild ist zu groß. Versuche ein anderes Foto.</string>
+    <string name="photo_error_invalid">Das Bild konnte nicht verarbeitet werden. Prüfe, ob es Lebensmittel enthält, und versuche ein anderes Foto.</string>
+    <string name="photo_error_limit">Zu viele Anfragen. Versuche es später erneut.</string>
+    <string name="photo_error_service">Die Fotoanalyse ist derzeit nicht verfügbar. Versuche es später erneut.</string>
+    <string name="photo_error_connection">Keine Verbindung zum Server. Prüfe deine Verbindung und versuche es erneut.</string>
+    <string name="photo_error_generic">Das Foto konnte nicht analysiert werden. Versuche es erneut.</string>
+    <string name="photo_error_camera_permission">Kamerazugriff ist erforderlich. Erlaube ihn in den Einstellungen oder wähle ein Foto aus der Galerie.</string>
+    <string name="photo_error_camera_open">Die Kamera konnte nicht geöffnet werden. Versuche es erneut oder wähle ein Foto aus der Galerie.</string>
+    <string name="sync_subscription_required">Für die Synchronisierung deiner Daten benötigst du ein aktives Abonnement.</string>
+</resources>

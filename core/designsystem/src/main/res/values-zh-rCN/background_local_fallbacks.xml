@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Local fallbacks for entries absent from the read-only Sheet export. -->
+    <string name="___progress">%1$s进度</string>
+    <string name="___stimulus___d_of__d_sets">%1$s刺激：%2$d / %3$d组</string>
+    <string name="_d_seconds_remaining">剩余%1$d秒</string>
+    <string name="add_15_seconds">增加15秒</string>
+    <string name="add_30_seconds">增加30秒</string>
+    <string name="breakfast">早餐</string>
+    <string name="check_in">签到</string>
+    <string name="continue_with_your_workout">继续锻炼</string>
+    <string name="dinner">晚餐</string>
+    <string name="focus____">重点：%1$s</string>
+    <string name="log_your_meals">记录饮食</string>
+    <string name="lunch">午餐</string>
+    <string name="mesocycle__d">中周期 %1$d</string>
+    <string name="muscle_groups">肌肉群</string>
+    <string name="nutrition">营养</string>
+    <string name="pause">暂停</string>
+    <string name="post_workout">训练后</string>
+    <string name="pre_workout">训练前</string>
+    <string name="ready">准备就绪</string>
+    <string name="remove">移除</string>
+    <string name="rest">休息</string>
+    <string name="rest_complete">休息结束</string>
+    <string name="shows_exercise_details_and_instructions">显示动作详情和说明</string>
+    <string name="snack">加餐</string>
+    <string name="start">开始</string>
+    <string name="time_for_you_workout_">该训练了！</string>
+    <string name="week__d_of__d">第%1$d周，共%2$d周</string>
+    <string name="workouts">训练</string>
+    <string name="you_still_have_meals_to_log_today_">今天还有餐食需要记录。</string>
+    <string name="you_still_need_to_log_____and____today_">今天还需记录%1$s和%2$s。</string>
+    <string name="you_still_need_to_log____and____today_">今天还需记录%1$s和%2$s。</string>
+    <string name="you_still_need_to_log____today_">今天还需记录%1$s。</string>
+</resources>

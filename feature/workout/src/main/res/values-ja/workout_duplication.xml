@@ -1,0 +1,5 @@
+<resources>
+    <string name="duplicate_workout">ワークアウトを複製</string>
+    <string name="duplicate_workout_error">ワークアウトを複製できませんでした</string>
+    <string name="duplicate_workout_retry">もう一度お試しください。</string>
+</resources>

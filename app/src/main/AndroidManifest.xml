@@ -19,6 +19,7 @@
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
     </queries>
@@ -56,6 +57,9 @@
                 android:resource="@xml/nutrition_status_widget_info" />
         </receiver>
         <receiver android:name="io.codepassion.doubletriangle.WildforceNotificationReceiver" android:exported="false" />
+        <service android:name="io.codepassion.doubletriangle.CheckInMessagingService" android:exported="false">
+            <intent-filter><action android:name="com.google.firebase.MESSAGING_EVENT" /></intent-filter>
+        </service>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

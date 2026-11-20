@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_intake_for_date">Assunzione del %1$s</string>
+</resources>

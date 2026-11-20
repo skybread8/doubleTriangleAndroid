@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="photo_error_session">Je sessie is verlopen. Meld je opnieuw aan.</string>
+    <string name="photo_error_access">Je account heeft geen toegang tot fotoanalyse.</string>
+    <string name="photo_error_size">De afbeelding is te groot. Probeer een andere foto.</string>
+    <string name="photo_error_invalid">De afbeelding kon niet worden verwerkt. Controleer of er voedsel op staat en probeer een andere foto.</string>
+    <string name="photo_error_limit">Te veel aanvragen. Probeer het later opnieuw.</string>
+    <string name="photo_error_service">Fotoanalyse is momenteel niet beschikbaar. Probeer het later opnieuw.</string>
+    <string name="photo_error_connection">Kan geen verbinding maken met de server. Controleer je verbinding en probeer het opnieuw.</string>
+    <string name="photo_error_generic">De foto kon niet worden geanalyseerd. Probeer het opnieuw.</string>
+    <string name="photo_error_camera_permission">Toegang tot de camera is nodig. Sta dit toe in Instellingen of kies een foto uit de galerij.</string>
+    <string name="photo_error_camera_open">De camera kon niet worden geopend. Probeer het opnieuw of kies een foto uit de galerij.</string>
+    <string name="sync_subscription_required">Je hebt een actief abonnement nodig om je gegevens te synchroniseren.</string>
+</resources>

@@ -1,0 +1,5 @@
+<resources>
+    <string name="duplicate_workout">Duplicar entrenament</string>
+    <string name="duplicate_workout_error">No s’ha pogut duplicar l’entrenament</string>
+    <string name="duplicate_workout_retry">Torna-ho a provar.</string>
+</resources>

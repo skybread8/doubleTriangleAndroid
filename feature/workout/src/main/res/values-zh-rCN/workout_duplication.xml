@@ -1,0 +1,5 @@
+<resources>
+    <string name="duplicate_workout">复制训练</string>
+    <string name="duplicate_workout_error">无法复制训练</string>
+    <string name="duplicate_workout_retry">请重试。</string>
+</resources>

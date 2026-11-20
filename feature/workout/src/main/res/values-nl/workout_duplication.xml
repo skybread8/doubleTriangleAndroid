@@ -1,0 +1,5 @@
+<resources>
+    <string name="duplicate_workout">Training dupliceren</string>
+    <string name="duplicate_workout_error">Training kon niet worden gedupliceerd</string>
+    <string name="duplicate_workout_retry">Probeer het opnieuw.</string>
+</resources>

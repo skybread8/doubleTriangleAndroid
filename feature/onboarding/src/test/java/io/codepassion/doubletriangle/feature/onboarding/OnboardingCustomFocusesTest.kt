@@ -74,4 +74,13 @@ class OnboardingCustomFocusesTest {
         assertFalse(WorkoutFocus.Mobility in result.values)
         assertFalse(WorkoutFocus.Recovery in result.values)
     }
+    @Test fun changingSplitDiscardsStaleFocusesAndPrefillsFromPreviousSplit() {
+        val profile = OnboardingProfile(name = "Alex", goal = FitnessGoal.GeneralFitness,
+            lifestyle = LifestyleLevel.ModeratelyActive, trainingSplitPreference = TrainingSplitPreference.PushPullLegs,
+            customWorkoutFocuses = mapOf(WorkoutWeekday.Wednesday to WorkoutFocus.Legs))
+        assertTrue(profile.activeCustomWorkoutFocuses.isEmpty())
+        val custom = profile.selectTrainingSplit(TrainingSplitPreference.Custom)
+        assertEquals(WorkoutFocus.Pull, custom.customWorkoutFocuses[WorkoutWeekday.Wednesday])
+        assertTrue(custom.selectTrainingSplit(TrainingSplitPreference.FullBody).customWorkoutFocuses.isEmpty())
+    }
 }

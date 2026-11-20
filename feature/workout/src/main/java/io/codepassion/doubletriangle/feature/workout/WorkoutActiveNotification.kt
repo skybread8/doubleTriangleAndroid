@@ -17,6 +17,8 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.media.RingtoneManager
 import android.graphics.drawable.Icon
+import io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext
+import io.codepassion.doubletriangle.core.designsystem.R as SharedR
 
 internal enum class WorkoutNotificationType {
     PROGRESS, REST
@@ -45,7 +47,7 @@ internal object WorkoutActiveNotification {
     fun show(
         context: Context,
         title: String,
-        detail: String = "Sesión activa",
+        detail: String? = null,
         headsUp: Boolean = false,
         progress: Int = 0,
         progressMax: Int = 0,
@@ -60,10 +62,10 @@ internal object WorkoutActiveNotification {
     ) {
         runCatching {
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            ensureChannel(manager)
+            ensureChannel(context, manager)
             manager.cancel(restFinishedNotificationId)
             val notification = build(
-                context, title, detail, headsUp, progress, progressMax, type, artwork,
+                context, title, detail ?: localizedBackgroundContext(context).getString(SharedR.string.ui_sheet_active_workout), headsUp, progress, progressMax, type, artwork,
                 exerciseIndex = exerciseIndex,
                 totalExercises = totalExercises,
                 exerciseTimerSeconds = exerciseTimerSeconds,
@@ -78,11 +80,11 @@ internal object WorkoutActiveNotification {
     fun showRestCompletedInPlace(context: Context, title: String, completedExercises: Int, totalExercises: Int) {
         runCatching {
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            ensureChannel(manager)
+            ensureChannel(context, manager)
             val notification = build(
                 context,
-                "Descanso terminado",
-                "¡DESCANSO TERMINADO! · Pulsa para siguiente serie",
+                localizedBackgroundContext(context).getString(SharedR.string.rest_complete),
+                localizedBackgroundContext(context).getString(SharedR.string.continue_with_your_workout),
                 headsUp = true,
                 progress = 0,
                 progressMax = totalExercises.coerceAtLeast(1),
@@ -138,21 +140,22 @@ internal object WorkoutActiveNotification {
         if (artwork != null) this.artwork = artwork
         val resolvedArtwork = artwork ?: this.artwork
 
+        val strings = localizedBackgroundContext(context)
         val isResting = type == WorkoutNotificationType.REST
         val index = exerciseIndex ?: 0
         val count = (totalExercises ?: 1).coerceAtLeast(1)
 
         val displayTitle = if (isResting) {
-            "Descanso · ${progress.coerceAtLeast(0)}s"
+            strings.getString(SharedR.string.ui_sheet_rest__ds, progress.coerceAtLeast(0))
         } else {
             val timer = exerciseTimerSeconds?.coerceAtLeast(0)?.let { " · ${it}s" }.orEmpty()
             "$title$timer (${index + 1}/$count)"
         }
-        val displayDetail = if (isResting) "${progress}s restantes" else detail
+        val displayDetail = if (isResting) strings.getString(SharedR.string._d_seconds_remaining, progress) else detail
 
         val builder: android.app.Notification.Builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            ensureChannel(manager)
+            ensureChannel(context, manager)
             android.app.Notification.Builder(context, channelId)
         } else {
             android.app.Notification.Builder(context)
@@ -169,7 +172,7 @@ internal object WorkoutActiveNotification {
         builder.setSmallIcon(R.drawable.ic_wildforce_notification)
             .setContentTitle(displayTitle)
             .setContentText(displayDetail)
-            .setSubText("Sesión activa")
+            .setSubText(strings.getString(SharedR.string.ui_sheet_active_workout))
             .setOngoing(true)
             .setVisibility(android.app.Notification.VISIBILITY_PUBLIC)
             .setCategory(android.app.Notification.CATEGORY_WORKOUT)
@@ -186,7 +189,7 @@ internal object WorkoutActiveNotification {
             builder.extras.putBoolean("android.requestPromotedOngoing", true)
             builder.setRequestPromotedOngoing(true)
             builder.setShortCriticalText(
-                if (alert) "LISTO"
+                if (alert) strings.getString(SharedR.string.ready).uppercase()
                 else if (isResting) "${progress.coerceAtLeast(0)}s"
                 else "${index + 1}/$count"
             )
@@ -267,7 +270,7 @@ internal object WorkoutActiveNotification {
         if (alert) {
             builder.setOnlyAlertOnce(false)
                 .setPriority(android.app.Notification.PRIORITY_HIGH)
-                .setTicker("¡Listo!")
+                .setTicker(strings.getString(SharedR.string.ready))
                 .setWhen(System.currentTimeMillis())
                 .setShowWhen(true)
                 .setLights(workoutProgressCurrent, 500, 500)
@@ -277,12 +280,12 @@ internal object WorkoutActiveNotification {
 
         if (isResting) {
             if (contentIntent != null) {
-                builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_menu_view), "Abrir", contentIntent).build())
+                builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_menu_view), strings.getString(SharedR.string.ui_sheet_active_workout), contentIntent).build())
             }
-            builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), "Omitir", skipIntent).build())
-            builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), "+30 s", addRestIntent).build())
+            builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_next), strings.getString(SharedR.string.ui_sheet_skip_rest), skipIntent).build())
+            builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_input_add), strings.getString(SharedR.string.add_30_seconds), addRestIntent).build())
         } else if (canToggleExerciseTimer) {
-            builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_pause), "Pausa/Reanuda", actionIntent(context, ACTION_TOGGLE_TIMER, 4202)).build())
+            builder.addAction(android.app.Notification.Action.Builder(Icon.createWithResource(context, android.R.drawable.ic_media_pause), strings.getString(if (exerciseTimerRunning) SharedR.string.pause else SharedR.string.ui_sheet_resume), actionIntent(context, ACTION_TOGGLE_TIMER, 4202)).build())
         }
 
         return builder.build()
@@ -291,9 +294,9 @@ internal object WorkoutActiveNotification {
     private fun actionIntent(context: Context, action: String, requestCode: Int): android.app.PendingIntent =
         android.app.PendingIntent.getBroadcast(context, requestCode, Intent(context, WorkoutNotificationActionReceiver::class.java).setAction(action), android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE)
 
-    private fun ensureChannel(manager: NotificationManager) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) manager.createNotificationChannel(NotificationChannel(channelId, "Entrenamiento activo", NotificationManager.IMPORTANCE_DEFAULT).apply {
-            description = "Progreso, descansos y ejercicio actual"
+    private fun ensureChannel(context: Context, manager: NotificationManager) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) manager.createNotificationChannel(NotificationChannel(channelId, localizedBackgroundContext(context).getString(SharedR.string.ui_sheet_active_workout), NotificationManager.IMPORTANCE_DEFAULT).apply {
+            description = localizedBackgroundContext(context).getString(SharedR.string.ui_sheet_active_workout)
             lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
             setSound(null, null)
             enableVibration(false)

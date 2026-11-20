@@ -2,6 +2,8 @@ package io.codepassion.doubletriangle.feature.workout
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,11 +38,24 @@ import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -57,6 +72,7 @@ import io.codepassion.doubletriangle.core.designsystem.liquidGlassBackground
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import io.codepassion.doubletriangle.core.model.WorkoutBlockType
 import io.codepassion.doubletriangle.core.model.WorkoutDaySummary
+import kotlinx.coroutines.delay
 import java.text.DateFormat
 import java.util.Date
 
@@ -72,9 +88,10 @@ internal fun WorkoutPathScreen(
     elapsedSeconds: Int,
     useImperial: Boolean = false,
     onAddExerciseToBlock: (Int) -> Unit = {},
+    onMoveExercise: (Int, Int, Int) -> Unit = { _, _, _ -> },
     onBack: () -> Unit,
 ) {
-    val addExerciseDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_exercise)
+    val addExerciseDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_add_exercise)
     val pathBlocks = remember(workout) { workout.pathBlocks() }
     val pathExercises = remember(pathBlocks) { pathBlocks.flatMap { it.exercises } }
     val matchedPathIndex = pathExercises.indexOfFirst { currentExerciseIndex in it.executionIndices }
@@ -88,17 +105,44 @@ internal fun WorkoutPathScreen(
         currentExerciseIndex > lastExecutionIndex -> pathExercises.size
         else -> 1
     }
+    val rowBounds = remember { mutableStateMapOf<Pair<Int, Int>, Rect>() }
+    var draggedRow by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+    var dragStartY by remember { mutableFloatStateOf(0f) }
+    var scrollCompensation by remember { mutableFloatStateOf(0f) }
+    var viewport by remember { mutableStateOf<Rect?>(null) }
+    val scrollState = rememberScrollState()
+    val edge = with(LocalDensity.current) { 56.dp.toPx() }
+    val step = with(LocalDensity.current) { 12.dp.toPx() }
+    LaunchedEffect(draggedRow) {
+        while (draggedRow != null) {
+            val bounds = viewport
+            if (bounds != null) {
+                val y = dragStartY + dragOffset
+                val distance = when {
+                    y < bounds.top + edge -> -step
+                    y > bounds.bottom - edge -> step
+                    else -> 0f
+                }
+                if (distance != 0f) scrollCompensation += scrollState.scrollBy(distance)
+            }
+            delay(16)
+        }
+    }
+    val haptics = LocalHapticFeedback.current
+    val moveUpDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.move_up)
+    val moveDownDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.move_down)
     val currentRowRequester = remember { BringIntoViewRequester() }
     LaunchedEffect(currentExerciseIndex, pathBlocks) {
         if (matchedPathIndex >= 0) currentRowRequester.bringIntoView()
     }
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 18.dp, vertical = 12.dp)) {
         InsightHeader("RUTA DEL ENTRENAMIENTO", onBack)
-        Text(workout.title, fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+        Text(workout.title, fontFamily = Exo2FontFamily, fontSize = 20.sp, fontWeight = FontWeight.Normal, color = WildforceThemeTokens.textPrimary)
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
             Text(formatInsightClock(elapsedSeconds), style = MaterialTheme.typography.h3, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Spacer(Modifier.weight(1f))
-            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_of__d, currentPathPosition, pathExercises.size), color = WildforceThemeTokens.textSecondary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_of__d, currentPathPosition, pathExercises.size), color = WildforceThemeTokens.textSecondary)
         }
         LinearProgressIndicator(
             progress = if (pathExercises.isEmpty()) 0f else currentPathPosition.toFloat() / pathExercises.size,
@@ -106,11 +150,11 @@ internal fun WorkoutPathScreen(
             color = WildforceThemeTokens.textPrimary,
             backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.18f),
         )
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+        Column(Modifier.weight(1f).onGloballyPositioned { viewport = it.boundsInWindow() }.verticalScroll(scrollState)) {
             pathBlocks.forEachIndexed { blockIndex, block ->
                 Row(Modifier.fillMaxWidth().padding(start = 28.dp, top = 10.dp, bottom = 3.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        block.type.label.uppercase(),
+                        workoutBlockLabel(block.type).uppercase(),
                         style = MaterialTheme.typography.caption,
                         fontWeight = FontWeight.Bold,
                         color = when (block.type) {
@@ -134,11 +178,36 @@ internal fun WorkoutPathScreen(
                     }
                 }
                 block.notes?.let { Text(it, Modifier.fillMaxWidth().padding(start = 28.dp, bottom = 4.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
-                block.exercises.forEach { pathExercise ->
+                block.exercises.forEachIndexed { itemIndex, pathExercise ->
                     val exercise = pathExercise.exercise
                     val completed = pathExercise.isCompleted(workout, completedByExercise, addedSetsByExercise)
                     val current = currentExerciseIndex in pathExercise.executionIndices
+                    val rowKey = blockIndex to itemIndex
+                    val upcoming = pathExercise.executionIndices.minOrNull()?.let { it > currentExerciseIndex } == true
                     val rowModifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                        .onGloballyPositioned { rowBounds[rowKey] = it.boundsInWindow() }
+                        .then(if (upcoming) Modifier.pointerInput(workout, currentExerciseIndex, rowKey) {
+                            detectDragGesturesAfterLongPress(
+                                onDragStart = { draggedRow = rowKey; dragOffset = 0f; scrollCompensation = 0f; dragStartY = rowBounds[rowKey]?.center?.y ?: 0f; haptics.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                onDragCancel = { draggedRow = null; dragOffset = 0f },
+                                onDragEnd = {
+                                    val dropY = dragStartY + dragOffset
+                                    // The dragged row's bounds follow its graphics translation. Including
+                                    // them makes the dragged row win the hit test against its destination.
+                                    val target = block.exercises.indices.mapNotNull { index ->
+                                        if (!block.canMoveUpcoming(itemIndex, index, currentExerciseIndex)) return@mapNotNull null
+                                        val bounds = rowBounds[blockIndex to index] ?: return@mapNotNull null
+                                        if (dropY !in bounds.top..bounds.bottom) return@mapNotNull null
+                                        index to bounds
+                                    }.minByOrNull { kotlin.math.abs(it.second.center.y - dropY) }?.first
+                                    if (target != null) onMoveExercise(blockIndex, itemIndex, target - itemIndex)
+                                    draggedRow = null; dragOffset = 0f
+                                },
+                                onDrag = { change, amount -> change.consume(); dragOffset += amount.y },
+                            )
+                        } else Modifier)
+                        .zIndex(if (draggedRow == rowKey) 1f else 0f)
+                        .graphicsLayer { if (draggedRow == rowKey) { translationY = dragOffset + scrollCompensation; shadowElevation = 8.dp.toPx(); alpha = .9f } }
                         .then(if (current) Modifier.bringIntoViewRequester(currentRowRequester) else Modifier)
                     Row(
                         rowModifier
@@ -152,10 +221,16 @@ internal fun WorkoutPathScreen(
                             modifier = Modifier.width(22.dp).size(16.dp),
                             tint = if (current) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary,
                         )
-                        RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exerciseDisplayName(exercise.imageKey, exercise.name), Modifier.size(width = 48.dp, height = 58.dp).clip(RoundedCornerShape(11.dp)))
+                        RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exerciseDisplayName(exercise.imageKey, exercise.name), Modifier.size(width = 42.dp, height = 52.dp).clip(RoundedCornerShape(10.dp)))
                         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                             Text(exerciseDisplayName(exercise.imageKey, exercise.name), fontWeight = if (current) FontWeight.Bold else FontWeight.Normal, color = if (completed) WildforceThemeTokens.textSecondary else WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             Text(pathExercisePrescription(pathExercise, useImperial), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                        if (block.canMoveUpcoming(itemIndex, itemIndex - 1, currentExerciseIndex)) androidx.compose.material.IconButton(onClick = { onMoveExercise(blockIndex, itemIndex, -1) }, modifier = Modifier.size(48.dp)) {
+                            Text("↑", color = WildforceThemeTokens.textPrimary, modifier = Modifier.semantics { contentDescription = moveUpDescription })
+                        }
+                        if (block.canMoveUpcoming(itemIndex, itemIndex + 1, currentExerciseIndex)) androidx.compose.material.IconButton(onClick = { onMoveExercise(blockIndex, itemIndex, 1) }, modifier = Modifier.size(48.dp)) {
+                            Text("↓", color = WildforceThemeTokens.textPrimary, modifier = Modifier.semantics { contentDescription = moveDownDescription })
                         }
                     }
                 }

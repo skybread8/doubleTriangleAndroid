@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fallbacks for untranslated Sheet choices. -->
+    <string name="onboarding_choice_automatic">Automatico</string>
+    <string name="onboarding_choice_body_part_split">Divisione per gruppi muscolari</string>
+    <string name="onboarding_choice_big_gym">Palestra grande</string>
+    <string name="onboarding_choice_small_gym">Palestra piccola</string>
+    <string name="onboarding_choice_home_gym">Palestra in casa</string>
+    <string name="onboarding_choice_some_accessories">Alcuni accessori</string>
+    <string name="onboarding_choice_bodyweight_only">Solo corpo libero</string>
+    <string name="onboarding_choice_pull_up_bar">Barra per trazioni</string>
+    <string name="onboarding_choice_cardio">Cardio</string>
+    <string name="onboarding_choice_male">Maschile</string>
+    <string name="onboarding_choice_female">Femminile</string>
+    <string name="onboarding_choice_upper_body">Parte superiore</string>
+    <string name="onboarding_choice_lower_body">Parte inferiore</string>
+    <string name="onboarding_choice_push">Spinta</string>
+    <string name="onboarding_choice_pull">Trazione</string>
+    <string name="onboarding_choice_core">Addome</string>
+    <string name="onboarding_choice_recovery">Recupero</string>
+</resources>

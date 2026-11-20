@@ -28,7 +28,7 @@ internal object NutritionAIPlanner {
             synchronize = {
                 val preferences = context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
                 suspend fun sync() {
-                    when (val result = WorkoutRemoteSync.synchronize(context, profile, preferences)) {
+                    when (val result = WorkoutRemoteSync.synchronize(context, profile, preferences, hydrateMedia = false)) {
                         is WorkoutRemoteSync.Outcome.Synchronized -> Unit
                         is WorkoutRemoteSync.Outcome.Failed -> error(result.message ?: "No se pudo sincronizar el perfil nutricional.")
                         WorkoutRemoteSync.Outcome.NoAccount -> error("Inicia sesión para generar el plan nutricional")
@@ -36,6 +36,7 @@ internal object NutritionAIPlanner {
                     }
                 }
                 val importing = preferences.getBoolean("remote_sync_import_required", false)
+                val startedAt = android.os.SystemClock.elapsedRealtime()
                 sync()
                 // The first sync on a new device imports without pushing local changes.
                 if (importing && !preferences.getBoolean("remote_sync_import_required", false) &&
@@ -45,6 +46,7 @@ internal object NutritionAIPlanner {
                     NutritionStore.hasNutritionProfile(context)) {
                     "No se pudo sincronizar el perfil nutricional. Inténtalo de nuevo."
                 }
+                Log.i("NutritionAIPlanner", "Pre-generation sync took ${android.os.SystemClock.elapsedRealtime() - startedAt} ms")
             },
             generate = { generateRemote(context) },
         )
@@ -60,12 +62,14 @@ internal object NutritionAIPlanner {
         val requestBody = JSONObject().apply {
             if (dailyEnergy.length() > 0) put("daily_energy", dailyEnergy)
         }.toString()
+        val startedAt = android.os.SystemClock.elapsedRealtime()
         val plan = AsyncOperationClient.execute(
             startPath = "nutrition/plans/generate",
             token = token,
             idempotencyKey = idempotencyKey,
             requestBody = requestBody,
         ) { it }
+        Log.i("NutritionAIPlanner", "Remote generation took ${android.os.SystemClock.elapsedRealtime() - startedAt} ms")
         val generated = remoteDays(plan.optJSONArray("days") ?: JSONArray())
         NutritionStore.rememberRemotePlanId(context, plan.optString("id"))
         check(generated.isNotEmpty()) { "El generador no devolvió ningún día del plan." }

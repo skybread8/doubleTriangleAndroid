@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android-specific copy without an equivalent in the shared Sheet. -->
+    <string name="settings_faq_description">Answers about training, nutrition, Android and your account.</string>
+    <string name="settings_health_description">Save workouts and sync body measurements with Health Connect.</string>
+    <string name="settings_health_disabled">Health Connect has been disabled for Wildforce.</string>
+    <string name="settings_health_imported">Body measurements imported from Health Connect.</string>
+    <string name="settings_health_connected">Health Connect is connected.</string>
+    <string name="settings_health_denied">Health Connect access was not granted.</string>
+    <string name="settings_focus_description">Reduce distractions during workouts using Android focus settings.</string>
+    <string name="settings_focus_categories_description">Manage the apps and categories that Android silences during workouts.</string>
+    <string name="settings_live_update_description">Show the session as a card or chip when Android 16 and the device support it.</string>
+    <string name="settings_workout_notifications">Workout notifications</string>
+    <string name="settings_workout_notifications_description">Show the active session in the notification panel and on the lock screen.</string>
+    <string name="settings_amazfit_description">Sync the active workout with Wildforce on your Amazfit. Active only during a workout.</string>
+    <string name="settings_rest_alerts">Alerts when rest starts</string>
+    <string name="settings_rest_alerts_description">Play an alert when the rest timer starts.</string>
+    <string name="settings_lock_photo_description">Require device authentication to open progress photos.</string>
+</resources>

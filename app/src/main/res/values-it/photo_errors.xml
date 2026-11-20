@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="photo_error_session">La sessione è scaduta. Accedi di nuovo.</string>
+    <string name="photo_error_access">Il tuo account non può usare l’analisi delle foto.</string>
+    <string name="photo_error_size">L’immagine è troppo grande. Prova un’altra foto.</string>
+    <string name="photo_error_invalid">Impossibile elaborare l’immagine. Verifica che contenga alimenti e prova un’altra foto.</string>
+    <string name="photo_error_limit">Troppe richieste. Riprova più tardi.</string>
+    <string name="photo_error_service">L’analisi delle foto non è disponibile. Riprova più tardi.</string>
+    <string name="photo_error_connection">Impossibile connettersi al server. Controlla la connessione e riprova.</string>
+    <string name="photo_error_generic">Impossibile analizzare la foto. Riprova.</string>
+    <string name="photo_error_camera_permission">È necessario accedere alla fotocamera. Consenti l’accesso nelle impostazioni o scegli una foto dalla galleria.</string>
+    <string name="photo_error_camera_open">Impossibile aprire la fotocamera. Riprova o scegli una foto dalla galleria.</string>
+    <string name="sync_subscription_required">È necessario un abbonamento attivo per sincronizzare i dati.</string>
+</resources>

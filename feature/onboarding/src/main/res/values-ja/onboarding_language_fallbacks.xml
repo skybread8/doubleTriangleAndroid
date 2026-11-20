@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Language names fill missing or untranslated Sheet cells. -->
+    <string name="onboarding_language_spanish">スペイン語</string>
+    <string name="onboarding_language_english">英語</string>
+    <string name="onboarding_language_catalan">カタルーニャ語</string>
+    <string name="onboarding_language_french">フランス語</string>
+    <string name="onboarding_language_italian">イタリア語</string>
+    <string name="onboarding_language_portuguese">ポルトガル語</string>
+    <string name="onboarding_language_german">ドイツ語</string>
+    <string name="onboarding_language_chinese__simplified_">中国語（簡体字）</string>
+    <string name="onboarding_language_dutch">オランダ語</string>
+    <string name="onboarding_language_japanese">日本語</string>
+</resources>

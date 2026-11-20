@@ -28,7 +28,7 @@ android {
             buildConfigString(
                 localProperties.getProperty(
                     "GOOGLE_SERVER_CLIENT_ID",
-                    "737395571151-0765h8e0g0sujldft4fj6h47leu7851h.apps.googleusercontent.com",
+                    "737395571151-0i6p4sko3790qdetiut3onbokbpcnvhk.apps.googleusercontent.com",
                 ),
             ),
         )

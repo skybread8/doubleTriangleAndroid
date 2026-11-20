@@ -73,3 +73,122 @@ foreach ($locale in $onboardingLocales.Keys) {
     }
 }
 Write-Output "Onboarding: $($onboardingNames.Count) iOS fallback keys available in all 10 locales."
+
+# iOS has four body metric names absent from the Sheet. Validate the local
+# fallback set separately from the generated shared catalogue.
+$bodyMetricRoot = Join-Path $PSScriptRoot '..\feature\onboarding\src\main\res'
+[xml]$bodyMetricBase = Get-Content (Join-Path $bodyMetricRoot 'values\body_metric_labels.xml') -Raw -Encoding utf8
+$bodyMetricNames = @($bodyMetricBase.resources.string | ForEach-Object { $_.name })
+foreach ($directory in $onboardingLocales.Values) {
+    [xml]$localizedBodyMetrics = Get-Content (Join-Path $bodyMetricRoot "$directory\body_metric_labels.xml") -Raw -Encoding utf8
+    $names = @($localizedBodyMetrics.resources.string | ForEach-Object { $_.name })
+    if (@(Compare-Object $bodyMetricNames $names).Count -or @($localizedBodyMetrics.resources.string | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete body metric fallbacks in $directory"
+    }
+}
+Write-Output "Body metrics: $($bodyMetricNames.Count) fallback keys available in all 10 locales."
+
+# Set-style and mesocycle names absent from the Sheet have local fallbacks.
+$workoutLabelRoot = Join-Path $PSScriptRoot '..\feature\workout\src\main\res'
+[xml]$workoutLabelBase = Get-Content (Join-Path $workoutLabelRoot 'values\workout_local_labels.xml') -Raw -Encoding utf8
+$workoutLabelNames = @($workoutLabelBase.resources.string | ForEach-Object { $_.name })
+foreach ($directory in $onboardingLocales.Values) {
+    [xml]$localizedWorkoutLabels = Get-Content (Join-Path $workoutLabelRoot "$directory\workout_local_labels.xml") -Raw -Encoding utf8
+    $names = @($localizedWorkoutLabels.resources.string | ForEach-Object { $_.name })
+    if (@(Compare-Object $workoutLabelNames $names).Count -or @($localizedWorkoutLabels.resources.string | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete workout label fallbacks in $directory"
+    }
+}
+Write-Output "Workout labels: $($workoutLabelNames.Count) fallback keys available in all 10 locales."
+
+# Background notification and accessibility fallbacks fill only untranslated Sheet cells.
+$backgroundNames = $null
+foreach ($directory in @('values-ja', 'values-nl', 'values-zh-rCN')) {
+    $fallback = Join-Path $ResRoot "$directory\background_local_fallbacks.xml"
+    [xml]$local = Get-Content -LiteralPath $fallback -Raw -Encoding utf8
+    [xml]$sheet = Get-Content -LiteralPath (Join-Path $ResRoot "$directory\sheet_translations.xml") -Raw -Encoding utf8
+    $sheetNames = @($sheet.resources.string | ForEach-Object { $_.name })
+    $names = @($local.resources.string | ForEach-Object { $_.name })
+    if (@($names | Where-Object { $_ -in $sheetNames -or $_ -notin $reference }).Count) { throw "Background fallback conflicts with the Sheet in $directory" }
+    if (@($local.resources.string | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) { throw "Empty background fallback in $directory" }
+    if ($null -eq $backgroundNames) { $backgroundNames = $names }
+    elseif (@(Compare-Object $backgroundNames $names).Count) { throw "Inconsistent background fallback keys in $directory" }
+}
+Write-Output "Background and accessibility: $($backgroundNames.Count) Sheet gaps covered locally in ja, nl and zh."
+# Android-only profile settings copy must be present in every supported locale.
+$settingsRoot = Join-Path $PSScriptRoot '..\feature\onboarding\src\main\res'
+[xml]$settingsBase = Get-Content (Join-Path $settingsRoot 'values\android_settings_labels.xml') -Raw -Encoding utf8
+$settingsNames = @($settingsBase.resources.string | ForEach-Object { $_.name })
+foreach ($directory in $onboardingLocales.Values) {
+    [xml]$settings = Get-Content (Join-Path $settingsRoot "$directory\android_settings_labels.xml") -Raw -Encoding utf8
+    $names = @($settings.resources.string | ForEach-Object { $_.name })
+    if (@(Compare-Object $settingsNames $names).Count -or @($settings.resources.string | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete Android settings translations in $directory"
+    }
+}
+Write-Output "Android settings: $($settingsNames.Count) local labels available in all 10 locales."
+# These aliases use the Sheet normally and replace cells that are absent or
+# still contain the English source in the affected locales.
+[xml]$settingsGapBase = Get-Content (Join-Path $settingsRoot 'values\settings_sheet_gaps.xml') -Raw -Encoding utf8
+foreach ($directory in @('values-ja', 'values-nl', 'values-zh-rCN')) {
+    [xml]$local = Get-Content (Join-Path $settingsRoot "$directory\settings_sheet_gaps.xml") -Raw -Encoding utf8
+    [xml]$sheet = Get-Content (Join-Path $ResRoot "$directory\sheet_translations.xml") -Raw -Encoding utf8
+    [xml]$english = Get-Content (Join-Path $ResRoot 'values\sheet_translations.xml') -Raw -Encoding utf8
+    $sheetValues = @{}; foreach ($entry in $sheet.resources.string) { $sheetValues[$entry.name] = $entry.'#text' }
+    $englishValues = @{}; foreach ($entry in $english.resources.string) { $englishValues[$entry.name] = $entry.'#text' }
+    foreach ($entry in $local.resources.string) {
+        $name = $entry.name.Substring('settings_sheet_'.Length)
+        if (!$englishValues.ContainsKey($name) -or [string]::IsNullOrWhiteSpace($entry.'#text')) { throw "Invalid settings Sheet fallback $name in $directory" }
+        if ($sheetValues.ContainsKey($name) -and $sheetValues[$name] -ne $englishValues[$name]) { throw "Sheet now translates $name in $directory; remove the local fallback" }
+    }
+    if (@(Compare-Object @($settingsGapBase.resources.string | ForEach-Object { $_.name }) @($local.resources.string | ForEach-Object { $_.name })).Count) { throw "Inconsistent settings Sheet fallbacks in $directory" }
+}
+Write-Output "Settings Sheet gaps: 8 localized aliases checked in ja, nl and zh."
+
+& (Join-Path $PSScriptRoot 'verify-onboarding-titles.ps1')
+# Shared labels with untranslated Sheet cells must use the Sheet where it has a
+# translated value, and any local replacements must retain formatting arguments.
+[xml]$uiBase = Get-Content (Join-Path $ResRoot 'values\ui_sheet_fallbacks.xml') -Raw -Encoding utf8
+[xml]$uiEnglish = Get-Content (Join-Path $ResRoot 'values\sheet_translations.xml') -Raw -Encoding utf8
+$uiEnglishByName = @{}; foreach ($entry in $uiEnglish.resources.string) { $uiEnglishByName[$entry.name] = $entry.'#text' }
+foreach ($locale in @('es','ca','de','fr','it','pt','nl','ja','zh-rCN')) {
+    [xml]$uiSheet = Get-Content (Join-Path $ResRoot "values-$locale\sheet_translations.xml") -Raw -Encoding utf8
+    [xml]$uiLocal = Get-Content (Join-Path $ResRoot "values-$locale\ui_sheet_fallbacks.xml") -Raw -Encoding utf8
+    $uiSheetByName = @{}; foreach ($entry in $uiSheet.resources.string) { $uiSheetByName[$entry.name] = $entry.'#text' }
+    $uiLocalByName = @{}; foreach ($entry in $uiLocal.resources.string) { $uiLocalByName[$entry.name] = $entry.'#text' }
+    foreach ($alias in $uiBase.resources.string) {
+        $key = $alias.name.Substring('ui_sheet_'.Length)
+        $untranslated = !$uiSheetByName.ContainsKey($key) -or $uiSheetByName[$key] -ceq $uiEnglishByName[$key]
+        if ($untranslated -and (!$uiLocalByName.ContainsKey($alias.name) -or [string]::IsNullOrWhiteSpace($uiLocalByName[$alias.name]))) { throw "Missing UI fallback $key in $locale" }
+    }
+    foreach ($entry in $uiLocal.resources.string) {
+        $key = $entry.name.Substring('ui_sheet_'.Length)
+        if (!$uiEnglishByName.ContainsKey($key) -or [string]::IsNullOrWhiteSpace($entry.'#text')) { throw "Invalid UI fallback $key in $locale" }
+        if ($uiSheetByName.ContainsKey($key) -and $uiSheetByName[$key] -ne $uiEnglishByName[$key]) { throw "Sheet now translates $key in $locale; remove its local fallback" }
+        $sourceArgs = @([regex]::Matches($uiEnglishByName[$key], '%\d+\$[ds]') | ForEach-Object { $_.Value } | Sort-Object)
+        $localArgs = @([regex]::Matches($entry.'#text', '%\d+\$[ds]') | ForEach-Object { $_.Value } | Sort-Object)
+        if (@(Compare-Object $sourceArgs $localArgs).Count) { throw "UI format arguments differ for $key in $locale" }
+    }
+}
+Write-Output "Common UI: $(@($uiBase.resources.string).Count) Sheet aliases checked for locale overlap and format arguments."
+# Four iOS workout day-type names have no Sheet rows.
+[xml]$daytypeBase = Get-Content (Join-Path $workoutLabelRoot 'values\workout_daytype_labels.xml') -Raw -Encoding utf8
+$daytypeNames = @($daytypeBase.resources.string | ForEach-Object { $_.name })
+foreach ($directory in $onboardingLocales.Values) {
+    [xml]$localized = Get-Content (Join-Path $workoutLabelRoot "$directory\workout_daytype_labels.xml") -Raw -Encoding utf8
+    $names = @($localized.resources.string | ForEach-Object { $_.name })
+    if (@(Compare-Object $daytypeNames $names).Count -or @($localized.resources.string | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) { throw "Incomplete workout day-type fallbacks in $directory" }
+}
+Write-Output "Workout day types: $($daytypeNames.Count) local labels available in all 10 locales."
+
+# FAQ content is Android-specific and has no corresponding Sheet entries.
+$faqRoot = Join-Path $PSScriptRoot '..\feature\onboarding\src\main\res'
+foreach ($directory in $locales) {
+    [xml]$faq = Get-Content (Join-Path $faqRoot "$directory\onboarding_faq.xml") -Raw -Encoding utf8
+    if (@($faq.resources.string).Count -ne 7 -or @($faq.resources.string | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) { throw "Incomplete FAQ headings in $directory" }
+    foreach ($name in @('faq_questions', 'faq_answers')) {
+        $array = @($faq.resources.'string-array' | Where-Object { $_.name -eq $name })
+        if ($array.Count -ne 1 -or @($array[0].item).Count -ne 23 -or @($array[0].item | Where-Object { [string]::IsNullOrWhiteSpace($_) }).Count) { throw "Incomplete FAQ $name in $directory" }
+    }
+}
+Write-Output 'FAQ: 23 questions and answers available in all 10 locales.'

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="faq_intro">Wildforceでトレーニング、食事管理、進捗の確認を始めましょう。</string>
+    <string name="faq_getting_started">はじめに</string>
+    <string name="faq_training">トレーニングと進捗</string>
+    <string name="faq_nutrition">栄養</string>
+    <string name="faq_devices">Androidとデバイス</string>
+    <string name="faq_account">アカウント・データ・設定</string>
+    <string name="faq_help">さらにサポートが必要ですか？「ヘルプ」から機種名、AndroidとWildforceのバージョン、問題の概要をお送りください。</string>
+    <string-array name="faq_questions">
+        <item>Wildforceとは何ですか？</item>
+        <item>トレーニングプランはどのように作られますか？</item>
+        <item>AndroidでWildforceを使うには何が必要ですか？</item>
+        <item>オフラインでトレーニングできますか？</item>
+        <item>トレーニング中に種目を変更できますか？</item>
+        <item>自分だけのトレーニングを作れますか？</item>
+        <item>休憩時間はどのように管理されますか？</item>
+        <item>進捗はどこで確認できますか？</item>
+        <item>トレーニングを終了するとどうなりますか？</item>
+        <item>食事はどのように記録しますか？</item>
+        <item>家にある食材から食事を提案できますか？</item>
+        <item>目標のマクロ栄養素に届かない場合は？</item>
+        <item>日ごとのプランを確認できますか？</item>
+        <item>Androidではどのヘルス連携を使いますか？</item>
+        <item>通知は何に使いますか？</item>
+        <item>Android用のWildforceウィジェットはありますか？</item>
+        <item>Wear OSに対応していますか？</item>
+        <item>iPhoneでもWildforceを使えますか？</item>
+        <item>ヤード・ポンド法を使えますか？</item>
+        <item>新しい端末でもデータを使えますか？</item>
+        <item>言語やテーマ、設定を変更できますか？</item>
+        <item>ヘルスコネクトが同期しない場合は？</item>
+        <item>問題が解決しない場合は？</item>
+    </string-array>
+    <string-array name="faq_answers">
+        <item>WildforceはiPhoneとAndroid向けのトレーニング・栄養管理アプリです。目標に合ったプランを作り、運動と栄養を記録して進捗を確認できます。</item>
+        <item>初期設定で目標、経験、運動できる時間、器具、好み、制限を選びます。その情報をもとに調整可能なプランを作成します。</item>
+        <item>Android 9以降と、お住まいの地域で利用できる最新のWildforceが必要です。</item>
+        <item>端末内にある内容は確認・記録できます。プランの作成やAIによる分析には通信が必要です。クラウド同期が有効な場合、未同期の変更は接続回復後に同期されます。</item>
+        <item>はい。代替種目を探したり、種目を入れ替えたり、進行中のセッションから削除したりできます。</item>
+        <item>はい。カスタムトレーニングを作成、編集、実行、削除できます。</item>
+        <item>各セット後の休憩をWildforceが管理します。通知が許可されていれば、通知から進行中のトレーニングを確認できます。</item>
+        <item>「進捗」で種目の履歴、運動量、統計、連続記録、体の変化を確認できます。</item>
+        <item>セッションが履歴に保存され、統計や進捗が更新されます。十分なデータがあれば過去のセッションと比較できます。</item>
+        <item>写真、バーコード、栄養成分表示、テキスト、食品検索、最近使った食品、手入力から選べます。</item>
+        <item>はい。食材を追加して食事のアイデアを使うと、栄養目標に合った提案を受けられます。</item>
+        <item>不足分を補う食品や食事をWildforceが提案できます。完璧を目指すより、より良い選択を続けることが大切です。</item>
+        <item>はい。週間カレンダー、カロリーとマクロ栄養素の目標、目標に応じた不足・維持・余剰の日を確認できます。</item>
+        <item>Wildforceはヘルスコネクトに接続します。身長、体重、カロリー、栄養、トレーニングの権限を選択でき、設定から取り消せます。</item>
+        <item>進行中のトレーニングや休憩を表示し、リマインダーを送ります。表示されない場合はWildforceの通知権限を確認してください。</item>
+        <item>ホーム画面からトレーニングを開くショートカットがあります。空き部分を長押しし、お使いのバージョンで有効な場合はウィジェット一覧からWildforceを選んでください。</item>
+        <item>Wear OSアプリではBluetooth経由でトレーニング状況の確認、セットの完了、休憩の操作ができます。Health Servicesと実機での検証は進行中です。</item>
+        <item>はい。iPhoneではApple HealthとApple Watchに連携し、トレーニング、休憩、対応種目の反復情報を確認できます。</item>
+        <item>はい。設定でメートル法またはヤード・ポンド法を選べます。体重や寸法が選択した形式で表示されます。</item>
+        <item>データは端末内に保存され、クラウド同期が有効ならアカウントと同期できます。同じアカウントでログインすると同期済みデータを復元できます。</item>
+        <item>はい。プロフィールと設定から言語、単位、プランの設定、リマインダー、テーマを変更できます。</item>
+        <item>ヘルスコネクトの権限を確認し、Wildforceを更新してアプリを開き直してください。解決しない場合は端末の種類とアプリのバージョンを添えてサポートに連絡してください。</item>
+        <item>Wildforceを更新し、アプリを再起動して権限を確認してください。それでも解決しない場合は機種名、AndroidとWildforceのバージョン、問題の概要を添えてサポートに連絡してください。</item>
+    </string-array>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared Sheet labels with local fallbacks for untranslated cells. -->
+    <string name="settings_sheet_none">无</string>
+    <string name="settings_sheet_join_your_gym">加入健身房</string>
+    <string name="settings_sheet_live_progress">实时进度</string>
+    <string name="settings_sheet_enabled">已启用</string>
+    <string name="settings_sheet_open_settings">打开设置</string>
+    <string name="settings_sheet_watch_auto_tracking">手表自动追踪</string>
+    <string name="settings_sheet_prevents_auto_lock_while_an_active_workout_is_open_">进行中的训练打开时，防止屏幕自动锁定。</string>
+    <string name="settings_sheet_confirm_your_identity_to_turn_off_progress_photo_protection_">请验证身份以关闭进度照片保护。</string>
+</resources>

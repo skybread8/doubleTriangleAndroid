@@ -137,10 +137,30 @@ internal class BookingApi(private val context: Context) {
     private fun HttpURLConnection.useResponse(): JSONObject {
         val body = BufferedReader((if (responseCode in 200..299) inputStream else errorStream).reader()).use { it.readText() }
         disconnect()
-        if (responseCode !in 200..299) throw BookingHttpException(responseCode, runCatching { JSONObject(body).optString("message") }.getOrDefault("").ifBlank { "No se pudo completar la reserva." })
+        if (responseCode !in 200..299) {
+            val payload = runCatching { JSONObject(body) }.getOrNull()
+            throw BookingHttpException(responseCode, payload?.optString("message").orEmpty(), payload?.optString("code")?.takeIf(String::isNotBlank))
+        }
         return JSONObject(body)
     }
 }
+
+internal fun bookingErrorResource(error: Throwable): Int = when ((error as? BookingHttpException)?.code) {
+        "room_full" -> io.codepassion.doubletriangle.core.designsystem.R.string.someone_just_took_the_last_place_for_this_time__availability_has_been_refreshed_
+        "time_not_available" -> io.codepassion.doubletriangle.core.designsystem.R.string.this_time_is_no_longer_available__the_room_may_have_been_closed_
+        "starts_in_past" -> io.codepassion.doubletriangle.core.designsystem.R.string.this_time_has_already_started__choose_a_later_one_
+        "outside_booking_window" -> io.codepassion.doubletriangle.core.designsystem.R.string.this_time_is_outside_the_room_s_booking_window_
+        "invalid_duration" -> io.codepassion.doubletriangle.core.designsystem.R.string.this_duration_isn_t_allowed_in_this_room_
+        "client_already_reserved" -> io.codepassion.doubletriangle.core.designsystem.R.string.you_already_have_another_reservation_at_this_time_
+        "room_not_reservable" -> io.codepassion.doubletriangle.core.designsystem.R.string.this_room_can_t_be_booked_right_now_
+        "not_active_client" -> io.codepassion.doubletriangle.core.designsystem.R.string.your_gym_membership_is_no_longer_active_
+        "cancellation_closed" -> io.codepassion.doubletriangle.core.designsystem.R.string.it_s_too_late_to_cancel_this_reservation_
+        else -> if (error is java.io.IOException) io.codepassion.doubletriangle.core.designsystem.R.string.you_seem_to_be_offline__connect_to_the_internet_and_try_again_
+            else io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_
+    }
+
+private fun bookingErrorMessage(context: android.content.Context, error: Throwable): String =
+    context.getString(bookingErrorResource(error))
 
 private const val SELECTED_BOOKING_GYM_ID = "booking_selected_gym_id"
 
@@ -170,7 +190,7 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
     DisposableEffect(Unit) { onDispose { onBookingVisibilityChanged(false) } }
     var joiningGym by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    suspend fun reload() { loading = true; error = null; runCatching { api.gyms() to api.reservations() }.onSuccess { (nextGyms, nextReservations) -> gyms = nextGyms; selectedGymId = selectedGymId?.takeIf { id -> nextGyms.any { it.id == id } } ?: nextGyms.firstOrNull()?.id; bookingPreferences.edit().putString(SELECTED_BOOKING_GYM_ID, selectedGymId).apply(); reservations = nextReservations }.onFailure { error = it.message ?: "No se pudieron cargar las reservas." }; loading = false }
+    suspend fun reload() { loading = true; error = null; runCatching { api.gyms() to api.reservations() }.onSuccess { (nextGyms, nextReservations) -> gyms = nextGyms; selectedGymId = selectedGymId?.takeIf { id -> nextGyms.any { it.id == id } } ?: nextGyms.firstOrNull()?.id; bookingPreferences.edit().putString(SELECTED_BOOKING_GYM_ID, selectedGymId).apply(); reservations = nextReservations }.onFailure { error = bookingErrorMessage(context, it) }; loading = false }
     LaunchedEffect(Unit) { reload() }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
@@ -209,7 +229,7 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
             ) {
                 when {
                     loading -> Box(Modifier.fillMaxWidth().height(180.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                    error != null -> BookingEmpty("No se pudieron cargar las reservas", error!!, onRetry = { scope.launch { reload() } })
+                    error != null -> BookingEmpty(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.couldn_t_load_your_reservations), error!!, onRetry = { scope.launch { reload() } })
                     selectedGym == null -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         BookingEmpty("No tienes gimnasios disponibles", "Introduce el código que te ha dado tu gimnasio para acceder a sus salas.")
                         OutlinedButton(onClick = { joiningGym = true }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.i_have_a_gym_code).uppercase()) }
@@ -219,8 +239,8 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
                     val visible = reservations.filter { it.gymId == selectedGym.id }
                     if (visible.none { !it.isCancelled }) BookingEmpty("No hay reservas próximas", "Reserva una sala para entrenar en tu gimnasio.")
                     visible.filter { !it.isCancelled }.forEach { reservation -> ReservationCard(reservation, onCancel = { cancellation = reservation }) }
-                    Button(onClick = { bookingGym = selectedGym }, modifier = Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.background)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.new_booking).uppercase(), fontWeight = FontWeight.Bold) }
-                    visible.filter { it.isCancelled }.takeIf { it.isNotEmpty() }?.let { cancelled -> Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancelled).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary); cancelled.forEach { ReservationCard(it, {}) } }
+                    Button(onClick = { bookingGym = selectedGym }, modifier = Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.background)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_new_booking).uppercase(), fontWeight = FontWeight.Bold) }
+                    visible.filter { it.isCancelled }.takeIf { it.isNotEmpty() }?.let { cancelled -> Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancelled).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary); cancelled.forEach { ReservationCard(it, {}) } }
                     }
                 }
             }
@@ -235,11 +255,11 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
             reload()
         },
     )
-    cancellation?.let { reservation -> AlertDialog(onDismissRequest = { cancellation = null }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_this_reservation_)) }, text = { Text("${reservation.roomName} · ${formatDateTime(reservation.startsAt, reservation.gymZone, locale)}") }, confirmButton = { TextButton(onClick = { cancellation = null; scope.launch { runCatching { api.cancel(reservation.id) }.onFailure { actionError = it.message ?: "No se pudo cancelar la reserva." }; reload() } }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } }, dismissButton = { TextButton(onClick = { cancellation = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.keep_it).uppercase()) } }) }
+    cancellation?.let { reservation -> AlertDialog(onDismissRequest = { cancellation = null }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel_this_reservation_)) }, text = { Text("${reservation.roomName} · ${formatDateTime(reservation.startsAt, reservation.gymZone, locale)}") }, confirmButton = { TextButton(onClick = { cancellation = null; scope.launch { runCatching { api.cancel(reservation.id) }.onFailure { actionError = bookingErrorMessage(context, it) }; reload() } }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } }, dismissButton = { TextButton(onClick = { cancellation = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.keep_it).uppercase()) } }) }
     actionError?.let { message ->
         AlertDialog(
             onDismissRequest = { actionError = null },
-            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.something_went_wrong)) },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_something_went_wrong)) },
             text = { Text(message) },
             confirmButton = { TextButton(onClick = { actionError = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_565339bc4d33d728)) } },
         )
@@ -258,17 +278,17 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
         title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.join_your_gym).uppercase()) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.enter_the_code_your_gym_gave_you__or_scan_its_qr_), color = WildforceThemeTokens.textSecondary)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_enter_the_code_your_gym_gave_you__or_scan_its_qr_), color = WildforceThemeTokens.textSecondary)
                 OutlinedTextField(
                     value = code,
                     onValueChange = { code = it; localError = null },
-                    label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym_code)) },
+                    label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_gym_code)) },
                     singleLine = true,
                     enabled = !submitting,
                     trailingIcon = {
                         Icon(
                             Icons.Filled.QrCodeScanner,
-                            contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.scan_the_gym_s_qr),
+                            contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_scan_the_gym_s_qr),
                             modifier = Modifier.clickable(enabled = !submitting) {
                                 runCatching {
                                     val options = GmsBarcodeScannerOptions.Builder()
@@ -278,19 +298,19 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
                                     GmsBarcodeScanning.getClient(context, options).startScan()
                                     .addOnSuccessListener { barcode -> barcode.rawValue?.let { value ->
                                     val parsed = parseGymJoinCode(value)
-                                    if (parsed == null) localError = "Este QR no contiene un código de gimnasio."
+                                    if (parsed == null) localError = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.this_qr_is_not_a_gym_join_code_)
                                     else {
                                         code = parsed
                                         localError = null
                                         submitting = true
                                         scope.launch {
-                                            runCatching { onJoin(parsed) }.onFailure { localError = it.message ?: "No se pudo unir al gimnasio." }
+                                            runCatching { onJoin(parsed) }.onFailure { localError = bookingErrorMessage(context, it) }
                                             submitting = false
                                         }
                                     }
                                     } }
-                                    .addOnFailureListener { localError = "No se pudo abrir el lector QR. Introduce el código manualmente." }
-                                }.onFailure { localError = "No se pudo abrir el lector QR. Introduce el código manualmente." }
+                                    .addOnFailureListener { localError = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }
+                                }.onFailure { localError = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }
                             },
                         )
                     },
@@ -304,13 +324,13 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
                 onClick = {
                     submitting = true
                     scope.launch {
-                        runCatching { onJoin(requireNotNull(parseGymJoinCode(code))) }.onFailure { localError = it.message ?: "No se pudo unir al gimnasio." }
+                        runCatching { onJoin(requireNotNull(parseGymJoinCode(code))) }.onFailure { localError = bookingErrorMessage(context, it) }
                         submitting = false
                     }
                 },
             ) { if (submitting) CircularProgressIndicator(Modifier.size(18.dp)) else Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.join).uppercase()) }
         },
-        dismissButton = { TextButton(enabled = !submitting, onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
+        dismissButton = { TextButton(enabled = !submitting, onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } },
     )
 }
 
@@ -361,7 +381,7 @@ private fun GymHeading(gym: BookingGym, gyms: List<BookingGym>, onSelect: (Booki
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Text(gym.name, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1)
-                        Icon(Icons.Filled.ExpandMore, contentDescription = "Cambiar gimnasio", tint = WildforceThemeTokens.textSecondary, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Filled.ExpandMore, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym), tint = WildforceThemeTokens.textSecondary, modifier = Modifier.size(18.dp))
                     }
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                         gyms.forEach { option ->
@@ -378,7 +398,7 @@ private fun GymHeading(gym: BookingGym, gyms: List<BookingGym>, onSelect: (Booki
         }
     }
 }
-@Composable private fun BookingEmpty(title: String, detail: String, onRetry: (() -> Unit)? = null, icon: ImageVector = Icons.Filled.EventAvailable) = Column(Modifier.fillMaxWidth().padding(vertical = 28.dp), horizontalAlignment = Alignment.CenterHorizontally) { Icon(icon, null, Modifier.size(42.dp), WildforceThemeTokens.textSecondary); Spacer(Modifier.height(8.dp)); Text(title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center); Text(detail, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center); onRetry?.let { TextButton(onClick = it) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase()) } } }
+@Composable private fun BookingEmpty(title: String, detail: String, onRetry: (() -> Unit)? = null, icon: ImageVector = Icons.Filled.EventAvailable) = Column(Modifier.fillMaxWidth().padding(vertical = 28.dp), horizontalAlignment = Alignment.CenterHorizontally) { Icon(icon, null, Modifier.size(42.dp), WildforceThemeTokens.textSecondary); Spacer(Modifier.height(8.dp)); Text(title, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center); Text(detail, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center); onRetry?.let { TextButton(onClick = it) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_retry).uppercase()) } } }
 @Composable
 private fun ReservationCard(reservation: BookingReservation, onCancel: () -> Unit) {
     var menuOpen by remember(reservation.id) { mutableStateOf(false) }
@@ -398,7 +418,7 @@ private fun ReservationCard(reservation: BookingReservation, onCancel: () -> Uni
                     BookingStatusBadge(reservation.status)
                     if (reservation.isCancellable) {
                         Box {
-                            IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(32.dp)) { Icon(Icons.Filled.MoreVert, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.more_options), tint = WildforceThemeTokens.textPrimary) }
+                            IconButton(onClick = { menuOpen = true }, modifier = Modifier.size(32.dp)) { Icon(Icons.Filled.MoreVert, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_more_options), tint = WildforceThemeTokens.textPrimary) }
                             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                                 DropdownMenuItem(onClick = { menuOpen = false; onCancel() }) {
                                     Icon(Icons.Filled.Close, null, tint = Color(0xFFE26D5A), modifier = Modifier.size(18.dp))
@@ -435,6 +455,7 @@ private fun BookingStatusBadge(status: String) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable private fun NewBookingScreen(gym: BookingGym, api: BookingApi, contentPadding: PaddingValues, onBack: () -> Unit, onBooked: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
     val locale = LocalLocale.current.platformLocale
     var rooms by remember { mutableStateOf<List<BookingRoom>>(emptyList()) }; var selectedRoom by remember { mutableStateOf<BookingRoom?>(null) }; var selectedDate by remember { mutableStateOf(ZonedDateTime.now(gym.zone).toLocalDate()) }; var duration by remember { mutableIntStateOf(0) }; var slots by remember { mutableStateOf<List<BookingSlot>>(emptyList()) }; var selected by remember { mutableStateOf<BookingStart?>(null) }; var loading by remember { mutableStateOf(true) }; var availabilityLoading by remember { mutableStateOf(false) }; var refreshing by remember { mutableStateOf(false) }; var availabilityRequestId by remember { mutableIntStateOf(0) }; var roomError by remember { mutableStateOf<String?>(null) }; var availabilityError by remember { mutableStateOf<String?>(null) }; var error by remember { mutableStateOf<String?>(null) }; var confirm by remember { mutableStateOf(false) }; var reserving by remember { mutableStateOf(false) }; var confirmedReservation by remember { mutableStateOf<BookingReservation?>(null) }; var pendingAttempt by remember { mutableStateOf<BookingAttempt?>(null) }
     var confirmingStart by remember { mutableStateOf<BookingStart?>(null) }
@@ -470,7 +491,7 @@ private fun BookingStatusBadge(status: String) {
                 selectedRoom = null
                 nextRoom?.let(::selectRoom)
             }
-            .onFailure { roomError = it.message ?: "No se pudieron cargar las salas." }
+            .onFailure { roomError = bookingErrorMessage(context, it) }
         loading = false
     }
     suspend fun refreshAvailability() {
@@ -491,7 +512,7 @@ private fun BookingStatusBadge(status: String) {
             .onFailure {
                 if (availabilityRequestId == requestId && selectedRoom?.id == room.id && selectedDate == requestedDate) {
                     slots = emptyList()
-                    availabilityError = it.message ?: "No se pudo cargar la disponibilidad."
+                    availabilityError = bookingErrorMessage(context, it)
                 }
             }
         if (availabilityRequestId == requestId) {
@@ -571,7 +592,7 @@ private fun BookingStatusBadge(status: String) {
                                 runCatching { api.reserve(room.id, start, attempt.key) }
                                     .onSuccess { reservation -> pendingAttempt = null; confirmedReservation = reservation; reserving = false; refreshAvailability() }
                                     .onFailure { failure ->
-                                        error = failure.message ?: "No se pudo confirmar la reserva."
+                                        error = bookingErrorMessage(context, failure)
                                         reserving = false
                                         if (isDefiniteBookingRejection(failure)) { pendingAttempt = null; refreshAvailability() }
                                     }
@@ -593,8 +614,8 @@ private fun BookingStatusBadge(status: String) {
                     .padding(bottom = if (selectedRoom != null) 76.dp else 0.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-            Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onBack) { Icon(Icons.Filled.Close, "Volver") }; Column { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.new_booking).uppercase(), fontSize = 22.sp, fontWeight = FontWeight.Black, color = WildforceThemeTokens.textPrimary); Text(gym.name, color = WildforceThemeTokens.textSecondary) } }
-            if (loading) Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } else if (roomError != null) BookingEmpty("No se pudieron cargar las salas", roomError!!, onRetry = { scope.launch { loadRooms() } }, icon = Icons.Filled.WarningAmber) else if (rooms.isEmpty()) BookingEmpty("No hay salas disponibles", "Este gimnasio no tiene salas abiertas para reservar.") else {
+            Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onBack) { Icon(Icons.Filled.Close, "Volver") }; Column { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_new_booking).uppercase(), fontSize = 22.sp, fontWeight = FontWeight.Black, color = WildforceThemeTokens.textPrimary); Text(gym.name, color = WildforceThemeTokens.textSecondary) } }
+            if (loading) Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } else if (roomError != null) BookingEmpty(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.couldn_t_load_the_rooms), roomError!!, onRetry = { scope.launch { loadRooms() } }, icon = Icons.Filled.WarningAmber) else if (rooms.isEmpty()) BookingEmpty("No hay salas disponibles", "Este gimnasio no tiene salas abiertas para reservar.") else {
                 BookingSection("DÍA") { LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(bookingWindowDays(ZonedDateTime.now(gym.zone).toLocalDate(), selectedRoom!!.windowDays)) { day -> BookingDayChoice(day, day == selectedDate, onClick = { selectedDate = day }) } } }
                 BookingSection("SALA") {
                     val showsImages = rooms.any { it.avatarUrl != null }
@@ -612,7 +633,7 @@ private fun BookingStatusBadge(status: String) {
                         onSelect = { duration = it; selected = refreshedBookingSelection(selected, slots, it); error = null },
                     )
                 }
-                BookingSection("HORAS DISPONIBLES") { when { availabilityError != null -> BookingEmpty("No se pudo cargar la disponibilidad", availabilityError!!, onRetry = { scope.launch { refreshAvailability() } }, icon = Icons.Filled.WarningAmber); availabilityLoading -> Box(Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }; starts.isEmpty() -> BookingEmpty("No hay horas disponibles", "Prueba otro día o una duración más corta."); else -> FlowTimes(starts, selected, gym.zone, locale, { selected = it; error = null }) } }
+                BookingSection("HORAS DISPONIBLES") { when { availabilityError != null -> BookingEmpty(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.couldn_t_load_availability), availabilityError!!, onRetry = { scope.launch { refreshAvailability() } }, icon = Icons.Filled.WarningAmber); availabilityLoading -> Box(Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }; starts.isEmpty() -> BookingEmpty("No hay horas disponibles", "Prueba otro día o una duración más corta."); else -> FlowTimes(starts, selected, gym.zone, locale, { selected = it; error = null }) } }
                  if (gym.zone != ZoneId.systemDefault()) {
                      Text(
                          "Las horas se muestran en la zona horaria del gimnasio (${gym.zone.id}).",
@@ -638,7 +659,7 @@ private fun BookingStatusBadge(status: String) {
                         disabledBackgroundColor = WildforceThemeTokens.textPrimary.copy(alpha = 0.12f),
                         disabledContentColor = WildforceThemeTokens.textSecondary,
                     ),
-                ) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_continue).uppercase(), fontWeight = FontWeight.Bold) }
+                ) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_key_continue).uppercase(), fontWeight = FontWeight.Bold) }
             }
             PullRefreshIndicator(refreshing, refreshState, Modifier.align(Alignment.TopCenter))
         }
@@ -661,8 +682,8 @@ private fun BookingConfirmationSheet(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            TextButton(enabled = !reserving, onClick = onCancel) { Text(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel)) }
-            Text(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.confirm_reservation), fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+            TextButton(enabled = !reserving, onClick = onCancel) { Text(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel)) }
+            Text(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_confirm_reservation), fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             Spacer(Modifier.width(64.dp))
         }
         Card(Modifier.fillMaxWidth(), backgroundColor = WildforceThemeTokens.backgroundSecondary, shape = RoundedCornerShape(14.dp)) {
@@ -689,7 +710,7 @@ private fun BookingConfirmationSheet(
             modifier = Modifier.fillMaxWidth().height(52.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.background),
         ) {
-            if (reserving) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.background, strokeWidth = 2.dp) else Text(if (error == null) stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.confirm_reservation).uppercase(locale) else stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry).uppercase(locale), fontWeight = FontWeight.Bold)
+            if (reserving) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.background, strokeWidth = 2.dp) else Text(if (error == null) stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_confirm_reservation).uppercase(locale) else stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_retry).uppercase(locale), fontWeight = FontWeight.Bold)
         }
     }
 }

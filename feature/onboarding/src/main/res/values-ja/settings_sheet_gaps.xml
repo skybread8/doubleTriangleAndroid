@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared Sheet labels with local fallbacks for untranslated cells. -->
+    <string name="settings_sheet_none">なし</string>
+    <string name="settings_sheet_join_your_gym">ジムに参加</string>
+    <string name="settings_sheet_live_progress">リアルタイムの進捗</string>
+    <string name="settings_sheet_enabled">有効</string>
+    <string name="settings_sheet_open_settings">設定を開く</string>
+    <string name="settings_sheet_watch_auto_tracking">ウォッチの自動記録</string>
+    <string name="settings_sheet_prevents_auto_lock_while_an_active_workout_is_open_">ワークアウト画面を開いている間は画面の自動ロックを防ぎます。</string>
+    <string name="settings_sheet_confirm_your_identity_to_turn_off_progress_photo_protection_">進捗写真の保護を解除するには本人確認を行ってください。</string>
+</resources>

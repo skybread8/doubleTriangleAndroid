@@ -12,6 +12,26 @@ import java.time.ZoneId
 
 class AnalyticsScreenTest {
     @Test
+    fun analyticsInsightsKeepLocalizedResourcesAndFormatArguments() {
+        val session = TrainingSessionHistoryEntry(timestampMillis = 1L, durationSeconds = 600, sets = 3, volumeKg = 200.0)
+        val insights = analyticsInsights(
+            AnalyticsData(listOf(session), emptyList(), emptyMap()),
+            currentStreak = 3,
+            longestStreak = 3,
+            timeframe = AnalyticsTimeframe.SevenDays,
+            plannedWorkoutCount = 2,
+            previousVolumeKg = null,
+        )
+        val streak = insights.first()
+        assertEquals(io.codepassion.doubletriangle.core.designsystem.R.string.you_ve_matched_your_best_streak, streak.titleResource)
+        assertEquals(io.codepassion.doubletriangle.core.designsystem.R.string._d_sessions_in_a_row_ties_your_longest_run_so_far_, streak.bodyResource)
+        assertEquals(listOf(3), streak.bodyArguments)
+        val plan = insights[1]
+        assertEquals(io.codepassion.doubletriangle.core.designsystem.R.string.you_completed__d_of__d_planned_sessions_in_this_period_, plan.bodyResource)
+        assertEquals(listOf(1, 2), plan.bodyArguments)
+    }
+
+    @Test
     fun longestStreakCountsConsecutiveUniqueTrainingDays() {
         fun session(daysAgo: Long) = TrainingSessionHistoryEntry(
             timestampMillis = LocalDate.now().minusDays(daysAgo).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Local fallbacks for entries absent from the read-only Sheet export. -->
+    <string name="___progress">Voortgang van %1$s</string>
+    <string name="___stimulus___d_of__d_sets">%1$s-stimulus: %2$d van %3$d sets</string>
+    <string name="_d_seconds_remaining">Nog %1$d seconden</string>
+    <string name="add_15_seconds">15 seconden toevoegen</string>
+    <string name="add_30_seconds">30 seconden toevoegen</string>
+    <string name="breakfast">Ontbijt</string>
+    <string name="check_in">Check-in</string>
+    <string name="continue_with_your_workout">Ga verder met je training</string>
+    <string name="dinner">Avondeten</string>
+    <string name="focus____">Focus: %1$s</string>
+    <string name="log_your_meals">Registreer je maaltijden</string>
+    <string name="lunch">Lunch</string>
+    <string name="mesocycle__d">Mesocyclus %1$d</string>
+    <string name="muscle_groups">Spiergroepen</string>
+    <string name="nutrition">Voeding</string>
+    <string name="pause">Pauzeren</string>
+    <string name="post_workout">Na de training</string>
+    <string name="pre_workout">Voor de training</string>
+    <string name="ready">Klaar</string>
+    <string name="remove">Verwijderen</string>
+    <string name="rest">Rust</string>
+    <string name="rest_complete">Rust voltooid</string>
+    <string name="shows_exercise_details_and_instructions">Toont trainingsdetails en instructies</string>
+    <string name="snack">Tussendoortje</string>
+    <string name="start">Start</string>
+    <string name="time_for_you_workout_">Tijd voor je training!</string>
+    <string name="week__d_of__d">Week %1$d van %2$d</string>
+    <string name="workouts">Trainingen</string>
+    <string name="you_still_have_meals_to_log_today_">Je hebt vandaag nog maaltijden om te registreren.</string>
+    <string name="you_still_need_to_log_____and____today_">Je moet vandaag %1$s en %2$s nog registreren.</string>
+    <string name="you_still_need_to_log____and____today_">Je moet vandaag %1$s en %2$s nog registreren.</string>
+    <string name="you_still_need_to_log____today_">Je moet vandaag %1$s nog registreren.</string>
+</resources>

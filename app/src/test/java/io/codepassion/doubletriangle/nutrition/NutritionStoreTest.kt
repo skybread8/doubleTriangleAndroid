@@ -1,5 +1,6 @@
 package io.codepassion.doubletriangle.nutrition
 
+import io.codepassion.doubletriangle.core.designsystem.R as DesignR
 import io.codepassion.doubletriangle.feature.onboarding.FitnessGoal
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.BodyCompositionPhase
@@ -12,6 +13,17 @@ import java.time.Instant
 import java.time.ZoneId
 
 class NutritionStoreTest {
+    @Test
+    fun `dietary style presentation localizes known synced values without changing custom values`() {
+        assertEquals(DesignR.string.ui_sheet_standard, dietaryStyleResource("Omnívora"))
+        assertEquals(DesignR.string.ui_sheet_standard, dietaryStyleResource("standard"))
+        assertEquals(DesignR.string.ui_sheet_vegetarian, dietaryStyleResource("vegetarian"))
+        assertEquals(DesignR.string.ui_sheet_vegan, dietaryStyleResource("Vegana"))
+        assertEquals(DesignR.string.ui_sheet_pescatarian, dietaryStyleResource("pescatarian"))
+        assertEquals(null, dietaryStyleResource("custom diet"))
+        assertEquals("standard", dietaryStyleSyncValue("Omnívora"))
+    }
+
     private val monday = LocalDate.of(2026, 8, 24)
 
     @Test
@@ -74,6 +86,21 @@ class NutritionStoreTest {
         assertEquals(created.toString(), nutritionLogTimestamp(monday, null, created.toEpochMilli(), zone))
         assertEquals(monday, nutritionLogDate(nutritionLogTimestamp(monday, null, 1L, zone), zone))
         assertEquals(monday, nutritionLogDate("2026-08-24", zone))
+    }
+
+    @Test
+    fun `editing meal time overrides remote timestamp and preserves entry metadata`() {
+        val original = MealLog(1, "Lunch", 400, 20, 40, 10, loggedDate = monday,
+            loggedAt = Instant.parse("2026-08-24T08:00:00Z"), isBookmarked = true,
+            photoPath = "photo.jpg", plannedMealKey = "planned-lunch")
+        val changed = original.copy(loggedDate = monday.plusDays(1), loggedAt = Instant.parse("2026-08-25T15:30:00Z"))
+        val saved = normalizeSavedMeal(changed, monday, null, original)
+        assertEquals(monday.plusDays(1), saved.loggedDate)
+        assertEquals("2026-08-25T15:30:00Z", nutritionLogTimestampForMeal(saved, "2026-08-24T08:00:00Z", ZoneId.of("UTC")))
+        assertEquals(original.id, saved.id)
+        assertEquals(original.photoPath, saved.photoPath)
+        assertEquals(original.isBookmarked, saved.isBookmarked)
+        assertEquals(original.plannedMealKey, saved.plannedMealKey)
     }
 
     @Test

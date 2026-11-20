@@ -6,6 +6,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.annotation.SuppressLint
 import android.util.Log
+import io.codepassion.doubletriangle.nutrition.nutritionLogTimestampForMeal
+import io.codepassion.doubletriangle.feature.onboarding.activeCustomWorkoutFocuses
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.BodyCompositionPhase
 import io.codepassion.doubletriangle.feature.onboarding.Equipment
@@ -37,6 +39,7 @@ import io.codepassion.doubletriangle.nutrition.cookingEffortSyncValue
 import io.codepassion.doubletriangle.nutrition.dietaryStyleSyncValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -82,7 +85,7 @@ internal object WorkoutRemoteSync {
     /** Same ordered resource set used by iOS's WildforceSync. */
     private val batchResources = listOf(
         "users", "user-app-settings", "subscriptions", "training-preferences", "training-locations",
-        "body-metric-entries", "body-progress-photo-sessions", "exercise-profiles", "nutrition-profiles",
+        "body-metric-entries", "body-progress-photo-sessions", "check-ins", "exercise-profiles", "nutrition-profiles",
         "workout-plans", "workout-days", "workout-blocks", "planned-exercises", "exercise-results",
         "coach-exercise-content", "coach-exercises", "nutrition-plans", "nutrition-days", "nutrition-meals",
         // iOS intentionally keeps nutrition-log-media out of pull batches:
@@ -90,6 +93,44 @@ internal object WorkoutRemoteSync {
         // of the binary bytes.
         "nutrition-log-entries", "nutrition-log-items",
     )
+    private val historyResources = setOf("body-metric-entries", "exercise-results", "nutrition-log-entries", "nutrition-log-items")
+    private const val historyDownloadedKey = "history_downloaded"
+
+    fun isHistoryDownloaded(context: Context): Boolean {
+        val state = context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
+        return state.getBoolean(historyDownloadedKey, false) || historyResources.all { state.contains("$pullWatermarkPrefix$it") }
+    }
+
+    /** iOS downloads the growing history after the essential initial sync. */
+    suspend fun downloadHistory(context: Context, profile: OnboardingProfile, preferences: SharedPreferences, onProgress: suspend (Float) -> Unit): Outcome = synchronizationMutex.withLock {
+        withContext(Dispatchers.IO) {
+            val account = context.getSharedPreferences(accountPrefs, Context.MODE_PRIVATE)
+            val token = account.getString("token", null) ?: return@withContext Outcome.NoAccount
+            val userId = account.getString("id", null) ?: return@withContext Outcome.NoAccount
+            try {
+                val state = context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
+                if (!state.getBoolean("nutrition_history_full_pull_v1:$userId", false)) {
+                    state.edit().remove("${pullWatermarkPrefix}nutrition-log-entries")
+                        .remove("${pullWatermarkPrefix}nutrition-log-items").apply()
+                }
+                val remote = pullRemoteSnapshot(context, token, onProgress, historyResources).materialize(context)
+                val dirty = RemoteSyncChangeTracker.dirty(context)
+                if (dirty.none { it in workoutResources }) pullWorkoutPlans(context, remote, preferences, false)
+                pullRemoteNutrition(context, token, remote, dirty)
+                if ("body-metric-entries" !in dirty) pullRemoteBodyMetrics(context, remote.records("body-metric-entries"), profile.heightCm)
+                remote.savePullWatermarks(context)
+                context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE).edit()
+                    .putBoolean(historyDownloadedKey, true)
+                    .putBoolean("nutrition_history_full_pull_v1:$userId", true).apply()
+                Outcome.Synchronized()
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                Log.w("WorkoutRemoteSync", "History download failed", error)
+                if (error is SubscriptionRequiredException) Outcome.SubscriptionRequired else Outcome.Failed(error.message)
+            }
+        }
+    }
+
     private val pushableResources = setOf(
         "users", "user-app-settings", "training-preferences", "training-locations",
         "body-metric-entries", "body-progress-photo-sessions", "exercise-profiles", "nutrition-profiles",
@@ -164,6 +205,62 @@ internal object WorkoutRemoteSync {
         ) : Outcome
     }
 
+    /** Mirrors iOS: duplicate the day, then pull its graph without pushing local changes. */
+    suspend fun duplicateWorkoutDay(context: Context, preferences: SharedPreferences, workoutId: String, idempotencyKey: String): io.codepassion.doubletriangle.core.model.WorkoutDaySummary = synchronizationMutex.withLock {
+        withContext(Dispatchers.IO) {
+            val token = context.getSharedPreferences(accountPrefs, Context.MODE_PRIVATE).getString("token", null)
+                ?: error("No account")
+            val persistedId = if (isUuid(workoutId)) workoutId else {
+                val plan = preferences.getString("workout_plan_json", null)?.let { runCatching { JSONObject(it) }.getOrNull() }
+                val planId = plan?.opt("planId")?.let(WorkoutPlanGenerator::normalizeNullableString) ?: preferences.getString(planKey, null)
+                val days = plan?.optJSONArray("workouts")
+                val isPlanDay = days != null && (0 until days.length()).any { days.optJSONObject(it)?.optString("id") == workoutId }
+                require(isPlanDay && !planId.isNullOrBlank()) { "Workout has not been synchronized" }
+                stableId("$planId:$workoutId")
+            }
+            duplicateThenPull(idempotencyKey, create = { key ->
+            val connection = (URL(WildforceApiEnvironment.apiUrl("workout/days/$persistedId/duplicate")).openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                connectTimeout = 20_000
+                readTimeout = 30_000
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("Authorization", "Bearer $token")
+                setRequestProperty("Idempotency-Key", key)
+            }
+            try {
+                val code = connection.responseCode
+                val stream = if (code in 200..299) connection.inputStream else connection.errorStream
+                val body = stream?.bufferedReader()?.use { it.readText() }.orEmpty()
+                if (code !in 200..299) throw apiException(body, "Couldn't duplicate workout")
+                JSONObject(body).getJSONObject("data").getString("id").also { require(isUuid(it)) }
+            } finally { connection.disconnect() }
+            }, pull = { duplicateId ->
+            var graph: RemoteSnapshot? = null
+            listOf("workout-days", "workout-blocks", "planned-exercises").forEach { resource ->
+                graph = pullRemoteSnapshot(context, token, {}, setOf(resource)).materialize(context)
+            }
+            val days = pullRemoteWorkoutDays(requireNotNull(graph))
+            val duplicate = (0 until days.length()).mapNotNull(days::optJSONObject)
+                .firstOrNull { it.optString("id").equals(duplicateId, true) }
+                ?: error("Duplicated workout was not returned by sync")
+            // Reuse the existing graph parser without attaching this day to a real plan.
+            val temporaryPlan = UUID.randomUUID().toString()
+            val isolatedDay = JSONObject(duplicate.toString()).put("workout_plan_id", temporaryPlan)
+            val plan = remotePlanJson(context, JSONObject(), temporaryPlan, JSONArray().put(isolatedDay))
+                ?: error("Couldn't load duplicated workout")
+            val parsed = WorkoutPlanGenerator.parse(plan.rawJson, "", "").workouts.single()
+            val result = parsed.copy(
+                dayType = WorkoutPlanGenerator.normalizeNullableString(duplicate.opt("day_type")).orEmpty(),
+                createdAt = WorkoutPlanGenerator.normalizeNullableString(duplicate.opt("created_at")),
+                estimatedMinutes = if (duplicate.isNull("estimated_duration_minutes")) parsed.estimatedMinutes else duplicate.optInt("estimated_duration_minutes"),
+            )
+            io.codepassion.doubletriangle.feature.workout.CustomWorkoutStore.save(context, result)
+            // Do not advance shared cursors: unrelated rows still need their normal import.
+            result
+            })
+        }
+    }
+
     /** Records completed-session omissions until the corresponding plan graph has uploaded them. */
     fun recordSkippedExercises(context: Context, workoutId: String, exerciseIndices: Set<Int>) {
         if (exerciseIndices.isEmpty()) return
@@ -182,6 +279,7 @@ internal object WorkoutRemoteSync {
         profile: OnboardingProfile,
         preferences: SharedPreferences,
         resourcesOnly: Set<String>? = null,
+        hydrateMedia: Boolean = true,
         onPullProgress: suspend (Float) -> Unit = {},
     ): Outcome = synchronizationMutex.withLock {
         withContext(Dispatchers.IO) {
@@ -207,7 +305,8 @@ internal object WorkoutRemoteSync {
             val profileMigrationKey = "exercise_profiles_uploaded_v2:$userId"
             val syncState = context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
             val nutritionHistoryRepairKey = "nutrition_history_full_pull_v1:$userId"
-            val needsNutritionHistoryRepair = !syncState.getBoolean(nutritionHistoryRepairKey, false)
+            val historyReady = isHistoryDownloaded(context)
+            val needsNutritionHistoryRepair = historyReady && !syncState.getBoolean(nutritionHistoryRepairKey, false)
             if (needsNutritionHistoryRepair) {
                 // Earlier versions could advance the cursor with an incomplete
                 // projection. Re-fetch history once and merge it with the local
@@ -219,7 +318,6 @@ internal object WorkoutRemoteSync {
                 && "exercise-profiles" !in RemoteSyncChangeTracker.dirty(context)) {
                 RemoteSyncChangeTracker.mark(context, "exercise-profiles")
             }
-            val shouldImportRemoteSnapshot = importingExistingAccount || preferences.getString("workout_plan_json", null).isNullOrBlank()
             // Match iOS: every synchronization pulls first and then pushes local
             // changes. Keep the local projection in memory while pulling so a
             // pending Android edit is not replaced before it is uploaded.
@@ -238,7 +336,7 @@ internal object WorkoutRemoteSync {
                 // graph. Materialize Android's incremental pages the same way;
                 // treating a delta as a full snapshot was the root cause of
                 // incomplete nutrition/profile imports after the first sync.
-                val remote = pullRemoteSnapshot(context, token, onPullProgress).materialize(context)
+                val remote = pullRemoteSnapshot(context, token, onPullProgress, if (historyReady) batchResources.toSet() else batchResources.toSet() - historyResources).materialize(context)
                 val failedPullResources = mutableSetOf<String>()
                 fun apply(vararg resources: String, block: () -> Unit) {
                     runCatching(block).onFailure {
@@ -260,13 +358,13 @@ internal object WorkoutRemoteSync {
                     importedRemotePlan = pullWorkoutPlans(context, remote, preferences, !pendingWorkoutChanges)
                 }
                 apply("nutrition-profiles", "nutrition-plans", "nutrition-days", "nutrition-meals", "nutrition-log-entries", "nutrition-log-items") {
-                    pullRemoteNutrition(context, token, remote, resourcesToPush)
+                    pullRemoteNutrition(context, token, remote, if (historyReady) resourcesToPush else resourcesToPush + nutritionLogResources, hydrateMedia)
                 }
                 // Older Android builds could save food without leaving a dirty
                 // marker. Recover local rows absent from the server after the
                 // remote graph has been merged, including server tombstones in
                 // the comparison so deleted entries are never resurrected.
-                if (!importingExistingAccount && resourcesOnly == null && failedPullResources.none { it in nutritionLogResources }) {
+                if (historyReady && !importingExistingAccount && resourcesOnly == null && failedPullResources.none { it in nutritionLogResources }) {
                     val serverIds = (0 until remote.records("nutrition-log-entries").length()).mapNotNull {
                         remote.records("nutrition-log-entries").optJSONObject(it)?.optString("id")?.lowercase()
                     }.toSet()
@@ -280,17 +378,19 @@ internal object WorkoutRemoteSync {
                         resourcesToPush.addAll(nutritionLogResources)
                     }
                 }
-                if ("body-metric-entries" !in resourcesToPush) {
+                if (historyReady && "body-metric-entries" !in resourcesToPush) {
                     apply("body-metric-entries") {
                         pullRemoteBodyMetrics(context, remote.records("body-metric-entries"), (remoteProfile ?: profile).heightCm)
                     }
                 }
                 var importedHealthConnectEnabled: Boolean? = null
-                apply("user-app-settings") {
-                    importedHealthConnectEnabled = pullRemoteAppSettings(context, remote)
+                if (importingExistingAccount || "user-app-settings" !in dirtyResources(context, preferences, false)) {
+                    apply("user-app-settings") {
+                        importedHealthConnectEnabled = pullRemoteAppSettings(context, remote)
+                    }
                 }
-                remoteProfile = remoteProfile?.let { imported ->
-                    importedHealthConnectEnabled?.let { imported.copy(isHealthConnectEnabled = it) } ?: imported
+                importedHealthConnectEnabled?.let { enabled ->
+                    remoteProfile = (remoteProfile ?: profile).copy(isHealthConnectEnabled = enabled)
                 }
                 // iOS pulls media on every synchronization. The local store
                 // de-duplicates sessions, so this also restores progress photos
@@ -298,16 +398,16 @@ internal object WorkoutRemoteSync {
                 // A local capture/deletion has the same precedence as an iOS
                 // SwiftData dirty object. Do not rehydrate the previous remote
                 // session over it before the outbound tombstone/upload.
-                if ("body-progress-photo-sessions" !in resourcesToPush) {
-                    pullRemoteMedia(context, token, remote.records("body-progress-photo-sessions"))
+                if (hydrateMedia && "body-progress-photo-sessions" !in resourcesToPush) {
+                    pullRemoteMedia(context, token, userId, remote.records("body-progress-photo-sessions"))
                 }
-                if ("training-locations" !in resourcesToPush) {
+                if (hydrateMedia && "training-locations" !in resourcesToPush) {
                     pullRemoteTrainingLocationPhotos(context, token, remote.records("training-locations"))
                 }
                 // Avatars are stored outside the sync graph on both platforms.
                 // iOS resolves the public avatar path when rendering Profile;
                 // hydrate it before Android renders the imported profile too.
-                pullRemoteAvatar(context, token, userId)
+                if (hydrateMedia) pullRemoteAvatar(context, token, userId)
                 // iOS advances each pull watermark only after every record in
                 // this page set has been applied locally. Do that before the
                 // outbound pass: a later push failure must not re-fetch and
@@ -316,8 +416,8 @@ internal object WorkoutRemoteSync {
                 if (needsNutritionHistoryRepair && failedPullResources.none { it in nutritionLogResources }) {
                     syncState.edit().putBoolean(nutritionHistoryRepairKey, true).apply()
                 }
-                if (shouldImportRemoteSnapshot && failedPullResources.isEmpty()) {
-                    preferences.edit().remove("remote_sync_import_required").apply()
+                if (failedPullResources.isNotEmpty()) {
+                    error("No se pudieron importar todos los datos. Vuelve a intentarlo.")
                 }
                 if (pendingWorkoutChanges && pendingPlanJson != null) {
                     preferences.edit().putString("workout_plan_json", pendingPlanJson)
@@ -353,7 +453,7 @@ internal object WorkoutRemoteSync {
                 .put("preferred_workout_duration_minutes", profileToSync.preferredWorkoutDurationMinutes)
                 .put("workout_planner_notes", profileToSync.workoutPlannerNotes)
                 .put("workout_days", JSONArray(profileToSync.workoutDays.map { it.storedValue }))
-                .put("custom_workout_focuses", JSONObject(profileToSync.customWorkoutFocuses.mapKeys { it.key.storedValue }.mapValues { it.value.storedValue }))
+                .put("custom_workout_focuses", JSONObject(profileToSync.activeCustomWorkoutFocuses.mapKeys { it.key.storedValue }.mapValues { it.value.storedValue }))
                 .put("movement_restrictions", JSONArray(profileToSync.movementRestrictions.map { it.storedValue }))
                 .put("body_composition_phase", profileToSync.bodyCompositionPhase?.storedValue ?: JSONObject.NULL)
                 .put("skips_warmups", profileToSync.skipsWarmups).put("skips_cooldowns", profileToSync.skipsCooldowns).put("skips_rest_periods", profileToSync.skipsRestPeriods)))
@@ -396,21 +496,30 @@ internal object WorkoutRemoteSync {
                 .put("has_rated_app", detailPrefs.getBoolean("has_rated_app", false))))
             val bodyMetrics = context.getSharedPreferences("wildforce_body_metrics", Context.MODE_PRIVATE).getString("history", "[]") ?: "[]"
             val metricRecords = JSONArray(); val metrics = JSONArray(bodyMetrics)
-            fun addMetric(date: String, type: String, value: Double, range: ClosedFloatingPointRange<Double>, source: String) {
+            fun addMetric(metric: JSONObject, type: String, value: Double, range: ClosedFloatingPointRange<Double>) {
+                val date = metric.optString("date")
                 if (date.isBlank() || !value.isFinite() || value !in range) return
-                metricRecords.put(record(stableId("$userId:$type:$date"), now)
-                    .put("type", type).put("value", value).put("recorded_at", "${date}T12:00:00Z").put("source", source))
+                val storedId = metric.optString("id").takeIf(::isUuid)
+                val recordedAt = metric.optString("recordedAt").takeIf { runCatching { java.time.Instant.parse(it) }.isSuccess }
+                    ?: "${date}T12:00:00Z"
+                val createdAt = metric.optString("createdAt").takeIf { runCatching { java.time.Instant.parse(it) }.isSuccess } ?: recordedAt
+                metricRecords.put(record(storedId ?: stableId("$userId:$type:$date"), now)
+                    .put("created_at", createdAt)
+                    .put("type", type).put("value", value).put("recorded_at", recordedAt)
+                    .put("source", metric.optString("source", "manual").let { if (it == "healthConnect") "manual" else it })
+                    .apply { metric.optString("checkInId").takeIf(::isUuid)?.let { put("check_in_id", it) } })
             }
             for (index in 0 until metrics.length()) {
                 val metric = metrics.optJSONObject(index) ?: continue
-                val date = metric.optString("date")
-                val source = metric.optString("source", "manual")
-                addMetric(date, "weight", metric.optDouble("weightKg", Double.NaN), 20.0..400.0, source)
-                addMetric(date, "leanBodyMass", metric.optionalDouble("leanBodyMassKg"), 1.0..300.0, source)
-                addMetric(date, "bodyFatPercentage", metric.optionalDouble("bodyFatPercentage"), 1.0..90.0, source)
-                addMetric(date, "waistCircumference", metric.optionalDouble("waistCm"), 20.0..300.0, source)
-                addMetric(date, "neckCircumference", metric.optionalDouble("neckCm"), 20.0..300.0, source)
-                addMetric(date, "hipCircumference", metric.optionalDouble("hipCm"), 20.0..300.0, source)
+                addMetric(metric, "weight", metric.optDouble("weightKg", Double.NaN), Double.MIN_VALUE..Double.MAX_VALUE)
+                addMetric(metric, "leanBodyMass", metric.optionalDouble("leanBodyMassKg"), Double.MIN_VALUE..Double.MAX_VALUE)
+                addMetric(metric, "bodyFatPercentage", metric.optionalDouble("bodyFatPercentage"), Double.MIN_VALUE..Double.MAX_VALUE)
+                addMetric(metric, "waistCircumference", metric.optionalDouble("waistCm"), Double.MIN_VALUE..Double.MAX_VALUE)
+                addMetric(metric, "neckCircumference", metric.optionalDouble("neckCm"), Double.MIN_VALUE..Double.MAX_VALUE)
+                addMetric(metric, "hipCircumference", metric.optionalDouble("hipCm"), Double.MIN_VALUE..Double.MAX_VALUE)
+                addMetric(metric, "chestCircumference", metric.optionalDouble("chestCm"), Double.MIN_VALUE..Double.MAX_VALUE)
+                addMetric(metric, "thighCircumference", metric.optionalDouble("thighCm"), Double.MIN_VALUE..Double.MAX_VALUE)
+                addMetric(metric, "armCircumference", metric.optionalDouble("armCm"), Double.MIN_VALUE..Double.MAX_VALUE)
             }
             push(token, "body-metric-entries", metricRecords)
             synchronizeAvatar(context, token)
@@ -464,6 +573,12 @@ internal object WorkoutRemoteSync {
             activePushGenerations = emptyMap()
             activePushContext = null
             }
+            if (resourcesOnly == null) {
+                synchronizeCheckInMetrics(context, token, userId)
+                synchronizeCheckInPhotos(context, token, userId)
+                synchronizeCheckInDrafts(context, token, userId)
+            }
+            if (importingExistingAccount) preferences.edit().remove("remote_sync_import_required").apply()
             Outcome.Synchronized(safeImportedProfile())
         } catch (error: Exception) {
             activePushResources = emptySet()
@@ -474,6 +589,94 @@ internal object WorkoutRemoteSync {
             if (error is SubscriptionRequiredException) Outcome.SubscriptionRequired
             else Outcome.Failed(error.message, importedRemotePlan, safeImportedProfile())
         }
+        }
+    }
+
+    private fun synchronizeCheckInMetrics(context: Context, token: String, userId: String) {
+        for (row in CheckInAssets.metrics(context, userId).filter { it.optBoolean("pending") }) {
+            checkCheckInAssetMaySync(context, row.getString("check_in_id"), row.getString("updated_at"))
+            val payload = JSONObject(row.toString()).apply { remove("version"); remove("pending") }
+            val returned = pushBatchWithResponse(token, "body-metric-entries", JSONArray().put(payload))
+                .optJSONArray("data")?.optJSONObject(0) ?: error("No se confirmó la medida del check-in.")
+            check(returned.optString("id").equals(payload.optString("id"), true) && returned.optString("check_in_id").equals(payload.optString("check_in_id"), true) &&
+                returned.optString("type") == payload.optString("type") && returned.optDouble("value") == payload.optDouble("value") &&
+                returned.isNull("deleted_at") == payload.isNull("deleted_at") &&
+                java.time.Instant.parse(returned.getString("updated_at")) == java.time.Instant.parse(payload.getString("updated_at"))) {
+                "La medida cambió en otro dispositivo."
+            }
+            CheckInAssets.acknowledge(context, userId, row)
+        }
+    }
+
+    private fun synchronizeCheckInPhotos(context: Context, token: String, userId: String) {
+        for (row in CheckInAssets.photos(context, userId).filter { it.optBoolean("pending") }) {
+            checkCheckInAssetMaySync(context, row.getString("check_in_id"), row.getString("updated_at"))
+            val payload = JSONObject().apply {
+                listOf("id", "created_at", "updated_at", "deleted_at", "check_in_id").forEach { put(it, row.opt(it)) }
+            }
+            val returned = pushBatchWithResponse(token, "body-progress-photo-sessions", JSONArray().put(payload))
+                .optJSONArray("data")?.optJSONObject(0) ?: error("No se confirmó la sesión de fotos.")
+            check(returned.optString("id").equals(payload.optString("id"), true) && returned.isNull("deleted_at") &&
+                returned.optString("check_in_id").equals(payload.optString("check_in_id"), true)) {
+                "Las fotos cambiaron en otro dispositivo."
+            }
+            for (angle in listOf("front", "profile", "back")) {
+                val path = row.optString(angle).takeIf { it.isNotBlank() } ?: continue
+                val file = File(path)
+                check(file.isFile) { "Falta una foto del check-in." }
+                uploadImage(token, WildforceApiEnvironment.apiUrl("body-progress-photo-sessions/${row.getString("id")}/photos/$angle"), file, "image/jpeg")
+            }
+            CheckInAssets.acknowledgePhoto(context, userId, row)
+        }
+    }
+
+    private fun checkCheckInAssetMaySync(context: Context, id: String, updatedAt: String) {
+        val state = context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
+        val records = JSONArray(state.getString("remote_projection:check-ins", "[]") ?: "[]")
+        val record = (0 until records.length()).mapNotNull { records.optJSONObject(it) }
+            .firstOrNull { it.optString("id").equals(id, true) }
+        val submittedAt = record?.optString("submitted_at")?.takeUnless { it.isBlank() || it == "null" }
+            ?.let { java.time.Instant.parse(it) }
+        check(record != null && (record.optString("status") != "submitted" || submittedAt != null) &&
+            maySyncCheckInAsset(!record.isNull("deleted_at"), submittedAt, java.time.Instant.parse(updatedAt))) {
+            "El check-in ya no se puede editar; se conservarán los cambios locales."
+        }
+    }
+
+    /** Upload check-ins after body metrics and photo sessions, never discarding a newer local edit. */
+    private fun synchronizeCheckInDrafts(context: Context, token: String, userId: String) {
+        val state = context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
+        for (item in CheckInDraftStore.pending(context, userId)) {
+            val payload = item.getJSONObject("payload")
+            val id = payload.getString("id")
+            val cached = JSONArray(state.getString("remote_projection:check-ins", "[]") ?: "[]")
+            val server = (0 until cached.length()).mapNotNull { cached.optJSONObject(it) }
+                .firstOrNull { it.optString("id").equals(id, ignoreCase = true) }
+                ?: error("Check-in no disponible; se conservará el borrador.")
+            if (server.optString("status") == "submitted" && payload.optString("status") == "submitted" &&
+                checkInJsonEquivalent(server.opt("answers"), payload.opt("answers"))) {
+                CheckInDraftStore.acknowledge(context, userId, id, item.getString("version"))
+                continue
+            }
+            check(server.isNull("deleted_at") && server.optString("status") != "submitted") {
+                "El check-in ya no se puede editar; se conservará el borrador."
+            }
+            val response = pushBatchWithResponse(token, "check-ins", JSONArray().put(payload))
+            val returned = response.optJSONArray("data")?.optJSONObject(0)
+                ?: error("No se recibió la confirmación del check-in.")
+            check(checkInWriteAcknowledged(id, returned.optString("id"),
+                java.time.Instant.parse(payload.getString("updated_at")), java.time.Instant.parse(returned.getString("updated_at")),
+                returned.optString("status") == payload.optString("status") && checkInJsonEquivalent(returned.opt("answers"), payload.opt("answers")))) {
+                "El check-in cambió en otro dispositivo; se conservará el borrador."
+            }
+            val updated = JSONArray().apply {
+                for (index in 0 until cached.length()) {
+                    val row = cached.optJSONObject(index) ?: continue
+                    put(if (row.optString("id").equals(id, ignoreCase = true)) returned else row)
+                }
+            }
+            check(state.edit().putString("remote_projection:check-ins", updated.toString()).commit())
+            CheckInDraftStore.acknowledge(context, userId, id, item.getString("version"))
         }
     }
 
@@ -488,7 +691,7 @@ internal object WorkoutRemoteSync {
             local.copy(
                 name = user.optString("name", local.name).ifBlank { local.name },
                 heightCm = user.optInt("height", user.optInt("height_cm", local.heightCm)).takeIf { it in 120..230 } ?: local.heightCm,
-                weightKg = user.optDouble("weight", user.optDouble("weight_kg", local.weightKg)).takeIf { it.isFinite() && it in 35.0..250.0 } ?: local.weightKg,
+                weightKg = user.optDouble("weight", user.optDouble("weight_kg", local.weightKg)).takeIf { it.isFinite() && it > 0.0 } ?: local.weightKg,
                 birthYear = user.optString("birth_date").take(4).toIntOrNull()?.coerceIn(1920, java.time.Year.now().value) ?: local.birthYear,
                 birthMonth = user.optString("birth_date").drop(5).take(2).toIntOrNull()?.coerceIn(1, 12) ?: local.birthMonth,
                 birthDay = user.optString("birth_date").drop(8).take(2).toIntOrNull()?.coerceIn(1, 31) ?: local.birthDay,
@@ -501,7 +704,7 @@ internal object WorkoutRemoteSync {
                 appLanguage = user.optString("language", local.appLanguage).ifBlank { local.appLanguage },
             )
         } ?: local
-        val preferences = remote.records("training-preferences").firstLiveRecord() ?: return remoteUser?.let { userProfile }
+        val preferences = remote.records("training-preferences").firstLiveRecord()
         val remoteLocations = remote.records("training-locations").liveRecords()
             .sortedBy { it.optInt("sort_order", Int.MAX_VALUE) }
         val locations = remoteLocations.mapIndexed { index, location ->
@@ -522,6 +725,13 @@ internal object WorkoutRemoteSync {
         if (locationIds.isNotEmpty()) {
             context.getSharedPreferences("wildforce_remote_sync", Context.MODE_PRIVATE).edit()
                 .putString("training_location_ids", JSONArray(locationIds).toString()).apply()
+        }
+        if (preferences == null) {
+            if (remoteUser == null && locations.isEmpty()) return null
+            return userProfile.copy(
+                trainingLocations = locations.ifEmpty { userProfile.trainingLocations },
+                availableEquipment = locations.firstOrNull { it.isDefault }?.equipment ?: userProfile.availableEquipment,
+            )
         }
         val focuses = preferences.optJSONObject("custom_workout_focuses")?.let { objectValue ->
             WorkoutWeekday.entries.mapNotNull { day ->
@@ -599,6 +809,9 @@ internal object WorkoutRemoteSync {
             }.sorted()
         }.orEmpty()
         val preferences = context.getSharedPreferences(syncPrefs, Context.MODE_PRIVATE)
+        response.optJSONArray("data")?.toString()?.let { coaches ->
+            if (preferences.getString("coach_summaries", null) != coaches) preferences.edit().putString("coach_summaries", coaches).apply()
+        }
         val previous = preferences.getStringSet(coachIDsKey, null)?.sorted()
         val projectionRepairKey = "coach_content_projection_repaired_v1"
         if (previous == ids && preferences.getBoolean(projectionRepairKey, false)) return
@@ -672,6 +885,7 @@ internal object WorkoutRemoteSync {
         token: String,
         remote: RemoteSnapshot,
         pendingLocalResources: Set<String>,
+        hydrateMedia: Boolean = true,
     ) {
         // `/sync/pull` is a flat-resource API. Hydrate the plan graph before
         // passing it to the store, which otherwise expects the legacy nested
@@ -707,7 +921,7 @@ internal object WorkoutRemoteSync {
             rememberImportedPushBaseline(context, "nutrition-log-items", items)
         }
         rememberRemoteNutritionIDs(context, entries, items, knownLocalIds)
-        if (pendingLocalResources.none { it in nutritionLogResources }) pullRemoteNutritionMedia(context, token, entries, knownLocalIds)
+        if (hydrateMedia && pendingLocalResources.none { it in nutritionLogResources }) pullRemoteNutritionMedia(context, token, entries, knownLocalIds)
     }
 
     private fun rememberImportedPushBaseline(context: Context, resource: String, records: JSONArray) {
@@ -844,57 +1058,113 @@ internal object WorkoutRemoteSync {
 
     /** Restores every body-metric type exposed by iOS, in canonical metric units. */
     private fun pullRemoteBodyMetrics(context: Context, remote: JSONArray, fallbackHeightCm: Int) {
-        val metricPreferences = context.getSharedPreferences("wildforce_body_metrics", Context.MODE_PRIVATE)
-        val stored = metricPreferences
-            .getString("history", "[]")?.let(::JSONArray) ?: JSONArray()
-        val byDate = linkedMapOf<String, JSONObject>()
+        val prefs = context.getSharedPreferences("wildforce_body_metrics", Context.MODE_PRIVATE)
+        val stored = prefs.getString("history", "[]")?.let(::JSONArray) ?: JSONArray()
+        val userId = context.getSharedPreferences(accountPrefs, Context.MODE_PRIVATE).getString("id", null) ?: return
+        val fields = linkedMapOf(
+            "weight" to "weightKg", "leanBodyMass" to "leanBodyMassKg", "bodyFatPercentage" to "bodyFatPercentage",
+            "waistCircumference" to "waistCm", "neckCircumference" to "neckCm", "hipCircumference" to "hipCm",
+            "chestCircumference" to "chestCm", "thighCircumference" to "thighCm", "armCircumference" to "armCm",
+        )
+        val rows = linkedMapOf<String, JSONObject>()
+        val legacyIds = mutableSetOf<String>()
         for (index in 0 until stored.length()) {
             val entry = stored.optJSONObject(index) ?: continue
-            entry.optString("date").takeIf(String::isNotBlank)?.let { byDate[it] = JSONObject(entry.toString()) }
-        }
-        for (index in 0 until remote.length()) {
-            val entry = remote.optJSONObject(index) ?: continue
-            if (!entry.isNull("deleted_at")) continue
-            val date = entry.optString("recorded_at").take(10)
-            val value = entry.optDouble("value", Double.NaN)
-            if (date.isBlank() || !value.isFinite()) continue
-            val target = byDate.getOrPut(date) {
-                JSONObject().put("date", date).put("heightCm", fallbackHeightCm.toDouble())
-            }
-            target.put("source", entry.optString("source", target.optString("source", "manual")))
-            when (entry.optString("type")) {
-                "weight" -> if (value in 20.0..400.0) target.put("weightKg", value)
-                "leanBodyMass" -> if (value in 1.0..300.0) target.put("leanBodyMassKg", value)
-                "bodyFatPercentage" -> if (value in 1.0..90.0) target.put("bodyFatPercentage", value)
-                "waistCircumference" -> if (value in 20.0..300.0) target.put("waistCm", value)
-                "neckCircumference" -> if (value in 20.0..300.0) target.put("neckCm", value)
-                "hipCircumference" -> if (value in 20.0..300.0) target.put("hipCm", value)
-            }
-        }
-        val history = JSONArray()
-        byDate.toSortedMap().values.forEach { history.put(it) }
-        if (history.length() > 0) {
-            metricPreferences.edit().putString("history", history.toString()).apply()
-            // The body section reads its circumference card from this compact
-            // profile store. Mirror the newest remote values into it so the
-            // imported iOS measurements are visible immediately, not just
-            // retained in background history.
-            val latest = history.optJSONObject(history.length() - 1)
-            if (latest != null) {
-                val details = context.getSharedPreferences("wildforce_profile_details", Context.MODE_PRIVATE)
-                val current = details.getString("body_composition", "{}")?.let(::JSONObject) ?: JSONObject()
-                fun copyMeasurement(localKey: String) {
-                    if (!latest.isNull(localKey)) current.put(localKey, latest.optDouble(localKey))
+            val date = entry.optString("date").takeIf(String::isNotBlank) ?: continue
+            val existingId = entry.optString("id").takeIf(::isUuid)
+            if (existingId != null) {
+                rows[existingId.lowercase()] = JSONObject(entry.toString())
+            } else {
+                // Old Android entries combined all values recorded on one day. Split
+                // them without changing the deterministic IDs used by older uploads.
+                fields.forEach { (type, key) ->
+                    if (!entry.isNull(key)) {
+                        val id = stableId("$userId:$type:$date")
+                        rows[id.lowercase()] = JSONObject().put("id", id).put("date", date)
+                            .put("heightCm", entry.optDouble("heightCm", fallbackHeightCm.toDouble()))
+                            .put("source", entry.optString("source", "manual")).put(key, entry.opt(key))
+                        legacyIds += id.lowercase()
+                    }
                 }
-                copyMeasurement("waistCm")
-                copyMeasurement("neckCm")
-                copyMeasurement("hipCm")
-                details.edit().putString("body_composition", current.toString()).apply()
             }
         }
+        val syncState = context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
+        val baseline = syncState.getString("$pushedRecordsPrefix${"body-metric-entries"}", "{}")?.let(::JSONObject) ?: JSONObject()
+        val remoteIds = (0 until remote.length()).mapNotNull { remote.optJSONObject(it)?.optString("id")?.takeIf(::isUuid)?.lowercase() }.toSet()
+        for (index in 0 until remote.length()) {
+            val remoteEntry = remote.optJSONObject(index) ?: continue
+            val id = remoteEntry.optString("id").takeIf(::isUuid) ?: continue
+            val normalizedId = id.lowercase()
+            val isDeleted = !remoteEntry.isNull("deleted_at") && remoteEntry.optString("deleted_at").isNotBlank()
+            val removed = if (isDeleted) rows.remove(normalizedId) else null
+            if (isDeleted) {
+                baseline.remove(id)
+                baseline.remove(normalizedId)
+            }
+            val type = remoteEntry.optString("type")
+            val key = fields[type] ?: continue
+            val value = remoteEntry.optDouble("value", Double.NaN)
+            val recordedAt = remoteEntry.optString("recorded_at")
+            val instant = runCatching { java.time.Instant.parse(recordedAt) }.getOrNull() ?: continue
+            if (!value.isFinite()) continue
+            val date = instant.atZone(java.time.ZoneId.systemDefault()).toLocalDate().toString()
+            if (isDeleted) {
+                if (removed == null) {
+                    val legacy = legacyIds.firstOrNull { oldId ->
+                        val old = rows[oldId] ?: return@firstOrNull false
+                        oldId !in remoteIds && old.optString("date") == date && !old.isNull(key) &&
+                            kotlin.math.abs(old.optDouble(key, Double.NaN) - value) < .001
+                    }
+                    if (legacy != null) { rows.remove(legacy); legacyIds.remove(legacy) }
+                }
+                continue
+            }
+            // Earlier Android versions collapsed an iOS row into a day bucket.
+            // Adopt its real ID when the stored value matches, instead of duplicating it.
+            if (!rows.containsKey(normalizedId)) {
+                val matchingLegacy = legacyIds.firstOrNull { oldId ->
+                    val old = rows[oldId] ?: return@firstOrNull false
+                    oldId !in remoteIds && old.optString("date") == date && !old.isNull(key) &&
+                        kotlin.math.abs(old.optDouble(key, Double.NaN) - value) < .001
+                }
+                if (matchingLegacy != null) {
+                    rows.remove(matchingLegacy)
+                    legacyIds.remove(matchingLegacy)
+                }
+            }
+            val previous = rows[normalizedId]
+            val target = JSONObject().put("id", id).put("date", date)
+                .put("heightCm", previous?.optDouble("heightCm", fallbackHeightCm.toDouble()) ?: fallbackHeightCm.toDouble())
+                .put("recordedAt", recordedAt)
+                .put("createdAt", remoteEntry.optString("created_at", recordedAt))
+                .put("source", if (previous?.optString("source") == "healthConnect" && remoteEntry.optString("source") == "manual") "healthConnect" else remoteEntry.optString("source", "manual")).put(key, value)
+            remoteEntry.optString("check_in_id").takeIf(::isUuid)?.let { target.put("checkInId", it) }
+            rows[normalizedId] = target
+            // Keep the actual remote ID in the upload baseline so deleting an
+            // imported row emits a tombstone for that same entry.
+            baseline.put(id, record(id, remoteEntry.optString("updated_at", recordedAt))
+                .put("created_at", remoteEntry.optString("created_at", recordedAt))
+                .put("type", type).put("value", value).put("recorded_at", recordedAt)
+                .put("source", remoteEntry.optString("source", "manual"))
+                .apply { remoteEntry.optString("check_in_id").takeIf(::isUuid)?.let { put("check_in_id", it) } })
+        }
+        val orderedRows = rows.values.sortedWith(compareBy<JSONObject> { it.optString("date") }.thenBy { it.optString("recordedAt") })
+        val history = JSONArray().apply { orderedRows.forEach(::put) }
+        prefs.edit().apply {
+            if (!prefs.contains("history_legacy_backup_v1") && stored.length() > 0) {
+                putString("history_legacy_backup_v1", stored.toString())
+            }
+            putString("history", history.toString())
+        }.apply()
+        syncState.edit().putString("$pushedRecordsPrefix${"body-metric-entries"}", baseline.toString()).apply()
+        val details = context.getSharedPreferences("wildforce_profile_details", Context.MODE_PRIVATE)
+        val composition = details.getString("body_composition", "{}")?.let(::JSONObject) ?: JSONObject()
+        listOf("waistCm", "neckCm", "hipCm").forEach { key ->
+            orderedRows.lastOrNull { !it.isNull(key) }?.let { composition.put(key, it.optDouble(key)) }
+        }
+        details.edit().putString("body_composition", composition.toString()).apply()
     }
 
-    /** Applies user settings before the next push so a fresh Android install never resets iOS choices. */
     private fun pullRemoteAppSettings(context: Context, remote: RemoteSnapshot): Boolean? {
         val settings = remote.records("user-app-settings").firstLiveRecord() ?: return null
         val profile = context.getSharedPreferences("wildforce_profile_details", Context.MODE_PRIVATE)
@@ -902,7 +1172,7 @@ internal object WorkoutRemoteSync {
             .putBoolean("keep_screen_on", settings.optBoolean("is_screen_on_during_workout_enabled", profile.getBoolean("keep_screen_on", true)))
             .putBoolean("full_focus", settings.optBoolean("is_full_focus_mode_enabled", profile.getBoolean("full_focus", false)))
             .putBoolean("has_seen_notification_request", settings.optBoolean("has_seen_notification_request", profile.getBoolean("has_seen_notification_request", false)))
-            .putBoolean("has_seen_body_progress_tutorial", settings.optBoolean("has_seen_body_progress_tutorial", profile.getBoolean("has_seen_body_progress_tutorial", false)))
+            .putBoolean("has_seen_body_progress_tutorial", settings.optBoolean("has_seen_body_progress_tutorial", false) || profile.getBoolean("has_seen_body_progress_tutorial", false))
             .putBoolean("has_rated_app", settings.optBoolean("has_rated_app", profile.getBoolean("has_rated_app", false)))
             .putBoolean("amazfit_watch_enabled", settings.optBoolean("is_watch_auto_tracking_enabled", profile.getBoolean("amazfit_watch_enabled", false)))
             .putBoolean("wear_auto_tracking_enabled", settings.optBoolean("is_watch_auto_tracking_enabled", profile.getBoolean("wear_auto_tracking_enabled", false)))
@@ -999,7 +1269,7 @@ internal object WorkoutRemoteSync {
             val entryRecord = recordFromRemoteProjection(context, "nutrition-log-entries", entryId, now)
             val previousLoggedAt = entryRecord.optString("logged_at").takeIf(String::isNotBlank)
             entries.put(entryRecord.put("title", meal.name)
-                .put("logged_at", nutritionLogTimestamp(meal.loggedDate, previousLoggedAt, meal.id)).put("meal_type", meal.type.syncValue())
+                .put("logged_at", nutritionLogTimestampForMeal(meal, previousLoggedAt)).put("meal_type", meal.type.syncValue())
                 .put("notes", meal.notes).put("is_favorite", meal.isBookmarked)
                 .put("nutrition_log_media_id", mediaId ?: JSONObject.NULL)
                 .put("nutrition_meal_id", meal.plannedMealKey?.let { key -> plannedMealIDs.optString(key).takeIf(::isUuid) } ?: JSONObject.NULL))
@@ -1120,7 +1390,7 @@ internal object WorkoutRemoteSync {
                 File(path).takeIf(File::isFile)?.let { uploadQueue += Triple(remoteId, angle, it) }
             }
         }
-        push(token, "body-progress-photo-sessions", records)
+        push(token, "body-progress-photo-sessions", records, clearOnSuccess = false)
         val uploadState = context.getSharedPreferences("wildforce_remote_media", Context.MODE_PRIVATE)
         uploadQueue.forEach { (remoteId, angle, file) ->
             val key = "body:$remoteId:$angle"
@@ -1130,6 +1400,7 @@ internal object WorkoutRemoteSync {
                 uploadState.edit().putString(key, fingerprint).apply()
             }
         }
+        clearDirtyResource("body-progress-photo-sessions")
     }
 
     /** The sync row carries only the safe file name; bytes use the private endpoint. */
@@ -1178,7 +1449,7 @@ internal object WorkoutRemoteSync {
     }
 
     /** Restores media only during the authoritative first-account import. */
-    private fun pullRemoteMedia(context: Context, token: String, sessions: JSONArray) {
+    private fun pullRemoteMedia(context: Context, token: String, userId: String, sessions: JSONArray) {
         val preferences = context.getSharedPreferences("wildforce_body_progress", Context.MODE_PRIVATE)
         val localById = linkedMapOf<String, JSONObject>()
         val stored = preferences.getString("sessions", "[]")?.let(::JSONArray) ?: JSONArray()
@@ -1190,12 +1461,40 @@ internal object WorkoutRemoteSync {
         val remoteIds = context.getSharedPreferences(syncPrefs, Context.MODE_PRIVATE)
             .getString("body_progress_remote_ids", "{}")?.let(::JSONObject) ?: JSONObject()
         val folder = File(context.filesDir, "body_progress_photos").apply { mkdirs() }
+        val syncState = context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
+        val pushed = syncState.getString("$pushedRecordsPrefix${"body-progress-photo-sessions"}", "{}")?.let(::JSONObject) ?: JSONObject()
         for (index in 0 until sessions.length()) {
             val session = sessions.optJSONObject(index) ?: continue
             val id = session.optString("id").takeIf(String::isNotBlank) ?: continue
+            val localId = localById.keys.firstOrNull { candidate ->
+                bodyProgressRemoteID(context, userId, candidate).equals(id, ignoreCase = true)
+            } ?: id
             if (!session.isNull("deleted_at")) {
-                localById.remove(id)
-                remoteIds.remove(id)
+                localById.remove(localId)?.let { removed ->
+                    listOf("frontPath", "profilePath", "backPath", "futurePath").forEach { key ->
+                        removed.optString(key).takeIf { it.isNotBlank() }?.let { File(it).delete() }
+                    }
+                }
+                remoteIds.remove(localId)
+                pushed.remove(id)
+                continue
+            }
+            // Remember imported rows so deleting one later emits a server tombstone.
+            val existing = localById[localId]
+            if (existing != null) {
+                // A previous download may have restored only some angles. Retry
+                // missing files on later syncs without replacing local captures.
+                listOf("front", "profile", "back").forEach { angle ->
+                    val key = "${angle}Path"
+                    val savedPath = existing.optString(key)
+                    if (savedPath.isBlank() || !File(savedPath).isFile) {
+                        val destination = File(folder, "${id}_${angle}.jpg")
+                        if (download(token, WildforceApiEnvironment.apiUrl("body-progress-photo-sessions/$id/photos/$angle"), destination)) {
+                            existing.put(key, destination.absolutePath)
+                        }
+                    }
+                }
+                pushed.put(id, JSONObject(session.toString()))
                 continue
             }
             val front = File(folder, "${id}_front.jpg")
@@ -1205,6 +1504,7 @@ internal object WorkoutRemoteSync {
             val profileDownloaded = download(token, WildforceApiEnvironment.apiUrl("body-progress-photo-sessions/$id/photos/profile"), profile)
             val backDownloaded = download(token, WildforceApiEnvironment.apiUrl("body-progress-photo-sessions/$id/photos/back"), back)
             if (frontDownloaded && profileDownloaded) {
+                pushed.put(id, JSONObject(session.toString()))
                 localById[id] = JSONObject().put("id", id).put("date", session.optString("created_at").take(10))
                     .put("frontPath", front.absolutePath).put("profilePath", profile.absolutePath)
                     .put("backPath", if (backDownloaded) back.absolutePath else localById[id]?.optString("backPath"))
@@ -1215,6 +1515,7 @@ internal object WorkoutRemoteSync {
         preferences.edit().putString("sessions", JSONArray().apply { localById.values.forEach(::put) }.toString()).apply()
         context.getSharedPreferences(syncPrefs, Context.MODE_PRIVATE).edit()
             .putString("body_progress_remote_ids", remoteIds.toString()).apply()
+        syncState.edit().putString("$pushedRecordsPrefix${"body-progress-photo-sessions"}", pushed.toString()).apply()
     }
 
     /** Hydrates iOS-created location photos without exposing their storage path. */
@@ -1310,7 +1611,7 @@ internal object WorkoutRemoteSync {
         Log.d("WorkoutRemoteSync", "Selected plan id=${active.id}, status=${active.status}, mesocycle=${active.mesocycleNumber}, createdAt=${active.createdAt}, updatedAt=${active.updatedAt}")
         // Keep every completed mesocycle locally. The hub renders the selected
         // active plan while its history remains available to overview screens.
-        plans.filterNot { it.id == active.id }.forEach { archived ->
+        plans.filterNot { it.id == active.id || it.status.equals("scheduled", true) }.forEach { archived ->
             WorkoutPlanArchiveStore.archive(preferences, archived.rawJson)
         }
         preferences.edit().putString("workout_plan_json", active.rawJson)
@@ -1954,11 +2255,11 @@ internal object WorkoutRemoteSync {
     }
 
     /** Mirrors iOS's paginated `/sync/pull/batch` pull state, per resource. */
-    private suspend fun pullRemoteSnapshot(context: Context, token: String, onProgress: suspend (Float) -> Unit): RemoteSnapshot {
+    private suspend fun pullRemoteSnapshot(context: Context, token: String, onProgress: suspend (Float) -> Unit, resources: Set<String>): RemoteSnapshot {
         val result = linkedMapOf<String, JSONArray>()
         val pullState = context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE)
         var request = JSONObject().put("resources", JSONArray().apply {
-            batchResources.forEach { resource ->
+            batchResources.filter { it in resources }.forEach { resource ->
                 val watermark = pullState.getString("$pullWatermarkPrefix$resource", null)
                 put(JSONObject().put("resource", resource).put("updated_after", watermark ?: JSONObject.NULL))
             }
@@ -1989,23 +2290,31 @@ internal object WorkoutRemoteSync {
                 .orEmpty()
             request = if (cursor.isBlank()) JSONObject() else JSONObject().put("cursor", cursor)
         } while (request.has("cursor"))
-        return RemoteSnapshot(result, asOf)
+        return RemoteSnapshot(result, asOf, resources)
     }
 
-    private fun postJson(token: String, url: String, body: JSONObject): JSONObject {
-        val connection = (URL(url).openConnection() as HttpURLConnection).apply {
-            requestMethod = "POST"; doOutput = true; connectTimeout = 20_000; readTimeout = 30_000
-            setRequestProperty("Accept", "application/json"); setRequestProperty("Content-Type", "application/json")
-            setRequestProperty("Authorization", "Bearer $token")
+    private suspend fun postJson(token: String, url: String, body: JSONObject): JSONObject {
+        while (true) {
+            val connection = (URL(url).openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"; doOutput = true; connectTimeout = 20_000; readTimeout = 30_000
+                setRequestProperty("Accept", "application/json"); setRequestProperty("Content-Type", "application/json")
+                setRequestProperty("Authorization", "Bearer $token")
+            }
+            OutputStreamWriter(connection.outputStream).use { it.write(body.toString()) }
+            val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
+            val response = BufferedReader(stream.reader()).use { it.readText() }
+            val retrySeconds = connection.getHeaderField("Retry-After")?.toDoubleOrNull()
+            if (connection.responseCode == 429 && retrySeconds != null && retrySeconds.isFinite() && retrySeconds >= 0) {
+                connection.disconnect()
+                delay((retrySeconds * 1000).toLong())
+                continue
+            }
+            if (connection.responseCode !in 200..299) throw apiException(response, "No se pudo descargar la cuenta")
+            return JSONObject(response)
         }
-        OutputStreamWriter(connection.outputStream).use { it.write(body.toString()) }
-        val stream = if (connection.responseCode in 200..299) connection.inputStream else connection.errorStream
-        val response = BufferedReader(stream.reader()).use { it.readText() }
-        if (connection.responseCode !in 200..299) throw apiException(response, "No se pudo descargar la cuenta")
-        return JSONObject(response)
     }
 
-    private data class RemoteSnapshot(private val data: Map<String, JSONArray>, private val asOf: String?) {
+    private data class RemoteSnapshot(private val data: Map<String, JSONArray>, private val asOf: String?, private val pulledResources: Set<String>) {
         fun records(resource: String): JSONArray = data[resource] ?: JSONArray()
 
         /**
@@ -2038,7 +2347,7 @@ internal object WorkoutRemoteSync {
                 editor.putString("remote_projection:$resource", records.toString())
             }
             editor.apply()
-            return RemoteSnapshot(full, asOf)
+            return RemoteSnapshot(full, asOf, pulledResources)
         }
 
         /** iOS overlaps one second because server timestamps have second precision. */
@@ -2046,7 +2355,7 @@ internal object WorkoutRemoteSync {
             val serverTime = asOf?.let { runCatching { java.time.Instant.parse(it) }.getOrNull() } ?: return
             val watermark = serverTime.minusSeconds(1).toString()
             context.getSharedPreferences(syncStatePrefs, Context.MODE_PRIVATE).edit().apply {
-                batchResources.filterNot(failedResources::contains).forEach { resource ->
+                pulledResources.filterNot(failedResources::contains).forEach { resource ->
                     putString("$pullWatermarkPrefix$resource", watermark)
                 }
             }.apply()
@@ -2154,3 +2463,5 @@ internal object WorkoutRemoteSync {
         }
     }
 }
+
+internal suspend fun <T> duplicateThenPull(key: String, create: suspend (String) -> String, pull: suspend (String) -> T): T = pull(create(key))

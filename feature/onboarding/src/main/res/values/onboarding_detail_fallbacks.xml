@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sheet-aware onboarding option fallbacks. -->
+    <string name="onboarding_detail_00">@string/sedentary</string>
+    <string name="onboarding_detail_01">@string/lightly_active</string>
+    <string name="onboarding_detail_02">@string/moderately_active</string>
+    <string name="onboarding_detail_03">@string/very_active</string>
+    <string name="onboarding_detail_04">@string/spend_most_of_the_day_sitting__e_g___office_job__desk_work__</string>
+    <string name="onboarding_detail_05">@string/spend_a_good_portion_of_the_day_on_your_feet__e_g___teacher__retail__</string>
+    <string name="onboarding_detail_06">@string/spend_a_lot_of_the_day_moving__e_g___waiter__mail_carrier__</string>
+    <string name="onboarding_detail_07">@string/spend_most_of_the_day_doing_physical_labor__e_g___construction__athlete__</string>
+    <string name="onboarding_detail_08">@string/lose_weight</string>
+    <string name="onboarding_detail_09">@string/build_muscle</string>
+    <string name="onboarding_detail_10">@string/gain_strength</string>
+    <string name="onboarding_detail_11">@string/improve_endurance</string>
+    <string name="onboarding_detail_12">@string/improve_mobility</string>
+    <string name="onboarding_detail_13">@string/body_recomposition</string>
+    <string name="onboarding_detail_14">@string/general_fitness</string>
+    <string name="onboarding_detail_15">@string/burn_fat_and_improve_metabolic_health_through_a_combination_of_cardio_and_strength_training_</string>
+    <string name="onboarding_detail_16">@string/increase_muscle_mass_and_definition_with_hypertrophy_focused_resistance_training_</string>
+    <string name="onboarding_detail_17">@string/focus_on_lifting_heavier_weights_and_improving_neuromuscular_efficiency_in_core_lifts_</string>
+    <string name="onboarding_detail_18">@string/enhance_cardiovascular_capacity_and_stamina_for_longer__more_sustained_physical_activity_</string>
+    <string name="onboarding_detail_19">@string/improve_range_of_motion__flexibility__and_joint_health_for_better_movement_and_less_pain_</string>
+    <string name="onboarding_detail_20">@string/simultaneously_lose_fat_and_gain_muscle_for_a_more_athletic_and_toned_physique_</string>
+    <string name="onboarding_detail_21">@string/maintain_a_healthy_lifestyle_and_improve_overall_well_being_with_balanced_training_</string>
+    <string name="onboarding_detail_22">@string/complete_beginner</string>
+    <string name="onboarding_detail_23">@string/beginner</string>
+    <string name="onboarding_detail_24">@string/novice</string>
+    <string name="onboarding_detail_25">@string/intermediate</string>
+    <string name="onboarding_detail_26">@string/advanced</string>
+    <string name="onboarding_detail_27">@string/elite</string>
+    <string name="onboarding_detail_28">@string/you_are_new_to_structured_training_and_still_learning_basic_movement_patterns_</string>
+    <string name="onboarding_detail_29">@string/you_have_some_early_experience_and_are_building_consistency__technique__and_confidence_</string>
+    <string name="onboarding_detail_30">@string/you_train_somewhat_regularly_and_can_handle_simple_progression_across_core_exercises_</string>
+    <string name="onboarding_detail_31">@string/you_have_solid_training_habits_and_can_recover_well_from_moderate_training_volume_</string>
+    <string name="onboarding_detail_32">@string/you_train_consistently__understand_progression_well__and_can_tolerate_demanding_programming_</string>
+    <string name="onboarding_detail_33">@string/you_have_a_very_high_training_base_and_can_manage_highly_specialized_or_high_performance_plans_</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="photo_error_session">La sessió ha caducat. Torna a iniciar sessió.</string>
+    <string name="photo_error_access">El teu compte no té accés a l’anàlisi de fotos.</string>
+    <string name="photo_error_size">La imatge és massa gran. Prova una altra foto.</string>
+    <string name="photo_error_invalid">No s’ha pogut processar la imatge. Comprova que conté aliments i prova una altra foto.</string>
+    <string name="photo_error_limit">Hi ha massa sol·licituds. Torna-ho a provar més tard.</string>
+    <string name="photo_error_service">L’anàlisi de fotos no està disponible ara. Torna-ho a provar més tard.</string>
+    <string name="photo_error_connection">No s’ha pogut connectar amb el servidor. Comprova la connexió i torna-ho a provar.</string>
+    <string name="photo_error_generic">No s’ha pogut analitzar la foto. Torna-ho a provar.</string>
+    <string name="photo_error_camera_permission">Cal accés a la càmera. Permet-lo a Configuració o tria una foto de la galeria.</string>
+    <string name="photo_error_camera_open">No s’ha pogut obrir la càmera. Torna-ho a provar o tria una foto de la galeria.</string>
+    <string name="sync_subscription_required">Necessites una subscripció activa per sincronitzar les dades.</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="unlink_google">Unlink Google</string>
+    <string name="unlink_google_confirm">Unlink Google?</string>
+    <string name="unlink_google_explanation">You will no longer be able to sign in with this Google account.</string>
+    <string name="unlink_google_last_method">Add another sign-in method before unlinking your only sign-in method.</string>
+    <string name="unlink_google_failed">Could not unlink Google. Please try again.</string>
+</resources>

@@ -298,6 +298,15 @@ enum class TrainingSplitPreference(val storedValue: String, val title: String, v
     }
 }
 
+val OnboardingProfile.activeCustomWorkoutFocuses: Map<WorkoutWeekday, WorkoutFocus>
+    get() = if (trainingSplitPreference == TrainingSplitPreference.Custom) customWorkoutFocuses else emptyMap()
+
+fun OnboardingProfile.selectTrainingSplit(split: TrainingSplitPreference): OnboardingProfile {
+    if (split == trainingSplitPreference) return this
+    return copy(trainingSplitPreference = split, customWorkoutFocuses = if (split == TrainingSplitPreference.Custom)
+        normalizedCustomFocuses(emptyMap(), workoutDays, trainingSplitPreference) else emptyMap())
+}
+
 internal fun normalizedCustomFocuses(
     current: Map<WorkoutWeekday, WorkoutFocus>,
     workoutDays: Set<WorkoutWeekday>,
@@ -367,7 +376,7 @@ fun OnboardingScreen(
     onStartTraining: () -> Unit = {},
     onContinueWithoutPlan: () -> Unit = {},
     onLanguageSelected: (String) -> Unit = {},
-    onLoggedIn: (AuthResponse) -> Unit = {},
+    onLoggedIn: (AuthResponse, String?) -> Unit = { _, _ -> },
     onRegistered: (AuthResponse, OnboardingProfile) -> Unit = { _, _ -> },
     onCheckGymJoinCode: suspend (String) -> GymJoinCodeInfo? = { null },
     onCompleted: (OnboardingProfile, Boolean) -> Unit,
@@ -396,7 +405,7 @@ fun OnboardingScreen(
     var isLanguagePickerVisible by remember { mutableStateOf(false) }
     var isGymCodePickerVisible by remember { mutableStateOf(false) }
     var gymCodeInput by remember { mutableStateOf("") }
-    val invalidQrMessage = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_qr_is_not_a_gym_join_code_)
+    val invalidQrMessage = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_this_qr_is_not_a_gym_join_code_)
     val validationErrorMessage = androidx.compose.ui.res.stringResource(R.string.onboarding_code_validation_error)
     val scannerErrorMessage = androidx.compose.ui.res.stringResource(R.string.onboarding_scanner_error)
     var gymCodeError by remember { mutableStateOf<String?>(null) }
@@ -481,8 +490,8 @@ fun OnboardingScreen(
             }, onJoinGym = { isGymCodePickerVisible = true })
             1 -> FormStep(
                 progress = progressFor(1),
-                title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.welcome),
-                subtitle = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.what_s_the_name_that_we_should_call_you_),
+                title = androidx.compose.ui.res.stringResource(R.string.onboarding_title_welcome),
+                subtitle = androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_what_s_the_name_that_we_should_call_you_),
                 canContinue = name.isNotBlank(),
                 onBack = { step = 0 },
                 onContinue = { step = 2 },
@@ -494,8 +503,8 @@ fun OnboardingScreen(
             }
             2 -> FormStep(
                 progress = progressFor(2),
-                title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_goals),
-                subtitle = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.choose_the_training_objective_that_best_fits_you_),
+                title = androidx.compose.ui.res.stringResource(R.string.onboarding_title_your_goals),
+                subtitle = androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_choose_the_training_objective_that_best_fits_you_),
                 canContinue = goal != null,
                 onBack = { step = 1 },
                 onContinue = { step = 3 },
@@ -507,8 +516,8 @@ fun OnboardingScreen(
             }
             3 -> FormStep(
                 progress = progressFor(3),
-                title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.lifestyle),
-                subtitle = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.tell_us_about_your_daily_activity_level_),
+                title = androidx.compose.ui.res.stringResource(R.string.onboarding_title_lifestyle),
+                subtitle = androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_tell_us_about_your_daily_activity_level_),
                 canContinue = lifestyle != null,
                 onBack = { step = 2 },
                 onContinue = { step = 4 },
@@ -520,8 +529,8 @@ fun OnboardingScreen(
             }
             4 -> FormStep(
                 progress = progressFor(4),
-                title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.availability),
-                subtitle = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.select_when_you_want_to_train_each_week_),
+                title = androidx.compose.ui.res.stringResource(R.string.onboarding_title_availability),
+                subtitle = androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_select_when_you_want_to_train_each_week_),
                 canContinue = workoutDays.isNotEmpty(),
                 onBack = { step = 3 },
                 onContinue = { step = 5 },
@@ -537,8 +546,8 @@ fun OnboardingScreen(
             }
             5 -> FormStep(
                 progress = progressFor(5),
-                title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.workout_duration),
-                subtitle = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.define_your_preferred_workout_structure_and_duration_),
+                title = androidx.compose.ui.res.stringResource(R.string.onboarding_title_workout_duration),
+                subtitle = androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_define_your_preferred_workout_structure_and_duration_),
                 canContinue = true,
                 onBack = { step = 4 },
                 onContinue = { step = 6 },
@@ -549,14 +558,14 @@ fun OnboardingScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     CenteredOnboardingControl("−", 48.dp) { duration = (duration - 5).coerceAtLeast(15) }
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_min, duration), style = MaterialTheme.typography.h5, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_min, duration), style = MaterialTheme.typography.h5, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                     CenteredOnboardingControl("+", 48.dp) { duration = (duration + 5).coerceAtMost(180) }
                 }
             }
             6 -> FormStep(
                 progress = progressFor(6),
-                title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.experience),
-                subtitle = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.tell_us_about_your_current_fitness_experience_),
+                title = androidx.compose.ui.res.stringResource(R.string.onboarding_title_experience),
+                subtitle = androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_tell_us_about_your_current_fitness_experience_),
                 canContinue = true,
                 onBack = { step = 5 },
                 onContinue = { step = 7 },
@@ -567,7 +576,7 @@ fun OnboardingScreen(
                 }
             }
             7 -> FormStep(
-                progress=progressFor(7),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.program),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.choose_the_workout_structure_that_feels_right_for_you_),
+                progress=progressFor(7),title=androidx.compose.ui.res.stringResource(R.string.onboarding_title_program),subtitle=androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_choose_the_workout_structure_that_feels_right_for_you_),
                 canContinue=trainingSplit!=TrainingSplitPreference.Custom||workoutDays.all{it in customFocuses},
                 onBack={step=6},onContinue={step=nextVisibleStep(7)},
             ){
@@ -575,7 +584,7 @@ fun OnboardingScreen(
                 TrainingSplitPreference.entries.forEach{split->ChoiceOption(onboardingLabel("TrainingSplitPreference",split.storedValue,split.title),onboardingSplitDescription(split),split.glyph,trainingSplit==split, {
                     val previousSplit = trainingSplit
                     trainingSplit=split
-                    if(split==TrainingSplitPreference.Custom)customFocuses=normalizedCustomFocuses(customFocuses, workoutDays, previousSplit)
+                    if (split != previousSplit) customFocuses = if (split == TrainingSplitPreference.Custom) normalizedCustomFocuses(emptyMap(), workoutDays, previousSplit) else emptyMap()
                 }, onboardingTrainingSplitIcon(split));Spacer(Modifier.height(10.dp))}
                 if(trainingSplit==TrainingSplitPreference.Custom){
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_82da898217b2b8b7),fontWeight=FontWeight.Bold,color=WildforceThemeTokens.textPrimary)
@@ -589,20 +598,20 @@ fun OnboardingScreen(
                     }
                 }
             }
-            8 -> FormStep(progress=progressFor(8),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.body_composition),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.choose_how_your_current_body_composition_focus_should_shape_your_training_plan_),canContinue=true,onBack={step=previousVisibleStep(8)},onContinue={step=nextVisibleStep(8)}){
+            8 -> FormStep(progress=progressFor(8),title=androidx.compose.ui.res.stringResource(R.string.onboarding_title_body_phase),subtitle=androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_choose_how_your_current_body_composition_focus_should_shape_your_training_plan_),canContinue=true,onBack={step=previousVisibleStep(8)},onContinue={step=nextVisibleStep(8)}){
                 BodyCompositionPhase.entries.forEach{phase->ChoiceOption(onboardingLabel("BodyCompositionPhase",phase.storedValue,phase.title),onboardingLabel("BodyCompositionPhase",phase.storedValue,phase.description,true),phase.glyph,bodyPhase==phase,{bodyPhase=phase}, onboardingBodyPhaseIcon(phase));Spacer(Modifier.height(10.dp))}
             }
-            9 -> FormStep(progress=progressFor(9),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.what_kind_of_environment_will_you_be_training_in_),canContinue=gymType!=null,onBack={step=previousVisibleStep(9)},onContinue={step=nextVisibleStep(9)}){
+            9 -> FormStep(progress=progressFor(9),title=androidx.compose.ui.res.stringResource(R.string.onboarding_title_gym),subtitle=androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_what_kind_of_environment_will_you_be_training_in_),canContinue=gymType!=null,onBack={step=previousVisibleStep(9)},onContinue={step=nextVisibleStep(9)}){
                 GymType.entries.forEach{gym->ChoiceOption(onboardingLabel("GymType",gym.storedValue,gym.title),null,gym.glyph,gymType==gym,{gymType=gym;equipment=gym.defaultEquipment}, onboardingGymTypeIcon(gym));Spacer(Modifier.height(10.dp))}
             }
             10 -> {
                 val equipmentNames = Equipment.entries.associateWith { onboardingLabel("Equipment", it.storedValue, it.title) }
-                FormStep(progress=progressFor(10),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.equipment),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.fine_tune_the_equipment_you_actually_have_access_to_),canContinue=true,onBack={step=previousVisibleStep(10)},onContinue={step=nextVisibleStep(10)}, lazyContent = {
+                FormStep(progress=progressFor(10),title=androidx.compose.ui.res.stringResource(R.string.onboarding_title_equipment),subtitle=androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_fine_tune_the_equipment_you_actually_have_access_to_),canContinue=true,onBack={step=previousVisibleStep(10)},onContinue={step=nextVisibleStep(10)}, lazyContent = {
                 item {
-                OutlinedTextField(value=equipmentSearch,onValueChange={equipmentSearch=it},modifier=Modifier.fillMaxWidth(),placeholder={Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.search_equipment))},singleLine=true,shape=RoundedCornerShape(14.dp))
+                OutlinedTextField(value=equipmentSearch,onValueChange={equipmentSearch=it},modifier=Modifier.fillMaxWidth(),placeholder={Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_search_equipment))},singleLine=true,shape=RoundedCornerShape(14.dp))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_selected, equipment.size),Modifier.padding(vertical=12.dp),color=WildforceThemeTokens.textSecondary)
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.unselect_all), Modifier.heightIn(min = 48.dp).clickable { equipment = emptySet() }.padding(horizontal = 8.dp, vertical = 8.dp), color = WildforceThemeTokens.textSecondary)
+                    Text(if (equipment.size == 1) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_key_1_selected) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_selected, equipment.size),Modifier.padding(vertical=12.dp),color=WildforceThemeTokens.textSecondary)
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_unselect_all), Modifier.heightIn(min = 48.dp).clickable { equipment = emptySet() }.padding(horizontal = 8.dp, vertical = 8.dp), color = WildforceThemeTokens.textSecondary)
                 }
                 }
                 Equipment.entries.filter{equipmentNames.getValue(it).contains(equipmentSearch.trim(),ignoreCase=true)}.groupBy { it.category }.forEach { (category, categoryItems) ->
@@ -633,10 +642,10 @@ fun OnboardingScreen(
                 }
                 })
             }
-            11 -> FormStep(progress=progressFor(11),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.restrictions),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.do_you_have_any_injury_or_mobility_restriction_),canContinue=true,onBack={step=previousVisibleStep(11)},onContinue={step=12}){
-                ChoiceOption(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no),androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.you_can_always_update_this_in_the_future_),"✓",!hasRestrictions, onClick = {hasRestrictions=false;restrictions=emptySet()})
+            11 -> FormStep(progress=progressFor(11),title=androidx.compose.ui.res.stringResource(R.string.onboarding_title_restrictions),subtitle=androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_do_you_have_any_injury_or_mobility_restriction_),canContinue=true,onBack={step=previousVisibleStep(11)},onContinue={step=12}){
+                ChoiceOption(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_no),androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_you_can_always_update_this_in_the_future_),"✓",!hasRestrictions, onClick = {hasRestrictions=false;restrictions=emptySet()})
                 Spacer(Modifier.height(10.dp))
-                ChoiceOption(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.yes),null,"!",hasRestrictions, onClick = {hasRestrictions=true})
+                ChoiceOption(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_yes),null,"!",hasRestrictions, onClick = {hasRestrictions=true})
                 if(hasRestrictions){
                     Spacer(Modifier.height(18.dp))
                     MovementRestriction.entries.forEach{item->ChoiceOption(onboardingLabel("MovementRestriction",item.storedValue,item.title),null,"•",item in restrictions, onClick = {restrictions=if(item in restrictions)restrictions-item else restrictions+item});Spacer(Modifier.height(8.dp))}
@@ -650,32 +659,32 @@ fun OnboardingScreen(
                             healthConnectEnabled = granted
                             height?.let { heightCm = it; importedHeight = true }
                             weight?.let { weightKg = it; importedWeight = true }
-                            if (granted) step = nextVisibleStep(12)
+                            if (granted) advanceToNextStep(12)
                         }
                     },
                     onNotNow = {
                         healthConnectEnabled = false
-                        step = nextVisibleStep(12)
+                        advanceToNextStep(12)
                     },
                 )
             }
-            13 -> FormStep(progress=progressFor(13),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.birth_date),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_helps_the_ai_tailor_the_volume_and_intensity_of_your_plans_),canContinue=true,onBack={step=previousVisibleStep(13)},onContinue={advanceToNextStep(13)}){
+            13 -> FormStep(progress=progressFor(13),title=androidx.compose.ui.res.stringResource(R.string.onboarding_title_when_is_your_birthday),subtitle=androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_this_helps_the_ai_tailor_the_volume_and_intensity_of_your_plans_),canContinue=true,onBack={step=previousVisibleStep(13)},onContinue={advanceToNextStep(13)}){
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.day), (1..31).toList(), birthDay, { it.toString() }, Modifier.weight(.7f)) { birthDay = it }
-                    WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.month), (1..12).toList(), birthMonth, { monthNames[it - 1] }, Modifier.weight(1.4f)) { birthMonth = it }
-                    WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.year), (1920..currentYear).toList().reversed(), birthYear, { it.toString() }, Modifier.weight(1f)) { birthYear = it }
+                    WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_day), (1..31).toList(), birthDay, { it.toString() }, Modifier.weight(.7f)) { birthDay = it }
+                    WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_month), (1..12).toList(), birthMonth, { monthNames[it - 1] }, Modifier.weight(1.4f)) { birthMonth = it }
+                    WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_year), (1920..currentYear).toList().reversed(), birthYear, { it.toString() }, Modifier.weight(1f)) { birthYear = it }
                 }
             }
-            14 -> FormStep(progress=progressFor(14),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.what_s_your_sex_),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.the_formula_to_get_better_results_differs_based_on_sex__we_need_this_information_to_serve_you_better_),canContinue=gender!=null,onBack={step=previousVisibleStep(14)},onContinue={advanceToNextStep(14)}){Gender.entries.forEach{item->ChoiceOption(onboardingLabel("Gender",item.storedValue,item.title),null,item.glyph,gender==item, onClick = {gender=item});Spacer(Modifier.height(10.dp))}}
-            15 -> FormStep(progress=progressFor(15),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.height),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_helps_us_calculate_your_needs_accurately_),canContinue=true,onBack={step=previousVisibleStep(15)},onContinue={advanceToNextStep(15)}){
+            14 -> FormStep(progress=progressFor(14),title=androidx.compose.ui.res.stringResource(R.string.onboarding_title_what_s_your_sex_),subtitle=androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_the_formula_to_get_better_results_differs_based_on_sex__we_need_this_information_to_serve_you_better_),canContinue=gender!=null,onBack={step=previousVisibleStep(14)},onContinue={advanceToNextStep(14)}){Gender.entries.forEach{item->ChoiceOption(onboardingLabel("Gender",item.storedValue,item.title),null,item.glyph,gender==item, onClick = {gender=item});Spacer(Modifier.height(10.dp))}}
+            15 -> FormStep(progress=progressFor(15),title=androidx.compose.ui.res.stringResource(R.string.onboarding_title_height),subtitle=androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_this_helps_us_calculate_your_needs_accurately_),canContinue=true,onBack={step=previousVisibleStep(15)},onContinue={advanceToNextStep(15)}){
                 MetricSystemSegmentedControl(metricSystem) { metricSystem = it }
                 Spacer(Modifier.height(20.dp))
                 val displayedHeight = if (metricSystem == MetricSystem.Metric) heightCm else (heightCm / 2.54).toInt()
-                WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.height), if (metricSystem == MetricSystem.Metric) (120..230).toList() else (48..91).toList(), displayedHeight, {
+                WheelPicker(androidx.compose.ui.res.stringResource(R.string.onboarding_title_height), if (metricSystem == MetricSystem.Metric) (120..230).toList() else (48..91).toList(), displayedHeight, {
                     if (metricSystem == MetricSystem.Metric) "$it cm" else "${it / 12} ft ${it % 12} in"
                 }, Modifier.fillMaxWidth()) { selected -> heightCm = if (metricSystem == MetricSystem.Metric) selected else (selected * 2.54).toInt() }
             }
-            16 -> FormStep(progress=progressFor(16),title=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.weight),subtitle=androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_helps_us_calculate_your_needs_accurately_),canContinue=true,onBack={step=previousVisibleStep(16)},onContinue={
+            16 -> FormStep(progress=progressFor(16),title=androidx.compose.ui.res.stringResource(R.string.onboarding_title_weight),subtitle=androidx.compose.ui.res.stringResource(R.string.onboarding_subtitle_this_helps_us_calculate_your_needs_accurately_),canContinue=true,onBack={step=previousVisibleStep(16)},onContinue={
                 authenticationRegisters = true
                 registrationCompletesOnboarding = true
                 isLoginVisible = true
@@ -707,7 +716,7 @@ fun OnboardingScreen(
         val languages = listOf("Español", "English", "Català", "Français", "Italiano", "Português", "Deutsch", "中文（简体）", "Nederlands", "日本語")
         AlertDialog(
             onDismissRequest = { isLanguagePickerVisible = false },
-            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.language)) },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_language)) },
             text = { Column { languages.forEach { language -> Text(localizedLanguageName(language), Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { appLanguage = language; onLanguageSelected(language); isLanguagePickerVisible = false }.padding(vertical = 12.dp), color = if (language == appLanguage) WildforceThemeTokens.accent else WildforceThemeTokens.textPrimary) } } },
             confirmButton = {},
         )
@@ -716,14 +725,14 @@ fun OnboardingScreen(
         var checking by remember { mutableStateOf(false) }
         AlertDialog(
             onDismissRequest = { if (!checking) isGymCodePickerVisible = false },
-            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_526484234b492b02)) },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_i_have_a_gym_code)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.enter_the_code_your_gym_gave_you__or_scan_its_qr_))
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_enter_the_code_your_gym_gave_you__or_scan_its_qr_))
                     OutlinedTextField(
                         value = gymCodeInput,
                         onValueChange = { gymCodeInput = it; gymCodeError = null },
-                        label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym_code)) },
+                        label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_gym_code)) },
                         singleLine = true,
                         enabled = !checking,
                         trailingIcon = {
@@ -763,7 +772,7 @@ fun OnboardingScreen(
                                 },
                                 contentAlignment = Alignment.Center,
                             ) {
-                                Icon(Icons.Filled.QrCodeScanner, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.scan_the_gym_s_qr), modifier = Modifier.size(24.dp))
+                                Icon(Icons.Filled.QrCodeScanner, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_scan_the_gym_s_qr), modifier = Modifier.size(24.dp))
                             }
                         },
                     )
@@ -789,9 +798,9 @@ fun OnboardingScreen(
                         } else gymCodeError = validationErrorMessage
                         checking = false
                     }
-                }) { Text(if (checking) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f12a8ada4dfd091e) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_continue).uppercase()) }
+                }) { Text(if (checking) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f12a8ada4dfd091e) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_key_continue).uppercase()) }
             },
-            dismissButton = { TextButton(enabled = !checking, onClick = { isGymCodePickerVisible = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
+            dismissButton = { TextButton(enabled = !checking, onClick = { isGymCodePickerVisible = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } },
         )
     }
     if (isLoginVisible) {
@@ -837,7 +846,7 @@ fun OnboardingScreen(
                         step = 18
                     }
                 } else {
-                    onLoggedIn(response)
+                    onLoggedIn(response, gymJoinCode)
                 }
             },
         )
@@ -905,7 +914,7 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit, onJoinGym: () ->
                 contentScale = ContentScale.Fit,
             )
             Text(
-                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_journey_to_a_stronger__healthier_you_starts_here_),
+                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_your_journey_to_a_stronger__healthier_you_starts_here_),
                 // The cover is always dark in iOS, independent of the app theme.
                 color = Color(0xFFA7A6AE),
                 textAlign = TextAlign.Center,
@@ -914,11 +923,11 @@ private fun CoverStep(onStart: () -> Unit, onLogin: () -> Unit, onJoinGym: () ->
             )
             Spacer(Modifier.height(40.dp))
             Box(Modifier.alpha(actionAlpha).offset(y = actionOffset.dp).graphicsLayer { scaleX = actionScale; scaleY = actionScale }) {
-                PrimaryAction(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.get_started), true, onStart)
+                PrimaryAction(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_get_started), true, onStart)
             }
-            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_526484234b492b02), Modifier.padding(top = 18.dp).heightIn(min = 48.dp).clickable(onClick = onJoinGym).padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_i_have_a_gym_code), Modifier.padding(top = 18.dp).heightIn(min = 48.dp).clickable(onClick = onJoinGym).padding(8.dp), color = Color.White, style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold)
             Text(
-                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.i_already_have_an_account),
+                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_i_already_have_an_account),
                 modifier = Modifier.padding(top = 10.dp).heightIn(min = 48.dp).clickable(onClick = onLogin).padding(8.dp),
                 color = Color.White.copy(alpha = 0.80f),
                 style = MaterialTheme.typography.caption,
@@ -974,25 +983,25 @@ private fun PlanGenerationStep(
             generationError != null -> {
                 Spacer(Modifier.height(96.dp))
                 Text("!", modifier = Modifier.fillMaxWidth(), color = WildforceThemeTokens.accentGold, style = MaterialTheme.typography.h2, textAlign = TextAlign.Center)
-                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_8535879c75ac3c86), modifier = Modifier.fillMaxWidth(), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_something_went_wrong_while_creating_your_plan), modifier = Modifier.fillMaxWidth(), style = MaterialTheme.typography.h6, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
                 Text(generationError, modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = .10f)).padding(16.dp), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
                 Spacer(Modifier.height(20.dp))
-                PrimaryAction(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry), !isGenerating, onGenerate)
+                PrimaryAction(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_retry), !isGenerating, onGenerate)
                 TextButton(
                     onClick = onContinueWithoutPlan,
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                ) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.continue_without_a_plan)) }
+                ) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_continue_without_a_plan)) }
             }
             preview != null -> {
                 PlanWeekSummary(preview)
                 preview.workouts.forEach { workout -> PlanWorkoutPreviewCard(workout) }
                 Spacer(Modifier.height(12.dp))
-                PrimaryAction(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.start_training), true, onStartTraining)
+                PrimaryAction(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_start_training), true, onStartTraining)
             }
             else -> {
                 Spacer(Modifier.height(110.dp))
                 PlanCreationAnimation()
-                Text(if (isGenerating) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_535139f051f45a12) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_d2b925965ea8d2b9), modifier = Modifier.fillMaxWidth().padding(top = 20.dp), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.body1, textAlign = TextAlign.Center)
+                Text(if (isGenerating) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_535139f051f45a12) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_preparing_), modifier = Modifier.fillMaxWidth().padding(top = 20.dp), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.body1, textAlign = TextAlign.Center)
             }
         }
     }
@@ -1010,10 +1019,10 @@ private fun PlanWeekSummary(preview: OnboardingPlanPreview) {
         Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(WildforceThemeTokens.backgroundSecondary).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_week).uppercase(), style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_this_week).uppercase(), style = MaterialTheme.typography.caption, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textSecondary)
         Text(preview.name, style = MaterialTheme.typography.h4, fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
         Text(preview.phase, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
-        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_sessions, preview.workouts.size), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_sessions, preview.workouts.size), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
     }
 }
 
@@ -1086,7 +1095,7 @@ private fun FormStep(
         if (showBottomAction) {
             Divider(color = WildforceThemeTokens.textSecondary.copy(alpha = 0.16f))
             Box(Modifier.fillMaxWidth().padding(24.dp)) {
-                PrimaryAction(buttonTitle ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_continue), canContinue, onContinue)
+                PrimaryAction(buttonTitle ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_key_continue), canContinue, onContinue)
             }
         }
     }
@@ -1122,7 +1131,7 @@ private fun HealthConnectStep(onConnect: () -> Unit, onNotNow: () -> Unit) {
         }
         Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f6f8978612a50da6), modifier = Modifier.alpha(contentAlpha), style = MaterialTheme.typography.h5, fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
         Text(
-            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.import_your_details_from_apple_health_now_and_keep_future_metrics_in_sync_).replace("Apple Health", "Health Connect"),
+            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_import_your_details_from_apple_health_now_and_keep_future_metrics_in_sync_).replace("Apple Health", "Health Connect"),
             modifier = Modifier.padding(top = 12.dp).alpha(contentAlpha),
             color = WildforceThemeTokens.textSecondary,
             style = MaterialTheme.typography.body1,
@@ -1131,7 +1140,7 @@ private fun HealthConnectStep(onConnect: () -> Unit, onNotNow: () -> Unit) {
         Spacer(Modifier.height(48.dp))
         Box(Modifier.alpha(contentAlpha)) { PrimaryAction(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_79de068350f9e051), true, onConnect) }
         Text(
-            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.not_now),
+            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_not_now),
             modifier = Modifier.padding(top = 18.dp).alpha(contentAlpha).clickable(onClick = onNotNow),
             color = WildforceThemeTokens.textSecondary,
             style = MaterialTheme.typography.body1,
@@ -1163,7 +1172,7 @@ private fun NameStepInput(name: String, onNameChange: (String) -> Unit) {
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     if (name.isBlank()) {
                         Text(
-                            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_name),
+                            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_your_name),
                             color = WildforceThemeTokens.textSecondary,
                             style = MaterialTheme.typography.h4.copy(fontFamily = Exo2FontFamily, fontSize = 34.sp, fontWeight = FontWeight.SemiBold),
                         )
@@ -1341,7 +1350,7 @@ private fun MetricSystemSegmentedControl(selected: MetricSystem, onSelect: (Metr
         MetricSystem.entries.forEach { system ->
             val isSelected = selected == system
             Text(
-                androidx.compose.ui.res.stringResource(if (system == MetricSystem.Metric) io.codepassion.doubletriangle.core.designsystem.R.string.metric else io.codepassion.doubletriangle.core.designsystem.R.string.imperial),
+                androidx.compose.ui.res.stringResource(if (system == MetricSystem.Metric) io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_metric else io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_imperial),
                 Modifier.weight(1f).clip(RoundedCornerShape(7.dp)).background(if (isSelected) WildforceThemeTokens.background else Color.Transparent).clickable { onSelect(system) }.padding(vertical = 10.dp),
                 color = WildforceThemeTokens.textPrimary,
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
@@ -1379,7 +1388,7 @@ private fun WeightWheelPicker(weight: Double, metricSystem: MetricSystem, onSele
     val integer = weight.toInt().coerceIn(if (metricSystem == MetricSystem.Metric) 35 else 77, if (metricSystem == MetricSystem.Metric) 250 else 551)
     val decimal = ((weight - integer) * 10).toInt().coerceIn(0, 9)
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.weight), ((if (metricSystem == MetricSystem.Metric) 35 else 77)..(if (metricSystem == MetricSystem.Metric) 250 else 551)).toList(), integer, { it.toString() }, Modifier.weight(1f)) { onSelected(it + decimal / 10.0) }
+        WheelPicker(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_weight), ((if (metricSystem == MetricSystem.Metric) 35 else 77)..(if (metricSystem == MetricSystem.Metric) 250 else 551)).toList(), integer, { it.toString() }, Modifier.weight(1f)) { onSelected(it + decimal / 10.0) }
         WheelPicker("", (0..9).toList(), decimal, { ".$it ${if (metricSystem == MetricSystem.Metric) "kg" else "lb"}" }, Modifier.weight(1f)) { onSelected(integer + it / 10.0) }
     }
 }

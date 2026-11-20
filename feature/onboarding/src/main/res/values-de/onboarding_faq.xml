@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="faq_intro">Alles, was du zum Trainieren, für bessere Ernährung und deine Fortschritte mit Wildforce brauchst.</string>
+    <string name="faq_getting_started">Erste Schritte</string>
+    <string name="faq_training">Training und Fortschritt</string>
+    <string name="faq_nutrition">Ernährung</string>
+    <string name="faq_devices">Android und Geräte</string>
+    <string name="faq_account">Konto, Daten und Einstellungen</string>
+    <string name="faq_help">Brauchst du Hilfe? Sende uns über Hilfe dein Handymodell, deine Android- und Wildforce-Version und eine kurze Beschreibung.</string>
+    <string-array name="faq_questions">
+        <item>Was ist Wildforce?</item>
+        <item>Wie entsteht mein Trainingsplan?</item>
+        <item>Was benötige ich für Wildforce auf Android?</item>
+        <item>Kann ich offline trainieren?</item>
+        <item>Kann ich eine Übung während des Trainings ändern?</item>
+        <item>Kann ich eigene Trainings erstellen?</item>
+        <item>Wie funktionieren die Pausen?</item>
+        <item>Wo sehe ich meine Fortschritte?</item>
+        <item>Was passiert nach dem Training?</item>
+        <item>Wie erfasse ich mein Essen?</item>
+        <item>Kann die App Mahlzeiten aus vorhandenen Zutaten vorschlagen?</item>
+        <item>Was passiert, wenn ich meine Makros nicht erreiche?</item>
+        <item>Kann ich meinen Plan nach Tagen ansehen?</item>
+        <item>Welche Gesundheitsintegration nutzt Android?</item>
+        <item>Wozu dienen Benachrichtigungen?</item>
+        <item>Gibt es ein Wildforce-Widget für Android?</item>
+        <item>Funktioniert Wildforce mit Wear OS?</item>
+        <item>Kann ich Wildforce auf dem iPhone nutzen?</item>
+        <item>Kann ich imperiale Einheiten verwenden?</item>
+        <item>Sind meine Daten auf einem neuen Gerät verfügbar?</item>
+        <item>Kann ich Sprache, Design oder Einstellungen ändern?</item>
+        <item>Was tun, wenn Health Connect nicht synchronisiert?</item>
+        <item>Was tun, wenn etwas nicht funktioniert?</item>
+    </string-array>
+    <string-array name="faq_answers">
+        <item>Wildforce ist deine Plattform für Training und Ernährung auf iPhone und Android. Erstelle passende Pläne, protokolliere Einheiten und Makros und verfolge deine Fortschritte.</item>
+        <item>Beim Start wählst du Ziel, Erfahrung, Verfügbarkeit, Ausrüstung, Vorlieben und Einschränkungen. Wildforce erstellt daraus einen anpassbaren Trainingsplan.</item>
+        <item>Du benötigst Android 9 oder neuer und die aktuelle, in deiner Region verfügbare Wildforce-Version.</item>
+        <item>Lokal verfügbare Inhalte kannst du ansehen und protokollieren. Für KI-Analysen und neue Pläne ist eine Verbindung erforderlich. Ausstehende Änderungen werden bei aktivierter Cloud-Synchronisierung später synchronisiert.</item>
+        <item>Ja. Du kannst eine Alternative suchen, die Übung ersetzen oder aus der laufenden Einheit entfernen.</item>
+        <item>Ja. Du kannst eigene Trainings erstellen, bearbeiten, durchführen und löschen.</item>
+        <item>Wildforce verfolgt nach jedem Satz deine Pause. Bei erlaubten Benachrichtigungen bleibt das aktive Training darüber zugänglich.</item>
+        <item>Unter Fortschritt findest du Übungsverlauf, Volumen, Statistiken, Serien und körperliche Veränderungen.</item>
+        <item>Die Einheit wird im Verlauf gespeichert und aktualisiert deine Statistiken und Fortschritte. Bei ausreichenden Daten kannst du sie mit früheren Einheiten vergleichen.</item>
+        <item>Nutze ein Foto, einen Barcode, ein Nährwertetikett, Text, die Lebensmittelsuche, zuletzt verwendete Einträge oder die manuelle Eingabe.</item>
+        <item>Ja. Füge deine Zutaten hinzu und nutze die Mahlzeitenideen für Vorschläge passend zu deinen Ernährungszielen.</item>
+        <item>Wildforce kann Lebensmittel oder Mahlzeiten für deine verbleibenden Makros vorschlagen. Es geht um langfristig bessere Entscheidungen.</item>
+        <item>Ja. Der Plan enthält einen Wochenkalender, Kalorien- und Makroziele sowie Defizit-, Erhaltungs- oder Überschusstage entsprechend deinem Ziel.</item>
+        <item>Wildforce verbindet sich mit Health Connect. Du wählst Berechtigungen für Größe, Gewicht, Kalorien, Ernährung und Training und kannst sie in den Einstellungen widerrufen.</item>
+        <item>Sie halten das aktive Training und die Pause sichtbar und ermöglichen Erinnerungen. Prüfe die Benachrichtigungsberechtigung, falls du die aktive Einheit nicht siehst.</item>
+        <item>Ein Trainingszugriff ist auf dem Startbildschirm verfügbar. Halte eine freie Stelle gedrückt und suche im Widget-Menü nach Wildforce, sofern es in deiner Version aktiviert ist.</item>
+        <item>Die Wear-OS-App zeigt den Trainingsstatus und ermöglicht es, Sätze abzuschließen und Pausen per Bluetooth zu steuern. Health Services und Tests mit einer echten Uhr sind noch in Arbeit.</item>
+        <item>Ja. Auf dem iPhone integriert Wildforce Apple Health und Apple Watch für aktive Trainings, Pausen und Wiederholungsdaten bei unterstützten Übungen.</item>
+        <item>Ja. Wähle in den Einstellungen das metrische oder imperiale System. Gewicht und Maße werden entsprechend angezeigt.</item>
+        <item>Daten werden lokal gespeichert und bei aktivierter Cloud-Synchronisierung mit deinem Konto synchronisiert. Melde dich mit demselben Konto an, um synchronisierte Daten wiederherzustellen.</item>
+        <item>Ja. Unter Profil und Einstellungen kannst du Sprache, Einheiten, Planvorlieben, Erinnerungen und Design ändern.</item>
+        <item>Prüfe die Berechtigungen in Health Connect, aktualisiere Wildforce und öffne die App erneut. Kontaktiere andernfalls den Support mit Plattform und App-Version.</item>
+        <item>Aktualisiere Wildforce, starte die App neu und prüfe die Berechtigungen. Kontaktiere bei anhaltenden Problemen den Support mit Gerätemodell, Android- und App-Version und einer kurzen Beschreibung.</item>
+    </string-array>
+</resources>

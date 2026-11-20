@@ -8,7 +8,7 @@ internal fun <T> selectCurrentRemoteWorkoutPlan(
     updatedAt: (T) -> String,
     id: (T) -> String,
 ): T? {
-    val eligible = plans.filterNot { status(it).equals("archived", true) || status(it).equals("superseded", true) }
+    val eligible = plans.filter { status(it).equals("active", true) || status(it).equals("completed", true) }
     val active = eligible.filter { status(it).equals("active", true) }
     return active.ifEmpty { eligible }.maxWithOrNull(compareBy<T> { createdAt(it) }.thenBy { updatedAt(it) }.thenBy { id(it) })
 }

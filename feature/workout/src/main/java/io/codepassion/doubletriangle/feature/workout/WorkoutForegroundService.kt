@@ -7,11 +7,13 @@ import android.os.IBinder
 import android.os.Handler
 import android.os.Looper
 import io.codepassion.doubletriangle.core.model.executionExercises
+import io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext
+import io.codepassion.doubletriangle.core.designsystem.R as SharedR
 
 internal class WorkoutForegroundService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private var workoutId: String? = null
-    private var currentTitle: String = "Entrenamiento activo"
+    private var currentTitle: String = ""
     private var totalExercises: Int = 1
     private var currentExerciseHasTimer = false
     private var restWasActive = false
@@ -101,7 +103,7 @@ internal class WorkoutForegroundService : Service() {
                     WorkoutActiveNotification.show(
                         context = this@WorkoutForegroundService,
                         title = currentTitle,
-                        detail = currentExerciseName?.let { "$it · descanso" } ?: "Descanso",
+                        detail = currentExerciseName?.let { "$it · ${localizedBackgroundContext(this@WorkoutForegroundService).getString(SharedR.string.rest)}" } ?: localizedBackgroundContext(this@WorkoutForegroundService).getString(SharedR.string.rest),
                         progress = remaining,
                         progressMax = snapshot.restInitialSeconds,
                         type = WorkoutNotificationType.REST,
@@ -133,7 +135,7 @@ internal class WorkoutForegroundService : Service() {
                         WorkoutActiveNotification.show(
                             context = this@WorkoutForegroundService,
                             title = currentTitle,
-                            detail = currentExerciseName ?: "A por la siguiente serie",
+                            detail = currentExerciseName ?: localizedBackgroundContext(this@WorkoutForegroundService).getString(SharedR.string.continue_with_your_workout),
                             progress = currentExerciseIndex,
                             progressMax = totalExercises,
                             type = WorkoutNotificationType.PROGRESS,
@@ -203,7 +205,7 @@ internal class WorkoutForegroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         android.util.Log.d("WorkoutService", "onStartCommand")
-        val title = intent?.getStringExtra("title") ?: currentTitle
+        val title = intent?.getStringExtra("title") ?: currentTitle.ifBlank { localizedBackgroundContext(this).getString(SharedR.string.ui_sheet_active_workout) }
         workoutId = intent?.getStringExtra("workoutId") ?: workoutId
         totalExercises = intent?.getIntExtra("totalExercises", totalExercises).takeIf { it != 0 } ?: totalExercises
         currentExerciseHasTimer = intent?.getBooleanExtra("currentExerciseHasTimer", currentExerciseHasTimer)
@@ -215,7 +217,7 @@ internal class WorkoutForegroundService : Service() {
         val notification = WorkoutActiveNotification.build(
             context = this,
             title = title,
-            detail = "Sesión activa",
+            detail = localizedBackgroundContext(this).getString(SharedR.string.ui_sheet_active_workout),
             progress = snapshot?.restRemaining ?: snapshot?.exerciseIndex ?: 0,
             progressMax = snapshot?.restInitialSeconds ?: totalExercises,
             type = if (snapshot?.restRemaining != null) WorkoutNotificationType.REST else WorkoutNotificationType.PROGRESS,

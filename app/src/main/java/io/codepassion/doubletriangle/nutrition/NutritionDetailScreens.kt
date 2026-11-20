@@ -13,6 +13,9 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
@@ -36,6 +39,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
@@ -122,8 +127,8 @@ internal fun NutritionPlanPreviewDialog(
                     }
                 }
                 Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.discard).uppercase()) }
-                    Button(onClick = onSave, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save_plan).uppercase(), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
+                    OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_discard).uppercase()) }
+                    Button(onClick = onSave, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_save_plan).uppercase(), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
                 }
             }
         }
@@ -165,7 +170,7 @@ internal fun NutritionDayDetail(
                     }
                     if (hasMealSuggestions) DropdownMenuItem(onClick = { showActions = false; onGrocery() }) {
                         Icon(Icons.Filled.ShoppingBasket, null, tint = NutritionCoral, modifier = Modifier.size(18.dp))
-                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.grocery_list), Modifier.padding(start = 10.dp))
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_grocery_list), Modifier.padding(start = 10.dp))
                     }
                 }
             }
@@ -292,7 +297,7 @@ private fun MacroBadge(label: String, value: Int, unit: String, color: Color, ic
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_84744cf2ee7e93cc, meal.targets.calories), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary)
             if (canLog) {
                 Box {
-                    IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.more_options), tint = WildforceThemeTokens.textSecondary) }
+                    IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_more_options), tint = WildforceThemeTokens.textSecondary) }
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                         MealMenuItem(Icons.Filled.CheckCircle, "Registrar esta comida") { menuOpen = false; onAction(meal, LogMethod.Manual) }
                         MealMenuItem(Icons.Filled.Kitchen, "Obtener ideas de comida") { menuOpen = false; onAction(meal, LogMethod.Describe) }
@@ -380,7 +385,7 @@ internal fun NutritionEntriesScreen(
             }
         }
     }
-    deleting?.let { entry -> AlertDialog(onDismissRequest = { deleting = null }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_c564319129b0cdb7)) }, text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_09c91686cd8d5922, entry.name)) }, confirmButton = { TextButton(onClick = { onChanged(entries.filterNot { it.id == entry.id }); deleting = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.delete).uppercase(), color = NutritionRed) } }, dismissButton = { TextButton(onClick = { deleting = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } }) }
+    deleting?.let { entry -> AlertDialog(onDismissRequest = { deleting = null }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_c564319129b0cdb7)) }, text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_09c91686cd8d5922, entry.name)) }, confirmButton = { TextButton(onClick = { onChanged(entries.filterNot { it.id == entry.id }); deleting = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.delete).uppercase(), color = NutritionRed) } }, dismissButton = { TextButton(onClick = { deleting = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } }) }
 }
 
 @Composable private fun EntrySummary(current: NutritionTargets, target: NutritionTargets) { Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp), emphasized = true).padding(16.dp)) { Row(verticalAlignment = Alignment.Bottom) { NutritionMacroSymbol(NutritionMacroIcon.Calories, NutritionCaloriesColor, Modifier.size(20.dp)); Text(current.calories.toString(), Modifier.padding(start = 6.dp), style = MaterialTheme.typography.h4, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary); Text(" / ${target.calories} kcal", color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(bottom = 5.dp)) }; Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) { MealMacro(NutritionMacroIcon.Protein, "${current.protein}/${target.protein}g", ProteinColor); MealMacro(NutritionMacroIcon.Carbs, "${current.carbs}/${target.carbs}g", CarbsColor); MealMacro(NutritionMacroIcon.Fat, "${current.fat}/${target.fat}g", FatColor) } } }
@@ -389,17 +394,18 @@ internal fun NutritionEntriesScreen(
 private fun EntryCard(entry: MealLog, onBookmark: (String?) -> Unit, onDelete: () -> Unit, onEdit: () -> Unit) {
     val photo = remember(entry.photoPath) { entry.photoPath?.let(BitmapFactory::decodeFile) }
     val remoteImage = rememberNutritionRemoteImage(entry.mediaUrl, photo == null)
-    val loggedTime = remember(entry.id) {
-        Instant.ofEpochMilli(entry.id).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("HH:mm"))
+    val loggedTime = remember(entry.id, entry.loggedAt) {
+        (entry.loggedAt ?: Instant.ofEpochMilli(entry.id)).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("HH:mm"))
     }
+    var showPhoto by remember(entry.id) { mutableStateOf(false) }
     var expanded by remember(entry.id) { mutableStateOf(false) }
     var confirmRemoveBookmark by remember(entry.id) { mutableStateOf(false) }
     var showBookmarkName by remember(entry.id) { mutableStateOf(false) }
     var bookmarkName by remember(entry.id) { mutableStateOf(entry.bookmarkName.ifBlank { entry.name }) }
     Column(Modifier.fillMaxWidth().background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(18.dp)).clickable(onClick = onEdit).padding(14.dp)) {
         Row(verticalAlignment = Alignment.Top) {
-            if (photo != null) Image(photo.asImageBitmap(), "Foto de ${entry.name}", Modifier.size(88.dp).clip(RoundedCornerShape(14.dp)), contentScale = ContentScale.Crop)
-            else if (remoteImage != null) Image(remoteImage.asImageBitmap(), "Imagen de ${entry.name}", Modifier.size(88.dp).clip(RoundedCornerShape(14.dp)), contentScale = ContentScale.Crop)
+            if (photo != null) Image(photo.asImageBitmap(), "Foto de ${entry.name}", Modifier.size(88.dp).clip(RoundedCornerShape(14.dp)).clickable { showPhoto = true }, contentScale = ContentScale.Crop)
+            else if (remoteImage != null) Image(remoteImage.asImageBitmap(), "Imagen de ${entry.name}", Modifier.size(88.dp).clip(RoundedCornerShape(14.dp)).clickable { showPhoto = true }, contentScale = ContentScale.Crop)
             else NutritionMealPlaceholder(entry)
             Column(Modifier.weight(1f).padding(start = 12.dp)) {
                 Text(entry.name, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
@@ -433,17 +439,20 @@ private fun EntryCard(entry: MealLog, onBookmark: (String?) -> Unit, onDelete: (
         }
         if (entry.notes.isNotBlank()) Text(entry.notes, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(top = 7.dp))
     }
+    if (showPhoto) (photo ?: remoteImage)?.let { image ->
+        NutritionPhotoDialog(image, entry.name) { showPhoto = false }
+    }
     if (confirmRemoveBookmark) {
         AlertDialog(
             onDismissRequest = { confirmRemoveBookmark = false },
-            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.remove_bookmark_)) },
-            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_meal_will_no_longer_appear_in_your_bookmarks_)) },
+            title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_remove_bookmark_)) },
+            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_this_meal_will_no_longer_appear_in_your_bookmarks_)) },
             confirmButton = {
                 TextButton(onClick = { confirmRemoveBookmark = false; onBookmark(null) }) {
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.remove).uppercase(), color = NutritionRed)
                 }
             },
-            dismissButton = { TextButton(onClick = { confirmRemoveBookmark = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
+            dismissButton = { TextButton(onClick = { confirmRemoveBookmark = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } },
         )
     }
     if (showBookmarkName) {
@@ -452,8 +461,31 @@ private fun EntryCard(entry: MealLog, onBookmark: (String?) -> Unit, onDelete: (
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_fc0eb916b51fbc32)) },
             text = { OutlinedTextField(bookmarkName, { bookmarkName = it.take(80) }, label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.name)) }, singleLine = true) },
             confirmButton = { TextButton(onClick = { showBookmarkName = false; onBookmark(bookmarkName.trim().ifBlank { entry.name }) }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase(), color = NutritionCoral) } },
-            dismissButton = { TextButton(onClick = { showBookmarkName = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
+            dismissButton = { TextButton(onClick = { showBookmarkName = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } },
         )
+    }
+}
+
+@Composable
+internal fun NutritionPhotoDialog(image: Bitmap, title: String, onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        var scale by remember { mutableFloatStateOf(1f) }
+        var offset by remember { mutableStateOf(Offset.Zero) }
+        val transform = rememberTransformableState { zoom, pan, _ ->
+            scale = (scale * zoom).coerceIn(1f, 4f)
+            offset = if (scale > 1f) offset + pan else Offset.Zero
+        }
+        Box(Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
+            Image(image.asImageBitmap(), title,
+                Modifier.fillMaxSize().pointerInput(Unit) {
+                    detectTapGestures(onDoubleTap = { scale = if (scale > 1f) 1f else 2.5f; offset = Offset.Zero })
+                }.transformable(transform).graphicsLayer {
+                    scaleX = scale; scaleY = scale; translationX = offset.x; translationY = offset.y
+                }, contentScale = ContentScale.Fit)
+            IconButton(onClick = onDismiss, modifier = Modifier.align(Alignment.TopEnd).padding(12.dp).size(48.dp).background(Color.DarkGray, CircleShape)) {
+                Icon(Icons.Filled.Close, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_close), tint = Color.White)
+            }
+        }
     }
 }
 
@@ -492,7 +524,7 @@ internal fun rememberNutritionRemoteImage(url: String?, enabled: Boolean): Bitma
 @Composable
 internal fun NutritionTargetsDialog(initial: NutritionTargets, onDismiss: () -> Unit, onSave: (NutritionTargets) -> Unit) {
     var calories by remember { mutableStateOf(initial.calories.toString()) }; var protein by remember { mutableStateOf(initial.protein.toString()) }; var carbs by remember { mutableStateOf(initial.carbs.toString()) }; var fat by remember { mutableStateOf(initial.fat.toString()) }
-    AlertDialog(onDismissRequest = onDismiss, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_960b584841df4abf), fontFamily = AntonFontFamily) }, text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Calorías", calories, { calories = it.filter(Char::isDigit) }, Modifier.fillMaxWidth()); Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Proteína", protein, { protein = it.filter(Char::isDigit) }, Modifier.weight(1f)); NumberField("Carbos", carbs, { carbs = it.filter(Char::isDigit) }, Modifier.weight(1f)); NumberField("Grasa", fat, { fat = it.filter(Char::isDigit) }, Modifier.weight(1f)) } } }, confirmButton = { Button(onClick = { onSave(NutritionTargets(calories.toIntOrNull()?.coerceIn(500, 8000) ?: initial.calories, protein.toIntOrNull()?.coerceIn(0, 500) ?: initial.protein, carbs.toIntOrNull()?.coerceIn(0, 1000) ?: initial.carbs, fat.toIntOrNull()?.coerceIn(0, 500) ?: initial.fat)) }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase(), fontFamily = Exo2FontFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) } }, dismissButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } })
+    AlertDialog(onDismissRequest = onDismiss, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_960b584841df4abf), fontFamily = AntonFontFamily) }, text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Calorías", calories, { calories = it.filter(Char::isDigit) }, Modifier.fillMaxWidth()); Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Proteína", protein, { protein = it.filter(Char::isDigit) }, Modifier.weight(1f)); NumberField("Carbos", carbs, { carbs = it.filter(Char::isDigit) }, Modifier.weight(1f)); NumberField("Grasa", fat, { fat = it.filter(Char::isDigit) }, Modifier.weight(1f)) } } }, confirmButton = { Button(onClick = { onSave(NutritionTargets(calories.toIntOrNull()?.coerceIn(500, 8000) ?: initial.calories, protein.toIntOrNull()?.coerceIn(0, 500) ?: initial.protein, carbs.toIntOrNull()?.coerceIn(0, 1000) ?: initial.carbs, fat.toIntOrNull()?.coerceIn(0, 500) ?: initial.fat)) }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase(), fontFamily = Exo2FontFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) } }, dismissButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } })
 }
 
 @Composable
@@ -531,23 +563,23 @@ internal fun NutritionPreferencesDialog(
     val styles = listOf("Omnívora", "Vegetariana", "Vegana", "Pescetariana")
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.nutrition_profile).uppercase(), fontFamily = AntonFontFamily) },
+        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_nutrition_profile).uppercase(), fontFamily = AntonFontFamily) },
         text = {
             LazyColumn(Modifier.heightIn(max = 440.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                item { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.planning).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) }
+                item { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_planning).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary) }
                 item { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_2f0b47dc21305702), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
-                item { Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) { styles.forEach { item -> NutritionOptionChip(item, style == item) { style = item } } } }
-                item { Row(verticalAlignment = Alignment.CenterVertically) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.meals_per_day), Modifier.weight(1f)); IconButton(onClick = { meals = (meals - 1).coerceAtLeast(1) }) { Icon(Icons.Filled.Remove, "Reducir comidas al día") }; Text(meals.toString(), fontWeight = FontWeight.Bold); IconButton(onClick = { meals = (meals + 1).coerceAtMost(10) }) { Icon(Icons.Filled.Add, "Aumentar comidas al día") } } }
+                item { Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) { styles.forEach { item -> NutritionOptionChip(dietaryStyleLabel(item), style == item) { style = item } } } }
+                item { Row(verticalAlignment = Alignment.CenterVertically) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_meals_per_day), Modifier.weight(1f)); IconButton(onClick = { meals = (meals - 1).coerceAtLeast(1) }) { Icon(Icons.Filled.Remove, "Reducir comidas al día") }; Text(meals.toString(), fontWeight = FontWeight.Bold); IconButton(onClick = { meals = (meals + 1).coerceAtMost(10) }) { Icon(Icons.Filled.Add, "Aumentar comidas al día") } } }
                 item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Inicio (0–23)", startHour, { startHour = it.filter(Char::isDigit).take(2) }, Modifier.weight(1f)); NumberField("Fin (0–23)", endHour, { endHour = it.filter(Char::isDigit).take(2) }, Modifier.weight(1f)) } }
-                item { Row(verticalAlignment = Alignment.CenterVertically) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.meal_suggestions), Modifier.weight(1f)); Switch(suggestions, { suggestions = it }, colors = SwitchDefaults.colors(checkedThumbColor = WildforceThemeTokens.textPrimary, checkedTrackColor = WildforceThemeTokens.textPrimary)) } }
-                item { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.preferences).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 8.dp)) }
+                item { Row(verticalAlignment = Alignment.CenterVertically) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_meal_suggestions), Modifier.weight(1f)); Switch(suggestions, { suggestions = it }, colors = SwitchDefaults.colors(checkedThumbColor = WildforceThemeTokens.textPrimary, checkedTrackColor = WildforceThemeTokens.textPrimary)) } }
+                item { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_preferences).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 8.dp)) }
                 item { PreferenceChoice("Esfuerzo al cocinar", cookingEffort, listOf("Bajo", "Medio", "Alto")) { cookingEffort = it } }
                 item { PreferenceChoice("Sensibilidad al presupuesto", budgetSensitivity, listOf("Baja", "Media", "Alta")) { budgetSensitivity = it } }
-                item { OutlinedTextField(proteinSources, { proteinSources = it }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.protein_sources)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_51abb8184a95f0c0)) }, maxLines = 3) }
+                item { OutlinedTextField(proteinSources, { proteinSources = it }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_protein_sources)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_51abb8184a95f0c0)) }, maxLines = 3) }
                 item { OutlinedTextField(dislikes, { dislikes = it }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_0218e37495d4775d)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_966462e99a10529e)) }, maxLines = 3) }
-                item { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.restrictions).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 8.dp)) }
-                item { OutlinedTextField(excludedFoods, { excludedFoods = it }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.excluded_foods)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_d0d81f2dcf960609)) }, maxLines = 3) }
-                item { OutlinedTextField(allergies, { allergies = it }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.allergies_or_intolerances)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.e_g__peanuts__lactose)) }, maxLines = 3) }
+                item { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_restrictions).uppercase(), fontFamily = AntonFontFamily, color = WildforceThemeTokens.textPrimary, modifier = Modifier.padding(top = 8.dp)) }
+                item { OutlinedTextField(excludedFoods, { excludedFoods = it }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_excluded_foods)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_d0d81f2dcf960609)) }, maxLines = 3) }
+                item { OutlinedTextField(allergies, { allergies = it }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_allergies_or_intolerances)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_e_g__peanuts__lactose)) }, maxLines = 3) }
                 item { OutlinedTextField(notes, { notes = it.take(500) }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.notes)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_cedac6b4faab8beb)) }, minLines = 3) }
             }
         },
@@ -569,7 +601,7 @@ internal fun NutritionPreferencesDialog(
                 ))
             }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase(), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } },
     )
 }
 
@@ -592,13 +624,14 @@ private fun NutritionOnboardingDialog(
     var suggestions by remember { mutableStateOf(initial.wantsSuggestions) }
     var healthConnecting by remember { mutableStateOf(false) }
     var healthError by remember { mutableStateOf<String?>(null) }
-    val titles = listOf("¿CÓMO COMES?", "¿CUÁNTAS COMIDAS TE ENCAJAN?", "¿HAY ALGO QUE EVITAR?", "¿QUIERES IDEAS DE COMIDAS?")
+    val titles = listOf(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_how_do_you_eat_).uppercase(), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_how_many_meals_fit_your_day_).uppercase(), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_anything_to_avoid_).uppercase(), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_do_you_want_meal_guidance_).uppercase())
     val subtitles = listOf(
-        "Usaremos esto para adaptar las sugerencias a tus preferencias.",
-        "Distribuiremos calorías y macros de una forma realista para tu día.",
-        "Añade alimentos excluidos y alergias o intolerancias.",
-        "Puedes recibir opciones sencillas junto a tus objetivos de macros.",
+        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_we_ll_use_this_to_keep_suggestions_aligned_with_your_food_preferences_),
+        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_this_helps_us_distribute_calories_and_macros_in_a_way_that_feels_realistic_),
+        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_add_foods_to_exclude_and_any_allergies_or_intolerances_as_a_simple_comma_separated_list_),
+        androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_this_controls_whether_your_future_plan_should_include_meal_ideas_alongside_macro_targets_),
     )
+    val healthDeniedMessage = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.feature.onboarding.R.string.settings_health_denied)
     val needsHealthConnect = !isHealthConnectEnabled
     val healthStep = 4
     val totalSteps = 4 + if (needsHealthConnect) 1 else 0
@@ -618,7 +651,7 @@ private fun NutritionOnboardingDialog(
                 NutritionWelcome(onContinue = { intro = false }, onDismiss = onDismiss)
             } else Column(Modifier.fillMaxSize().padding(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { if (step == 0) onDismiss() else step-- }) { Icon(if (step == 0) Icons.Filled.Close else Icons.AutoMirrored.Filled.ArrowBack, if (step == 0) "Cerrar" else "Atrás") }
+                    IconButton(onClick = { if (step == 0) onDismiss() else step-- }) { Icon(if (step == 0) Icons.Filled.Close else Icons.AutoMirrored.Filled.ArrowBack, if (step == 0) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_close) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_go_back)) }
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.nutrition).uppercase(), Modifier.weight(1f), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
                     Text("${step + 1}/$totalSteps", color = NutritionCoral, fontWeight = FontWeight.Bold)
                 }
@@ -648,29 +681,29 @@ private fun NutritionOnboardingDialog(
                                         onRequestHealthConnect { granted, _, _, _, _ ->
                                             healthConnecting = false
                                             if (granted) saveSetup()
-                                            else healthError = "No se concedió el acceso a Health Connect."
+                                            else healthError = healthDeniedMessage
                                         }
                                     }
                                 },
                                 onSkip = ::saveSetup,
                             )
                         } else when (displayedStep) {
-                            0 -> listOf("Omnívora", "Vegetariana", "Vegana", "Pescetariana").forEach { option -> SetupChoice(option, style == option) { style = option } }
+                            0 -> listOf("Omnívora", "Vegetariana", "Vegana", "Pescetariana").forEach { option -> SetupChoice(dietaryStyleLabel(option), style == option) { style = option } }
                             1 -> {
                                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                                    IconButton(onClick = { meals = (meals - 1).coerceAtLeast(1) }) { Icon(Icons.Filled.RemoveCircleOutline, "Menos") }
+                                    IconButton(onClick = { meals = (meals - 1).coerceAtLeast(1) }) { Icon(Icons.Filled.RemoveCircleOutline, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_less)) }
                                     Text("$meals", fontSize = 52.sp, fontWeight = FontWeight.Bold, color = NutritionCoral, modifier = Modifier.padding(horizontal = 24.dp))
-                                    IconButton(onClick = { meals = (meals + 1).coerceAtMost(10) }) { Icon(Icons.Filled.AddCircleOutline, "Más") }
+                                    IconButton(onClick = { meals = (meals + 1).coerceAtMost(10) }) { Icon(Icons.Filled.AddCircleOutline, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_more)) }
                                 }
-                                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.meals_per_day).uppercase(), Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_meals_per_day).uppercase(), Modifier.fillMaxWidth(), textAlign = TextAlign.Center, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                             }
                             2 -> {
-                                OutlinedTextField(excluded, { excluded = it.take(400) }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.excluded_foods)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_d0d81f2dcf960609)) }, minLines = 3)
-                                OutlinedTextField(allergies, { allergies = it.take(400) }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.allergies_or_intolerances)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.e_g__peanuts__lactose)) }, minLines = 3)
+                                OutlinedTextField(excluded, { excluded = it.take(400) }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_excluded_foods)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_d0d81f2dcf960609)) }, minLines = 3)
+                                OutlinedTextField(allergies, { allergies = it.take(400) }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_allergies_or_intolerances)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_e_g__peanuts__lactose)) }, minLines = 3)
                             }
                             else -> {
-                                SetupChoice("Sí, incluir sugerencias", suggestions, "Ideas sencillas adaptadas a tus macros.") { suggestions = true }
-                                SetupChoice("No, solo objetivos", !suggestions, "Plan centrado en calorías, macros y timing.") { suggestions = false }
+                                SetupChoice(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_yes__include_meal_suggestions), suggestions, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_show_simple_meal_ideas_next_to_calories__macros__and_workout_fueling_guidance_)) { suggestions = true }
+                                SetupChoice(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_no__just_give_me_targets), !suggestions, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_keep_future_plans_focused_on_calories__protein__carbs__fat__and_timing_guidance_)) { suggestions = false }
                             }
                         }
                     }
@@ -678,7 +711,7 @@ private fun NutritionOnboardingDialog(
                 if (!isHealthStep) {
                     Button(onClick = {
                         if (step < totalSteps - 1) step++ else saveSetup()
-                    }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Text(if (step == totalSteps - 1) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save_setup).uppercase() else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.key_continue).uppercase(), fontFamily = Exo2FontFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
+                    }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Text(if (step == totalSteps - 1) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save_setup).uppercase() else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_key_continue).uppercase(), fontFamily = Exo2FontFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
                 }
             }
         }
@@ -721,7 +754,7 @@ private fun NutritionHealthConnectStep(
                 if (isConnecting) CircularProgressIndicator(Modifier.size(20.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp)
                 else Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_79de068350f9e051), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.0.sp)
             }
-            TextButton(onClick = onSkip, enabled = !isConnecting, modifier = Modifier.fillMaxWidth()) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.not_now).uppercase(), color = WildforceThemeTokens.textSecondary) }
+            TextButton(onClick = onSkip, enabled = !isConnecting, modifier = Modifier.fillMaxWidth()) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_not_now).uppercase(), color = WildforceThemeTokens.textSecondary) }
         }
     }
 }
@@ -734,22 +767,22 @@ private fun NutritionWelcome(onContinue: () -> Unit, onDismiss: () -> Unit) {
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, "Cerrar") }
+            IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_close)) }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Box(Modifier.size(80.dp).background(WildforceThemeTokens.textPrimary, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
                 Icon(Icons.Filled.Eco, null, tint = WildforceThemeTokens.primaryButtonText, modifier = Modifier.size(36.dp))
             }
-            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.welcome_to_nutrition).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
-            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.wildforce_helps_you_set_targets__plan_meals__and_keep_nutrition_simple_), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_welcome_to_nutrition).uppercase(), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_wildforce_helps_you_set_targets__plan_meals__and_keep_nutrition_simple_), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
         }
         Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            WelcomeFeature(Icons.Filled.PieChart, "Macros personalizados", "Calorías y objetivos de proteína, carbohidratos y grasa adaptados a ti.")
-            WelcomeFeature(Icons.Filled.Event, "Planificación flexible", "Elige cuántas comidas haces y tu estilo alimentario.")
-            WelcomeFeature(Icons.Filled.WarningAmber, "Exclusiones y alergias", "Evita alimentos para que las sugerencias sigan siendo realistas.")
+            WelcomeFeature(Icons.Filled.PieChart, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_personalized_macros), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_daily_calories_and_protein_carb_fat_targets_tailored_to_your_goal_))
+            WelcomeFeature(Icons.Filled.Event, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_meal_planning_that_fits_you), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_choose_meals_per_day_and_a_dietary_style_get_simple_suggestions_if_you_want_))
+            WelcomeFeature(Icons.Filled.WarningAmber, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_allergies___exclusions), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_exclude_foods_and_flag_allergies_so_guidance_stays_realistic_for_you_))
         }
         Button(onClick = onContinue, Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) {
-            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_276f6069beea5cd5), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.1.sp)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_start_nutrition_setup), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.1.sp)
         }
     }
 }
@@ -799,7 +832,7 @@ private fun PreferenceChoice(label: String, selected: String, options: List<Stri
 @Composable
 internal fun MealIdeasDialog(day: NutritionDayPlan?, targetOverride: NutritionTargets? = null, onDismiss: () -> Unit, onSelect: (PlannedMeal) -> Unit) {
     if (day == null) {
-        AlertDialog(onDismissRequest = onDismiss, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.meal_ideas).uppercase(), fontFamily = AntonFontFamily) }, text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f859a18512113c62)) }, confirmButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase()) } })
+        AlertDialog(onDismissRequest = onDismiss, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.meal_ideas).uppercase(), fontFamily = AntonFontFamily) }, text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f859a18512113c62)) }, confirmButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dismiss).uppercase()) } })
         return
     }
     val context = LocalContext.current
@@ -822,7 +855,7 @@ internal fun MealIdeasDialog(day: NutritionDayPlan?, targetOverride: NutritionTa
             scope.launch {
                 runCatching { withContext(Dispatchers.IO) { NutritionAnalyzer.ingredientsFromPhoto(context, uri) } }
                     .onSuccess { ingredients -> photoIngredients = ingredients }
-                    .onFailure { error = photoAnalysisError(it) }
+                    .onFailure { error = photoAnalysisError(context, it) }
                 creating = false
             }
         }
@@ -836,18 +869,18 @@ internal fun MealIdeasDialog(day: NutritionDayPlan?, targetOverride: NutritionTa
                 scope.launch {
                     runCatching { withContext(Dispatchers.IO) { NutritionAnalyzer.ingredientsFromPhoto(context, uri) } }
                         .onSuccess { ingredients -> photoIngredients = ingredients }
-                        .onFailure { error = photoAnalysisError(it) }
+                        .onFailure { error = photoAnalysisError(context, it) }
                     creating = false
                 }
             }
         } else {
             file?.delete()
-            error = "No se pudo abrir la cámara o no se recibió ninguna foto. Puedes intentarlo de nuevo o elegir una imagen de la galería."
+            error = context.getString(io.codepassion.wildforce.android.R.string.photo_error_camera_open)
         }
     }
     val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) pendingCameraFile?.let { cameraPicker.launch(FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", it)) }
-        else { pendingCameraFile?.delete(); pendingCameraFile = null; error = "Necesitamos acceso a la cámara para fotografiar la comida." }
+        else { pendingCameraFile?.delete(); pendingCameraFile = null; error = context.getString(io.codepassion.wildforce.android.R.string.photo_error_camera_permission) }
     }
     fun launchCamera() {
         val file = File(context.cacheDir, "nutrition-ideas-${UUID.randomUUID()}.jpg")
@@ -886,12 +919,12 @@ internal fun MealIdeasDialog(day: NutritionDayPlan?, targetOverride: NutritionTa
                     )
                 }
             }.onSuccess { ideas ->
-                if (ideas.isEmpty()) error = "No se pudo crear ninguna idea. Comprueba tu conexión e inténtalo de nuevo."
+                if (ideas.isEmpty()) error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_)
                 else {
                     generatedIdeas = ideas
                     selectedIdea = 0
                 }
-            }.onFailure { error = "No se pudo crear la idea. Comprueba tu conexión e inténtalo de nuevo." }
+            }.onFailure { error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }
             creating = false
         }
     }
@@ -946,13 +979,13 @@ internal fun MealIdeasDialog(day: NutritionDayPlan?, targetOverride: NutritionTa
                                 Text(idea.title, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
                                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_ac0bf93ae7af8c28, idea.targets.calories, idea.targets.protein, idea.targets.carbs, idea.targets.fat), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                                 if (idea.description.isNotBlank()) Text(idea.description, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
-                                if (idea.usesIngredients.isNotEmpty()) Text("Usa: ${idea.usesIngredients.joinToString(", ")}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
-                                if (idea.extraIngredients.isNotEmpty()) Text("Necesita: ${idea.extraIngredients.joinToString(", ")}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                                if (idea.usesIngredients.isNotEmpty()) Text("${androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_used_ingredients)}: ${idea.usesIngredients.joinToString(", ")}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                                if (idea.extraIngredients.isNotEmpty()) Text("${androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_extra_ingredients_needed)}: ${idea.extraIngredients.joinToString(", ")}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                             }
                             if (selectedIdea == index) Icon(Icons.Filled.CheckCircle, "Seleccionada", tint = NutritionCoral)
                         }
                     }
-                    TextButton(onClick = { generateIdeas(regenerate = true) }, enabled = !creating) { Icon(Icons.Filled.Refresh, null, tint = NutritionCoral); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.generate_another), Modifier.padding(start = 6.dp), color = NutritionCoral) }
+                    TextButton(onClick = { generateIdeas(regenerate = true) }, enabled = !creating) { Icon(Icons.Filled.Refresh, null, tint = NutritionCoral); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_generate_another), Modifier.padding(start = 6.dp), color = NutritionCoral) }
                 }
                 AnimatedVisibility(
                     visible = creating,
@@ -981,7 +1014,7 @@ internal fun MealIdeasDialog(day: NutritionDayPlan?, targetOverride: NutritionTa
                 generateIdeas()
             }, enabled = (mode != "Texto" || ingredients.isNotBlank() || photoIngredients.isNotEmpty() || generatedIdeas.isNotEmpty()) && !creating, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { Icon(if (mode == "Foto") Icons.Filled.Photo else Icons.Filled.Kitchen, null, modifier = Modifier.size(17.dp)); Text(if (generatedIdeas.isNotEmpty()) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_2e89417900b71bf5).uppercase() else if (mode == "Foto" && photoIngredients.isNotEmpty()) "CREAR IDEAS" else if (mode == "Foto") "ELEGIR FOTO" else "CREAR IDEA", Modifier.padding(start = 7.dp), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
         },
-        dismissButton = { TextButton(onClick = onDismiss, enabled = !creating) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
+        dismissButton = { TextButton(onClick = onDismiss, enabled = !creating) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } },
     )
     val detailIdea = generatedIdeas.getOrNull(selectedIdea)
     if (showIdeaDetail && detailIdea != null) {
@@ -997,15 +1030,15 @@ internal fun MealIdeasDialog(day: NutritionDayPlan?, targetOverride: NutritionTa
                         MealMacro(NutritionMacroIcon.Carbs, "${detailIdea.targets.carbs}g", CarbsColor)
                         MealMacro(NutritionMacroIcon.Fat, "${detailIdea.targets.fat}g", FatColor)
                     }
-                    if (detailIdea.usesIngredients.isNotEmpty()) Text("Ingredientes usados\n${detailIdea.usesIngredients.joinToString("\n") { "• $it" }}", color = WildforceThemeTokens.textPrimary)
-                    if (detailIdea.extraIngredients.isNotEmpty()) Text("Ingredientes adicionales\n${detailIdea.extraIngredients.joinToString("\n") { "• $it" }}", color = WildforceThemeTokens.textPrimary)
+                    if (detailIdea.usesIngredients.isNotEmpty()) Text("${androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_used_ingredients)}\n${detailIdea.usesIngredients.joinToString("\n") { "• $it" }}", color = WildforceThemeTokens.textPrimary)
+                    if (detailIdea.extraIngredients.isNotEmpty()) Text("${androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_extra_ingredients_needed)}\n${detailIdea.extraIngredients.joinToString("\n") { "• $it" }}", color = WildforceThemeTokens.textPrimary)
                     detailIdea.matchReason?.takeIf(String::isNotBlank)?.let { Text(it, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 }
             },
             confirmButton = { Button(onClick = { onSelect(plannedMealFor(detailIdea)) }, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_2e89417900b71bf5)) } },
             dismissButton = {
                 Row {
-                    TextButton(onClick = { showIdeaDetail = false; generateIdeas(regenerate = true) }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.generate_another).uppercase(), color = NutritionCoral) }
+                    TextButton(onClick = { showIdeaDetail = false; generateIdeas(regenerate = true) }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_generate_another).uppercase(), color = NutritionCoral) }
                     TextButton(onClick = { showIdeaDetail = false; generatedIdeas = emptyList(); selectedIdea = 0 }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.edit).uppercase()) }
                 }
             },
@@ -1013,10 +1046,10 @@ internal fun MealIdeasDialog(day: NutritionDayPlan?, targetOverride: NutritionTa
     }
     if (showPhotoSource) AlertDialog(
         onDismissRequest = { showPhotoSource = false },
-        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.add_photo), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold) },
+        title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_add_photo), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold) },
         text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_63cd02ffaabd142e)) },
         confirmButton = { TextButton(onClick = { showPhotoSource = false; launchCamera() }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_841b8ccb44fa8d7f), color = NutritionCoral) } },
-        dismissButton = { TextButton(onClick = { showPhotoSource = false; photoPicker.launch("image/*") }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gallery)) } },
+        dismissButton = { TextButton(onClick = { showPhotoSource = false; photoPicker.launch("image/*") }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_gallery)) } },
     )
 }
 
@@ -1029,7 +1062,7 @@ internal fun NutritionMoreActionsDialog(onDismiss: () -> Unit, onIdeas: () -> Un
             ActionRow(Icons.Filled.Lightbulb, "Ideas de comidas", "Sugerencias ajustadas a tu plan", onIdeas)
             ActionRow(Icons.Filled.AutoAwesome, "Completar macros", "Encuentra opciones para cubrir lo que falta", onFulfill)
         } },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase()) } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dismiss).uppercase()) } },
     )
 }
 
@@ -1063,7 +1096,7 @@ internal fun NutritionGroceryDialog(plan: List<NutritionDayPlan>, onDismiss: () 
     ) {
         Surface(Modifier.fillMaxWidth().fillMaxHeight(.92f).padding(horizontal = 8.dp), shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp), color = WildforceThemeTokens.background) {
             Column(Modifier.fillMaxSize()) {
-                Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.grocery_list).uppercase(), Modifier.weight(1f), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary); TextButton(onClick = { val text = groceries.joinToString("\n") { "- ${it.first}: ${it.second * persons}g" }; context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, "Lista de la compra\n\n$text") }, "Compartir lista")) }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_884f0d53f3e1d469), color = NutritionCoral) }; TextButton(onClick = { if (groceries.all { it.first.lowercase() in checked } || groceries.isEmpty()) onDismiss() else showDiscard = true }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ready).uppercase(), color = NutritionCoral) } }
+                Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_grocery_list).uppercase(), Modifier.weight(1f), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary); TextButton(onClick = { val text = groceries.joinToString("\n") { "- ${it.first}: ${it.second * persons}g" }; context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, "Lista de la compra\n\n$text") }, "Compartir lista")) }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_884f0d53f3e1d469), color = NutritionCoral) }; TextButton(onClick = { if (groceries.all { it.first.lowercase() in checked } || groceries.isEmpty()) onDismiss() else showDiscard = true }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ready).uppercase(), color = NutritionCoral) } }
                 Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.People, "Personas", tint = NutritionCoral); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_fa2ea3fb081cf5c5), Modifier.padding(start = 8.dp).weight(1f), color = WildforceThemeTokens.textPrimary); IconButton(onClick = { persons = (persons - 1).coerceAtLeast(1) }) { Icon(Icons.Filled.Remove, "Reducir personas") }; Text(persons.toString(), fontWeight = FontWeight.Bold); IconButton(onClick = { persons = (persons + 1).coerceAtMost(20) }) { Icon(Icons.Filled.Add, "Aumentar personas") } }
                 LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     if (groceries.isEmpty()) item { EmptyState("Sin alimentos", "No hay sugerencias en este plan.") }
@@ -1103,7 +1136,7 @@ internal fun NutritionFulfillDialog(current: NutritionTargets, target: Nutrition
         if (met) { loading = false; return@LaunchedEffect }
         runCatching { withContext(Dispatchers.IO) { NutritionAnalyzer.generateMissingMacroIdeas(context, missing) } }
             .onSuccess { suggestions = it }
-            .onFailure { error = "No se pudieron cargar las ideas. Inténtalo de nuevo." }
+            .onFailure { error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }
         loading = false
     }
     var appeared by remember { mutableStateOf(false) }
@@ -1113,7 +1146,7 @@ internal fun NutritionFulfillDialog(current: NutritionTargets, target: Nutrition
             Column(Modifier.fillMaxSize()) {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_325b08a2f774093a), Modifier.weight(1f), fontFamily = AntonFontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-                    TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss).uppercase(), color = NutritionCoral) }
+                    TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dismiss).uppercase(), color = NutritionCoral) }
                 }
                 if (met) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { EmptyState("¡Objetivos cumplidos!", "Ya has cubierto los macros del día.") }

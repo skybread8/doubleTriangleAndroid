@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_downloading">Descargando datos adicionales...</string>
+    <string name="history_download_failed">No se pudo descargar tu historial</string>
+    <string name="history_download_retry">Reintentar</string>
+</resources>

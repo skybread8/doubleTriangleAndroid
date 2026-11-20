@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fallbacks for Sheet entries that are missing or still in English. -->
+    <string name="onboarding_subtitle_choose_the_training_objective_that_best_fits_you_">@string/choose_the_training_objective_that_best_fits_you_</string>
+    <string name="onboarding_subtitle_define_your_preferred_workout_structure_and_duration_">@string/define_your_preferred_workout_structure_and_duration_</string>
+    <string name="onboarding_subtitle_tell_us_about_your_current_fitness_experience_">@string/tell_us_about_your_current_fitness_experience_</string>
+    <string name="onboarding_subtitle_what_kind_of_environment_will_you_be_training_in_">@string/what_kind_of_environment_will_you_be_training_in_</string>
+    <string name="onboarding_subtitle_this_helps_us_calculate_your_needs_accurately_">@string/this_helps_us_calculate_your_needs_accurately_</string>
+    <string name="onboarding_subtitle_what_s_the_name_that_we_should_call_you_">@string/what_s_the_name_that_we_should_call_you_</string>
+    <string name="onboarding_subtitle_tell_us_about_your_daily_activity_level_">@string/tell_us_about_your_daily_activity_level_</string>
+    <string name="onboarding_subtitle_select_when_you_want_to_train_each_week_">@string/select_when_you_want_to_train_each_week_</string>
+    <string name="onboarding_subtitle_choose_the_workout_structure_that_feels_right_for_you_">@string/choose_the_workout_structure_that_feels_right_for_you_</string>
+    <string name="onboarding_subtitle_choose_how_your_current_body_composition_focus_should_shape_your_training_plan_">@string/choose_how_your_current_body_composition_focus_should_shape_your_training_plan_</string>
+    <string name="onboarding_subtitle_fine_tune_the_equipment_you_actually_have_access_to_">@string/fine_tune_the_equipment_you_actually_have_access_to_</string>
+    <string name="onboarding_subtitle_do_you_have_any_injury_or_mobility_restriction_">@string/do_you_have_any_injury_or_mobility_restriction_</string>
+    <string name="onboarding_subtitle_this_helps_the_ai_tailor_the_volume_and_intensity_of_your_plans_">@string/this_helps_the_ai_tailor_the_volume_and_intensity_of_your_plans_</string>
+    <string name="onboarding_subtitle_the_formula_to_get_better_results_differs_based_on_sex__we_need_this_information_to_serve_you_better_">@string/the_formula_to_get_better_results_differs_based_on_sex__we_need_this_information_to_serve_you_better_</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sheet strings remain authoritative; these fallbacks cover untranslated cells. -->
+    <string name="onboarding_title_welcome">ようこそ</string>
+    <string name="onboarding_title_your_goals">目標</string>
+    <string name="onboarding_title_lifestyle">ライフスタイル</string>
+    <string name="onboarding_title_availability">トレーニング可能な日</string>
+    <string name="onboarding_title_workout_duration">ワークアウト時間</string>
+    <string name="onboarding_title_experience">経験</string>
+    <string name="onboarding_title_program">プログラム</string>
+    <string name="onboarding_title_body_phase">身体づくりの段階</string>
+    <string name="onboarding_title_gym">ジム</string>
+    <string name="onboarding_title_equipment">器具</string>
+    <string name="onboarding_title_restrictions">制限事項</string>
+    <string name="onboarding_title_when_is_your_birthday">誕生日を教えてください</string>
+    <string name="onboarding_title_what_s_your_sex_">性別を教えてください</string>
+    <string name="onboarding_title_height">身長</string>
+    <string name="onboarding_title_weight">体重</string>
+</resources>

@@ -137,6 +137,9 @@ internal fun nutritionLogTimestamp(date: LocalDate, previous: String?, localId: 
     return date.atTime(12, 0).atZone(zone).toInstant().toString()
 }
 
+internal fun nutritionLogTimestampForMeal(meal: MealLog, previous: String?, zone: ZoneId = ZoneId.systemDefault()): String =
+    meal.loggedAt?.toString() ?: nutritionLogTimestamp(meal.loggedDate, previous, meal.id, zone)
+
 internal enum class NutritionDayType(val title: String) { Training("Entrenamiento"), Rest("Descanso"), Recovery("Recuperación") }
 internal enum class EnergyDemand(val title: String) { High("Alta"), Medium("Media"), Low("Baja") }
 
@@ -540,6 +543,10 @@ internal object NutritionStore {
 
     fun save(context: Context, date: LocalDate, meals: List<MealLog>) {
         write(context, all(context).filterNot { it.loggedDate == date } + meals.map { it.copy(loggedDate = date) })
+    }
+
+    fun replace(context: Context, meal: MealLog) {
+        write(context, all(context).filterNot { it.id == meal.id } + meal)
     }
 
     fun save(context: Context, meals: List<MealLog>) = save(context, LocalDate.now(), meals)

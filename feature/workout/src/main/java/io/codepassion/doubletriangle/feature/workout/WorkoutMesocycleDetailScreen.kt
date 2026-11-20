@@ -1,5 +1,6 @@
 package io.codepassion.doubletriangle.feature.workout
 
+import io.codepassion.doubletriangle.core.designsystem.localizedContentDescription
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -84,7 +85,7 @@ internal fun WorkoutMesocycleDetailScreen(state: WorkoutHubState, planHistory: L
         // iOS presents this as a sheet with a trailing Done action.
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Spacer(Modifier.weight(1f))
-            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.done).uppercase(), Modifier.heightIn(min = 48.dp).semantics { contentDescription = "Hecho" }.clickable(onClick = onBack).padding(horizontal = 8.dp), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.done).uppercase(), Modifier.heightIn(min = 48.dp).localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.done).clickable(onClick = onBack).padding(horizontal = 8.dp), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold)
         }
         LazyColumn(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 160.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             item { MesocycleSummaryCard(state, currentGroup, currentEntry, appLanguage) }
@@ -113,7 +114,7 @@ private fun MesocycleSummaryCard(state: WorkoutHubState, group: MesocycleTimelin
     Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(24.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.current_mesocycle).uppercase(), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.mesocycle__d, group.index), fontFamily = Exo2FontFamily, style = MaterialTheme.typography.h5, color = WildforceThemeTokens.textPrimary)
-        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.week__d_of__d_____, currentWeek, group.cycleLength, phase.label), style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
+        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.week__d_of__d_____, currentWeek, group.cycleLength, workoutPhaseLabel(phase)), style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
         MesocyclePillProgress(currentWeek, group.cycleLength)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             // The Android state only carries the goal display name; iOS resolves its specific goal symbol.
@@ -131,7 +132,7 @@ private fun MesocycleSummaryCard(state: WorkoutHubState, group: MesocycleTimelin
         }
         Spacer(Modifier.height(4.dp))
         DetailMetric("Esta semana", state.planName)
-        DetailMetric("Cronología", "${phase.label} · semana $phaseWeek", phaseIcon(phase))
+        DetailMetric(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.timeline), workoutPhaseLabel(phase) + " · " + androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.week__d, phaseWeek), phaseIcon(phase))
         formatMesocycleSummaryStartDate(state.planStartsOn, appLanguage)?.let { startsOn ->
             DetailMetric(localizedWorkoutLabel("Start date", appLanguage), startsOn, Icons.Filled.CalendarToday)
         }
@@ -190,7 +191,7 @@ private fun DetailSectionHeader(title: String, subtitle: String) = Column(vertic
 
 @Composable
 private fun CollapsibleMesocycleGroupCard(group: MesocycleTimelineGroup, expanded: Boolean, onToggle: () -> Unit) {
-    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).semantics { contentDescription = "Mesociclo ${group.index}, ${if (expanded) "desplegado" else "plegado"}" }.clickable(onClick = onToggle).padding(16.dp)) {
+    Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.mesocycle__d, group.index).clickable(onClick = onToggle).padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             MesocycleGroupHeader(group, false, Modifier.weight(1f))
             Icon(if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore, null, tint = WildforceThemeTokens.textSecondary)
@@ -231,13 +232,13 @@ private fun MesocycleEntryRow(entry: MesocycleTimelineEntry) {
             entry.isProjected -> WildforceThemeTokens.textSecondary.copy(alpha = .14f)
             else -> WildforceThemeTokens.textSecondary.copy(alpha = .44f)
         }), contentAlignment = Alignment.Center) {
-            if (entry.isCompleted) Icon(Icons.Filled.CheckCircle, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.completed), modifier = Modifier.size(18.dp), tint = Color.White)
+            if (entry.isCompleted) Icon(Icons.Filled.CheckCircle, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_completed), modifier = Modifier.size(18.dp), tint = Color.White)
             else Text(entry.position.toString(), fontWeight = FontWeight.Bold, color = Color.White)
         }
         Column(Modifier.weight(1f).padding(start = 14.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            val title = entry.state?.planName ?: "${entry.phase.label} · semana ${entry.position}"
+            val title = entry.state?.planName ?: workoutPhaseLabel(entry.phase) + " · " + androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.week__d, entry.position)
             Text(title, style = MaterialTheme.typography.subtitle2, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_38f03af9e95ae2cb, entry.phase.label, entry.phaseWeek), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_38f03af9e95ae2cb, workoutPhaseLabel(entry.phase), entry.phaseWeek), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
             formatMesocycleStartDate(entry.startsOn)?.let { startsOn ->
                 Row(Modifier.padding(top = 5.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.CalendarToday, null, Modifier.size(14.dp), WildforceThemeTokens.textSecondary)
@@ -248,7 +249,7 @@ private fun MesocycleEntryRow(entry: MesocycleTimelineEntry) {
         // Keep the phase badge bounded. Without this, Compose measures this
         // unweighted child first and can leave the plan title only a few pixels
         // wide, which makes it wrap one character per line on narrow layouts.
-        ContextPill(entry.phase.label, phaseIcon(entry.phase), Modifier.widthIn(max = 124.dp))
+        ContextPill(workoutPhaseLabel(entry.phase), phaseIcon(entry.phase), Modifier.widthIn(max = 124.dp))
     }
 }
 

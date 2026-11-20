@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fallbacks for untranslated Sheet choices. -->
+    <string name="onboarding_choice_automatic">@string/automatic</string>
+    <string name="onboarding_choice_body_part_split">@string/body_part_split</string>
+    <string name="onboarding_choice_big_gym">@string/big_gym</string>
+    <string name="onboarding_choice_small_gym">@string/small_gym</string>
+    <string name="onboarding_choice_home_gym">@string/home_gym</string>
+    <string name="onboarding_choice_some_accessories">@string/some_accessories</string>
+    <string name="onboarding_choice_bodyweight_only">@string/bodyweight_only</string>
+    <string name="onboarding_choice_pull_up_bar">@string/pull_up_bar</string>
+    <string name="onboarding_choice_cardio">@string/cardio</string>
+    <string name="onboarding_choice_male">@string/male</string>
+    <string name="onboarding_choice_female">@string/female</string>
+    <string name="onboarding_choice_upper_body">@string/upper_body</string>
+    <string name="onboarding_choice_lower_body">@string/lower_body</string>
+    <string name="onboarding_choice_push">@string/push</string>
+    <string name="onboarding_choice_pull">@string/pull</string>
+    <string name="onboarding_choice_core">@string/core</string>
+    <string name="onboarding_choice_recovery">@string/recovery</string>
+</resources>

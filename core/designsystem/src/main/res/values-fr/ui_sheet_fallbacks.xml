@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Local fallbacks for Sheet entries that are missing or still in English. -->
+    <string name="ui_sheet_restrictions">Restrictions</string>
+    <string name="ui_sheet_easy">Facile</string>
+    <string name="ui_sheet_hard">Difficile</string>
+    <string name="ui_sheet_very_easy">Très facile</string>
+    <string name="ui_sheet_very_hard">Très difficile</string>
+    <string name="ui_sheet_just_right">Juste comme il faut</string>
+    <string name="ui_sheet_performance">Performance</string>
+    <string name="ui_sheet__d_of__d">%1$d sur %2$d</string>
+    <string name="ui_sheet_distance__km_">Distance (km)</string>
+    <string name="ui_sheet_distance__mi_">Distance (mi)</string>
+    <string name="ui_sheet_recovery">Récupération</string>
+    <string name="ui_sheet__d_min">%1$d min</string>
+    <string name="ui_sheet_something_went_wrong_while_creating_your_plan">Une erreur s’est produite lors de la création de votre programme</string>
+    <string name="ui_sheet_automatic">Automatique</string>
+    <string name="ui_sheet_original">Original</string>
+    <string name="ui_sheet_preferences">Préférences</string>
+    <string name="ui_sheet_upper_body">Haut du corps</string>
+    <string name="ui_sheet_lower_body">Bas du corps</string>
+    <string name="ui_sheet_push">Poussée</string>
+    <string name="ui_sheet_pull">Tirage</string>
+    <string name="ui_sheet_cardio">Cardio</string>
+    <string name="ui_sheet_volume">Volume</string>
+    <string name="ui_sheet_standard">Standard</string>
+</resources>

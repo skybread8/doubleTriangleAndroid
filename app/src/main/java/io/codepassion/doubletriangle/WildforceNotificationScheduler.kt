@@ -1,6 +1,8 @@
 package io.codepassion.doubletriangle
 
 import io.codepassion.wildforce.android.R
+import io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext
+import io.codepassion.doubletriangle.core.designsystem.R as SharedR
 
 import android.app.AlarmManager
 import android.app.NotificationChannel
@@ -35,8 +37,8 @@ internal object WildforceNotificationScheduler {
     fun ensureChannels(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            manager.createNotificationChannel(NotificationChannel(CHANNEL_WORKOUT, "Entrenamientos", NotificationManager.IMPORTANCE_DEFAULT))
-            manager.createNotificationChannel(NotificationChannel(CHANNEL_NUTRITION, "Nutrición", NotificationManager.IMPORTANCE_DEFAULT))
+            manager.createNotificationChannel(NotificationChannel(CHANNEL_WORKOUT, localizedBackgroundContext(context).getString(SharedR.string.workouts), NotificationManager.IMPORTANCE_DEFAULT))
+            manager.createNotificationChannel(NotificationChannel(CHANNEL_NUTRITION, localizedBackgroundContext(context).getString(SharedR.string.nutrition), NotificationManager.IMPORTANCE_DEFAULT))
         }
     }
 
@@ -93,8 +95,8 @@ internal object WildforceNotificationScheduler {
             NUTRITION_ALARM,
             next.at,
             CHANNEL_NUTRITION,
-            "Registra tus comidas",
-            nutritionReminderBody(mealsAtCheckpoint),
+            localizedBackgroundContext(context).getString(SharedR.string.log_your_meals),
+            nutritionReminderBody(context, mealsAtCheckpoint),
         )
     }
 
@@ -177,10 +179,10 @@ internal object WildforceNotificationScheduler {
         persistScheduledWorkoutAlarmCodes(context, emptySet())
     }
 
-    private fun workoutReminderTitle(context: Context): String = listOf(
+    internal fun workoutReminderTitle(context: Context): String = listOf(
         io.codepassion.doubletriangle.core.designsystem.R.string.time_to_crush_it_,
         io.codepassion.doubletriangle.core.designsystem.R.string.sweat_now__shine_later_,
-        io.codepassion.doubletriangle.core.designsystem.R.string.your_future_self_will_thank_you_,
+        io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_your_future_self_will_thank_you_,
         io.codepassion.doubletriangle.core.designsystem.R.string.consistency_is_key_,
         io.codepassion.doubletriangle.core.designsystem.R.string.ready_for_your_workout_,
         io.codepassion.doubletriangle.core.designsystem.R.string.let_s_get_moving_,
@@ -188,7 +190,7 @@ internal object WildforceNotificationScheduler {
         io.codepassion.doubletriangle.core.designsystem.R.string.don_t_stop_until_you_re_proud_,
         io.codepassion.doubletriangle.core.designsystem.R.string.push_your_limits_,
         io.codepassion.doubletriangle.core.designsystem.R.string.believe_in_yourself_,
-    ).random().let(context::getString)
+    ).random().let(localizedBackgroundContext(context)::getString)
 
     /** Planned breakfast/lunch/dinner checkpoints, using the same iOS ranges: 12:00, 17:00 and 21:00. */
     private fun pendingNutritionCheckpoints(context: Context, now: LocalDateTime): List<NutritionCheckpoint> {
@@ -202,7 +204,7 @@ internal object WildforceNotificationScheduler {
         val loggedTypes = logged.map { it.type }.toSet()
         return planned
             .filter { it.type in reminderMealTypes && it.type !in loggedTypes }
-            .map { NutritionCheckpoint(it.title.ifBlank { it.type.title }, today.atTime(reminderTime(it.type))) }
+            .map { NutritionCheckpoint(it.title.ifBlank { localizedMealType(context, it.type) }, today.atTime(reminderTime(it.type))) }
     }
 
     /** A notification remains valid only while at least one of its meals is still overdue. */
@@ -218,12 +220,30 @@ internal object WildforceNotificationScheduler {
         MealType.PostWorkout -> error("Post-workout has no standalone logging checkpoint")
     }
 
-    private fun nutritionReminderBody(names: List<String>): String = when (names.size) {
-        0 -> "Aún te quedan comidas por registrar hoy."
-        1 -> "Aún tienes que registrar ${names.first()} hoy."
-        2 -> "Aún tienes que registrar ${names[0]} y ${names[1]} hoy."
-        else -> "Aún tienes que registrar ${names.dropLast(1).joinToString(", ")} y ${names.last()} hoy."
+    private fun localizedMealType(context: Context, type: MealType): String {
+        val resource = when (type) {
+            MealType.Breakfast -> SharedR.string.breakfast
+            MealType.Lunch -> SharedR.string.lunch
+            MealType.Dinner -> SharedR.string.dinner
+            MealType.Snack -> SharedR.string.snack
+            MealType.PreWorkout -> SharedR.string.pre_workout
+            MealType.PostWorkout -> SharedR.string.post_workout
+        }
+        return localizedBackgroundContext(context).getString(resource)
     }
+
+    internal fun nutritionReminderBody(context: Context, names: List<String>): String {
+        val resources = localizedBackgroundContext(context)
+        return when (names.size) {
+            0 -> resources.getString(SharedR.string.you_still_have_meals_to_log_today_)
+            1 -> resources.getString(SharedR.string.you_still_need_to_log____today_, names[0])
+            2 -> resources.getString(SharedR.string.you_still_need_to_log____and____today_, names[0], names[1])
+            else -> resources.getString(SharedR.string.you_still_need_to_log_____and____today_, names.dropLast(1).joinToString(", "), names.last())
+        }
+    }
+
+    internal fun currentNutritionReminderBody(context: Context, now: LocalDateTime = LocalDateTime.now()): String =
+        nutritionReminderBody(context, pendingNutritionCheckpoints(context, now).filter { !it.at.isAfter(now) }.map { it.title })
 
     private data class NutritionCheckpoint(val title: String, val at: LocalDateTime)
 
@@ -242,8 +262,11 @@ internal class WildforceNotificationReceiver : BroadcastReceiver() {
             WildforceNotificationScheduler.scheduleNutritionReminder(context)
             if (!isStillDue) return
         }
-        val title = intent.getStringExtra("title") ?: "Wildforce"
-        val body = intent.getStringExtra("body") ?: "Tienes una actividad pendiente."
+        val strings = localizedBackgroundContext(context)
+        val title = if (channel == WildforceNotificationScheduler.CHANNEL_NUTRITION) strings.getString(SharedR.string.log_your_meals)
+            else WildforceNotificationScheduler.workoutReminderTitle(context)
+        val body = if (channel == WildforceNotificationScheduler.CHANNEL_NUTRITION) WildforceNotificationScheduler.currentNutritionReminderBody(context)
+            else strings.getString(SharedR.string.time_for_you_workout_)
         WildforceNotificationScheduler.ensureChannels(context)
         val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) android.app.Notification.Builder(context, channel) else @Suppress("DEPRECATION") android.app.Notification.Builder(context)
         val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="someone_just_took_the_last_place_for_this_time__availability_has_been_refreshed_">最后一个名额刚刚被预订，可用时段已刷新。</string>
+    <string name="this_time_is_no_longer_available__the_room_may_have_been_closed_">该时段已不可用，房间可能已关闭。</string>
+    <string name="this_time_has_already_started__choose_a_later_one_">该时段已经开始，请选择较晚的时间。</string>
+    <string name="this_time_is_outside_the_room_s_booking_window_">该时段不在房间的预约范围内。</string>
+    <string name="this_duration_isn_t_allowed_in_this_room_">该房间不允许此预约时长。</string>
+    <string name="you_already_have_another_reservation_at_this_time_">你在此时段已有其他预约。</string>
+    <string name="this_room_can_t_be_booked_right_now_">该房间目前无法预约。</string>
+    <string name="your_gym_membership_is_no_longer_active_">你的健身房会员资格已失效。</string>
+    <string name="it_s_too_late_to_cancel_this_reservation_">已超过取消此预约的截止时间。</string>
+    <string name="you_seem_to_be_offline__connect_to_the_internet_and_try_again_">你似乎已离线。请连接网络后重试。</string>
+    <string name="the_operation_could_not_be_completed__please_try_again_">无法完成操作，请重试。</string>
+    <string name="we_couldn_t_sign_you_in__check_your_details_and_try_again_">无法登录。请检查信息后重试。</string>
+    <string name="google_sign_in_is_not_configured_yet_">尚未配置 Google 登录。</string>
+    <string name="enter_your_email_and_password_to_continue_">请输入邮箱和密码以继续。</string>
+    <string name="we_couldn_t_finish_the_estimate_right_now__please_try_again_">目前无法完成估算，请重试。</string>
+    <string name="couldn_t_generate_the_future_preview_right_now__please_try_again_">目前无法生成未来预览，请重试。</string>
+    <string name="couldn_t_save_these_progress_photos__please_try_again_">无法保存这些进度照片，请重试。</string>
+    <string name="failed_to_generate_workout__please_try_again_">无法生成训练，请重试。</string>
+    <string name="this_qr_is_not_a_gym_join_code_">此二维码不是健身房加入码。</string>
+    <string name="device_authentication_is_not_available_right_now_">目前无法使用设备身份验证。</string>
+    <string name="set_up_device_authentication_in_settings_to_protect_your_progress_photos_">请在设置中配置设备身份验证，以保护进度照片。</string>
+    <string name="unlock_progress_photos">解锁进度照片</string>
+    <string name="unlock_your_progress_photos_">解锁你的进度照片。</string>
+    <string name="couldn_t_load_your_reservations">无法加载预约</string>
+    <string name="couldn_t_load_the_rooms">无法加载房间</string>
+    <string name="couldn_t_load_availability">无法加载可用时段</string>
+    <string name="something_went_wrong">出现问题</string>
+    <string name="couldn_t_sync_your_data">无法同步数据</string>
+    <string name="check_your_connection_and_try_again_">请检查网络连接后重试。</string>
+</resources>

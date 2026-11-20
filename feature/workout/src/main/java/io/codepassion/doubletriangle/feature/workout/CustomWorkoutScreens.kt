@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import androidx.activity.compose.BackHandler
+import io.codepassion.doubletriangle.core.designsystem.localizedContentDescription
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -66,6 +67,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
@@ -219,7 +221,7 @@ internal fun CustomWorkoutsScreen(
                         .fillMaxWidth()
                         .height(180.dp)
                         .clip(RoundedCornerShape(18.dp))
-                        .semantics { contentDescription = "${workout.title}, $focusLabel, ${workout.estimatedMinutes} minutos" }
+                        .localizedWorkoutCardDescription(workout.title, focusLabel, workout.estimatedMinutes)
                         .clickable {
                             // iOS opens an unfinished manual draft back in
                             // the editor; only ready workouts open the detail.
@@ -254,11 +256,11 @@ internal fun CustomWorkoutsScreen(
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text(focusLabel, style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = 0.84f))
-                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_min, workout.estimatedMinutes), style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = 0.84f))
+                            Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_min, workout.estimatedMinutes), style = MaterialTheme.typography.caption, color = Color.White.copy(alpha = 0.84f))
                         }
                     }
                     Box(Modifier.align(Alignment.TopEnd).padding(top = 8.dp, end = 8.dp)) {
-                        Box(Modifier.size(48.dp).semantics { contentDescription = "Acciones" }.clickable { menuExpanded = true }, contentAlignment = Alignment.Center) {
+                        Box(Modifier.size(48.dp).localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_more_options).clickable { menuExpanded = true }, contentAlignment = Alignment.Center) {
                             Box(Modifier.size(30.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.20f)), contentAlignment = Alignment.Center) {
                                 Icon(Icons.Filled.MoreHoriz, contentDescription = stringResource(R.string.workout_actions), tint = Color.White, modifier = Modifier.size(19.dp))
                             }
@@ -320,7 +322,7 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
             .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(48.dp).clip(CircleShape).background(WildforceThemeTokens.textPrimary).semantics { contentDescription = "Cerrar" }.clickable { onCancel(editorSnapshot()) }, contentAlignment = Alignment.Center) {
+            Box(Modifier.size(48.dp).clip(CircleShape).background(WildforceThemeTokens.textPrimary).localizedContentDescription(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_close).clickable { onCancel(editorSnapshot()) }, contentAlignment = Alignment.Center) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.workout_close), tint = WildforceThemeTokens.backgroundSecondary, modifier = Modifier.size(22.dp))
             }
             Column(Modifier.weight(1f).padding(horizontal = 14.dp)) {
@@ -361,12 +363,12 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
             Text(stringResource(R.string.workout_editor_focus).uppercase(), Modifier.padding(top = 18.dp, bottom = 8.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             Box {
                 Row(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.08f)).semantics { contentDescription = "Enfoque: $focusLabel" }.clickable { focusMenuExpanded = true }.padding(horizontal = 14.dp, vertical = 13.dp),
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.08f)).localizedFocusDescription(focusLabel).clickable { focusMenuExpanded = true }.padding(horizontal = 14.dp, vertical = 13.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.focus), Modifier.weight(1f), color = WildforceThemeTokens.textSecondary)
                     Text(focusLabel, color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
-                    Icon(Icons.Filled.ExpandMore, contentDescription = "Abrir opciones", modifier = Modifier.padding(start = 10.dp), tint = WildforceThemeTokens.textSecondary)
+                    Icon(Icons.Filled.ExpandMore, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_more_options), modifier = Modifier.padding(start = 10.dp), tint = WildforceThemeTokens.textSecondary)
                 }
                 DropdownMenu(expanded = focusMenuExpanded, onDismissRequest = { focusMenuExpanded = false }) {
                     listOf("Full body", "Empuje", "Tirón", "Piernas").forEach { focus ->
@@ -427,7 +429,7 @@ internal fun CustomWorkoutEditorScreen(initial: WorkoutDaySummary, gender: Strin
                         WorkoutBlockType.Cooldown -> WildforceThemeTokens.cooldownAccent
                         else -> WildforceThemeTokens.textSecondary
                     }
-                    val sectionLabel = stringResource(R.string.workout_section, block.type.label.uppercase())
+                    val sectionLabel = stringResource(R.string.workout_section, workoutBlockLabel(block.type).uppercase())
                     Text(sectionLabel, Modifier.fillMaxWidth().heightIn(min = 48.dp).semantics { contentDescription = sectionLabel }.clickable { blocks = blocks.cycleSectionAt(blockIndex) }.padding(top = 8.dp, bottom = 2.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = sectionColor)
                     EditableExerciseCard(
                         exercise, gender, blockIndex, blocks.size,
@@ -533,7 +535,7 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
         LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             items(ExerciseSetStyle.values()) { style ->
                 val selected = exercise.setStyle == style
-                AnimatedSelectionChip(style.label, selected, setStyleIcon(style)) {
+                AnimatedSelectionChip(workoutSetStyleLabel(style), selected, setStyleIcon(style)) {
                     val parameters = if (style == exercise.setStyle) exercise.setStyleParameters else io.codepassion.doubletriangle.core.model.SetStyleParameters(
                         appliesToFinalSetOnly = style in setOf(ExerciseSetStyle.DropSet, ExerciseSetStyle.RestPause),
                     )
@@ -627,7 +629,7 @@ internal fun AutomaticWorkoutRequestDialog(defaultEquipment: String, equipmentPr
                 Box {
                     Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.08f)).clickable { goalMenuExpanded = true }.padding(horizontal = 14.dp, vertical = 13.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(selectedGoal ?: stringResource(R.string.workout_default_goal), Modifier.weight(1f), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.Bold)
-                        Icon(Icons.Filled.ExpandMore, contentDescription = "Abrir opciones", tint = WildforceThemeTokens.textSecondary)
+                        Icon(Icons.Filled.ExpandMore, contentDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_more_options), tint = WildforceThemeTokens.textSecondary)
                     }
                     DropdownMenu(expanded = goalMenuExpanded, onDismissRequest = { goalMenuExpanded = false }) {
                         DropdownMenuItem(onClick = { selectedGoal = null; goalMenuExpanded = false }) { Text(stringResource(R.string.workout_default_goal)) }
@@ -686,7 +688,7 @@ private fun AnimatedSelectionChip(label: String, selected: Boolean, icon: androi
             .graphicsLayer { scaleX = scale; scaleY = scale }
             .clip(RoundedCornerShape(11.dp))
             .background(if (selected) WildforceThemeTokens.accent.copy(alpha = 0.18f) else WildforceThemeTokens.textSecondary.copy(alpha = 0.07f))
-            .semantics { contentDescription = "$label, ${if (selected) "seleccionado" else "no seleccionado"}" }
+            .semantics { contentDescription = label; this.selected = selected }
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,

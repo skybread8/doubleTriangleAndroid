@@ -33,14 +33,15 @@ object CustomWorkoutStore {
                 add(
                     WorkoutDaySummary(
                         id = item.getString("id"), order = item.optInt("order", index + 1), title = item.getString("title"),
-                        focus = item.optString("focus", "Full body"), dayType = "Personalizado",
+                        focus = item.optString("focus", "Full body"), dayType = item.optString("dayType", "Personalizado"),
                         scheduledDay = runCatching { DayOfWeek.valueOf(item.getString("scheduledDay")) }.getOrDefault(DayOfWeek.MONDAY),
                         estimatedMinutes = item.optInt("estimatedMinutes", estimateMinutes(exercises)),
                         status = runCatching { WorkoutStatus.valueOf(item.optString("status")) }.getOrDefault(WorkoutStatus.Planned),
                         exercises = exercises, blocks = blocks,
                         kind = item.optString("kind", "workout").ifBlank { "workout" },
                         creationSource = item.optString("creationSource", "manual").ifBlank { "manual" },
-                        scheduledFor = item.optString("scheduledFor").takeIf(String::isNotBlank),
+                        scheduledFor = item.optString("scheduledFor").takeIf { it.isNotBlank() && it != "null" },
+                        createdAt = item.optString("createdAt").takeIf { it.isNotBlank() && it != "null" },
                         startedAt = item.optString("startedAt").takeIf(String::isNotBlank),
                         completedAt = item.optString("completedAt").takeIf(String::isNotBlank),
                         didCountTowardStreak = item.optBoolean("didCountTowardStreak", false),
@@ -57,7 +58,9 @@ object CustomWorkoutStore {
     }.getOrDefault(emptyList())
 
     fun save(context: Context, workout: WorkoutDaySummary) {
-        val workouts = (load(context).filterNot { it.id == workout.id } + workout)
+        val existing = load(context)
+        val saved = workout.copy(createdAt = workout.createdAt ?: existing.firstOrNull { it.id == workout.id }?.createdAt ?: java.time.Instant.now().toString())
+        val workouts = (existing.filterNot { it.id == workout.id } + saved)
             .mapIndexed { index, item -> item.copy(order = index + 1) }
         write(context, workouts)
     }
@@ -69,10 +72,11 @@ object CustomWorkoutStore {
         // a draft and only makes it planned when the user confirms it.
         val copy = source.asIndependentWorkoutCopy().copy(
             id = "custom-${UUID.randomUUID()}",
-            title = "${source.title} (copia)",
+            title = source.title,
             order = load(context).size + 1,
             status = WorkoutStatus.Draft,
             creationSource = "manual",
+            scheduledFor = null,
             startedAt = null,
             completedAt = null,
             didCountTowardStreak = false,
@@ -81,9 +85,11 @@ object CustomWorkoutStore {
             averageHeartRate = null,
             maximumHeartRate = null,
             totalVolumeKg = null,
+            createdAt = java.time.Instant.now().toString(),
         )
-        save(context, copy)
-        return copy
+        val draft = copy.copy(estimatedMinutes = if (copy.blocks.isEmpty()) estimateMinutes(copy.exercises) else estimateBlockMinutes(copy.blocks))
+        save(context, draft)
+        return draft
     }
 
     fun empty(day: DayOfWeek): WorkoutDaySummary = WorkoutDaySummary(
@@ -157,6 +163,7 @@ object CustomWorkoutStore {
                     workout.blocks.forEach { block ->
                         put(
                             JSONObject()
+                                .put("remoteId", block.remoteId ?: JSONObject.NULL)
                                 .put("type", block.type.name)
                                 .put("rounds", block.rounds)
                                 .put("restAfterBlockSeconds", block.restAfterBlockSeconds ?: JSONObject.NULL)
@@ -167,10 +174,10 @@ object CustomWorkoutStore {
                 }
                 put(
                     JSONObject().put("id", workout.id).put("order", workout.order).put("title", workout.title).put("focus", workout.focus)
-                        .put("scheduledDay", workout.scheduledDay.name).put("estimatedMinutes", workout.estimatedMinutes)
+                        .put("dayType", workout.dayType).put("scheduledDay", workout.scheduledDay.name).put("estimatedMinutes", workout.estimatedMinutes)
                         .put("status", workout.status.name)
                         .put("kind", workout.kind).put("creationSource", workout.creationSource)
-                        .put("scheduledFor", workout.scheduledFor).put("startedAt", workout.startedAt).put("completedAt", workout.completedAt)
+                        .put("scheduledFor", workout.scheduledFor).put("createdAt", workout.createdAt).put("startedAt", workout.startedAt).put("completedAt", workout.completedAt)
                         .put("didCountTowardStreak", workout.didCountTowardStreak).put("notes", workout.notes)
                         .put("activeDurationSeconds", workout.activeDurationSeconds).put("activeCaloriesBurned", workout.activeCaloriesBurned)
                         .put("averageHeartRate", workout.averageHeartRate).put("maximumHeartRate", workout.maximumHeartRate)
@@ -188,6 +195,7 @@ object CustomWorkoutStore {
             add(
                 WorkoutBlockSummary(
                     type = runCatching { WorkoutBlockType.valueOf(block.optString("type")) }.getOrDefault(WorkoutBlockType.Standard),
+                    remoteId = block.optString("remoteId").takeIf { it.isNotBlank() && it != "null" },
                     rounds = block.optInt("rounds", 1).coerceAtLeast(1),
                     restAfterBlockSeconds = block.optIntOrNull("restAfterBlockSeconds")?.takeIf { it >= 0 },
                     notes = block.optString("notes").takeIf(String::isNotBlank),
@@ -480,4 +488,13 @@ internal object CustomExerciseCatalog {
     }
 
     private fun humanize(value: String): String = value.replace(Regex("([a-z])([A-Z])"), "$1 $2").replaceFirstChar { it.uppercase() }
+}
+
+/** iOS groups independent workouts by start, completion, schedule, then creation date. */
+internal fun WorkoutDaySummary.customWorkoutWeekday(zone: java.time.ZoneId = java.time.ZoneId.systemDefault()): DayOfWeek {
+    return sequenceOf(startedAt, completedAt, scheduledFor, createdAt).filterNotNull().mapNotNull { text ->
+        runCatching { java.time.Instant.parse(text).atZone(zone).dayOfWeek }.getOrNull()
+            ?: runCatching { java.time.OffsetDateTime.parse(text).atZoneSameInstant(zone).dayOfWeek }.getOrNull()
+            ?: runCatching { java.time.LocalDate.parse(text).dayOfWeek }.getOrNull()
+    }.firstOrNull() ?: scheduledDay
 }

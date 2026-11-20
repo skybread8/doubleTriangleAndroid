@@ -16,6 +16,27 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WorkoutPathModelTest {
+    @Test fun `legacy workout path uses the same blocks as the session editor`() {
+        val exercises = (0..2).map { ExerciseSummary("Exercise $it", sets = 1, reps = "10", restSeconds = 0) }
+        val base = PreviewWorkoutRepository.load().workouts.first().copy(blocks = emptyList(), exercises = exercises)
+        val path = base.pathBlocks()
+        assertEquals(base.editableBlocks().map { it.exercises.size }, path.map { it.exercises.size })
+        assertTrue(path.none { it.canMoveUpcoming(0, 1, 0) })
+    }
+
+    @Test fun `only upcoming rows in one block can move`() {
+        val block = WorkoutBlockSummary(WorkoutBlockType.Standard, exercises = (0..3).map {
+            ExerciseSummary("Exercise $it", sets = 1, reps = "10", restSeconds = 0)
+        })
+        val base = PreviewWorkoutRepository.load().workouts.first()
+        val path = base.copy(blocks = listOf(block), exercises = block.executionExercises()).pathBlocks().single()
+        assertTrue(!path.canMoveUpcoming(0, 2, 1))
+        assertTrue(!path.canMoveUpcoming(1, 2, 1))
+        assertTrue(!path.canMoveUpcoming(2, 1, 1))
+        assertTrue(path.canMoveUpcoming(2, 3, 1))
+        assertTrue(!path.canMoveUpcoming(2, 4, 1))
+    }
+
     @Test fun `skipping a superset exercise covers every round and advances past it`() {
         val block = WorkoutBlockSummary(WorkoutBlockType.Superset, rounds = 3, exercises = listOf(
             ExerciseSummary("Press", sets = 1, reps = "10", restSeconds = 0),

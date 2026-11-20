@@ -10,6 +10,7 @@ import io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.time.LocalDate
 import java.util.UUID
@@ -39,7 +40,7 @@ internal object BodyProgressStore {
                 val date = item.optString("date")
                 val front = item.optString("frontPath")
                 val profile = item.optString("profilePath")
-                if (id.isNotBlank() && date.isNotBlank() && File(front).isFile && File(profile).isFile) {
+                if (id.isNotBlank() && date.isNotBlank()) {
                     add(BodyProgressSession(id, date, front, profile, item.optString("futurePath").takeIf { File(it).isFile }, item.optString("backPath").takeIf { File(it).isFile }))
                 }
             }
@@ -52,11 +53,16 @@ internal object BodyProgressStore {
         val frontFile = File(folder, "${id}_front.jpg")
         val profileFile = File(folder, "${id}_profile.jpg")
         val backFile = File(folder, "${id}_back.jpg")
-        writeScaled(front, frontFile)
-        writeScaled(profile, profileFile)
-        writeScaled(back, backFile)
+        try {
+            writeScaled(front, frontFile)
+            writeScaled(profile, profileFile)
+            writeScaled(back, backFile)
+        } catch (error: Exception) {
+            listOf(frontFile, profileFile, backFile).forEach { it.delete() }
+            throw error
+        }
         val session = BodyProgressSession(id, LocalDate.now().toString(), frontFile.absolutePath, profileFile.absolutePath, backPath = backFile.absolutePath)
-        persist(context, (load(context) + session).takeLast(60))
+        persist(context, load(context) + session)
         // The forecast is generated from the server-owned private upload. Mark
         // this capture as a local mutation so the next sync pushes it rather
         // than importing an older remote snapshot over it.
@@ -65,11 +71,12 @@ internal object BodyProgressStore {
     }
 
     fun delete(context: Context, session: BodyProgressSession) {
+        val remaining = load(context).filterNot { it.id == session.id }
         File(session.frontPath).delete()
         File(session.profilePath).delete()
         session.backPath?.let(::File)?.delete()
         session.futurePath?.let(::File)?.delete()
-        persist(context, load(context).filterNot { it.id == session.id })
+        persist(context, remaining)
         // iOS keeps a tombstone in SwiftData. Android's projection creates the
         // equivalent tombstone from the last pushed record, but only when this
         // resource is scheduled for outbound synchronization.
@@ -104,12 +111,33 @@ internal object BodyProgressStore {
     }
 
     private fun writeScaled(source: Bitmap, destination: File) {
-        val longest = maxOf(source.width, source.height).coerceAtLeast(1)
-        val bitmap = if (longest <= 1600) source else {
+        require(source.width > 0 && source.height > 0) { "Invalid progress photo" }
+        val longest = maxOf(source.width, source.height)
+        var bitmap = if (longest <= 1600) source else {
             val scale = 1600f / longest
-            Bitmap.createScaledBitmap(source, (source.width * scale).toInt(), (source.height * scale).toInt(), true)
+            Bitmap.createScaledBitmap(source, (source.width * scale).toInt().coerceAtLeast(1), (source.height * scale).toInt().coerceAtLeast(1), true)
         }
-        FileOutputStream(destination).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 92, it) }
-        if (bitmap !== source) bitmap.recycle()
+        try {
+            while (true) {
+                for (quality in 82 downTo 22 step 10) {
+                    val bytes = ByteArrayOutputStream().use { output ->
+                        check(bitmap.compress(Bitmap.CompressFormat.JPEG, quality, output)) { "Unable to encode progress photo" }
+                        output.toByteArray()
+                    }
+                    if (bytes.size <= 500 * 1024) {
+                        FileOutputStream(destination).use { it.write(bytes) }
+                        return
+                    }
+                }
+                val width = (bitmap.width * .8f).toInt().coerceAtLeast(1)
+                val height = (bitmap.height * .8f).toInt().coerceAtLeast(1)
+                check(width < bitmap.width || height < bitmap.height) { "Unable to compress progress photo" }
+                val smaller = Bitmap.createScaledBitmap(bitmap, width, height, true)
+                if (bitmap !== source) bitmap.recycle()
+                bitmap = smaller
+            }
+        } finally {
+            if (bitmap !== source) bitmap.recycle()
+        }
     }
 }

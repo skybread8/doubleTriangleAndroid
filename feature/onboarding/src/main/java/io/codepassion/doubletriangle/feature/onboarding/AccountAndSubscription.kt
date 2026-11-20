@@ -69,6 +69,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import org.json.JSONArray
 import java.io.BufferedReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
@@ -187,7 +188,7 @@ data class SubscriptionAccess(
 
 /** Persists the last server decision so feature gates remain useful offline, like iOS AppAccessStore. */
 object SubscriptionAccessStore {
-    private const val PREFS = "wildforce_subscription_access"
+    const val PREFS = "wildforce_subscription_access"
 
     fun load(context: Context): SubscriptionAccess? {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -238,6 +239,81 @@ object SubscriptionAccessStore {
     }
 }
 
+/** The profile displays the synchronized Subscription, independently of feature access. */
+internal data class ProfileSubscription(
+    val plan: String,
+    val status: String,
+    val provider: String,
+    val autoRenews: Boolean,
+    val renewsAt: String?,
+)
+
+internal data class ProfileSubscriptionRecord(
+    val userId: String,
+    val updatedAt: String,
+    val deleted: Boolean,
+    val subscription: ProfileSubscription,
+)
+
+internal fun selectProfileSubscription(records: List<ProfileSubscriptionRecord>, userId: String): ProfileSubscription? =
+    records.filter { !it.deleted && it.userId.equals(userId, ignoreCase = true) }
+        .maxByOrNull { it.updatedAt }?.subscription
+
+internal fun loadProfileSubscription(context: Context): ProfileSubscription? {
+    val userId = context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE).getString("id", null) ?: return null
+    val raw = context.getSharedPreferences("wildforce_sync_state", Context.MODE_PRIVATE)
+        .getString("remote_projection:subscriptions", null)
+    val synced = runCatching {
+        val records = JSONArray(raw ?: "[]")
+        selectProfileSubscription((0 until records.length()).mapNotNull { records.optJSONObject(it) }
+            .map { row ->
+                ProfileSubscriptionRecord(
+                    userId = row.optString("user_id"), updatedAt = row.optString("updated_at"),
+                    deleted = !row.isNull("deleted_at") && row.optString("deleted_at").isNotBlank(),
+                    subscription = ProfileSubscription(
+                    plan = row.optString("plan"), status = row.optString("status"),
+                    provider = row.optString("provider"), autoRenews = row.optBoolean("auto_renews"),
+                    renewsAt = row.optString("renews_at").takeUnless { it.isBlank() || it.equals("null", true) },
+                    ),
+                )
+            }, userId)
+    }.getOrNull()
+    if (synced != null) return synced
+    val access = SubscriptionAccessStore.load(context) ?: return null
+    val plan = access.plan?.takeUnless { it.isBlank() || it.equals("null", ignoreCase = true) } ?: return null
+    return ProfileSubscription(
+        plan = plan,
+        status = access.status?.takeUnless { it.equals("null", ignoreCase = true) }.orEmpty(),
+        provider = access.provider?.takeUnless { it.equals("null", ignoreCase = true) }.orEmpty(),
+        autoRenews = access.autoRenews == true,
+        renewsAt = access.renewsAt?.takeUnless { it.equals("null", ignoreCase = true) },
+    )
+}
+
+@Composable
+internal fun rememberProfileSubscription(): ProfileSubscription? {
+    val context = LocalContext.current
+    var subscription by remember(context) { mutableStateOf(loadProfileSubscription(context)) }
+    DisposableEffect(context) {
+        val prefs = context.getSharedPreferences("wildforce_sync_state", Context.MODE_PRIVATE)
+        val accounts = context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE)
+        val accessPrefs = context.getSharedPreferences(SubscriptionAccessStore.PREFS, Context.MODE_PRIVATE)
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
+            subscription = loadProfileSubscription(context)
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        accounts.registerOnSharedPreferenceChangeListener(listener)
+        accessPrefs.registerOnSharedPreferenceChangeListener(listener)
+        subscription = loadProfileSubscription(context)
+        onDispose {
+            prefs.unregisterOnSharedPreferenceChangeListener(listener)
+            accounts.unregisterOnSharedPreferenceChangeListener(listener)
+            accessPrefs.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
+    return subscription
+}
+
 /** Clears account-owned projections and media, matching iOS Logout.perform. */
 fun clearLocalAccountData(context: Context) {
     val detailPreferences = context.getSharedPreferences("wildforce_profile_details", Context.MODE_PRIVATE)
@@ -251,13 +327,14 @@ fun clearLocalAccountData(context: Context) {
         "wildforce_completion_prompts", "wildforce_skipped_exercises", "wildforce_account_progress",
         "wildforce_coach_exercise_media", "wildforce_remote_media", "wildforce_sync_state", "wildforce_remote_sync",
         "wildforce_watch", "wildforce_watch_commands", "wildforce_subscription_access",
+        "wildforce_check_in_assets", "wildforce_check_in_drafts", "wildforce_check_in_push", "wildforce_check_in_read",
     ).forEach { context.getSharedPreferences(it, Context.MODE_PRIVATE).edit().clear().apply() }
     context.getSharedPreferences("wildforce_profile_details", Context.MODE_PRIVATE).edit().apply {
         language?.let { putString("language", it) }
         theme?.let { putString("theme", it) }
         putBoolean("keep_screen_on", keepScreenOn)
     }.apply()
-    listOf("body_progress_photos", "NutritionLogMedia").forEach { java.io.File(context.filesDir, it).deleteRecursively() }
+    listOf("body_progress_photos", "NutritionLogMedia", "check_in_photos").forEach { java.io.File(context.filesDir, it).deleteRecursively() }
     listOf("profile-avatar.jpg", "profile-avatar.png", "profile-avatar.download").forEach { java.io.File(context.filesDir, it).delete() }
     listOf("body_progress_camera", "nutrition_camera").forEach { java.io.File(context.cacheDir, it).deleteRecursively() }
 }
@@ -326,6 +403,7 @@ internal fun initialRegistrationData(context: Context, profile: OnboardingProfil
     val detailPreferences = context.getSharedPreferences("wildforce_profile_details", Context.MODE_PRIVATE)
     val notificationPreferences = context.getSharedPreferences("wildforce_notification_settings", Context.MODE_PRIVATE)
     return JSONObject()
+        .apply { profile.gymJoinCode?.let { put("gym_join_code", it) } }
         .put("user", JSONObject()
             .put("id", userId)
             .put("name", profile.name)
@@ -345,7 +423,7 @@ internal fun initialRegistrationData(context: Context, profile: OnboardingProfil
             .put("training_split_preference", profile.trainingSplitPreference.storedValue)
             .put("preferred_workout_duration_minutes", profile.preferredWorkoutDurationMinutes)
             .put("workout_days", org.json.JSONArray(profile.workoutDays.map { it.storedValue }))
-            .put("custom_workout_focuses", JSONObject(profile.customWorkoutFocuses.mapKeys { it.key.storedValue }.mapValues { it.value.storedValue }))
+            .put("custom_workout_focuses", JSONObject(profile.activeCustomWorkoutFocuses.mapKeys { it.key.storedValue }.mapValues { it.value.storedValue }))
             .put("movement_restrictions", org.json.JSONArray(profile.movementRestrictions.map { it.storedValue }))
             .put("body_composition_phase", profile.bodyCompositionPhase?.storedValue ?: "automatic")
             .put("skips_warmups", profile.skipsWarmups)
@@ -441,18 +519,18 @@ fun AccountSection(
     var logoutConfirmation by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         if (destination == AccountProfileDestination.Account && account == null) {
-            ProfileAccountCard(title = "Cuenta") {
+            ProfileAccountCard(title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_account)) {
                 ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_an_account), "person.badge.plus") { dialog = AccountDialog.Register }
-                ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.i_already_have_an_account), "login") { dialog = AccountDialog.Login }
+                ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_i_already_have_an_account), "login") { dialog = AccountDialog.Login }
             }
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_an_account_to_keep_your_progress_available_on_every_device_), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(horizontal = 14.dp))
         } else if (destination == AccountProfileDestination.Account) {
-            ProfileAccountCard(title = "Cuenta") {
+            ProfileAccountCard(title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_account)) {
                 Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.Email, null, tint = WildforceThemeTokens.textPrimary)
                     Column(Modifier.padding(start = 12.dp).weight(1f)) { Text(account!!.name, color = WildforceThemeTokens.textPrimary); Text(account!!.email, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 }
-                ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_out), "exit_to_app", destructive = true) {
+                ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_log_out), "exit_to_app", destructive = true) {
                     logoutConfirmation = true
                 }
             }
@@ -460,7 +538,6 @@ fun AccountSection(
         }
         if (destination == AccountProfileDestination.Subscription) {
             SubscriptionDetailsCard(
-                token = store.token(),
                 hasAccount = account != null,
                 onRegister = { dialog = AccountDialog.Register },
                 onPaywall = { dialog = AccountDialog.Paywall },
@@ -478,6 +555,8 @@ fun AccountSection(
                     // Keep local training data until the account reset policy is
                     // explicitly confirmed; credentials and remote markers are
                     // removed just like the iOS logout job.
+                    // Clear the Google SDK session as well as the app credentials.
+                    runCatching { GoogleSignIn.getClient(context, GoogleSignInOptions.DEFAULT_SIGN_IN).signOut() }
                     store.clear()
                     clearLocalAccountData(context)
                     SubscriptionAccessStore.reset(context)
@@ -486,9 +565,9 @@ fun AccountSection(
                     RemoteSyncChangeTracker.clearAll(context)
                     account = null
                     onAccountChanged()
-                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_out).uppercase(), color = WildforceThemeTokens.destructiveText) }
+                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_log_out).uppercase(), color = WildforceThemeTokens.destructiveText) }
             },
-            dismissButton = { TextButton(onClick = { logoutConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
+            dismissButton = { TextButton(onClick = { logoutConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } },
         )
     }
     when (dialog) {
@@ -535,7 +614,7 @@ fun AccountLogoutAction(onAccountChanged: () -> Unit = {}) {
     if (account == null) return
 
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_out), "exit_to_app", destructive = true) { logoutConfirmation = true }
+        ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_log_out), "exit_to_app", destructive = true) { logoutConfirmation = true }
     }
     if (logoutConfirmation) {
         AlertDialog(
@@ -545,6 +624,8 @@ fun AccountLogoutAction(onAccountChanged: () -> Unit = {}) {
             confirmButton = {
                 TextButton(onClick = {
                     logoutConfirmation = false
+                    // Clear the Google SDK session as well as the app credentials.
+                    runCatching { GoogleSignIn.getClient(context, GoogleSignInOptions.DEFAULT_SIGN_IN).signOut() }
                     store.clear()
                     clearLocalAccountData(context)
                     SubscriptionAccessStore.reset(context)
@@ -553,9 +634,9 @@ fun AccountLogoutAction(onAccountChanged: () -> Unit = {}) {
                     RemoteSyncChangeTracker.clearAll(context)
                     account = null
                     onAccountChanged()
-                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_out).uppercase(), color = WildforceThemeTokens.destructiveText) }
+                }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_log_out).uppercase(), color = WildforceThemeTokens.destructiveText) }
             },
-            dismissButton = { TextButton(onClick = { logoutConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancel).uppercase()) } },
+            dismissButton = { TextButton(onClick = { logoutConfirmation = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase()) } },
         )
     }
 }
@@ -563,38 +644,24 @@ fun AccountLogoutAction(onAccountChanged: () -> Unit = {}) {
 /** Android counterpart of iOS's SubscriptionDetailsView. */
 @Composable
 private fun SubscriptionDetailsCard(
-    token: String?,
     hasAccount: Boolean,
     onRegister: () -> Unit,
     onPaywall: () -> Unit,
 ) {
-    val context = LocalContext.current
-    var access by remember(token) { mutableStateOf(SubscriptionAccessStore.load(context)) }
-    var loading by remember(token) { mutableStateOf(token != null) }
-    var error by remember(token) { mutableStateOf<String?>(null) }
-    LaunchedEffect(token) {
-        if (token == null) return@LaunchedEffect
-        subscriptionAccess(token)
-            .onSuccess { access = it; SubscriptionAccessStore.update(context, it) }
-            .onFailure { error = it.message ?: "No se ha podido consultar la suscripción." }
-        loading = false
-    }
+    val subscription = rememberProfileSubscription()
     ProfileAccountCard(title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.subscription)) {
         when {
             !hasAccount -> ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_an_account_to_subscribe), "person.badge.plus", onClick = onRegister)
-            loading -> Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_205443ee88568e8c), color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(vertical = 10.dp))
             else -> {
-                access?.let { subscription ->
+                subscription?.let { subscription ->
                     SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.plan), subscriptionPlanName(subscription.plan))
-                    SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.status), subscriptionStatusName(subscription.status, subscription.hasAccess))
-                    subscription.provider?.let { SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.provider), subscriptionProviderName(it)) }
-                    subscription.renewsAt?.let { SubscriptionDetailRow(if (subscription.autoRenews == true) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.renews) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ends), formatSubscriptionDate(it)) }
-                    subscription.cancelledAt?.let { SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancelled), formatSubscriptionDate(it)) }
+                    if (subscription.status.isNotBlank()) SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.status), subscriptionStatusName(subscription.status, false))
+                    if (subscription.provider.isNotBlank()) SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.provider), subscriptionProviderName(subscription.provider))
+                    subscription.renewsAt?.let { SubscriptionDetailRow(if (subscription.autoRenews) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.renews) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ends), formatSubscriptionDate(it)) }
                 }
-                ProfileRow(if (access?.hasAccess == true) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.view_subscription_options) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.get_wildforce_premium), "crown.fill", onClick = onPaywall)
+                ProfileRow(if (subscription != null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.view_subscription_options) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.get_wildforce_premium), "crown.fill", onClick = onPaywall)
             }
         }
-        error?.let { Text(it, color = WildforceThemeTokens.destructiveText, style = MaterialTheme.typography.caption, modifier = Modifier.padding(vertical = 6.dp)) }
     }
 }
 
@@ -647,10 +714,13 @@ private fun subscriptionProviderName(provider: String): String = when (provider)
 
 @Composable
 private fun GoogleLinkedAccountCard(token: String?) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var linkedProviders by remember { mutableStateOf<Set<String>>(emptySet()) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
+    var confirmUnlink by remember { mutableStateOf(false) }
+    var unlinking by remember { mutableStateOf(false) }
     LaunchedEffect(token) {
         if (token == null) {
             loading = false
@@ -658,7 +728,7 @@ private fun GoogleLinkedAccountCard(token: String?) {
         }
         linkedAccounts(token).onSuccess { accounts ->
             linkedProviders = accounts.map { it.provider.lowercase() }.toSet()
-        }.onFailure { error = it.message }
+        }.onFailure { error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }
         loading = false
     }
     ProfileAccountCard(title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.linked_accounts)) {
@@ -670,6 +740,9 @@ private fun GoogleLinkedAccountCard(token: String?) {
             // making a linked Google account look as if it had disappeared.
             if ("google" in linkedProviders) {
                 LinkedProviderStatusRow("Google")
+                TextButton(onClick = { confirmUnlink = true }, enabled = !unlinking) {
+                    Text(androidx.compose.ui.res.stringResource(R.string.unlink_google), color = WildforceThemeTokens.destructiveText)
+                }
             } else {
                 GoogleAuthenticationButton(
                     title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.connect_google),
@@ -678,7 +751,7 @@ private fun GoogleLinkedAccountCard(token: String?) {
                         scope.launch {
                             linkGoogle(token ?: return@launch, idToken)
                                 .onSuccess { linkedProviders = linkedProviders + "google"; error = null }
-                                .onFailure { error = it.message ?: "No se ha podido vincular Google." }
+                                .onFailure { error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }
                         }
                     },
                     onError = { error = it },
@@ -687,6 +760,29 @@ private fun GoogleLinkedAccountCard(token: String?) {
             if ("apple" in linkedProviders) LinkedProviderStatusRow("Apple")
         }
         error?.let { Text(it, color = WildforceThemeTokens.destructiveText, style = MaterialTheme.typography.caption) }
+    }
+    if (confirmUnlink) {
+        AlertDialog(
+            onDismissRequest = { confirmUnlink = false },
+            title = { Text(androidx.compose.ui.res.stringResource(R.string.unlink_google_confirm)) },
+            text = { Text(androidx.compose.ui.res.stringResource(R.string.unlink_google_explanation)) },
+            confirmButton = { TextButton(onClick = {
+                confirmUnlink = false
+                unlinking = true
+                scope.launch {
+                    val result = unlinkGoogle(token ?: return@launch)
+                    result.onSuccess {
+                        linkedProviders = linkedProviders - "google"
+                        error = null
+                        runCatching { GoogleSignIn.getClient(context, GoogleSignInOptions.DEFAULT_SIGN_IN).signOut() }
+                    }.onFailure {
+                        error = context.getString(if (it is LastSignInMethodException) R.string.unlink_google_last_method else R.string.unlink_google_failed)
+                    }
+                    unlinking = false
+                }
+            }) { Text(androidx.compose.ui.res.stringResource(R.string.unlink_google)) } },
+            dismissButton = { TextButton(onClick = { confirmUnlink = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel)) } },
+        )
     }
 }
 
@@ -706,7 +802,7 @@ private fun LinkedProviderStatusRow(provider: String) {
             Icon(Icons.Filled.Person, contentDescription = null, tint = WildforceThemeTokens.textPrimary)
         }
         Text(provider, Modifier.padding(start = 12.dp).weight(1f), color = WildforceThemeTokens.textPrimary)
-        Icon(Icons.Filled.CheckCircle, contentDescription = "$provider vinculada", tint = Color(0xFF26A269))
+        Icon(Icons.Filled.CheckCircle, contentDescription = "$provider, ${androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.linked_accounts)}", tint = Color(0xFF26A269))
     }
 }
 
@@ -718,6 +814,27 @@ private suspend fun linkedAccounts(token: String): Result<List<LinkedAccount>> =
                 LinkedAccount(account.getString("provider"), account.optString("email").ifBlank { null })
             }
         }.orEmpty()
+    }
+}
+
+private class LastSignInMethodException : Exception()
+
+private suspend fun unlinkGoogle(token: String): Result<Unit> = withContext(Dispatchers.IO) {
+    runCatching {
+        val connection = (URL(WildforceApiEnvironment.apiUrl("account/identities/google")).openConnection() as HttpURLConnection).apply {
+            requestMethod = "DELETE"
+            setRequestProperty("Accept", "application/json")
+            setRequestProperty("Authorization", "Bearer $token")
+            connectTimeout = 15_000
+            readTimeout = 15_000
+        }
+        try {
+            when (connection.responseCode) {
+                in 200..299 -> Unit
+                422 -> throw LastSignInMethodException()
+                else -> throw IllegalStateException("Unlink failed")
+            }
+        } finally { connection.disconnect() }
     }
 }
 
@@ -823,16 +940,16 @@ private fun GoogleAuthenticationButton(
             val idToken = account.idToken ?: throw IllegalStateException("Google no ha devuelto un token de identidad.")
             onIdToken(idToken)
         } catch (error: ApiException) {
-            onError(googleSignInErrorMessage(error.statusCode))
+            if (error.statusCode != 12501) onError(context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.we_couldn_t_sign_you_in__check_your_details_and_try_again_))
         } catch (error: Exception) {
-            onError(error.localizedMessage ?: "No se ha podido iniciar sesión con Google.")
+            onError(context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.we_couldn_t_sign_you_in__check_your_details_and_try_again_))
         }
     }
     Button(
         enabled = enabled,
         onClick = {
             if (BuildConfig.GOOGLE_SERVER_CLIENT_ID.isBlank()) {
-                onError("Google Sign-In aún no está configurado.")
+                onError(context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.google_sign_in_is_not_configured_yet_))
                 return@Button
             }
             val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -865,12 +982,6 @@ private fun GoogleAuthenticationButton(
     }
 }
 
-internal fun googleSignInErrorMessage(statusCode: Int): String = when (statusCode) {
-    12501 -> "Se ha cancelado el inicio de sesión con Google."
-    10, 12500 -> "No se ha podido iniciar sesión con Google (error $statusCode). Comprueba la configuración de Google Sign-In."
-    else -> "No se ha podido iniciar sesión con Google (error $statusCode)."
-}
-
 private enum class PasswordRequirement(val shortLabel: String) {
     MinimumLength("12+"), Uppercase("A–Z"), Lowercase("a–z"), Number("0–9"), Symbol("#");
 
@@ -890,7 +1001,7 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
     // iOS opens both login and registration on the social-provider choice first.
     var isEmailLoginPresented by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current.applicationContext
+    val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         // Dialogs dim their host window by default. That dark scrim made this
@@ -967,7 +1078,7 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
                                     onIdToken = { idToken -> scope.launch {
                                         submitting = true
                                         error = null
-                                        authenticateWithGoogle(context, idToken, profile.takeIf { register }).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión con Google." }
+                                        authenticateWithGoogle(context, idToken, profile.takeIf { register }).onSuccess(onAuthenticated).onFailure { error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.we_couldn_t_sign_you_in__check_your_details_and_try_again_) }
                                         submitting = false
                                     } },
                                     onError = { error = it },
@@ -1019,14 +1130,14 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
                                 }
                                 error?.let { Text(it, color = WildforceThemeTokens.destructiveText, style = MaterialTheme.typography.caption) }
                                 Button(enabled = !submitting && (!register || PasswordRequirement.entries.all { it.isSatisfiedBy(password) }), onClick = {
-                                    if (email.isBlank() || password.isBlank()) { error = "Introduce tu email y contraseña para continuar."; return@Button }
-                                    scope.launch { submitting = true; authenticate(context, if (register) "auth/register" else "auth/login", profile.takeIf { register }, email, password).onSuccess(onAuthenticated).onFailure { error = it.message ?: "No hemos podido iniciar sesión." }; submitting = false }
+                                    if (email.isBlank() || password.isBlank()) { error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.enter_your_email_and_password_to_continue_); return@Button }
+                                    scope.launch { submitting = true; authenticate(context, if (register) "auth/register" else "auth/login", profile.takeIf { register }, email, password).onSuccess(onAuthenticated).onFailure { error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.we_couldn_t_sign_you_in__check_your_details_and_try_again_) }; submitting = false }
                                 }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText)) { if (submitting) CircularProgressIndicator(Modifier.size(18.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp) else Text(if (register) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_account) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_in), modifier = Modifier.padding(vertical = 4.dp), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, letterSpacing = 1.2.sp) }
                             }
                         }
                     }
                     if (register || isEmailLoginPresented) {
-                        Text(if (register) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.i_already_have_an_account) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_an_account), Modifier.fillMaxWidth().clickable(onClick = onSwitch).padding(8.dp), color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                        Text(if (register) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_i_already_have_an_account) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_an_account), Modifier.fillMaxWidth().clickable(onClick = onSwitch).padding(8.dp), color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                     }
                 }
             }
@@ -1066,19 +1177,19 @@ fun SubscriptionPaywall(
     LaunchedEffect(Unit) { appeared = true }
     val paywallAlpha by animateFloatAsState(if (appeared) 1f else 0f, tween(220), label = "paywall-alpha")
     val paywallScale by animateFloatAsState(if (appeared) 1f else .97f, spring(dampingRatio = .82f, stiffness = 420f), label = "paywall-scale")
-    val billing = remember { BillingClient.newBuilder(context).setListener { result, purchases -> purchasing = false; if (result.responseCode == BillingClient.BillingResponseCode.OK) pendingPurchases = purchases.orEmpty().filter { it.purchaseState == Purchase.PurchaseState.PURCHASED } else if (result.responseCode != BillingClient.BillingResponseCode.USER_CANCELED) error = result.debugMessage }.enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()).build() }
+    val billing = remember { BillingClient.newBuilder(context).setListener { result, purchases -> purchasing = false; if (result.responseCode == BillingClient.BillingResponseCode.OK) pendingPurchases = purchases.orEmpty().filter { it.purchaseState == Purchase.PurchaseState.PURCHASED } else if (result.responseCode != BillingClient.BillingResponseCode.USER_CANCELED) error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }.enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()).build() }
     LaunchedEffect(pendingPurchases) {
         pendingPurchases.forEach { purchase ->
             synchronizeGooglePlayPurchase(context, accountId, purchase).onSuccess {
                 if (!purchase.isAcknowledged) acknowledgePurchase(purchase, billing)
                 onPurchaseCompleted()
-            }.onFailure { failure -> error = failure.message ?: "No hemos podido verificar la compra con Google Play." }
+            }.onFailure { failure -> error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }
         }
         if (pendingPurchases.isNotEmpty()) pendingPurchases = emptyList()
     }
-    DisposableEffect(billing) { billing.startConnection(object : BillingClientStateListener { override fun onBillingSetupFinished(result: BillingResult) { if (result.responseCode == BillingClient.BillingResponseCode.OK) scope.launch { products = queryProducts(billing); loading = false; val restored = billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build()); if (restored.billingResult.responseCode == BillingClient.BillingResponseCode.OK) pendingPurchases = restored.purchasesList.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED } else error = restored.billingResult.debugMessage } else { error = result.debugMessage; loading = false } }; override fun onBillingServiceDisconnected() = Unit }); onDispose { billing.endConnection() } }
+    DisposableEffect(billing) { billing.startConnection(object : BillingClientStateListener { override fun onBillingSetupFinished(result: BillingResult) { if (result.responseCode == BillingClient.BillingResponseCode.OK) scope.launch { products = queryProducts(billing); loading = false; val restored = billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build()); if (restored.billingResult.responseCode == BillingClient.BillingResponseCode.OK) pendingPurchases = restored.purchasesList.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED } else error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) } else { error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_); loading = false } }; override fun onBillingServiceDisconnected() = Unit }); onDispose { billing.endConnection() } }
     val content: @Composable () -> Unit = { Surface(Modifier.fillMaxSize().padding(contentPadding).graphicsLayer { alpha = paywallAlpha; scaleX = paywallScale; scaleY = paywallScale }, color = WildforceThemeTokens.background) { Column(Modifier.verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(28.dp)) {
-        if (!mandatory) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.dismiss), Modifier.clickable(onClick = onDismiss).padding(8.dp), color = WildforceThemeTokens.accent) }
+        if (!mandatory) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dismiss), Modifier.clickable(onClick = onDismiss).padding(8.dp), color = WildforceThemeTokens.accent) }
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) { Icon(Icons.Filled.Shield, null, Modifier.size(46.dp), tint = WildforceThemeTokens.accent); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.train_with_your_full_potential), fontFamily = AntonFontFamily, fontSize = 30.sp); Text(if (selectedTier == SubscriptionTier.Premium) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_64027eb54f7319b4) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_09d0552889efc208), color = WildforceThemeTokens.textSecondary, textAlign = androidx.compose.ui.text.style.TextAlign.Center) }
         if (offeredTiers.size > 1) {
             TabRow(selectedTabIndex = offeredTiers.indexOf(selectedTier), backgroundColor = WildforceThemeTokens.backgroundSecondary, contentColor = WildforceThemeTokens.accent) {
@@ -1116,12 +1227,12 @@ fun SubscriptionPaywall(
             val params = BillingFlowParams.newBuilder().setProductDetailsParamsList(listOf(BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(detail).setOfferToken(offer.offerToken).build()))
             accountId?.let { params.setObfuscatedAccountId(obfuscatedAccountId(it)) }
             val result = billing.launchBillingFlow(activity!!, params.build())
-            if (result.responseCode != BillingClient.BillingResponseCode.OK) { error = result.debugMessage; purchasing = false }
+            if (result.responseCode != BillingClient.BillingResponseCode.OK) { error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_); purchasing = false }
         }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText)) { if (loading || purchasing) CircularProgressIndicator(Modifier.size(20.dp), color = WildforceThemeTokens.primaryButtonText, strokeWidth = 2.dp) else Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_819eb0325573d67e), modifier = Modifier.padding(vertical = 4.dp), letterSpacing = 1.2.sp) }
         if (selectedPrice != null) {
             val periodLabel = androidx.compose.ui.res.stringResource(
-                if (selectedPeriod == "P1Y") io.codepassion.doubletriangle.core.designsystem.R.string.year
-                else io.codepassion.doubletriangle.core.designsystem.R.string.month,
+                if (selectedPeriod == "P1Y") io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_year
+                else io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_month,
             ).lowercase()
             val renewalText = androidx.compose.ui.res.stringResource(
                 io.codepassion.doubletriangle.core.designsystem.R.string.____is_charged_____your_subscription_renews_automatically_unless_cancelled_at_least_24_hours_before_the_end_of_the_current_period_,
@@ -1135,14 +1246,14 @@ fun SubscriptionPaywall(
         Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.restore_purchases), Modifier.fillMaxWidth().clickable {
             scope.launch {
                 val result = billing.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build())
-                if (result.billingResult.responseCode != BillingClient.BillingResponseCode.OK) { error = result.billingResult.debugMessage; return@launch }
+                if (result.billingResult.responseCode != BillingClient.BillingResponseCode.OK) { error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_); return@launch }
                 val restoredPurchases = result.purchasesList.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED }
-                if (restoredPurchases.isEmpty()) { error = "No hemos encontrado compras activas para restaurar."; return@launch }
+                if (restoredPurchases.isEmpty()) { error = context.getString(R.string.purchase_none_to_restore); return@launch }
                 restoredPurchases.forEach { purchase ->
                     synchronizeGooglePlayPurchase(context, accountId, purchase).onSuccess {
                         if (!purchase.isAcknowledged) acknowledgePurchase(purchase, billing)
                         onPurchaseCompleted()
-                    }.onFailure { failure -> error = failure.message ?: "No hemos podido restaurar la compra." }
+                    }.onFailure { failure -> error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }
                 }
             }
         }.padding(8.dp), color = WildforceThemeTokens.accent, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
@@ -1170,8 +1281,8 @@ fun SubscriptionPaywall(
         Spacer(Modifier.height(if (best) 10.dp else 30.dp))
         Text(title, fontWeight = FontWeight.Bold); Text(price ?: "—", fontSize = 18.sp, fontWeight = FontWeight.Bold)
         val periodLabel = androidx.compose.ui.res.stringResource(
-            if (isYearly) io.codepassion.doubletriangle.core.designsystem.R.string.year
-            else io.codepassion.doubletriangle.core.designsystem.R.string.month,
+            if (isYearly) io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_year
+            else io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_month,
         ).lowercase()
         Text("/ $periodLabel", style = MaterialTheme.typography.caption)
     }

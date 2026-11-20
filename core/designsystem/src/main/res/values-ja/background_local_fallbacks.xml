@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Local fallbacks for entries absent from the read-only Sheet export. -->
+    <string name="___progress">%1$sの進捗</string>
+    <string name="___stimulus___d_of__d_sets">%1$sへの刺激: %2$d / %3$dセット</string>
+    <string name="_d_seconds_remaining">残り%1$d秒</string>
+    <string name="add_15_seconds">15秒追加</string>
+    <string name="add_30_seconds">30秒追加</string>
+    <string name="breakfast">朝食</string>
+    <string name="check_in">チェックイン</string>
+    <string name="continue_with_your_workout">ワークアウトを続ける</string>
+    <string name="dinner">夕食</string>
+    <string name="focus____">重点: %1$s</string>
+    <string name="log_your_meals">食事を記録</string>
+    <string name="lunch">昼食</string>
+    <string name="mesocycle__d">メソサイクル %1$d</string>
+    <string name="muscle_groups">筋肉グループ</string>
+    <string name="nutrition">栄養</string>
+    <string name="pause">一時停止</string>
+    <string name="post_workout">運動後</string>
+    <string name="pre_workout">運動前</string>
+    <string name="ready">準備完了</string>
+    <string name="remove">削除</string>
+    <string name="rest">休憩</string>
+    <string name="rest_complete">休憩終了</string>
+    <string name="shows_exercise_details_and_instructions">エクササイズの詳細と説明を表示</string>
+    <string name="snack">間食</string>
+    <string name="start">開始</string>
+    <string name="time_for_you_workout_">ワークアウトの時間です！</string>
+    <string name="week__d_of__d">第%1$d週 / 全%2$d週</string>
+    <string name="workouts">ワークアウト</string>
+    <string name="you_still_have_meals_to_log_today_">今日の食事で未記録のものがあります。</string>
+    <string name="you_still_need_to_log_____and____today_">今日は%1$s、%2$sを記録する必要があります。</string>
+    <string name="you_still_need_to_log____and____today_">今日は%1$sと%2$sを記録する必要があります。</string>
+    <string name="you_still_need_to_log____today_">今日は%1$sを記録する必要があります。</string>
+</resources>

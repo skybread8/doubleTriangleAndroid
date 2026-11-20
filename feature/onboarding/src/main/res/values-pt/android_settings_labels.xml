@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android-specific copy without an equivalent in the shared Sheet. -->
+    <string name="settings_faq_description">Respostas sobre treino, nutrição, Android e a sua conta.</string>
+    <string name="settings_health_description">Guarde treinos e sincronize medidas corporais com o Health Connect.</string>
+    <string name="settings_health_disabled">O Health Connect foi desativado para o Wildforce.</string>
+    <string name="settings_health_imported">Medidas corporais importadas do Health Connect.</string>
+    <string name="settings_health_connected">O Health Connect está ligado.</string>
+    <string name="settings_health_denied">O acesso ao Health Connect não foi concedido.</string>
+    <string name="settings_focus_description">Reduz as distrações durante os treinos com as definições de concentração do Android.</string>
+    <string name="settings_focus_categories_description">Gira as aplicações e categorias que o Android silencia durante o treino.</string>
+    <string name="settings_live_update_description">Mostra a sessão como cartão ou indicador quando o Android 16 e o dispositivo o permitirem.</string>
+    <string name="settings_workout_notifications">Notificações de treino</string>
+    <string name="settings_workout_notifications_description">Mostra a sessão ativa no painel de notificações e no ecrã bloqueado.</string>
+    <string name="settings_amazfit_description">Sincroniza o treino ativo com o Wildforce no seu Amazfit. Só está ativo durante o treino.</string>
+    <string name="settings_rest_alerts">Alertas ao iniciar o descanso</string>
+    <string name="settings_rest_alerts_description">Emite um alerta quando o temporizador de descanso começa.</string>
+    <string name="settings_lock_photo_description">Exige a autenticação do dispositivo para abrir as fotos de progresso.</string>
+</resources>

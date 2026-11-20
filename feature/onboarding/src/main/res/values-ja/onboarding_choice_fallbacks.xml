@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fallbacks for untranslated Sheet choices. -->
+    <string name="onboarding_choice_automatic">自動</string>
+    <string name="onboarding_choice_body_part_split">部位別分割</string>
+    <string name="onboarding_choice_big_gym">大きなジム</string>
+    <string name="onboarding_choice_small_gym">小さなジム</string>
+    <string name="onboarding_choice_home_gym">自宅ジム</string>
+    <string name="onboarding_choice_some_accessories">一部の器具</string>
+    <string name="onboarding_choice_bodyweight_only">自重のみ</string>
+    <string name="onboarding_choice_pull_up_bar">懸垂バー</string>
+    <string name="onboarding_choice_cardio">有酸素運動</string>
+    <string name="onboarding_choice_male">男性</string>
+    <string name="onboarding_choice_female">女性</string>
+    <string name="onboarding_choice_upper_body">上半身</string>
+    <string name="onboarding_choice_lower_body">下半身</string>
+    <string name="onboarding_choice_push">プッシュ</string>
+    <string name="onboarding_choice_pull">プル</string>
+    <string name="onboarding_choice_core">体幹</string>
+    <string name="onboarding_choice_recovery">回復</string>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Local fallbacks for iOS keys absent from the shared Sheet. -->
+<resources>
+    <string name="workout_local_straight">Gerade Sätze</string>
+    <string name="workout_local_top_backoff">Spitzensatz und leichtere Sätze</string>
+    <string name="workout_local_pyramid">Aufsteigende Pyramide</string>
+    <string name="workout_local_drop">Reduktionssatz</string>
+    <string name="workout_local_rest_pause">Rest-Pause</string>
+    <string name="workout_local_intervals">Intervalle</string>
+    <string name="workout_local_accumulation">Akkumulation</string>
+    <string name="workout_local_intensification">Intensivierung</string>
+    <string name="workout_local_deload">Entlastung</string>
+</resources>

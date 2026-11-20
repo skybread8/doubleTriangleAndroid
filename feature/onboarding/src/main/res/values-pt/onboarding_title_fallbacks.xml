@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sheet strings remain authoritative; these fallbacks cover untranslated cells. -->
+    <string name="onboarding_title_welcome">Bem-vindo</string>
+    <string name="onboarding_title_your_goals">Os teus objetivos</string>
+    <string name="onboarding_title_availability">Disponibilidade</string>
+    <string name="onboarding_title_workout_duration">Duração do treino</string>
+    <string name="onboarding_title_experience">Experiência</string>
+    <string name="onboarding_title_program">Programa</string>
+    <string name="onboarding_title_equipment">Equipamento</string>
+    <string name="onboarding_title_restrictions">Restrições</string>
+    <string name="onboarding_title_height">Altura</string>
+</resources>

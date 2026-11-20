@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android-specific copy without an equivalent in the shared Sheet. -->
+    <string name="settings_faq_description">トレーニング、栄養、Android、アカウントに関する回答。</string>
+    <string name="settings_health_description">ワークアウトを保存し、身体測定値をHealth Connectと同期します。</string>
+    <string name="settings_health_disabled">WildforceのHealth Connectを無効にしました。</string>
+    <string name="settings_health_imported">Health Connectから身体測定値を読み込みました。</string>
+    <string name="settings_health_connected">Health Connectに接続しました。</string>
+    <string name="settings_health_denied">Health Connectへのアクセスが許可されませんでした。</string>
+    <string name="settings_focus_description">Androidの集中設定を使って、トレーニング中の通知などを抑えます。</string>
+    <string name="settings_focus_categories_description">トレーニング中にAndroidが通知を抑えるアプリやカテゴリーを管理します。</string>
+    <string name="settings_live_update_description">Android 16とデバイスが対応している場合、セッションをカードやチップで表示します。</string>
+    <string name="settings_workout_notifications">ワークアウト通知</string>
+    <string name="settings_workout_notifications_description">進行中のセッションを通知パネルとロック画面に表示します。</string>
+    <string name="settings_amazfit_description">進行中のワークアウトをAmazfitのWildforceと同期します。ワークアウト中のみ有効です。</string>
+    <string name="settings_rest_alerts">休憩開始時の通知</string>
+    <string name="settings_rest_alerts_description">休憩タイマーの開始時に通知します。</string>
+    <string name="settings_lock_photo_description">経過写真を開くときにデバイスの認証を求めます。</string>
+</resources>

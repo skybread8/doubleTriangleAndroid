@@ -27,7 +27,7 @@ internal object AppQuickActions {
                     shortcut(
                         context,
                         START_WORKOUT,
-                        if (hasActiveWorkout(context)) io.codepassion.doubletriangle.core.designsystem.R.string.resume_workout else io.codepassion.doubletriangle.core.designsystem.R.string.start_today_s_workout,
+                        if (hasActiveWorkout(context)) io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_resume_workout else io.codepassion.doubletriangle.core.designsystem.R.string.start_today_s_workout,
                         "wildforce://start-workout",
                         android.R.drawable.ic_media_play,
                     ),
@@ -48,7 +48,7 @@ internal object AppQuickActions {
                 shortcut(
                     context,
                     BODY_METRICS,
-                    io.codepassion.doubletriangle.core.designsystem.R.string.body_metrics,
+                    io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_body_metrics,
                     "wildforce://body-metrics",
                     android.R.drawable.ic_menu_edit,
                 ),
@@ -57,7 +57,7 @@ internal object AppQuickActions {
                 shortcut(
                     context,
                     LEAVING_FEEDBACK,
-                    io.codepassion.doubletriangle.core.designsystem.R.string.feedback,
+                    io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_feedback,
                     "wildforce://leaving-feedback",
                     android.R.drawable.ic_menu_info_details,
                 ),

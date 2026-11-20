@@ -22,6 +22,7 @@ import io.codepassion.doubletriangle.core.model.displayBlocks
 import io.codepassion.doubletriangle.feature.workout.CustomWorkoutRequest
 import io.codepassion.doubletriangle.feature.workout.WorkoutHistoryStore
 import io.codepassion.doubletriangle.feature.workout.canonicalExerciseMediaKey
+import io.codepassion.doubletriangle.feature.onboarding.activeCustomWorkoutFocuses
 import io.codepassion.doubletriangle.feature.onboarding.OnboardingProfile
 import io.codepassion.doubletriangle.feature.onboarding.WorkoutWeekday
 import io.codepassion.doubletriangle.feature.onboarding.TrainingSplitPreference
@@ -212,7 +213,7 @@ object WorkoutPlanGenerator {
             val workout = JSONObject(response).getJSONObject("data")
             return parse(remoteSingleWorkoutToLocalJson(workout), profile.name, profile.goal.title)
                 .workouts.first()
-                .copy(id = "custom-ai-${UUID.randomUUID()}", order = 1, estimatedMinutes = request.durationMinutes, status = WorkoutStatus.Planned)
+                .copy(id = "custom-ai-${UUID.randomUUID()}", order = 1, estimatedMinutes = request.durationMinutes, status = WorkoutStatus.Planned, scheduledFor = workout.optString("scheduled_for").takeIf { it.isNotBlank() && it != "null" } ?: java.time.Instant.now().toString())
         } finally {
             connection.disconnect()
         }
@@ -545,7 +546,7 @@ Perfil obligatorio del usuario:
 - Nombre: ${profile.name}; objetivo: ${profile.goal.title}; nivel: ${profile.trainingLevel.title}; estilo de vida: ${profile.lifestyle.title}
 - Sexo: ${profile.gender.title}; idioma de salida: ${profile.appLanguage}; todas las cadenas visibles, títulos, notas y explicaciones deben estar en ese idioma.
 - Días disponibles: ${profile.workoutDays.joinToString { it.storedValue }}; duración preferida: ${profile.preferredWorkoutDurationMinutes} minutos
-- Estructura: ${profile.trainingSplitPreference.title}; focos personalizados: ${profile.customWorkoutFocuses.entries.joinToString { "${it.key.storedValue}=${it.value.storedValue}" }.ifBlank { "ninguno" }}
+- Estructura: ${profile.trainingSplitPreference.title}; focos personalizados: ${profile.activeCustomWorkoutFocuses.entries.joinToString { "${it.key.storedValue}=${it.value.storedValue}" }.ifBlank { "ninguno" }}
 - Equipamiento: ${profile.availableEquipment.joinToString { it.title }.ifBlank { "peso corporal" }}; restricciones: ${profile.movementRestrictions.joinToString { it.title }.ifBlank { "ninguna" }}
 - Ubicaciones: ${profile.effectiveTrainingLocations().joinToString { location -> "${location.name} [${location.equipment.joinToString { it.title }}]" }.ifBlank { "sin ubicación adicional" }}
 - Composición corporal: ${profile.bodyCompositionPhase?.storedValue ?: "no especificada"}; edad aproximada: ${(java.time.Year.now().value - profile.birthYear).coerceAtLeast(0)}; altura: ${profile.heightCm} cm; peso: ${profile.weightKg} kg

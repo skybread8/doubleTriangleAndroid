@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_intake_today">今日摄入</string>
+    <string name="nutrition_intake_for_date">%1$s的摄入量</string>
+</resources>
