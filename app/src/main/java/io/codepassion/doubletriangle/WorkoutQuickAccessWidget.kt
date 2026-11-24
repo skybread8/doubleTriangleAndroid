@@ -13,7 +13,9 @@ import android.net.Uri
 import android.view.View
 import android.widget.RemoteViews
 import io.codepassion.doubletriangle.feature.workout.cachedTrainingBitmap
-import io.codepassion.doubletriangle.feature.workout.exerciseDisplayName
+import io.codepassion.doubletriangle.feature.workout.localizedExerciseName
+import io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext
+import io.codepassion.doubletriangle.core.designsystem.R as SharedR
 import io.codepassion.doubletriangle.feature.workout.exerciseImageUrl
 import io.codepassion.doubletriangle.feature.workout.loadTrainingBitmap
 import io.codepassion.doubletriangle.feature.workout.workoutCoverUrl
@@ -34,9 +36,11 @@ internal data class WidgetWorkout(
     val dayNumber: Int? = null,
     val meta: String? = null,
     val streakWarning: Boolean = false,
+    val fallback: WidgetFallback? = null,
 )
+internal enum class WidgetFallback { NoPlan, Planned, Rest }
 internal data class WidgetDayCandidate(val id: String, val weekday: String, val status: String, val completedAt: String? = null)
-private val noPlanWidgetWorkout = WidgetWorkout("Sin plan", "Crea tu primer entrenamiento", "ENTRENAMIENTO", null)
+private val noPlanWidgetWorkout = WidgetWorkout("Sin plan", "Crea tu primer entrenamiento", "ENTRENAMIENTO", null, fallback = WidgetFallback.NoPlan)
 
 internal fun selectWidgetDay(days: List<WidgetDayCandidate>, today: String, todayDate: java.time.LocalDate, activeId: String? = null): String? {
     val active = activeId?.let { id -> days.firstOrNull { it.id == id } }
@@ -52,9 +56,9 @@ internal fun selectWidgetDay(days: List<WidgetDayCandidate>, today: String, toda
 
 internal fun fallbackWidgetWorkout(scheduledDays: Set<String>, today: String): WidgetWorkout =
     if (scheduledDays.any { it.equals(today, true) }) {
-        WidgetWorkout("Entrenamiento planeado", "", "PLANIFICADO", null)
+        WidgetWorkout("Entrenamiento planeado", "", "PLANIFICADO", null, fallback = WidgetFallback.Planned)
     } else {
-        WidgetWorkout("Día de descanso", "Recupera y vuelve mañana", "DÍA DE DESCANSO", null)
+        WidgetWorkout("Día de descanso", "Recupera y vuelve mañana", "DÍA DE DESCANSO", null, fallback = WidgetFallback.Rest)
     }
 
 internal fun widgetShowsStatusBadge(status: String): Boolean =
@@ -118,6 +122,7 @@ class WorkoutQuickAccessWidget : AppWidgetProvider() {
         }
 
         private fun views(context: Context, options: android.os.Bundle, workout: WidgetWorkout): RemoteViews {
+            val localized = localizedBackgroundContext(context)
             val streak = context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
                 .getInt("current_streak", 0)
                 .coerceAtLeast(0)
@@ -129,19 +134,30 @@ class WorkoutQuickAccessWidget : AppWidgetProvider() {
             )
             val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
             val layout = if (minWidth in 1 until 250) R.layout.widget_workout_status_small else R.layout.widget_workout_status
+            val displayTitle = when (workout.fallback) {
+                WidgetFallback.NoPlan -> localized.getString(SharedR.string.no_plan)
+                WidgetFallback.Planned -> localized.getString(SharedR.string.ui_sheet_planned_workout)
+                WidgetFallback.Rest -> localized.getString(SharedR.string.rest_day)
+                null -> workout.title
+            }
+            val displayDetail = when (workout.fallback) {
+                WidgetFallback.NoPlan -> localized.getString(R.string.widget_create_first_workout)
+                WidgetFallback.Rest -> localized.getString(R.string.widget_recover_tomorrow)
+                else -> workout.detail
+            }
             return RemoteViews(context.packageName, layout).apply {
                 setOnClickPendingIntent(R.id.widget_root, openApp)
                 setImageViewResource(R.id.widget_streak_icon, R.drawable.ic_macro_calories)
                 setViewVisibility(R.id.widget_streak_warning, if (workout.streakWarning) View.VISIBLE else View.GONE)
                 setTextViewText(R.id.widget_streak, streak.toString())
                 setViewVisibility(R.id.widget_day_label, if (workout.dayNumber != null) View.VISIBLE else View.GONE)
-                workout.dayNumber?.let { setTextViewText(R.id.widget_day_label, "DÍA $it") }
-                setTextViewText(R.id.widget_title, workout.title.uppercase())
+                workout.dayNumber?.let { setTextViewText(R.id.widget_day_label, "${localized.getString(SharedR.string.ui_sheet_day).uppercase()} $it") }
+                setTextViewText(R.id.widget_title, displayTitle.uppercase())
                 setViewVisibility(
                     R.id.widget_detail,
-                    if (workout.detail.isBlank() || workout.progress != null) View.GONE else View.VISIBLE,
+                    if (displayDetail.isBlank() || workout.progress != null) View.GONE else View.VISIBLE,
                 )
-                setTextViewText(R.id.widget_detail, workout.detail)
+                setTextViewText(R.id.widget_detail, displayDetail)
                 setViewVisibility(
                     R.id.widget_progress_exercise,
                     if (workout.progress != null && workout.detail.isNotBlank()) View.VISIBLE else View.GONE,
@@ -149,7 +165,11 @@ class WorkoutQuickAccessWidget : AppWidgetProvider() {
                 setTextViewText(R.id.widget_progress_exercise, workout.detail)
                 setViewVisibility(R.id.widget_meta, if (workout.meta.isNullOrBlank()) View.GONE else View.VISIBLE)
                 workout.meta?.let { setTextViewText(R.id.widget_meta, it) }
-                setTextViewText(R.id.widget_status, workout.status)
+                setTextViewText(R.id.widget_status, when (workout.status) {
+                    "COMPLETADO" -> localized.getString(SharedR.string.ui_sheet_completed)
+                    "OMITIDO" -> localized.getString(SharedR.string.ui_sheet_skipped)
+                    else -> workout.status
+                })
                 workout.coverUrl?.let { coverUrl -> cachedTrainingBitmap(context, coverUrl) }.let { bitmap ->
                     if (bitmap == null) {
                         setViewVisibility(R.id.widget_background, View.GONE)
@@ -227,7 +247,7 @@ class WorkoutQuickAccessWidget : AppWidgetProvider() {
             val progress = activeIndex?.let { ((it.coerceAtLeast(0) * 100) / total.coerceAtLeast(1)).coerceIn(0, 100) }
             val currentExercise = activeIndex?.let { index ->
                 exercises?.optJSONObject(index)?.let { exercise ->
-                    exerciseDisplayName(exercise.optString("imageKey").takeIf(String::isNotBlank), exercise.optString("name"))
+                    localizedExerciseName(localizedBackgroundContext(context), exercise.optString("imageKey").takeIf(String::isNotBlank), exercise.optString("name"))
                 }
             }?.takeIf(String::isNotBlank)
             val currentExerciseImageKey = activeIndex?.let { index ->

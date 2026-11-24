@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_serving_grams">Amount per serving (g)</string>
+    <string name="nutrition_total_weight_optional">Total weight (g, optional)</string>
+    <string name="nutrition_total_grams">Total grams</string>
+    <string name="nutrition_total_macros">Total macros</string>
+</resources>

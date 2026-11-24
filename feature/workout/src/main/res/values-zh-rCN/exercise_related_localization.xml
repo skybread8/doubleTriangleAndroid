@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_related_loading">正在加载动作</string>
+    <string name="exercise_related_searching">正在查找替代动作和相同肌群的动作。</string>
+    <string name="exercise_related_none">没有针对相同肌群的其他动作。</string>
+</resources>

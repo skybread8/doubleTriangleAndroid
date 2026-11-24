@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_surprise_description">Crea un’idea a sorpresa in base agli obiettivi del giorno e a una combinazione equilibrata di alimenti.</string>
+    <string name="nutrition_aligned_with_training">Adattato al tuo allenamento</string>
+</resources>

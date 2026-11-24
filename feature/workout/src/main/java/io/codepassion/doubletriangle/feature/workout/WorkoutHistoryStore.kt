@@ -151,7 +151,7 @@ internal data class ExerciseHistoryEntry(
 internal fun mergeExerciseHistory(
     existing: List<ExerciseHistoryEntry>,
     imported: List<ExerciseHistoryEntry>,
-    limit: Int,
+    limit: Int = Int.MAX_VALUE,
 ): List<ExerciseHistoryEntry> {
     val merged = existing.toMutableList()
     imported.forEach { incoming ->
@@ -166,7 +166,8 @@ internal fun mergeExerciseHistory(
         }
         if (matches.size == 1) {
             val index = matches.single()
-            if (merged[index].pendingEditAt == 0L || incoming.updatedAtMillis > merged[index].pendingEditAt) merged[index] = incoming
+            val existingVersion = maxOf(merged[index].updatedAtMillis, merged[index].pendingEditAt)
+            if ((existingVersion == 0L && incoming.updatedAtMillis == 0L) || incoming.updatedAtMillis > existingVersion) merged[index] = incoming
             else if (merged[index].remoteResultId == null && incoming.remoteResultId != null) {
                 merged[index] = merged[index].copy(remoteResultId = incoming.remoteResultId)
             }
@@ -174,6 +175,13 @@ internal fun mergeExerciseHistory(
     }
     return merged.sortedByDescending(ExerciseHistoryEntry::timestampMillis).take(limit)
 }
+
+/** Apply remote tombstones by identity without discarding a newer local edit. */
+internal fun removeDeletedExerciseHistory(entries: List<ExerciseHistoryEntry>, deletedAt: Map<String, Long>): List<ExerciseHistoryEntry> =
+    entries.filter { entry ->
+        val remoteDeletion = entry.remoteResultId?.lowercase()?.let(deletedAt::get) ?: return@filter true
+        remoteDeletion <= maxOf(entry.updatedAtMillis, entry.pendingEditAt)
+    }
 
 internal fun claimUploadedHistory(entries: List<ExerciseHistoryEntry>, entry: RemoteExerciseHistoryEntry, id: String, plannedId: String): List<ExerciseHistoryEntry> {
     val matches = entries.indices.filter { index ->
@@ -291,7 +299,6 @@ object WorkoutHistoryStore {
     // Keep the same local horizon as the completed-session analytics store so
     // 12W and All can include the complete exercise history available on the
     // device instead of silently stopping after eight-ish weeks.
-    private const val MAX_ENTRIES = 180
 
     internal fun history(context: Context, exercise: ExerciseSummary): List<ExerciseHistoryEntry> =
         historyForKey(context, exercise.historyKey()).sortedByDescending(ExerciseHistoryEntry::timestampMillis)
@@ -338,6 +345,20 @@ object WorkoutHistoryStore {
         } }
     }
 
+    /** Remove server-deleted results from every exercise, retaining newer local edits. */
+    fun removeRemoteDeletedEntries(context: Context, deletedAt: Map<String, Long>) {
+        if (deletedAt.isEmpty()) return
+        val preferences = context.getSharedPreferences(PREFERENCES, 0)
+        val normalized = deletedAt.mapKeys { it.key.lowercase() }
+        val editor = preferences.edit()
+        historyKeys(context).forEach { key ->
+            val existing = historyForKey(context, key)
+            val remaining = removeDeletedExerciseHistory(existing, normalized)
+            if (remaining.size != existing.size) editor.putString(key, historyJson(remaining).toString())
+        }
+        editor.apply()
+    }
+
     /** Imports completed sets downloaded from another device without replacing local history. */
     fun importRemoteEntries(context: Context, entries: List<RemoteExerciseHistoryEntry>) {
         if (entries.isEmpty()) return
@@ -369,7 +390,7 @@ object WorkoutHistoryStore {
                     paceSecondsPerKm = entry.paceSecondsPerKm,
                 )
             }
-            val merged = mergeExerciseHistory(existing, importedHistory, MAX_ENTRIES)
+            val merged = mergeExerciseHistory(existing, importedHistory)
             preferences.edit().putString(key, historyJson(merged).toString()).apply()
             keys += key
         }
@@ -502,7 +523,7 @@ object WorkoutHistoryStore {
                 ExerciseHistoryEntry(timestamp, result.sets, result.totalReps, result.maxWeightKg, result.volumeKg, details, feedback, note, result.durationSeconds, result.distanceKm, workout.id, exercise.plannedExerciseId),
             ) + history(context, exercise)
             val json = JSONArray().apply {
-                entries.take(MAX_ENTRIES).forEach { entry ->
+                entries.forEach { entry ->
                     val detailsJson = JSONArray().apply {
                         entry.setDetails.forEach { set ->
                             put(

@@ -255,6 +255,7 @@ data class TrainingLocationProfile(
     val photoPath: String? = null,
     val id: String? = null,
     val gymId: String? = null,
+    val updatedAt: String? = null,
 )
 
 fun OnboardingProfile.effectiveTrainingLocations(): List<TrainingLocationProfile> = trainingLocations.ifEmpty {
@@ -832,6 +833,7 @@ fun OnboardingScreen(
         AuthenticationSheet(
             register = authenticationRegisters,
             profile = authenticationProfile,
+            allowsRegister = registrationCompletesOnboarding,
             onDismiss = { isLoginVisible = false },
             onSwitch = { authenticationRegisters = !authenticationRegisters },
             onAuthenticated = { response ->

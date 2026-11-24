@@ -6,6 +6,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CheckInSyncPolicyTest {
+    @Test fun builtInAnswersStartADraftAndClearingAnswersDoesNotRevertIt() {
+        assertTrue(checkInDraftStatus(false, "pending", null, false) == "pending")
+        assertTrue(checkInDraftStatus(false, "pending", null, true) == "draft")
+        assertTrue(checkInDraftStatus(false, "pending", "draft", false) == "draft")
+        assertTrue(checkInDraftStatus(false, "draft", null, false) == "draft")
+        assertTrue(checkInDraftStatus(true, "draft", null, false) == "submitted")
+    }
     @Test fun onlyAcknowledgesTheSameWriteAndContent() {
         val at = Instant.parse("2026-11-16T12:00:00Z")
         assertTrue(checkInWriteAcknowledged("ABC", "abc", at, at, true))

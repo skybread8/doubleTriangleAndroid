@@ -68,3 +68,7 @@ Diez textos de onboarding proceden de claves de iOS que no existen en el Sheet.
 Sus traducciones locales se mantienen en `scripts/onboarding-local-fallbacks.json`
 y se generan mediante `sync-onboarding-sheet-map.ps1`; cuando el Sheet contiene
 una clave equivalente, se utiliza el recurso compartido.
+
+## Informes de cobertura
+
+`sync-shared-translations.ps1` genera dos informes a partir de la exportación disponible: `sheet-missing-cells.tsv` enumera recursos sin celda exportada por idioma; `sheet-unchanged-candidates.tsv` señala textos idénticos al inglés para revisión. Una coincidencia no demuestra un error: puede ser una marca, unidad o término compartido. La ausencia en la exportación tampoco implica que Android no tenga una alternativa local. Los identificadores son nombres normalizados de Android, no necesariamente las claves literales del Sheet.

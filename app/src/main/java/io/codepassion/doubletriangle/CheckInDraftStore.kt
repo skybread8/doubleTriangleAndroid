@@ -35,7 +35,9 @@ internal object CheckInDraftStore {
             .put("created_at", record.getString("created_at"))
             .put("updated_at", updated)
             .put("deleted_at", JSONObject.NULL)
-            .put("status", if (submit) "submitted" else if (answers.length() > 0 || record.optString("status") == "draft") "draft" else "pending")
+            .put("status", checkInDraftStatus(submit, record.optString("status"), queue.optJSONObject(id)?.optJSONObject("payload")?.optString("status"),
+                answers.length() > 0 || CheckInAssets.metrics(context, userId, id).isNotEmpty() ||
+                    CheckInAssets.photos(context, userId).any { it.optString("check_in_id").equals(id, true) }))
             .put("answers", if (answers.length() == 0) JSONObject.NULL else JSONObject(answers.toString()))
             .put("submitted_at", if (submit) updated else JSONObject.NULL)
         queue.put(id, JSONObject().put("version", UUID.randomUUID().toString()).put("payload", payload))

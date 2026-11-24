@@ -654,10 +654,10 @@ private fun SubscriptionDetailsCard(
             !hasAccount -> ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_an_account_to_subscribe), "person.badge.plus", onClick = onRegister)
             else -> {
                 subscription?.let { subscription ->
-                    SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.plan), subscriptionPlanName(subscription.plan))
-                    if (subscription.status.isNotBlank()) SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.status), subscriptionStatusName(subscription.status, false))
-                    if (subscription.provider.isNotBlank()) SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.provider), subscriptionProviderName(subscription.provider))
-                    subscription.renewsAt?.let { SubscriptionDetailRow(if (subscription.autoRenews) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.renews) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ends), formatSubscriptionDate(it)) }
+                    SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.plan), localizedSubscriptionPlan(subscription.plan))
+                    if (subscription.status.isNotBlank()) SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.status), localizedSubscriptionStatus(subscription.status))
+                    if (subscription.provider.isNotBlank()) SubscriptionDetailRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.provider), if (subscription.provider.equals("external", true)) androidx.compose.ui.res.stringResource(R.string.subscription_external) else subscriptionProviderName(subscription.provider))
+                    subscription.renewsAt?.let { SubscriptionDetailRow(if (subscription.autoRenews) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.renews) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ends), formatSubscriptionDate(it, androidx.compose.ui.platform.LocalConfiguration.current.locales[0])) }
                 }
                 ProfileRow(if (subscription != null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.view_subscription_options) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.get_wildforce_premium), "crown.fill", onClick = onPaywall)
             }
@@ -673,10 +673,30 @@ private fun SubscriptionDetailRow(label: String, value: String) {
     }
 }
 
-private fun formatSubscriptionDate(value: String): String = runCatching {
+private fun formatSubscriptionDate(value: String, locale: java.util.Locale): String = runCatching {
     java.time.OffsetDateTime.parse(value).toLocalDate()
-        .format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(java.util.Locale.getDefault()))
+        .format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM).withLocale(locale))
 }.getOrElse { value.substringBefore('T') }
+
+@Composable
+private fun localizedSubscriptionPlan(plan: String?): String {
+    val resource = when (plan) {
+        null -> io.codepassion.doubletriangle.core.designsystem.R.string.not_available
+        "trial" -> R.string.subscription_trial
+        "demo" -> R.string.subscription_demo
+        "member_monthly" -> R.string.subscription_member_monthly
+        "member_yearly" -> R.string.subscription_member_yearly
+        "coach_basic_monthly" -> R.string.subscription_coach_basic_monthly
+        "coach_basic_yearly" -> R.string.subscription_coach_basic_yearly
+        "coach_pro_monthly" -> R.string.subscription_coach_pro_monthly
+        "coach_pro_yearly" -> R.string.subscription_coach_pro_yearly
+        "coached_external" -> R.string.subscription_coached_external
+        "nutrition" -> io.codepassion.doubletriangle.core.designsystem.R.string.nutrition
+        "premium" -> io.codepassion.doubletriangle.core.designsystem.R.string.premium
+        else -> null
+    }
+    return if (resource != null) androidx.compose.ui.res.stringResource(resource) else subscriptionPlanName(plan)
+}
 
 internal fun subscriptionPlanName(plan: String?): String = when (plan) {
     null -> "Sin suscripción"
@@ -696,6 +716,17 @@ internal fun subscriptionPlanName(plan: String?): String = when (plan) {
     "gym_300" -> "Gym 300"
     "gym_1000" -> "Gym 1000"
     else -> plan.replace('_', ' ').replaceFirstChar { it.uppercase() }
+}
+
+@Composable
+private fun localizedSubscriptionStatus(status: String): String = when (status.lowercase()) {
+    "active" -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_active)
+    "cancelled", "canceled" -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancelled)
+    "pending" -> androidx.compose.ui.res.stringResource(R.string.subscription_pending)
+    "grace_period" -> androidx.compose.ui.res.stringResource(R.string.subscription_grace_period)
+    "expired" -> androidx.compose.ui.res.stringResource(R.string.subscription_expired)
+    "revoked" -> androidx.compose.ui.res.stringResource(R.string.subscription_revoked)
+    else -> subscriptionStatusName(status, false)
 }
 
 private fun subscriptionStatusName(status: String?, hasAccess: Boolean): String = when (status) {
@@ -995,7 +1026,7 @@ private enum class PasswordRequirement(val shortLabel: String) {
 }
 
 @Composable
-fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss: () -> Unit, onSwitch: () -> Unit, onAuthenticated: (AuthResponse) -> Unit) {
+fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss: () -> Unit, onSwitch: () -> Unit, allowsRegister: Boolean = true, onAuthenticated: (AuthResponse) -> Unit) {
     var email by remember { mutableStateOf("") }; var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }; var submitting by remember { mutableStateOf(false) }
     // iOS opens both login and registration on the social-provider choice first.
@@ -1072,7 +1103,7 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
                             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 error?.let { Text(it, color = WildforceThemeTokens.destructiveText, style = MaterialTheme.typography.caption) }
                                 GoogleAuthenticationButton(
-                                    title = if (register) "Registrarme con Google" else "Iniciar sesión con Google",
+                                    title = androidx.compose.ui.res.stringResource(if (register) io.codepassion.doubletriangle.core.designsystem.R.string.sign_up_with_google else io.codepassion.doubletriangle.core.designsystem.R.string.sign_in_with_google),
                                     enabled = !submitting,
                                     loading = submitting,
                                     onIdToken = { idToken -> scope.launch {
@@ -1136,8 +1167,16 @@ fun AuthenticationSheet(register: Boolean, profile: OnboardingProfile, onDismiss
                             }
                         }
                     }
-                    if (register || isEmailLoginPresented) {
-                        Text(if (register) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_i_already_have_an_account) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_an_account), Modifier.fillMaxWidth().clickable(onClick = onSwitch).padding(8.dp), color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    if (isEmailLoginPresented) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Text("← " + androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.action_back), Modifier.clickable { error = null; isEmailLoginPresented = false }.padding(8.dp), color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption)
+                            if (!register && allowsRegister) {
+                                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_an_account), Modifier.clickable { error = null; email = ""; password = ""; isEmailLoginPresented = false; onSwitch() }.padding(8.dp), color = WildforceThemeTokens.textPrimary, style = MaterialTheme.typography.caption)
+                            }
+                        }
+                    }
+                    if (register) {
+                        Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_i_already_have_an_account), Modifier.fillMaxWidth().clickable { error = null; email = ""; password = ""; isEmailLoginPresented = false; onSwitch() }.padding(8.dp), color = WildforceThemeTokens.textPrimary, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                     }
                 }
             }
@@ -1201,19 +1240,19 @@ fun SubscriptionPaywall(
         Column(Modifier.fillMaxWidth().background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(20.dp)).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.what_you_get), fontFamily = Exo2FontFamily, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
             (if (selectedTier == SubscriptionTier.Premium) listOf(
-                "Todo lo incluido en Nutrición" to "Registro de comidas e ideas con IA.",
-                "Entrenamiento personalizado" to "Planes que se adaptan a tus objetivos y progreso.",
-                "Información sobre tu progreso" to "Entiende tu entrenamiento y mantén la constancia.",
+                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.everything_in_nutrition) to androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ai_meal_logging_and_meal_ideas_included_),
+                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.personalized_training) to androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.plans_that_adapt_to_your_goals_and_progress_),
+                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.progress_insights) to androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.understand_your_training_and_stay_consistent_),
             ) else listOf(
-                "Registro de comidas con IA" to "Registra comidas desde una foto, etiqueta o descripción.",
-                "Ideas de comidas" to "Ideas que encajan con los macros que te quedan.",
-                "Información sobre tu progreso" to "Entiende tu entrenamiento y mantén la constancia.",
+                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ai_meal_logging) to androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_meals_from_a_photo__a_label_or_a_description_),
+                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.meal_ideas) to androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ideas_that_fit_the_macros_you_have_left_),
+                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.progress_insights) to androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.understand_your_training_and_stay_consistent_),
             )).forEach { (title, detail) -> Row { Icon(Icons.Filled.Star, null, Modifier.width(24.dp), tint = WildforceThemeTokens.accent); Column(Modifier.padding(start = 12.dp)) { Text(title, fontWeight = FontWeight.Bold); Text(detail, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } } }
             if (selectedTier == SubscriptionTier.Nutrition && SubscriptionTier.Premium in offeredTiers) Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.premium_includes_everything_in_nutrition__plus_personalized_training_), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            PlanCard("Mensual", selectedTier.monthlyProductId, "P1M", selected, products) { selected = it }
-            PlanCard("Anual", selectedTier.yearlyProductId, "P1Y", selected, products, isYearly = true, best = true) { selected = it }
+            PlanCard(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.monthly), selectedTier.monthlyProductId, "P1M", selected, products) { selected = it }
+            PlanCard(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.yearly), selectedTier.yearlyProductId, "P1Y", selected, products, isYearly = true, best = true) { selected = it }
         }
         val selectedPeriod = if (selected == selectedTier.yearlyProductId) "P1Y" else "P1M"
         val selectedOffer = products[selected]?.renewableBaseOffer(selectedPeriod)

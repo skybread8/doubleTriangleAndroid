@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_generation_goals">正在分析你的营养目标…</string>
+    <string name="nutrition_generation_preferences">正在查看你的饮食偏好…</string>
+    <string name="nutrition_generation_macros">正在计算热量和三大营养素…</string>
+    <string name="nutrition_generation_training">正在根据你的训练调整计划…</string>
+    <string name="nutrition_generation_planner">正在咨询 AI 规划器…</string>
+    <string name="nutrition_generation_meals">正在为你定制餐食…</string>
+    <string name="nutrition_generation_balance">正在平衡蛋白质、脂肪和碳水化合物…</string>
+</resources>

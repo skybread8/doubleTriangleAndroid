@@ -341,7 +341,7 @@ object WorkoutPlanGenerator {
                 add(WorkoutDaySummary(
                     id, index + 1, day.optString("title").trim().ifBlank { "Sesión ${index + 1}" },
                     day.optString("focus").trim().ifBlank { "Fitness general" },
-                    day.optString("dayType").trim().lowercase().ifBlank { "strength" }, weekday,
+                    day.nullableString("dayType")?.lowercase().orEmpty(), weekday,
                     estimatedMinutes.coerceIn(15, 180), parseWorkoutStatus(day.optString("status")), exercises, blocks,
                     kind = day.optString("kind", "workout").trim().ifBlank { "workout" },
                     creationSource = day.optString("creationSource", "generated").trim().ifBlank { "generated" },

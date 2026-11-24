@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="workout_toolbar_path">Ruta del entrenamiento</string>
+    <string name="workout_toolbar_insights">Datos del ejercicio</string>
+    <string name="workout_toolbar_guide">Guía del ejercicio</string>
+</resources>

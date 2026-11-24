@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle.feature.workout
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +36,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -78,14 +81,12 @@ internal fun setStyleIcon(style: ExerciseSetStyle): ImageVector = when (style) {
 @Composable
 internal fun SetStyleGlyph(style: ExerciseSetStyle, modifier: Modifier = Modifier, tint: Color) {
     if (style == ExerciseSetStyle.Straight) {
-        Text(
-            "=",
-            modifier = modifier,
-            color = tint,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-        )
+        Canvas(modifier = modifier) {
+            val stroke = size.minDimension * 0.1f
+            listOf(0.4f, 0.6f).forEach { y ->
+                drawLine(tint, Offset(size.width * 0.25f, size.height * y), Offset(size.width * 0.75f, size.height * y), strokeWidth = stroke, cap = StrokeCap.Round)
+            }
+        }
     } else {
         Icon(setStyleIcon(style), contentDescription = null, modifier = modifier, tint = tint)
     }

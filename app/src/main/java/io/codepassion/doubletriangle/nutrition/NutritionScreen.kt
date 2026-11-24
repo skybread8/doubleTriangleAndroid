@@ -306,13 +306,10 @@ fun NutritionScreen(
 
     // Equivalent to iOS's scheduled sync after a SwiftData save. Keep the
     // pending marker if transport fails so the next foreground sync retries.
-    fun queueRemoteSync() {
+    fun queueRemoteSync(vararg changedResources: String) {
         val syncPreferences = context.getSharedPreferences("wildforce_profile", Context.MODE_PRIVATE)
-        RemoteSyncChangeTracker.mark(
-            context,
-            "nutrition-profiles", "nutrition-plans", "nutrition-days", "nutrition-meals",
-            "nutrition-log-media", "nutrition-log-entries", "nutrition-log-items",
-        )
+        val resources = changedResources.ifEmpty { arrayOf("nutrition-log-media", "nutrition-log-entries", "nutrition-log-items") }
+        RemoteSyncChangeTracker.mark(context, *resources)
         // Keep the change pending even if the profile has not loaded yet.
         // The next account sync can then send the deletion as a tombstone.
         val syncProfile = profile ?: return
@@ -405,7 +402,7 @@ fun NutritionScreen(
     fun discardPlannedMeal(date: LocalDate, meal: PlannedMeal) {
         NutritionStore.dismissPlannedMeal(context, date, meal)
         dayMealStateVersion++
-        queueRemoteSync()
+        queueRemoteSync("nutrition-meals")
     }
 
     fun openLogForSomethingElse(date: LocalDate, meal: PlannedMeal) {
@@ -520,7 +517,7 @@ fun NutritionScreen(
         )
     }
     if (showTargets) NutritionTargetsDialog(targets, { showTargets = false }) { value ->
-        targets = value; NutritionStore.saveTargets(context, value); NutritionStore.clearGeneratedPlan(context); generatedPlan = null; planMetadata = null; showTargets = false; queueRemoteSync()
+        targets = value; NutritionStore.saveTargets(context, value); NutritionStore.clearGeneratedPlan(context); generatedPlan = null; planMetadata = null; showTargets = false; queueRemoteSync("nutrition-plans", "nutrition-days", "nutrition-meals")
     }
     if (showPreferences) NutritionPreferencesDialog(
         preferences,
@@ -529,7 +526,7 @@ fun NutritionScreen(
         isHealthConnectEnabled = profile?.isHealthConnectEnabled == true,
         onRequestHealthConnect = onRequestHealthConnect,
     ) { value ->
-        NutritionPlanProfileSnapshot.ensureBaseline(context); preferences = value; NutritionStore.savePreferences(context, value); hasNutritionProfile = true; showPreferences = false; queueRemoteSync()
+        NutritionPlanProfileSnapshot.ensureBaseline(context); preferences = value; NutritionStore.savePreferences(context, value); hasNutritionProfile = true; showPreferences = false; queueRemoteSync("nutrition-profiles")
     }
     if (showIdeas) MealIdeasDialog(plan.firstOrNull { it.date == selectedDate }, fridgeTarget, { showIdeas = false; fridgeTarget = null }) { planned ->
         val entry = MealLog(System.currentTimeMillis(), planned.title, planned.targets.calories, planned.targets.protein, planned.targets.carbs, planned.targets.fat, planned.type, selectedDate, planned.guidance, "meal_idea", plannedMealKey = plannedMealKey)
@@ -563,7 +560,7 @@ fun NutritionScreen(
                 planMetadata = metadata
                 generatedPlanPreview = null
                 planVersion = NutritionStore.regeneratePlan(context)
-                queueRemoteSync()
+                queueRemoteSync("nutrition-plans", "nutrition-days", "nutrition-meals")
             },
         )
     }
@@ -613,15 +610,15 @@ private fun NutritionPlanGenerationAnimation() {
         // animation canvas prevents AlertDialog from remeasuring for each line.
         modifier = Modifier.width(320.dp).height(380.dp),
         steps = listOf(
-            "Analizando tus objetivos nutricionales…",
-            "Evaluando tus preferencias alimentarias…",
-            "Calculando calorías y macronutrientes…",
-            "Ajustando el plan a tus entrenamientos…",
-            "Consultando al generador de IA…",
-            "Personalizando tus comidas…",
-            "Equilibrando proteínas, grasas y carbohidratos…",
-            "Terminando tu semana nutricional…",
-            "Ya casi está…",
+            androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_generation_goals),
+            androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_generation_preferences),
+            androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_generation_macros),
+            androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_generation_training),
+            androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_generation_planner),
+            androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_generation_meals),
+            androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_generation_balance),
+            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.finalizing_your_personalized_plan___),
+            androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.almost_there___),
         ),
     )
 }
@@ -814,8 +811,8 @@ private fun NutritionEmptyPlanState(showsAiCoach: Boolean) {
         Icon(Icons.Filled.Eco, null, tint = NutritionCoral, modifier = Modifier.size(42.dp))
         Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_nutrition_plan_yet), fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
         Text(
-            if (showsAiCoach) "Genera un plan nutricional semanal para ver calorías, macros y orientación personalizada."
-            else "Tu coach compartirá aquí tu plan nutricional.",
+            if (showsAiCoach) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.generate_a_weekly_nutrition_plan_to_see_day_by_day_calories__macros__and_workout_fueling_guidance_here_)
+            else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_coach_will_share_your_nutrition_plan_here_),
             style = MaterialTheme.typography.caption,
             color = WildforceThemeTokens.textSecondary,
             textAlign = TextAlign.Center,
@@ -849,7 +846,7 @@ private fun NutritionPlanSummaryCard(plan: List<NutritionDayPlan>, profile: Onbo
             }
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_daily_average), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
-        Icon(Icons.Filled.ChevronRight, "Abrir plan", tint = WildforceThemeTokens.textSecondary, modifier = Modifier.size(22.dp))
+        Icon(Icons.Filled.ChevronRight, null, tint = WildforceThemeTokens.textSecondary, modifier = Modifier.size(22.dp))
     }
 }
 
@@ -1109,7 +1106,7 @@ private fun DayMealsPreview(
                     textAlign = TextAlign.Center,
                 )
                 Text(
-                    "Aquí aparecerán las comidas registradas y las sugerencias de tu plan.",
+                    androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.logged_meals_and_your_plan_s_suggestions_for_this_day_will_appear_here_),
                     style = MaterialTheme.typography.caption,
                     color = WildforceThemeTokens.textSecondary,
                     textAlign = TextAlign.Center,
@@ -1229,9 +1226,9 @@ private fun HubMealRow(entry: MealLog, onBookmark: (MealLog, String?) -> Unit, o
         verticalAlignment = Alignment.Top,
     ) {
         if (photo != null) {
-            androidx.compose.foundation.Image(photo.asImageBitmap(), "Foto de ${entry.name}", Modifier.size(88.dp).clip(RoundedCornerShape(14.dp)).clickable { showPhoto = true }, contentScale = ContentScale.Crop)
+            androidx.compose.foundation.Image(photo.asImageBitmap(), "${androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.photo)}: ${entry.name}", Modifier.size(88.dp).clip(RoundedCornerShape(14.dp)).clickable { showPhoto = true }, contentScale = ContentScale.Crop)
         } else if (remoteImage != null) {
-            androidx.compose.foundation.Image(remoteImage.asImageBitmap(), "Imagen de ${entry.name}", Modifier.size(88.dp).clip(RoundedCornerShape(14.dp)).clickable { showPhoto = true }, contentScale = ContentScale.Crop)
+            androidx.compose.foundation.Image(remoteImage.asImageBitmap(), "${androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.photo)}: ${entry.name}", Modifier.size(88.dp).clip(RoundedCornerShape(14.dp)).clickable { showPhoto = true }, contentScale = ContentScale.Crop)
         } else {
             NutritionMealPlaceholder(entry)
         }
@@ -1248,7 +1245,7 @@ private fun HubMealRow(entry: MealLog, onBookmark: (MealLog, String?) -> Unit, o
                 ) {
                     Icon(
                         if (entry.isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-                        if (entry.isBookmarked) "Quitar de guardadas" else "Guardar",
+                        if (entry.isBookmarked) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.remove_bookmark) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.bookmark),
                         tint = if (entry.isBookmarked) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary.copy(alpha = .4f),
                         modifier = Modifier.size(18.dp),
                     )
@@ -1264,7 +1261,7 @@ private fun HubMealRow(entry: MealLog, onBookmark: (MealLog, String?) -> Unit, o
                     IconButton(onClick = { expanded = !expanded }, modifier = Modifier.size(32.dp)) {
                         Icon(
                             if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                            if (expanded) "Contraer alimentos" else "Expandir alimentos",
+                            if (expanded) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.collapse_items) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.expand_items),
                             tint = WildforceThemeTokens.textSecondary,
                             modifier = Modifier.size(18.dp),
                         )
@@ -1606,12 +1603,12 @@ private fun WeeklyBalanceCard(energyHistory: Map<LocalDate, NutritionEnergyPoint
         val hasAverageSummary = averageEaten > 0 || averageBurned != null || averageNet != null
         val inspectedIndex = inspectedDate?.let(dates::indexOf)?.takeIf { it >= 0 }
         val displayedEaten = inspectedIndex?.let { history[it] } ?: averageEaten
-        val displayedBurned = inspectedIndex?.let { index -> energyHistory[dates[index]]?.let(::burnedCaloriesOrNull)?.toInt() } ?: averageBurned
-        val displayedNet = inspectedIndex?.let { index ->
+        val displayedBurned = if (inspectedIndex == null) averageBurned else energyHistory[dates[inspectedIndex]]?.let(::burnedCaloriesOrNull)?.toInt()
+        val displayedNet = if (inspectedIndex == null) averageNet else inspectedIndex.let { index ->
             val eaten = history[index]
             val burned = energyHistory[dates[index]]?.let(::burnedCaloriesOrNull)?.toInt()
             burned?.takeIf { eaten > 0 }?.let { eaten - it }
-        } ?: averageNet
+        }
         val netColor = when {
             displayedNet == null -> WildforceThemeTokens.textSecondary
             displayedNet > 0 -> NutritionOrange
@@ -1619,10 +1616,10 @@ private fun WeeklyBalanceCard(energyHistory: Map<LocalDate, NutritionEnergyPoint
             else -> WildforceThemeTokens.textSecondary
         }
         if (hasAverageSummary) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                BalanceMetric(if (inspectedIndex == null) "Media ingerida" else "Ingerida", if (displayedEaten > 0) "$displayedEaten kcal" else "—", NutritionCoral)
-                BalanceMetric(if (inspectedIndex == null) "Media quemada" else "Quemada", displayedBurned?.let { "$it kcal" } ?: "—", WildforceThemeTokens.accent)
-                BalanceMetric("Balance", displayedNet?.let { "${if (it > 0) "+" else ""}$it kcal" } ?: "—", netColor)
+            Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                BalanceMetric(if (inspectedIndex == null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.avg_eaten) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.eaten), if (displayedEaten > 0) "$displayedEaten kcal" else "—", NutritionCoral, Modifier.weight(1f))
+                BalanceMetric(if (inspectedIndex == null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.avg_burned) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.burned), displayedBurned?.let { "$it kcal" } ?: "—", WildforceThemeTokens.accent, Modifier.weight(1f))
+                BalanceMetric("Balance", displayedNet?.let { "${if (it > 0) "+" else ""}$it kcal" } ?: "—", netColor, Modifier.weight(1f))
             }
         }
         val chartBurnedValues = dates.mapNotNull { energyHistory[it]?.totalCalories ?: energyHistory[it]?.activeCalories }.map { it.toInt() }
@@ -1643,7 +1640,7 @@ private fun WeeklyBalanceCard(energyHistory: Map<LocalDate, NutritionEnergyPoint
               Text("0", style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary)
           }
           Box(Modifier.weight(1f).height(145.dp)) {
-            Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom) {
+            Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
                 dates.forEachIndexed { index, date ->
                     val eaten = history[index]
                     val point = energyHistory[date]
@@ -1655,9 +1652,9 @@ private fun WeeklyBalanceCard(energyHistory: Map<LocalDate, NutritionEnergyPoint
                     // standard series. The gap is data-space, not a fixed dp gap:
                     // converting it with the same scale preserves both segment
                     // heights and the chart proportions on every density/scale.
-                    val chartScale = 130f / maximum.toFloat()
+                    val chartScale = 145f / maximum.toFloat()
                     val animatedBurnedHeight by animateDpAsState(
-                        targetValue = (130 * burned / maximum).dp,
+                        targetValue = (burned * chartScale).dp,
                         animationSpec = tween(420),
                         label = "energy-balance-bar-$date",
                     )
@@ -1717,10 +1714,7 @@ private fun WeeklyBalanceCard(energyHistory: Map<LocalDate, NutritionEnergyPoint
           val eatenPointColor = WildforceThemeTokens.backgroundSecondary
           val chartGridColor = WildforceThemeTokens.textSecondary.copy(alpha = .15f)
           Canvas(Modifier.fillMaxSize()) {
-              // Canvas coordinates are pixels, whereas the bars above use the
-              // full 170.dp plot height. Use the actual pixel height here;
-              // using a hard-coded 154px made small meals (e.g. a banana)
-              // collapse against the baseline on xxhdpi devices.
+              // The line and bars share the same plot height and day centers.
               val lineWidth = 2.dp.toPx()
               val pointRadius = 4.dp.toPx()
               // Match Swift Charts' subtle horizontal grid marks.
@@ -1730,7 +1724,7 @@ private fun WeeklyBalanceCard(energyHistory: Map<LocalDate, NutritionEnergyPoint
               }
               val points = history.mapIndexedNotNull { index, eaten ->
                   if (eaten <= 0) null else Offset(
-                      x = if (dates.lastIndex == 0) size.width / 2f else size.width * index / dates.lastIndex,
+                      x = size.width * (index + .5f) / dates.size,
                       y = size.height - (size.height * eaten / maximum),
                   )
               }
@@ -1749,7 +1743,7 @@ private fun WeeklyBalanceCard(energyHistory: Map<LocalDate, NutritionEnergyPoint
               val selectedDateValue = dates[index]
               val selectedPoint = energyHistory[selectedDateValue]
               val selectedY = selectedPoint?.totalCalories ?: selectedPoint?.activeCalories ?: 0.0
-              val selectedXFraction = if (dates.lastIndex == 0) .5f else index.toFloat() / dates.lastIndex
+              val selectedXFraction = (index + .5f) / dates.size
               val selectedYFraction = (selectedY / maximum).toFloat().coerceIn(0f, 1f)
               BoxWithConstraints(Modifier.fillMaxSize()) {
                   val plotWidth = maxWidth
@@ -1798,7 +1792,15 @@ private fun WeeklyBalanceCard(energyHistory: Map<LocalDate, NutritionEnergyPoint
     }
 }
 
-@Composable private fun BalanceMetric(label: String, value: String, color: Color) { Column(verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(label, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Medium, color = WildforceThemeTokens.textSecondary); Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) { Text(value.removeSuffix(" kcal"), style = MaterialTheme.typography.body2, fontWeight = FontWeight.Bold, color = color); Text("kcal", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary) } } }
+@Composable private fun BalanceMetric(label: String, value: String, color: Color, modifier: Modifier = Modifier) {
+    Column(modifier.fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
+        Text(label, style = MaterialTheme.typography.caption, fontWeight = FontWeight.Medium, color = WildforceThemeTokens.textSecondary)
+        Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(value.removeSuffix(" kcal"), modifier = Modifier.weight(1f, fill = false), style = MaterialTheme.typography.body2, fontWeight = FontWeight.Bold, color = color, maxLines = 1)
+            Text("kcal", style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary, maxLines = 1)
+        }
+    }
+}
 @Composable private fun BalanceLegend(color: Color, label: String) { Row(verticalAlignment = Alignment.CenterVertically) { Box(Modifier.size(8.dp).background(color, CircleShape)); Text(label, Modifier.padding(start = 6.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Medium, color = WildforceThemeTokens.textSecondary) } }
 
 @Composable
@@ -1831,7 +1833,7 @@ private fun PlanHeader(
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             PlanTag(Icons.Filled.CalendarToday, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_key_7_day_plan))
             PlanTag(Icons.Filled.LocalFireDepartment, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_960b584841df4abf))
-            PlanTag(Icons.Filled.FitnessCenter, "Adaptado al entreno")
+            PlanTag(Icons.Filled.FitnessCenter, androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_aligned_with_training))
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
             PlanMetric(Icons.Filled.Restaurant, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_dietary_style), dietaryStyleLabel(preferences.dietaryStyle), onEditPreferences)
@@ -1866,7 +1868,7 @@ private fun NutritionPlanNotesDialog(notes: String, onDismiss: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    text = "Notas del plan",
+                    text = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.plan_notes),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = WildforceThemeTokens.textPrimary,

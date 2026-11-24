@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subscription_pending">In behandeling</string>
+    <string name="subscription_grace_period">Respijtperiode</string>
+    <string name="subscription_expired">Verlopen</string>
+    <string name="subscription_revoked">Ingetrokken</string>
+    <string name="subscription_external">Extern</string>
+</resources>

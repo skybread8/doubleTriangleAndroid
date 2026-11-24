@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
@@ -213,15 +214,16 @@ private fun PlaceholderBar(width: androidx.compose.ui.unit.Dp, height: androidx.
     Spacer(Modifier.width(width).height(height).clip(RoundedCornerShape(8.dp)).background(color))
 }
 
+@Composable
 private fun defaultPlanGenerationSteps() = listOf(
-    "Analizando tus objetivos de fitness…",
-    "Evaluando tu equipamiento disponible…",
-    "Optimizando la división de entrenamientos…",
-    "Calculando las cargas objetivo…",
-    "Revisando las restricciones de movimiento…",
-    "Consultando al generador de IA…",
-    "Personalizando los ejercicios…",
-    "Equilibrando volumen e intensidad…",
-    "Terminando tu plan personalizado…",
-    "Ya casi está…",
+    stringResource(R.string.analyzing_your_fitness_goals___),
+    stringResource(R.string.evaluating_equipment_availability___),
+    stringResource(R.string.optimizing_workout_split___),
+    stringResource(R.string.calculating_target_weights___),
+    stringResource(R.string.reviewing_movement_restrictions___),
+    stringResource(R.string.consulting_the_ai_workout_generator___),
+    stringResource(R.string.personalizing_exercises___),
+    stringResource(R.string.balancing_volume_and_intensity___),
+    stringResource(R.string.finalizing_your_personalized_plan___),
+    stringResource(R.string.almost_there___),
 )

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subscription_trial">Trial</string>
+    <string name="subscription_demo">Demo</string>
+    <string name="subscription_member_monthly">Member monthly</string>
+    <string name="subscription_member_yearly">Member yearly</string>
+    <string name="subscription_coach_basic_monthly">Coach Basic monthly</string>
+    <string name="subscription_coach_basic_yearly">Coach Basic yearly</string>
+    <string name="subscription_coach_pro_monthly">Coach Pro monthly</string>
+    <string name="subscription_coach_pro_yearly">Coach Pro yearly</string>
+    <string name="subscription_coached_external">Coached externally</string>
+</resources>

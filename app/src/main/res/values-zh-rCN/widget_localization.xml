@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_create_first_workout">创建你的首次训练</string>
+    <string name="widget_recover_tomorrow">好好休息，明天再来</string>
+</resources>

@@ -83,15 +83,29 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 
-internal enum class LogMethod(val title: String, val description: String) {
-    Barcode("Código de barras", "Escanea o introduce el código de un producto"),
-    Describe("Describir comida", "Describe con tus palabras lo que has comido"),
-    Photo("Foto", "Selecciona una foto de tu comida"),
-    Recent("Recientes", "Vuelve a registrar una comida anterior"),
-    Label("Etiqueta nutricional", "Fotografía los valores de una etiqueta"),
-    Search("Buscar", "Busca un alimento en el catálogo"),
-    Manual("Entrada manual", "Introduce alimento, cantidad y macros"),
-}
+internal enum class LogMethod { Barcode, Describe, Photo, Recent, Label, Search, Manual }
+
+@Composable
+private fun localizedLogMethodTitle(method: LogMethod): String = androidx.compose.ui.res.stringResource(when (method) {
+    LogMethod.Barcode -> io.codepassion.doubletriangle.core.designsystem.R.string.scan_barcode
+    LogMethod.Describe -> io.codepassion.doubletriangle.core.designsystem.R.string.describe_meal
+    LogMethod.Photo -> io.codepassion.doubletriangle.core.designsystem.R.string.scan_photo
+    LogMethod.Recent -> io.codepassion.doubletriangle.core.designsystem.R.string.recent
+    LogMethod.Label -> io.codepassion.doubletriangle.core.designsystem.R.string.nutrition_label
+    LogMethod.Search -> io.codepassion.doubletriangle.core.designsystem.R.string.search_food_database
+    LogMethod.Manual -> io.codepassion.doubletriangle.core.designsystem.R.string.manual
+})
+
+@Composable
+private fun localizedLogMethodDescription(method: LogMethod): String = androidx.compose.ui.res.stringResource(when (method) {
+    LogMethod.Barcode -> io.codepassion.doubletriangle.core.designsystem.R.string.scan_a_product__adjust_the_portion__and_save_
+    LogMethod.Describe -> io.codepassion.doubletriangle.core.designsystem.R.string.type_or_dictate_what_you_ate_and_let_ai_estimate_it_
+    LogMethod.Photo -> io.codepassion.doubletriangle.core.designsystem.R.string.estimate_the_meal_from_a_photo__adjust_details__and_save_
+    LogMethod.Recent -> io.codepassion.doubletriangle.core.designsystem.R.string.copy_from_a_previous_meal_
+    LogMethod.Label -> io.codepassion.doubletriangle.core.designsystem.R.string.scan_label_macros__then_adjust_the_consumed_amount_before_saving_
+    LogMethod.Search -> io.codepassion.wildforce.android.R.string.nutrition_search_specific_food
+    LogMethod.Manual -> io.codepassion.doubletriangle.core.designsystem.R.string.add_one_or_more_foods_yourself_
+})
 
 /** AI-backed nutrition methods are the same two providers gated by iOS. */
 internal fun LogMethod.requiresAiNutritionAccess(): Boolean = this == LogMethod.Describe || this == LogMethod.Photo
@@ -322,9 +336,9 @@ internal fun NutritionLogFlow(
                 )
             } else {
                 MealEditor(
-                    title = if (initialEntry != null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.edit) else method!!.title,
+                    title = if (initialEntry != null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.edit) else localizedLogMethodTitle(method!!),
                     isEditing = initialEntry != null,
-                initial = (initialEntry ?: defaultFor(method!!, mealType, selectedDate, photoUri)).let { draft ->
+                initial = (initialEntry ?: defaultFor(context, method!!, mealType, selectedDate, photoUri)).let { draft ->
                     draft.copy(name = initialTitle ?: draft.name)
                 },
                     onBack = { if (initialEntry != null) onDismiss() else { method = null; photoUri = null } },
@@ -383,7 +397,7 @@ private fun PrimaryMethod(method: LogMethod, icon: androidx.compose.ui.graphics.
                 )
             }
         }
-        Box(Modifier.fillMaxWidth().padding(top = 8.dp).heightIn(min = 32.dp), contentAlignment = Alignment.Center) { Text(method.title, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center, lineHeight = 16.sp) }
+        Box(Modifier.fillMaxWidth().padding(top = 8.dp).heightIn(min = 32.dp), contentAlignment = Alignment.Center) { Text(localizedLogMethodTitle(method), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center, lineHeight = 16.sp) }
     }
 }
 
@@ -400,7 +414,7 @@ private fun MethodRow(method: LogMethod, onClick: () -> Unit) {
             LogMethod.Search -> Icons.Filled.Search
             else -> Icons.Filled.EditNote
         }, null, modifier = Modifier.size(44.dp).padding(10.dp), tint = WildforceThemeTokens.textPrimary)
-        Column(Modifier.weight(1f)) { Text(method.title, color = WildforceThemeTokens.textPrimary); Text(method.description, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+        Column(Modifier.weight(1f)) { Text(localizedLogMethodTitle(method), color = WildforceThemeTokens.textPrimary); Text(localizedLogMethodDescription(method), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
         Icon(Icons.Filled.ChevronRight, null, tint = WildforceThemeTokens.textSecondary)
     }
 }
@@ -476,7 +490,7 @@ private fun RecentPicker(
             NutritionTargets((total.calories + item.calories).roundToInt(), (total.protein + item.protein).roundToInt(), (total.carbs + item.carbs).roundToInt(), (total.fat + item.fat).roundToInt())
         }
         MealEditor(
-            title = if (selected.size == 1) "Revisar comida" else "Revisar comidas",
+            title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.review_entry),
             initial = MealLog(
                 id = System.currentTimeMillis(),
                 name = selected.singleOrNull()?.name ?: "",
@@ -517,7 +531,7 @@ private fun RecentPicker(
             contentPadding = PaddingValues(start = 20.dp, top = 20.dp, end = 20.dp, bottom = if (selectedIds.isNotEmpty()) 96.dp else 20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-        item { SheetHeader("Comidas recientes", onBack) }
+        item { SheetHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.recent_meals), onBack) }
         item {
             OutlinedTextField(
                 value = query,
@@ -530,15 +544,15 @@ private fun RecentPicker(
         }
         item {
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                RecentFilterChip("Todas", filter == null && !bookmarksOnly) { filter = null; bookmarksOnly = false }
-                RecentFilterChip("Guardadas", bookmarksOnly) { filter = null; bookmarksOnly = true }
+                RecentFilterChip(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.all), filter == null && !bookmarksOnly) { filter = null; bookmarksOnly = false }
+                RecentFilterChip(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.bookmarks), bookmarksOnly) { filter = null; bookmarksOnly = true }
                 MealType.entries.forEach { type -> RecentFilterChip(mealTypeLabel(type), filter == type) { filter = type; bookmarksOnly = false } }
             }
         }
         if (visible.isEmpty()) item {
             EmptyState(
-                if (recent.isEmpty()) "Sin comidas recientes" else "No hay coincidencias",
-                if (recent.isEmpty()) "Los alimentos que registres aparecerán aquí para repetirlos rápidamente." else "Prueba con otra búsqueda o filtro.",
+                androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_recent_meals),
+                if (recent.isEmpty()) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.when_you_log_meals__they_will_appear_here_so_you_can_log_them_again_quickly) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.try_searching_for_something_else),
                 icon = Icons.Filled.Event,
             )
         }
@@ -548,10 +562,11 @@ private fun RecentPicker(
                 Modifier.fillMaxWidth()
                     .background(if (selected) WildforceThemeTokens.accent.copy(alpha = .12f) else WildforceThemeTokens.textSecondary.copy(alpha = .08f), RoundedCornerShape(16.dp))
                     .clickable { selectedIds = if (selected) selectedIds - entry.id else selectedIds + entry.id }
+                    .semantics { this.selected = selected }
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(if (selected) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked, if (selected) "Seleccionada" else "Seleccionar", tint = if (selected) NutritionCoral else WildforceThemeTokens.textSecondary)
+                Icon(if (selected) Icons.Filled.CheckCircle else Icons.Filled.RadioButtonUnchecked, null, tint = if (selected) NutritionCoral else WildforceThemeTokens.textSecondary)
                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(entry.name, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, modifier = Modifier.weight(1f))
@@ -559,7 +574,7 @@ private fun RecentPicker(
                             if (entry.isBookmarked) removeBookmarkEntry = entry
                             else { bookmarkName = entry.name; bookmarkEntry = entry }
                         }, modifier = Modifier.size(36.dp)) {
-                            Icon(if (entry.isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, if (entry.isBookmarked) "Quitar de guardadas" else "Guardar", tint = if (entry.isBookmarked) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary, modifier = Modifier.size(18.dp))
+                            Icon(if (entry.isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, if (entry.isBookmarked) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.remove_bookmark) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.bookmark), tint = if (entry.isBookmarked) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary, modifier = Modifier.size(18.dp))
                         }
                     }
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_618a60f5e4f90716, mealTypeLabel(entry.type), entry.calories), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
@@ -598,7 +613,7 @@ private fun FoodSearch(type: MealType, date: LocalDate, onBack: () -> Unit, onSa
     if (portionDraft != null) {
         val draft = requireNotNull(portionDraft)
         MealEditor(
-            title = "Revisar alimento",
+            title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.review_entry),
             initial = draft,
             onBack = { portionDraft = null }, onSave = onSave, photoLabel = null, photoUri = null, photoBitmap = null,
             describeMode = false, barcodeMode = false, labelMode = false, initialBarcode = "",
@@ -616,8 +631,8 @@ private fun FoodSearch(type: MealType, date: LocalDate, onBack: () -> Unit, onSa
             },
         )
     } else LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        item { SheetHeader("Buscar alimento", onBack) }
-        item { Row(verticalAlignment = Alignment.CenterVertically) { OutlinedTextField(query, { query = it.take(100) }, Modifier.weight(1f), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_5ad374c93f3ed129)) }, leadingIcon = { Icon(Icons.Filled.Search, null) }, singleLine = true); IconButton(onClick = { scope.launch { loading = true; error = null; runCatching { withContext(Dispatchers.IO) { NutritionAnalyzer.searchFoods(context, query) } }.onSuccess { results = it }.onFailure { error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }; loading = false } }, enabled = query.trim().length >= 2 && !loading) { if (loading) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = NutritionCoral) else Icon(Icons.Filled.Search, "Buscar", tint = NutritionCoral) } } }
+        item { SheetHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.search_food_database), onBack) }
+        item { Row(verticalAlignment = Alignment.CenterVertically) { OutlinedTextField(query, { query = it.take(100) }, Modifier.weight(1f), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_5ad374c93f3ed129)) }, leadingIcon = { Icon(Icons.Filled.Search, null) }, singleLine = true); IconButton(onClick = { scope.launch { loading = true; error = null; runCatching { withContext(Dispatchers.IO) { NutritionAnalyzer.searchFoods(context, query) } }.onSuccess { results = it }.onFailure { error = context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.the_operation_could_not_be_completed__please_try_again_) }; loading = false } }, enabled = query.trim().length >= 2 && !loading) { if (loading) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = NutritionCoral) else Icon(Icons.Filled.Search, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.search_food_database), tint = NutritionCoral) } } }
         error?.let { message -> item { Text(message, color = MaterialTheme.colors.error, style = MaterialTheme.typography.caption) } }
         if (!loading && results.isEmpty() && query.isNotBlank() && error == null) item { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_a92708024e2207b6), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
         items(results) { food ->
@@ -661,7 +676,7 @@ private fun FoodPortionReview(
     val fat = ((selectedPortion?.fat ?: food.fat) * factor).roundToInt()
     val step = if (!byWeight) .5 else when { quantity < 50 -> 5.0; quantity < 200 -> 10.0; else -> 25.0 }
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
-        item { SheetHeader("Cantidad", onBack) }
+        item { SheetHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.portion), onBack) }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (food.brand.isNotBlank()) Text(food.brand, style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary)
@@ -673,7 +688,7 @@ private fun FoodPortionReview(
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.portion), Modifier.weight(1f), color = WildforceThemeTokens.textPrimary)
                     Box {
-                        TextButton(onClick = { expanded = true }) { Text(if (byWeight) "g" else selectedPortion?.name ?: "Ración", color = WildforceThemeTokens.textPrimary); Icon(Icons.Filled.ExpandMore, null) }
+                        TextButton(onClick = { expanded = true }) { Text(if (byWeight) "g" else selectedPortion?.name ?: androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.portion), color = WildforceThemeTokens.textPrimary); Icon(Icons.Filled.ExpandMore, null) }
                         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                             food.portions.forEach { portion -> DropdownMenuItem(onClick = { selectedPortion = portion; byWeight = false; quantity = 1.0; expanded = false }) { Text(portion.name) } }
                             if (food.portions.any { it.amountGrams != null } || food.portions.isEmpty()) DropdownMenuItem(onClick = { selectedPortion = food.portions.firstOrNull { it.amountGrams != null } ?: selectedPortion; byWeight = true; quantity = 100.0; expanded = false }) { Text("g") }
@@ -689,7 +704,7 @@ private fun FoodPortionReview(
             }
         }
         item { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.total), fontFamily = FontFamily.Default, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary); PhotoMacroSummary(NutritionTargets(calories, protein, carbs, fat)) } }
-        item { Button(onClick = { onReview(grams, quantity, if (byWeight) "g" else selectedPortion?.name ?: "ración", calories, protein, carbs, fat) }, enabled = quantity > 0, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel("Revisar ingesta", 16) } }
+        item { Button(onClick = { onReview(grams, quantity, if (byWeight) "g" else selectedPortion?.name ?: "ración", calories, protein, carbs, fat) }, enabled = quantity > 0, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.review_entry), 16) } }
     }
     if (editAmount) AlertDialog(onDismissRequest = { editAmount = false }, title = { Text(if (byWeight) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_amount_in_grams) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_08c640c10c2f46d2)) }, text = { OutlinedTextField(amountDraft, { amountDraft = decimalValue(it) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)) }, confirmButton = { TextButton(onClick = { quantity = (amountDraft.decimalOrNull() ?: quantity).coerceIn(if (byWeight) 1.0 else .5, 5000.0); editAmount = false }, enabled = (amountDraft.decimalOrNull() ?: 0.0) > 0) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ready)) } }, dismissButton = { TextButton(onClick = { editAmount = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel)) } })
 }
@@ -709,7 +724,8 @@ private fun PhotoAnalysisReview(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var title by remember { mutableStateOf("Comida fotografiada") }
+    val defaultMealName = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.meal)
+    var title by remember { mutableStateOf(defaultMealName) }
     var mealType by remember { mutableStateOf(initialType) }
     var notes by remember { mutableStateOf("") }
     var foods by remember { mutableStateOf<List<MealItem>>(emptyList()) }
@@ -727,12 +743,12 @@ private fun PhotoAnalysisReview(
     }.value
 
     fun apply(analysis: NutritionAnalysis) {
-        title = analysis.name.ifBlank { "Comida fotografiada" }
+        title = analysis.name.ifBlank { defaultMealName }
         notes = analysis.notes
         foods = analysis.foods.map { food ->
             MealItem(food.name, food.calories, food.protein, food.carbs, food.fat, grams = food.grams.takeIf { it > 0 })
         }.ifEmpty {
-            listOf(MealItem(analysis.name.ifBlank { "Alimento" }, analysis.calories, analysis.protein, analysis.carbs, analysis.fat))
+            listOf(MealItem(analysis.name.ifBlank { defaultMealName }, analysis.calories, analysis.protein, analysis.carbs, analysis.fat))
         }
     }
 
@@ -782,12 +798,12 @@ private fun PhotoAnalysisReview(
         LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.weight(1f)) { SheetHeader("Revisar foto", onBack) }
+                    Box(Modifier.weight(1f)) { SheetHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.review_entry), onBack) }
                     TextButton(onClick = { showingCorrection = true }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_d38ec149b0ba76cf), color = WildforceThemeTokens.textPrimary) }
                     IconButton(onClick = { showInfo = true }) { Icon(Icons.Filled.Info, "Información de la estimación", tint = WildforceThemeTokens.textPrimary) }
                 }
             }
-            if (previewBitmap != null) item { Image(previewBitmap.asImageBitmap(), "Foto de la comida", Modifier.fillMaxWidth().height(300.dp).clip(RoundedCornerShape(20.dp)), contentScale = ContentScale.Crop) }
+            if (previewBitmap != null) item { Image(previewBitmap.asImageBitmap(), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.photo), Modifier.fillMaxWidth().height(300.dp).clip(RoundedCornerShape(20.dp)), contentScale = ContentScale.Crop) }
             item { Text(title, Modifier.clickable { titleDraft = title; rename = true }, fontFamily = FontFamily.Default, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary) }
             item {
                 Column(Modifier.fillMaxWidth().background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(24.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -813,7 +829,7 @@ private fun PhotoAnalysisReview(
                             IconButton(onClick = { updateGrams(index, amount + step) }, Modifier.size(32.dp).background(WildforceThemeTokens.background, CircleShape)) { Icon(Icons.Filled.Add, "Aumentar gramos", Modifier.size(16.dp)) }
                         }
                     }
-                    Button(onClick = { scope.launch { val path = withContext(Dispatchers.IO) { saveNutritionPhoto(context, photoUri, photoBitmap) }; onSave(MealLog(System.currentTimeMillis(), title.trim().ifBlank { "Comida" }, totals.calories, totals.protein, totals.carbs, totals.fat, mealType, date, notes.trim(), "photo", items = validFoods, photoPath = path)) } }, enabled = validFoods.isNotEmpty(), modifier = Modifier.fillMaxWidth().padding(top = 8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel("Guardar ingesta", 16) }
+                    Button(onClick = { scope.launch { val path = withContext(Dispatchers.IO) { saveNutritionPhoto(context, photoUri, photoBitmap) }; onSave(MealLog(System.currentTimeMillis(), title.trim().ifBlank { context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.meal) }, totals.calories, totals.protein, totals.carbs, totals.fat, mealType, date, notes.trim(), "photo", items = validFoods, photoPath = path)) } }, enabled = validFoods.isNotEmpty(), modifier = Modifier.fillMaxWidth().padding(top = 8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save_entry), 16) }
                 }
             }
         }
@@ -825,12 +841,12 @@ private fun PhotoAnalysisReview(
         return
     }
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-        item { SheetHeader("Revisar foto", onBack) }
+        item { SheetHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.review_entry), onBack) }
         item {
             if (previewBitmap != null) {
                 Image(
                     previewBitmap.asImageBitmap(),
-                    "Foto de la comida",
+                    androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.photo),
                     Modifier.fillMaxWidth().height(230.dp).clip(RoundedCornerShape(20.dp)),
                     contentScale = ContentScale.Crop,
                 )
@@ -876,13 +892,13 @@ private fun PhotoAnalysisReview(
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             NumberField("kcal", food.calories.nutritionInputString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(calories = value.decimalOrNull()?.coerceIn(0.0, 8000.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
-                            NumberField("Proteína", food.protein.nutritionInputString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(protein = value.decimalOrNull()?.coerceIn(0.0, 500.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
+                            NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.protein) + " (g)", food.protein.nutritionInputString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(protein = value.decimalOrNull()?.coerceIn(0.0, 500.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            NumberField("Carbos", food.carbs.nutritionInputString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(carbs = value.decimalOrNull()?.coerceIn(0.0, 1000.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
-                            NumberField("Grasa", food.fat.nutritionInputString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(fat = value.decimalOrNull()?.coerceIn(0.0, 500.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
+                            NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.carbs) + " (g)", food.carbs.nutritionInputString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(carbs = value.decimalOrNull()?.coerceIn(0.0, 1000.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
+                            NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.fat) + " (g)", food.fat.nutritionInputString(), { value -> foods = foods.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(fat = value.decimalOrNull()?.coerceIn(0.0, 500.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
                         }
-                        NumberField("Cantidad en gramos", food.grams?.toInt()?.toString().orEmpty(), { value ->
+                        NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.amount_in_grams), food.grams?.toInt()?.toString().orEmpty(), { value ->
                             val newGrams = value.decimalOrNull()?.coerceIn(0.0, 5_000.0)
                             foods = foods.mapIndexed { itemIndex, current ->
                                 if (itemIndex != index) current else {
@@ -915,16 +931,16 @@ private fun PhotoAnalysisReview(
                     OutlinedTextField(correction, { correction = it.take(300) }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f3a532f08e933f5c)) }, placeholder = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_3c4c833c1d150638)) }, minLines = 5, maxLines = 10)
                     Text("${(300 - correction.length).coerceAtLeast(0)}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.End)
                 }
-                item { Button(onClick = { analyze(correction) }, enabled = correction.isNotBlank(), modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel("Reanalizar foto") } }
+                item { Button(onClick = { analyze(correction) }, enabled = correction.isNotBlank(), modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.analyze_meal_photo)) } }
             }
             item { OutlinedTextField(notes, { notes = it.take(240) }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.notes__optional_)) }, minLines = 2) }
             item {
                 Button(onClick = {
                     scope.launch {
                         val localPhotoPath = withContext(Dispatchers.IO) { saveNutritionPhoto(context, photoUri, photoBitmap) }
-                        onSave(MealLog(System.currentTimeMillis(), title.trim().ifBlank { "Comida fotografiada" }, totals.calories, totals.protein, totals.carbs, totals.fat, mealType, date, notes.trim(), "photo", items = validFoods, photoPath = localPhotoPath))
+                        onSave(MealLog(System.currentTimeMillis(), title.trim().ifBlank { defaultMealName }, totals.calories, totals.protein, totals.carbs, totals.fat, mealType, date, notes.trim(), "photo", items = validFoods, photoPath = localPhotoPath))
                     }
-                }, enabled = title.isNotBlank() && foods.any { it.name.isNotBlank() }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel("Guardar ingesta", 16) }
+                }, enabled = title.isNotBlank() && foods.any { it.name.isNotBlank() }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save_entry), 16) }
             }
         }
     }
@@ -933,11 +949,11 @@ private fun PhotoAnalysisReview(
 @Composable
 private fun PhotoMacroSummary(target: NutritionTargets) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        DescriptionMacroBadge("Calorías", target.calories, NutritionMacroIcon.Calories, NutritionCaloriesColor, Modifier.fillMaxWidth())
+        DescriptionMacroBadge(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.calories), target.calories, NutritionMacroIcon.Calories, NutritionCaloriesColor, Modifier.fillMaxWidth())
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            DescriptionMacroBadge("Proteína", target.protein, NutritionMacroIcon.Protein, ProteinColor, Modifier.weight(1f))
-            DescriptionMacroBadge("Carbos", target.carbs, NutritionMacroIcon.Carbs, CarbsColor, Modifier.weight(1f))
-            DescriptionMacroBadge("Grasa", target.fat, NutritionMacroIcon.Fat, FatColor, Modifier.weight(1f))
+            DescriptionMacroBadge(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.protein), target.protein, NutritionMacroIcon.Protein, ProteinColor, Modifier.weight(1f))
+            DescriptionMacroBadge(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.carbs), target.carbs, NutritionMacroIcon.Carbs, CarbsColor, Modifier.weight(1f))
+            DescriptionMacroBadge(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.fat), target.fat, NutritionMacroIcon.Fat, FatColor, Modifier.weight(1f))
         }
     }
 }
@@ -1155,7 +1171,7 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
         val totals = NutritionTargets((per100.calories * factor).roundToInt(), (per100.protein * factor).roundToInt(), (per100.carbs * factor).roundToInt(), (per100.fat * factor).roundToInt())
         LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
             item { SheetHeader(title, onBack) }
-            if (labelMode && previewBitmap != null) item { Image(previewBitmap.asImageBitmap(), "Etiqueta nutricional", Modifier.fillMaxWidth().height(300.dp).clip(RoundedCornerShape(20.dp)), contentScale = ContentScale.Crop) }
+            if (labelMode && previewBitmap != null) item { Image(previewBitmap.asImageBitmap(), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.nutrition_label), Modifier.fillMaxWidth().height(300.dp).clip(RoundedCornerShape(20.dp)), contentScale = ContentScale.Crop) }
             if (barcodeMode && barcodeImageUrl.isNotBlank()) item { BarcodeProductImage(barcodeImageUrl) }
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1181,14 +1197,14 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                     }
                     Button(onClick = { scope.launch {
                         val totalGrams = servings * grams
-                        val food = per100.copy(name = name.trim().ifBlank { "Alimento escaneado" }, brand = brands, quantity = totalGrams, unit = "g", grams = totalGrams, calories = per100.calories * factor, protein = per100.protein * factor, carbs = per100.carbs * factor, fat = per100.fat * factor)
+                        val food = per100.copy(name = name.trim().ifBlank { context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.scanned_food) }, brand = brands, quantity = totalGrams, unit = "g", grams = totalGrams, calories = per100.calories * factor, protein = per100.protein * factor, carbs = per100.carbs * factor, fat = per100.fat * factor)
                         val path = if (labelMode) withContext(Dispatchers.IO) { saveNutritionPhoto(context, photoUri, photoBitmap) } else initial.photoPath
                         onSave(initial.copy(name = food.name, calories = totals.calories, protein = totals.protein, carbs = totals.carbs, fat = totals.fat, items = listOf(food), photoPath = path, mediaUrl = barcodeImageUrl.takeIf { it.isNotBlank() } ?: initial.mediaUrl))
-                    } }, Modifier.fillMaxWidth().padding(top = 8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel("Guardar ingesta", 16) }
+                    } }, Modifier.fillMaxWidth().padding(top = 8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save_entry), 16) }
                 }
             }
         }
-        if (rename) AlertDialog(onDismissRequest = { rename = false }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_meal_name)) }, text = { OutlinedTextField(titleDraft, { titleDraft = it.take(80) }, singleLine = true) }, confirmButton = { TextButton(onClick = { name = titleDraft.trim().ifBlank { "Alimento escaneado" }; rename = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save)) } }, dismissButton = { TextButton(onClick = { rename = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel)) } })
+        if (rename) AlertDialog(onDismissRequest = { rename = false }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_meal_name)) }, text = { OutlinedTextField(titleDraft, { titleDraft = it.take(80) }, singleLine = true) }, confirmButton = { TextButton(onClick = { name = titleDraft.trim().ifBlank { context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.scanned_food) }; rename = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save)) } }, dismissButton = { TextButton(onClick = { rename = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel)) } })
         if (editingMacros) ManualFoodEditorDialog(per100, onDismiss = { editingMacros = false }, onDelete = null, onSave = { updated -> val scale = 100.0 / (updated.grams?.takeIf { it > 0.0 } ?: 100.0); calories = (updated.calories * scale).nutritionInputString(); protein = (updated.protein * scale).nutritionInputString(); carbs = (updated.carbs * scale).nutritionInputString(); fat = (updated.fat * scale).nutritionInputString(); editingMacros = false })
         return
     }
@@ -1214,7 +1230,7 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                     Text("${(300 - name.length).coerceAtLeast(0)}", style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 }
                 analysisError?.let { Text(it, color = MaterialTheme.colors.error, style = MaterialTheme.typography.caption) }
-                Button(onClick = { originalDescription = name; focusManager.clearFocus(); scope.launch { runAnalysis { NutritionAnalyzer.describe(context, originalDescription, mealTitle) } } }, enabled = name.isNotBlank(), modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel("Analizar descripción") }
+                Button(onClick = { originalDescription = name; focusManager.clearFocus(); scope.launch { runAnalysis { NutritionAnalyzer.describe(context, originalDescription, mealTitle) } } }, enabled = name.isNotBlank(), modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.analyze_description)) }
             }
         }
         return
@@ -1248,16 +1264,16 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
             }
             item { Spacer(Modifier.height(62.dp)) }
             item {
-                Text(mealTitle.ifBlank { "Comida" }, Modifier.clickable { titleDraft = mealTitle; rename = true }.padding(horizontal = 4.dp), fontFamily = FontFamily.Default, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                Text(mealTitle.ifBlank { androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.meal) }, Modifier.clickable { titleDraft = mealTitle; rename = true }.padding(horizontal = 4.dp), fontFamily = FontFamily.Default, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
             }
             item {
                 Column(Modifier.fillMaxWidth().background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(24.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        DescriptionMacroBadge("Calorías", totals.calories, NutritionMacroIcon.Calories, NutritionCaloriesColor, Modifier.fillMaxWidth())
+                        DescriptionMacroBadge(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.calories), totals.calories, NutritionMacroIcon.Calories, NutritionCaloriesColor, Modifier.fillMaxWidth())
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            DescriptionMacroBadge("Proteína", totals.protein, NutritionMacroIcon.Protein, ProteinColor, Modifier.weight(1f))
-                            DescriptionMacroBadge("Carbos", totals.carbs, NutritionMacroIcon.Carbs, CarbsColor, Modifier.weight(1f))
-                            DescriptionMacroBadge("Grasa", totals.fat, NutritionMacroIcon.Fat, FatColor, Modifier.weight(1f))
+                            DescriptionMacroBadge(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.protein), totals.protein, NutritionMacroIcon.Protein, ProteinColor, Modifier.weight(1f))
+                            DescriptionMacroBadge(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.carbs), totals.carbs, NutritionMacroIcon.Carbs, CarbsColor, Modifier.weight(1f))
+                            DescriptionMacroBadge(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.fat), totals.fat, NutritionMacroIcon.Fat, FatColor, Modifier.weight(1f))
                         }
                     }
                     foods.forEachIndexed { index, food ->
@@ -1283,13 +1299,13 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                     }
                     Button(onClick = {
                         val validFoods = foods.filter { it.name.isNotBlank() }
-                        onSave(initial.copy(name = mealTitle.trim().ifBlank { "Comida" }, calories = totals.calories, protein = totals.protein, carbs = totals.carbs, fat = totals.fat, notes = notes.trim(), items = validFoods))
-                    }, enabled = foods.any { it.name.isNotBlank() }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel("Guardar ingesta", 16) }
+                        onSave(initial.copy(name = mealTitle.trim().ifBlank { context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.meal) }, calories = totals.calories, protein = totals.protein, carbs = totals.carbs, fat = totals.fat, notes = notes.trim(), items = validFoods))
+                    }, enabled = foods.any { it.name.isNotBlank() }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText), shape = RoundedCornerShape(8.dp)) { NutritionButtonLabel(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save_entry), 16) }
                 }
             }
         }
         if (showInfo) AlertDialog(onDismissRequest = { showInfo = false }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_ai_estimate)) }, text = { Text(listOf(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_these_values_are_estimated_and_may_not_be_exact_), notes).filter { it.isNotBlank() }.joinToString("\n\n")) }, confirmButton = { TextButton(onClick = { showInfo = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.got_it)) } })
-        if (rename) AlertDialog(onDismissRequest = { rename = false }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_meal_name)) }, text = { OutlinedTextField(titleDraft, { titleDraft = it.take(80) }, singleLine = true) }, confirmButton = { TextButton(onClick = { mealTitle = titleDraft.trim().ifBlank { "Comida" }; rename = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save)) } }, dismissButton = { TextButton(onClick = { rename = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel)) } })
+        if (rename) AlertDialog(onDismissRequest = { rename = false }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_meal_name)) }, text = { OutlinedTextField(titleDraft, { titleDraft = it.take(80) }, singleLine = true) }, confirmButton = { TextButton(onClick = { mealTitle = titleDraft.trim().ifBlank { context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.meal) }; rename = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save)) } }, dismissButton = { TextButton(onClick = { rename = false }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel)) } })
         gramsIndex?.let { index ->
             AlertDialog(onDismissRequest = { gramsIndex = null }, title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_amount_in_grams)) }, text = { OutlinedTextField(gramsDraft, { gramsDraft = decimalValue(it) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)) }, confirmButton = { TextButton(onClick = { gramsDraft.decimalOrNull()?.let { updateGrams(index, it) }; gramsIndex = null }, enabled = (gramsDraft.decimalOrNull() ?: 0.0) > 0.0) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ready)) } }, dismissButton = { TextButton(onClick = { gramsIndex = null }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel)) } })
         }
@@ -1305,7 +1321,7 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
         return
     }
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
-        item { ReviewAppearance(reviewAppeared, 0) { if (describeMode && descriptionAnalyzed) { Row(verticalAlignment = Alignment.CenterVertically) { Box(Modifier.weight(1f)) { SheetHeader("Revisar comida", onBack) }; TextButton(onClick = { name = originalDescription; descriptionAnalyzed = false; analysisError = null; extraItems = emptyList() }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.edit), color = NutritionCoral) } } } else SheetHeader(title, onBack) } }
+        item { ReviewAppearance(reviewAppeared, 0) { if (describeMode && descriptionAnalyzed) { Row(verticalAlignment = Alignment.CenterVertically) { Box(Modifier.weight(1f)) { SheetHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.review_entry), onBack) }; TextButton(onClick = { name = originalDescription; descriptionAnalyzed = false; analysisError = null; extraItems = emptyList() }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.edit), color = NutritionCoral) } } } else SheetHeader(title, onBack) } }
         if (isEditing) item {
             Column {
                 Box {
@@ -1404,7 +1420,7 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
             if (labelMode && previewBitmap != null) {
                 Image(
                     previewBitmap.asImageBitmap(),
-                    "Etiqueta nutricional",
+                    androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.nutrition_label),
                     Modifier.fillMaxWidth().height(230.dp).clip(RoundedCornerShape(20.dp)),
                     contentScale = ContentScale.Crop,
                 )
@@ -1415,7 +1431,7 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
         if (barcodeMode) item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(barcode, { barcode = it.filter(Char::isDigit).take(14) }, Modifier.weight(1f), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.barcode)) }, leadingIcon = { Icon(Icons.Filled.QrCodeScanner, null) }, singleLine = true, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
-                IconButton(onClick = { scope.launch { hasBarcodeProduct = false; runAnalysis { NutritionAnalyzer.barcode(barcode) } } }, enabled = barcode.length >= 8 && !analyzing) { Icon(Icons.Filled.Search, "Buscar producto", tint = NutritionCoral) }
+                IconButton(onClick = { scope.launch { hasBarcodeProduct = false; runAnalysis { NutritionAnalyzer.barcode(barcode) } } }, enabled = barcode.length >= 8 && !analyzing) { Icon(Icons.Filled.Search, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.search_food_database), tint = NutritionCoral) }
             }
         }
         if (barcodeMode && hasBarcodeProduct) item {
@@ -1432,8 +1448,8 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                 Text(name, style = MaterialTheme.typography.h6, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                 if (brands.isNotBlank()) Text(brands, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NumberField("Número de raciones", barcodeServings, { barcodeServings = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true)
-                    NumberField("Cantidad por ración (g)", barcodeServingGrams, { barcodeServingGrams = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true)
+                    NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.number_of_servings), barcodeServings, { barcodeServings = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true)
+                    NumberField(androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_serving_grams), barcodeServingGrams, { barcodeServingGrams = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true)
                 }
                 PhotoMacroSummary(NutritionTargets(
                     ((calories.decimalOrNull() ?: 0.0) * productFactor).roundToInt(),
@@ -1472,19 +1488,19 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
         }
         if (!isManualReview && (!labelMode && !barcodeMode) && (!describeMode || descriptionAnalyzed)) item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                NumberField("Cantidad", itemQuantity, { itemQuantity = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true)
+                NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.quantity), itemQuantity, { itemQuantity = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true)
                 OutlinedTextField(itemUnit, { itemUnit = it.take(24) }, Modifier.weight(1f), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.unit)) }, singleLine = true)
             }
         }
-        if (!isManualReview && isPortionEditor && (!describeMode || descriptionAnalyzed)) item { NumberField(if (gramsPerUnit) "Gramos por unidad" else "Peso total (g, opcional)", itemGrams, { value ->
+        if (!isManualReview && isPortionEditor && (!describeMode || descriptionAnalyzed)) item { NumberField(if (gramsPerUnit) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.grams_each) else androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_total_weight_optional), itemGrams, { value ->
             itemGrams = decimalValue(value)
             val parsedGrams = value.decimalOrNull()
             if (parsedGrams == null || parsedGrams <= 0.0) macrosPer100g = false
         }, Modifier.fillMaxWidth(), allowDecimal = true) }
         if (!isManualReview && isPortionEditor && (!describeMode || descriptionAnalyzed)) item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip("Gramos totales", !gramsPerUnit) { setGramsPerUnit(false) }
-                FilterChip("Por unidad", gramsPerUnit) { setGramsPerUnit(true) }
+                FilterChip(androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_total_grams), !gramsPerUnit) { setGramsPerUnit(false) }
+                FilterChip(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.per_unit), gramsPerUnit) { setGramsPerUnit(true) }
             }
         }
         if (!isManualReview && isPortionEditor && gramsPerUnit && totalPortionGrams != null) item {
@@ -1505,7 +1521,7 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                     contentColor = WildforceThemeTokens.primaryButtonText,
                 ),
                 shape = RoundedCornerShape(8.dp),
-            ) { NutritionButtonLabel("Analizar descripción") }
+            ) { NutritionButtonLabel(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.analyze_description)) }
         }
         if (analyzing) item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) { CircularProgressIndicator(Modifier.size(22.dp), color = NutritionCoral, strokeWidth = 2.dp); Text(if (labelMode) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_b591629ee036e383) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_88f37ba6156531bd), Modifier.padding(start = 10.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) } }
         analysisError?.let { message -> item { Text(message, color = MaterialTheme.colors.error, style = MaterialTheme.typography.caption, modifier = Modifier.background(MaterialTheme.colors.error.copy(alpha = .08f), RoundedCornerShape(10.dp)).padding(10.dp)) } }
@@ -1515,7 +1531,7 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
             val consumed = consumedLabelGrams.decimalOrNull()?.coerceIn(1.0, 5_000.0) ?: 100.0
             val factor = consumed / 100.0
             Column(Modifier.fillMaxWidth().liquidGlass(RoundedCornerShape(20.dp)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                NumberField("Cantidad consumida (g)", consumedLabelGrams, { consumedLabelGrams = decimalValue(it) }, Modifier.fillMaxWidth(), allowDecimal = true)
+                NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.amount__grams_), consumedLabelGrams, { consumedLabelGrams = decimalValue(it) }, Modifier.fillMaxWidth(), allowDecimal = true)
                 PhotoMacroSummary(NutritionTargets(
                     ((calories.decimalOrNull() ?: 0.0) * factor).roundToInt(),
                     ((protein.decimalOrNull() ?: 0.0) * factor).roundToInt(),
@@ -1527,15 +1543,15 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
         }
         if (!isManualReview && isPortionEditor && (!describeMode || descriptionAnalyzed)) item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip("Macros totales", !macrosPer100g) { setMacrosPer100g(false) }
-                FilterChip("Por 100 g", macrosPer100g && canUsePer100g) { setMacrosPer100g(true) }
+                FilterChip(androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_total_macros), !macrosPer100g) { setMacrosPer100g(false) }
+                FilterChip(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.per_100_g), macrosPer100g && canUsePer100g) { setMacrosPer100g(true) }
             }
         }
         if (!isManualReview && isPortionEditor && (!describeMode || descriptionAnalyzed) && macrosPer100g && totalPortionGrams != null) item {
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_88d179af1ae196cf, decimalText(totalPortionGrams)), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
         }
-        if (!isManualReview && (!describeMode || descriptionAnalyzed) && (!barcodeMode || !hasBarcodeProduct || listOf(calories, protein, carbs, fat).all { (it.decimalOrNull() ?: 0.0) == 0.0 })) item { ReviewAppearance(reviewAppeared, 130) { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField(if (labelMode || barcodeMode || macrosPer100g) "kcal /100g" else "Calorías", calories, { calories = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true); NumberField(if (labelMode || barcodeMode || macrosPer100g) "Proteína /100g" else "Proteína g", protein, { protein = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true) } } }
-        if (!isManualReview && (!describeMode || descriptionAnalyzed) && (!barcodeMode || !hasBarcodeProduct || listOf(calories, protein, carbs, fat).all { (it.decimalOrNull() ?: 0.0) == 0.0 })) item { ReviewAppearance(reviewAppeared, 170) { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField(if (labelMode || barcodeMode || macrosPer100g) "Carbos /100g" else "Carbos g", carbs, { carbs = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true); NumberField(if (labelMode || barcodeMode || macrosPer100g) "Grasa /100g" else "Grasa g", fat, { fat = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true) } } }
+        if (!isManualReview && (!describeMode || descriptionAnalyzed) && (!barcodeMode || !hasBarcodeProduct || listOf(calories, protein, carbs, fat).all { (it.decimalOrNull() ?: 0.0) == 0.0 })) item { ReviewAppearance(reviewAppeared, 130) { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField(if (labelMode || barcodeMode || macrosPer100g) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.kcal__100g) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.calories), calories, { calories = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true); NumberField(if (labelMode || barcodeMode || macrosPer100g) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.protein__100g) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.protein) + " (g)", protein, { protein = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true) } } }
+        if (!isManualReview && (!describeMode || descriptionAnalyzed) && (!barcodeMode || !hasBarcodeProduct || listOf(calories, protein, carbs, fat).all { (it.decimalOrNull() ?: 0.0) == 0.0 })) item { ReviewAppearance(reviewAppeared, 170) { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField(if (labelMode || barcodeMode || macrosPer100g) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.carbs__100g) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.carbs) + " (g)", carbs, { carbs = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true); NumberField(if (labelMode || barcodeMode || macrosPer100g) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.fat__100g) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.fat) + " (g)", fat, { fat = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true) } } }
         if (!isManualReview && isPortionEditor && (!describeMode || descriptionAnalyzed) && macrosPer100g && totalPortionGrams != null) item {
             val totalFactor = totalPortionGrams / 100.0
             PhotoMacroSummary(NutritionTargets(
@@ -1547,8 +1563,8 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
         }
         if (barcodeMode && !hasBarcodeProduct) item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                NumberField("Raciones", barcodeServings, { barcodeServings = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true)
-                NumberField("g / ración", barcodeServingGrams, { barcodeServingGrams = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true)
+                NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.number_of_servings), barcodeServings, { barcodeServings = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true)
+                NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.grams_each), barcodeServingGrams, { barcodeServingGrams = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true)
             }
         }
         if (barcodeMode && (!hasBarcodeProduct || listOf(calories, protein, carbs, fat).all { (it.decimalOrNull() ?: 0.0) == 0.0 })) {
@@ -1596,18 +1612,18 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                         }, enabled = removingExtraItemIndex == null) { Icon(Icons.Filled.DeleteOutline, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_delete_food_item), tint = NutritionRed) }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NumberField("Calorías", food.calories.nutritionInputString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(calories = value.decimalOrNull()?.coerceIn(0.0, 8000.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
-                        NumberField("Proteína g", food.protein.nutritionInputString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(protein = value.decimalOrNull()?.coerceIn(0.0, 500.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
+                        NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.calories), food.calories.nutritionInputString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(calories = value.decimalOrNull()?.coerceIn(0.0, 8000.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
+                        NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.protein) + " (g)", food.protein.nutritionInputString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(protein = value.decimalOrNull()?.coerceIn(0.0, 500.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NumberField("Carbos g", food.carbs.nutritionInputString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(carbs = value.decimalOrNull()?.coerceIn(0.0, 1000.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
-                        NumberField("Grasa g", food.fat.nutritionInputString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(fat = value.decimalOrNull()?.coerceIn(0.0, 500.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
+                        NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.carbs) + " (g)", food.carbs.nutritionInputString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(carbs = value.decimalOrNull()?.coerceIn(0.0, 1000.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
+                        NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.fat) + " (g)", food.fat.nutritionInputString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(fat = value.decimalOrNull()?.coerceIn(0.0, 500.0) ?: 0.0) else current } }, Modifier.weight(1f), allowDecimal = true)
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NumberField("Cantidad", food.quantity.toInt().coerceAtLeast(1).toString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(quantity = value.decimalOrNull()?.coerceIn(1.0, 1_000.0) ?: 1.0) else current } }, Modifier.weight(1f), allowDecimal = true)
+                        NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.quantity), food.quantity.toInt().coerceAtLeast(1).toString(), { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(quantity = value.decimalOrNull()?.coerceIn(1.0, 1_000.0) ?: 1.0) else current } }, Modifier.weight(1f), allowDecimal = true)
                         OutlinedTextField(food.unit, { value -> extraItems = extraItems.mapIndexed { itemIndex, current -> if (itemIndex == index) current.copy(unit = value.take(24)) else current } }, Modifier.weight(1f), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.unit)) }, singleLine = true)
                     }
-                    NumberField("Peso total (g, opcional)", food.grams?.toInt()?.toString().orEmpty(), { value ->
+                    NumberField(androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.nutrition_total_weight_optional), food.grams?.toInt()?.toString().orEmpty(), { value ->
                         val newGrams = value.decimalOrNull()?.coerceIn(1.0, 5_000.0)
                         extraItems = extraItems.mapIndexed { itemIndex, current ->
                             if (itemIndex != index) current else {
@@ -1670,7 +1686,7 @@ private fun MealEditor(title: String, initial: MealLog, onBack: () -> Unit, onSa
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.primaryButtonText),
                 shape = RoundedCornerShape(8.dp),
-            ) { NutritionButtonLabel(if (isEditing) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save) else "Guardar ingesta", 16) } }
+            ) { NutritionButtonLabel(if (isEditing) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save_entry), 16) } }
         }
     }
     contributionSourceTarget?.let { target ->
@@ -1746,24 +1762,24 @@ private fun ManualFoodEditorDialog(food: MealItem, onDismiss: () -> Unit, onDele
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Surface(Modifier.fillMaxSize().padding(top = 32.dp), color = MaterialTheme.colors.background) {
             LazyColumn(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                item { SheetHeader("Editar alimento", onDismiss, onDelete) }
+                item { SheetHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.edit_food), onDismiss, onDelete) }
                 item { OutlinedTextField(name, { name = it.take(80) }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.name)) }, singleLine = true) }
                 item { OutlinedTextField(brand, { brand = it.take(80) }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.brand)) }, singleLine = true) }
                 item { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.nutrition_per_100g), style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary) }
-                item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Kcal", kcal, { kcal = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true); NumberField("Proteína g", protein, { protein = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true) } }
-                item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Carbos g", carbs, { carbs = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true); NumberField("Grasa g", fat, { fat = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true) } }
+                item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField("Kcal", kcal, { kcal = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true); NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.protein) + " (g)", protein, { protein = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true) } }
+                item { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.carbs) + " (g)", carbs, { carbs = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true); NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.fat) + " (g)", fat, { fat = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true) } }
                 item { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.how_much_did_you_eat_), style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary) }
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             IconButton(onClick = { quantity = ((quantity.decimalOrNull() ?: 1.0) - 1.0).coerceAtLeast(1.0).toString() }) { Icon(Icons.Filled.RemoveCircleOutline, "Reducir cantidad") }
-                            NumberField("Cantidad", quantity, { quantity = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true)
+                            NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.quantity), quantity, { quantity = decimalValue(it) }, Modifier.weight(1f), allowDecimal = true)
                             IconButton(onClick = { quantity = ((quantity.decimalOrNull() ?: 1.0) + 1.0).coerceAtMost(1000.0).toString() }) { Icon(Icons.Filled.AddCircleOutline, "Aumentar cantidad") }
                         }
                         OutlinedTextField(unit, { unit = it.take(24) }, Modifier.weight(1f), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.unit)) }, singleLine = true)
                     }
                 }
-                item { NumberField("Gramos", grams, { grams = decimalValue(it) }, Modifier.fillMaxWidth(), allowDecimal = true) }
+                item { NumberField(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.grams), grams, { grams = decimalValue(it) }, Modifier.fillMaxWidth(), allowDecimal = true) }
                 item { OutlinedTextField(notes, { notes = it.take(240) }, Modifier.fillMaxWidth(), label = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_55a42a91d5d61227)) }, minLines = 2) }
                 item {
                     val consumed = grams.decimalOrNull() ?: 100.0
@@ -1821,7 +1837,7 @@ private fun NutritionButtonLabel(label: String, size: Int = 14) {
         title.lowercase(Locale.US).replaceFirstChar { it.uppercase() }
     } else title.replaceFirstChar { it.uppercase() }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atrás", modifier = Modifier.size(22.dp)) }
+        IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.action_back), modifier = Modifier.size(22.dp)) }
         Text(displayTitle, Modifier.weight(1f), fontFamily = Exo2FontFamily, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary)
         if (onAction != null) IconButton(onClick = onAction) { Icon(Icons.Filled.Add, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_add_food), tint = WildforceThemeTokens.textPrimary) }
     }
@@ -1897,9 +1913,9 @@ private fun saveNutritionPhoto(context: android.content.Context, uri: Uri?, bitm
     null
 }.getOrNull()
 
-private fun defaultFor(method: LogMethod, type: MealType, date: LocalDate, uri: Uri?) = MealLog(
+private fun defaultFor(context: android.content.Context, method: LogMethod, type: MealType, date: LocalDate, uri: Uri?) = MealLog(
     id = System.currentTimeMillis(),
-    name = when (method) { LogMethod.Photo -> "Comida fotografiada"; LogMethod.Label -> "Alimento de etiqueta"; else -> "" },
+    name = when (method) { LogMethod.Photo -> context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.meal); LogMethod.Label -> context.getString(io.codepassion.doubletriangle.core.designsystem.R.string.scanned_food); else -> "" },
     calories = 0, protein = 0, carbs = 0, fat = 0, type = type, loggedDate = date,
     notes = uri?.let { "Imagen: ${it.lastPathSegment}" }.orEmpty(), source = method.name.lowercase(),
 )

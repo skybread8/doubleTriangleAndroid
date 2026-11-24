@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_related_loading">A carregar exercícios</string>
+    <string name="exercise_related_searching">A procurar alternativas e exercícios para o mesmo grupo muscular.</string>
+    <string name="exercise_related_none">Não há outros exercícios para o mesmo grupo muscular.</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subscription_trial">Proefperiode</string>
+    <string name="subscription_demo">Demo</string>
+    <string name="subscription_member_monthly">Lid maandelijks</string>
+    <string name="subscription_member_yearly">Lid jaarlijks</string>
+    <string name="subscription_coach_basic_monthly">Coach Basic maandelijks</string>
+    <string name="subscription_coach_basic_yearly">Coach Basic jaarlijks</string>
+    <string name="subscription_coach_pro_monthly">Coach Pro maandelijks</string>
+    <string name="subscription_coach_pro_yearly">Coach Pro jaarlijks</string>
+    <string name="subscription_coached_external">Externe begeleiding</string>
+</resources>

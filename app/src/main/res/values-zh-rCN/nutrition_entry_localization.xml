@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_serving_grams">每份数量（克）</string>
+    <string name="nutrition_total_weight_optional">总重量（克，可选）</string>
+    <string name="nutrition_total_grams">总克数</string>
+    <string name="nutrition_total_macros">营养素总量</string>
+</resources>

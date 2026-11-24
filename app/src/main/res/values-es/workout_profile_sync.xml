@@ -1,0 +1,3 @@
+<resources>
+    <string name="workout_profile_sync_failed">No se ha podido sincronizar tu perfil. Comprueba tu conexión e inténtalo de nuevo.</string>
+</resources>

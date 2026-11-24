@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_surprise_description">Crearé una idea sorpresa segons els objectius del dia i una combinació equilibrada d’aliments.</string>
+    <string name="nutrition_aligned_with_training">Adaptat a l’entrenament</string>
+</resources>

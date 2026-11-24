@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feedback_reason_expensive">Te duur</string>
+    <string name="feedback_reason_not_useful">Niet nuttig genoeg</string>
+    <string name="feedback_reason_hard">Te moeilijk in gebruik</string>
+    <string name="feedback_reason_missing">Ontbrekende functies</string>
+    <string name="feedback_reason_technical">Technische problemen / bugs</string>
+    <string name="feedback_reason_other">Ik probeer gewoon iets anders</string>
+</resources>

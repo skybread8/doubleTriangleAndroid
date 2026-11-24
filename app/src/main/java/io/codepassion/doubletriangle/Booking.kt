@@ -231,13 +231,13 @@ internal fun refreshedBookingSelection(selected: BookingStart?, slots: List<Book
                     loading -> Box(Modifier.fillMaxWidth().height(180.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
                     error != null -> BookingEmpty(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.couldn_t_load_your_reservations), error!!, onRetry = { scope.launch { reload() } })
                     selectedGym == null -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        BookingEmpty("No tienes gimnasios disponibles", "Introduce el código que te ha dado tu gimnasio para acceder a sus salas.")
+                        BookingEmpty(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.join_your_gym), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.enter_the_code_your_gym_gave_you__or_scan_its_qr_))
                         OutlinedButton(onClick = { joiningGym = true }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.i_have_a_gym_code).uppercase()) }
                     }
                     else -> {
                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.upcoming_reservations).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                     val visible = reservations.filter { it.gymId == selectedGym.id }
-                    if (visible.none { !it.isCancelled }) BookingEmpty("No hay reservas próximas", "Reserva una sala para entrenar en tu gimnasio.")
+                    if (visible.none { !it.isCancelled }) BookingEmpty(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_upcoming_reservations), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.book_a_room_to_train_at_your_gym_))
                     visible.filter { !it.isCancelled }.forEach { reservation -> ReservationCard(reservation, onCancel = { cancellation = reservation }) }
                     Button(onClick = { bookingGym = selectedGym }, modifier = Modifier.fillMaxWidth().height(52.dp), colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.background)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_new_booking).uppercase(), fontWeight = FontWeight.Bold) }
                     visible.filter { it.isCancelled }.takeIf { it.isNotEmpty() }?.let { cancelled -> Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancelled).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textSecondary); cancelled.forEach { ReservationCard(it, {}) } }
@@ -432,7 +432,7 @@ private fun ReservationCard(reservation: BookingReservation, onCancel: () -> Uni
                 Text("${formatTime(reservation.startsAt, reservation.gymZone, locale)} – ${formatTime(reservation.endsAt, reservation.gymZone, locale)}", fontSize = 14.sp, color = WildforceThemeTokens.textSecondary)
                 if (!reservation.isCancelled && reservation.cancellableUntil != null) {
                     Text(
-                        if (reservation.isCancellable) "Cancelación gratuita hasta ${formatDateTime(reservation.cancellableUntil, reservation.gymZone, locale)}" else "Ya no se puede cancelar",
+                        if (reservation.isCancellable) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.free_cancellation_until___, formatDateTime(reservation.cancellableUntil, reservation.gymZone, locale)) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.cancellation_is_no_longer_possible),
                         style = MaterialTheme.typography.caption,
                         color = WildforceThemeTokens.textSecondary,
                         modifier = Modifier.padding(top = 4.dp),
@@ -615,9 +615,9 @@ private fun BookingStatusBadge(status: String) {
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
             Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onBack) { Icon(Icons.Filled.Close, "Volver") }; Column { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_new_booking).uppercase(), fontSize = 22.sp, fontWeight = FontWeight.Black, color = WildforceThemeTokens.textPrimary); Text(gym.name, color = WildforceThemeTokens.textSecondary) } }
-            if (loading) Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } else if (roomError != null) BookingEmpty(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.couldn_t_load_the_rooms), roomError!!, onRetry = { scope.launch { loadRooms() } }, icon = Icons.Filled.WarningAmber) else if (rooms.isEmpty()) BookingEmpty("No hay salas disponibles", "Este gimnasio no tiene salas abiertas para reservar.") else {
-                BookingSection("DÍA") { LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(bookingWindowDays(ZonedDateTime.now(gym.zone).toLocalDate(), selectedRoom!!.windowDays)) { day -> BookingDayChoice(day, day == selectedDate, onClick = { selectedDate = day }) } } }
-                BookingSection("SALA") {
+            if (loading) Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } else if (roomError != null) BookingEmpty(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.couldn_t_load_the_rooms), roomError!!, onRetry = { scope.launch { loadRooms() } }, icon = Icons.Filled.WarningAmber) else if (rooms.isEmpty()) BookingEmpty(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_rooms_to_book), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_gym_has_no_rooms_open_for_booking_yet_)) else {
+                BookingSection(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_day).uppercase()) { LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { items(bookingWindowDays(ZonedDateTime.now(gym.zone).toLocalDate(), selectedRoom!!.windowDays)) { day -> BookingDayChoice(day, day == selectedDate, onClick = { selectedDate = day }) } } }
+                BookingSection(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.room).uppercase()) {
                     val showsImages = rooms.any { it.avatarUrl != null }
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(rooms, key = { it.id }) { room ->
@@ -625,7 +625,7 @@ private fun BookingStatusBadge(status: String) {
                         }
                     }
                 }
-                if (selectedRoom!!.durations.size > 1) BookingSection("DURACIÓN") {
+                if (selectedRoom!!.durations.size > 1) BookingSection(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_duration).uppercase()) {
                     BookingDurationPicker(
                         durations = selectedRoom!!.durations,
                         selection = duration,
@@ -633,10 +633,10 @@ private fun BookingStatusBadge(status: String) {
                         onSelect = { duration = it; selected = refreshedBookingSelection(selected, slots, it); error = null },
                     )
                 }
-                BookingSection("HORAS DISPONIBLES") { when { availabilityError != null -> BookingEmpty(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.couldn_t_load_availability), availabilityError!!, onRetry = { scope.launch { refreshAvailability() } }, icon = Icons.Filled.WarningAmber); availabilityLoading -> Box(Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }; starts.isEmpty() -> BookingEmpty("No hay horas disponibles", "Prueba otro día o una duración más corta."); else -> FlowTimes(starts, selected, gym.zone, locale, { selected = it; error = null }) } }
+                BookingSection(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.available_times).uppercase()) { when { availabilityError != null -> BookingEmpty(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.couldn_t_load_availability), availabilityError!!, onRetry = { scope.launch { refreshAvailability() } }, icon = Icons.Filled.WarningAmber); availabilityLoading -> Box(Modifier.fillMaxWidth().height(120.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }; starts.isEmpty() -> BookingEmpty(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_times_available), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.try_another_day_or_a_shorter_duration_)); else -> FlowTimes(starts, selected, gym.zone, locale, { selected = it; error = null }) } }
                  if (gym.zone != ZoneId.systemDefault()) {
                      Text(
-                         "Las horas se muestran en la zona horaria del gimnasio (${gym.zone.id}).",
+                         androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.times_are_shown_in_the_gym_s_time_zone______, gym.zone.id),
                          style = MaterialTheme.typography.caption,
                          color = WildforceThemeTokens.textSecondary,
                      )
@@ -688,13 +688,13 @@ private fun BookingConfirmationSheet(
         }
         Card(Modifier.fillMaxWidth(), backgroundColor = WildforceThemeTokens.backgroundSecondary, shape = RoundedCornerShape(14.dp)) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                BookingSummaryRow("Sala", room.name)
+                BookingSummaryRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.room), room.name)
                 Divider()
-                BookingSummaryRow("Gimnasio", gym.name)
+                BookingSummaryRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.gym), gym.name)
                 Divider()
-                BookingSummaryRow("Día", formatRelativeDay(start.startsAt, gym.zone, locale))
+                BookingSummaryRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_day), formatRelativeDay(start.startsAt, gym.zone, locale))
                 Divider()
-                BookingSummaryRow("Hora", "${formatTime(start.startsAt, gym.zone, locale)} – ${formatTime(start.endsAt, gym.zone, locale)}")
+                BookingSummaryRow(androidx.compose.ui.res.stringResource(io.codepassion.wildforce.android.R.string.booking_time_of_day), "${formatTime(start.startsAt, gym.zone, locale)} – ${formatTime(start.endsAt, gym.zone, locale)}")
             }
         }
         Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_2040464160c3581e, formatDuration(room.cancellationCutoff, locale)), color = WildforceThemeTokens.textSecondary, fontSize = 13.sp)
@@ -838,12 +838,13 @@ private fun FlowTimes(starts: List<BookingStart>, selected: BookingStart?, zone:
 }
 /** Every booking instant is rendered in the gym's time zone, as on iOS. */
 private fun formatDateTime(time: OffsetDateTime, zone: ZoneId, locale: Locale) = time.atZoneSameInstant(zone).format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(locale))
+@Composable
 private fun formatRelativeDay(time: OffsetDateTime, zone: ZoneId, locale: Locale): String {
     val date = time.atZoneSameInstant(zone).toLocalDate()
     val today = ZonedDateTime.now(zone).toLocalDate()
     val prefix = when (date) {
-        today -> "Hoy, "
-        today.plusDays(1) -> "Mañana, "
+        today -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_today) + ", "
+        today.plusDays(1) -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.tomorrow) + ", "
         else -> ""
     }
     val pattern = DateTimePatternGenerator.getInstance(locale).getBestPattern("dMMMM")

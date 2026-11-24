@@ -18,10 +18,32 @@ internal fun tutorialText(key: String): String {
 }
 
 @Composable
-internal fun tutorialExerciseName(imageKey: String?, fallback: String): String {
-    val catalog = tutorialCatalog()
-    val key = canonicalExerciseMediaKey(imageKey ?: fallback)
-    return catalog.optJSONObject("names")?.optString(key)?.takeIf { it.isNotBlank() }
+fun tutorialExerciseName(imageKey: String?, fallback: String): String =
+    exerciseNameFromCatalog(tutorialCatalog(), imageKey, fallback)
+
+/** Resolve names in services and widgets using the caller's configured locale. */
+fun localizedExerciseName(context: android.content.Context, imageKey: String?, fallback: String): String {
+    val locale = context.resources.configuration.locales.toLanguageTags()
+    val catalog = synchronized(backgroundCatalogs) {
+        backgroundCatalogs.getOrPut(locale) {
+            runCatching {
+                JSONObject(context.resources.openRawResource(R.raw.exercise_tutorial_labels).bufferedReader().use { it.readText() })
+            }.getOrDefault(JSONObject())
+        }
+    }
+    return exerciseNameFromCatalog(catalog, imageKey, fallback)
+}
+
+private val backgroundCatalogs = mutableMapOf<String, JSONObject>()
+
+private fun exerciseNameFromCatalog(catalog: JSONObject, imageKey: String?, fallback: String): String {
+    val key = canonicalExerciseMediaKey(imageKey?.takeIf { it.isNotBlank() } ?: fallback)
+    val names = catalog.optJSONObject("names")
+    val normalizedKey = key?.filter(Char::isLetterOrDigit)?.lowercase(java.util.Locale.ROOT)
+    val catalogKey = names?.keys()?.asSequence()?.firstOrNull {
+        it.filter(Char::isLetterOrDigit).lowercase(java.util.Locale.ROOT) == normalizedKey
+    }
+    return catalogKey?.let { names?.optString(it)?.takeIf(String::isNotBlank) }
         ?: exerciseDisplayName(imageKey, fallback)
 }
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="analyzing_your_fitness_goals___">Je fitnessdoelen analyseren...</string>
+    <string name="evaluating_equipment_availability___">Beschikbare apparatuur beoordelen...</string>
+    <string name="optimizing_workout_split___">Trainingsindeling optimaliseren...</string>
+    <string name="calculating_target_weights___">Streefgewichten berekenen...</string>
+    <string name="reviewing_movement_restrictions___">Bewegingsbeperkingen bekijken...</string>
+    <string name="consulting_the_ai_workout_generator___">De AI-trainingsgenerator raadplegen...</string>
+    <string name="personalizing_exercises___">Oefeningen personaliseren...</string>
+    <string name="balancing_volume_and_intensity___">Volume en intensiteit in balans brengen...</string>
+    <string name="finalizing_your_personalized_plan___">Je persoonlijke plan afronden...</string>
+    <string name="almost_there___">Bijna klaar...</string>
+</resources>

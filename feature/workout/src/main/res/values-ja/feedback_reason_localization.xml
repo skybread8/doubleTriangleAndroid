@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feedback_reason_expensive">料金が高すぎる</string>
+    <string name="feedback_reason_not_useful">十分に役立たない</string>
+    <string name="feedback_reason_hard">使い方が難しすぎる</string>
+    <string name="feedback_reason_missing">必要な機能がない</string>
+    <string name="feedback_reason_technical">技術的な問題・不具合</string>
+    <string name="feedback_reason_other">別のサービスを試している</string>
+</resources>

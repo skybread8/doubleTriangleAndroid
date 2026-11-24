@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_related_loading">Chargement des exercices</string>
+    <string name="exercise_related_searching">Recherche d’alternatives et d’exercices pour le même groupe musculaire.</string>
+    <string name="exercise_related_none">Aucun autre exercice pour le même groupe musculaire.</string>
+</resources>

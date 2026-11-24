@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_serving_grams">Hoeveelheid per portie (g)</string>
+    <string name="nutrition_total_weight_optional">Totaalgewicht (g, optioneel)</string>
+    <string name="nutrition_total_grams">Totaal aantal gram</string>
+    <string name="nutrition_total_macros">Totale macro’s</string>
+</resources>

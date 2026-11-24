@@ -192,3 +192,147 @@ foreach ($directory in $locales) {
     }
 }
 Write-Output 'FAQ: 23 questions and answers available in all 10 locales.'
+
+# Widget text has local fallbacks for Sheet keys that have not yet been added.
+$widgetRoot = Join-Path $PSScriptRoot '..\app\src\main\res'
+$widgetKeys = @('widget_create_first_workout', 'widget_recover_tomorrow')
+foreach ($directory in @('values', 'values-ca', 'values-de', 'values-es', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+    $path = Join-Path $widgetRoot "$directory\widget_localization.xml"
+    [xml]$widgetResources = Get-Content -LiteralPath $path -Raw -Encoding utf8
+    $entries = @($widgetResources.resources.string)
+    $names = @($entries | ForEach-Object { $_.name })
+    if (@(Compare-Object $widgetKeys $names).Count -or $names.Count -ne $widgetKeys.Count -or @($entries | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete widget translations in $path"
+    }
+}
+Write-Output "Workout widget: $($widgetKeys.Count) local labels available in all 10 locales."
+
+$methodKeys = @('nutrition_search_specific_food')
+foreach ($directory in @('values', 'values-ca', 'values-de', 'values-es', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+    $path = Join-Path $widgetRoot "$directory\nutrition_method_localization.xml"
+    [xml]$methodResources = Get-Content -LiteralPath $path -Raw -Encoding utf8
+    $entries = @($methodResources.resources.string)
+    $names = @($entries | ForEach-Object { $_.name })
+    if (@(Compare-Object $methodKeys $names).Count -or $names.Count -ne $methodKeys.Count -or @($entries | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete nutrition method translations in $path"
+    }
+}
+Write-Output 'Nutrition methods: local search description available in all 10 locales.'
+
+$generationKeys = @('nutrition_generation_goals', 'nutrition_generation_preferences', 'nutrition_generation_macros', 'nutrition_generation_training', 'nutrition_generation_planner', 'nutrition_generation_meals', 'nutrition_generation_balance')
+foreach ($directory in @('values', 'values-ca', 'values-de', 'values-es', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+    $path = Join-Path $widgetRoot "$directory\nutrition_generation_localization.xml"
+    [xml]$generationResources = Get-Content -LiteralPath $path -Raw -Encoding utf8
+    $entries = @($generationResources.resources.string)
+    $names = @($entries | ForEach-Object { $_.name })
+    if (@(Compare-Object $generationKeys $names).Count -or $names.Count -ne $generationKeys.Count -or @($entries | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete nutrition generation translations in $path"
+    }
+}
+Write-Output 'Nutrition generation: 7 local labels available in all 10 locales.'
+
+foreach ($directory in @('values', 'values-ca', 'values-de', 'values-es', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+    $path = Join-Path $widgetRoot "$directory\nutrition_ideas_localization.xml"
+    [xml]$ideaResources = Get-Content -LiteralPath $path -Raw -Encoding utf8
+    $entries = @($ideaResources.resources.string)
+    $ideaKeys = @('nutrition_surprise_description', 'nutrition_aligned_with_training')
+    $names = @($entries | ForEach-Object { $_.name })
+    if (@(Compare-Object $ideaKeys $names).Count -or $entries.Count -ne $ideaKeys.Count -or @($entries | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete nutrition ideas translations in $path"
+    }
+}
+Write-Output 'Nutrition ideas: 2 local labels available in all 10 locales.'
+
+$chartKeys = @('analytics_bar_chart', 'analytics_radar_chart')
+foreach ($directory in @('values', 'values-ca', 'values-de', 'values-es', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+    $path = Join-Path $widgetRoot "$directory\analytics_chart_localization.xml"
+    [xml]$chartResources = Get-Content -LiteralPath $path -Raw -Encoding utf8
+    $entries = @($chartResources.resources.string)
+    $names = @($entries | ForEach-Object { $_.name })
+    if (@(Compare-Object $chartKeys $names).Count -or $names.Count -ne $chartKeys.Count -or @($entries | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete chart translations in $path"
+    }
+}
+Write-Output 'Analytics charts: 2 accessibility labels available in all 10 locales.'
+
+$toolbarKeys = @('workout_toolbar_path', 'workout_toolbar_insights', 'workout_toolbar_guide')
+foreach ($directory in @('values', 'values-ca', 'values-de', 'values-es', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+    $path = Join-Path $workoutLabelRoot "$directory\workout_toolbar_localization.xml"
+    [xml]$toolbarResources = Get-Content -LiteralPath $path -Raw -Encoding utf8
+    $entries = @($toolbarResources.resources.string)
+    $names = @($entries | ForEach-Object { $_.name })
+    if (@(Compare-Object $toolbarKeys $names).Count -or $entries.Count -ne $toolbarKeys.Count -or @($entries | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete workout toolbar translations in $path"
+    }
+}
+Write-Output 'Workout toolbar: 3 accessibility labels available in all 10 locales.'
+
+$subscriptionKeys = @('subscription_pending', 'subscription_grace_period', 'subscription_expired', 'subscription_revoked', 'subscription_external')
+foreach ($directory in @('values', 'values-ca', 'values-de', 'values-es', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+    $path = Join-Path $faqRoot "$directory\subscription_status_localization.xml"
+    [xml]$subscriptionResources = Get-Content -LiteralPath $path -Raw -Encoding utf8
+    $entries = @($subscriptionResources.resources.string)
+    $names = @($entries | ForEach-Object { $_.name })
+    if (@(Compare-Object $subscriptionKeys $names).Count -or $entries.Count -ne $subscriptionKeys.Count -or @($entries | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete subscription translations in $path"
+    }
+}
+Write-Output 'Subscription: 5 local labels available in all 10 locales.'
+
+$subscriptionPlanKeys = @('subscription_trial', 'subscription_demo', 'subscription_member_monthly', 'subscription_member_yearly', 'subscription_coach_basic_monthly', 'subscription_coach_basic_yearly', 'subscription_coach_pro_monthly', 'subscription_coach_pro_yearly', 'subscription_coached_external')
+foreach ($directory in @('values', 'values-ca', 'values-de', 'values-es', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+    $path = Join-Path $faqRoot "$directory\subscription_plan_localization.xml"
+    [xml]$planResources = Get-Content -LiteralPath $path -Raw -Encoding utf8
+    $entries = @($planResources.resources.string)
+    $names = @($entries | ForEach-Object { $_.name })
+    if (@(Compare-Object $subscriptionPlanKeys $names).Count -or $entries.Count -ne $subscriptionPlanKeys.Count -or @($entries | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete subscription plan translations in $path"
+    }
+}
+Write-Output 'Subscription plans: 9 local labels available in all 10 locales.'
+
+$nutritionEntryKeys = @('nutrition_serving_grams', 'nutrition_total_weight_optional', 'nutrition_total_grams', 'nutrition_total_macros')
+foreach ($directory in @('values', 'values-ca', 'values-de', 'values-es', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+    $path = Join-Path $widgetRoot "$directory\nutrition_entry_localization.xml"
+    [xml]$entryResources = Get-Content -LiteralPath $path -Raw -Encoding utf8
+    $entries = @($entryResources.resources.string)
+    $names = @($entries | ForEach-Object { $_.name })
+    if (@(Compare-Object $nutritionEntryKeys $names).Count -or $entries.Count -ne $nutritionEntryKeys.Count -or @($entries | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete nutrition entry translations in $path"
+    }
+}
+Write-Output 'Nutrition entry: 4 local labels available in all 10 locales.'
+
+$relatedKeys = @('exercise_related_loading', 'exercise_related_searching', 'exercise_related_none')
+foreach ($directory in @('values', 'values-ca', 'values-de', 'values-es', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+    $path = Join-Path $workoutLabelRoot "$directory\exercise_related_localization.xml"
+    [xml]$relatedResources = Get-Content -LiteralPath $path -Raw -Encoding utf8
+    $entries = @($relatedResources.resources.string)
+    $names = @($entries | ForEach-Object { $_.name })
+    if (@(Compare-Object $relatedKeys $names).Count -or $entries.Count -ne $relatedKeys.Count -or @($entries | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete related exercise translations in $path"
+    }
+}
+Write-Output 'Related exercises: 3 local labels available in all 10 locales.'
+
+$feedbackKeys = @('feedback_reason_expensive', 'feedback_reason_not_useful', 'feedback_reason_hard', 'feedback_reason_missing', 'feedback_reason_technical', 'feedback_reason_other')
+foreach ($directory in @('values', 'values-ca', 'values-de', 'values-es', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+    $path = Join-Path $workoutLabelRoot "$directory\feedback_reason_localization.xml"
+    [xml]$feedbackResources = Get-Content -LiteralPath $path -Raw -Encoding utf8
+    $entries = @($feedbackResources.resources.string)
+    $names = @($entries | ForEach-Object { $_.name })
+    if (@(Compare-Object $feedbackKeys $names).Count -or $entries.Count -ne $feedbackKeys.Count -or @($entries | Where-Object { [string]::IsNullOrWhiteSpace($_.'#text') }).Count) {
+        throw "Incomplete feedback reasons in $path"
+    }
+}
+Write-Output 'Feedback reasons: 6 local labels available in all 10 locales.'
+
+foreach ($directory in @('values', 'values-ca', 'values-de', 'values-es', 'values-fr', 'values-it', 'values-ja', 'values-nl', 'values-pt', 'values-zh-rCN')) {
+    $path = Join-Path $widgetRoot "$directory\booking_localization.xml"
+    [xml]$bookingResources = Get-Content -LiteralPath $path -Raw -Encoding utf8
+    $entries = @($bookingResources.resources.string)
+    if ($entries.Count -ne 1 -or $entries[0].name -ne 'booking_time_of_day' -or [string]::IsNullOrWhiteSpace($entries[0].'#text')) {
+        throw "Incomplete booking translations in $path"
+    }
+}
+Write-Output 'Booking: time-of-day label available in all 10 locales.'

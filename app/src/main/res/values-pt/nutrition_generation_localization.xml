@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_generation_goals">A analisar os teus objetivos nutricionais…</string>
+    <string name="nutrition_generation_preferences">A avaliar as tuas preferências alimentares…</string>
+    <string name="nutrition_generation_macros">A calcular calorias e macronutrientes…</string>
+    <string name="nutrition_generation_training">A ajustar o plano aos teus treinos…</string>
+    <string name="nutrition_generation_planner">A consultar o planeador de IA…</string>
+    <string name="nutrition_generation_meals">A personalizar as tuas refeições…</string>
+    <string name="nutrition_generation_balance">A equilibrar proteínas, gorduras e hidratos de carbono…</string>
+</resources>

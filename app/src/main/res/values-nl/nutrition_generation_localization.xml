@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_generation_goals">Je voedingsdoelen analyseren…</string>
+    <string name="nutrition_generation_preferences">Je voedingsvoorkeuren bekijken…</string>
+    <string name="nutrition_generation_macros">Calorieën en macronutriënten berekenen…</string>
+    <string name="nutrition_generation_training">Het plan op je trainingen afstemmen…</string>
+    <string name="nutrition_generation_planner">De AI-planner raadplegen…</string>
+    <string name="nutrition_generation_meals">Je maaltijden personaliseren…</string>
+    <string name="nutrition_generation_balance">Eiwitten, vetten en koolhydraten in balans brengen…</string>
+</resources>

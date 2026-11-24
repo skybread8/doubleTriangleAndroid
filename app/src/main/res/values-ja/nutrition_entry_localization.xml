@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_serving_grams">1食分の量（g）</string>
+    <string name="nutrition_total_weight_optional">総重量（g、任意）</string>
+    <string name="nutrition_total_grams">合計グラム数</string>
+    <string name="nutrition_total_macros">合計栄養素</string>
+</resources>

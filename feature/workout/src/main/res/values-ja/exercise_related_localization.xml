@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_related_loading">エクササイズを読み込み中</string>
+    <string name="exercise_related_searching">代替エクササイズと同じ筋肉群のエクササイズを探しています。</string>
+    <string name="exercise_related_none">同じ筋肉群の他のエクササイズはありません。</string>
+</resources>

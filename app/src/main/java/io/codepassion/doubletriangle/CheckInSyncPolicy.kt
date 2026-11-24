@@ -19,6 +19,13 @@ internal fun checkInVersionAcknowledged(sentVersion: String, currentVersion: Str
 internal fun shouldOverlayCheckInDraft(serverStatus: String, serverDeleted: Boolean): Boolean =
     !serverDeleted && serverStatus != "submitted"
 
+internal fun checkInDraftStatus(submit: Boolean, previousStatus: String, queuedStatus: String?, answered: Boolean): String =
+    when {
+        submit -> "submitted"
+        previousStatus == "draft" || queuedStatus == "draft" || answered -> "draft"
+        else -> "pending"
+    }
+
 /** A linked asset recorded before submission may arrive after it, per the sync contract. */
 internal fun maySyncCheckInAsset(serverDeleted: Boolean, submittedAt: Instant?, assetUpdatedAt: Instant): Boolean =
     !serverDeleted && (submittedAt == null || assetUpdatedAt <= submittedAt)

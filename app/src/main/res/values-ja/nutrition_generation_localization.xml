@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_generation_goals">栄養目標を分析しています…</string>
+    <string name="nutrition_generation_preferences">食事の好みを確認しています…</string>
+    <string name="nutrition_generation_macros">カロリーと主要栄養素を計算しています…</string>
+    <string name="nutrition_generation_training">ワークアウトに合わせてプランを調整しています…</string>
+    <string name="nutrition_generation_planner">AIプランナーに問い合わせています…</string>
+    <string name="nutrition_generation_meals">食事をカスタマイズしています…</string>
+    <string name="nutrition_generation_balance">タンパク質、脂質、炭水化物のバランスを調整しています…</string>
+</resources>

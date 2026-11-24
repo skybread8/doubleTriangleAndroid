@@ -1,8 +1,36 @@
 # iOS Workout Parity Specification
 
+## Coach-assigned workout labels (2026-11-24)
+
+- Missing day types are omitted rather than displayed as the literal `null`, matching iOS. Active-set target and weight labels use shared translations. An assigned plan and its first set/rest were exercised on Android; the changes still require a rebuilt app and matched iOS visual verification.
+
+## Live workout notification compatibility (2026-11-23)
+
+- Restored compatibility with the initial Android 16 release by requesting promotion through the notification extra without invoking a builder method introduced in API 36.1. Samsung Now Bar recognition and iOS visual parity still require verification on a physical device after a fresh install.
+- The foreground service now waits briefly for the first saved session instead of immediately cancelling the notification if session creation is still underway. Once a session has been observed, its removal still stops the service. Workout module compilation and unit tests pass; the change and Samsung's presentation require an end-to-end workout check on the device. The connected S23 Ultra had notification permissions granted and historical notifications marked promoted, but no active workout notification at inspection time. iOS lock-screen and Dynamic Island visual parity remains unverified.
+- On a subsequent active workout on the connected S23 Ultra (One UI 8.5), the service and notification were active and Android marked the ProgressStyle notification PROMOTED_ONGOING, yet Samsung's Now Bar Showing list was empty. The device's global Now Bar developer test setting was off. This separates Android promotion from Samsung presentation; enabling the setting briefly without reposting did not establish a fix, and it was restored. Samsung Now Bar inclusion remains unresolved.
+
+## Workout path block notes (2026-11-23)
+
+- The active workout path no longer displays block notes above exercises, matching iOS and preventing placeholder values such as `null` from appearing there. Device verification remains outstanding.
+
+## Workout path icon (2026-11-23)
+
+- Android uses a bulleted-list icon for the workout path at the user's request; iOS uses a route icon. Device visual verification remains outstanding.
+
+## Completion summary viewport (2026-11-23)
+
+- Android's workout summary scrolls when its metric cards exceed the available height, while Continue remains visible. Source comparison with the iOS summary is complete; compact-device, large-text and matched iOS screenshot verification remain outstanding.
+- The summary uses iOS-style staggered spring entrances, entrance blur and a metric-icon bounce, plus adaptive background and secondary card colors. Android's Compose blur requires Android 12 or newer; on older versions the remaining entrance effects still run. Animation timing, light/dark colors and compact layout still need matched device verification.
+- Summary metric labels and volume units now use the shared iOS strings and the share action sits with Continue. Android still lacks the iOS calorie-calculation information control and summary-level Watch insights; exercise counting also follows Android's existing main-exercise rules. Matched device verification remains outstanding.
+
 ## Return from exercise feedback (2026-11-20)
 
 - Android's Edit sets action returns to the current exercise and restores its last set for correction. It now retains the selected feedback and notes when returning, as iOS does. Source comparison is complete; dedicated transition coverage, an end-to-end device check and matched screenshots remain outstanding.
+
+## Workout path reordering (2026-11-23)
+
+- Android also permits upcoming single-exercise blocks in the same uninterrupted section to be reordered. This extends iOS behavior, which restricts moves to one block. Device gesture, persistence, and visual verification remain outstanding.
 
 ## Workout path reordering (2026-11-20)
 
@@ -769,3 +797,11 @@ Android's completed-workout export now uses the persisted completion timestamp f
 - Matched WorkoutDayView: target-muscle effort and equipment appear in Information only; Exercises starts with the planned workout blocks. Source comparison completed; Android build and visual verification remain pending in this environment.
 
 - The Information equipment list no longer invents a bodyweight item for exercises without catalogued equipment; an empty list hides the equipment section. Added regression coverage; execution remains pending due to the unavailable JDK.
+
+### Localization audit (2026-11-23)
+
+- Several exercise names in the workout detail, active session, feedback, notifications, widget, watch bridge and analytics presentation now resolve the localized exercise catalogue when a catalog key is available. User-defined names continue to fall back to their stored value.
+- The widget resolves the profile language for exercise names, status, day and its locally translated empty states. Localization checks and Android unit tests cover the available resources and widget selection; on-device checks across languages and complete workout parity remain outstanding.
+- Completion score tiers, effort/metric labels, streak messages and plan/mesocycle actions now use the corresponding iOS Sheet keys. Localized record titles and exercise names are shown in the record celebration. Compilation and workout unit tests passed; device and complete localization verification remain outstanding.
+- Watch motion insight labels and empty states now use the iOS shared keys for disabled, manual, ready, tracking, low-confidence and fallback states. Unit/build checks do not replace wearable or accessibility verification.
+- Exercise detail history/profile headings, level labels, related-exercise names and empty states, plus mesocycle section headings, now resolve localized resources. History dates and distances use the selected locale. Local resource checks and workout unit tests pass; a matched on-device localization review remains outstanding.

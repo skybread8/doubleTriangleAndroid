@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subscription_pending">In attesa</string>
+    <string name="subscription_grace_period">Periodo di tolleranza</string>
+    <string name="subscription_expired">Scaduto</string>
+    <string name="subscription_revoked">Revocato</string>
+    <string name="subscription_external">Esterno</string>
+</resources>

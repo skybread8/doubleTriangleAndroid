@@ -4,6 +4,38 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ExerciseHistoryMergeTest {
+    @Test fun olderRemoteRecordDoesNotReplaceANewerImportedLocalRecord() {
+        val local = ExerciseHistoryEntry(100, 1, 12, 20.0, 240.0, remoteResultId = "result", updatedAtMillis = 300)
+        val remote = local.copy(totalReps = 8, updatedAtMillis = 200)
+        assertEquals(listOf(local), mergeExerciseHistory(listOf(local), listOf(remote)))
+    }
+
+    @Test fun equalTimestampKeepsExistingRecordAsOnIos() {
+        val local = ExerciseHistoryEntry(100, 1, 12, 20.0, 240.0, remoteResultId = "result", updatedAtMillis = 300)
+        val remote = local.copy(totalReps = 8)
+        assertEquals(listOf(local), mergeExerciseHistory(listOf(local), listOf(remote)))
+    }
+
+    @Test fun newerTombstoneRemovesOnlyItsOwnResult() {
+        val first = ExerciseHistoryEntry(100, 1, 8, 20.0, 160.0, remoteResultId = "first", updatedAtMillis = 100)
+        val second = first.copy(remoteResultId = "second")
+        assertEquals(listOf(second), removeDeletedExerciseHistory(listOf(first, second), mapOf("first" to 200)))
+    }
+
+    @Test fun olderTombstoneDoesNotRemoveNewerLocalEdit() {
+        val entry = ExerciseHistoryEntry(100, 1, 8, 20.0, 160.0, remoteResultId = "first", pendingEditAt = 300)
+        assertEquals(listOf(entry), removeDeletedExerciseHistory(listOf(entry), mapOf("first" to 200)))
+    }
+
+    @Test fun fullHistoryIsRetainedBeyondTheFormerLimit() {
+        val history = (1..250).map { index ->
+            ExerciseHistoryEntry(index.toLong(), 1, 8, 20.0, 160.0, remoteResultId = "result-$index")
+        }
+        val merged = mergeExerciseHistory(emptyList(), history)
+        assertEquals(250, merged.size)
+        assertEquals("result-1", merged.last().remoteResultId)
+    }
+
     @Test fun remoteEditReplacesTheSameResultWithoutLosingLocalHistory() {
         val local = ExerciseHistoryEntry(100, 1, 8, 20.0, 160.0, plannedExerciseId = "local")
         val previous = ExerciseHistoryEntry(200, 1, 8, 30.0, 240.0, plannedExerciseId = "planned", remoteResultId = "result")

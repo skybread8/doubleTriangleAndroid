@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="analyzing_your_fitness_goals___">フィットネスの目標を分析中...</string>
+    <string name="evaluating_equipment_availability___">利用できる器具を確認中...</string>
+    <string name="optimizing_workout_split___">トレーニングの分割を最適化中...</string>
+    <string name="calculating_target_weights___">目標重量を計算中...</string>
+    <string name="reviewing_movement_restrictions___">動作の制限を確認中...</string>
+    <string name="consulting_the_ai_workout_generator___">AIトレーニング生成ツールに問い合わせ中...</string>
+    <string name="personalizing_exercises___">エクササイズをカスタマイズ中...</string>
+    <string name="balancing_volume_and_intensity___">ボリュームと強度を調整中...</string>
+    <string name="finalizing_your_personalized_plan___">パーソナルプランを仕上げ中...</string>
+    <string name="almost_there___">もうすぐ完了...</string>
+</resources>

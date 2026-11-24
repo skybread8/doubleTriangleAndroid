@@ -24,6 +24,25 @@ class WorkoutPathModelTest {
         assertTrue(path.none { it.canMoveUpcoming(0, 1, 0) })
     }
 
+    @Test fun `upcoming single exercise blocks move only within the same uninterrupted section`() {
+        val exercises = (0..3).map { ExerciseSummary("Exercise $it", sets = 1, reps = "10", restSeconds = 0) }
+        val base = PreviewWorkoutRepository.load().workouts.first().copy(blocks = emptyList(), exercises = exercises)
+        val path = base.pathBlocks()
+        assertTrue(path.canMovePathExercise(1, 0, 3, 0, 0))
+        assertTrue(!path.canMovePathExercise(0, 0, 1, 0, 0))
+        val interrupted = path.toMutableList().apply { this[2] = this[2].copy(type = WorkoutBlockType.Cooldown) }
+        assertTrue(!interrupted.canMovePathExercise(1, 0, 3, 0, 0))
+    }
+
+    @Test fun `drop chooses nearest valid position including the original after scrolling`() {
+        val source = 1 to 0
+        val candidates = listOf((2 to 0) to 100f, (3 to 0) to 200f)
+        assertEquals(null, pathDropTarget(source, 0f, 40f, candidates))
+        assertEquals(2 to 0, pathDropTarget(source, 0f, 75f, candidates))
+        assertEquals(3 to 0, pathDropTarget(source, -80f, 250f, candidates))
+        assertEquals(null, pathDropTarget(source, -80f, -70f, candidates))
+    }
+
     @Test fun `only upcoming rows in one block can move`() {
         val block = WorkoutBlockSummary(WorkoutBlockType.Standard, exercises = (0..3).map {
             ExerciseSummary("Exercise $it", sets = 1, reps = "10", restSeconds = 0)
@@ -78,6 +97,7 @@ class WorkoutPathModelTest {
     @Test
     fun `scheduled workout date mirrors the iOS full date metadata`() {
         assertTrue(formatScheduledWorkoutDate("2026-10-19T00:00:00Z", "Español")?.contains("19") == true)
+        assertTrue(formatScheduledWorkoutDate("2026-10-19T00:00:00Z", "en")?.startsWith("Monday") == true)
         assertEquals(null, formatScheduledWorkoutDate("not-a-date", "Español"))
     }
 

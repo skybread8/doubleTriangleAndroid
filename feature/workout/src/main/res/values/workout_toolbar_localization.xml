@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="workout_toolbar_path">Workout path</string>
+    <string name="workout_toolbar_insights">Exercise insights</string>
+    <string name="workout_toolbar_guide">Exercise guide</string>
+</resources>

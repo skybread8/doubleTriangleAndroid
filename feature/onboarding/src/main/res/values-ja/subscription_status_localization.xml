@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subscription_pending">保留中</string>
+    <string name="subscription_grace_period">猶予期間</string>
+    <string name="subscription_expired">期限切れ</string>
+    <string name="subscription_revoked">取り消し済み</string>
+    <string name="subscription_external">外部</string>
+</resources>

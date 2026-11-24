@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_surprise_description">Create a surprise idea based on today’s goals and balanced foods.</string>
+    <string name="nutrition_aligned_with_training">Aligned with training</string>
+</resources>

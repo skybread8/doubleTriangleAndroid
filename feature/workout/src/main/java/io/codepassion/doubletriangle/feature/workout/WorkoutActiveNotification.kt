@@ -186,8 +186,10 @@ internal object WorkoutActiveNotification {
             // Live Update surface when it requests promotion and uses
             // ProgressStyle. A regular progress bar silently falls back to a
             // conventional notification and loses its critical status text.
+            // The builder method was added in API 36.1, not the initial
+            // Android 16 release. Use the compatible extra so the foreground
+            // notification can also be built on API 36.0.
             builder.extras.putBoolean("android.requestPromotedOngoing", true)
-            builder.setRequestPromotedOngoing(true)
             builder.setShortCriticalText(
                 if (alert) strings.getString(SharedR.string.ready).uppercase()
                 else if (isResting) "${progress.coerceAtLeast(0)}s"

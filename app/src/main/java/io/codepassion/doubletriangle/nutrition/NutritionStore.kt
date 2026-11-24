@@ -45,6 +45,8 @@ internal data class MealItem(
     val unit: String = "",
     val grams: Double? = null,
     val notes: String = "",
+    val remoteId: String? = null,
+    val updatedAt: Instant? = null,
 ) {
     constructor(
         name: String,
@@ -87,7 +89,38 @@ internal data class MealLog(
     val mediaUrl: String? = null,
     val loggedAt: Instant? = null,
     val createdAt: Instant? = null,
+    val updatedAt: Instant? = null,
 )
+
+/** Keep the modification time of unchanged rows when saving a whole day. */
+internal fun stampEditedMeals(previous: List<MealLog>, current: List<MealLog>, now: Instant): List<MealLog> {
+    val byId = previous.associateBy { it.id }
+    return current.map { meal ->
+        val old = byId[meal.id]
+        val used = mutableSetOf<Int>()
+        val foods = meal.items.mapIndexed { index, item ->
+            val priorItems = old?.items.orEmpty()
+            val byRemoteId = item.remoteId?.let { id -> priorItems.indices.firstOrNull { it !in used && priorItems[it].remoteId.equals(id, true) } }
+            val byValue = priorItems.indices.filter { it !in used &&
+                priorItems[it].copy(remoteId = null, updatedAt = null) == item.copy(remoteId = null, updatedAt = null) }.singleOrNull()
+            val priorIndex = byRemoteId ?: byValue ?: index.takeIf { it in priorItems.indices && it !in used }
+            val prior = priorIndex?.let { used += it; priorItems[it] }
+            val sameValue = prior != null && prior.copy(remoteId = null, updatedAt = null) == item.copy(remoteId = null, updatedAt = null)
+            item.copy(remoteId = item.remoteId ?: prior?.remoteId,
+                updatedAt = if (sameValue && priorIndex == index) prior?.updatedAt else now)
+        }
+        fun MealLog.parentValue() = copy(items = emptyList(), calories = 0, protein = 0, carbs = 0, fat = 0, updatedAt = null)
+        val parentTime = if (old != null && old.parentValue() == meal.parentValue()) old.updatedAt else now
+        meal.copy(items = foods, updatedAt = parentTime)
+    }
+}
+
+/** A newer local entry wins; equal live parents still allow independent item updates. */
+internal fun shouldApplyNutritionEntry(localUpdatedAt: Instant?, remoteUpdatedAt: Instant?, deleted: Boolean): Boolean {
+    if (remoteUpdatedAt == null) return false
+    if (localUpdatedAt == null) return true
+    return if (deleted) remoteUpdatedAt.isAfter(localUpdatedAt) else !remoteUpdatedAt.isBefore(localUpdatedAt)
+}
 
 internal fun mealLoggedAt(meal: MealLog, zone: ZoneId = ZoneId.systemDefault()): Instant =
     meal.loggedAt ?: Instant.ofEpochMilli(meal.id).takeIf { it.atZone(zone).toLocalDate() == meal.loggedDate }
@@ -114,6 +147,44 @@ internal fun applyNutritionBookmark(entry: MealLog, name: String?): MealLog =
     else entry.copy(name = name.trim().ifBlank { entry.name }, isBookmarked = true, bookmarkName = name.trim())
 
 internal data class RemoteNutritionItem(val order: Int, val item: MealItem, val deleted: Boolean)
+
+internal data class NutritionItemMergeResult(val items: List<MealItem>, val resolvedDeletions: Set<String>)
+
+/** iOS reconciles every food row independently by UUID and updatedAt. */
+internal fun mergeNutritionItems(
+    local: List<MealItem>, remote: List<RemoteNutritionItem>, pendingDeletions: Map<String, Instant>,
+): NutritionItemMergeResult {
+    val merged = local.toMutableList()
+    val positions = local.mapIndexedNotNull { index, item -> item.remoteId?.lowercase()?.let { it to index } }.toMap().toMutableMap()
+    val order = local.mapIndexedNotNull { index, item -> item.remoteId?.lowercase()?.let { it to index } }.toMap().toMutableMap()
+    val resolved = mutableSetOf<String>()
+    val removed = mutableSetOf<String>()
+    remote.forEach { row ->
+        val id = row.item.remoteId?.lowercase() ?: return@forEach
+        val remoteTime = row.item.updatedAt ?: return@forEach
+        val pendingTime = pendingDeletions[id]
+        if (pendingTime != null) {
+            if (!remoteTime.isAfter(pendingTime)) return@forEach
+            resolved += id
+        }
+        val index = positions[id]
+        if (index == null) {
+            if (!row.deleted) {
+                positions[id] = merged.size
+                order[id] = row.order
+                merged += row.item
+            }
+        } else {
+            val localTime = merged[index].updatedAt
+            if (localTime == null || remoteTime.isAfter(localTime)) {
+                if (row.deleted) removed += id
+                else { merged[index] = row.item; order[id] = row.order }
+            }
+        }
+    }
+    return NutritionItemMergeResult(merged.filterNot { it.remoteId?.lowercase() in removed }
+        .sortedBy { it.remoteId?.lowercase()?.let(order::get) ?: Int.MAX_VALUE }, resolved)
+}
 
 internal fun localNutritionLogId(remoteId: String, knownIds: Map<String, Long>): Long =
     knownIds[remoteId] ?: knownIds.entries.firstOrNull { it.key.equals(remoteId, ignoreCase = true) }?.value
@@ -198,6 +269,8 @@ internal data class NutritionPreferences(
 internal object NutritionStore {
     private const val PREFS = "wildforce_nutrition"
     private const val ENTRIES_KEY = "nutrition_entries_v2"
+    const val PENDING_DELETIONS_KEY = "nutrition_pending_entry_deletions_v1"
+    const val PENDING_ITEM_DELETIONS_KEY = "nutrition_pending_item_deletions_v1"
     private const val LEGACY_KEY = "today_meals"
     private const val TARGETS_KEY = "nutrition_targets"
     private const val PROFILE_KEY = "nutrition_profile"
@@ -367,12 +440,14 @@ internal object NutritionStore {
      * a compact local representation, so entries and their items are folded
      * into one MealLog while retaining a deterministic local id for later syncs.
      */
+    @Synchronized
     fun importRemoteLogs(
         context: Context,
         remoteEntries: JSONArray,
         remoteItems: JSONArray,
         plannedMealKeys: Map<String, String> = emptyMap(),
         knownLocalIds: Map<String, Long> = emptyMap(),
+        protectedEntryIds: Set<String> = emptySet(),
     ) {
         // The sync layer materializes all pages and cached records before this
         // import. Rebuild from live rows so tombstones cannot delete a new row
@@ -394,26 +469,44 @@ internal object NutritionStore {
                 unit = item.optString("unit"),
                 grams = item.optDouble("amount_grams", Double.NaN).takeUnless(Double::isNaN),
                 notes = item.optString("notes"),
+                remoteId = item.optString("id").takeIf(String::isNotBlank),
+                updatedAt = runCatching { Instant.parse(item.optString("updated_at")) }.getOrNull(),
             )
             itemsByEntry.getOrPut(entryId.lowercase(java.util.Locale.ROOT)) { mutableListOf() }
                 .add(RemoteNutritionItem(orderIndex, mealItem, !item.isNull("deleted_at")))
         }
 
         val merged = all(context).associateBy { it.id }.toMutableMap()
+        val itemIds = context.getSharedPreferences("wildforce_remote_sync", Context.MODE_PRIVATE)
+            .getString("nutrition_item_ids", "{}")?.let(::JSONObject) ?: JSONObject()
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val pendingItems = prefs.getString(PENDING_ITEM_DELETIONS_KEY, "{}")?.let(::JSONObject) ?: JSONObject()
+        val pendingItemTimes = pendingItems.keys().asSequence().mapNotNull { id ->
+            runCatching { Instant.parse(pendingItems.optString(id)) }.getOrNull()?.let { id.lowercase() to it }
+        }.toMap()
         var changed = false
         for (index in 0 until remoteEntries.length()) {
             val entry = remoteEntries.optJSONObject(index) ?: continue
             val remoteId = entry.optString("id")
-            if (remoteId.isBlank()) continue
+            if (remoteId.isBlank() || remoteId.lowercase() in protectedEntryIds) continue
             val localId = localNutritionLogId(remoteId, knownLocalIds)
-            if (!entry.isNull("deleted_at")) {
+            val remoteUpdatedAt = runCatching { Instant.parse(entry.optString("updated_at")) }.getOrNull()
+            val deleted = !entry.isNull("deleted_at")
+            val existing = merged[localId]
+            if (remoteUpdatedAt == null) continue
+            if (deleted && shouldApplyNutritionEntry(existing?.updatedAt, remoteUpdatedAt, true)) {
                 changed = merged.remove(localId) != null || changed
                 continue
             }
+            if (deleted && existing == null) continue
             val loggedDate = nutritionLogDate(entry.optString("logged_at")) ?: continue
-            val existing = merged[localId]
-            val items = activeRemoteNutritionItems(itemsByEntry[remoteId.lowercase(java.util.Locale.ROOT)].orEmpty())
-            merged[localId] = MealLog(
+            val localItems = existing?.items.orEmpty().mapIndexed { itemIndex, food ->
+                food.copy(remoteId = food.remoteId ?: itemIds.optString("$localId:$itemIndex").takeIf(String::isNotBlank))
+            }
+            val itemMerge = mergeNutritionItems(localItems, itemsByEntry[remoteId.lowercase(java.util.Locale.ROOT)].orEmpty(), pendingItemTimes)
+            itemMerge.resolvedDeletions.forEach(pendingItems::remove)
+            val items = itemMerge.items
+            val remoteParent = MealLog(
                 id = localId,
                 name = entry.optString("title").trim().ifBlank { "Comida" },
                 calories = items.sumOf { it.calories }.coerceIn(0.0, 8000.0).toInt(),
@@ -432,9 +525,16 @@ internal object NutritionStore {
                 mediaUrl = existing?.mediaUrl,
                 loggedAt = runCatching { Instant.parse(entry.optString("logged_at")) }.getOrNull(),
                 createdAt = runCatching { Instant.parse(entry.optString("created_at")) }.getOrNull(),
+                updatedAt = remoteUpdatedAt,
+            )
+            val parentWins = existing == null || existing.updatedAt == null || remoteUpdatedAt.isAfter(existing.updatedAt)
+            merged[localId] = if (parentWins && !deleted) remoteParent else requireNotNull(existing).copy(
+                items = items, calories = remoteParent.calories, protein = remoteParent.protein,
+                carbs = remoteParent.carbs, fat = remoteParent.fat,
             )
             changed = true
         }
+        prefs.edit().putString(PENDING_ITEM_DELETIONS_KEY, pendingItems.toString()).apply()
         if (changed) write(context, merged.values.toList())
     }
 
@@ -497,6 +597,12 @@ internal object NutritionStore {
         onboarding.optBoolean("isConfigured", false)
     }.getOrDefault(false)
 
+    /** A deleted iOS NutritionProfile is absent, so onboarding is offered again. */
+    fun clearRemotePreferences(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().remove(PROFILE_KEY).apply()
+        context.getSharedPreferences("wildforce_profile_details", Context.MODE_PRIVATE).edit().remove("nutrition_profile").apply()
+    }
+
     fun savePreferences(context: Context, value: NutritionPreferences) {
         val json = JSONObject()
             .put("dietaryStyle", dietaryStyleDisplayName(value.dietaryStyle))
@@ -525,13 +631,58 @@ internal object NutritionStore {
     }
 
     fun load(context: Context, date: LocalDate = LocalDate.now()): List<MealLog> {
-        return orderNutritionMealsForDay(all(context).filter { it.loggedDate == date })
+        return orderNutritionMealsForDay(entriesByDate(context)[date].orEmpty())
     }
 
     fun recent(context: Context, limit: Int = Int.MAX_VALUE): List<MealLog> = orderRecentNutritionMeals(all(context)).take(limit)
 
     /** Returns every local entry so the account synchronizer can upload its complete history. */
     fun allForSync(context: Context): List<MealLog> = all(context)
+
+    /** Adopt a cached server version only for legacy rows whose complete contents still match. */
+    @Synchronized
+    fun migrateMatchingRemoteVersions(context: Context, knownLocalIds: Map<String, Long>) {
+        val state = context.getSharedPreferences("wildforce_sync_state", Context.MODE_PRIVATE)
+        fun projection(resource: String): Map<String, JSONObject> {
+            val array = state.getString("remote_projection:$resource", "[]")?.let(::JSONArray) ?: JSONArray()
+            return (0 until array.length()).mapNotNull(array::optJSONObject)
+                .filter { it.isNull("deleted_at") }.associateBy { it.optString("id").lowercase() }
+        }
+        val entries = projection("nutrition-log-entries")
+        val remoteItems = projection("nutrition-log-items")
+        val localToRemote = knownLocalIds.entries.associate { it.value to it.key.lowercase() }
+        val ids = context.getSharedPreferences("wildforce_remote_sync", Context.MODE_PRIVATE)
+            .getString("nutrition_item_ids", "{}")?.let(::JSONObject) ?: JSONObject()
+        val original = all(context)
+        val migrated = original.map { meal ->
+            val parentId = localToRemote[meal.id]
+            val parent = parentId?.let(entries::get)
+            val loggedDate = parent?.optString("logged_at")?.let(::nutritionLogDate)
+            val parentMatches = parent != null && meal.name == parent.optString("title").trim().ifBlank { "Comida" } &&
+                meal.type == mealTypeFromRemote(parent.optString("meal_type")) && meal.loggedDate == loggedDate &&
+                meal.notes == parent.cleanString("notes") && meal.isBookmarked == parent.optBoolean("is_favorite", false) &&
+                meal.plannedMealKey == null && parent.isNull("nutrition_meal_id") &&
+                meal.photoPath == null && meal.mediaUrl == null && parent.isNull("nutrition_log_media_id")
+            val parentTime = if (meal.updatedAt == null && parentMatches) runCatching {
+                Instant.parse(requireNotNull(parent).optString("updated_at"))
+            }.getOrNull() else meal.updatedAt
+            val foods = meal.items.mapIndexed { index, food ->
+                val id = food.remoteId ?: ids.optString("${meal.id}:$index").takeIf(String::isNotBlank)
+                val row = id?.lowercase()?.let(remoteItems::get)
+                val sameParent = row?.optString("nutrition_log_entry_id")?.equals(parentId, true) == true
+                val same = row != null && sameParent && row.optInt("order_index", index) == index &&
+                    food.name == row.optString("name").trim().ifBlank { "Alimento" } && food.brand == row.cleanString("brand") &&
+                    food.quantity == row.optDouble("quantity", 1.0) && food.unit == row.cleanString("unit") &&
+                    food.grams == row.optDouble("amount_grams", Double.NaN).takeUnless(Double::isNaN) &&
+                    food.calories == row.optDouble("calories") && food.protein == row.optDouble("protein_grams") &&
+                    food.carbs == row.optDouble("carbs_grams") && food.fat == row.optDouble("fat_grams") && food.notes == row.cleanString("notes")
+                val time = if (food.updatedAt == null && same) runCatching { Instant.parse(requireNotNull(row).optString("updated_at")) }.getOrNull() else food.updatedAt
+                food.copy(remoteId = food.remoteId ?: id?.takeIf { same }, updatedAt = time)
+            }
+            meal.copy(items = foods, updatedAt = parentTime)
+        }
+        if (migrated != original) write(context, migrated)
+    }
 
     /** Attaches a private image downloaded for an existing server log without creating a new log. */
     fun attachRemotePhoto(context: Context, remoteEntryId: String, path: String, knownLocalIds: Map<String, Long> = emptyMap()) {
@@ -541,12 +692,57 @@ internal object NutritionStore {
         write(context, entries.map { entry -> if (entry.id == localId) entry.copy(photoPath = path) else entry })
     }
 
-    fun save(context: Context, date: LocalDate, meals: List<MealLog>) {
-        write(context, all(context).filterNot { it.loggedDate == date } + meals.map { it.copy(loggedDate = date) })
+    private fun stampLocalMeals(context: Context, existing: List<MealLog>, meals: List<MealLog>, now: Instant): List<MealLog> {
+        val ids = context.getSharedPreferences("wildforce_remote_sync", Context.MODE_PRIVATE)
+            .getString("nutrition_item_ids", "{}")?.let(::JSONObject) ?: JSONObject()
+        val hydrated = existing.map { meal -> meal.copy(items = meal.items.mapIndexed { index, food ->
+            food.copy(remoteId = food.remoteId ?: ids.optString("${meal.id}:$index").takeIf {
+                runCatching { java.util.UUID.fromString(it) }.isSuccess
+            })
+        }) }
+        val stamped = stampEditedMeals(hydrated, meals, now)
+        val updatedById = stamped.associateBy { it.id }
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val deleted = prefs.getString(PENDING_ITEM_DELETIONS_KEY, "{}")?.let(::JSONObject) ?: JSONObject()
+        hydrated.forEach { old ->
+            val updated = updatedById[old.id] ?: return@forEach // deleting a parent keeps its children on iOS
+            val surviving = updated.items.mapNotNull { it.remoteId?.lowercase() }.toSet()
+            old.items.mapNotNull { it.remoteId?.lowercase() }.filterNot { it in surviving }.forEach { deleted.put(it, now.toString()) }
+        }
+        prefs.edit().putString(PENDING_ITEM_DELETIONS_KEY, deleted.toString()).apply()
+        return stamped
     }
 
+    @Synchronized
+    fun save(context: Context, date: LocalDate, meals: List<MealLog>) {
+        val existing = all(context)
+        val now = Instant.now()
+        val remainingIds = meals.mapTo(mutableSetOf()) { it.id }
+        val removed = existing.filter { it.loggedDate == date && it.id !in remainingIds }
+        if (removed.isNotEmpty()) {
+            val accountId = context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE).getString("id", null)
+            if (accountId != null) {
+                val idMap = context.getSharedPreferences("wildforce_remote_sync", Context.MODE_PRIVATE)
+                    .getString("nutrition_entry_ids", "{}")?.let(::JSONObject) ?: JSONObject()
+                val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                val pending = prefs.getString(PENDING_DELETIONS_KEY, "{}")?.let(::JSONObject) ?: JSONObject()
+                removed.forEach { meal ->
+                    val remoteId = idMap.optString(meal.id.toString()).takeIf {
+                        runCatching { java.util.UUID.fromString(it) }.isSuccess
+                    } ?: nutritionEntryId(accountId, meal.id)
+                    pending.put(remoteId.lowercase(), now.toString())
+                }
+                prefs.edit().putString(PENDING_DELETIONS_KEY, pending.toString()).apply()
+            }
+        }
+        val changed = stampLocalMeals(context, existing, meals.map { it.copy(loggedDate = date) }, now)
+        write(context, existing.filterNot { it.loggedDate == date } + changed)
+    }
+
+    @Synchronized
     fun replace(context: Context, meal: MealLog) {
-        write(context, all(context).filterNot { it.id == meal.id } + meal)
+        val existing = all(context)
+        write(context, existing.filterNot { it.id == meal.id } + stampLocalMeals(context, existing, listOf(meal), Instant.now()))
     }
 
     fun save(context: Context, meals: List<MealLog>) = save(context, LocalDate.now(), meals)
@@ -574,29 +770,50 @@ internal object NutritionStore {
         }
     }
 
+    // The hub asks for many dates while rendering. Parsing the entire JSON
+    // history for each one makes its first frame increasingly expensive.
+    private var cachedEntriesRaw: String? = null
+    private var cachedEntriesZone: ZoneId? = null
+    private var cachedEntries: List<MealLog> = emptyList()
+    private var cachedEntriesByDate: Map<LocalDate, List<MealLog>> = emptyMap()
+
+    @Synchronized
+    private fun entriesByDate(context: Context): Map<LocalDate, List<MealLog>> {
+        all(context)
+        return cachedEntriesByDate
+    }
+
+    @Synchronized
     private fun all(context: Context): List<MealLog> {
         val prefs = context.getSharedPreferences(PREFS, 0)
         val raw = prefs.getString(ENTRIES_KEY, null) ?: prefs.getString(LEGACY_KEY, "[]") ?: "[]"
-        return runCatching {
+        val zone = ZoneId.systemDefault()
+        if (raw == cachedEntriesRaw && zone == cachedEntriesZone) return cachedEntries
+        val entries = runCatching {
             val array = JSONArray(raw)
             buildList {
                 for (index in 0 until array.length()) {
                     val item = array.getJSONObject(index)
                     val id = item.optLong("id", System.currentTimeMillis() + index)
-                    val fallbackDate = Instant.ofEpochMilli(id).atZone(ZoneId.systemDefault()).toLocalDate()
+                    val fallbackDate = Instant.ofEpochMilli(id).atZone(zone).toLocalDate()
                     val date = runCatching { LocalDate.parse(item.optString("date")) }.getOrDefault(fallbackDate)
-                    val items = item.optJSONArray("items")?.let { array -> buildList { for (itemIndex in 0 until array.length()) { val food = array.getJSONObject(itemIndex); add(MealItem(food.cleanString("name"), food.optDouble("calories"), food.optDouble("protein"), food.optDouble("carbs"), food.optDouble("fat"), food.cleanString("brand"), food.optDouble("quantity", 1.0), food.cleanString("unit"), food.optDouble("grams", Double.NaN).takeUnless(Double::isNaN), food.cleanString("notes"))) } } }.orEmpty()
-                    add(MealLog(id, item.cleanString("name").trim().ifBlank { "Comida" }, item.optInt("calories").coerceIn(0, 8000), item.optInt("protein").coerceIn(0, 500), item.optInt("carbs").coerceIn(0, 1000), item.optInt("fat").coerceIn(0, 500), runCatching { MealType.valueOf(item.cleanString("type")) }.getOrDefault(MealType.Snack), date, item.cleanString("notes"), item.cleanString("source", "manual"), item.optBoolean("bookmarked", false), items, item.cleanString("photoPath").takeIf(String::isNotBlank), item.cleanString("plannedMealKey").takeIf(String::isNotBlank), item.cleanString("bookmarkName"), item.cleanString("mediaUrl").takeIf(String::isNotBlank), item.cleanString("loggedAt").let { runCatching { Instant.parse(it) }.getOrNull() }, item.cleanString("createdAt").let { runCatching { Instant.parse(it) }.getOrNull() }))
+                    val items = item.optJSONArray("items")?.let { array -> buildList { for (itemIndex in 0 until array.length()) { val food = array.getJSONObject(itemIndex); add(MealItem(food.cleanString("name"), food.optDouble("calories"), food.optDouble("protein"), food.optDouble("carbs"), food.optDouble("fat"), food.cleanString("brand"), food.optDouble("quantity", 1.0), food.cleanString("unit"), food.optDouble("grams", Double.NaN).takeUnless(Double::isNaN), food.cleanString("notes"), food.cleanString("remoteId").takeIf(String::isNotBlank), food.cleanString("updatedAt").let { runCatching { Instant.parse(it) }.getOrNull() })) } } }.orEmpty()
+                    add(MealLog(id, item.cleanString("name").trim().ifBlank { "Comida" }, item.optInt("calories").coerceIn(0, 8000), item.optInt("protein").coerceIn(0, 500), item.optInt("carbs").coerceIn(0, 1000), item.optInt("fat").coerceIn(0, 500), runCatching { MealType.valueOf(item.cleanString("type")) }.getOrDefault(MealType.Snack), date, item.cleanString("notes"), item.cleanString("source", "manual"), item.optBoolean("bookmarked", false), items, item.cleanString("photoPath").takeIf(String::isNotBlank), item.cleanString("plannedMealKey").takeIf(String::isNotBlank), item.cleanString("bookmarkName"), item.cleanString("mediaUrl").takeIf(String::isNotBlank), item.cleanString("loggedAt").let { runCatching { Instant.parse(it) }.getOrNull() }, item.cleanString("createdAt").let { runCatching { Instant.parse(it) }.getOrNull() }, item.cleanString("updatedAt").let { runCatching { Instant.parse(it) }.getOrNull() }))
                 }
             }
         }.getOrDefault(emptyList())
+        cachedEntriesRaw = raw
+        cachedEntriesZone = zone
+        cachedEntries = entries
+        cachedEntriesByDate = entries.groupBy { it.loggedDate }
+        return entries
     }
 
     private fun write(context: Context, entries: List<MealLog>) {
         val array = JSONArray().apply {
             entries.sortedBy { it.id }.forEach { meal ->
-                val itemArray = JSONArray().apply { meal.items.forEach { food -> put(JSONObject().put("name", food.name).put("calories", food.calories).put("protein", food.protein).put("carbs", food.carbs).put("fat", food.fat).put("brand", food.brand).put("quantity", food.quantity).put("unit", food.unit).put("grams", food.grams).put("notes", food.notes)) } }
-                put(JSONObject().put("id", meal.id).put("date", meal.loggedDate.toString()).put("name", meal.name).put("calories", meal.calories).put("protein", meal.protein).put("carbs", meal.carbs).put("fat", meal.fat).put("type", meal.type.name).put("notes", meal.notes).put("source", meal.source).put("bookmarked", meal.isBookmarked).put("bookmarkName", meal.bookmarkName).put("items", itemArray).put("photoPath", meal.photoPath ?: JSONObject.NULL).put("plannedMealKey", meal.plannedMealKey ?: JSONObject.NULL).put("mediaUrl", meal.mediaUrl ?: JSONObject.NULL).put("loggedAt", meal.loggedAt?.toString() ?: JSONObject.NULL).put("createdAt", meal.createdAt?.toString() ?: JSONObject.NULL))
+                val itemArray = JSONArray().apply { meal.items.forEach { food -> put(JSONObject().put("name", food.name).put("calories", food.calories).put("protein", food.protein).put("carbs", food.carbs).put("fat", food.fat).put("brand", food.brand).put("quantity", food.quantity).put("unit", food.unit).put("grams", food.grams).put("notes", food.notes).put("remoteId", food.remoteId ?: JSONObject.NULL).put("updatedAt", food.updatedAt?.toString() ?: JSONObject.NULL)) } }
+                put(JSONObject().put("id", meal.id).put("date", meal.loggedDate.toString()).put("name", meal.name).put("calories", meal.calories).put("protein", meal.protein).put("carbs", meal.carbs).put("fat", meal.fat).put("type", meal.type.name).put("notes", meal.notes).put("source", meal.source).put("bookmarked", meal.isBookmarked).put("bookmarkName", meal.bookmarkName).put("items", itemArray).put("photoPath", meal.photoPath ?: JSONObject.NULL).put("plannedMealKey", meal.plannedMealKey ?: JSONObject.NULL).put("mediaUrl", meal.mediaUrl ?: JSONObject.NULL).put("loggedAt", meal.loggedAt?.toString() ?: JSONObject.NULL).put("createdAt", meal.createdAt?.toString() ?: JSONObject.NULL).put("updatedAt", meal.updatedAt?.toString() ?: JSONObject.NULL))
             }
         }
         context.getSharedPreferences(PREFS, 0).edit().putString(ENTRIES_KEY, array.toString()).remove(LEGACY_KEY).apply()

@@ -96,7 +96,9 @@ import io.codepassion.doubletriangle.feature.workout.RemoteTrainingImage
 import io.codepassion.doubletriangle.feature.workout.WorkoutAnalyticsStore
 import io.codepassion.doubletriangle.feature.workout.exerciseImageUrl
 import io.codepassion.doubletriangle.feature.workout.exerciseMatchesSearch
+import io.codepassion.doubletriangle.feature.workout.localizedExerciseName
 import io.codepassion.doubletriangle.feature.workout.exerciseDisplayName
+import io.codepassion.doubletriangle.feature.workout.tutorialExerciseName
 import io.codepassion.doubletriangle.feature.workout.localizedWorkoutLabel
 import java.text.DateFormat
 import java.time.*
@@ -265,7 +267,9 @@ fun AnalyticsScreen(
     val allSessions = TrainingSessionHistoryStore.load(preferences)
     var historyRevision by remember { mutableStateOf(0) }
     val allHistories = remember(exerciseSummaries, historyRevision) { exerciseSummaries.associateWith { WorkoutAnalyticsStore.history(context, it.exercise) } }
-    val data = remember(timeframe, allSessions, exerciseSummaries, allHistories) {
+    val localizedExerciseContext = androidx.compose.ui.platform.LocalContext.current
+    val localeConfiguration = androidx.compose.ui.platform.LocalConfiguration.current
+    val data = remember(timeframe, allSessions, exerciseSummaries, allHistories, localeConfiguration) {
         val cutoff = timeframe.days?.let { analyticsStartMillis(timeframe) }
         val histories = allHistories.mapValues { (_, points) ->
             filteredAnalyticsHistory(points, timeframe)
@@ -283,7 +287,7 @@ fun AnalyticsScreen(
         }.sortedWith(
             compareByDescending<Pair<ExerciseAnalyticsSummary, Long>> { it.second }
                 .thenByDescending { it.first.sessions }
-                .thenBy { exerciseDisplayName(it.first.exercise.imageKey, it.first.exercise.name) },
+                .thenBy { localizedExerciseName(localizedExerciseContext, it.first.exercise.imageKey, it.first.exercise.name) },
         ).map { it.first }
         AnalyticsData(
             allSessions.filter { (cutoff == null || it.timestampMillis >= cutoff) && localDate(it.timestampMillis) <= LocalDate.now() },
@@ -442,7 +446,6 @@ private fun AnalyticsHeader(
                         .background(if (selected) WildforceThemeTokens.textPrimary else Color.Transparent)
                         .semantics {
                             contentDescription = localizedResources.getString(option.labelRes)
-                            stateDescription = if (selected) "Seleccionado" else "No seleccionado"
                             this.selected = selected
                         }
                         .clickable { onChange(option) },
@@ -815,7 +818,7 @@ private fun analyticsFocusEnglishName(raw: String): String = when (raw.lowercase
             // The iOS 188 × 168 frame describes the content, before padding.
             Column(Modifier.width(220.dp).height(200.dp).background(colors.inset, RoundedCornerShape(22.dp)).border(1.dp, colors.border, RoundedCornerShape(22.dp)).clickable { onExerciseSelected(record.exercise) }.padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Badge(record.glyph); Text(shortDate(record.recordedAtMillis), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary) }
-                Column { Text(record.exerciseName, style = MaterialTheme.typography.subtitle1, maxLines = 2); Text(localizedAnalyticsTitle(record.title), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                Column { Text(tutorialExerciseName(record.exercise.imageKey, record.exercise.name), style = MaterialTheme.typography.subtitle1, maxLines = 2); Text(localizedAnalyticsTitle(record.title), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 Text(record.value, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
                 record.delta?.let {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -885,7 +888,7 @@ private fun analyticsFocusEnglishName(raw: String): String = when (raw.lowercase
                             .background(if (radar == option.first) colors.elevated else Color.Transparent)
                             .clickable { radar = option.first },
                         contentAlignment = Alignment.Center,
-                    ) { Icon(option.second, contentDescription = if (option.first) "Gráfico radial" else "Gráfico de barras", tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(19.dp)) }
+                    ) { Icon(option.second, contentDescription = androidx.compose.ui.res.stringResource(if (option.first) R.string.analytics_radar_chart else R.string.analytics_bar_chart), tint = WildforceThemeTokens.textPrimary, modifier = Modifier.size(19.dp)) }
                 }
             }
         }
@@ -959,11 +962,11 @@ private fun analyticsFocusEnglishName(raw: String): String = when (raw.lowercase
     Row(Modifier.fillMaxWidth().clickable(onClick = click).padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
         RemoteTrainingImage(
             url = exerciseImageUrl(summary.exercise.imageKey, gender),
-            contentDescription = exerciseDisplayName(summary.exercise.imageKey, summary.exercise.name),
+            contentDescription = tutorialExerciseName(summary.exercise.imageKey, summary.exercise.name),
             modifier = Modifier.size(width = 56.dp, height = 68.dp).clip(RoundedCornerShape(10.dp)),
             contentScale = ContentScale.Crop,
         )
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(exerciseDisplayName(summary.exercise.imageKey, summary.exercise.name), style = MaterialTheme.typography.subtitle1, maxLines = 2); Text(localizedAnalyticsTitle(analyticsExerciseCategory(summary.exercise)), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f1fdb8c054140c2d, summary.sessions), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary) }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(tutorialExerciseName(summary.exercise.imageKey, summary.exercise.name), style = MaterialTheme.typography.subtitle1, maxLines = 2); Text(localizedAnalyticsTitle(analyticsExerciseCategory(summary.exercise)), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_f1fdb8c054140c2d, summary.sessions), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary) }
         Column(horizontalAlignment = Alignment.End) { if (summary.personalBestKg > 0) { Text(formatWeight(summary.personalBestKg, useImperial), style = MaterialTheme.typography.subtitle1); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_best_weight).uppercase(), style = MaterialTheme.typography.overline, color = WildforceThemeTokens.textSecondary) }; Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(22.dp), tint = WildforceThemeTokens.textSecondary) }
     }
 }
@@ -988,11 +991,11 @@ private fun analyticsFocusEnglishName(raw: String): String = when (raw.lowercase
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
             RemoteTrainingImage(
                 url = exerciseImageUrl(summary.exercise.imageKey, gender),
-                contentDescription = exerciseDisplayName(summary.exercise.imageKey, summary.exercise.name),
+                contentDescription = tutorialExerciseName(summary.exercise.imageKey, summary.exercise.name),
                 modifier = Modifier.size(width = 84.dp, height = 100.dp).clip(RoundedCornerShape(20.dp)),
                 contentScale = ContentScale.Crop,
             )
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { Text(exerciseDisplayName(summary.exercise.imageKey, summary.exercise.name), fontSize = 22.sp, lineHeight = 27.sp, fontWeight = FontWeight.Bold); Text(localizedAnalyticsTitle(analyticsExerciseCategory(summary.exercise)), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_5e08a99c835e696d, history.size), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_in_the_last_30_days, history.count { it.timestampMillis >= startMillis(29) }), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary) }
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) { Text(tutorialExerciseName(summary.exercise.imageKey, summary.exercise.name), fontSize = 22.sp, lineHeight = 27.sp, fontWeight = FontWeight.Bold); Text(localizedAnalyticsTitle(analyticsExerciseCategory(summary.exercise)), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_5e08a99c835e696d, history.size), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary); Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string._d_in_the_last_30_days, history.count { it.timestampMillis >= startMillis(29) }), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary) }
         }
         if (history.isEmpty()) DashboardCard { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_complete_this_exercise_in_a_workout_to_unlock_detailed_analytics_), color = WildforceThemeTokens.textSecondary) }
         else {

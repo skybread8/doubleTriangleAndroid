@@ -12,8 +12,8 @@ class NutritionEnergyFallbackTest {
     private val profile = OnboardingProfile(name = "Test", goal = FitnessGoal.entries.first(), birthYear = 1990, birthMonth = 6, birthDay = 15, gender = Gender.Male, heightCm = 175, weightKg = 70.0)
 
     @Test fun restingEstimateUsesAgeOnEachDate() {
-        assertEquals(1628.75, estimatedRestingCalories(profile, LocalDate.of(2026, 6, 14))!!, 0.001)
-        assertEquals(1623.75, estimatedRestingCalories(profile, LocalDate.of(2026, 6, 15))!!, 0.001)
+        assertEquals(1623.75, estimatedRestingCalories(profile, LocalDate.of(2026, 6, 14))!!, 0.001)
+        assertEquals(1618.75, estimatedRestingCalories(profile, LocalDate.of(2026, 6, 15))!!, 0.001)
         assertNull(estimatedRestingCalories(null, LocalDate.of(2026, 6, 15)))
     }
 

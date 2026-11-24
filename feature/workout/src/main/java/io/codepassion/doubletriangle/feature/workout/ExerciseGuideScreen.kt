@@ -464,14 +464,15 @@ private fun InstructionsContent(context: Context, exercise: ExerciseSummary, gen
 
 @Composable
 private fun HistoryContent(history: List<ExerciseHistoryEntry>, exercise: ExerciseSummary, useImperial: Boolean, onEdit: (ExerciseHistoryEntry) -> Unit) {
+    val locale = LocalLocale.current.platformLocale
     if (history.isEmpty()) {
-        EmptyDetailsState(Icons.Filled.BarChart, "SIN HISTORIAL", "Completa este ejercicio para ver aquí tus sesiones anteriores.")
+        EmptyDetailsState(Icons.Filled.BarChart, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_history_available_for_this_exercise).uppercase(), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.complete_this_exercise_in_a_workout_to_see_its_history_here_))
         return
     }
     exerciseHistoryChartSeries(exercise, history).forEach { series ->
         ExerciseHistoryChartCard(series, useImperial)
     }
-    SectionTitle("HISTORIAL")
+    SectionTitle(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.history).uppercase())
     history.forEach { entry ->
         Column(
             Modifier.fillMaxWidth().padding(vertical = 4.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(14.dp))
@@ -479,12 +480,12 @@ private fun HistoryContent(history: List<ExerciseHistoryEntry>, exercise: Exerci
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(entry.timestampMillis)), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                    Text(historyEntrySummary(entry, useImperial), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    Text(DateFormat.getDateInstance(DateFormat.MEDIUM, locale).format(Date(entry.timestampMillis)), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
+                    Text(localizedHistoryEntrySummary(entry, useImperial), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(formatTrainingWeight(entry.maxWeightKg, useImperial), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
-                    Text(formatVolumeSummary(entry.volumeKg), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                    Text(formatVolumeSummary(entry.volumeKg, locale), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                 }
             }
             if (entry.note != null) Text("“${entry.note}”", Modifier.padding(top = 4.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -592,8 +593,8 @@ private fun ExerciseHistoryChartCard(series: ExerciseHistoryChartSeries, useImpe
     }
 }
 
-private fun formatVolumeSummary(volumeKg: Double): String =
-    String.format(java.util.Locale.getDefault(), "%.0f kg vol.", volumeKg)
+private fun formatVolumeSummary(volumeKg: Double, locale: Locale): String =
+    String.format(locale, "%.0f kg vol.", volumeKg)
 
 @Composable
 private fun ProfileContent(
@@ -606,26 +607,32 @@ private fun ProfileContent(
 ) {
     val locale = LocalLocale.current.platformLocale
     if (profile == null) {
-        EmptyDetailsState(Icons.Filled.Person, "SIN PERFIL", "Crea un perfil para guardar notas e información específica de este ejercicio.")
+        EmptyDetailsState(Icons.Filled.Person, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_profile_yet).uppercase(), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_a_profile_to_keep_personal_notes_and_exercise_specific_information_))
         Button(onClick = onCreate, colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary), modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_profile).uppercase()) }
         return
     }
-    SectionTitle("PERFIL")
-    ProfileValue("Nivel", profile.level)
-    profile.workingWeightKg?.let { ProfileValue("Peso de trabajo", formatTrainingWeight(it, false)) }
-    profile.estimatedOneRepMaxKg?.let { ProfileValue("1RM estimado", formatTrainingWeight(it, false)) }
-    (profile.maxReps ?: history.maxOfOrNull { it.totalReps }.takeIf { reps -> reps?.let { it > 0 } == true })?.let { ProfileValue("Máximas repeticiones", "$it reps") }
+    SectionTitle(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_profile).uppercase())
+    ProfileValue(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.level), when (profile.level.lowercase(Locale.ROOT)) {
+        "beginner", "principiante" -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.beginner)
+        "novice" -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.novice)
+        "intermediate", "intermedio" -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.intermediate)
+        "advanced", "avanzado" -> androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.advanced)
+        else -> profile.level
+    })
+    profile.workingWeightKg?.let { ProfileValue(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.working_weight), formatTrainingWeight(it, false)) }
+    profile.estimatedOneRepMaxKg?.let { ProfileValue(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.estimated_1rm), formatTrainingWeight(it, false)) }
+    (profile.maxReps ?: history.maxOfOrNull { it.totalReps }.takeIf { reps -> reps?.let { it > 0 } == true })?.let { ProfileValue(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.max_reps), "$it reps") }
     if (profile.preferredRepRangeMin != null && profile.preferredRepRangeMax != null) {
         val range = if (profile.preferredRepRangeMin == profile.preferredRepRangeMax) {
             "${profile.preferredRepRangeMin} reps"
         } else {
             "${profile.preferredRepRangeMin}-${profile.preferredRepRangeMax} reps"
         }
-        ProfileValue("Rango de repeticiones", range)
+        ProfileValue(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.preferred_rep_range), range)
     }
-    (profile.typicalDurationMinutes ?: history.firstOrNull()?.durationSeconds?.takeIf { it > 0 }?.div(60))?.let { ProfileValue("Duración habitual", "$it min") }
-    profile.typicalDistanceKm?.let { ProfileValue("Distancia habitual", String.format(locale, "%.1f km", it)) }
-    profile.typicalPaceSecondsPerKm?.let { pace -> ProfileValue("Ritmo habitual", "${pace / 60}:${(pace % 60).toString().padStart(2, '0')} min/km") }
+    (profile.typicalDurationMinutes ?: history.firstOrNull()?.durationSeconds?.takeIf { it > 0 }?.div(60))?.let { ProfileValue(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.typical_duration), "$it min") }
+    profile.typicalDistanceKm?.let { ProfileValue(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.typical_distance), String.format(locale, "%.1f km", it)) }
+    profile.typicalPaceSecondsPerKm?.let { pace -> ProfileValue(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.typical_pace), "${pace / 60}:${(pace % 60).toString().padStart(2, '0')} min/km") }
     Divider(Modifier.padding(vertical = 14.dp))
     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.notes).uppercase(), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
     OutlinedTextField(
@@ -660,17 +667,17 @@ private fun RelatedContent(context: Context, exercise: ExerciseSummary, gender: 
     }
 
     val resolvedRelated = related ?: run {
-        EmptyDetailsState(Icons.Filled.Link, "CARGANDO EJERCICIOS", "Buscando sustitutos y ejercicios del mismo grupo muscular.")
+        EmptyDetailsState(Icons.Filled.Link, androidx.compose.ui.res.stringResource(R.string.exercise_related_loading).uppercase(), androidx.compose.ui.res.stringResource(R.string.exercise_related_searching))
         return
     }
     if (resolvedRelated.isEmpty()) {
-        EmptyDetailsState(Icons.Filled.Link, "SIN EJERCICIOS RELACIONADOS", "No hay otros ejercicios del mismo grupo muscular.")
+        EmptyDetailsState(Icons.Filled.Link, androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.no_related_exercises).uppercase(), androidx.compose.ui.res.stringResource(R.string.exercise_related_none))
         return
     }
     resolvedRelated.forEachIndexed { index, item ->
         Row(Modifier.fillMaxWidth().clickable { onSelect(item) }.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            RemoteTrainingImage(exerciseImageUrl(item.imageKey, gender), item.name, Modifier.size(58.dp).clip(RoundedCornerShape(12.dp)))
-            Text(item.name, Modifier.padding(start = 12.dp).weight(1f), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
+            RemoteTrainingImage(exerciseImageUrl(item.imageKey, gender), tutorialExerciseName(item.imageKey, item.name), Modifier.size(58.dp).clip(RoundedCornerShape(12.dp)))
+            Text(tutorialExerciseName(item.imageKey, item.name), Modifier.padding(start = 12.dp).weight(1f), color = WildforceThemeTokens.textPrimary, fontWeight = FontWeight.SemiBold)
         }
         if (index < resolvedRelated.lastIndex) Divider()
     }

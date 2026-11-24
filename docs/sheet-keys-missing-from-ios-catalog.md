@@ -1,5 +1,7 @@
 # Keys que faltan en el Sheet y ya usa iOS
 
+> Esta es una auditoría histórica del 23/10/2026. Para la cobertura de la exportación local actual, consulta `sheet-missing-cells.tsv`; no todos los elementos de esta lista se han vuelto a contrastar con la hoja en directo.
+
 Auditoría actualizada el 23/10/2026 tras exportar las pestañas `app` y `exercise_catalog` del Sheet. El catálogo Android contiene ahora 3.226 recursos: esta actualización incorporó 234 keys respecto a la exportación anterior.
 
 ## Resultado

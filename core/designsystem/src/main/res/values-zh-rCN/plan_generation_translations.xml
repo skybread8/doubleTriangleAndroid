@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="analyzing_your_fitness_goals___">正在分析你的健身目标...</string>
+    <string name="evaluating_equipment_availability___">正在评估可用器材...</string>
+    <string name="optimizing_workout_split___">正在优化训练安排...</string>
+    <string name="calculating_target_weights___">正在计算目标重量...</string>
+    <string name="reviewing_movement_restrictions___">正在检查动作限制...</string>
+    <string name="consulting_the_ai_workout_generator___">正在咨询 AI 训练生成器...</string>
+    <string name="personalizing_exercises___">正在个性化训练动作...</string>
+    <string name="balancing_volume_and_intensity___">正在平衡训练量和强度...</string>
+    <string name="finalizing_your_personalized_plan___">正在完成你的专属计划...</string>
+    <string name="almost_there___">即将完成...</string>
+</resources>

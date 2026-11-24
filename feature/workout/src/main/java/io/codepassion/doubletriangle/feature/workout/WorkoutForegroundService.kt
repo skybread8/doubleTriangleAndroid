@@ -23,16 +23,25 @@ internal class WorkoutForegroundService : Service() {
     private var restPausedByAction = false
     private var restCompletionShownAtMillis: Long? = null
     private var lastActionTimestamp: Long = 0L
+    private var hasObservedSession = false
+    private var sessionWaitStartedAt = 0L
 
     private val monitor = object : Runnable {
         override fun run() {
             val id = workoutId
             if (id == null) {
-                handler.postDelayed(this, 1000L)
+                stopSelf()
                 return
             }
             val snapshot = WorkoutSessionStore.load(this@WorkoutForegroundService, id)
             if (snapshot == null) {
+                // A new workout starts this service before Compose has finished
+                // saving its first snapshot. Do not remove the notification in
+                // that window; once observed, a missing session means discard.
+                if (!hasObservedSession && android.os.SystemClock.elapsedRealtime() - sessionWaitStartedAt < 10_000L) {
+                    handler.postDelayed(this, 250L)
+                    return
+                }
                 // A cancelled/discarded workout has no session to monitor.
                 // Stop rather than leaving a stale foreground notification.
                 WorkoutNotificationActionStore.clear(this@WorkoutForegroundService)
@@ -40,6 +49,7 @@ internal class WorkoutForegroundService : Service() {
                 stopSelf()
                 return
             }
+            hasObservedSession = true
             val appForeground = getSharedPreferences("wildforce_notification_settings", 0).getBoolean("app_foreground", false)
             val notificationsEnabled = WorkoutNotificationPreferences.enabled(this@WorkoutForegroundService)
             val restAlertsEnabled = WorkoutNotificationPreferences.restAlertsEnabled(this@WorkoutForegroundService)
@@ -65,7 +75,7 @@ internal class WorkoutForegroundService : Service() {
             val currentExerciseName = snapshot.editableBlocks
                 ?.flatMap { it.executionExercises() }
                 ?.getOrNull(currentExerciseIndex)
-                ?.let { exerciseDisplayName(it.imageKey, it.name) }
+                ?.let { localizedExerciseName(localizedBackgroundContext(this@WorkoutForegroundService), it.imageKey, it.name) }
 
             if (storedRest != null && storedRest > 0 && !restPausedByAction) {
                 restWasActive = true
@@ -206,7 +216,12 @@ internal class WorkoutForegroundService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         android.util.Log.d("WorkoutService", "onStartCommand")
         val title = intent?.getStringExtra("title") ?: currentTitle.ifBlank { localizedBackgroundContext(this).getString(SharedR.string.ui_sheet_active_workout) }
-        workoutId = intent?.getStringExtra("workoutId") ?: workoutId
+        val requestedWorkoutId = intent?.getStringExtra("workoutId") ?: workoutId
+        if (requestedWorkoutId != workoutId || sessionWaitStartedAt == 0L) {
+            hasObservedSession = false
+            sessionWaitStartedAt = android.os.SystemClock.elapsedRealtime()
+        }
+        workoutId = requestedWorkoutId
         totalExercises = intent?.getIntExtra("totalExercises", totalExercises).takeIf { it != 0 } ?: totalExercises
         currentExerciseHasTimer = intent?.getBooleanExtra("currentExerciseHasTimer", currentExerciseHasTimer)
             ?: currentExerciseHasTimer

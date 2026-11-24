@@ -171,10 +171,10 @@ internal object WorkoutCompletionCalculator {
             val previousWeight = previous.maxOfOrNull { it.maxWeightKg } ?: 0.0
             val previousVolume = previous.maxOfOrNull { it.volumeKg } ?: 0.0
             if (current.maxWeightKg > 0 && current.maxWeightKg > previousWeight) {
-                add(ExerciseRecordEvent(exerciseDisplayName(exercise.imageKey, exercise.name), if (previousWeight > 0) "MEJOR PESO" else "PRIMER REGISTRO DE PESO", previousWeight, current.maxWeightKg, "kg"))
+                add(ExerciseRecordEvent(localizedExerciseName(io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext(context), exercise.imageKey, exercise.name), if (previousWeight > 0) "MEJOR PESO" else "PRIMER REGISTRO DE PESO", previousWeight, current.maxWeightKg, "kg"))
             }
             if (current.volumeKg > 0 && current.volumeKg > previousVolume) {
-                add(ExerciseRecordEvent(exerciseDisplayName(exercise.imageKey, exercise.name), if (previousVolume > 0) "MEJOR VOLUMEN" else "PRIMER REGISTRO DE VOLUMEN", previousVolume, current.volumeKg, "kg"))
+                add(ExerciseRecordEvent(localizedExerciseName(io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext(context), exercise.imageKey, exercise.name), if (previousVolume > 0) "MEJOR VOLUMEN" else "PRIMER REGISTRO DE VOLUMEN", previousVolume, current.volumeKg, "kg"))
             }
         }
     }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_related_loading">Carregant exercicis</string>
+    <string name="exercise_related_searching">Cercant alternatives i exercicis del mateix grup muscular.</string>
+    <string name="exercise_related_none">No hi ha altres exercicis del mateix grup muscular.</string>
+</resources>

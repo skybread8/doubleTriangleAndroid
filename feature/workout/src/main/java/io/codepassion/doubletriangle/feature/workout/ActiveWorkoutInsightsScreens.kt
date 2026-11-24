@@ -23,6 +23,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Icon
@@ -52,6 +54,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -88,7 +91,7 @@ internal fun WorkoutPathScreen(
     elapsedSeconds: Int,
     useImperial: Boolean = false,
     onAddExerciseToBlock: (Int) -> Unit = {},
-    onMoveExercise: (Int, Int, Int) -> Unit = { _, _, _ -> },
+    onMoveExercise: (Int, Int, Int, Int) -> Unit = { _, _, _, _ -> },
     onBack: () -> Unit,
 ) {
     val addExerciseDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_add_exercise)
@@ -130,10 +133,21 @@ internal fun WorkoutPathScreen(
         }
     }
     val haptics = LocalHapticFeedback.current
+    val rowKeys = pathBlocks.flatMapIndexed { blockIndex, block ->
+        block.exercises.indices.map { blockIndex to it }
+    }
+    val sourceKey = draggedRow
+    val previewTarget = sourceKey?.let { source ->
+        val candidates = rowBounds.mapNotNull { (key, bounds) ->
+            if (key == source || !pathBlocks.canMovePathExercise(source.first, source.second, key.first, key.second, currentExerciseIndex)) null
+            else key to bounds.center.y
+        }
+        pathDropTarget(source, dragStartY - scrollCompensation, dragStartY + dragOffset, candidates)
+    }
     val moveUpDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.move_up)
     val moveDownDescription = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.move_down)
     val currentRowRequester = remember { BringIntoViewRequester() }
-    LaunchedEffect(currentExerciseIndex, pathBlocks) {
+    LaunchedEffect(currentExerciseIndex, workout.id) {
         if (matchedPathIndex >= 0) currentRowRequester.bringIntoView()
     }
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 18.dp, vertical = 12.dp)) {
@@ -177,38 +191,59 @@ internal fun WorkoutPathScreen(
                         Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(20.dp), tint = WildforceThemeTokens.textPrimary)
                     }
                 }
-                block.notes?.let { Text(it, Modifier.fillMaxWidth().padding(start = 28.dp, bottom = 4.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                 block.exercises.forEachIndexed { itemIndex, pathExercise ->
                     val exercise = pathExercise.exercise
                     val completed = pathExercise.isCompleted(workout, completedByExercise, addedSetsByExercise)
                     val current = currentExerciseIndex in pathExercise.executionIndices
                     val rowKey = blockIndex to itemIndex
                     val upcoming = pathExercise.executionIndices.minOrNull()?.let { it > currentExerciseIndex } == true
-                    val rowModifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
-                        .onGloballyPositioned { rowBounds[rowKey] = it.boundsInWindow() }
+                    val sourceIndex = rowKeys.indexOf(sourceKey)
+                    val targetIndex = rowKeys.indexOf(previewTarget)
+                    val rowIndex = rowKeys.indexOf(rowKey)
+                    val displacedTo = when {
+                        sourceIndex >= 0 && targetIndex > sourceIndex && rowIndex in (sourceIndex + 1)..targetIndex -> rowKeys[rowIndex - 1]
+                        targetIndex >= 0 && sourceIndex > targetIndex && rowIndex in targetIndex until sourceIndex -> rowKeys[rowIndex + 1]
+                        else -> null
+                    }
+                    val destinationCenter = displacedTo?.let { key ->
+                        if (key == sourceKey) dragStartY - scrollCompensation else rowBounds[key]?.center?.y
+                    }
+                    val rowCenter = rowBounds[rowKey]?.center?.y
+                    val previewOffset by animateFloatAsState(
+                        targetValue = if (destinationCenter != null && rowCenter != null) destinationCenter - rowCenter else 0f,
+                        animationSpec = if (draggedRow == null) snap() else tween(180),
+                        label = "workoutPathReorder",
+                    )
+                    val rowModifier = Modifier.fillMaxWidth()
                         .then(if (upcoming) Modifier.pointerInput(workout, currentExerciseIndex, rowKey) {
                             detectDragGesturesAfterLongPress(
                                 onDragStart = { draggedRow = rowKey; dragOffset = 0f; scrollCompensation = 0f; dragStartY = rowBounds[rowKey]?.center?.y ?: 0f; haptics.performHapticFeedback(HapticFeedbackType.LongPress) },
                                 onDragCancel = { draggedRow = null; dragOffset = 0f },
                                 onDragEnd = {
                                     val dropY = dragStartY + dragOffset
-                                    // The dragged row's bounds follow its graphics translation. Including
-                                    // them makes the dragged row win the hit test against its destination.
-                                    val target = block.exercises.indices.mapNotNull { index ->
-                                        if (!block.canMoveUpcoming(itemIndex, index, currentExerciseIndex)) return@mapNotNull null
-                                        val bounds = rowBounds[blockIndex to index] ?: return@mapNotNull null
-                                        if (dropY !in bounds.top..bounds.bottom) return@mapNotNull null
-                                        index to bounds
-                                    }.minByOrNull { kotlin.math.abs(it.second.center.y - dropY) }?.first
-                                    if (target != null) onMoveExercise(blockIndex, itemIndex, target - itemIndex)
+                                    val candidates = rowBounds.mapNotNull { (key, bounds) ->
+                                        if (key == rowKey || !pathBlocks.canMovePathExercise(blockIndex, itemIndex, key.first, key.second, currentExerciseIndex)) null
+                                        else key to bounds.center.y
+                                    }
+                                    val target = pathDropTarget(rowKey, dragStartY - scrollCompensation, dropY, candidates)
+                                    if (target != null) onMoveExercise(blockIndex, itemIndex, target.first, target.second)
                                     draggedRow = null; dragOffset = 0f
                                 },
                                 onDrag = { change, amount -> change.consume(); dragOffset += amount.y },
                             )
                         } else Modifier)
                         .zIndex(if (draggedRow == rowKey) 1f else 0f)
-                        .graphicsLayer { if (draggedRow == rowKey) { translationY = dragOffset + scrollCompensation; shadowElevation = 8.dp.toPx(); alpha = .9f } }
+                        .graphicsLayer {
+                            translationY = if (draggedRow == rowKey) dragOffset + scrollCompensation else previewOffset
+                            if (draggedRow == rowKey) { shadowElevation = 8.dp.toPx(); alpha = .9f }
+                        }
                         .then(if (current) Modifier.bringIntoViewRequester(currentRowRequester) else Modifier)
+                    Box(
+                        Modifier.fillMaxWidth().padding(vertical = 4.dp).onGloballyPositioned {
+                            val position = it.positionInWindow()
+                            rowBounds[rowKey] = Rect(position.x, position.y, position.x + it.size.width, position.y + it.size.height)
+                        }.zIndex(if (draggedRow == rowKey) 1f else 0f),
+                    ) {
                     Row(
                         rowModifier
                             .background(if (current) WildforceThemeTokens.accent.copy(alpha = 0.13f) else Color.Transparent, RoundedCornerShape(14.dp))
@@ -221,17 +256,18 @@ internal fun WorkoutPathScreen(
                             modifier = Modifier.width(22.dp).size(16.dp),
                             tint = if (current) WildforceThemeTokens.accent else WildforceThemeTokens.textSecondary,
                         )
-                        RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exerciseDisplayName(exercise.imageKey, exercise.name), Modifier.size(width = 42.dp, height = 52.dp).clip(RoundedCornerShape(10.dp)))
+                        RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), tutorialExerciseName(exercise.imageKey, exercise.name), Modifier.size(width = 42.dp, height = 52.dp).clip(RoundedCornerShape(10.dp)))
                         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                            Text(exerciseDisplayName(exercise.imageKey, exercise.name), fontWeight = if (current) FontWeight.Bold else FontWeight.Normal, color = if (completed) WildforceThemeTokens.textSecondary else WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(tutorialExerciseName(exercise.imageKey, exercise.name), fontWeight = if (current) FontWeight.Bold else FontWeight.Normal, color = if (completed) WildforceThemeTokens.textSecondary else WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             Text(pathExercisePrescription(pathExercise, useImperial), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
-                        if (block.canMoveUpcoming(itemIndex, itemIndex - 1, currentExerciseIndex)) androidx.compose.material.IconButton(onClick = { onMoveExercise(blockIndex, itemIndex, -1) }, modifier = Modifier.size(48.dp)) {
+                        if (pathBlocks.canMovePathExercise(blockIndex, itemIndex, blockIndex, itemIndex - 1, currentExerciseIndex) || pathBlocks.canMovePathExercise(blockIndex, itemIndex, blockIndex - 1, 0, currentExerciseIndex)) androidx.compose.material.IconButton(onClick = { if (itemIndex > 0) onMoveExercise(blockIndex, itemIndex, blockIndex, itemIndex - 1) else onMoveExercise(blockIndex, itemIndex, blockIndex - 1, 0) }, modifier = Modifier.size(48.dp)) {
                             Text("↑", color = WildforceThemeTokens.textPrimary, modifier = Modifier.semantics { contentDescription = moveUpDescription })
                         }
-                        if (block.canMoveUpcoming(itemIndex, itemIndex + 1, currentExerciseIndex)) androidx.compose.material.IconButton(onClick = { onMoveExercise(blockIndex, itemIndex, 1) }, modifier = Modifier.size(48.dp)) {
+                        if (pathBlocks.canMovePathExercise(blockIndex, itemIndex, blockIndex, itemIndex + 1, currentExerciseIndex) || pathBlocks.canMovePathExercise(blockIndex, itemIndex, blockIndex + 1, 0, currentExerciseIndex)) androidx.compose.material.IconButton(onClick = { if (itemIndex < block.exercises.lastIndex) onMoveExercise(blockIndex, itemIndex, blockIndex, itemIndex + 1) else onMoveExercise(blockIndex, itemIndex, blockIndex + 1, 0) }, modifier = Modifier.size(48.dp)) {
                             Text("↓", color = WildforceThemeTokens.textPrimary, modifier = Modifier.semantics { contentDescription = moveDownDescription })
                         }
+                    }
                     }
                 }
             }
@@ -266,9 +302,9 @@ internal fun ExerciseHistoryScreen(exercise: ExerciseSummary, gender: String, hi
     Column(Modifier.fillMaxSize().liquidGlassBackground().padding(horizontal = 18.dp, vertical = 12.dp)) {
         InsightHeader("HISTORIAL DEL EJERCICIO", onBack)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exerciseDisplayName(exercise.imageKey, exercise.name), Modifier.size(72.dp).clip(RoundedCornerShape(16.dp)))
+            RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), tutorialExerciseName(exercise.imageKey, exercise.name), Modifier.size(72.dp).clip(RoundedCornerShape(16.dp)))
             Column(Modifier.padding(start = 14.dp)) {
-                Text(exerciseDisplayName(exercise.imageKey, exercise.name), fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(tutorialExerciseName(exercise.imageKey, exercise.name), fontFamily = Exo2FontFamily, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_70ffcec48320c070), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -339,7 +375,7 @@ private fun HistoryEntryRow(entry: ExerciseHistoryEntry, useImperial: Boolean) {
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.07f), RoundedCornerShape(14.dp)).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(entry.timestampMillis)), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(historyEntrySummary(entry, useImperial), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+            Text(localizedHistoryEntrySummary(entry, useImperial), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
             if (entry.setDetails.isNotEmpty()) {
                 Text(
                     entry.setDetails.joinToString("  ·  ") { set ->
@@ -369,6 +405,20 @@ private fun HistoryEntryRow(entry: ExerciseHistoryEntry, useImperial: Boolean) {
     }
 }
 
+@Composable
+internal fun localizedHistoryEntrySummary(entry: ExerciseHistoryEntry, useImperial: Boolean): String {
+    val sets = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_sets).lowercase()
+    val reps = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_reps).lowercase()
+    val fallback = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_workout)
+    val locale = LocalLocale.current.platformLocale
+    return listOfNotNull(
+        entry.sets.takeIf { it > 0 }?.let { "$it $sets" },
+        entry.totalReps.takeIf { it > 0 }?.let { "$it $reps" },
+        entry.durationSeconds.takeIf { it > 0 }?.let(::formatHistoryDuration),
+        entry.distanceKm.takeIf { it > 0 }?.let { formatHistoryDistance(it, useImperial, locale) },
+    ).joinToString(" · ").ifBlank { fallback }
+}
+
 internal fun historyEntrySummary(entry: ExerciseHistoryEntry, useImperial: Boolean): String = listOfNotNull(
     entry.sets.takeIf { it > 0 }?.let { "$it series" },
     entry.totalReps.takeIf { it > 0 }?.let { "$it repeticiones" },
@@ -380,10 +430,10 @@ private fun formatHistoryDuration(seconds: Int): String = if (seconds >= 60) {
     "${seconds / 60} min${if (seconds % 60 == 0) "" else " ${seconds % 60}s"}"
 } else "${seconds}s"
 
-private fun formatHistoryDistance(kilometres: Double, useImperial: Boolean): String = if (useImperial) {
-    "${String.format(java.util.Locale.getDefault(), "%.2f", kilometres * KM_TO_MILES)} mi"
+private fun formatHistoryDistance(kilometres: Double, useImperial: Boolean, locale: java.util.Locale = java.util.Locale.getDefault()): String = if (useImperial) {
+    "${String.format(locale, "%.2f", kilometres * KM_TO_MILES)} mi"
 } else {
-    "${String.format(java.util.Locale.getDefault(), "%.2f", kilometres)} km"
+    "${String.format(locale, "%.2f", kilometres)} km"
 }
 
 private fun formatInsightClock(seconds: Int): String = if (seconds >= 3600) "%d:%02d:%02d".format(seconds / 3600, seconds / 60 % 60, seconds % 60) else "%d:%02d".format(seconds / 60, seconds % 60)

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_related_loading">Oefeningen laden</string>
+    <string name="exercise_related_searching">Alternatieven en oefeningen voor dezelfde spiergroep zoeken.</string>
+    <string name="exercise_related_none">Er zijn geen andere oefeningen voor dezelfde spiergroep.</string>
+</resources>

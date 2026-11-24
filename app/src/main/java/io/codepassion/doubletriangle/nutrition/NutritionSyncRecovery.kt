@@ -20,3 +20,9 @@ internal fun nutritionPushDependencies(resources: Set<String>): Set<String> =
     if (resources.any { it == "nutrition-log-media" || it == "nutrition-log-entries" || it == "nutrition-log-items" })
         resources + "nutrition-log-media" + "nutrition-log-entries"
     else resources
+
+/** Deleting an iOS log entry does not soft-delete its food item rows. */
+internal fun itemIdsForDeletedNutritionEntries(parentByItem: Map<String, String>, deletedEntryIds: Set<String>): Set<String> {
+    val deleted = deletedEntryIds.mapTo(mutableSetOf()) { it.lowercase(Locale.ROOT) }
+    return parentByItem.filterValues { it.lowercase(Locale.ROOT) in deleted }.keys
+}

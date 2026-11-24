@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feedback_reason_expensive">Zu teuer</string>
+    <string name="feedback_reason_not_useful">Nicht nützlich genug</string>
+    <string name="feedback_reason_hard">Zu schwierig zu bedienen</string>
+    <string name="feedback_reason_missing">Fehlende Funktionen</string>
+    <string name="feedback_reason_technical">Technische Probleme / Fehler</string>
+    <string name="feedback_reason_other">Ich probiere nur etwas anderes aus</string>
+</resources>

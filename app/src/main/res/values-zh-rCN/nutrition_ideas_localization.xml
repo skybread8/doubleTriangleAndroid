@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_surprise_description">根据今天的目标和均衡食材，生成一个惊喜餐食创意。</string>
+    <string name="nutrition_aligned_with_training">匹配训练计划</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feedback_reason_expensive">价格太高</string>
+    <string name="feedback_reason_not_useful">不够实用</string>
+    <string name="feedback_reason_hard">使用太困难</string>
+    <string name="feedback_reason_missing">缺少功能</string>
+    <string name="feedback_reason_technical">技术问题或错误</string>
+    <string name="feedback_reason_other">只是想尝试其他服务</string>
+</resources>

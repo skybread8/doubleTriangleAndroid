@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_serving_grams">Quantidade por porção (g)</string>
+    <string name="nutrition_total_weight_optional">Peso total (g, opcional)</string>
+    <string name="nutrition_total_grams">Gramas totais</string>
+    <string name="nutrition_total_macros">Macros totais</string>
+</resources>

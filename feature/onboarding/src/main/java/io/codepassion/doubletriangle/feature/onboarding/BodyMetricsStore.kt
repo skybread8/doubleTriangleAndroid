@@ -42,6 +42,7 @@ internal data class BodyMetricEntry(
     val recordedAt: String? = null,
     val createdAt: String? = null,
     val checkInId: String? = null,
+    val updatedAt: String? = null,
 )
 
 /** A dated Health Connect snapshot used by the manual full-history import. */
@@ -57,7 +58,9 @@ data class ImportedBodyMetric(
 object BodyMetricsStore {
     private const val PREFS = "wildforce_body_metrics"
     private const val KEY = "history"
+    const val PENDING_DELETIONS_KEY = "pending_metric_deletions_v1"
 
+    @Synchronized
     internal fun record(
         context: Context,
         profile: OnboardingProfile,
@@ -77,7 +80,7 @@ object BodyMetricsStore {
         val height = importedHeightCm ?: profile.heightCm.toDouble()
         val entries = load(context).toMutableList()
         fun add(entry: BodyMetricEntry) {
-            entries += entry.copy(id = java.util.UUID.randomUUID().toString(), recordedAt = now.toString())
+            entries += entry.copy(id = java.util.UUID.randomUUID().toString(), recordedAt = now.toString(), updatedAt = now.toString())
         }
         (importedWeightKg ?: profile.weightKg.takeIf { recordWeight })?.let { add(BodyMetricEntry(date, height, weightKg = it, source = source)) }
         leanBodyMassKg?.let { add(BodyMetricEntry(date, height, leanBodyMassKg = it, source = source)) }
@@ -114,6 +117,7 @@ object BodyMetricsStore {
     }
 
     /** Merges every dated Health Connect snapshot without replacing local-only metrics. */
+    @Synchronized
     fun recordImportedHistory(
         context: Context,
         profile: OnboardingProfile,
@@ -130,7 +134,7 @@ object BodyMetricsStore {
             fun add(value: Double?, kind: BodyMetricKind, make: (Double) -> BodyMetricEntry) {
                 if (value == null || !value.isFinite()) return
                 val alreadyStored = entries.any { existing -> matchesImportedMetric(existing, kind, value, instant) }
-                if (!alreadyStored) entries += make(value).copy(id = java.util.UUID.randomUUID().toString(), recordedAt = instant.toString())
+                if (!alreadyStored) entries += make(value).copy(id = java.util.UUID.randomUUID().toString(), recordedAt = instant.toString(), updatedAt = java.time.Instant.now().toString())
             }
             add(imported.weightKg, BodyMetricKind.Weight) { BodyMetricEntry(date, height, weightKg = it, source = BodyMetricSource.HealthConnect) }
             add(imported.leanBodyMassKg, BodyMetricKind.LeanBodyMass) { BodyMetricEntry(date, height, leanBodyMassKg = it, source = BodyMetricSource.HealthConnect) }
@@ -139,9 +143,32 @@ object BodyMetricsStore {
         if (entries != existingEntries) save(context, entries)
     }
 
+    @Synchronized
     internal fun deleteMetric(context: Context, target: BodyMetricEntry, kind: BodyMetricKind) {
-        val updated = removeBodyMetric(load(context), target, kind)
-        save(context, updated)
+        val existing = load(context)
+        if (target !in existing || target.metricValue(kind) == null) return
+        val userId = context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE).getString("id", null)
+        val type = when (kind) {
+            BodyMetricKind.Weight -> "weight"
+            BodyMetricKind.LeanBodyMass -> "leanBodyMass"
+            BodyMetricKind.BodyFat -> "bodyFatPercentage"
+            BodyMetricKind.Waist -> "waistCircumference"
+            BodyMetricKind.Neck -> "neckCircumference"
+            BodyMetricKind.Hip -> "hipCircumference"
+            BodyMetricKind.Chest -> "chestCircumference"
+            BodyMetricKind.Thigh -> "thighCircumference"
+            BodyMetricKind.Arm -> "armCircumference"
+        }
+        val id = target.id ?: userId?.let {
+            java.util.UUID.nameUUIDFromBytes("$it:$type:${target.date}".toByteArray()).toString()
+        }
+        if (id != null) {
+            val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            val pending = prefs.getString(PENDING_DELETIONS_KEY, "{}")?.let(::JSONObject) ?: JSONObject()
+            pending.put(id.lowercase(), java.time.Instant.now().toString())
+            prefs.edit().putString(PENDING_DELETIONS_KEY, pending.toString()).apply()
+        }
+        save(context, removeBodyMetric(existing, target, kind))
     }
 
     internal fun load(context: Context): List<BodyMetricEntry> = runCatching {
@@ -172,6 +199,7 @@ object BodyMetricsStore {
                         recordedAt = item.optString("recordedAt").takeIf { it.isNotBlank() && it != "null" },
                         createdAt = item.optString("createdAt").takeIf { it.isNotBlank() && it != "null" },
                         checkInId = item.optString("checkInId").takeIf { it.isNotBlank() && it != "null" },
+                        updatedAt = item.optString("updatedAt").takeIf { it.isNotBlank() && it != "null" },
                     ))
                 }
             }
@@ -197,7 +225,8 @@ object BodyMetricsStore {
                     .put("id", entry.id ?: JSONObject.NULL)
                     .put("recordedAt", entry.recordedAt ?: JSONObject.NULL)
                     .put("createdAt", entry.createdAt ?: JSONObject.NULL)
-                    .put("checkInId", entry.checkInId ?: JSONObject.NULL))
+                    .put("checkInId", entry.checkInId ?: JSONObject.NULL)
+                    .put("updatedAt", entry.updatedAt ?: JSONObject.NULL))
             }
         }
         context.getSharedPreferences(PREFS, 0).edit().putString(KEY, array.toString()).apply()

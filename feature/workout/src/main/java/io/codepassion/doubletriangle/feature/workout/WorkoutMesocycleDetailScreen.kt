@@ -89,10 +89,10 @@ internal fun WorkoutMesocycleDetailScreen(state: WorkoutHubState, planHistory: L
         }
         LazyColumn(contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 160.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
             item { MesocycleSummaryCard(state, currentGroup, currentEntry, appLanguage) }
-            item { DetailSectionHeader("Mesociclo actual", "Tu posición actual dentro del ciclo activo.") }
+            item { DetailSectionHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.current_mesocycle), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_current_place_in_the_active_cycle_)) }
             item { MesocycleGroupCard(currentGroup, currentGroup.entries.any { it.isProjected }) }
             if (previousGroups.isNotEmpty()) {
-                item { DetailSectionHeader("Mesociclos anteriores", "Historial de entrenamientos completados por ciclo.") }
+                item { DetailSectionHeader(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.previous_mesocycles), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.completed_workout_history_grouped_by_cycle_)) }
                 previousGroups.forEach { group ->
                     item(key = "archived-mesocycle-${group.index}") {
                         val expanded = group.index in expandedHistory
@@ -131,7 +131,7 @@ private fun MesocycleSummaryCard(state: WorkoutHubState, group: MesocycleTimelin
             ContextPill(localizedWorkoutLabel(state.planStatus, appLanguage), Icons.Filled.CheckCircle)
         }
         Spacer(Modifier.height(4.dp))
-        DetailMetric("Esta semana", state.planName)
+        DetailMetric(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_week), state.planName)
         DetailMetric(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.timeline), workoutPhaseLabel(phase) + " · " + androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.week__d, phaseWeek), phaseIcon(phase))
         formatMesocycleSummaryStartDate(state.planStartsOn, appLanguage)?.let { startsOn ->
             DetailMetric(localizedWorkoutLabel("Start date", appLanguage), startsOn, Icons.Filled.CalendarToday)

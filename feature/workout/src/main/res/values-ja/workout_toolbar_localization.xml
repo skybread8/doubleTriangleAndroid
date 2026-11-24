@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="workout_toolbar_path">ワークアウトの流れ</string>
+    <string name="workout_toolbar_insights">エクササイズのデータ</string>
+    <string name="workout_toolbar_guide">エクササイズガイド</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_generation_goals">Analisi dei tuoi obiettivi nutrizionali…</string>
+    <string name="nutrition_generation_preferences">Valutazione delle tue preferenze alimentari…</string>
+    <string name="nutrition_generation_macros">Calcolo di calorie e macronutrienti…</string>
+    <string name="nutrition_generation_training">Adattamento del piano ai tuoi allenamenti…</string>
+    <string name="nutrition_generation_planner">Consultazione del pianificatore IA…</string>
+    <string name="nutrition_generation_meals">Personalizzazione dei tuoi pasti…</string>
+    <string name="nutrition_generation_balance">Bilanciamento di proteine, grassi e carboidrati…</string>
+</resources>

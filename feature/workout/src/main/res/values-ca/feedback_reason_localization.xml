@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feedback_reason_expensive">Massa car</string>
+    <string name="feedback_reason_not_useful">No és prou útil</string>
+    <string name="feedback_reason_hard">Massa difícil de fer servir</string>
+    <string name="feedback_reason_missing">Falten funcions</string>
+    <string name="feedback_reason_technical">Problemes tècnics o errors</string>
+    <string name="feedback_reason_other">Només estic provant una altra cosa</string>
+</resources>

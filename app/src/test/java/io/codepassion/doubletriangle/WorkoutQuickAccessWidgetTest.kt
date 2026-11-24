@@ -9,6 +9,7 @@ class WorkoutQuickAccessWidgetTest {
     fun unscheduledDayShowsRestDay() {
         val widget = fallbackWidgetWorkout(setOf("monday", "wednesday"), "tuesday")
 
+        assertEquals(WidgetFallback.Rest, widget.fallback)
         assertEquals("Día de descanso", widget.title)
         assertEquals("DÍA DE DESCANSO", widget.status)
         assertEquals(null, widget.progress)
@@ -18,6 +19,7 @@ class WorkoutQuickAccessWidgetTest {
     fun scheduledDayWithoutMatchingPlanShowsPlannedWorkout() {
         val widget = fallbackWidgetWorkout(setOf("monday", "wednesday"), "wednesday")
 
+        assertEquals(WidgetFallback.Planned, widget.fallback)
         assertEquals("Entrenamiento planeado", widget.title)
         assertEquals("PLANIFICADO", widget.status)
         assertEquals("", widget.detail)

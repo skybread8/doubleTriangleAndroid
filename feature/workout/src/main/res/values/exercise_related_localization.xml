@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_related_loading">Loading exercises</string>
+    <string name="exercise_related_searching">Finding substitutes and exercises for the same muscle group.</string>
+    <string name="exercise_related_none">There are no other exercises for the same muscle group.</string>
+</resources>

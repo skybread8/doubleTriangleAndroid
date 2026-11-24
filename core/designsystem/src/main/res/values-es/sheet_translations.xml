@@ -522,7 +522,7 @@
     <string name="generate_plan" formatted="false">Generar plan</string>
     <string name="generating_your_workout_plan_" formatted="false">Generating your workout plan…</string>
     <string name="generating_" formatted="false">Generando…</string>
-    <string name="generation_failed" formatted="false">Generation Failed</string>
+    <string name="generation_failed" formatted="false">Error al generar el plan</string>
     <string name="german" formatted="false">German</string>
     <string name="get_a_personalized_training_plan_powered_by_ai__tailored_to_your_goals_and_equipment_" formatted="false">Obtén un plan de entrenamiento personalizado impulsado por IA, adaptado a tus objetivos y a tu equipo.</string>
     <string name="get_all_the_features_and_improve_your_training_" formatted="false">Accede a todas las funciones y mejora tu entrenamiento.</string>

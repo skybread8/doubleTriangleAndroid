@@ -6,6 +6,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class NutritionSyncRecoveryTest {
+    @Test fun deletingParentPreservesItsFoodRowsOnly() {
+        org.junit.Assert.assertEquals(setOf("food-a"), itemIdsForDeletedNutritionEntries(
+            mapOf("food-a" to "ENTRY-A", "food-b" to "entry-b"), setOf("entry-a"),
+        ))
+    }
+
     @Test fun reconstructsTheSameRemoteIdentityAfterMappingIsLost() {
         val id = nutritionEntryId("user-1", 12345L)
         assertEquals(12345L, localNutritionLogId(id.uppercase(), mapOf(id to 12345L)))

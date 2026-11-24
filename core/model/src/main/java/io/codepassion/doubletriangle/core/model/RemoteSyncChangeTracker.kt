@@ -21,6 +21,7 @@ object RemoteSyncChangeTracker {
         resources.distinct().forEach { resource ->
             val key = "dirty_generation:$resource"
             editor.putLong(key, preferences.getLong(key, 0L) + 1L)
+            editor.putLong("dirty_updated_at:$resource", System.currentTimeMillis())
         }
         editor.apply()
     }
@@ -36,6 +37,12 @@ object RemoteSyncChangeTracker {
     fun generation(context: Context, resource: String): Long = context
         .getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
         .getLong("dirty_generation:$resource", 0L)
+
+    /** Missing for pending edits from older releases: keep them until uploaded. */
+    @Synchronized
+    fun updatedAtMillis(context: Context, resource: String): Long? = context
+        .getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
+        .getLong("dirty_updated_at:$resource", 0L).takeIf { it > 0L }
 
     @Synchronized
     fun clearIfUnchanged(context: Context, resource: String, generation: Long): Boolean {

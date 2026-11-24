@@ -68,3 +68,27 @@ internal fun WorkoutPathBlock.canMoveUpcoming(from: Int, to: Int, currentIndex: 
         exercises[index].executionIndices.minOrNull()?.let { it > currentIndex } == true
     }
 }
+
+/** Adjacent single-exercise blocks of the same section can be reordered as a list. */
+internal fun List<WorkoutPathBlock>.canMovePathExercise(fromBlock: Int, from: Int, toBlock: Int, to: Int, currentIndex: Int): Boolean {
+    val source = getOrNull(fromBlock) ?: return false
+    val destination = getOrNull(toBlock) ?: return false
+    if (fromBlock == toBlock) return source.canMoveUpcoming(from, to, currentIndex)
+    if (from != 0 || to != 0 || source.type == WorkoutBlockType.Superset || source.type != destination.type) return false
+    return (minOf(fromBlock, toBlock)..maxOf(fromBlock, toBlock)).all { index ->
+        val block = this[index]
+        block.type == source.type && block.exercises.size == 1 &&
+            block.exercises.single().executionIndices.minOrNull()?.let { it > currentIndex } == true
+    }
+}
+
+/** Pick the closest valid position, including the original one, even between rows. */
+internal fun pathDropTarget(
+    source: Pair<Int, Int>,
+    sourceCenter: Float,
+    dropY: Float,
+    candidates: List<Pair<Pair<Int, Int>, Float>>,
+): Pair<Int, Int>? =
+    (candidates + (source to sourceCenter))
+        .minByOrNull { (_, center) -> kotlin.math.abs(center - dropY) }
+        ?.first?.takeUnless { it == source }

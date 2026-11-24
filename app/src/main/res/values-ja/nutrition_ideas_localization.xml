@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nutrition_surprise_description">今日の目標とバランスのよい食材に基づいて、おまかせの食事案を作成します。</string>
+    <string name="nutrition_aligned_with_training">トレーニングに合わせたプラン</string>
+</resources>

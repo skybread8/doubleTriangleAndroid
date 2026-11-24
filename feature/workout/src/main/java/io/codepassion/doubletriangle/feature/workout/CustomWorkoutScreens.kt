@@ -463,9 +463,9 @@ private fun EditableExerciseCard(exercise: ExerciseSummary, gender: String, inde
     val removeDescription = stringResource(R.string.workout_remove_exercise)
     Column(Modifier.fillMaxWidth().padding(vertical = 5.dp).liquidGlass(RoundedCornerShape(16.dp)).padding(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), exerciseDisplayName(exercise.imageKey, exercise.name), Modifier.size(54.dp).clip(RoundedCornerShape(12.dp)))
+            RemoteTrainingImage(exerciseImageUrl(exercise.imageKey, gender), tutorialExerciseName(exercise.imageKey, exercise.name), Modifier.size(54.dp).clip(RoundedCornerShape(12.dp)))
             label?.let { Text(it, Modifier.padding(start = 9.dp), color = WildforceThemeTokens.accent, fontWeight = FontWeight.Bold) }
-            Text(exerciseDisplayName(exercise.imageKey, exercise.name), Modifier.weight(1f).padding(horizontal = 10.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(tutorialExerciseName(exercise.imageKey, exercise.name), Modifier.weight(1f).padding(horizontal = 10.dp), fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Box(Modifier.size(48.dp).semantics { contentDescription = moveUpDescription }.clickable(enabled = index > 0, onClick = onMoveUp), contentAlignment = Alignment.Center) {
                 Icon(Icons.Filled.ArrowUpward, contentDescription = null, tint = if (index > 0) WildforceThemeTokens.textPrimary else Color.Transparent, modifier = Modifier.size(20.dp))
             }

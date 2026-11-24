@@ -368,7 +368,7 @@ private fun CheckInForm(record: JSONObject, userId: String, imperial: Boolean, c
                                     var value by remember(id, type, imperial) { mutableStateOf(metrics.firstOrNull { it.optString("type") == type }?.optDouble("value")?.let { "%.1f".format(java.util.Locale.ROOT, it * factor) }.orEmpty()) }
                                     val label = metricLabels[type] ?: type
                                     val unit = checkInMetricUnit(type, imperial)
-                                    TextField(value = value, onValueChange = { value = it; val number = it.replace(',', '.').toDoubleOrNull()?.takeIf { n -> n > 0 }; if (number == null) CheckInAssets.clearMetric(context, userId, id, type) else CheckInAssets.putMetric(context, userId, id, type, number / factor); revision++ }, label = { Text("$label ($unit)") }, modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), shape = RoundedCornerShape(14.dp), colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.backgroundSecondary, textColor = WildforceThemeTokens.textPrimary, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent))
+                                    TextField(value = value, onValueChange = { value = it; val number = it.replace(',', '.').toDoubleOrNull()?.takeIf { n -> n > 0 }; if (number == null) CheckInAssets.clearMetric(context, userId, id, type) else CheckInAssets.putMetric(context, userId, id, type, number / factor); CheckInDraftStore.save(context, userId, editableRecord, JSONObject(answersRaw)); revision++ }, label = { Text("$label ($unit)") }, modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), shape = RoundedCornerShape(14.dp), colors = TextFieldDefaults.textFieldColors(backgroundColor = WildforceThemeTokens.backgroundSecondary, textColor = WildforceThemeTokens.textPrimary, focusedIndicatorColor = Color.Transparent, unfocusedIndicatorColor = Color.Transparent))
                                 } }
                                 "progress_photos" -> {
                                     val angles = listOf("front" to androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.front), "profile" to androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_profile), "back" to androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.back))
@@ -427,6 +427,7 @@ private fun CheckInForm(record: JSONObject, userId: String, imperial: Boolean, c
             Box(Modifier.fillMaxSize().background(Color.Black).windowInsetsPadding(WindowInsets.safeDrawing)) {
                 CheckInGuidedPhotoCapture(onClose = { capturingPhotos = false }, onSave = { front, profile, back ->
                     CheckInAssets.putGuidedPhotos(context, userId, id, front, profile, back)
+                    CheckInDraftStore.save(context, userId, editableRecord, JSONObject(answersRaw))
                     revision++
                 })
             }
