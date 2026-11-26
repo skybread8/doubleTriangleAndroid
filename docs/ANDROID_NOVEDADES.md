@@ -9,6 +9,7 @@ Registro de funcionalidades y mejoras visibles para las personas que usan la app
 - Registrar únicamente cambios comprobados; señalar las limitaciones o verificaciones pendientes. No incluir detalles sensibles ni prometer funciones aún no implementadas.
 - Al preparar una versión, agrupar las entradas publicadas bajo su versión y fecha reales, conservando el historial. No asignar versiones ni marcar entradas como publicadas sin confirmación.
 - Las correcciones pequeñas y los cambios exclusivamente internos no necesitan una entrada, salvo que sean relevantes para comunicar a usuarios.
+- Mantener actualizado el borrador de Google Play en catalán (`ca`), inglés estadounidense (`en-US`) y español de España (`es-ES`), con etiquetas en líneas separadas y un máximo de 500 caracteres Unicode por idioma. Si no cabe todo, priorizar las novedades más relevantes y conservar el detalle en el registro. Confirmar qué cambios incluye la versión antes de publicar. [Formato de Google Play](https://support.google.com/googleplay/android-developer/answer/9859348?hl=es).
 
 ## Pendientes de publicación
 
@@ -36,6 +37,37 @@ Revisados en el código, sin verificar su funcionamiento en un dispositivo duran
 - **26-11-2026 · Entrenamiento:** visualización de las notas asociadas a los bloques de ejercicios. Referencias: `WorkoutHubScreen.kt`, `WorkoutBlockNotes.kt`.
 - **26-11-2026 · Apariencia:** decoración navideña y cambio estacional del icono, con una opción en ajustes para activar o desactivar las decoraciones. Referencias: `SeasonalDecorations.kt`, `SeasonalLauncherIcon.kt`, `ProfileScreen.kt`.
 - **26-11-2026 · Cuenta:** pantalla de diagnóstico de sincronización que permite consultar información local y copiarla. Referencias: `AccountAndSubscription.kt`, `SyncDiagnosticsDialog.kt`.
+
+## Borrador para Google Play
+
+Preparado a partir del inventario anterior. Incluye cambios aún sin commit y otros cuya publicación se desconoce; revisar su inclusión en la versión antes de copiarlo a Play Console. Las etiquetas deben coincidir con los idiomas configurados en la ficha de la aplicación.
+
+```text
+<ca>
+• Exporta entrenaments i reserves al calendari.
+• Consulta els entrenaments del teu gimnàs i les notes dels exercicis.
+• Segueix l'entrenament i els descansos des de les notificacions.
+• Consulta i edita els àpats i personalitza els objectius nutricionals.
+• Activa o desactiva la decoració nadalenca.
+• Consulta el diagnòstic de sincronització.
+</ca>
+<en-US>
+• Export workouts and bookings to your calendar.
+• View your gym workouts and exercise block notes.
+• Follow your workout and rest periods from notifications.
+• View and edit meals and customize nutrition goals.
+• Turn Christmas decorations on or off.
+• View sync diagnostics.
+</en-US>
+<es-ES>
+• Exporta entrenamientos y reservas al calendario.
+• Consulta los entrenamientos de tu gimnasio y las notas de los bloques.
+• Sigue tu entrenamiento y descansos desde las notificaciones.
+• Consulta y edita comidas y personaliza tus objetivos nutricionales.
+• Activa o desactiva la decoración navideña.
+• Consulta el diagnóstico de sincronización.
+</es-ES>
+```
 
 ## Versiones publicadas
 
