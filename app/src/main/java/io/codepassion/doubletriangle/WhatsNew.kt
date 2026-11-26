@@ -15,6 +15,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -30,14 +31,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.wildforce.android.R
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun WhatsNewDialog(onDismiss: () -> Unit) {
+    val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = RoundedCornerShape(28.dp), color = WildforceThemeTokens.backgroundSecondary) {
             Column(Modifier.fillMaxWidth().heightIn(max = 640.dp)) {
                 Column(
-                    Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(start = 24.dp, end = 24.dp, top = 24.dp),
+                    Modifier.weight(1f, fill = false).verticalScroll(scrollState).padding(start = 24.dp, end = 24.dp, top = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(stringResource(R.string.whats_new_title), style = MaterialTheme.typography.h5, textAlign = TextAlign.Center)
@@ -54,9 +58,19 @@ internal fun WhatsNewDialog(onDismiss: () -> Unit) {
                     Spacer(Modifier.height(18.dp))
                     NewsItem(Icons.AutoMirrored.Filled.Notes, stringResource(R.string.whats_new_notes_title), stringResource(R.string.whats_new_notes_description))
                 }
+                if (scrollState.canScrollForward) {
+                    TextButton(
+                        onClick = { scope.launch { scrollState.animateScrollTo(scrollState.maxValue) } },
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                    ) {
+                        Text(stringResource(R.string.whats_new_more), color = WildforceThemeTokens.textSecondary, style = MaterialTheme.typography.caption)
+                        Icon(Icons.Default.ExpandMore, contentDescription = null, tint = WildforceThemeTokens.textSecondary, modifier = Modifier.size(20.dp))
+                    }
+                }
                 Button(
                     onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 24.dp).heightIn(min = 52.dp),
+                    modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = if (scrollState.canScrollForward) 2.dp else 22.dp, bottom = 24.dp).heightIn(min = 52.dp),
                     shape = RoundedCornerShape(16.dp),
                 ) { Text(stringResource(R.string.whats_new_continue)) }
             }

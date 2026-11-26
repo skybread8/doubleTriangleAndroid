@@ -13,4 +13,5 @@
     <string name="whats_new_gym_description">View and follow your gym’s workouts when a program is available.</string>
     <string name="whats_new_notes_title">Exercise block notes</string>
     <string name="whats_new_notes_description">See the notes included with exercise blocks in your workouts.</string>
+    <string name="whats_new_more">See more updates</string>
 </resources>
