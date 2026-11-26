@@ -13,6 +13,8 @@ Registro de funcionalidades y mejoras visibles para las personas que usan la app
 
 ## Pendientes de publicación
 
+- **26-11-2026 · Novedades:** una ventana de bienvenida presenta mejoras destacadas con una demostración animada real en la entrada de exportación al calendario en español y novedades sobre reservas, entrenamientos del gimnasio y notas de ejercicios. El botón para continuar permanece accesible mientras se desplazan las novedades. Aparece después de iniciar sesión con una cuenta existente, sin interrumpir el onboarding, y puede cerrarse para continuar. La selección inicial está disponible en español, catalán e inglés; los demás idiomas usan inglés. Pendiente de comprobación visual en un dispositivo. Referencia: `WhatsNew.kt`.
+
 - **26-11-2026 · Entrenamiento:** añadidos al selector el curl con barra Z y las rotaciones de cuello, y completadas fichas de ejercicios existentes. Algunas traducciones recurren al inglés cuando no están disponibles en iOS. Referencia: `scripts/sync-ios-exercises.py`.
 
 ## Inventario retrospectivo: publicación por confirmar
@@ -44,6 +46,7 @@ Preparado a partir del inventario anterior. Incluye cambios aún sin commit y ot
 
 ```text
 <ca>
+• Descobreix les novetats destacades en iniciar sessió.
 • Nous exercicis i fitxes d’entrenament.
 • Exporta entrenaments i reserves al calendari.
 • Consulta els entrenaments del teu gimnàs i les notes dels exercicis.
@@ -53,6 +56,7 @@ Preparado a partir del inventario anterior. Incluye cambios aún sin commit y ot
 • Consulta el diagnòstic de sincronització.
 </ca>
 <en-US>
+• Discover highlighted updates when you sign in.
 • More exercises and workout guides.
 • Export workouts and bookings to your calendar.
 • View your gym workouts and exercise block notes.
@@ -62,6 +66,7 @@ Preparado a partir del inventario anterior. Incluye cambios aún sin commit y ot
 • View sync diagnostics.
 </en-US>
 <es-ES>
+• Descubre las novedades destacadas al iniciar sesión.
 • Nuevos ejercicios y fichas de entrenamiento.
 • Exporta entrenamientos y reservas al calendario.
 • Consulta los entrenamientos de tu gimnasio y las notas de los bloques.

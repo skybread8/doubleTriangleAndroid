@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whats_new_title">Novedades</string>
+    <string name="whats_new_subtitle">Descubre las últimas mejoras de WildForce.</string>
+    <string name="whats_new_calendar_title">Entrenamientos en tu calendario</string>
+    <string name="whats_new_calendar_description">Exporta tus próximos entrenamientos al calendario y ten tus planes a mano.</string>
+    <string name="whats_new_exercises_title">Más ejercicios</string>
+    <string name="whats_new_exercises_description">Descubre el curl con barra Z y las rotaciones de cuello en el selector de ejercicios.</string>
+    <string name="whats_new_continue">¡Vamos!</string>
+    <string name="whats_new_booking_title">Reservas en tu calendario</string>
+    <string name="whats_new_booking_description">Añade una reserva a tu calendario con una aplicación compatible.</string>
+    <string name="whats_new_gym_title">Entrenamientos de tu gimnasio</string>
+    <string name="whats_new_gym_description">Consulta y realiza los entrenamientos de tu gimnasio cuando haya un programa disponible.</string>
+    <string name="whats_new_notes_title">Notas de los bloques</string>
+    <string name="whats_new_notes_description">Consulta las notas incluidas en los bloques de ejercicios de tus entrenamientos.</string>
+</resources>
