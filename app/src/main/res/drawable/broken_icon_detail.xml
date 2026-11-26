@@ -1,11 +1,5 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="1024dp" android:height="1024dp"
-    android:viewportWidth="1024" android:viewportHeight="1024">
-    <!-- Fine, irregular fissures radiate from a compact central impact. -->
-    <path android:fillColor="@android:color/transparent" android:strokeColor="#A81D2930" android:strokeWidth="16" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M510,502 L490,466 L478,433 L449,413 L438,374 L406,344 L395,304 M510,502 L531,468 L546,440 L576,424 L584,385 L612,363 L625,318 M510,502 L553,501 L579,490 L610,496 L650,483 L696,490 M510,502 L543,524 L560,554 L592,568 L610,605 L647,623 M510,502 L513,543 L496,572 L500,609 L478,638 L472,680 M510,502 L476,518 L449,515 L420,533 L389,527 L353,549 M510,502 L480,490 L462,469 L429,461 L405,440 L371,433 L344,409" />
-    <path android:fillColor="@android:color/transparent" android:strokeColor="#D7DCECF1" android:strokeWidth="5.5" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M510,502 L490,466 L478,433 L449,413 L438,374 L406,344 L395,304 M510,502 L531,468 L546,440 L576,424 L584,385 L612,363 L625,318 M510,502 L553,501 L579,490 L610,496 L650,483 L696,490 M510,502 L543,524 L560,554 L592,568 L610,605 L647,623 M510,502 L513,543 L496,572 L500,609 L478,638 L472,680 M510,502 L476,518 L449,515 L420,533 L389,527 L353,549 M510,502 L480,490 L462,469 L429,461 L405,440 L371,433 L344,409" />
-    <path android:fillColor="#4296C0CC" android:pathData="M482,489 L470,478 L479,463 L491,475 Z M522,470 L538,463 L548,477 L532,481 Z M526,520 L540,527 L532,539 L513,530 L513,525 Z M482,506 L470,508 L475,519 L487,517 Z" />
-    <path android:fillColor="@android:color/transparent" android:strokeColor="#CBE8F5F7" android:strokeWidth="5" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M491,487 L491,475 L499,467 L511,466 L522,470 L532,481 M536,495 L534,509 L526,520 L513,525 M499,523 L487,517 L482,506 M478,455 L487,446 L499,443 M525,448 L539,455 L548,468 M557,488 L564,500 L559,513 M543,531 L532,543 L520,548 M501,552 L486,548 L475,538 M465,515 L456,504 L455,492 M449,413 L434,418 L421,414 M584,385 L599,391 L608,388 M610,496 L620,481 L630,478 M560,554 L575,548 L585,551 M500,609 L483,602 L474,605 M420,533 L414,545 L400,549 M405,440 L391,447 L378,444" />
-    <path android:fillColor="#A61B272C" android:strokeColor="#DAF2FAFC" android:strokeWidth="4" android:pathData="M509,489 L515,493 L522,493 L519,500 L522,506 L516,509 L511,516 L505,511 L498,511 L501,504 L498,498 L505,497 Z" />
-    <path android:fillColor="#ECF8FC" android:pathData="M505,495 L510,491 L514,495 L511,500 L505,501 Z M514,505 L519,501 L518,507 L513,510 Z" />
-</vector>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="12%" android:insetTop="12%"
+    android:insetRight="12%" android:insetBottom="12%">
+    <bitmap android:src="@drawable/glass_bullet_impact" android:gravity="fill" android:alpha="0.7" />
+</inset>
