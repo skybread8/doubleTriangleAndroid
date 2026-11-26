@@ -18,14 +18,18 @@ import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 import androidx.compose.ui.window.Dialog
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.wildforce.android.R
@@ -51,36 +55,66 @@ internal fun WhatsNewOnLaunch() {
 
 @Composable
 private fun WhatsNewDialog(onDismiss: () -> Unit) {
-    val transition = rememberInfiniteTransition(label = "calendar")
-    val scale by transition.animateFloat(
-        initialValue = .94f, targetValue = 1.04f,
-        animationSpec = infiniteRepeatable(tween(1400), RepeatMode.Reverse), label = "calendar scale",
-    )
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = RoundedCornerShape(28.dp), color = WildforceThemeTokens.backgroundSecondary) {
-            Column(
-                Modifier.fillMaxWidth().heightIn(max = 620.dp).verticalScroll(rememberScrollState()).padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Box(
-                    Modifier.size(92.dp).background(WildforceThemeTokens.accentGold.copy(alpha = .13f), RoundedCornerShape(28.dp)),
-                    contentAlignment = Alignment.Center,
+            Column(Modifier.fillMaxWidth().heightIn(max = 640.dp)) {
+                Column(
+                    Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()).padding(start = 24.dp, end = 24.dp, top = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = WildforceThemeTokens.accentGold, modifier = Modifier.size(50.dp).scale(scale))
+                    CalendarIllustration()
+                    Spacer(Modifier.height(22.dp))
+                    Text(stringResource(R.string.whats_new_title), style = MaterialTheme.typography.h5, textAlign = TextAlign.Center)
+                    Spacer(Modifier.height(6.dp))
+                    Text(stringResource(R.string.whats_new_subtitle), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
+                    Spacer(Modifier.height(24.dp))
+                    NewsItem(Icons.Default.CalendarMonth, stringResource(R.string.whats_new_calendar_title), stringResource(R.string.whats_new_calendar_description))
+                    Spacer(Modifier.height(18.dp))
+                    NewsItem(Icons.Default.FitnessCenter, stringResource(R.string.whats_new_exercises_title), stringResource(R.string.whats_new_exercises_description))
                 }
-                Spacer(Modifier.height(18.dp))
-                Text(stringResource(R.string.whats_new_title), style = MaterialTheme.typography.h5, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(8.dp))
-                Text(stringResource(R.string.whats_new_subtitle), style = MaterialTheme.typography.body2, color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(24.dp))
-                NewsItem(Icons.Default.CalendarMonth, stringResource(R.string.whats_new_calendar_title), stringResource(R.string.whats_new_calendar_description))
-                Spacer(Modifier.height(18.dp))
-                NewsItem(Icons.Default.FitnessCenter, stringResource(R.string.whats_new_exercises_title), stringResource(R.string.whats_new_exercises_description))
-                Spacer(Modifier.height(26.dp))
-                Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = RoundedCornerShape(16.dp)) {
-                    Text(stringResource(R.string.whats_new_continue))
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 24.dp).heightIn(min = 52.dp),
+                    shape = RoundedCornerShape(16.dp),
+                ) { Text(stringResource(R.string.whats_new_continue)) }
+            }
+        }
+    }
+}
+
+/** A conceptual illustration of a workout being added to a calendar, not an app screenshot. */
+@Composable
+private fun CalendarIllustration() {
+    val transition = rememberInfiniteTransition(label = "workout to calendar")
+    val progress by transition.animateFloat(
+        initialValue = 0f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(2200), RepeatMode.Reverse), label = "workout movement",
+    )
+    val gold = WildforceThemeTokens.accentGold
+    Box(
+        modifier = Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(22.dp))
+            .background(Brush.linearGradient(listOf(gold.copy(alpha = .18f), gold.copy(alpha = .06f)))),
+        contentAlignment = Alignment.Center,
+    ) {
+        // The two panels represent the source workout and its calendar destination.
+        Row(horizontalArrangement = Arrangement.spacedBy(48.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(shape = RoundedCornerShape(18.dp), color = WildforceThemeTokens.backgroundSecondary, elevation = 3.dp) {
+                Box(Modifier.size(70.dp), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.FitnessCenter, null, tint = gold, modifier = Modifier.size(30.dp))
                 }
             }
+            Surface(shape = RoundedCornerShape(18.dp), color = WildforceThemeTokens.backgroundSecondary, elevation = 3.dp) {
+                Box(Modifier.size(70.dp), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.CalendarMonth, null, tint = gold, modifier = Modifier.size(34.dp))
+                }
+            }
+        }
+        Surface(
+            modifier = Modifier.offset { IntOffset(((progress - .5f) * 100.dp.toPx()).roundToInt(), 28.dp.roundToPx()) }
+                .alpha(.75f + .25f * progress),
+            shape = RoundedCornerShape(10.dp), color = gold, elevation = 4.dp,
+        ) {
+            Icon(Icons.Default.FitnessCenter, null, tint = Color.White, modifier = Modifier.padding(7.dp).size(16.dp))
         }
     }
 }
