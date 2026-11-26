@@ -23,6 +23,8 @@ internal data class BodyProgressSession(
     val profilePath: String,
     val futurePath: String? = null,
     val backPath: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null,
 )
 
 internal object BodyProgressStore {
@@ -41,7 +43,9 @@ internal object BodyProgressStore {
                 val front = item.optString("frontPath")
                 val profile = item.optString("profilePath")
                 if (id.isNotBlank() && date.isNotBlank()) {
-                    add(BodyProgressSession(id, date, front, profile, item.optString("futurePath").takeIf { File(it).isFile }, item.optString("backPath").takeIf { File(it).isFile }))
+                    add(BodyProgressSession(id, date, front, profile, item.optString("futurePath").takeIf { File(it).isFile }, item.optString("backPath").takeIf { File(it).isFile },
+                        item.optString("createdAt").takeIf { runCatching { java.time.Instant.parse(it) }.isSuccess },
+                        item.optString("updatedAt").takeIf { runCatching { java.time.Instant.parse(it) }.isSuccess }))
                 }
             }
         }.sortedBy { it.date }
@@ -61,7 +65,9 @@ internal object BodyProgressStore {
             listOf(frontFile, profileFile, backFile).forEach { it.delete() }
             throw error
         }
-        val session = BodyProgressSession(id, LocalDate.now().toString(), frontFile.absolutePath, profileFile.absolutePath, backPath = backFile.absolutePath)
+        val timestamp = java.time.Instant.now().toString()
+        val session = BodyProgressSession(id, LocalDate.now().toString(), frontFile.absolutePath, profileFile.absolutePath,
+            backPath = backFile.absolutePath, createdAt = timestamp, updatedAt = timestamp)
         persist(context, load(context) + session)
         // The forecast is generated from the server-owned private upload. Mark
         // this capture as a local mutation so the next sync pushes it rather
@@ -72,11 +78,15 @@ internal object BodyProgressStore {
 
     fun delete(context: Context, session: BodyProgressSession) {
         val remaining = load(context).filterNot { it.id == session.id }
+        val preferences = context.getSharedPreferences(prefs, 0)
+        val pending = preferences.getString("pending_session_deletions_v1", "{}")?.let(::JSONObject) ?: JSONObject()
+        pending.put(session.id, java.time.Instant.now().toString())
+        check(preferences.edit().putString("pending_session_deletions_v1", pending.toString()).commit())
+        persist(context, remaining)
         File(session.frontPath).delete()
         File(session.profilePath).delete()
         session.backPath?.let(::File)?.delete()
         session.futurePath?.let(::File)?.delete()
-        persist(context, remaining)
         // iOS keeps a tombstone in SwiftData. Android's projection creates the
         // equivalent tombstone from the last pushed record, but only when this
         // resource is scheduled for outbound synchronization.
@@ -104,7 +114,7 @@ internal object BodyProgressStore {
     private fun persist(context: Context, sessions: List<BodyProgressSession>) {
         val value = JSONArray().apply {
             sessions.forEach { session ->
-                put(JSONObject().put("id", session.id).put("date", session.date).put("frontPath", session.frontPath).put("profilePath", session.profilePath).put("futurePath", session.futurePath).put("backPath", session.backPath))
+                put(JSONObject().put("id", session.id).put("date", session.date).put("frontPath", session.frontPath).put("profilePath", session.profilePath).put("futurePath", session.futurePath).put("backPath", session.backPath).put("createdAt", session.createdAt).put("updatedAt", session.updatedAt))
             }
         }
         context.getSharedPreferences(prefs, 0).edit().putString(key, value.toString()).apply()

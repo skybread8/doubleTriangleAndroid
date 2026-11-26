@@ -1,6 +1,7 @@
 package io.codepassion.doubletriangle.nutrition
 
 import android.content.Context
+import io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker
 import io.codepassion.doubletriangle.NutritionStatusWidget
 import io.codepassion.doubletriangle.WildforceNotificationScheduler
 import io.codepassion.doubletriangle.feature.onboarding.BodyCompositionPhase
@@ -279,14 +280,24 @@ internal object NutritionStore {
     private const val PLAN_METADATA_KEY = "nutrition_plan_metadata"
     private const val REMOTE_PLAN_ID_KEY = "nutrition_remote_plan_id"
     private const val DISMISSED_PLANNED_MEALS_KEY = "nutrition_dismissed_planned_meals"
+    const val PLAN_RECORD_VERSIONS_KEY = "nutrition_plan_record_versions_v1"
+    const val DISMISSED_PLANNED_MEAL_DATES_KEY = "nutrition_dismissed_planned_meal_dates_v1"
 
     fun plannedMealKey(date: LocalDate, meal: PlannedMeal): String =
         "${date}|${meal.type.name}|${meal.title.trim().lowercase()}"
 
     fun dismissPlannedMeal(context: Context, date: LocalDate, meal: PlannedMeal) {
         val prefs = context.getSharedPreferences(PREFS, 0)
-        val dismissed = prefs.getStringSet(DISMISSED_PLANNED_MEALS_KEY, emptySet()).orEmpty() + plannedMealKey(date, meal)
-        prefs.edit().putStringSet(DISMISSED_PLANNED_MEALS_KEY, dismissed).apply()
+        val key = plannedMealKey(date, meal)
+        val dismissed = prefs.getStringSet(DISMISSED_PLANNED_MEALS_KEY, emptySet()).orEmpty() + key
+        val timestamp = Instant.now().toString()
+        val versions = prefs.getString(PLAN_RECORD_VERSIONS_KEY, "{}")?.let(::JSONObject) ?: JSONObject()
+        val dates = prefs.getString(DISMISSED_PLANNED_MEAL_DATES_KEY, "{}")?.let(::JSONObject) ?: JSONObject()
+        versions.put("meal:$key", timestamp)
+        dates.put(key, timestamp)
+        prefs.edit().putStringSet(DISMISSED_PLANNED_MEALS_KEY, dismissed)
+            .putString(PLAN_RECORD_VERSIONS_KEY, versions.toString())
+            .putString(DISMISSED_PLANNED_MEAL_DATES_KEY, dates.toString()).apply()
     }
 
     fun isPlannedMealDismissed(context: Context, date: LocalDate, meal: PlannedMeal): Boolean =
@@ -333,7 +344,7 @@ internal object NutritionStore {
             dailyCalorieAverage = plan.take(7).map { it.targets.calories }.average().takeIf { it.isFinite() },
         )
 
-    fun saveGeneratedPlan(context: Context, plan: List<NutritionDayPlan>, metadata: NutritionPlanMetadata? = null) {
+    fun saveGeneratedPlan(context: Context, plan: List<NutritionDayPlan>, metadata: NutritionPlanMetadata? = null, remoteVersions: JSONObject? = null) {
         val days = JSONArray().apply { plan.forEach { day -> put(JSONObject().put("date", day.date.toString()).put("type", day.type.name).put("demand", day.energyDemand.name).put("targets", day.targets.toJson()).put("workoutTitle", day.safeWorkoutTitle()).put("notes", day.notes).put("pre", day.preWorkoutGuidance).put("post", day.postWorkoutGuidance).put("meals", JSONArray().apply { day.meals.forEach { meal -> put(JSONObject().put("title", meal.title).put("type", meal.type.name).put("targets", meal.targets.toJson()).put("guidance", meal.guidance).put("foods", JSONArray().apply { meal.foods.forEach { (name, grams) -> put(JSONObject().put("name", name).put("grams", grams)) } })) } })) } }
         val effectiveMetadata = metadata ?: loadPlanMetadata(context) ?: metadataForPlan(null, plan)
         val metadataJson = JSONObject().apply {
@@ -344,7 +355,13 @@ internal object NutritionStore {
             put("dailyCalorieAverage", effectiveMetadata.dailyCalorieAverage)
             put("notes", effectiveMetadata.notes)
         }
-        context.getSharedPreferences(PREFS, 0).edit()
+        val preferences = context.getSharedPreferences(PREFS, 0)
+        val versions = remoteVersions ?: updateNutritionPlanVersions(
+            preferences.getString(GENERATED_PLAN_KEY, null), preferences.getString(PLAN_METADATA_KEY, null),
+            days, metadataJson, preferences.getString(PLAN_RECORD_VERSIONS_KEY, null), Instant.now().toString(),
+        )
+        preferences.edit()
+            .putString(PLAN_RECORD_VERSIONS_KEY, versions.toString())
             .putString(GENERATED_PLAN_KEY, days.toString())
             .putString(PLAN_METADATA_KEY, metadataJson.toString())
             .apply()
@@ -401,6 +418,32 @@ internal object NutritionStore {
             }
         }
         if (plan.isNotEmpty()) {
+            val versions = JSONObject()
+            fun rememberVersion(key: String, row: JSONObject) {
+                row.cleanString("updated_at").takeIf { runCatching { Instant.parse(it) }.isSuccess }
+                    ?.let { versions.put(key, it) }
+            }
+            rememberVersion("plan", remote)
+            val dismissed = mutableSetOf<String>()
+            val dismissalDates = JSONObject()
+            for (index in 0 until days.length()) {
+                val day = days.optJSONObject(index) ?: continue
+                val date = parseRemoteNutritionDate(day.optString("date")) ?: continue
+                rememberVersion("day:$date", day)
+                val meals = day.optJSONArray("meals") ?: continue
+                for (mealIndex in 0 until meals.length()) {
+                    val meal = meals.optJSONObject(mealIndex) ?: continue
+                    if (!meal.isNull("deleted_at")) continue
+                    val key = "$date|${mealTypeFromRemote(meal.optString("meal_type")).name}|${meal.cleanString("title").trim().lowercase()}"
+                    rememberVersion("meal:$key", meal)
+                    meal.cleanString("discarded_at").takeIf { runCatching { Instant.parse(it) }.isSuccess }?.let {
+                        dismissed += key
+                        dismissalDates.put(key, it)
+                    }
+                }
+            }
+            context.getSharedPreferences(PREFS, 0).edit().putStringSet(DISMISSED_PLANNED_MEALS_KEY, dismissed)
+                .putString(DISMISSED_PLANNED_MEAL_DATES_KEY, dismissalDates.toString()).apply()
             saveGeneratedPlan(
                 context,
                 plan,
@@ -414,6 +457,7 @@ internal object NutritionStore {
                         ?: plan.take(7).map { it.targets.calories }.average(),
                     notes = remote.cleanString("notes").takeIf(String::isNotBlank),
                 ),
+                remoteVersions = versions,
             )
         }
     }
@@ -453,10 +497,13 @@ internal object NutritionStore {
         // import. Rebuild from live rows so tombstones cannot delete a new row
         // that happens to reuse the same order index.
         val itemsByEntry = mutableMapOf<String, MutableList<RemoteNutritionItem>>()
+        val remoteItemParents = mutableMapOf<String, String>()
         for (index in 0 until remoteItems.length()) {
             val item = remoteItems.optJSONObject(index) ?: continue
             val entryId = item.optString("nutrition_log_entry_id")
             if (entryId.isBlank()) continue
+            val itemId = item.optString("id").lowercase(java.util.Locale.ROOT)
+            if (itemId.isNotBlank()) remoteItemParents[itemId] = entryId
             val orderIndex = item.optInt("order_index", index).coerceAtLeast(0)
             val mealItem = MealItem(
                 name = item.optString("name").trim().ifBlank { "Alimento" },
@@ -502,6 +549,9 @@ internal object NutritionStore {
             val loggedDate = nutritionLogDate(entry.optString("logged_at")) ?: continue
             val localItems = existing?.items.orEmpty().mapIndexed { itemIndex, food ->
                 food.copy(remoteId = food.remoteId ?: itemIds.optString("$localId:$itemIndex").takeIf(String::isNotBlank))
+            }.filter { food ->
+                val parent = food.remoteId?.lowercase(java.util.Locale.ROOT)?.let(remoteItemParents::get)
+                nutritionItemBelongsToParent(parent, remoteId)
             }
             val itemMerge = mergeNutritionItems(localItems, itemsByEntry[remoteId.lowercase(java.util.Locale.ROOT)].orEmpty(), pendingItemTimes)
             itemMerge.resolvedDeletions.forEach(pendingItems::remove)
@@ -715,6 +765,7 @@ internal object NutritionStore {
 
     @Synchronized
     fun save(context: Context, date: LocalDate, meals: List<MealLog>) {
+        markNutritionChangesPending(context)
         val existing = all(context)
         val now = Instant.now()
         val remainingIds = meals.mapTo(mutableSetOf()) { it.id }
@@ -741,11 +792,18 @@ internal object NutritionStore {
 
     @Synchronized
     fun replace(context: Context, meal: MealLog) {
+        markNutritionChangesPending(context)
         val existing = all(context)
         write(context, existing.filterNot { it.id == meal.id } + stampLocalMeals(context, existing, listOf(meal), Instant.now()))
     }
 
     fun save(context: Context, meals: List<MealLog>) = save(context, LocalDate.now(), meals)
+
+    private fun markNutritionChangesPending(context: Context) {
+        if (context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE).getString("id", null) != null) {
+            RemoteSyncChangeTracker.mark(context, "nutrition-log-entries", "nutrition-log-items", "nutrition-log-media")
+        }
+    }
 
     fun weekPlan(profile: OnboardingProfile?, baseTargets: NutritionTargets, today: LocalDate = LocalDate.now(), preferences: NutritionPreferences = NutritionPreferences(), version: Int = 1): List<NutritionDayPlan> {
         val monday = today.minusDays((today.dayOfWeek.value - DayOfWeek.MONDAY.value).toLong())
@@ -859,7 +917,7 @@ internal object NutritionStore {
     }
 }
 
-private fun stableRemoteLogId(value: String): Long {
+internal fun stableRemoteLogId(value: String): Long {
     val digest = java.security.MessageDigest.getInstance("SHA-256").digest(value.toByteArray(Charsets.UTF_8))
     val id = java.nio.ByteBuffer.wrap(digest).long and Long.MAX_VALUE
     return id.takeIf { it != 0L } ?: 1L
@@ -904,7 +962,7 @@ internal fun budgetSensitivitySyncValue(value: String): String = when (budgetSen
     else -> "medium"
 }
 
-private fun mealTypeFromRemote(value: String) = when (value.lowercase()) {
+internal fun mealTypeFromRemote(value: String) = when (value.lowercase()) {
     "breakfast" -> MealType.Breakfast
     "lunch" -> MealType.Lunch
     "dinner" -> MealType.Dinner
@@ -946,3 +1004,35 @@ private fun WorkoutWeekday.toDayOfWeek(): DayOfWeek = DayOfWeek.of(ordinal + 1)
 private fun JSONObject.optionalHour(key: String): Int? = takeUnless { isNull(key) }?.optInt(key)?.takeIf { it in 0..23 }
 private fun JSONObject.stringList(key: String): List<String> = optJSONArray(key)?.let { values -> buildList { for (index in 0 until values.length()) values.optString(index).trim().takeIf(String::isNotBlank)?.let(::add) } } ?: emptyList()
 private fun JSONArray?.stringPairs(): List<Pair<String, Int>> = this?.let { values -> buildList { for (index in 0 until values.length()) { val item = values.optJSONObject(index) ?: continue; item.optString("name").trim().takeIf(String::isNotBlank)?.let { add(it to item.optInt("grams").coerceAtLeast(0)) } } } } ?: emptyList()
+
+/** Store each plan row's edit time at save, not at the next network attempt. */
+internal fun updateNutritionPlanVersions(previousDays: String?, previousMetadata: String?, days: JSONArray, metadata: JSONObject, oldVersions: String?, changedAt: String): JSONObject {
+    fun rows(array: JSONArray, info: JSONObject): Map<String, String> {
+        val result = linkedMapOf("plan" to info.toString())
+        for (i in 0 until array.length()) {
+            val day = array.optJSONObject(i) ?: continue
+            val date = day.optString("date")
+            val dayFields = JSONObject(day.toString()).apply { remove("meals") }
+            result["day:$date"] = dayFields.toString()
+            val meals = day.optJSONArray("meals") ?: continue
+            for (j in 0 until meals.length()) {
+                val meal = meals.optJSONObject(j) ?: continue
+                val key = "$date|${meal.optString("type")}|${meal.optString("title").trim().lowercase()}"
+                result["meal:$key"] = JSONObject(meal.toString()).put("_order", j).toString()
+            }
+        }
+        return result
+    }
+    val old = if (previousDays == null) emptyMap() else rows(JSONArray(previousDays), previousMetadata?.let(::JSONObject) ?: JSONObject())
+    val current = rows(days, metadata)
+    val versions = oldVersions?.let(::JSONObject) ?: JSONObject()
+    return JSONObject().apply {
+        current.forEach { (key, value) ->
+            val time = nutritionPlanRecordVersion(old[key], value, versions.optString(key).takeIf(String::isNotBlank), changedAt)
+            if (time != null) put(key, time)
+        }
+    }
+}
+
+internal fun nutritionPlanRecordVersion(previous: String?, current: String, saved: String?, editedAt: String): String? =
+    if (previous != current) editedAt else saved

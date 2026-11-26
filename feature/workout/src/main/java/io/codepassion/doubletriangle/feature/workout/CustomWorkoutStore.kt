@@ -76,6 +76,7 @@ object CustomWorkoutStore {
             order = load(context).size + 1,
             status = WorkoutStatus.Draft,
             creationSource = "manual",
+            gymProgramId = null,
             scheduledFor = null,
             startedAt = null,
             completedAt = null,
@@ -198,7 +199,7 @@ object CustomWorkoutStore {
                     remoteId = block.optString("remoteId").takeIf { it.isNotBlank() && it != "null" },
                     rounds = block.optInt("rounds", 1).coerceAtLeast(1),
                     restAfterBlockSeconds = block.optIntOrNull("restAfterBlockSeconds")?.takeIf { it >= 0 },
-                    notes = block.optString("notes").takeIf(String::isNotBlank),
+                    notes = block.optString("notes").visibleWorkoutBlockNotes(),
                     exercises = parseExercises(block.optJSONArray("exercises") ?: JSONArray()),
                 ),
             )

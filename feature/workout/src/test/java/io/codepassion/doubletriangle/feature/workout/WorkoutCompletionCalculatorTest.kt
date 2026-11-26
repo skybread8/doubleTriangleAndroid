@@ -57,6 +57,30 @@ class WorkoutCompletionCalculatorTest {
         assertEquals(false, progress.streakIncreased)
     }
 
+    @Test fun accountProgressFeedsTheSameXpLevelAndStreakShownInProfile() {
+        val value = trainingProgressSnapshot(75, 2, 2, 4)
+        assertEquals(75, value.xp)
+        assertEquals(2, value.level)
+        assertEquals(2, value.currentStreak)
+        assertEquals(4, value.longestStreak)
+        assertEquals(15f / 95f, value.levelProgress, 0.0001f)
+    }
+
+    @Test fun accountWorkoutDayUsesTheDevicesTimeZone() {
+        val zone = java.time.ZoneId.of("Europe/Madrid")
+        assertEquals(LocalDate.of(2026, 11, 25).toEpochDay(), accountWorkoutDay("2026-11-24T23:30:00Z", zone))
+        assertNull(accountWorkoutDay("bad-date", zone))
+    }
+
+    @Test fun streakSurvivesRestDaysButNotAMissedScheduledDay() {
+        val monday = LocalDate.of(2026, 11, 23).toEpochDay()
+        val scheduled = setOf(DayOfWeek.MONDAY, DayOfWeek.THURSDAY)
+        val wednesday = CompletionProgressStore.calculate(75, 2, monday, monday + 2, false, false, scheduled)
+        val friday = CompletionProgressStore.calculate(75, 2, monday, monday + 4, false, false, scheduled)
+        assertEquals(3, wednesday.streakAfter)
+        assertEquals(1, friday.streakAfter)
+    }
+
     private val workout = WorkoutDaySummary(
         id = "test", order = 1, title = "Push", focus = "Empuje", dayType = "Fuerza",
         scheduledDay = DayOfWeek.MONDAY, estimatedMinutes = 45, status = WorkoutStatus.Planned,

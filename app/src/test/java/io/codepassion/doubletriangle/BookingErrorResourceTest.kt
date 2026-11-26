@@ -2,10 +2,15 @@ package io.codepassion.doubletriangle
 
 import io.codepassion.doubletriangle.core.designsystem.R
 import java.io.IOException
+import java.time.OffsetDateTime
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class BookingErrorResourceTest {
+    @Test fun reservationTimestampsAlwaysIncludeSecondsAndNumericOffset() {
+        assertEquals("2026-12-08T09:00:00+01:00", bookingRequestTimestamp(OffsetDateTime.parse("2026-12-08T09:00:00+01:00")))
+        assertEquals("2026-12-08T08:00:00+00:00", bookingRequestTimestamp(OffsetDateTime.parse("2026-12-08T08:00:00Z")))
+    }
     @Test fun mapsReservationRejectionsToIosMessages() {
         val cases = mapOf(
             "room_full" to R.string.someone_just_took_the_last_place_for_this_time__availability_has_been_refreshed_,

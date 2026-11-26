@@ -6,6 +6,39 @@ import org.junit.Test
 import java.time.OffsetDateTime
 
 class BookingAvailabilityTest {
+    @Test fun `cancellation is offered only before the cutoff on an active reservation`() {
+        val cutoff = OffsetDateTime.parse("2026-10-15T10:00:00+02:00")
+        val reservation = BookingReservation("id", "confirmed", cutoff.plusHours(1), cutoff.plusHours(2), cutoff, "Room", null, "gym", "Gym", null, java.time.ZoneId.of("Europe/Madrid"))
+        assertTrue(reservation.isCancellableAt(cutoff.minusSeconds(1)))
+        assertTrue(!reservation.isCancellableAt(cutoff))
+        assertTrue(!reservation.isCancellableAt(cutoff.plusSeconds(1)))
+        assertTrue(!reservation.copy(status = "cancelled").isCancellableAt(cutoff.minusSeconds(1)))
+        assertTrue(!reservation.copy(cancellableUntil = null).isCancellableAt(cutoff.minusSeconds(1)))
+    }
+    @Test fun `calendar event keeps the reservation instants and gym timezone`() {
+        val start = OffsetDateTime.parse("2026-10-25T02:30:00+02:00")
+        val end = OffsetDateTime.parse("2026-10-25T02:30:00+01:00")
+        val reservation = BookingReservation("id", "confirmed", start, end, null, "Sala", null, "gym", "Gimnasio", null, java.time.ZoneId.of("Europe/Madrid"))
+        val event = bookingCalendarEvent(reservation, " Calle Mayor 1 ")
+        assertEquals("Sala · Gimnasio", event.title)
+        assertEquals("Gimnasio, Calle Mayor 1", event.location)
+        assertEquals(start.toInstant().toEpochMilli(), event.beginMillis)
+        assertEquals(end.toInstant().toEpochMilli(), event.endMillis)
+        assertEquals(3600000L, event.endMillis - event.beginMillis)
+        assertEquals("Europe/Madrid", event.timeZone)
+        assertEquals("Gimnasio", bookingCalendarEvent(reservation, null).location)
+    }
+    @Test fun `existing active reservations block overlapping intervals but not adjacent or cancelled ones`() {
+        val start = OffsetDateTime.parse("2026-10-15T10:00:00+02:00")
+        val reservation = BookingReservation("id", "confirmed", start, start.plusHours(1), null, "Room", null, "other-gym", "Gym", null, java.time.ZoneId.of("Europe/Madrid"))
+        fun choice(from: OffsetDateTime, to: OffsetDateTime) = BookingStart(from, to, 5)
+        assertTrue(overlapsActiveReservation(choice(start, start.plusHours(1)), listOf(reservation)))
+        assertTrue(overlapsActiveReservation(choice(start.minusMinutes(30), start.plusMinutes(30)), listOf(reservation)))
+        assertTrue(overlapsActiveReservation(choice(start.plusMinutes(30).withOffsetSameInstant(java.time.ZoneOffset.UTC), start.plusHours(2)), listOf(reservation)))
+        assertTrue(!overlapsActiveReservation(choice(start.plusHours(1), start.plusHours(2)), listOf(reservation)))
+        assertTrue(!overlapsActiveReservation(choice(start.minusHours(1), start), listOf(reservation)))
+        assertTrue(!overlapsActiveReservation(choice(start, start.plusHours(1)), listOf(reservation.copy(status = "cancelled"))))
+    }
     @Test
     fun `only offers starts covered by consecutive bookable slots`() {
         val start = OffsetDateTime.parse("2026-10-15T10:00:00+02:00")

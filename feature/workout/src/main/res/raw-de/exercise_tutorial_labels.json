@@ -137,7 +137,9 @@
     "ezBarSkullCrusher": "Stirndrücken mit SZ-Stange",
     "closeGripDumbbellBenchPress": "Enges Kurzhantel-Bankdrücken",
     "lyingCableCurl": "Bizepscurl am Kabelzug in Rückenlage",
-    "smithMachineCalfRaise": "Wadenheben an der Smith-Maschine"
+    "smithMachineCalfRaise": "Wadenheben an der Smith-Maschine",
+    "closeGripLatPulldown": "Latzug mit engem Griff",
+    "Close-Grip Lat Pulldown": "Latzug mit engem Griff"
   },
   "texts": {
     "Walking": "Gehen",

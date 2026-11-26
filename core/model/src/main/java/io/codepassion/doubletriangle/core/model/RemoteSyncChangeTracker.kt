@@ -24,6 +24,7 @@ object RemoteSyncChangeTracker {
             editor.putLong("dirty_updated_at:$resource", System.currentTimeMillis())
         }
         editor.apply()
+        SyncDiagnostics.record(context, "pending", "Marked: ${resources.distinct().joinToString()}")
     }
 
     @Synchronized
@@ -55,6 +56,7 @@ object RemoteSyncChangeTracker {
     fun clear(context: Context, resource: String) {
         val preferences = context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
         preferences.edit().putStringSet(dirtyResourcesKey, preferences.getStringSet(dirtyResourcesKey, emptySet()).orEmpty() - resource).apply()
+        SyncDiagnostics.record(context, "pending", "Acknowledged: $resource")
     }
 
     @Synchronized

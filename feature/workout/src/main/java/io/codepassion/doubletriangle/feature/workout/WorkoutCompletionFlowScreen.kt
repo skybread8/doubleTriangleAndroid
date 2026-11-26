@@ -376,7 +376,12 @@ private fun CompletionSummary(
             ) { Text(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.share_workout), fontWeight = FontWeight.Bold) }
         }
     } else null) {
-        Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.summaryEntrance(100).size(80.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.1f), CircleShape).padding(20.dp), tint = WildforceThemeTokens.accent)
+        Box(contentAlignment = Alignment.Center) {
+            Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.summaryEntrance(100).size(80.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.1f), CircleShape).padding(20.dp), tint = WildforceThemeTokens.accent)
+            if (io.codepassion.doubletriangle.core.designsystem.rememberChristmasActive()) {
+                io.codepassion.doubletriangle.core.designsystem.ChristmasSnowflakes(Modifier.size(110.dp))
+            }
+        }
         Column(Modifier.padding(top = 16.dp).summaryEntrance(200), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.great_job_).uppercase(), fontFamily = Exo2FontFamily, fontSize = 28.sp, fontWeight = FontWeight.SemiBold, color = WildforceThemeTokens.textPrimary, textAlign = TextAlign.Center)
             Text(stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.you_ve_completed_your_workout_), Modifier.padding(top = 4.dp), color = WildforceThemeTokens.textSecondary, textAlign = TextAlign.Center)

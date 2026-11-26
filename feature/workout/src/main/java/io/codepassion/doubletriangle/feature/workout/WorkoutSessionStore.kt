@@ -41,6 +41,7 @@ internal data class WorkoutSessionSnapshot(
     val skippedExerciseIndices: Set<Int> = emptySet(),
     /** The editable workout structure must survive process recreation too. */
     val editableBlocks: List<WorkoutBlockSummary>? = null,
+    val skipsRestPeriods: Boolean = false,
     val updatedAtMillis: Long = System.currentTimeMillis(),
 )
 
@@ -118,6 +119,7 @@ object WorkoutSessionStore {
             exerciseTimerFinishedWhileAway = exerciseTimerWasRunning && savedExerciseTime != null && savedExerciseTime <= elapsedWhileAway,
             skippedExerciseIndices = skipped,
             editableBlocks = editableBlocks,
+            skipsRestPeriods = json.optBoolean("skipsRestPeriods"),
             updatedAtMillis = System.currentTimeMillis(),
         )
     }.getOrNull()
@@ -165,6 +167,7 @@ object WorkoutSessionStore {
             .put("addedSetsByExercise", addedSets)
             .put("completedDistanceKm", snapshot.completedDistanceKm)
             .put("restContext", snapshot.restContext?.name ?: JSONObject.NULL)
+            .put("skipsRestPeriods", snapshot.skipsRestPeriods)
             .put("skippedExerciseIndices", org.json.JSONArray(snapshot.skippedExerciseIndices.sorted()))
         if (snapshot.editableBlocks != null) json.put("editableBlocks", encodeEditableBlocks(snapshot.editableBlocks))
         context.getSharedPreferences(PREFERENCES, 0).edit().putString(workoutId, json.toString()).apply()
@@ -235,7 +238,7 @@ object WorkoutSessionStore {
                     type = runCatching { WorkoutBlockType.valueOf(item.optString("type")) }.getOrDefault(WorkoutBlockType.Standard),
                     rounds = item.optInt("rounds", 1).coerceAtLeast(1),
                     restAfterBlockSeconds = item.optInt("restAfterBlockSeconds", -1).takeIf { it >= 0 },
-                    notes = item.optString("notes").takeIf(String::isNotBlank),
+                    notes = item.optString("notes").visibleWorkoutBlockNotes(),
                     exercises = exercises,
                 ),
             )

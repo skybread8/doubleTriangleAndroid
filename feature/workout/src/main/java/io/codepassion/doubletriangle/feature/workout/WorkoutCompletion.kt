@@ -204,7 +204,7 @@ internal object WorkoutCompletionCalculator {
 }
 
 object CompletionProgressStore {
-    private const val PREFERENCES = "wildforce_completion_progress"
+    const val PREFERENCES = "wildforce_completion_progress"
 
     internal fun preview(
         context: Context,
@@ -212,13 +212,14 @@ object CompletionProgressStore {
         completesPlan: Boolean = false,
         completesMesocycle: Boolean = false,
         completedOn: LocalDate = LocalDate.now(),
+        scheduledDays: Set<java.time.DayOfWeek> = java.time.DayOfWeek.entries.toSet(),
     ): CompletionProgress {
         val preferences = context.getSharedPreferences(PREFERENCES, 0)
         val xpBefore = preferences.getInt("xp", 0)
         val today = completedOn.toEpochDay()
         val previousDay = preferences.getLong("lastWorkoutDay", Long.MIN_VALUE)
         val storedStreak = preferences.getInt("streak", fallbackStreak)
-        return calculate(xpBefore, storedStreak, previousDay, today, completesPlan, completesMesocycle)
+        return calculate(xpBefore, storedStreak, previousDay, today, completesPlan, completesMesocycle, scheduledDays)
     }
 
     internal fun calculate(
@@ -228,12 +229,14 @@ object CompletionProgressStore {
         today: Long,
         completesPlan: Boolean,
         completesMesocycle: Boolean,
+        scheduledDays: Set<java.time.DayOfWeek> = java.time.DayOfWeek.entries.toSet(),
     ): CompletionProgress {
         val increased = previousDay != today
         val streak = when {
             !increased -> storedStreak
-            previousDay == today - 1 -> storedStreak + 1
-            else -> 1
+            previousDay == Long.MIN_VALUE || previousDay > today -> 1
+            missedScheduledWorkout(previousDay, today, scheduledDays) -> 1
+            else -> storedStreak + 1
         }
         val xpAfterWorkout = xpBefore + WorkoutCompletionCalculator.WORKOUT_XP
         val xpAfterPlan = xpAfterWorkout + if (completesPlan) WorkoutCompletionCalculator.PLAN_XP else 0
@@ -256,23 +259,56 @@ object CompletionProgressStore {
         val preferences = context.getSharedPreferences(PREFERENCES, 0)
         preferences.edit()
             .putInt("xp", progress.xpAfter)
+            .putInt("level", progress.levelAfter)
             .putInt("streak", progress.streakAfter)
             .putInt("longestStreak", maxOf(preferences.getInt("longestStreak", 0), progress.streakAfter))
             .putLong("lastWorkoutDay", completedOn.toEpochDay()).apply()
     }
 
+    /** The same account progress that iOS persists on its User model. */
+    fun applyAccountProgress(context: Context, xp: Int, level: Int, streak: Int, longest: Int, lastCompletedAt: String?) {
+        val day = accountWorkoutDay(lastCompletedAt, java.time.ZoneId.systemDefault())
+        context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).edit()
+            .putInt("xp", xp.coerceAtLeast(0)).putInt("level", level.coerceAtLeast(1))
+            .putInt("streak", streak.coerceAtLeast(0)).putInt("longestStreak", longest.coerceAtLeast(0))
+            .apply { if (day == null) remove("lastWorkoutDay") else putLong("lastWorkoutDay", day) }
+            .apply()
+    }
+
+    /** Restore the already downloaded account snapshot when upgrading an older install. */
+    fun restoreCachedAccountProgressIfNeeded(context: Context) {
+        val local = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)
+        if (local.contains("xp") || local.contains("streak")) return
+        val account = context.getSharedPreferences("wildforce_account_progress", Context.MODE_PRIVATE)
+        if (!account.contains("xp") && !account.contains("current_streak")) return
+        applyAccountProgress(context, account.getInt("xp", 0), account.getInt("xp_level", 1),
+            account.getInt("current_streak", 0), account.getInt("longest_streak", 0),
+            account.getString("last_completed_workout_at", null))
+    }
+
     fun progress(context: Context): TrainingProgress {
         val preferences = context.getSharedPreferences(PREFERENCES, 0)
         val xp = preferences.getInt("xp", 0)
-        val level = WorkoutCompletionCalculator.level(xp)
-        val levelStart = WorkoutCompletionCalculator.minimumXp(level)
-        val levelEnd = WorkoutCompletionCalculator.minimumXp(level + 1)
-        return TrainingProgress(
-            xp = xp,
-            currentStreak = preferences.getInt("streak", 0),
-            longestStreak = preferences.getInt("longestStreak", 0),
-            level = level,
-            levelProgress = ((xp - levelStart).toFloat() / (levelEnd - levelStart).coerceAtLeast(1)).coerceIn(0f, 1f),
-        )
+        val level = preferences.getInt("level", WorkoutCompletionCalculator.level(xp)).coerceAtLeast(1)
+        return trainingProgressSnapshot(xp, level, preferences.getInt("streak", 0), preferences.getInt("longestStreak", 0))
     }
+}
+
+internal fun accountWorkoutDay(timestamp: String?, zone: java.time.ZoneId): Long? = timestamp?.let {
+    runCatching { java.time.Instant.parse(it).atZone(zone).toLocalDate().toEpochDay() }.getOrNull()
+}
+
+internal fun trainingProgressSnapshot(xp: Int, level: Int, streak: Int, longest: Int): TrainingProgress {
+    val start = WorkoutCompletionCalculator.minimumXp(level)
+    val end = WorkoutCompletionCalculator.minimumXp(level + 1)
+    return TrainingProgress(xp, streak, longest, level,
+        ((xp - start).toFloat() / (end - start).coerceAtLeast(1)).coerceIn(0f, 1f))
+}
+
+/** iOS resets only when a scheduled training day was missed between sessions. */
+internal fun missedScheduledWorkout(previousDay: Long, today: Long, scheduledDays: Set<java.time.DayOfWeek>): Boolean {
+    if (scheduledDays.isEmpty() || today <= previousDay + 1) return false
+    // Any complete week contains every weekday; avoid iterating over long gaps.
+    if (today - previousDay > 7) return true
+    return (previousDay + 1 until today).any { LocalDate.ofEpochDay(it).dayOfWeek in scheduledDays }
 }

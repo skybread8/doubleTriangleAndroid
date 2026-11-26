@@ -13,7 +13,7 @@ Registro de funcionalidades y mejoras visibles para las personas que usan la app
 
 ## Pendientes de publicación
 
-Todavía no hay novedades registradas mediante este proceso.
+- **26-11-2026 · Entrenamiento:** añadidos al selector el curl con barra Z y las rotaciones de cuello, y completadas fichas de ejercicios existentes. Algunas traducciones recurren al inglés cuando no están disponibles en iOS. Referencia: `scripts/sync-ios-exercises.py`.
 
 ## Inventario retrospectivo: publicación por confirmar
 
@@ -44,6 +44,7 @@ Preparado a partir del inventario anterior. Incluye cambios aún sin commit y ot
 
 ```text
 <ca>
+• Nous exercicis i fitxes d’entrenament.
 • Exporta entrenaments i reserves al calendari.
 • Consulta els entrenaments del teu gimnàs i les notes dels exercicis.
 • Segueix l'entrenament i els descansos des de les notificacions.
@@ -52,6 +53,7 @@ Preparado a partir del inventario anterior. Incluye cambios aún sin commit y ot
 • Consulta el diagnòstic de sincronització.
 </ca>
 <en-US>
+• More exercises and workout guides.
 • Export workouts and bookings to your calendar.
 • View your gym workouts and exercise block notes.
 • Follow your workout and rest periods from notifications.
@@ -60,6 +62,7 @@ Preparado a partir del inventario anterior. Incluye cambios aún sin commit y ot
 • View sync diagnostics.
 </en-US>
 <es-ES>
+• Nuevos ejercicios y fichas de entrenamiento.
 • Exporta entrenamientos y reservas al calendario.
 • Consulta los entrenamientos de tu gimnasio y las notas de los bloques.
 • Sigue tu entrenamiento y descansos desde las notificaciones.

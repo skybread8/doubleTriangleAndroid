@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="seasonal_decorations">Seasonal decorations</string>
+    <string name="seasonal_decorations_description">Show seasonal decorations automatically during special dates.</string>
+</resources>

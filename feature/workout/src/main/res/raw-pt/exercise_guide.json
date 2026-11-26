@@ -1944,5 +1944,117 @@
       "Utilize um degrau ou uma plataforma estável apenas se couber com segurança dentro da máquina Smith.",
       "Dê prioridade à amplitude total do movimento em vez de aumentar a carga."
     ]
+  },
+  "closeGripLatPulldown": {
+    "description": "Uma puxada na polia alta com pegada fechada que trabalha as costas com um movimento de tração vertical controlado.",
+    "instructions": [
+      "Sente-se na máquina de puxada na polia alta e prenda as coxas sob os rolos de apoio.",
+      "Prenda uma pega de pegada fechada ou neutra ao cabo alto e segure-a com as palmas das mãos voltadas uma para a outra.",
+      "Mantenha o peito elevado e incline-se ligeiramente para trás. Depois, puxe a pega em direção à parte superior do peito, levando os cotovelos para baixo e para trás.",
+      "Faça uma pausa sem encolher os ombros e, em seguida, leve a pega de volta acima da cabeça de forma controlada."
+    ],
+    "tips": [
+      "Mantenha os cotovelos junto ao tronco durante toda a puxada.",
+      "Não transforme o movimento numa remada inclinando-se demasiado para trás.",
+      "Estenda completamente os braços no topo, mantendo as costas sob tensão."
+    ]
+  },
+  "ezBarCurl": {
+    "description": "Uma rosca de bíceps em pé com uma barra EZ, cujas pegas anguladas podem ser mais confortáveis para os pulsos.",
+    "instructions": [
+      "Fique de pé com os pés afastados à largura das ancas. Segure a barra EZ com uma pegada supinada e os braços estendidos ao lado do corpo.",
+      "Mantenha os cotovelos junto ao tronco e flexione os braços para levar a barra em direção aos ombros.",
+      "Contraia brevemente os bíceps no topo do movimento, sem deixar os cotovelos avançarem.",
+      "Baixe a barra lentamente até os braços ficarem quase totalmente estendidos."
+    ],
+    "tips": [
+      "Escolha a posição angulada das mãos que seja confortável para os pulsos.",
+      "Mantenha o tronco imóvel e evite balançar a barra para levantar o peso.",
+      "Controle a amplitude do movimento e pare antes de estender os cotovelos até sentir dor."
+    ]
+  },
+  "ropeTricepsPushdown": {
+    "description": "Um exercício de extensão de tríceps na polia com corda que isola os tríceps e permite uma contração intensa no final de cada repetição.",
+    "instructions": [
+      "Prenda uma corda a uma polia alta e fique de pé de frente para a máquina.",
+      "Segure as extremidades da corda com uma pegada neutra e mantenha os cotovelos junto ao corpo.",
+      "Empurre a corda para baixo até estender completamente os cotovelos e afaste ligeiramente as extremidades no final do movimento.",
+      "Retorne a corda de forma controlada até que os antebraços fiquem um pouco acima da horizontal."
+    ],
+    "tips": [
+      "Mantenha os ombros baixos e os braços parados durante todo o movimento.",
+      "Evite inclinar o corpo sobre o cabo para movimentar a carga usando o peso do corpo.",
+      "Faça o movimento com amplitude completa, mas controlada, sem travar os cotovelos bruscamente."
+    ]
+  },
+  "reversePecDeck": {
+    "description": "Um exercício de crucifixo inverso na máquina para isolar os deltoides posteriores e a parte superior das costas.",
+    "instructions": [
+      "Posicione os braços da máquina atrás de si e sente-se de frente para o apoio, com o peito encostado no acolchoamento.",
+      "Segure as empunhaduras com os braços estendidos à sua frente, à altura dos ombros.",
+      "Abra os braços em um arco amplo até que fiquem alinhados com o tronco.",
+      "Contraia os deltoides posteriores e volte lentamente à posição inicial."
+    ],
+    "tips": [
+      "Mantenha o peito bem apoiado no acolchoamento durante toda a série.",
+      "Inicie o movimento com os cotovelos e evite encolher os ombros.",
+      "Mantenha um ritmo controlado e evite que as placas de peso se toquem entre as repetições."
+    ]
+  },
+  "spiderCurl": {
+    "description": "Uma rosca com o peito apoiado, feita de bruços em um banco inclinado para isolar os bíceps e limitar o impulso.",
+    "instructions": [
+      "Ajuste um banco regulável para uma inclinação acentuada e deite-se de barriga para baixo, com o peito apoiado no encosto.",
+      "Deixe os braços estendidos na direção do chão enquanto segura os halteres com as palmas das mãos viradas para a frente.",
+      "Flexione os braços e leve os pesos em direção aos ombros sem deixar os cotovelos avançarem.",
+      "Baixe os halteres lentamente até estender novamente os braços por completo."
+    ],
+    "tips": [
+      "Mantenha os braços perpendiculares ao chão durante todo o movimento.",
+      "Use uma carga mais leve do que nos curls em pé para manter a execução rigorosa.",
+      "Faça uma breve pausa no topo sem levantar o peito do banco."
+    ]
+  },
+  "preacherCurl": {
+    "description": "Um curl com apoio que mantém os braços fixos para isolar os bíceps ao longo de uma amplitude de movimento controlada.",
+    "instructions": [
+      "Prepare um banco Scott ou um banco regulável de modo que os braços fiquem bem apoiados no suporte.",
+      "Segure uma barra EZ com as palmas das mãos viradas para cima e comece com os braços quase totalmente estendidos.",
+      "Flexione os braços e leve a barra em direção aos ombros, mantendo os braços apoiados no suporte.",
+      "Baixe a barra lentamente até sentir o alongamento dos bíceps, sem forçar a extensão dos cotovelos."
+    ],
+    "tips": [
+      "Mantenha os pulsos numa posição neutra e evite dobrá-los para trás sob carga.",
+      "Não deixe a barra ressaltar na posição mais baixa.",
+      "Controle a amplitude do movimento e pare antes de estender os cotovelos até sentir dor."
+    ]
+  },
+  "hackSquat": {
+    "description": "Uma máquina guiada para agachamento que permite treinar os quadríceps e os glúteos com elevada estabilidade e pouca exigência de equilíbrio.",
+    "instructions": [
+      "Ajuste os apoios para os ombros para conseguir ficar de pé, com as costas apoiadas no encosto.",
+      "Coloque os pés na plataforma à largura dos ombros, ligeiramente à frente das ancas.",
+      "Desbloqueie as travas de segurança e desça de forma controlada, dobrando os joelhos e as ancas.",
+      "Empurre com toda a planta dos pés para voltar à posição inicial, sem esticar os joelhos de forma brusca."
+    ],
+    "tips": [
+      "Mantenha a zona lombar em contacto com o encosto durante todo o movimento.",
+      "Posicione os pés de forma que os joelhos acompanhem confortavelmente a direção dos dedos.",
+      "Controle a posição mais baixa e utilize os batentes de segurança a uma profundidade adequada."
+    ]
+  },
+  "machineHipThrust": {
+    "description": "Uma máquina guiada de hip thrust que trabalha diretamente os glúteos e proporciona uma posição estável e confortável.",
+    "instructions": [
+      "Ajuste o encosto e o cinto ou apoio para a anca, de modo que fique bem apoiado sobre as ancas.",
+      "Coloque os pés afastados aproximadamente à largura dos ombros. No topo do movimento, os joelhos devem estar dobrados a cerca de 90 graus.",
+      "Empurre com os calcanhares e estenda as ancas até o tronco e as coxas formarem uma linha reta.",
+      "Contraia os glúteos no topo do movimento e depois baixe a carga de forma controlada."
+    ],
+    "tips": [
+      "Mantenha as costelas baixas e evite hiperestender a zona lombar no topo do movimento.",
+      "Posicione os pés de forma a sentir o movimento sobretudo nos glúteos, e não nos músculos posteriores da coxa.",
+      "Utilize os batentes de segurança da máquina antes de aumentar muito a carga."
+    ]
   }
 }

@@ -137,7 +137,9 @@
     "ezBarSkullCrusher": "EZ Bar Skull Crusher",
     "closeGripDumbbellBenchPress": "Close-Grip Dumbbell Bench Press",
     "lyingCableCurl": "Lying Cable Curl",
-    "smithMachineCalfRaise": "Smith Machine Calf Raise"
+    "smithMachineCalfRaise": "Smith Machine Calf Raise",
+    "closeGripLatPulldown": "Close-Grip Lat Pulldown",
+    "Close-Grip Lat Pulldown": "Close-Grip Lat Pulldown"
   },
   "texts": {
     "Walking": "Walking",

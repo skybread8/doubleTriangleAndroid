@@ -15,7 +15,9 @@ internal class WorkoutPlanStateStore(
 
     fun saveCurrentPlan(rawJson: String) {
         require(rawJson.isNotBlank()) { "No se puede guardar un plan vacío." }
-        preferences.edit().putString(CURRENT_PLAN_KEY, rawJson).apply()
+        val versions = WorkoutPlanVersions.update(currentPlanJson(), rawJson,
+            preferences.getString(WorkoutPlanVersions.KEY, null), java.time.Instant.now().toString())
+        preferences.edit().putString(CURRENT_PLAN_KEY, rawJson).putString(WorkoutPlanVersions.KEY, versions).apply()
     }
 
     /**

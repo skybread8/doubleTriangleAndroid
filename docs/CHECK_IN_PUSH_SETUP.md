@@ -23,6 +23,9 @@ To enable the Android transport:
    login to another account, and token rotation as well.
 
 The token registration code retries when the app resumes or the account changes.
+It registers only while the app's notification setting and Android notification
+permission are enabled, and requests removal when either is disabled. The app
+setting is also checked when a message arrives in the foreground.
 Logout requests device removal, but a failed offline removal is not yet retried
 after process exit; this and real FCM delivery need end-to-end verification before
 production release.

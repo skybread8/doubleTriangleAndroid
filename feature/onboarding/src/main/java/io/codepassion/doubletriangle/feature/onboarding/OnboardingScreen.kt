@@ -161,11 +161,12 @@ data class OnboardingProfile(
     val appLanguage: String = "Español",
     val gymJoinCode: String? = null,
     val gymJoinName: String? = null,
+    val coachJoinCode: String? = null,
     /** Day is optional for backwards-compatible profiles that only stored month/year. */
     val birthDay: Int = 1,
 )
 
-data class GymJoinCodeInfo(val code: String, val gymName: String)
+data class GymJoinCodeInfo(val code: String, val gymName: String, val isCoach: Boolean = false)
 
 data class OnboardingPlanPreview(
     val name: String,
@@ -369,6 +370,7 @@ enum class FitnessGoal(val storedValue: String, val title: String, val descripti
 
 @Composable
 fun OnboardingScreen(
+    onCoverVisibilityChanged: (Boolean) -> Unit = {},
     onRequestHealthConnect: ((((Boolean, Int?, Double?, Double?, Double?) -> Unit) -> Unit)) = { result -> result(false, null, null, null, null) },
     onHealthMetricsImported: (Boolean, Double?, Double?) -> Unit = { _, _, _ -> },
     isGenerating: Boolean = false,
@@ -377,13 +379,14 @@ fun OnboardingScreen(
     onStartTraining: () -> Unit = {},
     onContinueWithoutPlan: () -> Unit = {},
     onLanguageSelected: (String) -> Unit = {},
-    onLoggedIn: (AuthResponse, String?) -> Unit = { _, _ -> },
+    onLoggedIn: (AuthResponse, String?, String?) -> Unit = { _, _, _ -> },
     onRegistered: (AuthResponse, OnboardingProfile) -> Unit = { _, _ -> },
     onCheckGymJoinCode: suspend (String) -> GymJoinCodeInfo? = { null },
     onCompleted: (OnboardingProfile, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     var step by remember { mutableStateOf(0) }
+    LaunchedEffect(step) { onCoverVisibilityChanged(step == 0) }
     var name by remember { mutableStateOf("") }
     var goal by remember { mutableStateOf<FitnessGoal?>(null) }
     var lifestyle by remember { mutableStateOf<LifestyleLevel?>(null) }
@@ -411,6 +414,7 @@ fun OnboardingScreen(
     val scannerErrorMessage = androidx.compose.ui.res.stringResource(R.string.onboarding_scanner_error)
     var gymCodeError by remember { mutableStateOf<String?>(null) }
     var gymJoinCode by remember { mutableStateOf<String?>(null) }
+    var coachJoinCode by remember { mutableStateOf<String?>(null) }
     var gymJoinName by remember { mutableStateOf<String?>(null) }
     val gymCodeScope = rememberCoroutineScope()
     var isLoginVisible by remember { mutableStateOf(false) }
@@ -459,7 +463,7 @@ fun OnboardingScreen(
         val selectedLifestyle = lifestyle
         if (selectedGoal != null && selectedLifestyle != null) {
             val selectedBodyPhase = bodyPhase.takeIf { selectedGoal.supportsBodyComposition && trainingLevel.supportsBodyComposition }
-            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses.filterKeys { it in workoutDays }, gymType ?: GymType.SmallGym, equipment, restrictions, healthConnectEnabled == true, birthMonth, birthYear, gender ?: Gender.Male, metricSystem, heightCm, weightKg, skipsWarmups = trainingLevel.skipsWarmupsByDefault, skipsCooldowns = true, appLanguage = appLanguage, gymJoinCode = gymJoinCode, gymJoinName = gymJoinName, birthDay = birthDay), useAi)
+            onCompleted(OnboardingProfile(name.trim(), selectedGoal, selectedLifestyle, workoutDays, duration, trainingLevel, trainingSplit, selectedBodyPhase, customFocuses.filterKeys { it in workoutDays }, gymType ?: GymType.SmallGym, equipment, restrictions, healthConnectEnabled == true, birthMonth, birthYear, gender ?: Gender.Male, metricSystem, heightCm, weightKg, skipsWarmups = trainingLevel.skipsWarmupsByDefault, skipsCooldowns = true, appLanguage = appLanguage, gymJoinCode = gymJoinCode, gymJoinName = gymJoinName.takeIf { gymJoinCode != null }, coachJoinCode = coachJoinCode, birthDay = birthDay), useAi)
         }
     }
 
@@ -482,6 +486,7 @@ fun OnboardingScreen(
         when (currentStep) {
             0 -> CoverStep(onStart = {
                 gymJoinCode = null
+                coachJoinCode = null
                 gymJoinName = null
                 step = 1
             }, onLogin = {
@@ -756,10 +761,10 @@ fun OnboardingScreen(
                                                     gymCodeScope.launch {
                                                         val result = runCatching { onCheckGymJoinCode(parsed) }.getOrNull()
                                                         if (result != null) {
-                                                            gymJoinCode = result.code
+                                                            gymJoinCode = result.code.takeUnless { result.isCoach }
+                                                            coachJoinCode = result.code.takeIf { result.isCoach }
                                                             gymJoinName = result.gymName
-                                                            gymType = GymType.BigGym
-                                                            equipment = GymType.BigGym.defaultEquipment
+                                                            if (!result.isCoach) { gymType = GymType.BigGym; equipment = GymType.BigGym.defaultEquipment }
                                                             isGymCodePickerVisible = false
                                                             step = 1
                                                         } else gymCodeError = validationErrorMessage
@@ -786,13 +791,13 @@ fun OnboardingScreen(
                     gymCodeScope.launch {
                         val result = runCatching { onCheckGymJoinCode(requireNotNull(parseGymJoinCode(gymCodeInput))) }.getOrNull()
                         if (result != null) {
-                            gymJoinCode = result.code
+                            gymJoinCode = result.code.takeUnless { result.isCoach }
+                            coachJoinCode = result.code.takeIf { result.isCoach }
                             gymJoinName = result.gymName
                             // A gym membership supplies the training location and
                             // equipment in iOS, so the gym questions are skipped
                             // without falling back to the small-gym defaults.
-                            gymType = GymType.BigGym
-                            equipment = GymType.BigGym.defaultEquipment
+                            if (!result.isCoach) { gymType = GymType.BigGym; equipment = GymType.BigGym.defaultEquipment }
                             gymCodeError = null
                             isGymCodePickerVisible = false
                             step = 1
@@ -828,7 +833,8 @@ fun OnboardingScreen(
             weightKg = weightKg,
             appLanguage = appLanguage,
             gymJoinCode = gymJoinCode,
-            gymJoinName = gymJoinName,
+            gymJoinName = gymJoinName.takeIf { gymJoinCode != null },
+            coachJoinCode = coachJoinCode,
         )
         AuthenticationSheet(
             register = authenticationRegisters,
@@ -840,7 +846,7 @@ fun OnboardingScreen(
                 isLoginVisible = false
                 if (authenticationRegisters && registrationCompletesOnboarding) {
                     onRegistered(response, authenticationProfile)
-                    if (authenticationProfile.gymJoinCode != null) {
+                    if (authenticationProfile.gymJoinCode != null || authenticationProfile.coachJoinCode != null) {
                         // iOS members enter the app after registration and
                         // membership join; they do not enter the AI-plan step.
                         onCompleted(authenticationProfile, false)
@@ -848,7 +854,7 @@ fun OnboardingScreen(
                         step = 18
                     }
                 } else {
-                    onLoggedIn(response, gymJoinCode)
+                    onLoggedIn(response, gymJoinCode, coachJoinCode)
                 }
             },
         )

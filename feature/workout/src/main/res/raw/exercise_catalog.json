@@ -3,7 +3,7 @@
         "schemaVersion": "1.0.0",
         "locale": "en",
         "source": "WildforceShared ExerciseCatalog.swift",
-        "exerciseCount": 145
+        "exerciseCount": 146
     },
     "referenceData": {
         "exerciseCategories": [
@@ -5070,6 +5070,72 @@
             "assets": {
                 "verticalImageKey": "latPulldown_{gender}.jpeg",
                 "tutorialImageKey": "latPulldown_{gender}.png"
+            }
+        },
+        {
+            "id": "closeGripLatPulldown",
+            "name": "Close-Grip Lat Pulldown",
+            "aliases": [
+                "Close-Grip Pulldown",
+                "Neutral-Grip Lat Pulldown",
+                "Jaló tancat",
+                "Jalón cerrado"
+            ],
+            "category": "strength",
+            "requiredEquipment": [
+                "cableMachine"
+            ],
+            "compatibleGoals": [
+                "buildMuscle",
+                "generalFitness",
+                "bodyRecomposition"
+            ],
+            "movementPatterns": [
+                "verticalPull"
+            ],
+            "mechanic": "compound",
+            "difficulty": "completeBeginner",
+            "isUnilateral": false,
+            "isPerSideLoad": false,
+            "contraindicatedRestrictions": [
+                "shoulderPain",
+                "elbowPain"
+            ],
+            "substitutionCandidates": [
+                "latPulldown",
+                "pullUp",
+                "chinUp",
+                "seatedCableRow"
+            ],
+            "description": "A close-grip lat pulldown that trains the back through a controlled vertical pulling pattern.",
+            "instructions": [
+                "Sit at a lat pulldown machine and secure your thighs under the knee pads.",
+                "Attach a close-grip or neutral-grip handle to the high cable and hold it with your palms facing each other.",
+                "Keep your chest tall with a slight lean back, then pull the handle toward your upper chest by driving your elbows down and back.",
+                "Pause without shrugging your shoulders, then return the handle overhead with control."
+            ],
+            "tips": [
+                "Keep your elbows close to your torso throughout the pull.",
+                "Do not turn the movement into a row by leaning back excessively.",
+                "Let your arms extend fully at the top while keeping tension in your back."
+            ],
+            "primaryMuscles": [
+                "back"
+            ],
+            "secondaryMuscles": [
+                "biceps"
+            ],
+            "supportsExternalLoad": true,
+            "trackingMode": "reps",
+            "targetMetrics": [
+                "reps",
+                "weight"
+            ],
+            "metValue": 4,
+            "notesForLlm": "Close-grip or neutral-grip lat pulldown. Keep the elbows close to the torso and pull the handle to the upper chest without excessive torso lean.",
+            "assets": {
+                "verticalImageKey": "closeGripLatPulldown_{gender}.jpeg",
+                "tutorialImageKey": "closeGripLatPulldown_{gender}.png"
             }
         },
         {

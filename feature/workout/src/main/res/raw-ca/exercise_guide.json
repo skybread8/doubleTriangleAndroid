@@ -1944,5 +1944,117 @@
       "Fes servir un esglaó o una plataforma estable només si cap amb seguretat dins la màquina Smith.",
       "Dona prioritat a completar tot el recorregut del moviment abans que a afegir càrrega."
     ]
+  },
+  "closeGripLatPulldown": {
+    "description": "Un jaló al pit amb agafada tancada que treballa l’esquena amb un moviment de tracció vertical controlat.",
+    "instructions": [
+      "Seu-te en una màquina de jaló al pit i fixa les cuixes sota els rodets de subjecció.",
+      "Col·loca un mànec d’agafada tancada o neutra al cable alt i subjecta’l amb els palmells encarats.",
+      "Mantén el pit ben dret i inclina’t lleugerament enrere. Després, estira el mànec cap a la part superior del pit, portant els colzes avall i enrere.",
+      "Fes una pausa sense apujar les espatlles i torna a portar el mànec per damunt del cap de manera controlada."
+    ],
+    "tips": [
+      "Mantén els colzes a prop del tors durant tota la tracció.",
+      "No converteixis el moviment en un rem inclinant-te massa enrere.",
+      "Estén els braços del tot a la part superior, mantenint la tensió a l’esquena."
+    ]
+  },
+  "ezBarCurl": {
+    "description": "Un curl de bíceps dret amb una barra Z, les agafades inclinades de la qual poden resultar més còmodes per als canells.",
+    "instructions": [
+      "Posa't dret amb els peus separats a l'amplada dels malucs. Agafa la barra Z amb les mans en supinació i els braços estesos als costats.",
+      "Mantén els colzes a prop del tors i flexiona els braços per portar la barra cap a les espatlles.",
+      "Contreu els bíceps breument a la part superior del moviment, sense deixar que els colzes avancin.",
+      "Baixa la barra a poc a poc fins que els braços estiguin gairebé del tot estesos."
+    ],
+    "tips": [
+      "Tria la posició inclinada de les mans que et resulti còmoda per als canells.",
+      "Mantén el tors quiet i evita balancejar la barra per aixecar el pes.",
+      "Controla el recorregut i atura't abans d'estendre els colzes fins a un punt dolorós."
+    ]
+  },
+  "ropeTricepsPushdown": {
+    "description": "Un exercici d’extensió de tríceps a la politja amb corda que aïlla els tríceps i permet una contracció intensa al final de cada repetició.",
+    "instructions": [
+      "Connecta una corda a una politja alta i posa’t dret mirant cap a la màquina.",
+      "Agafa els extrems de la corda amb una presa neutra i mantén els colzes a prop dels costats.",
+      "Empeny la corda cap avall fins que els colzes estiguin completament estesos i separa’n lleugerament els extrems al final del moviment.",
+      "Torna a pujar la corda de manera controlada fins que els avantbraços quedin just per sobre de l’horitzontal."
+    ],
+    "tips": [
+      "Mantén les espatlles baixes i els braços quiets durant tot el moviment.",
+      "Evita inclinar-te sobre el cable per moure la càrrega amb el pes del cos.",
+      "Fes el moviment amb un recorregut complet però controlat, sense bloquejar els colzes bruscament."
+    ]
+  },
+  "reversePecDeck": {
+    "description": "Un exercici d’obertures inverses a la màquina per aïllar els deltoides posteriors i la part superior de l’esquena.",
+    "instructions": [
+      "Col·loca els braços de la màquina darrere teu i seu mirant cap al suport, amb el pit recolzat al coixinet.",
+      "Agafa les nanses amb els braços estesos davant teu a l’altura de les espatlles.",
+      "Obre els braços seguint un arc ampli fins que quedin alineats amb el tors.",
+      "Tensa els deltoides posteriors i torna lentament a la posició inicial."
+    ],
+    "tips": [
+      "Mantén el pit ben recolzat al coixinet durant tota la sèrie.",
+      "Guia el moviment amb els colzes i evita encongir les espatlles.",
+      "Mantén un ritme controlat i evita que les plaques de pes es toquin entre repeticions."
+    ]
+  },
+  "spiderCurl": {
+    "description": "Un curl amb el pit recolzat, fet de bocaterrosa en un banc inclinat per aïllar els bíceps i limitar l’impuls.",
+    "instructions": [
+      "Col·loca un banc ajustable amb una inclinació pronunciada i estira’t de bocaterrosa amb el pit recolzat al respatller.",
+      "Deixa que els braços pengin rectes cap a terra mentre subjectes les manuelles amb els palmells mirant endavant.",
+      "Flexiona els braços i porta els pesos cap a les espatlles sense deixar que els colzes avancin.",
+      "Baixa les manuelles lentament fins que tornis a tenir els braços completament estirats."
+    ],
+    "tips": [
+      "Mantén els braços perpendiculars a terra durant tot el moviment.",
+      "Fes servir menys pes que en els curls de peu per mantenir una execució estricta.",
+      "Fes una breu pausa a dalt sense aixecar el pit del banc."
+    ]
+  },
+  "preacherCurl": {
+    "description": "Un curl amb suport que manté els braços fixos per aïllar els bíceps al llarg d'un recorregut controlat.",
+    "instructions": [
+      "Ajusta un banc predicador o un banc regulable perquè els braços descansin fermament sobre el suport.",
+      "Agafa una barra EZ amb les mans en supinació i comença amb els braços gairebé del tot estirats.",
+      "Flexiona els braços i porta la barra cap a les espatlles mantenint els braços recolzats al suport.",
+      "Baixa la barra lentament fins que notis que s'estiren els bíceps, sense forçar l'extensió dels colzes."
+    ],
+    "tips": [
+      "Mantén els canells en una posició neutra i evita doblegar-los cap enrere quan aixequis pes.",
+      "No deixis que la barra reboti a la posició més baixa.",
+      "Controla el recorregut i atura't abans d'estendre els colzes fins a un punt dolorós."
+    ]
+  },
+  "hackSquat": {
+    "description": "Una màquina guiada per fer esquats que permet entrenar els quàdriceps i els glutis amb molta estabilitat i poca exigència d'equilibri.",
+    "instructions": [
+      "Ajusta els coixinets de les espatlles perquè puguis estar dret amb l'esquena recolzada al respatller.",
+      "Col·loca els peus a la plataforma separats a l'amplada de les espatlles i una mica per davant dels malucs.",
+      "Desbloqueja els topalls de seguretat i baixa de manera controlada flexionant els genolls i els malucs.",
+      "Empeny amb tota la planta dels peus per tornar a la posició inicial, sense bloquejar els genolls de cop."
+    ],
+    "tips": [
+      "Mantén la zona lumbar en contacte amb el respatller durant tot el moviment.",
+      "Col·loca els peus de manera que els genolls segueixin còmodament la línia dels dits.",
+      "Controla la posició més baixa i utilitza els topalls de seguretat a una profunditat adequada."
+    ]
+  },
+  "machineHipThrust": {
+    "description": "Una màquina guiada d'empenta de maluc que treballa directament els glutis i ofereix una posició estable i còmoda.",
+    "instructions": [
+      "Ajusta el respatller i el cinturó o el coixinet per als malucs perquè quedi ben col·locat sobre els malucs.",
+      "Col·loca els peus separats aproximadament a l'amplada de les espatlles. A dalt, els genolls han d'estar flexionats uns 90 graus.",
+      "Empeny amb els talons i estén els malucs fins que el tors i les cuixes formin una línia recta.",
+      "Estreny els glutis a dalt i després baixa la càrrega de manera controlada."
+    ],
+    "tips": [
+      "Mantén les costelles avall i evita hiperestendre la zona lumbar a dalt.",
+      "Col·loca els peus de manera que notis el moviment principalment als glutis i no als isquiotibials.",
+      "Utilitza els topalls de seguretat de la màquina abans de carregar molt de pes."
+    ]
   }
 }

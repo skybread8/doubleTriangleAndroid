@@ -1944,5 +1944,117 @@
       "Utiliza un escalón o una plataforma estable solo si cabe de forma segura dentro de la máquina Smith.",
       "Da prioridad a completar todo el recorrido del movimiento antes que a añadir carga."
     ]
+  },
+  "closeGripLatPulldown": {
+    "description": "Un jalón al pecho con agarre cerrado que trabaja la espalda mediante un movimiento de tracción vertical controlado.",
+    "instructions": [
+      "Siéntate en una máquina de jalón al pecho y asegura los muslos bajo los rodillos de sujeción.",
+      "Acopla un agarre cerrado o neutro al cable alto y sujétalo con las palmas enfrentadas.",
+      "Mantén el pecho erguido e inclínate ligeramente hacia atrás. Después, lleva el agarre hacia la parte superior del pecho, dirigiendo los codos hacia abajo y atrás.",
+      "Haz una pausa sin encoger los hombros y luego devuelve el agarre por encima de la cabeza de forma controlada."
+    ],
+    "tips": [
+      "Mantén los codos cerca del torso durante todo el tirón.",
+      "No conviertas el movimiento en un remo inclinándote demasiado hacia atrás.",
+      "Extiende los brazos por completo en la parte superior, manteniendo la tensión en la espalda."
+    ]
+  },
+  "ezBarCurl": {
+    "description": "Un curl de bíceps de pie con una barra Z, cuyos agarres angulados pueden resultar más cómodos para las muñecas.",
+    "instructions": [
+      "Colócate de pie con los pies separados a la anchura de las caderas. Sujeta la barra Z con un agarre supino y los brazos extendidos a los lados.",
+      "Mantén los codos cerca del torso y flexiona los brazos para llevar la barra hacia los hombros.",
+      "Contrae los bíceps brevemente arriba, sin dejar que los codos se desplacen hacia delante.",
+      "Baja la barra lentamente hasta que los brazos estén casi completamente extendidos."
+    ],
+    "tips": [
+      "Elige la posición de las manos en ángulo que resulte cómoda para tus muñecas.",
+      "Mantén el torso quieto y evita balancear la barra para levantar el peso.",
+      "Controla el recorrido y detente antes de extender los codos hasta un punto doloroso."
+    ]
+  },
+  "ropeTricepsPushdown": {
+    "description": "Un ejercicio de extensión de tríceps en polea con cuerda que aísla los tríceps y permite una contracción intensa al final de cada repetición.",
+    "instructions": [
+      "Conecta una cuerda a una polea alta y ponte de pie mirando hacia la máquina.",
+      "Sujeta los extremos de la cuerda con un agarre neutro y mantén los codos pegados a los costados.",
+      "Empuja la cuerda hacia abajo hasta extender completamente los codos y separa ligeramente sus extremos al final del movimiento.",
+      "Devuelve la cuerda de forma controlada hasta que los antebrazos queden justo por encima de la horizontal."
+    ],
+    "tips": [
+      "Mantén los hombros bajos y los brazos inmóviles durante todo el movimiento.",
+      "Evita inclinarte sobre el cable para mover la carga con el peso de tu cuerpo.",
+      "Realiza el movimiento con un recorrido completo y controlado, sin bloquear los codos bruscamente."
+    ]
+  },
+  "reversePecDeck": {
+    "description": "Un ejercicio de aperturas inversas en máquina para aislar los deltoides posteriores y la parte superior de la espalda.",
+    "instructions": [
+      "Coloca los brazos de la máquina detrás de ti y siéntate mirando hacia el respaldo, con el pecho apoyado en el acolchado.",
+      "Sujeta las empuñaduras con los brazos extendidos delante de ti a la altura de los hombros.",
+      "Abre los brazos describiendo un arco amplio hasta alinearlos con el torso.",
+      "Contrae los deltoides posteriores y vuelve lentamente a la posición inicial."
+    ],
+    "tips": [
+      "Mantén el pecho bien apoyado en el acolchado durante toda la serie.",
+      "Guía el movimiento con los codos y evita encoger los hombros.",
+      "Mantén un ritmo controlado y evita que las placas de peso se toquen entre repeticiones."
+    ]
+  },
+  "spiderCurl": {
+    "description": "Un curl con el pecho apoyado, realizado boca abajo en un banco inclinado para aislar los bíceps y limitar el impulso.",
+    "instructions": [
+      "Coloca un banco ajustable con una inclinación pronunciada y túmbate boca abajo con el pecho apoyado en el respaldo.",
+      "Deja que los brazos cuelguen rectos hacia el suelo mientras sujetas las mancuernas con las palmas hacia delante.",
+      "Flexiona los brazos y lleva las pesas hacia los hombros sin dejar que los codos se desplacen hacia delante.",
+      "Baja las mancuernas lentamente hasta volver a extender completamente los brazos."
+    ],
+    "tips": [
+      "Mantén los brazos perpendiculares al suelo durante todo el movimiento.",
+      "Utiliza menos peso que en los curls de pie para mantener una técnica estricta.",
+      "Haz una breve pausa arriba sin levantar el pecho del banco."
+    ]
+  },
+  "preacherCurl": {
+    "description": "Un curl con apoyo que mantiene los brazos fijos para aislar los bíceps durante un recorrido controlado.",
+    "instructions": [
+      "Ajusta un banco predicador o un banco regulable para que los brazos queden bien apoyados en el soporte.",
+      "Sujeta una barra EZ con agarre supino y empieza con los brazos casi completamente extendidos.",
+      "Flexiona los brazos y lleva la barra hacia los hombros manteniendo los brazos apoyados en el soporte.",
+      "Baja la barra lentamente hasta notar un estiramiento en los bíceps, sin forzar la extensión de los codos."
+    ],
+    "tips": [
+      "Mantén las muñecas en posición neutra y evita doblarlas hacia atrás al levantar peso.",
+      "No dejes que la barra rebote en la posición más baja.",
+      "Controla el recorrido y detente antes de extender los codos hasta un punto doloroso."
+    ]
+  },
+  "hackSquat": {
+    "description": "Una máquina de sentadillas guiada que permite entrenar los cuádriceps y los glúteos con gran estabilidad y pocas exigencias de equilibrio.",
+    "instructions": [
+      "Ajusta las hombreras para poder mantenerte erguido con la espalda apoyada en el respaldo.",
+      "Coloca los pies en la plataforma separados a la anchura de los hombros y un poco por delante de las caderas.",
+      "Desbloquea los seguros y baja de forma controlada flexionando las rodillas y las caderas.",
+      "Empuja con toda la planta de los pies para volver a la posición inicial, sin bloquear las rodillas bruscamente."
+    ],
+    "tips": [
+      "Mantén la zona lumbar en contacto con el respaldo durante todo el movimiento.",
+      "Coloca los pies de forma que las rodillas sigan cómodamente la línea de los dedos.",
+      "Controla la posición más baja y utiliza los topes de seguridad a una profundidad adecuada."
+    ]
+  },
+  "machineHipThrust": {
+    "description": "Una máquina guiada de empuje de cadera que trabaja directamente los glúteos y ofrece una posición estable y cómoda.",
+    "instructions": [
+      "Ajusta el respaldo y el cinturón o el apoyo para la cadera para que quede bien colocado sobre las caderas.",
+      "Apoya los pies separados aproximadamente a la anchura de los hombros. Arriba, las rodillas deben estar flexionadas unos 90 grados.",
+      "Empuja con los talones y extiende las caderas hasta que el torso y los muslos formen una línea recta.",
+      "Aprieta los glúteos arriba y luego baja la carga de forma controlada."
+    ],
+    "tips": [
+      "Mantén las costillas hacia abajo y evita hiperextender la zona lumbar arriba.",
+      "Coloca los pies de forma que notes el movimiento principalmente en los glúteos y no en los isquiotibiales.",
+      "Utiliza los topes de seguridad de la máquina antes de cargar mucho peso."
+    ]
   }
 }

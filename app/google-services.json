@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "737395571151",
+    "project_id": "wildforce-prod",
+    "storage_bucket": "wildforce-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:737395571151:android:9e117d36f221af90eb3aba",
+        "android_client_info": {
+          "package_name": "io.codepassion.wildforce.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "737395571151-0i6p4sko3790qdetiut3onbokbpcnvhk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtbhwLFnb1z_JHso6rh3MISBeAB9dvKd0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "737395571151-0i6p4sko3790qdetiut3onbokbpcnvhk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "737395571151-0765h8e0g0sujldft4fj6h47leu7851h.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "io.codepassion.doublegym",
+                "app_store_id": "6761293096"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -274,6 +274,10 @@ fun WorkoutHubScreen(
     contentPadding: PaddingValues,
     state: WorkoutHubState = PreviewWorkoutRepository.load(),
     planHistory: List<WorkoutHubState> = emptyList(),
+    gymName: String? = null,
+    gymWorkouts: List<WorkoutDaySummary> = emptyList(),
+    onRefreshGym: () -> Unit = {},
+    gymHistory: List<WorkoutDaySummary> = emptyList(),
     onWorkoutSelected: (WorkoutDaySummary) -> Unit = {},
     onWorkoutAction: (WorkoutDaySummary, WorkoutDayMenuAction) -> Unit = { workout, _ -> onWorkoutSelected(workout) },
     gender: String = "male",
@@ -283,6 +287,7 @@ fun WorkoutHubScreen(
     skipsCooldowns: Boolean = false,
     customEquipmentPresets: List<Pair<String, String>> = emptyList(),
     allowAutomaticCreation: Boolean = true,
+    hasAiCoach: Boolean = true,
     canRegeneratePlan: Boolean = true,
     canGenerateNextPlan: Boolean = true,
     onGenerateNextPlan: () -> Unit = {},
@@ -302,7 +307,11 @@ fun WorkoutHubScreen(
     checkInContent: (@Composable () -> Unit)? = null,
 ) {
     var selectedDay by remember { mutableStateOf<DayOfWeek?>(null) }
-    var mode by remember { mutableStateOf(WorkoutMode.Plan) }
+    val availableModes = io.codepassion.doubletriangle.core.model.availableWorkoutModes(gymName != null, hasAiCoach)
+    var mode by remember { mutableStateOf(availableModes.first()) }
+    LaunchedEffect(availableModes) {
+        if (mode !in availableModes) mode = availableModes.first()
+    }
     val customContext = androidx.compose.ui.platform.LocalContext.current.applicationContext
     var customWorkouts by remember { mutableStateOf(CustomWorkoutStore.load(customContext)) }
     var editingCustomWorkout by remember { mutableStateOf<WorkoutDaySummary?>(null) }
@@ -382,7 +391,7 @@ fun WorkoutHubScreen(
                 WorkoutHeader(
                     state = state,
                     planHistory = planHistory,
-                    customWorkouts = customWorkouts,
+                    customWorkouts = customWorkouts + gymHistory,
                     avatarPath = avatarPath,
                     avatarRevision = avatarRevision,
                     openFeedback = openFeedback,
@@ -400,9 +409,10 @@ fun WorkoutHubScreen(
             }
         }
 
-        AnimatedVisibility(visible = hubEntered, enter = fadeIn(tween(320, delayMillis = 70)) + slideInVertically(tween(320, delayMillis = 70)) { it / 18 }) {
+        AnimatedVisibility(visible = hubEntered && availableModes.size > 1, enter = fadeIn(tween(320, delayMillis = 70)) + slideInVertically(tween(320, delayMillis = 70)) { it / 18 }) {
             WorkoutModeSelector(
                 selected = mode,
+                modes = availableModes,
                 onSelected = { mode = it },
                 modifier = Modifier.padding(start = 18.dp, top = 16.dp, end = 18.dp, bottom = 8.dp),
             )
@@ -433,6 +443,26 @@ fun WorkoutHubScreen(
                 checkInContent = checkInContent,
                 modifier = Modifier.fillMaxSize(),
             )
+        }
+        AnimatedVisibility(
+            visible = mode == WorkoutMode.Gym,
+            modifier = Modifier.weight(1f),
+        ) {
+            LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 12.dp, bottom = 120.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                item { Text(gymName.orEmpty(), style = MaterialTheme.typography.h6, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary) }
+                item { Text(androidx.compose.ui.res.stringResource(R.string.gym_workout_sync_hint), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                if (gymWorkouts.isEmpty()) {
+                    item {
+                        Column {
+                            Text(androidx.compose.ui.res.stringResource(R.string.gym_workouts_pending), color = WildforceThemeTokens.textSecondary)
+                            TextButton(onClick = onRefreshGym) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.retry)) }
+                        }
+                    }
+                }
+                items(gymWorkouts, key = { it.id }) { workout ->
+                    WorkoutCard(workout, gender, appLanguage, null, onWorkoutAction, allowAutomaticCreation, false) { onWorkoutSelected(workout) }
+                }
+            }
         }
         AnimatedVisibility(
             visible = mode == WorkoutMode.Custom,
@@ -557,6 +587,7 @@ private fun WorkoutHeader(
     appLanguage: String,
     onWorkoutSelected: (WorkoutDaySummary) -> Unit,
 ) {
+    val christmasActive = io.codepassion.doubletriangle.core.designsystem.rememberChristmasActive()
     var showsMoreOptions by remember { mutableStateOf(false) }
     var showsFeedback by remember { mutableStateOf(false) }
     var showsFaq by remember { mutableStateOf(false) }
@@ -580,8 +611,9 @@ private fun WorkoutHeader(
     val streakLabel = androidx.compose.ui.res.stringResource(SharedR.string.ui_sheet_streak___d, state.user.currentStreak)
     val plannedTodayLabel = androidx.compose.ui.res.stringResource(SharedR.string.ui_sheet_planned_workout) + ", " + androidx.compose.ui.res.stringResource(SharedR.string.ui_sheet_today)
     Row(Modifier.fillMaxWidth().padding(horizontal = 28.dp), verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(42.dp)) {
         Box(
-            Modifier.size(42.dp).clip(CircleShape).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.10f)),
+            Modifier.matchParentSize().clip(CircleShape).background(WildforceThemeTokens.textSecondary.copy(alpha = 0.10f)),
             contentAlignment = Alignment.Center,
         ) {
             val avatar = remember(avatarPath, avatarRevision) { avatarPath?.let(BitmapFactory::decodeFile) }
@@ -600,6 +632,12 @@ private fun WorkoutHeader(
                     tint = WildforceThemeTokens.textSecondary,
                 )
             }
+        }
+        if (christmasActive) {
+            io.codepassion.doubletriangle.core.designsystem.ChristmasHat(
+                Modifier.align(Alignment.TopCenter).offset(y = (-7).dp).size(27.dp).graphicsLayer { rotationZ = (-10f) },
+            )
+        }
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(state.user.name, fontFamily = FontFamily.Default, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -627,6 +665,9 @@ private fun WorkoutHeader(
                 Modifier.heightIn(min = 48.dp).clip(RoundedCornerShape(12.dp)).clickable { showsStreakCalendar = true }.padding(horizontal = 3.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                if (christmasActive) {
+                    io.codepassion.doubletriangle.core.designsystem.ChristmasSnowflakes(Modifier.size(22.dp))
+                }
                 // The warning belongs to the flame, not the complete streak
                 // control: iOS layers it over the flame's bottom-right corner.
                 Box(Modifier.size(18.dp)) {
@@ -1087,6 +1128,7 @@ internal fun isWorkoutCompletedOnDate(state: WorkoutHubState, date: LocalDate): 
 @Composable
 private fun WorkoutModeSelector(
     selected: WorkoutMode,
+    modes: List<WorkoutMode>,
     onSelected: (WorkoutMode) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -1099,10 +1141,11 @@ private fun WorkoutModeSelector(
                 .background(WildforceThemeTokens.textSecondary.copy(alpha = 0.16f)).padding(2.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            WorkoutMode.values().forEach { mode ->
+            modes.forEach { mode ->
                 val isSelected = selected == mode
                 val modeLabel = androidx.compose.ui.res.stringResource(when (mode) {
                     WorkoutMode.Plan -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_your_plan
+                    WorkoutMode.Gym -> R.string.gym_plan
                     WorkoutMode.Custom -> io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_custom_workouts
                 })
                 Box(
@@ -1407,11 +1450,13 @@ private fun WeeklyPlanHeaderCard(state: WorkoutHubState, planHistory: List<Worko
     val planGoal = state.planGoal?.takeIf(String::isNotBlank) ?: state.user.goal
     val planGoalLabel = localizedWorkoutLabel(planGoal, appLanguage)
     val planNotes = state.planNotes?.takeIf(String::isNotBlank)
+    val christmasActive = io.codepassion.doubletriangle.core.designsystem.rememberChristmasActive()
     Column(
         // Match iOS's PlanHeaderView: both home context cards share the same
         // opaque secondary surface instead of mixing glass and solid whites.
         Modifier.fillMaxWidth()
             .background(WildforceThemeTokens.backgroundSecondary, RoundedCornerShape(20.dp))
+            .then(if (christmasActive) Modifier.border(1.5.dp, Color(0xFF8DB7A1), RoundedCornerShape(20.dp)) else Modifier)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -1600,13 +1645,15 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage:
     val completionMetrics = remember(workout.id, workout.status) {
         if (workout.status == WorkoutStatus.Completed) WorkoutCompletionMetricsStore.load(sessionContext, workout.id) else null
     }
+    val christmasActive = io.codepassion.doubletriangle.core.designsystem.rememberChristmasActive()
     val focusLabel = localizedWorkoutLabel(workout.focus, appLanguage)
     val dayTypeLabel = localizedWorkoutLabel(workout.dayType, appLanguage)
     val statusLabel = workoutCardStatus(workout.status, isInProgress)?.first
     val dayLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_day) + " " + workout.order
     val durationLabel = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_estimated_duration___d_minutes, workout.estimatedMinutes)
     val cardAccessibilityLabel = buildString {
-        append("$dayLabel, ${workout.title}")
+        if (workout.gymProgramId == null) append("$dayLabel, ")
+        append(workout.title)
         statusLabel?.let { append(", $it") }
         append(", $focusLabel")
         if (workout.dayType.isNotBlank()) append(", $dayTypeLabel")
@@ -1650,6 +1697,11 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage:
                     ),
                 ),
             )
+            if (christmasActive) {
+                io.codepassion.doubletriangle.core.designsystem.ChristmasWorkoutTrim(
+                    Modifier.matchParentSize(),
+                )
+            }
             if (onDuplicate != null && workout.kind != "template" && workout.status in setOf(WorkoutStatus.Planned, WorkoutStatus.InProgress, WorkoutStatus.Completed)) {
                 var expanded by remember(workout.id) { mutableStateOf(false) }
                 Box(Modifier.align(Alignment.TopEnd).fillMaxWidth().wrapContentSize(Alignment.TopEnd).padding(end = 12.dp).zIndex(1f)) {
@@ -1682,7 +1734,7 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage:
                 Modifier.fillMaxWidth()
                     .padding(start = 12.dp, top = 6.dp, end = 12.dp, bottom = 10.dp),
             ) {
-                Text(
+                if (workout.gymProgramId == null) Text(
                     dayLabel.uppercase(),
                     fontFamily = AntonFontFamily,
                     fontSize = 30.sp,
@@ -1722,6 +1774,7 @@ private fun WorkoutCard(workout: WorkoutDaySummary, gender: String, appLanguage:
                     // of exposing clipped, scrollable fragments.
                     WorkoutCardMetadata(Icons.Filled.MyLocation, focusLabel, modifier = Modifier.weight(1f))
                     if (workout.dayType.isNotBlank()) WorkoutCardMetadata(workoutDayTypeIcon(workout.dayType), dayTypeLabel, modifier = Modifier.weight(1f))
+                    if (workout.gymProgramId != null) WorkoutCardMetadata(Icons.Filled.Business, androidx.compose.ui.res.stringResource(R.string.gym_plan), modifier = Modifier.weight(1f))
                     WorkoutCardMetadata(
                         Icons.Filled.Timer,
                         if (workout.status == WorkoutStatus.Completed) {
@@ -2145,7 +2198,7 @@ private fun AdaptWorkoutLocationDialog(
 }
 
 @Composable
-fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, historyReady: Boolean = true, useImperial: Boolean = false, showWearStartOption: Boolean = false, appLanguage: String = "Español", mesocyclePhase: io.codepassion.doubletriangle.core.model.MesocyclePhase? = null, onBack: () -> Unit, onStart: (Boolean) -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}, adaptEquipmentPresets: List<Pair<String, String>> = emptyList(), adaptEquipmentPresetIds: List<String> = emptyList(), adaptAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null, canUseAiCoach: Boolean = true, onShowAiCoachOffer: () -> Unit = {}, onResultEdited: () -> Unit = {}, duplicateWorkout: (suspend (WorkoutDaySummary, String) -> WorkoutDaySummary)? = null, onDuplicated: (WorkoutDaySummary) -> Unit = {}, initialMenuAction: WorkoutDayMenuAction? = null, onMenuActionConsumed: () -> Unit = {}) {
+fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, historyReady: Boolean = true, useImperial: Boolean = false, showWearStartOption: Boolean = false, appLanguage: String = "Español", mesocyclePhase: io.codepassion.doubletriangle.core.model.MesocyclePhase? = null, showsPlanDayNumber: Boolean = true, onBack: () -> Unit, onStart: (Boolean) -> Unit, onSkip: () -> Unit = {}, onUnskip: () -> Unit = {}, onWorkoutUpdated: (WorkoutDaySummary) -> Unit = {}, adaptEquipmentPresets: List<Pair<String, String>> = emptyList(), adaptEquipmentPresetIds: List<String> = emptyList(), adaptAiGenerator: (suspend (CustomWorkoutRequest) -> WorkoutDaySummary)? = null, canUseAiCoach: Boolean = true, onShowAiCoachOffer: () -> Unit = {}, onResultEdited: () -> Unit = {}, duplicateWorkout: (suspend (WorkoutDaySummary, String) -> WorkoutDaySummary)? = null, onDuplicated: (WorkoutDaySummary) -> Unit = {}, initialMenuAction: WorkoutDayMenuAction? = null, onMenuActionConsumed: () -> Unit = {}) {
     val detailHeroHeight = (LocalConfiguration.current.screenHeightDp * 0.43f).dp.coerceIn(330.dp, 430.dp)
     val focusLabel = localizedWorkoutLabel(workout.focus, appLanguage)
     val dayTypeLabel = localizedWorkoutLabel(workout.dayType, appLanguage)
@@ -2259,6 +2312,9 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, historyReady
             modifier = Modifier.fillMaxWidth().height(detailHeroHeight),
         )
         Box(Modifier.fillMaxWidth().height(detailHeroHeight).background(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.48f), Color.Transparent, WildforceThemeTokens.backgroundSecondary))))
+        if (io.codepassion.doubletriangle.core.designsystem.rememberChristmasActive()) {
+            io.codepassion.doubletriangle.core.designsystem.ChristmasWorkoutTrim(Modifier.matchParentSize())
+        }
         Column(
             Modifier.fillMaxSize()
                 .verticalScroll(androidx.compose.foundation.rememberScrollState())
@@ -2314,12 +2370,12 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, historyReady
                 }
             }
             Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 10.dp)) {
-                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_8c1f2fcbdf15dcce, workout.order), fontFamily = AntonFontFamily, fontSize = 38.sp, color = Color.White, maxLines = 1)
+                if (showsPlanDayNumber) Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_8c1f2fcbdf15dcce, workout.order), fontFamily = AntonFontFamily, fontSize = 38.sp, color = Color.White, maxLines = 1)
                 // WorkoutDayView.swift uses an 8 pt VStack gap between the
                 // day label and the workout title.
                 Text(
                     workout.title.uppercase(),
-                    Modifier.padding(top = 8.dp),
+                    Modifier.padding(top = if (showsPlanDayNumber) 8.dp else 0.dp),
                     fontFamily = AntonFontFamily,
                     fontSize = 24.sp,
                     color = Color.White,
@@ -2425,11 +2481,11 @@ fun WorkoutDetailScreen(workout: WorkoutDaySummary, gender: String, historyReady
                                     Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_b2636d897f370e98, block.rounds), Modifier.padding(start = 9.dp).background(WildforceThemeTokens.accent.copy(alpha = 0.12f), RoundedCornerShape(12.dp)).padding(horizontal = 8.dp, vertical = 3.dp), style = MaterialTheme.typography.caption, fontWeight = FontWeight.Bold, color = WildforceThemeTokens.textPrimary)
                                 }
                             }
-                            block.notes?.let { Text(it, Modifier.padding(top = 5.dp, start = if (collapsible) 22.dp else 14.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                            block.notes.visibleWorkoutBlockNotes()?.let { Text(it, Modifier.padding(top = 5.dp, start = if (collapsible) 22.dp else 14.dp), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
                         }
                     }
                     if (!collapsed) {
-                        block.notes?.takeIf { block.type == WorkoutBlockType.Standard && it.isNotBlank() }?.let { notes ->
+                        block.notes.visibleWorkoutBlockNotes()?.takeIf { block.type == WorkoutBlockType.Standard }?.let { notes ->
                             Text(
                                 notes,
                                 Modifier.padding(top = 8.dp, bottom = 4.dp, start = 12.dp),
@@ -2942,6 +2998,7 @@ fun ActiveWorkoutScreen(
     useImperial: Boolean = false,
     skipRestPeriods: Boolean = false,
     currentStreak: Int = 0,
+    scheduledDays: Set<java.time.DayOfWeek> = java.time.DayOfWeek.entries.toSet(),
     isPlanCompletedAfterWorkout: Boolean = false,
     isMesocycleCompletedAfterWorkout: Boolean = false,
     planName: String = "",
@@ -3579,6 +3636,22 @@ fun ActiveWorkoutScreen(
                 WorkoutSessionStore.load(context, workout.id)?.let { latest ->
                     exerciseIndex = latest.exerciseIndex.coerceIn(0, workout.exercises.lastIndex.coerceAtLeast(0))
                     completedByExercise = latest.completedByExercise
+                    reps = latest.reps
+                    weightKg = latest.weightKg
+                    totalCompletedSets = latest.totalCompletedSets
+                    totalVolumeKg = latest.totalVolumeKg
+                    pendingFeedback = latest.pendingFeedback
+                    selectedFeedback = latest.selectedFeedback ?: "JUSTO"
+                    pendingNote = latest.pendingNote
+                    showsSummary = latest.showsSummary
+                    exerciseStats = latest.exerciseStats
+                    feedbackByExercise = latest.feedbackByExercise
+                    notesByExercise = latest.notesByExercise
+                    completedSetRecords = latest.completedSetRecords
+                    exerciseTimeInitial = latest.exerciseTimeInitial
+                    addedSetsByExercise = latest.addedSetsByExercise
+                    completedDistanceKm = latest.completedDistanceKm
+                    initializedExerciseIndex = latest.exerciseIndex
                     val resumedRest = latest.restRemaining?.takeIf { it > 0 }
                     restRemaining = resumedRest
                     restEndsAtMillis = resumedRest?.let { System.currentTimeMillis() + it * 1_000L }
@@ -3612,6 +3685,7 @@ fun ActiveWorkoutScreen(
                     restContext = restContext,
                     skippedExerciseIndices = skippedExerciseIndices,
                     editableBlocks = workout.editableBlocks(),
+                    skipsRestPeriods = skipRestPeriods,
                 )
                 WorkoutSessionStore.save(context, workout.id, snapshot)
                 val refreshIntent = android.content.Intent(context, WorkoutForegroundService::class.java)
@@ -3717,6 +3791,7 @@ fun ActiveWorkoutScreen(
                 restContext = restContext,
                 skippedExerciseIndices = skippedExerciseIndices,
                 editableBlocks = workout.editableBlocks(),
+                skipsRestPeriods = skipRestPeriods,
             )
             WorkoutSessionStore.save(context, workout.id, snapshot)
             WorkoutSessionStore.saveLegacy(/*
@@ -3725,7 +3800,7 @@ fun ActiveWorkoutScreen(
             */)
         }
     }
-    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, elapsedSeconds, showsSummary) {
+    LaunchedEffect(exerciseIndex, completedByExercise, reps, weightKg, restRemaining, restInitialSeconds, restEndsAtMillis, restTimerPaused, elapsedSeconds, showsSummary, pendingFeedback, selectedFeedback) {
         val activeExercise = exercise ?: return@LaunchedEffect
         if (!showsSummary) {
             WildforceWatchLocalBridge.publish(
@@ -3742,6 +3817,9 @@ fun ActiveWorkoutScreen(
                     weightKg = weightKg,
                     restRemaining = restRemaining,
                     restInitialSeconds = restInitialSeconds,
+                    restEndAtMillis = restEndsAtMillis.takeUnless { restTimerPaused },
+                    pendingFeedback = pendingFeedback,
+                    selectedFeedback = selectedFeedback,
                     exercises = workout.exercises.map { localizedExerciseName(localizedBackgroundContext(context), it.imageKey, it.name) },
                     elapsedSeconds = elapsedSeconds,
                 ),
@@ -3990,8 +4068,8 @@ fun ActiveWorkoutScreen(
         // crashing the activity while returning to the home screen.
         if (completionCommitted) return
         completionCommitted = true
+        runCatching { WorkoutHistoryStore.record(context, workout, exerciseStats, completedSetRecords, feedbackByExercise, notesByExercise) }
         runCatching {
-            WorkoutHistoryStore.record(context, workout, exerciseStats, completedSetRecords, feedbackByExercise, notesByExercise)
             WorkoutCompletionMetricsStore.save(
                 context,
                 workout.id,
@@ -4002,6 +4080,9 @@ fun ActiveWorkoutScreen(
                     totalVolumeKg = totalVolumeKg,
                 ),
             )
+        }
+        // Optional history/metrics failures must not skip the XP and streak commit.
+        runCatching {
             CompletionProgressStore.commit(context, progress, completedOn ?: LocalDate.now())
             WorkoutSessionStore.clear(context, workout.id)
         }
@@ -4020,6 +4101,7 @@ fun ActiveWorkoutScreen(
                 completesPlan = isPlanCompletedAfterWorkout,
                 completesMesocycle = isMesocycleCompletedAfterWorkout,
                 completedOn = completedOn ?: LocalDate.now(),
+                scheduledDays = scheduledDays,
             )
         }
         val recordEvents = remember(workout.id, exerciseStats) { WorkoutCompletionCalculator.records(context, workout, exerciseStats) }
@@ -4151,6 +4233,7 @@ fun ActiveWorkoutScreen(
     }
 
     ActiveWorkoutSurface {
+        val christmasActive = io.codepassion.doubletriangle.core.designsystem.rememberChristmasActive()
         // iOS's ActiveWorkoutSceneView ignores the safe area for the image
         // and both gradient layers. The parent app shell keeps foreground
         // controls below the status bar, so extend only this visual scene
@@ -4201,6 +4284,9 @@ fun ActiveWorkoutScreen(
             ),
         )
         Column(Modifier.fillMaxSize().padding(horizontal = 4.dp)) {
+            if (christmasActive) {
+                io.codepassion.doubletriangle.core.designsystem.ChristmasGarland(Modifier.fillMaxWidth().height(18.dp))
+            }
             val sectionIndices = currentSectionSourceIndices()
             val sectionPosition = currentSourceIndex()?.let(sectionIndices::indexOf) ?: -1
             ActiveWorkoutHeroHeader(
@@ -4265,6 +4351,7 @@ fun ActiveWorkoutScreen(
                     .shadow(12.dp, RoundedCornerShape(54.dp), ambientColor = Color.Black.copy(alpha = 0.10f), spotColor = Color.Black.copy(alpha = 0.10f))
                     .clip(RoundedCornerShape(54.dp))
                     .background(WildforceThemeTokens.backgroundSecondary)
+                    .then(if (christmasActive) Modifier.border(2.dp, Color(0xFF31865C), RoundedCornerShape(54.dp)) else Modifier)
                     // ActiveWorkoutSceneView keeps the sheet clear of the
                     // home-indicator area. Without this outer inset the
                     // completion CTA is clipped at the bottom on gesture-nav
@@ -4572,7 +4659,7 @@ fun ActiveWorkoutScreen(
                                         reps = reps,
                                         weightKg = weightKg,
                                         useImperial = useImperial,
-                                        showWeight = exerciseTracksWeight(exercise),
+                                        showWeight = exerciseTracksWeight(effectiveExercise ?: exercise),
                                         isPerSideLoad = exercise.isPerSideLoad,
                                         onRepsChanged = { reps = it },
                                         onWeightChanged = { weightKg = it },
@@ -4684,6 +4771,7 @@ private fun ActiveWorkoutHeroHeader(
     onRemoveExercise: () -> Unit,
     onCancelWorkout: () -> Unit,
 ) {
+    val christmasActive = io.codepassion.doubletriangle.core.designsystem.rememberChristmasActive()
     Row(Modifier.fillMaxWidth().padding(horizontal = 6.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
         CenteredBackButton(onExit, 40.dp)
         Spacer(Modifier.weight(1f))
@@ -4691,7 +4779,7 @@ private fun ActiveWorkoutHeroHeader(
             Modifier.height(52.dp)
                 .clip(RoundedCornerShape(26.dp))
                 .background(if (MaterialTheme.colors.isLight) Color.White.copy(alpha = 0.68f) else Color.Black.copy(alpha = 0.46f))
-                .border(1.dp, Color.White.copy(alpha = 0.46f), RoundedCornerShape(26.dp))
+                .border(if (christmasActive) 2.dp else 1.dp, if (christmasActive) Color(0xFF31865C) else Color.White.copy(alpha = 0.46f), RoundedCornerShape(26.dp))
                 .padding(horizontal = 2.dp, vertical = 2.dp),
             horizontalArrangement = Arrangement.spacedBy(0.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -4914,6 +5002,7 @@ private fun ActiveWorkoutPhaseContent(
     state: ActiveWorkoutPhaseState,
     actions: ActiveWorkoutPhaseActions,
 ) {
+    val christmasActive = io.codepassion.doubletriangle.core.designsystem.rememberChristmasActive()
     val phaseKey = "${state.exerciseIndex}_${state.pendingFeedback}_${state.restRemaining != null}"
     // Timer ticks update the current phase without restarting its transition.
     // Retain the last snapshot of an outgoing phase until its animation ends.
@@ -5092,7 +5181,7 @@ private fun ActiveWorkoutPhaseContent(
                                             reps = state.reps,
                                             weightKg = state.weightKg,
                                             useImperial = state.useImperial,
-                                            showWeight = exerciseTracksWeight(exercise),
+                                            showWeight = exerciseTracksWeight(state.effectiveExercise ?: exercise),
                                             isPerSideLoad = exercise.isPerSideLoad,
                                             onRepsChanged = actions.onRepsChanged,
                                             onWeightChanged = actions.onWeightChanged,
@@ -5135,7 +5224,7 @@ private fun ActiveWorkoutPhaseContent(
                         onClick = actions.onCompleteCurrentStep,
                         modifier = Modifier.fillMaxWidth().height(48.dp).semantics { contentDescription = completionLabel },
                         shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(backgroundColor = WildforceThemeTokens.textPrimary, contentColor = WildforceThemeTokens.backgroundSecondary),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = if (christmasActive) Color(0xFF176044) else WildforceThemeTokens.textPrimary, contentColor = if (christmasActive) Color.White else WildforceThemeTokens.backgroundSecondary),
                         elevation = ButtonDefaults.elevation(defaultElevation = 2.dp, pressedElevation = 0.dp, disabledElevation = 0.dp),
                     ) {
                         Text(completionLabel.uppercase(), fontWeight = FontWeight.Bold)
@@ -5202,7 +5291,7 @@ private fun SupersetRoundMap(block: WorkoutPathBlock, currentExerciseIndex: Int,
 
 internal fun exerciseTracksWeight(exercise: ExerciseSummary): Boolean {
     if (exercise.targetWeightKg != null || !exercise.targetWeightsKg.isNullOrEmpty()) return true
-    return ExerciseVisualCatalog.equipmentFor(exercise.imageKey).any { it != "Peso corporal" }
+    return catalogWeightMetrics[exercise.imageKey] ?: ExerciseVisualCatalog.equipmentFor(exercise.imageKey).any { it != "Peso corporal" }
 }
 
 @Composable
@@ -5666,6 +5755,8 @@ private fun RestTimerContent(
     onSkip: () -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
+    val christmasActive = io.codepassion.doubletriangle.core.designsystem.rememberChristmasActive()
+    val christmasTimerColor = if (MaterialTheme.colors.isLight) Color(0xFF27714F) else Color(0xFF91D4AD)
     val restLabel = androidx.compose.ui.res.stringResource(when (context) {
         WorkoutRestContext.BetweenSets -> SharedR.string.rest_before_next_set
         WorkoutRestContext.BetweenRounds -> SharedR.string.rest_before_next_round
@@ -5713,7 +5804,7 @@ private fun RestTimerContent(
             ) {
                 CircularProgressIndicator(
                     progress = animatedProgress,
-                    modifier = Modifier.fillMaxSize(), color = WildforceThemeTokens.accent,
+                    modifier = Modifier.fillMaxSize(), color = if (christmasActive) christmasTimerColor else WildforceThemeTokens.accent,
                     backgroundColor = WildforceThemeTokens.textSecondary.copy(alpha = 0.18f), strokeWidth = 12.dp,
                 )
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {

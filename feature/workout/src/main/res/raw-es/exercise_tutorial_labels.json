@@ -137,7 +137,9 @@
     "ezBarSkullCrusher": "Extensión de tríceps tumbado con barra EZ",
     "closeGripDumbbellBenchPress": "Press de banca con mancuernas y agarre cerrado",
     "lyingCableCurl": "Curl de bíceps tumbado en polea",
-    "smithMachineCalfRaise": "Elevación de gemelos en máquina Smith"
+    "smithMachineCalfRaise": "Elevación de gemelos en máquina Smith",
+    "closeGripLatPulldown": "Jalón al pecho con agarre cerrado",
+    "Close-Grip Lat Pulldown": "Jalón al pecho con agarre cerrado"
   },
   "texts": {
     "Walking": "Caminar",

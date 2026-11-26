@@ -96,6 +96,7 @@ class WorkoutQuickAccessWidget : AppWidgetProvider() {
         private val imagePrefetchScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
         fun refresh(context: Context) {
+            runCatching { SeasonalLauncherIcon.refresh(context) }
             val manager = AppWidgetManager.getInstance(context)
             val component = ComponentName(context, WorkoutQuickAccessWidget::class.java)
             updateWidgets(context, manager, manager.getAppWidgetIds(component))

@@ -31,6 +31,7 @@ internal object WorkoutActiveNotification {
     private const val channelId = "active_workout_live_v4"
     private const val notificationId = 4101
     private const val restFinishedNotificationId = 4105
+    private const val workoutNotificationBackground = 0xFF171717.toInt()
     // These match the active workout's progress segments: completed, current,
     // and pending respectively.
     private const val workoutProgressCompleted = 0xFFFFFFFF.toInt()
@@ -101,11 +102,13 @@ internal object WorkoutActiveNotification {
                 context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
             }
             if (vibrator?.hasVibrator() == true) {
+                // Two distinct double pulses make the end of rest easier to notice.
+                val pattern = longArrayOf(0L, 350L, 150L, 350L, 500L, 350L, 150L, 350L)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0L, 180L, 90L, 180L), -1))
+                    vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1))
                 } else {
                     @Suppress("DEPRECATION")
-                    vibrator.vibrate(longArrayOf(0L, 180L, 90L, 180L), -1)
+                    vibrator.vibrate(pattern, -1)
                 }
             }
             RingtoneManager.getRingtone(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))?.play()
@@ -178,7 +181,8 @@ internal object WorkoutActiveNotification {
             .setCategory(android.app.Notification.CATEGORY_WORKOUT)
             .setOnlyAlertOnce(true)
             .setAutoCancel(false)
-            .setColor(workoutProgressCurrent)
+            .setColor(workoutNotificationBackground)
+            .setColorized(true)
 
         @Suppress("NewApi")
         if (useLiveUpdate) {
@@ -309,7 +313,7 @@ internal object WorkoutActiveNotification {
         if (artworkTitle == title && artwork != null) return artwork!!
         val bitmap = Bitmap.createBitmap(720, 360, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        val background = Paint().apply { shader = LinearGradient(0f, 0f, 720f, 360f, intArrayOf(0xFF171717.toInt(), 0xFF6A5A3E.toInt()), null, Shader.TileMode.CLAMP) }
+        val background = Paint().apply { shader = LinearGradient(0f, 0f, 720f, 360f, intArrayOf(workoutNotificationBackground, 0xFF4A4A4A.toInt()), null, Shader.TileMode.CLAMP) }
         canvas.drawRect(0f, 0f, 720f, 360f, background)
         val text = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt(); textSize = 54f; typeface = android.graphics.Typeface.DEFAULT_BOLD }
         canvas.drawText(title.take(26), 42f, 205f, text)

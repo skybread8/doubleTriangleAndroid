@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application>
+        <!-- Android Studio can always launch this stable alias in debug builds. -->
+        <activity-alias
+            android:name="io.codepassion.doubletriangle.LauncherDefault"
+            android:icon="@drawable/wildforce_christmas_broken_icon"
+            android:roundIcon="@drawable/wildforce_christmas_broken_icon"
+            tools:replace="android:icon,android:roundIcon" />
+    </application>
+</manifest>

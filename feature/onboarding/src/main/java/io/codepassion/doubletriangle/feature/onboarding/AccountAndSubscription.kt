@@ -17,6 +17,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.draw.clip
@@ -43,6 +44,7 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -67,6 +69,8 @@ import io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker
 import io.codepassion.doubletriangle.core.model.WildforceApiEnvironment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.json.JSONArray
@@ -137,6 +141,10 @@ data class WildforceGymMembership(
     val teamName: String,
     val gymName: String?,
 )
+
+/** Prefer actual memberships; bookable gyms keep the section useful if that list is unavailable. */
+fun displayedGymMemberships(memberships: List<WildforceGymMembership>, bookableGyms: List<WildforceGymMembership>): List<WildforceGymMembership> =
+    memberships.ifEmpty { bookableGyms }
 
 suspend fun currentWildforceGymMemberships(context: Context): List<WildforceGymMembership>? = withContext(Dispatchers.IO) {
     runCatching {
@@ -322,7 +330,7 @@ fun clearLocalAccountData(context: Context) {
     val keepScreenOn = detailPreferences.getBoolean("keep_screen_on", true)
     listOf(
         "wildforce_profile", "wildforce_profile_details", "wildforce_body_progress", "wildforce_body_metrics",
-        "wildforce_nutrition", "wildforce_nutrition_health", "wildforce_custom_workouts", "wildforce_active_workouts",
+        "wildforce_nutrition", "wildforce_nutrition_health", "wildforce_custom_workouts", "wildforce_gym_programs", "wildforce_active_workouts",
         "wildforce_exercise_history", "wildforce_exercise_profiles", "wildforce_workout_completion_metrics", "wildforce_completion_progress",
         "wildforce_completion_prompts", "wildforce_skipped_exercises", "wildforce_account_progress",
         "wildforce_coach_exercise_media", "wildforce_remote_media", "wildforce_sync_state", "wildforce_remote_sync",
@@ -334,7 +342,7 @@ fun clearLocalAccountData(context: Context) {
         theme?.let { putString("theme", it) }
         putBoolean("keep_screen_on", keepScreenOn)
     }.apply()
-    listOf("body_progress_photos", "NutritionLogMedia", "check_in_photos").forEach { java.io.File(context.filesDir, it).deleteRecursively() }
+    listOf("body_progress_photos", "NutritionLogMedia", "check_in_photos", "training_location_photos").forEach { java.io.File(context.filesDir, it).deleteRecursively() }
     listOf("profile-avatar.jpg", "profile-avatar.png", "profile-avatar.download").forEach { java.io.File(context.filesDir, it).delete() }
     listOf("body_progress_camera", "nutrition_camera").forEach { java.io.File(context.cacheDir, it).deleteRecursively() }
 }
@@ -403,7 +411,7 @@ internal fun initialRegistrationData(context: Context, profile: OnboardingProfil
     val detailPreferences = context.getSharedPreferences("wildforce_profile_details", Context.MODE_PRIVATE)
     val notificationPreferences = context.getSharedPreferences("wildforce_notification_settings", Context.MODE_PRIVATE)
     return JSONObject()
-        .apply { profile.gymJoinCode?.let { put("gym_join_code", it) } }
+        .apply { profile.gymJoinCode?.let { put("gym_join_code", it) }; profile.coachJoinCode?.let { put("coach_join_code", it) } }
         .put("user", JSONObject()
             .put("id", userId)
             .put("name", profile.name)
@@ -517,6 +525,8 @@ fun AccountSection(
     var account by remember { mutableStateOf(store.account()) }
     var dialog by remember { mutableStateOf<AccountDialog?>(null) }
     var logoutConfirmation by remember { mutableStateOf(false) }
+    var diagnosticsUnlocked by remember { mutableStateOf(false) }
+    var diagnosticsVisible by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         if (destination == AccountProfileDestination.Account && account == null) {
             ProfileAccountCard(title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_account)) {
@@ -526,9 +536,19 @@ fun AccountSection(
             Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.create_an_account_to_keep_your_progress_available_on_every_device_), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary, modifier = Modifier.padding(horizontal = 14.dp))
         } else if (destination == AccountProfileDestination.Account) {
             ProfileAccountCard(title = androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_account)) {
-                Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.fillMaxWidth().pointerInput(Unit) {
+                    detectTapGestures(onPress = {
+                        coroutineScope {
+                            val hold = launch { delay(10_000); diagnosticsUnlocked = true }
+                            try { tryAwaitRelease() } finally { hold.cancel() }
+                        }
+                    })
+                }.padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.Email, null, tint = WildforceThemeTokens.textPrimary)
                     Column(Modifier.padding(start = 12.dp).weight(1f)) { Text(account!!.name, color = WildforceThemeTokens.textPrimary); Text(account!!.email, style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary) }
+                }
+                if (diagnosticsUnlocked) {
+                    ProfileRow(androidx.compose.ui.res.stringResource(R.string.sync_diagnostics_title), "settings") { diagnosticsVisible = true }
                 }
                 ProfileRow(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_log_out), "exit_to_app", destructive = true) {
                     logoutConfirmation = true
@@ -544,17 +564,15 @@ fun AccountSection(
             )
         }
     }
+    if (diagnosticsVisible) SyncDiagnosticsDialog { diagnosticsVisible = false }
     if (logoutConfirmation) {
         AlertDialog(
             onDismissRequest = { logoutConfirmation = false },
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_out_)) },
-            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_8e2c90c5cde299e5)) },
+            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_removes_this_account_s_data_from_this_device__your_data_remains_available_when_you_sign_in_again_)) },
             confirmButton = {
                 TextButton(onClick = {
                     logoutConfirmation = false
-                    // Keep local training data until the account reset policy is
-                    // explicitly confirmed; credentials and remote markers are
-                    // removed just like the iOS logout job.
                     // Clear the Google SDK session as well as the app credentials.
                     runCatching { GoogleSignIn.getClient(context, GoogleSignInOptions.DEFAULT_SIGN_IN).signOut() }
                     store.clear()
@@ -593,7 +611,11 @@ fun AccountSection(
             account = store.account()
             onAccountChanged()
             dialog = null
-            scope.launch { synchronizeAccountProfile(response, profile).onSuccess(onProfileSynchronized) }
+            // Existing accounts are restored by the initial graph sync. A
+            // separate profile push here can race that import and overwrite it.
+            if (response.isNewAccount) {
+                scope.launch { synchronizeAccountProfile(response, profile).onSuccess(onProfileSynchronized) }
+            }
         }
         AccountDialog.Paywall -> SubscriptionPaywall(
             accountId = account?.id,
@@ -620,7 +642,7 @@ fun AccountLogoutAction(onAccountChanged: () -> Unit = {}) {
         AlertDialog(
             onDismissRequest = { logoutConfirmation = false },
             title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.log_out_)) },
-            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_8e2c90c5cde299e5)) },
+            text = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.this_removes_this_account_s_data_from_this_device__your_data_remains_available_when_you_sign_in_again_)) },
             confirmButton = {
                 TextButton(onClick = {
                     logoutConfirmation = false

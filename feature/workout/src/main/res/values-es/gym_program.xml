@@ -1,0 +1,5 @@
+<resources>
+    <string name="gym_plan">Plan del gimnasio</string>
+    <string name="gym_workouts_pending">Tus entrenamientos del gimnasio están en camino. Actualiza después de que el gimnasio publique el programa.</string>
+    <string name="gym_workout_sync_hint">Cuando completes un entrenamiento, su siguiente repetición aparecerá aquí después de sincronizar.</string>
+</resources>
