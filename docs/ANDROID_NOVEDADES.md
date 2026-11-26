@@ -13,6 +13,7 @@ Registro de funcionalidades y mejoras visibles para las personas que usan la app
 
 ## Pendientes de publicación
 
+- **26-11-2026 · Apariencia:** retocado el efecto de cristal roto del icono alternativo, también en su variante navideña. Pendiente de comprobación visual en un dispositivo. Referencia: `broken_icon_detail.xml`.
 - **26-11-2026 · Entrenamiento:** añadidos al selector el curl con barra Z y las rotaciones de cuello, y completadas fichas de ejercicios existentes. Algunas traducciones recurren al inglés cuando no están disponibles en iOS. Referencia: `scripts/sync-ios-exercises.py`.
 
 ## Inventario retrospectivo: publicación por confirmar
@@ -49,7 +50,7 @@ Preparado a partir del inventario anterior. Incluye cambios aún sin commit y ot
 • Consulta els entrenaments del teu gimnàs i les notes dels exercicis.
 • Segueix l'entrenament i els descansos des de les notificacions.
 • Consulta i edita els àpats i personalitza els objectius nutricionals.
-• Activa o desactiva la decoració nadalenca.
+• Activa o desactiva la decoració nadalenca i descobreix el nou efecte de vidre trencat de la icona.
 • Consulta el diagnòstic de sincronització.
 </ca>
 <en-US>
@@ -58,7 +59,7 @@ Preparado a partir del inventario anterior. Incluye cambios aún sin commit y ot
 • View your gym workouts and exercise block notes.
 • Follow your workout and rest periods from notifications.
 • View and edit meals and customize nutrition goals.
-• Turn Christmas decorations on or off.
+• Turn Christmas decorations on or off and see the refreshed shattered-glass icon.
 • View sync diagnostics.
 </en-US>
 <es-ES>
@@ -67,7 +68,7 @@ Preparado a partir del inventario anterior. Incluye cambios aún sin commit y ot
 • Consulta los entrenamientos de tu gimnasio y las notas de los bloques.
 • Sigue tu entrenamiento y descansos desde las notificaciones.
 • Consulta y edita comidas y personaliza tus objetivos nutricionales.
-• Activa o desactiva la decoración navideña.
+• Activa o desactiva la decoración navideña y descubre el nuevo efecto de cristal roto del icono.
 • Consulta el diagnóstico de sincronización.
 </es-ES>
 ```
