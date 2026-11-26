@@ -1,6 +1,5 @@
 package io.codepassion.doubletriangle
 
-import android.content.Context
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -23,7 +22,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -34,27 +32,8 @@ import androidx.compose.ui.window.Dialog
 import io.codepassion.doubletriangle.core.designsystem.WildforceThemeTokens
 import io.codepassion.wildforce.android.R
 
-// Update this only when the curated content below changes for a new release.
-private const val WHATS_NEW_REVISION = 1
-private const val PREFS = "wildforce_whats_new"
-private const val SEEN_REVISION = "seen_revision"
-
 @Composable
-internal fun WhatsNewOnLaunch() {
-    val context = LocalContext.current
-    val preferences = remember { context.getSharedPreferences(PREFS, Context.MODE_PRIVATE) }
-    var visible by remember { mutableStateOf(preferences.getInt(SEEN_REVISION, 0) < WHATS_NEW_REVISION) }
-    if (visible) {
-        val dismiss = {
-            preferences.edit().putInt(SEEN_REVISION, WHATS_NEW_REVISION).apply()
-            visible = false
-        }
-        WhatsNewDialog(onDismiss = dismiss)
-    }
-}
-
-@Composable
-private fun WhatsNewDialog(onDismiss: () -> Unit) {
+internal fun WhatsNewDialog(onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = RoundedCornerShape(28.dp), color = WildforceThemeTokens.backgroundSecondary) {
             Column(Modifier.fillMaxWidth().heightIn(max = 640.dp)) {
