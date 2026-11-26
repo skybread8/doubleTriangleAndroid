@@ -1,0 +1,4 @@
+<resources>
+    <string name="booking_add_to_calendar">Adicionar ao calendário</string>
+    <string name="booking_no_calendar_app">Não existe uma aplicação de calendário disponível para adicionar este evento.</string>
+</resources>

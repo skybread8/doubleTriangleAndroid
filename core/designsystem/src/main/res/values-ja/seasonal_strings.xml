@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="seasonal_decorations">季節の装飾</string>
+    <string name="seasonal_decorations_description">特別な時期に装飾を自動的に表示します。</string>
+</resources>

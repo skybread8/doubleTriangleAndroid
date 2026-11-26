@@ -1,0 +1,8 @@
+<resources>
+    <string name="sync_diagnostics_title">Sync diagnostics</string>
+    <string name="sync_diagnostics_pending">Pending upload</string>
+    <string name="sync_diagnostics_none">None</string>
+    <string name="sync_diagnostics_info">Events recorded on this device from now on. The latest 1,500 are kept. Server-internal logs are not available here. Times are UTC; credentials and record bodies are not logged.</string>
+    <string name="sync_diagnostics_copy">Copy</string>
+    <string name="sync_diagnostics_close">Close</string>
+</resources>

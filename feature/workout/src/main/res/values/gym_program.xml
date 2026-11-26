@@ -1,0 +1,5 @@
+<resources>
+    <string name="gym_plan">Gym plan</string>
+    <string name="gym_workouts_pending">Your gym workouts are on their way. Pull to refresh after your gym publishes the program.</string>
+    <string name="gym_workout_sync_hint">Complete a workout and its next repetition will appear here after syncing.</string>
+</resources>

@@ -1944,5 +1944,117 @@
       "Verwende nur dann eine stabile Stufe oder Plattform, wenn sie sicher in die Smith-Maschine passt.",
       "Lege mehr Wert auf den vollen Bewegungsumfang als auf zusätzliches Gewicht."
     ]
+  },
+  "closeGripLatPulldown": {
+    "description": "Ein Latzug mit engem Griff, der den Rücken durch eine kontrollierte vertikale Zugbewegung trainiert.",
+    "instructions": [
+      "Setz dich an eine Latzugmaschine und fixiere deine Oberschenkel unter den Kniepolstern.",
+      "Befestige einen Griff für engen oder neutralen Griff am oberen Kabelzug und halte ihn mit den Handflächen zueinander.",
+      "Halte die Brust aufrecht und lehne dich leicht zurück. Ziehe dann den Griff zur oberen Brust, indem du die Ellbogen nach unten und hinten führst.",
+      "Halte kurz inne, ohne die Schultern hochzuziehen, und führe den Griff anschließend kontrolliert über den Kopf zurück."
+    ],
+    "tips": [
+      "Halte die Ellbogen während der gesamten Zugbewegung nah am Oberkörper.",
+      "Verwandle die Bewegung nicht in eine Ruderbewegung, indem du dich übermäßig zurücklehnst.",
+      "Strecke die Arme oben vollständig aus und halte dabei die Spannung im Rücken."
+    ]
+  },
+  "ezBarCurl": {
+    "description": "Ein stehender Bizepscurl mit einer SZ-Stange, deren abgewinkelte Griffe die Handgelenke entlasten können.",
+    "instructions": [
+      "Stelle dich hüftbreit hin und halte die SZ-Stange im Untergriff mit gestreckten Armen seitlich am Körper.",
+      "Halte die Ellbogen nah am Oberkörper und beuge die Arme, um die Stange zu den Schultern zu führen.",
+      "Spanne deinen Bizeps oben kurz an, ohne die Ellbogen nach vorne zu bewegen.",
+      "Senke die Stange langsam ab, bis deine Arme fast vollständig gestreckt sind."
+    ],
+    "tips": [
+      "Wähle die abgewinkelte Griffposition, die sich für deine Handgelenke angenehm anfühlt.",
+      "Halte den Oberkörper ruhig und vermeide es, die Stange zu schwingen, um das Gewicht anzuheben.",
+      "Führe die Bewegung kontrolliert aus und beende sie, bevor die Ellbogen schmerzhaft durchgestreckt werden."
+    ]
+  },
+  "ropeTricepsPushdown": {
+    "description": "Eine Trizepsübung am Kabelzug mit Seil, die den Trizeps isoliert und am Ende jeder Wiederholung eine kräftige Kontraktion ermöglicht.",
+    "instructions": [
+      "Befestige ein Seil an einem oberen Kabelzug und stelle dich mit dem Gesicht zum Gerät.",
+      "Fasse die Seilenden im neutralen Griff und halte die Ellbogen nah am Körper.",
+      "Drücke das Seil nach unten, bis deine Ellbogen vollständig gestreckt sind, und ziehe die Seilenden unten leicht auseinander.",
+      "Führe das Seil kontrolliert zurück, bis deine Unterarme knapp über der Waagerechten sind."
+    ],
+    "tips": [
+      "Halte die Schultern unten und die Oberarme während der gesamten Bewegung ruhig.",
+      "Verlagere dein Körpergewicht nicht auf das Kabel, um das Gewicht zu bewegen.",
+      "Nutze den vollen, aber kontrollierten Bewegungsumfang, ohne die Ellbogen ruckartig durchzustrecken."
+    ]
+  },
+  "reversePecDeck": {
+    "description": "Eine Reverse-Fly-Übung am Butterfly-Gerät, die die hinteren Deltamuskeln und den oberen Rücken isoliert.",
+    "instructions": [
+      "Stelle die Hebel des Butterfly-Geräts hinter dich und setze dich mit der Brust an das Polster.",
+      "Fasse die Griffe mit nach vorn gestreckten Armen auf Schulterhöhe.",
+      "Führe die Arme in einem weiten Bogen auseinander, bis sie auf einer Linie mit deinem Oberkörper sind.",
+      "Spanne die hinteren Deltamuskeln an und kehre dann langsam in die Ausgangsposition zurück."
+    ],
+    "tips": [
+      "Halte die Brust während des gesamten Satzes fest am Polster.",
+      "Führe die Bewegung mit den Ellbogen und vermeide es, die Schultern hochzuziehen.",
+      "Bewege das Gewicht kontrolliert und vermeide, dass sich die Gewichtsplatten zwischen den Wiederholungen berühren."
+    ]
+  },
+  "spiderCurl": {
+    "description": "Ein brustgestützter Curl, der bäuchlings auf einer Schrägbank ausgeführt wird, um den Bizeps zu isolieren und Schwung zu vermeiden.",
+    "instructions": [
+      "Stelle eine verstellbare Bank steil schräg ein und lege dich mit der Brust auf das Polster.",
+      "Lass die Arme gerade zum Boden hängen und halte die Kurzhanteln mit den Handflächen nach vorn.",
+      "Beuge die Arme und führe die Gewichte zu den Schultern, ohne die Ellbogen nach vorn zu bewegen.",
+      "Senke die Kurzhanteln langsam ab, bis deine Arme wieder vollständig gestreckt sind."
+    ],
+    "tips": [
+      "Halte die Oberarme während der gesamten Bewegung senkrecht zum Boden.",
+      "Verwende ein geringeres Gewicht als bei stehenden Curls, damit du die Bewegung sauber ausführst.",
+      "Halte oben kurz inne, ohne die Brust von der Bank zu heben."
+    ]
+  },
+  "preacherCurl": {
+    "description": "Ein abgestützter Curl, bei dem die Oberarme fixiert bleiben, um den Bizeps über den kontrollierten Bewegungsumfang gezielt zu trainieren.",
+    "instructions": [
+      "Stelle eine Scottbank oder eine verstellbare Bank so ein, dass deine Oberarme sicher auf dem Polster aufliegen.",
+      "Halte eine SZ-Stange im Untergriff und beginne mit fast vollständig gestreckten Armen.",
+      "Beuge die Arme und führe die Stange zu den Schultern, während die Oberarme am Polster bleiben.",
+      "Senke die Stange langsam ab, bis du eine Dehnung im Bizeps spürst, ohne die Ellbogen gewaltsam durchzustrecken."
+    ],
+    "tips": [
+      "Halte die Handgelenke in neutraler Position und beuge sie unter Belastung nicht nach hinten.",
+      "Lass die Stange am tiefsten Punkt nicht federn.",
+      "Führe die Bewegung kontrolliert aus und beende sie, bevor die Ellbogen schmerzhaft durchgestreckt werden."
+    ]
+  },
+  "hackSquat": {
+    "description": "Eine geführte Kniebeugenmaschine, mit der du Quadrizeps und Gesäßmuskeln bei hoher Stabilität und geringem Gleichgewichtsbedarf trainieren kannst.",
+    "instructions": [
+      "Stelle die Schulterpolster so ein, dass du aufrecht stehen kannst und dein Rücken am Polster anliegt.",
+      "Stelle deine Füße schulterbreit auf die Plattform, etwas weiter nach vorn als deine Hüften.",
+      "Entriegle die Sicherheitsgriffe und senke das Gewicht kontrolliert ab, indem du Knie und Hüfte beugst.",
+      "Drücke dich über die ganze Fußsohle zurück in die Ausgangsposition, ohne die Knie ruckartig durchzustrecken."
+    ],
+    "tips": [
+      "Halte den unteren Rücken während der gesamten Bewegung in Kontakt mit dem Polster.",
+      "Stelle deine Füße so auf, dass deine Knie bequem in Richtung deiner Zehen folgen.",
+      "Kontrolliere die untere Position und nutze die Sicherheitsanschläge bei einer angemessenen Tiefe."
+    ]
+  },
+  "machineHipThrust": {
+    "description": "Eine geführte Hüftstoßmaschine, die die Gesäßmuskulatur direkt belastet und gleichzeitig für einen stabilen und bequemen Aufbau sorgt.",
+    "instructions": [
+      "Stelle das Rückenpolster und den Gurt oder das Hüftpolster so ein, dass es sicher über deiner Hüfte liegt.",
+      "Stelle deine Füße etwa schulterbreit auf. In der oberen Position sollten deine Knie ungefähr im 90-Grad-Winkel gebeugt sein.",
+      "Drücke dich über die Fersen ab und strecke die Hüfte, bis Oberkörper und Oberschenkel eine gerade Linie bilden.",
+      "Spanne oben die Gesäßmuskulatur an und senke dann das Gewicht kontrolliert ab."
+    ],
+    "tips": [
+      "Halte die Rippen unten und überstrecke den unteren Rücken oben nicht.",
+      "Stelle deine Füße so auf, dass du die Bewegung hauptsächlich in der Gesäßmuskulatur und nicht in den hinteren Oberschenkeln spürst.",
+      "Nutze die Sicherheitsanschläge der Maschine, bevor du die Übung mit viel Gewicht ausführst."
+    ]
   }
 }

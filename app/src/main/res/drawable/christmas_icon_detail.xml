@@ -1,0 +1,13 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="1024dp" android:height="1024dp"
+    android:viewportWidth="1024" android:viewportHeight="1024">
+    <!-- Snow caps follow the existing mark. -->
+    <path android:fillColor="#CFE6EB" android:pathData="M164,242 C194,225 232,221 262,225 C286,225 309,228 323,237 L323,266 C303,255 285,254 265,255 C235,251 195,255 164,270 Z" />
+    <path android:fillColor="#CFE6EB" android:pathData="M437,348 C467,333 526,332 558,337 C573,338 586,341 594,348 L594,373 C567,362 550,361 526,361 C493,359 463,364 437,375 Z" />
+    <!-- Large festive cap rests on the tall right-hand stroke. -->
+    <path android:fillColor="#B72535" android:pathData="M635,194 C652,147 687,65 749,55 C805,46 845,75 855,122 C839,113 821,114 817,133 C848,147 870,169 879,196 C804,176 712,176 635,194 Z" />
+    <path android:fillColor="#E3404C" android:pathData="M654,173 C676,123 706,82 749,76 C728,101 711,139 704,171 Z" />
+    <path android:fillColor="#F4F9F7" android:pathData="M624,185 C690,166 805,165 871,187 Q884,191 883,207 L880,225 C808,206 699,204 630,224 Q620,226 618,213 L617,200 Q616,189 624,185 Z" />
+    <path android:fillColor="#D7E7E3" android:pathData="M622,212 C692,196 810,196 881,213 L880,226 C805,207 699,206 630,224 Q620,226 622,212 Z" />
+    <path android:fillColor="#F4F9F7" android:pathData="M860,103 a28,28 0,1 0,0 56 a28,28 0,1 0,0 -56" />
+</vector>

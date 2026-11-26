@@ -1944,5 +1944,117 @@
       "Use a stable step or platform only if it fits safely inside the Smith machine.",
       "Prioritize full range of motion over adding load."
     ]
+  },
+  "closeGripLatPulldown": {
+    "description": "A close-grip lat pulldown that trains the back through a controlled vertical pulling pattern.",
+    "instructions": [
+      "Sit at a lat pulldown machine and secure your thighs under the knee pads.",
+      "Attach a close-grip or neutral-grip handle to the high cable and hold it with your palms facing each other.",
+      "Keep your chest tall with a slight lean back, then pull the handle toward your upper chest by driving your elbows down and back.",
+      "Pause without shrugging your shoulders, then return the handle overhead with control."
+    ],
+    "tips": [
+      "Keep your elbows close to your torso throughout the pull.",
+      "Do not turn the movement into a row by leaning back excessively.",
+      "Let your arms extend fully at the top while keeping tension in your back."
+    ]
+  },
+  "ezBarCurl": {
+    "description": "A standing biceps curl using an EZ bar, with angled grips that can feel more comfortable on the wrists.",
+    "instructions": [
+      "Stand with your feet hip-width apart, holding an EZ bar with an underhand grip and your arms extended by your sides.",
+      "Keep your elbows close to your torso and curl the bar toward your shoulders.",
+      "Squeeze your biceps briefly at the top without letting your elbows move forward.",
+      "Lower the bar slowly until your arms are almost fully extended."
+    ],
+    "tips": [
+      "Choose the angled hand position that keeps your wrists comfortable.",
+      "Keep your torso still and avoid swinging the bar to lift the weight.",
+      "Use a controlled range and stop short of painful elbow extension."
+    ]
+  },
+  "ropeTricepsPushdown": {
+    "description": "A rope cable pushdown that isolates the triceps and allows a strong contraction at the bottom of each rep.",
+    "instructions": [
+      "Attach a rope to a high cable pulley and stand facing the machine.",
+      "Grip the rope ends with a neutral grip and keep your elbows close to your sides.",
+      "Press the rope down until your elbows are fully extended, separating the rope ends slightly at the bottom.",
+      "Return the rope under control until your forearms are just above parallel to the floor."
+    ],
+    "tips": [
+      "Keep your shoulders down and your upper arms still throughout the movement.",
+      "Avoid leaning your body weight into the cable to move the load.",
+      "Use a full but controlled range of motion without locking the elbows aggressively."
+    ]
+  },
+  "reversePecDeck": {
+    "description": "A reverse fly performed on a pec deck machine to isolate the rear deltoids and upper back.",
+    "instructions": [
+      "Set the pec deck arms behind you and sit facing the pad with your chest supported.",
+      "Grip the handles with your arms extended in front of you at shoulder height.",
+      "Open your arms in a wide arc until they are in line with your torso.",
+      "Squeeze your rear delts, then return slowly to the starting position."
+    ],
+    "tips": [
+      "Keep your chest firmly against the pad throughout the set.",
+      "Lead with your elbows and avoid shrugging your shoulders upward.",
+      "Use a controlled tempo and avoid letting the weight stack touch between reps."
+    ]
+  },
+  "spiderCurl": {
+    "description": "A chest-supported curl performed face down on an incline bench to isolate the biceps and limit momentum.",
+    "instructions": [
+      "Set an adjustable bench to a steep incline and lie face down with your chest against the pad.",
+      "Let your arms hang straight toward the floor while holding dumbbells with palms facing forward.",
+      "Curl the weights toward your shoulders without letting your elbows travel forward.",
+      "Lower the dumbbells slowly until your arms are fully extended again."
+    ],
+    "tips": [
+      "Keep your upper arms perpendicular to the floor throughout the movement.",
+      "Use lighter loads than in standing curls to keep the movement strict.",
+      "Pause briefly at the top without lifting your chest from the bench."
+    ]
+  },
+  "preacherCurl": {
+    "description": "A supported curl that keeps the upper arms fixed to isolate the biceps through a controlled range of motion.",
+    "instructions": [
+      "Set up an angled preacher support or an adjustable bench so your upper arms rest securely on the pad.",
+      "Hold an EZ bar with an underhand grip and begin with your arms almost fully extended.",
+      "Curl the bar toward your shoulders while keeping your upper arms against the support.",
+      "Lower the bar slowly until you feel a stretch in your biceps without forcing your elbows straight."
+    ],
+    "tips": [
+      "Keep your wrists neutral and avoid bending them back under load.",
+      "Do not bounce the bar from the bottom position.",
+      "Use a controlled range and stop short of painful elbow extension."
+    ]
+  },
+  "hackSquat": {
+    "description": "A guided squat machine that lets you train the quads and glutes with high stability and minimal balance demand.",
+    "instructions": [
+      "Set the shoulder pads so you can stand tall with your back supported against the pad.",
+      "Place your feet shoulder-width apart on the platform, slightly forward of your hips.",
+      "Unlock the safety handles and lower under control by bending your knees and hips.",
+      "Drive through your whole feet to return to the start without forcefully locking your knees."
+    ],
+    "tips": [
+      "Keep your lower back in contact with the pad throughout the movement.",
+      "Use a foot position that lets your knees track comfortably in line with your toes.",
+      "Control the bottom position and use the safety stops at an appropriate depth."
+    ]
+  },
+  "machineHipThrust": {
+    "description": "A guided hip thrust machine that loads the glutes directly while providing a stable and comfortable setup.",
+    "instructions": [
+      "Adjust the back pad and belt or hip pad so it rests securely across your hips.",
+      "Plant your feet about shoulder-width apart with your knees bent at roughly 90 degrees at the top.",
+      "Drive through your heels to extend your hips until your torso and thighs form a straight line.",
+      "Squeeze your glutes at the top, then lower the load under control."
+    ],
+    "tips": [
+      "Keep your ribs down and avoid overextending your lower back at the top.",
+      "Position your feet so you feel the movement primarily in your glutes rather than your hamstrings.",
+      "Use the machine's safety stops before loading the movement heavily."
+    ]
   }
 }

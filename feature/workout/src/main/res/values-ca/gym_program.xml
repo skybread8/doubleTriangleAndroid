@@ -1,0 +1,5 @@
+<resources>
+    <string name="gym_plan">Pla del gimnàs</string>
+    <string name="gym_workouts_pending">Els entrenaments del gimnàs estan en camí. Actualitza quan el gimnàs publiqui el programa.</string>
+    <string name="gym_workout_sync_hint">Quan completis un entrenament, la següent repetició apareixerà aquí després de sincronitzar.</string>
+</resources>

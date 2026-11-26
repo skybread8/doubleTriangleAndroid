@@ -1,0 +1,8 @@
+<resources>
+    <string name="sync_diagnostics_title">Diagnóstico de sincronización</string>
+    <string name="sync_diagnostics_pending">Pendiente de subir</string>
+    <string name="sync_diagnostics_none">Nada</string>
+    <string name="sync_diagnostics_info">Eventos registrados en este dispositivo desde ahora. Se conservan los últimos 1.500. Los registros internos del servidor no están disponibles aquí. Horas en UTC; no se guardan credenciales ni contenido de registros.</string>
+    <string name="sync_diagnostics_copy">Copiar</string>
+    <string name="sync_diagnostics_close">Cerrar</string>
+</resources>

@@ -191,6 +191,7 @@ fun ProfileScreen(
     avatarPath: String? = null,
     avatarRevision: Int = 0,
     gymMembershipRevision: Int = 0,
+    bookableGyms: List<WildforceGymMembership> = emptyList(),
     onRequestHealthConnect: (((Boolean, Int?, Double?, Double?, Double?) -> Unit) -> Unit) = { _ -> },
     onSyncHealthConnect: (((Boolean, List<ImportedBodyMetric>) -> Unit) -> Unit) = { result -> result(false, emptyList()) },
     onAutoSyncHealthConnect: suspend () -> List<ImportedBodyMetric> = { emptyList() },
@@ -228,6 +229,7 @@ fun ProfileScreen(
     var healthConnectMessage by remember { mutableStateOf<String?>(null) }
     var entered by remember { mutableStateOf(false) }
     val profileContext = LocalContext.current
+    val seasonalDecorationsEnabled = io.codepassion.doubletriangle.core.designsystem.rememberSeasonalDecorationsEnabled()
     var amazfitWatchEnabled by remember { mutableStateOf(WildforceWatchLocalBridge.enabled(profileContext)) }
     val notificationPreferences = remember(profileContext) { profileContext.getSharedPreferences("wildforce_notification_settings", 0) }
     var notificationsEnabled by remember { mutableStateOf(notificationPreferences.getBoolean("enabled", true)) }
@@ -484,8 +486,9 @@ fun ProfileScreen(
         // that entry point instead of hiding it until after the first join.
         if (selectedSection == null && currentAccount != null) { item {
             ProfileEntrance(entered, 400) {
-                Section(if (gymMemberships.size > 1) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_gyms) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_gym)) {
-                    gymMemberships.forEach { membership ->
+                val visibleGyms = displayedGymMemberships(gymMemberships, bookableGyms)
+                Section(if (visibleGyms.size > 1) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_gyms) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.your_gym)) {
+                    visibleGyms.forEach { membership ->
                         Row(
                             Modifier.fillMaxWidth().padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
@@ -718,6 +721,9 @@ fun ProfileScreen(
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_language), localizedLanguageName(appLanguage), icon = Icons.Filled.Settings) { settingsPicker = SettingsPicker.Language }
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_metric_system), localizedMetricSystem(draft.metricSystem), icon = Icons.Filled.Settings) { picker = Picker.Metric }
                 ChoiceButton(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.theme), localizedNutritionOption(appTheme), icon = Icons.Filled.Settings) { settingsPicker = SettingsPicker.Theme }
+                TogglePreference(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.seasonal_decorations), androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.seasonal_decorations_description), seasonalDecorationsEnabled, Icons.Filled.Settings) {
+                    io.codepassion.doubletriangle.core.designsystem.SeasonalDecorations.setEnabled(profileContext, !seasonalDecorationsEnabled)
+                }
             } } } }
         if (selectedSection == ProfileSection.Settings) { item { ProfileEntrance(sectionEntered, 265) { Section(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_environment)) {
                 val healthDisabledMessage = androidx.compose.ui.res.stringResource(R.string.settings_health_disabled)
@@ -2113,6 +2119,14 @@ private fun ProfileHero(profile: OnboardingProfile, currentStreak: Int, complete
                             tint = WildforceThemeTokens.textSecondary,
                         )
                     }
+                    if (io.codepassion.doubletriangle.core.designsystem.rememberChristmasActive()) {
+                        io.codepassion.doubletriangle.core.designsystem.ChristmasHat(
+                            Modifier.align(Alignment.TopCenter)
+                                .offset(x = avatarSize * .24f, y = -(avatarSize * .23f))
+                                .size(width = avatarSize * .72f, height = avatarSize * .48f)
+                                .graphicsLayer { rotationZ = 28f },
+                        )
+                    }
                     Box(
                         Modifier.align(Alignment.BottomEnd).offset((-4).dp, (-4).dp).size(34.dp)
                             .background(WildforceThemeTokens.accent, CircleShape)
@@ -2432,7 +2446,12 @@ private fun EquipmentPickerDialog(initial: Set<Equipment>, onSave: (Set<Equipmen
     androidx.compose.material.AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_equipment).uppercase(), fontFamily = AntonFontFamily) },
-        text = { LazyColumn(Modifier.height(360.dp)) { items(Equipment.entries) { equipment -> TogglePickerRow(onboardingLabel("Equipment", equipment.storedValue, equipment.title), equipment in selected) { selected = if (equipment in selected) selected - equipment else selected + equipment } } } },
+        text = {
+            Column {
+                Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_selected, selected.size), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
+                LazyColumn(Modifier.height(360.dp)) { items(Equipment.entries) { equipment -> TogglePickerRow(onboardingLabel("Equipment", equipment.storedValue, equipment.title), equipment in selected) { selected = if (equipment in selected) selected - equipment else selected + equipment } } }
+            }
+        },
         confirmButton = { Button(onClick = { onSave(selected); onDismiss() }) { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.save).uppercase()) } },
         dismissButton = { Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet_cancel).uppercase(), Modifier.heightIn(min = 48.dp).clickable(onClick = onDismiss).padding(12.dp), color = WildforceThemeTokens.textSecondary) },
     )
@@ -2511,6 +2530,7 @@ private fun TrainingLocationsDialog(
                         Icon(Icons.Filled.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
                         Text(if (editorPhotoPath == null) androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_59b4cecc3ad11b01) else androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.android_fallback_39f21ad6de26c344), Modifier.padding(start = 8.dp))
                     }
+                    Text(androidx.compose.ui.res.stringResource(io.codepassion.doubletriangle.core.designsystem.R.string.ui_sheet__d_selected, editorEquipment.size), style = MaterialTheme.typography.caption, color = WildforceThemeTokens.textSecondary)
                     LazyColumn(Modifier.height(280.dp)) {
                         items(Equipment.entries) { equipment ->
                             TogglePickerRow(onboardingLabel("Equipment", equipment.storedValue, equipment.title), equipment in editorEquipment) {

@@ -1944,5 +1944,117 @@
       "Utilise une marche ou une plateforme stable uniquement si elle tient en toute sécurité dans la machine Smith.",
       "Privilégie une amplitude de mouvement complète plutôt que d'ajouter de la charge."
     ]
+  },
+  "closeGripLatPulldown": {
+    "description": "Un tirage vertical à prise serrée qui sollicite le dos par un mouvement de traction vertical contrôlé.",
+    "instructions": [
+      "Asseyez-vous à la machine de tirage vertical et calez vos cuisses sous les boudins de maintien.",
+      "Fixez une poignée à prise serrée ou neutre au câble haut et tenez-la avec les paumes face à face.",
+      "Gardez la poitrine haute en vous penchant légèrement en arrière, puis tirez la poignée vers le haut de la poitrine en ramenant les coudes vers le bas et l’arrière.",
+      "Marquez une pause sans hausser les épaules, puis ramenez la poignée au-dessus de la tête de façon contrôlée."
+    ],
+    "tips": [
+      "Gardez les coudes près du torse tout au long du tirage.",
+      "Ne transformez pas le mouvement en un rowing en vous penchant excessivement en arrière.",
+      "Tendez complètement les bras en haut tout en gardant le dos sous tension."
+    ]
+  },
+  "ezBarCurl": {
+    "description": "Un curl biceps debout avec une barre EZ, dont les poignées inclinées peuvent être plus confortables pour les poignets.",
+    "instructions": [
+      "Tenez-vous debout, les pieds écartés à la largeur des hanches. Tenez la barre EZ en prise supination, les bras tendus le long du corps.",
+      "Gardez les coudes près du torse et fléchissez les bras pour remonter la barre vers les épaules.",
+      "Contractez brièvement les biceps en haut du mouvement sans avancer les coudes.",
+      "Abaissez lentement la barre jusqu'à ce que vos bras soient presque complètement tendus."
+    ],
+    "tips": [
+      "Choisissez la position inclinée des mains qui est confortable pour vos poignets.",
+      "Gardez le torse immobile et évitez de balancer la barre pour soulever la charge.",
+      "Contrôlez l’amplitude et arrêtez-vous avant que l’extension des coudes ne devienne douloureuse."
+    ]
+  },
+  "ropeTricepsPushdown": {
+    "description": "Une extension des triceps à la poulie avec corde qui isole les triceps et permet une forte contraction à la fin de chaque répétition.",
+    "instructions": [
+      "Fixez une corde à une poulie haute et placez-vous face à la machine.",
+      "Saisissez les extrémités de la corde en prise neutre et gardez les coudes près du corps.",
+      "Poussez la corde vers le bas jusqu’à ce que vos coudes soient complètement tendus, en écartant légèrement les extrémités en bas du mouvement.",
+      "Laissez la corde remonter de manière contrôlée jusqu’à ce que vos avant-bras soient juste au-dessus de l’horizontale."
+    ],
+    "tips": [
+      "Gardez les épaules basses et les bras immobiles pendant tout le mouvement.",
+      "Évitez de vous pencher sur le câble pour déplacer la charge en utilisant le poids de votre corps.",
+      "Effectuez un mouvement complet mais contrôlé, sans verrouiller brusquement les coudes."
+    ]
+  },
+  "reversePecDeck": {
+    "description": "Un exercice d’oiseau inversé à la machine qui isole les deltoïdes postérieurs et le haut du dos.",
+    "instructions": [
+      "Réglez les bras de la machine derrière vous et asseyez-vous face au support, la poitrine appuyée contre le coussin.",
+      "Saisissez les poignées, les bras tendus devant vous à hauteur d’épaules.",
+      "Écartez les bras en décrivant un large arc jusqu’à ce qu’ils soient alignés avec votre torse.",
+      "Contractez les deltoïdes postérieurs, puis revenez lentement à la position de départ."
+    ],
+    "tips": [
+      "Gardez la poitrine fermement appuyée contre le coussin pendant toute la série.",
+      "Initiez le mouvement avec les coudes et évitez de hausser les épaules.",
+      "Gardez un rythme contrôlé et évitez que les plaques de poids se touchent entre les répétitions."
+    ]
+  },
+  "spiderCurl": {
+    "description": "Un curl avec la poitrine appuyée, effectué face contre un banc incliné pour isoler les biceps et limiter l’élan.",
+    "instructions": [
+      "Inclinez fortement un banc réglable et allongez-vous face contre le dossier, la poitrine appuyée contre le coussin.",
+      "Laissez vos bras pendre droit vers le sol en tenant les haltères, paumes tournées vers l’avant.",
+      "Fléchissez les bras pour ramener les poids vers vos épaules sans laisser vos coudes avancer.",
+      "Abaissez lentement les haltères jusqu’à ce que vos bras soient de nouveau complètement tendus."
+    ],
+    "tips": [
+      "Gardez les bras perpendiculaires au sol pendant tout le mouvement.",
+      "Utilisez une charge plus légère que pour les curls debout afin de garder une exécution stricte.",
+      "Marquez une brève pause en haut sans décoller la poitrine du banc."
+    ]
+  },
+  "preacherCurl": {
+    "description": "Un curl avec appui qui maintient les bras fixes afin d’isoler les biceps sur une amplitude contrôlée.",
+    "instructions": [
+      "Installez un pupitre à biceps ou un banc réglable de façon à ce que vos bras reposent bien sur le coussin.",
+      "Tenez une barre EZ en prise supination et commencez avec les bras presque complètement tendus.",
+      "Fléchissez les bras pour ramener la barre vers vos épaules en gardant les bras contre le support.",
+      "Abaissez lentement la barre jusqu’à sentir un étirement des biceps, sans forcer l’extension des coudes."
+    ],
+    "tips": [
+      "Gardez les poignets en position neutre et évitez de les fléchir vers l’arrière sous la charge.",
+      "Ne faites pas rebondir la barre en position basse.",
+      "Contrôlez l’amplitude et arrêtez-vous avant que l’extension des coudes ne devienne douloureuse."
+    ]
+  },
+  "hackSquat": {
+    "description": "Une machine guidée pour les squats qui permet de travailler les quadriceps et les fessiers avec une grande stabilité et peu d’exigences en matière d’équilibre.",
+    "instructions": [
+      "Réglez les coussinets d’épaules pour pouvoir vous tenir droit, le dos appuyé contre le dossier.",
+      "Placez vos pieds sur la plateforme, écartés de la largeur des épaules et légèrement en avant de vos hanches.",
+      "Déverrouillez les poignées de sécurité et descendez de manière contrôlée en fléchissant les genoux et les hanches.",
+      "Poussez avec toute la plante des pieds pour revenir à la position de départ, sans verrouiller les genoux brusquement."
+    ],
+    "tips": [
+      "Gardez le bas du dos en contact avec le dossier pendant tout le mouvement.",
+      "Placez vos pieds de façon à ce que vos genoux suivent confortablement la direction de vos orteils.",
+      "Contrôlez la position basse et utilisez les butées de sécurité à une profondeur adaptée."
+    ]
+  },
+  "machineHipThrust": {
+    "description": "Une machine guidée pour le hip thrust qui sollicite directement les fessiers tout en offrant une installation stable et confortable.",
+    "instructions": [
+      "Réglez le dossier et la ceinture ou le coussin de hanches afin qu'il repose bien en place sur vos hanches.",
+      "Placez les pieds à peu près à la largeur des épaules. En haut du mouvement, vos genoux doivent être fléchis à environ 90 degrés.",
+      "Poussez avec les talons et tendez les hanches jusqu'à ce que le torse et les cuisses forment une ligne droite.",
+      "Contractez les fessiers en haut du mouvement, puis redescendez la charge de manière contrôlée."
+    ],
+    "tips": [
+      "Gardez les côtes rentrées et évitez de trop cambrer le bas du dos en haut du mouvement.",
+      "Placez vos pieds de façon à sentir le mouvement principalement dans les fessiers plutôt que dans les ischio-jambiers.",
+      "Utilisez les butées de sécurité de la machine avant d'augmenter fortement la charge."
+    ]
   }
 }

@@ -1,5 +1,41 @@
 # iOS Workout Parity Specification
 
+## Workout hub mode availability (2026-11-26)
+
+- The personal plan remains available without an active gym program, and with a gym program it follows iOS showsAiCoach. Mode selection falls back to an available mode when access changes. The four availability combinations have unit coverage; build and matched device verification remain outstanding.
+
+## Independent workout day labels (2026-11-25)
+
+- Independent custom and gym-program workout details omit the day number, matching iOS. Gym cards also omit it. Matched device and accessibility verification remain outstanding.
+
+## Exercise replacement weight entry (2026-11-25)
+
+- Weight controls now use the iOS catalog target metrics after an exercise is swapped, while clearing the previous exercise’s load as iOS does. Regression coverage checks weighted and unweighted replacements. Coach exercise metadata and matched device verification remain outstanding.
+
+## Account progress synchronization (2026-11-25)
+
+- Android applies the downloaded User XP, level, current streak, longest streak and last workout date to the progress store used by Profile and workout completion. Local completion publishes that same progress snapshot. The completion calculation now preserves a streak across unscheduled rest days, matching the iOS scheduled-day rule. Unit tests cover the XP snapshot, local date conversion and rest-day calculation. The iOS plan-overview streak-reset behavior and full cross-resource synchronization still require verification.
+
+## Amazfit rest synchronization (2026-11-24)
+
+- Android sends the rest deadline to the Amazfit extension, allowing the watch to update its countdown and trigger a vibration without receiving every timer tick, like the deadline-based iOS watch timer. Watch behavior, vibration, and clock synchronization require physical-device verification. Amazfit set, weight, repetition, rest and exercise-feedback commands are applied to the persisted Android session in the background; the screen restores those fields on resume. Unit tests cover regular sets, rest, feedback and supersets, while physical lock-screen, background-service and cross-device verification remain outstanding. BLE-only duration, distance and motion commands still wait for the screen to resume; full parity is not established. The watch uses the iOS age-based zone calculation and now starts continuous heart-rate measurement even if no historical sample is available; simulated zone changes pass, but sensor and visual behavior on the watch remain unverified.
+
+## Live notification colors (2026-11-24)
+
+- Android requests a charcoal notification background with monochrome progress colors and fallback artwork. iOS uses a black Live Activity background but retains colored phase accents; Android's monochrome treatment follows the user's request. The system controls notification rendering, and physical-device light/dark verification remains outstanding.
+
+## Rest completion vibration (2026-11-24)
+
+- Android uses two longer double pulses for the background rest-completion alert at the user's request. iOS schedules a system notification instead, so the vibration pattern is an intentional platform difference. Physical-device verification remains outstanding.
+
+## Active workout seasonal header
+
+- The shared seasonal header is hidden while the active workout is open, so its background can extend to the status bar. The active screen retains its own garland. Verified entry and return on the Android emulator with decorations enabled; matched iOS screenshots and other device configurations remain unverified. The decoration has no iOS equivalent.
+
+## Seasonal decoration (Android-only)
+
+- Android adds optional Christmas snowfall across the main app and details to workout cards, detail, the active workout sheet and rest timer, and completion summary from December 7 through January 6. The local setting defaults to enabled. No equivalent was found in iOS, so this is an intentional platform difference; matched visual and accessibility verification remains outstanding.
+
 ## Coach-assigned workout labels (2026-11-24)
 
 - Missing day types are omitted rather than displayed as the literal `null`, matching iOS. Active-set target and weight labels use shared translations. An assigned plan and its first set/rest were exercised on Android; the changes still require a rebuilt app and matched iOS visual verification.
@@ -805,3 +841,10 @@ Android's completed-workout export now uses the persisted completion timestamp f
 - Completion score tiers, effort/metric labels, streak messages and plan/mesocycle actions now use the corresponding iOS Sheet keys. Localized record titles and exercise names are shown in the record celebration. Compilation and workout unit tests passed; device and complete localization verification remain outstanding.
 - Watch motion insight labels and empty states now use the iOS shared keys for disabled, manual, ready, tracking, low-confidence and fallback states. Unit/build checks do not replace wearable or accessibility verification.
 - Exercise detail history/profile headings, level labels, related-exercise names and empty states, plus mesocycle section headings, now resolve localized resources. History dates and distances use the selected locale. Local resource checks and workout unit tests pass; a matched on-device localization review remains outstanding.
+
+### Gym program parity
+
+- Android downloads active gym program metadata and reconstructs independent gym sessions separately from personal plans. The hub offers the gym tab when an active program is available, deduplicates pending sessions by title, and gives an in-progress session priority, following `GymPlanView`.
+- The available modes follow the iOS AI-coach and active-program rules, with coverage for all four combinations. Gym titles use natural numeric ordering and the empty state offers a sync retry.
+- Local changes and completion are queued with row versions; the server owns program links and creates the successor after completion. Android pulls again after uploading so the successor can appear. A full program metadata refresh also removes access when gym membership ends.
+- Source comparison is complete for the hub selection and grouping rules. Matched iOS/Android screenshots and an end-to-end run against a gym program, including offline completion and membership changes, remain outstanding; do not mark overall workout parity complete on this basis.

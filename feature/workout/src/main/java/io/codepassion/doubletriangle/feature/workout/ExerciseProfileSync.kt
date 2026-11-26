@@ -14,7 +14,7 @@ object ExerciseProfileSync {
     fun hasLocalProfiles(context: Context): Boolean =
         context.getSharedPreferences(prefsName, Context.MODE_PRIVATE).all.keys.any { it.endsWith(".level") }
 
-    fun records(context: Context, userId: String, remote: JSONArray, now: String, trainingLevel: String): Records {
+    fun records(context: Context, userId: String, remote: JSONArray, trainingLevel: String): Records {
         val prefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
         val metadata = JSONObject(context.resources.openRawResource(R.raw.ios_exercise_metadata).bufferedReader().use { it.readText() })
         val catalog = metadata.keys().asSequence().associateBy { it.lowercase(Locale.ROOT) }
@@ -27,10 +27,19 @@ object ExerciseProfileSync {
                 ?: run { unresolved++; return@forEach }
             val existing = (0 until remote.length()).asSequence().mapNotNull(remote::optJSONObject)
                 .firstOrNull { it.optString("exercise").equals(exercise, ignoreCase = true) }
+            val localUpdated = prefs.getString("$key.updatedAt", null)
+            val remoteUpdated = existing?.optString("updated_at")
+            if (localUpdated == null || runCatching { java.time.Instant.parse(localUpdated) }.isFailure) {
+                // A legacy edit with no reliable time cannot safely replace a server row.
+                if (existing == null) unresolved++
+                return@forEach
+            }
+            if (exerciseProfileRemoteWins(localUpdated, remoteUpdated)) return@forEach
             val id = existing?.optString("id")?.takeIf { it.isNotBlank() }
                 ?: UUID.nameUUIDFromBytes("$userId:exercise-profile:$exercise".toByteArray()).toString()
-            val record = existing?.let { JSONObject(it.toString()) } ?: JSONObject().put("id", id).put("created_at", now)
-            record.put("updated_at", now).put("deleted_at", JSONObject.NULL).put("exercise", exercise)
+            val createdAt = prefs.getString("$key.createdAt", null) ?: localUpdated
+            val record = existing?.let { JSONObject(it.toString()) } ?: JSONObject().put("id", id).put("created_at", createdAt)
+            record.put("updated_at", localUpdated).put("deleted_at", JSONObject.NULL).put("exercise", exercise)
             record.put("level", when (prefs.getString(levelKey, "Principiante")?.lowercase(Locale.ROOT)) {
                 "intermedio", "intermediate" -> "intermediate"
                 "avanzado", "advanced" -> "advanced"
@@ -65,13 +74,21 @@ object ExerciseProfileSync {
             val weight = latest.maxWeightKg.takeIf { it > 0 }?.let { kotlin.math.round(it * factor * 2) / 2 }
             val maximumReps = history.maxOfOrNull { it.totalReps }?.takeIf { it > 0 }
             val reps = if (weight == null) maximumReps?.let { (it * factor).toInt() } else maximumReps
+            val historyTime = java.time.Instant.ofEpochMilli(maxOf(latest.timestampMillis, latest.pendingEditAt)).toString()
             result.put(JSONObject()
                 .put("id", UUID.nameUUIDFromBytes("$userId:exercise-profile:$exercise".toByteArray()).toString())
-                .put("created_at", now).put("updated_at", now).put("exercise", exercise).put("level", trainingLevel)
+                .put("created_at", historyTime).put("updated_at", historyTime).put("exercise", exercise).put("level", trainingLevel)
                 .put("working_weight", weight ?: JSONObject.NULL).put("max_reps", reps ?: JSONObject.NULL)
                 .put("typical_duration_minutes", (latest.durationSeconds / 60).takeIf { it > 0 } ?: JSONObject.NULL)
                 .put("typical_distance_km", latest.distanceKm.takeIf { it > 0 } ?: JSONObject.NULL))
         }
         return Records(result, unresolved)
     }
+}
+
+/** iOS applies a downloaded profile only when its modification time is newer. */
+internal fun exerciseProfileRemoteWins(localUpdated: String?, remoteUpdated: String?): Boolean {
+    val remote = remoteUpdated?.let { runCatching { java.time.Instant.parse(it) }.getOrNull() } ?: return false
+    val local = localUpdated?.let { runCatching { java.time.Instant.parse(it) }.getOrNull() } ?: return true
+    return remote > local
 }

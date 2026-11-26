@@ -317,7 +317,7 @@ fun AnalyticsScreen(
     val averageVolume = averageVolumePerWorkout(data.sessions)
     val minutes = totalActiveMinutes(data.sessions)
     val averageMinutes = averageActiveMinutes(data.sessions)
-    val longest = longestStreakForAnalytics(allSessions, preferences.getInt("longest_streak", 0))
+    val longest = io.codepassion.doubletriangle.feature.workout.CompletionProgressStore.progress(context).longestStreak
     val appLanguage = preferences.getString("app_language", "Español") ?: "Español"
     // iOS bases its empty state on the account's all-time history, not on the
     // currently selected timeframe. Older workouts therefore keep the

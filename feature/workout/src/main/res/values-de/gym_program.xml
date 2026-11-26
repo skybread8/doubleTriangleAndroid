@@ -1,0 +1,5 @@
+<resources>
+    <string name="gym_plan">Fitnessstudio-Plan</string>
+    <string name="gym_workouts_pending">Deine Trainingseinheiten sind unterwegs. Aktualisiere, nachdem dein Fitnessstudio das Programm veröffentlicht hat.</string>
+    <string name="gym_workout_sync_hint">Nach Abschluss einer Trainingseinheit erscheint die nächste Wiederholung nach der Synchronisierung hier.</string>
+</resources>

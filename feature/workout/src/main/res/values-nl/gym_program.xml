@@ -1,0 +1,5 @@
+<resources>
+    <string name="gym_plan">Sportschoolplan</string>
+    <string name="gym_workouts_pending">Je trainingen zijn onderweg. Vernieuw nadat je sportschool het programma heeft gepubliceerd.</string>
+    <string name="gym_workout_sync_hint">Na het voltooien verschijnt de volgende training hier na synchronisatie.</string>
+</resources>

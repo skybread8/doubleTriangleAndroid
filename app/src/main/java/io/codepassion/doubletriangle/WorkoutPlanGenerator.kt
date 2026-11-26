@@ -345,6 +345,7 @@ object WorkoutPlanGenerator {
                     estimatedMinutes.coerceIn(15, 180), parseWorkoutStatus(day.optString("status")), exercises, blocks,
                     kind = day.optString("kind", "workout").trim().ifBlank { "workout" },
                     creationSource = day.optString("creationSource", "generated").trim().ifBlank { "generated" },
+                    gymProgramId = day.nullableString("gymProgramId"),
                     scheduledFor = day.nullableString("scheduledFor"),
                     startedAt = day.nullableString("startedAt"),
                     completedAt = day.nullableString("completedAt"),
@@ -491,6 +492,7 @@ object WorkoutPlanGenerator {
                 .put("status", workout.status.wireValue)
                 .put("kind", workout.kind)
                 .put("creationSource", workout.creationSource)
+                .put("gymProgramId", workout.gymProgramId)
                 .put("weekday", workout.scheduledDay.name)
                 .put("estimatedDurationMinutes", workout.estimatedMinutes)
                 .put("scheduledFor", workout.scheduledFor)

@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- The hat rests on the upper edge of the mark, inside the launcher's safe area. -->
+    <path android:fillColor="#A91D2E" android:pathData="M49,35 C51,30 53,22 59,20 C65,18 70,21 72,25 C73,27 74,30 77,31 C74,32 71,31 69,29 L72,35 C64,33 57,33 49,35 Z" />
+    <path android:fillColor="#DB3444" android:pathData="M51,33 C53,28 55,23 59,22 C57,26 56,30 56,33 Z" />
+    <path android:fillColor="#F8FBF9" android:pathData="M48,34 C54,32 65,32 72,34 Q74,34.5 74,36 L73.6,38 C65,36 55,36 48,38 Q47,38 47,37 L47,35 Q47,34 48,34 Z" />
+    <path android:fillColor="#DAE7E3" android:pathData="M47,36.7 C54,35 66,35 74,36.5 L73.6,38 C65,36 55,36 48,38 Z" />
+    <path android:fillColor="#F8FBF9" android:pathData="M76,29 a3,3 0,1 0,0 6 a3,3 0,1 0,0 -6" />
+</vector>

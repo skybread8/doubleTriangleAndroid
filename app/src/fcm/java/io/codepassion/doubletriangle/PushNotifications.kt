@@ -16,6 +16,7 @@ import io.codepassion.doubletriangle.core.model.WildforceApiEnvironment
 import io.codepassion.wildforce.android.BuildConfig
 import io.codepassion.wildforce.android.R
 import io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext
+import io.codepassion.doubletriangle.feature.workout.WorkoutNotificationPreferences
 import io.codepassion.doubletriangle.core.designsystem.R as SharedR
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -29,6 +30,7 @@ internal object CheckInPushTransport {
     private var started = false
     private var lastAccountToken: String? = null
     private var accountListener: android.content.SharedPreferences.OnSharedPreferenceChangeListener? = null
+    private var settingsListener: android.content.SharedPreferences.OnSharedPreferenceChangeListener? = null
 
     @Synchronized fun start(context: Context) {
         val app = context.applicationContext
@@ -46,10 +48,20 @@ internal object CheckInPushTransport {
             }
         }
         account.registerOnSharedPreferenceChangeListener(accountListener)
+        val settings = app.getSharedPreferences("wildforce_notification_settings", Context.MODE_PRIVATE)
+        settingsListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == null || key == "enabled") refresh(app)
+        }
+        settings.registerOnSharedPreferenceChangeListener(settingsListener)
         refresh(app)
     }
 
     fun refresh(context: Context) {
+        if (!pushAllowed(context)) {
+            val auth = context.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE).getString("token", null)
+            if (auth != null) executor.execute { unregister(context.applicationContext, auth) }
+            return
+        }
         FirebaseMessaging.getInstance().token.addOnSuccessListener { token -> onToken(context, token) }
             .addOnFailureListener { Log.w("PushNotifications", "Unable to obtain an FCM token", it) }
     }
@@ -59,6 +71,7 @@ internal object CheckInPushTransport {
         app.getSharedPreferences("wildforce_push", Context.MODE_PRIVATE).edit().putString("fcm_token", token).apply()
         executor.execute {
             val auth = app.getSharedPreferences("wildforce_account", Context.MODE_PRIVATE).getString("token", null) ?: return@execute
+            if (!pushAllowed(app)) { unregister(app, auth); return@execute }
             val installation = installationId(app)
             runCatching {
                 val body = JSONObject().put("platform", "android").put("environment", "production")
@@ -67,6 +80,9 @@ internal object CheckInPushTransport {
             }.onFailure { Log.w("PushNotifications", "Unable to register this device", it) }
         }
     }
+
+    private fun pushAllowed(context: Context): Boolean =
+        WorkoutNotificationPreferences.enabled(context) && NotificationManagerCompat.from(context).areNotificationsEnabled()
 
     private fun unregister(context: Context, auth: String) {
         runCatching { request("DELETE", "account/push-devices/${installationId(context)}", auth, null) }
@@ -102,6 +118,7 @@ class CheckInMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) { CheckInPushTransport.onToken(applicationContext, token) }
 
     override fun onMessageReceived(message: RemoteMessage) {
+        if (!WorkoutNotificationPreferences.enabled(this) || !NotificationManagerCompat.from(this).areNotificationsEnabled()) return
         val type = message.data["type"] ?: return
         val id = message.data["check_in_id"] ?: return
         if (!isCheckInPush(type, id)) return

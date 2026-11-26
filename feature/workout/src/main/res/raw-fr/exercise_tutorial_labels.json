@@ -137,7 +137,9 @@
     "ezBarSkullCrusher": "Barre au front avec barre EZ",
     "closeGripDumbbellBenchPress": "Développé couché serré avec haltères",
     "lyingCableCurl": "Curl biceps allongé à la poulie",
-    "smithMachineCalfRaise": "Extensions des mollets à la machine Smith"
+    "smithMachineCalfRaise": "Extensions des mollets à la machine Smith",
+    "closeGripLatPulldown": "Tirage vertical à prise serrée",
+    "Close-Grip Lat Pulldown": "Tirage vertical à prise serrée"
   },
   "texts": {
     "Walking": "Marche",

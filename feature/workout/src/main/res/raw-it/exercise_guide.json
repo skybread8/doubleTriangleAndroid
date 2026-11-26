@@ -1944,5 +1944,117 @@
       "Usa un gradino o una piattaforma stabile solo se entra in sicurezza nella macchina Smith.",
       "Dai la priorità all'intero arco di movimento piuttosto che ad aggiungere carico."
     ]
+  },
+  "closeGripLatPulldown": {
+    "description": "Una lat machine con presa stretta che allena la schiena con un movimento di tirata verticale controllato.",
+    "instructions": [
+      "Siediti alla macchina per lat machine e blocca le cosce sotto i rulli fermacosce.",
+      "Fissa una maniglia per presa stretta o neutra al cavo alto e afferrala con i palmi rivolti l’uno verso l’altro.",
+      "Tieni il petto alto e inclinati leggermente all’indietro, poi tira la maniglia verso la parte alta del petto portando i gomiti in basso e indietro.",
+      "Fai una pausa senza sollevare le spalle, poi riporta la maniglia sopra la testa in modo controllato."
+    ],
+    "tips": [
+      "Tieni i gomiti vicini al busto durante tutta la tirata.",
+      "Non trasformare il movimento in una remata inclinandoti eccessivamente all’indietro.",
+      "Distendi completamente le braccia in alto, mantenendo la schiena in tensione."
+    ]
+  },
+  "ezBarCurl": {
+    "description": "Un curl per bicipiti in piedi con un bilanciere EZ, le cui impugnature angolate possono risultare più comode per i polsi.",
+    "instructions": [
+      "Mettiti in piedi con i piedi alla larghezza dei fianchi. Impugna il bilanciere EZ con presa supina e le braccia distese lungo i fianchi.",
+      "Tieni i gomiti vicini al busto e fletti le braccia per portare il bilanciere verso le spalle.",
+      "Contrai brevemente i bicipiti nella posizione alta, senza portare i gomiti in avanti.",
+      "Abbassa lentamente il bilanciere finché le braccia non sono quasi completamente distese."
+    ],
+    "tips": [
+      "Scegli la posizione angolata delle mani che risulta più comoda per i polsi.",
+      "Tieni fermo il busto ed evita di dondolare il bilanciere per sollevare il peso.",
+      "Controlla l'arco di movimento e fermati prima di estendere i gomiti fino a provare dolore."
+    ]
+  },
+  "ropeTricepsPushdown": {
+    "description": "Un push-down per tricipiti ai cavi con corda che isola i tricipiti e permette una contrazione intensa alla fine di ogni ripetizione.",
+    "instructions": [
+      "Fissa una corda a una carrucola alta e mettiti in piedi di fronte alla macchina.",
+      "Afferra le estremità della corda con una presa neutra e tieni i gomiti vicini ai fianchi.",
+      "Spingi la corda verso il basso fino a distendere completamente i gomiti e divarica leggermente le estremità nella parte finale del movimento.",
+      "Riporta la corda in modo controllato finché gli avambracci non sono appena sopra la posizione orizzontale."
+    ],
+    "tips": [
+      "Tieni le spalle basse e le braccia ferme per tutta la durata del movimento.",
+      "Evita di inclinarti sul cavo per spostare il carico usando il peso del corpo.",
+      "Esegui il movimento con un’ampiezza completa ma controllata, senza bloccare bruscamente i gomiti."
+    ]
+  },
+  "reversePecDeck": {
+    "description": "Un esercizio di aperture inverse alla pec deck per isolare i deltoidi posteriori e la parte alta della schiena.",
+    "instructions": [
+      "Posiziona i bracci della pec deck dietro di te e siediti rivolto verso il supporto, con il petto appoggiato al cuscino.",
+      "Afferra le impugnature con le braccia distese davanti a te all’altezza delle spalle.",
+      "Apri le braccia formando un ampio arco finché non sono allineate con il busto.",
+      "Contrai i deltoidi posteriori, poi torna lentamente alla posizione iniziale."
+    ],
+    "tips": [
+      "Tieni il petto ben appoggiato al cuscino per tutta la serie.",
+      "Guida il movimento con i gomiti ed evita di sollevare le spalle.",
+      "Mantieni un ritmo controllato ed evita che i pacchi pesi si tocchino tra una ripetizione e l’altra."
+    ]
+  },
+  "spiderCurl": {
+    "description": "Un curl con il petto appoggiato, eseguito prono su una panca inclinata per isolare i bicipiti e limitare lo slancio.",
+    "instructions": [
+      "Imposta una panca regolabile con un'inclinazione ripida e sdraiati a pancia in giù con il petto appoggiato al supporto.",
+      "Lascia che le braccia pendano dritte verso il pavimento mentre impugni i manubri con i palmi rivolti in avanti.",
+      "Fletti le braccia e porta i pesi verso le spalle senza spostare i gomiti in avanti.",
+      "Abbassa lentamente i manubri finché le braccia non sono di nuovo completamente distese."
+    ],
+    "tips": [
+      "Mantieni le braccia perpendicolari al pavimento per tutta la durata del movimento.",
+      "Usa un carico più leggero rispetto ai curl in piedi per mantenere un'esecuzione rigorosa.",
+      "Fai una breve pausa nella posizione alta senza sollevare il petto dalla panca."
+    ]
+  },
+  "preacherCurl": {
+    "description": "Un curl con supporto che mantiene fermi i bracci per isolare i bicipiti attraverso un arco di movimento controllato.",
+    "instructions": [
+      "Posiziona una panca Scott o una panca regolabile in modo che le braccia siano ben appoggiate sul supporto.",
+      "Impugna una barra EZ con presa supina e inizia con le braccia quasi completamente distese.",
+      "Fletti le braccia e porta il bilanciere verso le spalle mantenendo i bracci appoggiati al supporto.",
+      "Abbassa lentamente il bilanciere finché senti allungare i bicipiti, senza forzare l'estensione dei gomiti."
+    ],
+    "tips": [
+      "Mantieni i polsi in posizione neutra ed evita di piegarli all'indietro sotto carico.",
+      "Non far rimbalzare il bilanciere nella posizione più bassa.",
+      "Controlla l'arco di movimento e fermati prima di estendere i gomiti fino a provare dolore."
+    ]
+  },
+  "hackSquat": {
+    "description": "Una macchina guidata per lo squat che permette di allenare quadricipiti e glutei con elevata stabilità e una minima richiesta di equilibrio.",
+    "instructions": [
+      "Regola i cuscinetti per le spalle in modo da poter stare in posizione eretta con la schiena appoggiata allo schienale.",
+      "Posiziona i piedi sulla pedana alla larghezza delle spalle, leggermente più avanti rispetto ai fianchi.",
+      "Sblocca le leve di sicurezza e scendi in modo controllato piegando le ginocchia e le anche.",
+      "Spingi con tutta la pianta dei piedi per tornare alla posizione iniziale, senza bloccare bruscamente le ginocchia."
+    ],
+    "tips": [
+      "Mantieni la zona lombare a contatto con lo schienale durante tutto il movimento.",
+      "Posiziona i piedi in modo che le ginocchia seguano comodamente la direzione delle dita.",
+      "Controlla la posizione più bassa e usa i fermi di sicurezza a una profondità adeguata."
+    ]
+  },
+  "machineHipThrust": {
+    "description": "Una macchina guidata per l'hip thrust che sollecita direttamente i glutei e offre un assetto stabile e confortevole.",
+    "instructions": [
+      "Regola lo schienale e la cintura o il cuscinetto per i fianchi in modo che poggi saldamente sui fianchi.",
+      "Posiziona i piedi a circa la larghezza delle spalle. In alto, le ginocchia dovrebbero essere piegate a circa 90 gradi.",
+      "Spingi con i talloni ed estendi le anche finché il busto e le cosce non formano una linea retta.",
+      "Contrai i glutei in alto, poi abbassa il carico in modo controllato."
+    ],
+    "tips": [
+      "Tieni le costole abbassate ed evita di iperestendere la zona lombare in alto.",
+      "Posiziona i piedi in modo da sentire il movimento soprattutto nei glutei e non nei muscoli posteriori della coscia.",
+      "Usa i fermi di sicurezza della macchina prima di caricare molto peso."
+    ]
   }
 }

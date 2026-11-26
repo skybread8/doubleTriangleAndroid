@@ -1,0 +1,5 @@
+<resources>
+    <string name="gym_plan">Programme de la salle</string>
+    <string name="gym_workouts_pending">Les séances de votre salle arrivent. Actualisez après la publication du programme.</string>
+    <string name="gym_workout_sync_hint">Après une séance, la répétition suivante apparaîtra ici après synchronisation.</string>
+</resources>

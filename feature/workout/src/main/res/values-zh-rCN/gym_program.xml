@@ -1,0 +1,5 @@
+<resources>
+    <string name="gym_plan">健身房计划</string>
+    <string name="gym_workouts_pending">健身房训练即将到来。请在健身房发布计划后刷新。</string>
+    <string name="gym_workout_sync_hint">完成训练后，下一次训练将在同步后显示在这里。</string>
+</resources>

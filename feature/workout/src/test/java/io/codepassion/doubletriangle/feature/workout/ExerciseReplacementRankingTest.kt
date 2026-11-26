@@ -3,6 +3,7 @@ package io.codepassion.doubletriangle.feature.workout
 import io.codepassion.doubletriangle.core.model.ExerciseSummary
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ExerciseReplacementRankingTest {
@@ -40,6 +41,17 @@ class ExerciseReplacementRankingTest {
     @Test
     fun `does not show weight controls for bicycle crunch`() {
         assertFalse(exerciseTracksWeight(ExerciseSummary("Bicycle Crunch", "bicycleCrunch", 3, "12", 60)))
+    }
+
+    @Test
+    fun `replacement uses catalog weight support after clearing old targets`() {
+        val original = ExerciseSummary("Press", "barbellBenchPress", 3, "8", 90, targetWeightKg = 50.0)
+        val replacement = original.swappedTo(catalogExerciseChoice("Remo", "barbellBentOverRow"))
+
+        assertEquals(null, replacement.targetWeightKg)
+        assertTrue(exerciseTracksWeight(replacement))
+        assertTrue(exerciseTracksWeight(original.swappedTo(catalogExerciseChoice("Flexiones", "pushUp"))))
+        assertFalse(exerciseTracksWeight(original.swappedTo(catalogExerciseChoice("Abdominales", "bicycleCrunch"))))
     }
 
     @Test

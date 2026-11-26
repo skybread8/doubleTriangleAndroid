@@ -24,4 +24,14 @@ class RemoteWorkoutPlanSelectionTest {
         val latest = Plan("c", "active", "2026-01-01", "2026-01-03")
         assertEquals(latest, select(Plan("a", "active", "2026-01-01", "2026-01-02"), Plan("b", "active", "2026-01-01", "2026-01-03"), latest))
     }
+
+    @Test fun datesAreComparedAsInstantsRatherThanText() {
+        val newer = Plan("a", "active", "2026-11-24T12:00:00Z")
+        val olderWithFraction = Plan("b", "active", "2026-11-24T11:59:59.999Z")
+        assertEquals(newer, select(olderWithFraction, newer))
+        val sameMomentLaterUpdate = Plan("c", "active", "2026-11-24T13:00:00+01:00", "2026-11-24T12:00:01Z")
+        assertEquals(sameMomentLaterUpdate, select(newer, sameMomentLaterUpdate))
+        val fractional = Plan("d", "active", "2026-11-24T12:00:00.500Z")
+        assertEquals(fractional, select(newer, fractional))
+    }
 }

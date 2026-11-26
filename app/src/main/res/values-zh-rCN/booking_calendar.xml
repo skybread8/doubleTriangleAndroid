@@ -1,0 +1,4 @@
+<resources>
+    <string name="booking_add_to_calendar">添加到日历</string>
+    <string name="booking_no_calendar_app">没有可用于添加此活动的日历应用。</string>
+</resources>

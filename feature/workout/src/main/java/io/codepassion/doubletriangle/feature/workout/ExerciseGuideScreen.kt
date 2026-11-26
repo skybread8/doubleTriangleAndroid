@@ -127,7 +127,8 @@ private object LocalExerciseProfileStore {
             null
         }
         val remote = remoteProfile(context, exercise)
-        return local?.mergeMissing(remote) ?: remote
+        val localUpdated = preferences.getString("$key.updatedAt", null)
+        return if (remote != null && (local == null || exerciseProfileRemoteWins(localUpdated, remote.second))) remote.first else local
     }
 
     fun create(context: Context, exercise: ExerciseSummary): LocalExerciseProfile {
@@ -157,7 +158,12 @@ private object LocalExerciseProfileStore {
     }
 
     fun save(context: Context, exercise: ExerciseSummary, profile: LocalExerciseProfile) {
-        context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE).edit()
+        val key = exercise.historyKey()
+        val preferences = context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
+        val now = java.time.Instant.now().toString()
+        preferences.edit()
+            .putString("$key.createdAt", preferences.getString("$key.createdAt", null) ?: now)
+            .putString("$key.updatedAt", now)
             .putString("${exercise.historyKey()}.exercise", exercise.coachExerciseId?.let { "coach:${it.lowercase(Locale.ROOT)}" } ?: exercise.imageKey)
             .putString("${exercise.historyKey()}.level", profile.level)
             .putString("${exercise.historyKey()}.workingWeightKg", profile.workingWeightKg?.toString())
@@ -173,7 +179,7 @@ private object LocalExerciseProfileStore {
         io.codepassion.doubletriangle.core.model.RemoteSyncChangeTracker.mark(context, "exercise-profiles")
     }
 
-    private fun remoteProfile(context: Context, exercise: ExerciseSummary): LocalExerciseProfile? = runCatching {
+    private fun remoteProfile(context: Context, exercise: ExerciseSummary): Pair<LocalExerciseProfile?, String?>? = runCatching {
         val raw = context.getSharedPreferences("wildforce_remote_sync", Context.MODE_PRIVATE)
             .getString("exercise_profiles", null) ?: return null
         val keys = listOfNotNull(exercise.historyKey(), exercise.imageKey, exercise.name).map(::normalizedKey).toSet()
@@ -182,9 +188,11 @@ private object LocalExerciseProfileStore {
                 .map { records.getJSONObject(it) }
                 .firstOrNull { record ->
                     val exerciseKey = normalizedKey(record.optString("exercise"))
-                    exerciseKey in keys && record.optString("deleted_at").let { it.isBlank() || it.equals("null", ignoreCase = true) }
+                    exerciseKey in keys
                 }
         } ?: return null
+        val updatedAt = profile.optString("updated_at").takeIf { it.isNotBlank() && !it.equals("null", true) }
+        if (!profile.isNull("deleted_at")) return null to updatedAt
         LocalExerciseProfile(
             level = trainingLevelLabel(profile.optString("level")),
             workingWeightKg = profile.optionalDouble("working_weight", "workingWeight"),
@@ -196,22 +204,8 @@ private object LocalExerciseProfileStore {
             typicalDistanceKm = profile.optionalDouble("typical_distance_km", "typicalDistanceKm"),
             typicalPaceSecondsPerKm = profile.optionalInt("typical_pace_seconds_per_km", "typicalPaceSecondsPerKm"),
             notes = profile.optString("notes").takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) }.orEmpty(),
-        )
+        ) to updatedAt
     }.getOrNull()
-
-    private fun LocalExerciseProfile.mergeMissing(remote: LocalExerciseProfile?): LocalExerciseProfile = remote?.let {
-        copy(
-            workingWeightKg = workingWeightKg ?: it.workingWeightKg,
-            estimatedOneRepMaxKg = estimatedOneRepMaxKg ?: it.estimatedOneRepMaxKg,
-            maxReps = maxReps ?: it.maxReps,
-            preferredRepRangeMin = preferredRepRangeMin ?: it.preferredRepRangeMin,
-            preferredRepRangeMax = preferredRepRangeMax ?: it.preferredRepRangeMax,
-            typicalDurationMinutes = typicalDurationMinutes ?: it.typicalDurationMinutes,
-            typicalDistanceKm = typicalDistanceKm ?: it.typicalDistanceKm,
-            typicalPaceSecondsPerKm = typicalPaceSecondsPerKm ?: it.typicalPaceSecondsPerKm,
-            notes = notes.takeIf(String::isNotBlank) ?: it.notes,
-        )
-    } ?: this
 
     private fun normalizedKey(value: String): String = value.filter(Char::isLetterOrDigit).lowercase(Locale.ROOT)
 

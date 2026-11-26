@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.health.READ_HEIGHT" />
     <uses-permission android:name="android.permission.health.READ_WEIGHT" />
     <uses-permission android:name="android.permission.health.READ_BODY_FAT" />
@@ -69,10 +70,6 @@
         </provider>
         <activity android:name="io.codepassion.doubletriangle.MainActivity" android:exported="true" android:launchMode="singleTop" android:configChanges="locale|layoutDirection">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
                 <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
                 <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
             </intent-filter>
@@ -87,5 +84,37 @@
                 <data android:scheme="wildforce" android:host="leaving-feedback" />
             </intent-filter>
         </activity>
+        <activity-alias android:name="io.codepassion.doubletriangle.LauncherDefault" android:targetActivity="io.codepassion.doubletriangle.MainActivity" android:exported="true" android:enabled="true" android:icon="@drawable/wildforce_app_icon" android:roundIcon="@drawable/wildforce_app_icon">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias android:name="io.codepassion.doubletriangle.LauncherChristmas" android:targetActivity="io.codepassion.doubletriangle.MainActivity" android:exported="true" android:enabled="false" android:icon="@drawable/wildforce_christmas_icon" android:roundIcon="@drawable/wildforce_christmas_icon">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias android:name="io.codepassion.doubletriangle.LauncherBroken" android:targetActivity="io.codepassion.doubletriangle.MainActivity" android:exported="true" android:enabled="false" android:icon="@drawable/wildforce_broken_icon" android:roundIcon="@drawable/wildforce_broken_icon">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias android:name="io.codepassion.doubletriangle.LauncherChristmasBroken" android:targetActivity="io.codepassion.doubletriangle.MainActivity" android:exported="true" android:enabled="false" android:icon="@drawable/wildforce_christmas_broken_icon" android:roundIcon="@drawable/wildforce_christmas_broken_icon">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <receiver android:name="io.codepassion.doubletriangle.SeasonalIconReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

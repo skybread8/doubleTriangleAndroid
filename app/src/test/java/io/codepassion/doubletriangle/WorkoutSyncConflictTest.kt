@@ -5,6 +5,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WorkoutSyncConflictTest {
+    @org.junit.Test fun gymSyncUploadsOnlyNewOrNewerLocalRows() {
+        org.junit.Assert.assertTrue(shouldPushGymRow("2026-11-25T10:00:01Z", null))
+        org.junit.Assert.assertTrue(shouldPushGymRow("2026-11-25T10:00:01Z", "2026-11-25T10:00:00Z"))
+        org.junit.Assert.assertFalse(shouldPushGymRow("2026-11-25T10:00:00Z", "2026-11-25T10:00:00Z"))
+        org.junit.Assert.assertFalse(shouldPushGymRow("2026-11-25T10:00:00Z", "2026-11-25T10:00:01Z"))
+    }
     @Test fun userDeletionUsesIosTimestampOrderingAndKeepsUnknownLegacyEdits() {
         val local = java.time.Instant.parse("2026-11-14T10:00:00Z").toEpochMilli()
         assertTrue(remoteDeletionWins(false, null, "2026-11-14T10:00:00Z"))
@@ -45,5 +51,29 @@ class WorkoutSyncConflictTest {
         assertTrue(serverHasNewerWorkoutRecord("2026-11-14T10:00:00Z", "2026-11-14T10:00:00.001Z"))
         assertFalse(serverHasNewerWorkoutRecord("2026-11-14T10:00:00Z", "2026-11-14T10:00:00Z"))
         assertFalse(serverHasNewerWorkoutRecord("2026-11-14T10:00:01Z", "2026-11-14T10:00:00Z"))
+    }
+    @Test fun onlyUnversionedAndUnchangedPendingGraphsCanBeReplaced() {
+        val dirty = setOf("workout-days")
+        val before = mapOf("workout-days" to 2L)
+        assertTrue(canReplaceLegacyWorkoutGraph(dirty, false, before, before))
+        assertFalse(canReplaceLegacyWorkoutGraph(dirty, true, before, before))
+        assertFalse(canReplaceLegacyWorkoutGraph(dirty, false, before, mapOf("workout-days" to 3L)))
+        assertFalse(canReplaceLegacyWorkoutGraph(emptySet(), false, before, before))
+    }
+    @Test fun migratesOnlyUnversionedRowsThatHaveARemoteVersion() {
+        org.junit.Assert.assertEquals(LegacyWorkoutRecordAction.UploadVersioned, legacyWorkoutRecordAction(true, true, false))
+        org.junit.Assert.assertEquals(LegacyWorkoutRecordAction.UseRemote, legacyWorkoutRecordAction(false, true, false))
+        org.junit.Assert.assertEquals(LegacyWorkoutRecordAction.UseMatchingRemote, legacyWorkoutRecordAction(false, true, true))
+        org.junit.Assert.assertEquals(LegacyWorkoutRecordAction.KeepPending, legacyWorkoutRecordAction(false, false, false))
+    }
+    @Test fun equalNumericValuesHaveTheSameSyncFingerprintComponent() {
+        org.junit.Assert.assertEquals(canonicalSyncNumber(12), canonicalSyncNumber(12.0))
+        org.junit.Assert.assertEquals("0", canonicalSyncNumber(-0.0))
+        org.junit.Assert.assertEquals("1.25", canonicalSyncNumber(1.25))
+    }
+    @Test fun missingBodyPhotoSessionRequiresExplicitDeletionTime() {
+        assertFalse(shouldSendBodyPhotoTombstone(null))
+        assertFalse(shouldSendBodyPhotoTombstone("invalid"))
+        assertTrue(shouldSendBodyPhotoTombstone("2026-11-25T10:00:00Z"))
     }
 }

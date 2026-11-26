@@ -13,6 +13,10 @@ import java.net.Socket
 import java.nio.charset.StandardCharsets
 import java.util.Calendar
 import java.util.concurrent.Executors
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import io.codepassion.doubletriangle.core.model.executionExercises
+import io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContext
 
 /** Opt-in, phone-local bridge for the Zepp Side Service. It never binds to Wi-Fi/mobile data. */
 object WildforceWatchLocalBridge {
@@ -28,12 +32,18 @@ object WildforceWatchLocalBridge {
         val exercises: List<String>,
         val elapsedSeconds: Int,
         val heartRateZoneAge: Int = 30,
+        val restEndAtMillis: Long? = null,
+        val pendingFeedback: Boolean = false,
+        val selectedFeedback: String = "JUSTO",
     ) {
         fun toJson(): String = JSONObject()
             .put("active", true).put("workoutId", workoutId).put("workoutTitle", workoutTitle)
             .put("exerciseName", exerciseName).put("exerciseIndex", exerciseIndex).put("exerciseCount", exerciseCount)
             .put("setNumber", setNumber).put("targetSets", targetSets).put("reps", reps).put("weightKg", weightKg)
             .put("restRemaining", restRemaining ?: JSONObject.NULL).put("restInitialSeconds", restInitialSeconds)
+            .put("restEndAtMillis", restEndAtMillis ?: JSONObject.NULL)
+            .put("serverTimeMillis", System.currentTimeMillis())
+            .put("pendingFeedback", pendingFeedback).put("selectedFeedback", selectedFeedback)
             .put("exercises", JSONArray(exercises))
             .put("heartRateZoneAge", heartRateZoneAge)
             .put("elapsedSeconds", elapsedSeconds).toString()
@@ -64,20 +74,65 @@ object WildforceWatchLocalBridge {
         state = null
     }
     fun publish(context: Context, value: State) {
-        val birthYear = context.getSharedPreferences("wildforce_profile", 0).getInt("birth_year", 1995)
-        val age = (Calendar.getInstance().get(Calendar.YEAR) - birthYear).coerceIn(10, 100)
+        val prefs = context.getSharedPreferences("wildforce_profile", 0)
+        val today = Calendar.getInstance()
+        val birthYear = prefs.getInt("birth_year", 1995)
+        val birthMonth = prefs.getInt("birth_month", 1)
+        val birthDay = prefs.getInt("birth_day", 1)
+        val birthdayHasPassed = today.get(Calendar.MONTH) + 1 > birthMonth ||
+            (today.get(Calendar.MONTH) + 1 == birthMonth && today.get(Calendar.DAY_OF_MONTH) >= birthDay)
+        val age = (today.get(Calendar.YEAR) - birthYear - if (birthdayHasPassed) 0 else 1).coerceIn(10, 100)
         state = value.copy(heartRateZoneAge = age)
         start(context)
     }
-    /**
-     * A workout screen is not guaranteed to be composed while Android has the
-     * app in the background. Keep a command received in that window instead of
-     * silently dropping it; it is consumed as soon as its workout is restored.
-     */
-    internal fun dispatch(context: Context, command: Command) = Handler(Looper.getMainLooper()).post {
-        val listener = commandListener
-        if (listener != null && context.getSharedPreferences("wildforce_notification_settings", 0).getBoolean("app_foreground", false)) listener(command)
-        else (state?.workoutId ?: WildforceWatchBridge.state?.workoutId)?.let { WatchCommandStore.enqueue(context, it, command) }
+    internal fun currentState(context: Context): State? {
+        val published = state ?: return null
+        if (context.getSharedPreferences("wildforce_notification_settings", 0).getBoolean("app_foreground", false)) return published
+        val snapshot = WorkoutSessionStore.load(context, published.workoutId) ?: return null
+        if (snapshot.showsSummary) return null
+        val exercises = snapshot.editableBlocks?.flatMap { it.executionExercises() } ?: return published
+        val exercise = exercises.getOrNull(snapshot.exerciseIndex) ?: return null
+        val rest = snapshot.restRemaining?.takeIf { it > 0 }
+        return published.copy(
+            exerciseName = localizedExerciseName(localizedBackgroundContext(context), exercise.imageKey, exercise.name),
+            exerciseIndex = snapshot.exerciseIndex, exerciseCount = exercises.size,
+            setNumber = (snapshot.completedByExercise[snapshot.exerciseIndex] ?: 0) + 1,
+            targetSets = exercise.sets + (snapshot.addedSetsByExercise[snapshot.exerciseIndex] ?: 0),
+            reps = snapshot.reps, weightKg = snapshot.weightKg, restRemaining = rest,
+            restInitialSeconds = snapshot.restInitialSeconds,
+            restEndAtMillis = rest?.let { System.currentTimeMillis() + it * 1_000L },
+            elapsedSeconds = snapshot.elapsedSeconds, pendingFeedback = snapshot.pendingFeedback,
+            selectedFeedback = snapshot.selectedFeedback ?: "JUSTO",
+        )
+    }
+
+    internal fun dispatch(context: Context, command: Command): Boolean {
+        val done = CountDownLatch(1)
+        var accepted = false
+        val action = Runnable {
+            try {
+                val foreground = context.getSharedPreferences("wildforce_notification_settings", 0).getBoolean("app_foreground", false)
+                val listener = commandListener
+                if (foreground && listener != null) {
+                    listener(command)
+                    accepted = true
+                } else {
+                    val workoutId = state?.workoutId ?: WildforceWatchBridge.state?.workoutId
+                    val snapshot = workoutId?.let { WorkoutSessionStore.load(context, it) }
+                    val updated = snapshot?.let { BackgroundWatchActions.apply(it, command) }
+                    if (workoutId != null && updated != null) {
+                        WorkoutSessionStore.save(context, workoutId, updated)
+                        WorkoutForegroundService.watchSessionChanged()
+                        accepted = true
+                    } else if (workoutId != null && command.operation in setOf("set_duration", "set_distance", "motion")) {
+                        WatchCommandStore.enqueue(context, workoutId, command)
+                        accepted = true
+                    }
+                }
+            } finally { done.countDown() }
+        }
+        if (Looper.myLooper() == Looper.getMainLooper()) action.run() else Handler(Looper.getMainLooper()).post(action)
+        return done.await(3, TimeUnit.SECONDS) && accepted
     }
 }
 
@@ -155,24 +210,40 @@ class WildforceWatchLocalBridgeService : Service() {
     }
 
     private fun handle(client: Socket) {
-        val reader = client.getInputStream().bufferedReader(StandardCharsets.UTF_8)
-        val request = reader.readLine() ?: return
-        var contentLength = 0
-        while (true) {
-            val line = reader.readLine() ?: return
-            if (line.isEmpty()) break
-            if (line.startsWith("Content-Length:", ignoreCase = true)) contentLength = line.substringAfter(':').trim().toIntOrNull() ?: 0
+        client.soTimeout = 3_000
+        val input = client.getInputStream().buffered()
+        val header = java.io.ByteArrayOutputStream()
+        var matched = 0
+        val end = byteArrayOf(13, 10, 13, 10)
+        while (matched < end.size && header.size() < 8192) {
+            val value = input.read()
+            if (value < 0) return
+            header.write(value)
+            matched = if (value == end[matched].toInt()) matched + 1 else if (value == 13) 1 else 0
         }
-        val body = if (contentLength > 0) CharArray(contentLength).also { reader.read(it) }.concatToString() else ""
+        if (matched != end.size) return
+        val lines = header.toString(StandardCharsets.UTF_8.name()).split("\r\n")
+        val request = lines.firstOrNull() ?: return
+        val contentLength = lines.firstOrNull { it.startsWith("Content-Length:", ignoreCase = true) }
+            ?.substringAfter(':')?.trim()?.toIntOrNull() ?: 0
+        if (contentLength !in 0..4096) return
+        val bytes = ByteArray(contentLength)
+        var offset = 0
+        while (offset < bytes.size) {
+            val count = input.read(bytes, offset, bytes.size - offset)
+            if (count < 0) return
+            offset += count
+        }
+        val body = String(bytes, StandardCharsets.UTF_8)
         val response = when {
-            request.startsWith("GET /v1/state") -> WildforceWatchLocalBridge.state?.toJson() ?: "{\"active\":false}"
-            request.startsWith("POST /v1/command") -> { parseCommand(body)?.let { WildforceWatchLocalBridge.dispatch(applicationContext, it) }; "{\"ok\":true}" }
+            request.startsWith("GET /v1/state") -> WildforceWatchLocalBridge.currentState(applicationContext)?.toJson() ?: "{\"active\":false}"
+            request.startsWith("POST /v1/command") -> { val accepted = parseCommand(body)?.let { WildforceWatchLocalBridge.dispatch(applicationContext, it) } == true; if (accepted) "{\"ok\":true}" else "{\"ok\":false}" }
             else -> "{\"error\":\"not_found\"}"
         }
-        val bytes = response.toByteArray(StandardCharsets.UTF_8)
+        val responseBytes = response.toByteArray(StandardCharsets.UTF_8)
         client.getOutputStream().use { out ->
-            out.write("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: ${bytes.size}\r\nConnection: close\r\n\r\n".toByteArray())
-            out.write(bytes)
+            out.write("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: ${responseBytes.size}\r\nConnection: close\r\n\r\n".toByteArray())
+            out.write(responseBytes)
         }
     }
 
@@ -184,6 +255,8 @@ class WildforceWatchLocalBridgeService : Service() {
             "complete_set" -> WildforceWatchLocalBridge.Command("complete_set")
             "skip_rest" -> WildforceWatchLocalBridge.Command("skip_rest")
             "add_rest" -> WildforceWatchLocalBridge.Command("add_rest")
+            "set_feedback" -> WildforceWatchLocalBridge.Command("set_feedback", feedback = json.optString("feedback"))
+            "complete_feedback" -> WildforceWatchLocalBridge.Command("complete_feedback")
             else -> null
         }
     }.getOrNull()

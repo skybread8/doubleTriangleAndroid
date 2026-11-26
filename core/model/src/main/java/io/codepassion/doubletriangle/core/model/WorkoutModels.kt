@@ -6,6 +6,7 @@ data class UserSummary(val name: String, val goal: String, val currentStreak: In
 
 enum class WorkoutMode(val label: String) {
     Plan("Tu plan"),
+    Gym("Gym plan"),
     Custom("Entrenamiento personalizado"),
 }
 
@@ -196,6 +197,7 @@ data class WorkoutDaySummary(
     val maximumHeartRate: Double? = null,
     val totalVolumeKg: Double? = null,
     val createdAt: String? = null,
+    val gymProgramId: String? = null,
 )
 
 fun WorkoutDaySummary.displayBlocks(): List<WorkoutBlockSummary> =

@@ -1,0 +1,5 @@
+<resources>
+    <string name="gym_plan">ジムプラン</string>
+    <string name="gym_workouts_pending">ジムのワークアウトを準備しています。プログラムの公開後に更新してください。</string>
+    <string name="gym_workout_sync_hint">ワークアウトを完了すると、同期後に次のセッションがここに表示されます。</string>
+</resources>

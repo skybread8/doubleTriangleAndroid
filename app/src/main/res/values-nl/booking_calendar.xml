@@ -1,0 +1,4 @@
+<resources>
+    <string name="booking_add_to_calendar">Toevoegen aan agenda</string>
+    <string name="booking_no_calendar_app">Er is geen agenda-app beschikbaar om deze afspraak toe te voegen.</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="seasonal_decorations">节日装饰</string>
+    <string name="seasonal_decorations_description">在特殊日期自动显示节日装饰。</string>
+</resources>

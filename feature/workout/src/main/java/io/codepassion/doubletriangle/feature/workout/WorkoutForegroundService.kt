@@ -11,6 +11,27 @@ import io.codepassion.doubletriangle.core.designsystem.localizedBackgroundContex
 import io.codepassion.doubletriangle.core.designsystem.R as SharedR
 
 internal class WorkoutForegroundService : Service() {
+    companion object {
+        private var instance: WorkoutForegroundService? = null
+        fun watchSessionChanged() { instance?.resetAfterWatchAction() }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        instance = this
+    }
+
+    private fun resetAfterWatchAction() {
+        restEndAtMillis = null
+        lastObservedRest = null
+        restWasActive = false
+        restPausedByAction = false
+        restCompletionShownAtMillis = null
+        lastNotifiedRemaining = null
+        handler.removeCallbacks(monitor)
+        handler.post(monitor)
+    }
+
     private val handler = Handler(Looper.getMainLooper())
     private var workoutId: String? = null
     private var currentTitle: String = ""
@@ -255,6 +276,7 @@ internal class WorkoutForegroundService : Service() {
     }
 
     override fun onDestroy() {
+        if (instance === this) instance = null
         handler.removeCallbacks(monitor)
         super.onDestroy()
     }
