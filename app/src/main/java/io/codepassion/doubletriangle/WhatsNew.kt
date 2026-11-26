@@ -89,7 +89,7 @@ private fun NewsDemo(@DrawableRes resource: Int) {
     AndroidView(
         factory = { ImageView(it).apply { scaleType = ImageView.ScaleType.FIT_CENTER; setImageDrawable(animation); animation.start() } },
         modifier = Modifier.width(150.dp).height(180.dp).clip(RoundedCornerShape(16.dp))
-            .background(WildforceThemeTokens.accentGold.copy(alpha = .08f)),
+            .background(WildforceThemeTokens.surfaceSubtle),
     )
 }
 
@@ -97,7 +97,7 @@ private fun NewsDemo(@DrawableRes resource: Int) {
 private fun NewsItem(icon: ImageVector, title: String, description: String, @DrawableRes demoRes: Int? = null) {
     Column(Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.Top) {
-            Icon(icon, contentDescription = null, tint = WildforceThemeTokens.accentGold, modifier = Modifier.size(24.dp))
+            Icon(icon, contentDescription = null, tint = WildforceThemeTokens.accent, modifier = Modifier.size(24.dp))
             Spacer(Modifier.width(14.dp))
             Column {
                 Text(title, style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.Bold)
