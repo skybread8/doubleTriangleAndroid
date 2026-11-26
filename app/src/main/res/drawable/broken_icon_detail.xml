@@ -1,14 +1,5 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="1024dp" android:height="1024dp"
-    android:viewportWidth="1024" android:viewportHeight="1024">
-    <!-- Impact in the gap between the marks keeps the logo legible. -->
-    <path android:fillColor="@android:color/transparent" android:strokeColor="#AA182026" android:strokeWidth="19" android:strokeLineCap="round" android:strokeLineJoin="round"
-        android:pathData="M645,665 L619,620 L607,580 L578,550 L561,485 L527,434 L502,345 M645,665 L682,618 L705,577 L737,552 L755,490 L792,439 L808,345 M645,665 L696,658 L744,644 L781,652 L835,626 M645,665 L680,704 L705,733 L735,760 L748,815 M645,665 L623,716 L597,747 L575,799 L544,843 M645,665 L593,672 L557,659 L511,678 L451,668 L392,699 M645,665 L606,640 L574,620 L529,610 L497,586 L449,570 L402,526 L352,509 L315,473 M645,665 L669,625 L672,574 L656,533 L670,492 L661,453" />
-    <path android:fillColor="@android:color/transparent" android:strokeColor="#D6DFEAF0" android:strokeWidth="7" android:strokeLineCap="round" android:strokeLineJoin="round"
-        android:pathData="M645,665 L619,620 L607,580 L578,550 L561,485 L527,434 L502,345 M645,665 L682,618 L705,577 L737,552 L755,490 L792,439 L808,345 M645,665 L696,658 L744,644 L781,652 L835,626 M645,665 L680,704 L705,733 L735,760 L748,815 M645,665 L623,716 L597,747 L575,799 L544,843 M645,665 L593,672 L557,659 L511,678 L451,668 L392,699 M645,665 L606,640 L574,620 L529,610 L497,586 L449,570 L402,526 L352,509 L315,473 M645,665 L669,625 L672,574 L656,533 L670,492 L661,453" />
-    <!-- Broken rings and branches give the impact its glass texture. -->
-    <path android:fillColor="@android:color/transparent" android:strokeColor="#DDE4F1F4" android:strokeWidth="6" android:strokeLineCap="round" android:strokeLineJoin="round"
-        android:pathData="M614,644 L624,630 L641,627 L658,632 L674,645 L682,659 L677,680 L663,694 L643,699 L623,693 L610,680 L604,663 L614,644 M593,625 L615,610 L638,606 L663,611 L686,624 L699,643 M699,678 L690,699 L671,713 L648,721 L624,717 L602,707 L589,689 M619,620 L596,608 L580,610 M705,577 L690,559 L687,540 M744,644 L759,623 L778,614 M705,733 L727,729 L745,738 M597,747 L579,739 L561,742 M511,678 L495,696 L476,700 M449,570 L430,577 L412,573" />
-    <path android:fillColor="#B81B242B" android:strokeColor="#E9EAF7FA" android:strokeWidth="7" android:strokeLineJoin="round" android:pathData="M645,646 L653,652 L663,653 L660,663 L664,672 L654,674 L648,683 L640,677 L629,677 L632,666 L628,657 L638,655 Z" />
-    <path android:fillColor="#E5F5FA" android:pathData="M640,654 L646,650 L650,658 L644,663 L637,661 Z M651,669 L659,664 L657,672 L649,676 Z" />
-</vector>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="12%" android:insetTop="12%"
+    android:insetRight="12%" android:insetBottom="12%">
+    <bitmap android:src="@drawable/glass_bullet_impact" android:gravity="fill" android:alpha="0.7" />
+</inset>
