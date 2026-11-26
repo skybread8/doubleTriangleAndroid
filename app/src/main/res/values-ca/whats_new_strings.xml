@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whats_new_title">Novetats</string>
+    <string name="whats_new_subtitle">Descobreix les últimes millores de WildForce.</string>
+    <string name="whats_new_calendar_title">Entrenaments al calendari</string>
+    <string name="whats_new_calendar_description">Exporta els pròxims entrenaments al calendari i tingues els plans a mà.</string>
+    <string name="whats_new_exercises_title">Més exercicis</string>
+    <string name="whats_new_exercises_description">Descobreix el curl amb barra Z i les rotacions de coll al selector d’exercicis.</string>
+    <string name="whats_new_continue">Som-hi!</string>
+</resources>

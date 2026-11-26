@@ -338,6 +338,7 @@ class MainActivity : AppCompatActivity() {
             val systemDarkTheme = isSystemInDarkTheme()
             val savedTheme = remember { getSharedPreferences("wildforce_profile_details", 0).getString("theme", "Sistema") ?: "Sistema" }
             WildforceTheme(darkTheme = when (savedTheme) { "Claro" -> false; "Oscuro" -> true; else -> systemDarkTheme }) {
+                WhatsNewOnLaunch()
                 // Protect the top and sides, including cutouts and caption bars.
                 // The bottom navigation owns the bottom inset to avoid adding it twice.
                 val christmasActive = rememberChristmasActive()

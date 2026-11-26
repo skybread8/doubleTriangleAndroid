@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whats_new_title">Novedades</string>
+    <string name="whats_new_subtitle">Descubre las últimas mejoras de WildForce.</string>
+    <string name="whats_new_calendar_title">Entrenamientos en tu calendario</string>
+    <string name="whats_new_calendar_description">Exporta tus próximos entrenamientos al calendario y ten tus planes a mano.</string>
+    <string name="whats_new_exercises_title">Más ejercicios</string>
+    <string name="whats_new_exercises_description">Descubre el curl con barra Z y las rotaciones de cuello en el selector de ejercicios.</string>
+    <string name="whats_new_continue">¡Vamos!</string>
+</resources>

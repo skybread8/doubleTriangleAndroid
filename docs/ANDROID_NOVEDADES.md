@@ -13,6 +13,8 @@ Registro de funcionalidades y mejoras visibles para las personas que usan la app
 
 ## Pendientes de publicación
 
+- **26-11-2026 · Novedades:** una ventana de bienvenida presenta mejoras destacadas con una ilustración animada. Aparece una vez por selección de novedades y puede cerrarse para continuar. La selección inicial está disponible en español, catalán e inglés; los demás idiomas usan inglés. Pendiente de comprobación visual en un dispositivo. Referencia: `WhatsNew.kt`.
+
 - **26-11-2026 · Apariencia:** retocado el efecto de cristal roto del icono alternativo, también en su variante navideña. Pendiente de comprobación visual en un dispositivo. Referencia: `broken_icon_detail.xml`.
 - **26-11-2026 · Entrenamiento:** añadidos al selector el curl con barra Z y las rotaciones de cuello, y completadas fichas de ejercicios existentes. Algunas traducciones recurren al inglés cuando no están disponibles en iOS. Referencia: `scripts/sync-ios-exercises.py`.
 
@@ -45,6 +47,7 @@ Preparado a partir del inventario anterior. Incluye cambios aún sin commit y ot
 
 ```text
 <ca>
+• Descobreix les novetats destacades en obrir l’app.
 • Nous exercicis i fitxes d’entrenament.
 • Exporta entrenaments i reserves al calendari.
 • Consulta els entrenaments del teu gimnàs i les notes dels exercicis.
@@ -54,6 +57,7 @@ Preparado a partir del inventario anterior. Incluye cambios aún sin commit y ot
 • Consulta el diagnòstic de sincronització.
 </ca>
 <en-US>
+• Discover highlighted updates when you open the app.
 • More exercises and workout guides.
 • Export workouts and bookings to your calendar.
 • View your gym workouts and exercise block notes.
@@ -63,6 +67,7 @@ Preparado a partir del inventario anterior. Incluye cambios aún sin commit y ot
 • View sync diagnostics.
 </en-US>
 <es-ES>
+• Descubre las novedades destacadas al abrir la app.
 • Nuevos ejercicios y fichas de entrenamiento.
 • Exporta entrenamientos y reservas al calendario.
 • Consulta los entrenamientos de tu gimnasio y las notas de los bloques.
