@@ -15,7 +15,7 @@ Registro de funcionalidades y mejoras visibles para las personas que usan la app
 
 - **26-11-2026 · Novedades:** una ventana de bienvenida presenta mejoras destacadas con una ilustración animada del paso de un entrenamiento al calendario. El botón para continuar permanece accesible mientras se desplazan las novedades. Aparece una vez por selección de novedades y puede cerrarse para continuar. La selección inicial está disponible en español, catalán e inglés; los demás idiomas usan inglés. Pendiente de comprobación visual en un dispositivo. Referencia: `WhatsNew.kt`.
 
-- **26-11-2026 · Apariencia:** retocado el efecto de cristal roto del icono alternativo, también en su variante navideña. Pendiente de comprobación visual en un dispositivo. Referencia: `broken_icon_detail.xml`.
+- **26-11-2026 · Apariencia:** refinado y centrado el efecto de cristal roto del icono alternativo, también en su variante navideña, y ampliado el logotipo de los iconos adaptables. Pendiente de comprobación visual en un Samsung S23. Referencias: `broken_icon_detail.xml`, `glass_launcher_foreground.xml`.
 - **26-11-2026 · Entrenamiento:** añadidos al selector el curl con barra Z y las rotaciones de cuello, y completadas fichas de ejercicios existentes. Algunas traducciones recurren al inglés cuando no están disponibles en iOS. Referencia: `scripts/sync-ios-exercises.py`.
 
 ## Inventario retrospectivo: publicación por confirmar
