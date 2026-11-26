@@ -14,3 +14,13 @@ captures/
 **/build/
 *.jks
 *.keystore
+
+# Local Gradle downloads and generated release packages
+.gradle-user-home/
+**/release/
+
+# Emulator screenshots and UI hierarchy dumps saved at the repository root
+/*.png
+/*.jpg
+/*.jpeg
+/*.xml
