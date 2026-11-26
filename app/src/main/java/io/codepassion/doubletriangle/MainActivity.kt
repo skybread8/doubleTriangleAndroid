@@ -794,6 +794,7 @@ private fun WildforceRoot(
     var initialSyncState by remember { mutableStateOf<InitialSyncState?>(
         if (preferences.getBoolean("initial_account_sync_pending", false)) InitialSyncState.Failed("") else null
     ) }
+    var showWhatsNew by remember { mutableStateOf(preferences.getBoolean("whats_new_after_login", false) && !preferences.getBoolean("initial_account_sync_pending", false)) }
     var initialSyncProgress by remember { mutableStateOf<Float?>(null) }
     var initialSyncFallback by remember { mutableStateOf<OnboardingProfile?>(
         if (preferences.getBoolean("initial_account_sync_pending", false)) OnboardingProfile(
@@ -843,6 +844,7 @@ private fun WildforceRoot(
                     }
                     profile = resolvedProfile
                     initialSyncState = null
+                    showWhatsNew = preferences.getBoolean("whats_new_after_login", false)
                 }
 
                 WorkoutRemoteSync.Outcome.SubscriptionRequired -> {
@@ -967,6 +969,7 @@ private fun WildforceRoot(
             },
             onLoggedIn = { response, gymJoinCode, coachJoinCode ->
                 preferences.edit().putBoolean("initial_account_sync_pending", true)
+                    .putBoolean("whats_new_after_login", !response.isNewAccount)
                     .putBoolean("remote_sync_import_required", !response.isNewAccount).commit()
                 saveAuthenticatedAccount(context, response)
                 initialSyncFallback = OnboardingProfile(
@@ -1190,6 +1193,12 @@ private fun WildforceRoot(
             lifecycleOwner.lifecycle.addObserver(observer)
             onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
         }
+        if (showWhatsNew) {
+            WhatsNewDialog {
+                preferences.edit().remove("whats_new_after_login").apply()
+                showWhatsNew = false
+            }
+        }
         WildforceApp(
             historyReady = historyReady,
             backgroundDownload = backgroundDownload,
@@ -1250,7 +1259,8 @@ private fun WildforceRoot(
                     // Signing in from Profile is not a logout. Clearing all
                     // stores here discarded the import flag and local changes.
                     // Route through the same initial import as onboarding.
-                    preferences.edit().putBoolean("initial_account_sync_pending", true).commit()
+                    preferences.edit().putBoolean("initial_account_sync_pending", true)
+                        .putBoolean("whats_new_after_login", preferences.getBoolean("remote_sync_import_required", false)).commit()
                     initialSyncFallback = OnboardingProfile(
                         name = account.getString("name", null).orEmpty().ifBlank { "Wildforce" },
                         goal = FitnessGoal.BuildMuscle,

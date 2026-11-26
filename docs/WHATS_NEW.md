@@ -1,0 +1,5 @@
+# Novedades en la app
+
+La selección se mantiene localmente en `WhatsNew.kt` y en los recursos `whats_new_strings.xml`. Para una nueva entrega, sustituir los textos y la ilustración por contenido confirmado en esa versión. La ventana aparece después de iniciar sesión con una cuenta existente y completar la sincronización inicial. Se muestra en cada inicio de sesión, pero no durante el onboarding, al registrar una cuenta ni al abrir una sesión que ya estaba iniciada. Si la sincronización se interrumpe, se conserva la presentación pendiente hasta completarla.
+
+En español, la entrada de calendario incluye un GIF recortado de una grabación real de la hoja de exportación y la selección de hora. Se han excluido los datos de la cuenta y la hora del ejemplo es ficticia. Los demás idiomas no muestran vídeo hasta disponer de grabaciones traducidas. Revisar las traducciones y comprobar la ventana en dispositivos y tamaños de fuente diferentes antes de publicar. Los idiomas sin traducción propia usan los recursos ingleses.

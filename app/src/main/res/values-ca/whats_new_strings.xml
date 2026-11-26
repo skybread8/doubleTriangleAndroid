@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="whats_new_title">Novetats</string>
+    <string name="whats_new_subtitle">Descobreix les últimes millores de WildForce.</string>
+    <string name="whats_new_calendar_title">Entrenaments al calendari</string>
+    <string name="whats_new_calendar_description">Exporta els pròxims entrenaments al calendari i tingues els plans a mà.</string>
+    <string name="whats_new_exercises_title">Més exercicis</string>
+    <string name="whats_new_exercises_description">Descobreix el curl amb barra Z i les rotacions de coll al selector d’exercicis.</string>
+    <string name="whats_new_continue">Som-hi!</string>
+    <string name="whats_new_booking_title">Reserves al calendari</string>
+    <string name="whats_new_booking_description">Afegeix una reserva al calendari amb una aplicació compatible.</string>
+    <string name="whats_new_gym_title">Entrenaments del teu gimnàs</string>
+    <string name="whats_new_gym_description">Consulta i fes els entrenaments del teu gimnàs quan hi hagi un programa disponible.</string>
+    <string name="whats_new_notes_title">Notes dels blocs</string>
+    <string name="whats_new_notes_description">Consulta les notes incloses als blocs d’exercicis dels teus entrenaments.</string>
+</resources>
