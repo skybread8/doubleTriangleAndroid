@@ -12,7 +12,30 @@ Registro de funcionalidades y mejoras visibles para las personas que usan la app
 
 ## Pendientes de publicación
 
-Todavía no hay novedades registradas mediante este proceso. Los cambios anteriores no se han inventariado.
+Todavía no hay novedades registradas mediante este proceso.
+
+## Inventario retrospectivo: publicación por confirmar
+
+Revisión realizada el 26-11-2026. La presencia en el código no confirma que un cambio se haya publicado ni en qué versión. Las fechas de los cambios confirmados corresponden al commit citado; las de los cambios sin commit son las de esta revisión. Estas entradas deben contrastarse con las versiones publicadas antes de utilizarlas como novedades de una versión.
+
+### Cambios confirmados en el repositorio
+
+- **14-11-2026 · Entrenamiento:** exportación de entrenamientos pendientes al calendario, con revisión de fechas y hora y opción de abrir o compartir el archivo. Referencia: `c72d255`.
+- **26-08-2026 · Entrenamiento:** seguimiento del entrenamiento activo mediante la notificación y Live Updates en dispositivos Android compatibles, con progreso y avisos de finalización del descanso. Referencias: `7e1d709`, `22a864d`.
+- **24-08-2026 · Recordatorios:** avisos programados para entrenamientos y nutrición, sujetos a la configuración y los permisos de notificaciones. Referencias: `6f6e6c6`, `8292519`.
+- **24-08-2026 · Nutrición:** consulta del historial por día y organización de los registros por tipo de comida. Referencias: `befee56`, `13cc01b`.
+- **24-08-2026 · Nutrición:** edición de comidas registradas y personalización de objetivos nutricionales. Referencias: `9631a4a`, `b3571d9`.
+- **24-08-2026 · Nutrición:** resumen de adherencia de siete días y mejoras en la navegación por fechas y el resumen de macronutrientes. Referencias: `c051fd9`, `df35673`.
+
+### Cambios presentes en el árbol de trabajo, aún sin commit
+
+Revisados en el código, sin verificar su funcionamiento en un dispositivo durante este inventario. Su contenido puede cambiar antes de integrarse.
+
+- **26-11-2026 · Reservas:** añadir una reserva al calendario desde la confirmación o desde la lista de reservas; requiere una aplicación de calendario compatible. Referencias: `Booking.kt`, `booking_calendar.xml`.
+- **26-11-2026 · Entrenamiento:** consultar y realizar entrenamientos del programa del gimnasio cuando haya un programa disponible; se muestra la opción de actualizar si todavía no hay entrenamientos. Referencias: `WorkoutHubScreen.kt`, `GymProgramStore.kt`.
+- **26-11-2026 · Entrenamiento:** visualización de las notas asociadas a los bloques de ejercicios. Referencias: `WorkoutHubScreen.kt`, `WorkoutBlockNotes.kt`.
+- **26-11-2026 · Apariencia:** decoración navideña y cambio estacional del icono, con una opción en ajustes para activar o desactivar las decoraciones. Referencias: `SeasonalDecorations.kt`, `SeasonalLauncherIcon.kt`, `ProfileScreen.kt`.
+- **26-11-2026 · Cuenta:** pantalla de diagnóstico de sincronización que permite consultar información local y copiarla. Referencias: `AccountAndSubscription.kt`, `SyncDiagnosticsDialog.kt`.
 
 ## Versiones publicadas
 
